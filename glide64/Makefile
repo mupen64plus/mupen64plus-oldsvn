@@ -1,61 +1,16 @@
-# detect system architecture: i386, x86_64, or PPC/PPC64
-UNAME = $(shell uname -m)
-ifeq ("$(UNAME)","x86_64")
-  CPU = X86
-  ifeq ("$(BITS)", "32")
-    ARCH = 64BITS_32
-  else
-    BITS = 64
-    ARCH = 64BITS
-  endif
-endif
-ifneq ("$(filter i%86,$(UNAME))","")
-  CPU = X86
-  ARCH = 32BITS
-  BITS = 32
-endif
-ifeq ("$(UNAME)","ppc")
-  CPU = PPC
-  ARCH = 32BITS
-  BITS = 32
-endif
-ifeq ("$(UNAME)","ppc64")
-  CPU = PPC
-  ARCH = 64BITS
-  BITS = 64
+# Makefile for Glide64, in Mupen64Plus
+
+# include pre-make file with a bunch of definitions
+include ../pre.mk
+
+# set BITS
+ifeq ("$(ARCH)","64BITS")
+  BITS=64
+else
+  BITS=32
 endif
 
-# test for presence of SDL
-ifeq ("$(shell which sdl-config 2>&1 | head -c 9)", "which: no")
-  # throw error
-  $(error No SDL development libraries found!)
-endif
-
-# test for presence of GTK 2.0
-ifeq ("$(shell which pkg-config 2>&1 | head -c 9)", "which: no")
-  # throw error
-  $(error No GTK 2.x development libraries found!)
-endif
-ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
-  # throw error
-  $(error No GTK 2.x development libraries found!)
-endif
-
-# set GTK flags and libraries
-GTK_FLAGS := $(shell pkg-config gtk+-2.0 --cflags) -D_GTK2
-GTK_LIBS := $(shell pkg-config gtk+-2.0 --libs)
-
-# set SDL flags and libraries
-SDL_CFLAGS := $(shell sdl-config --cflags)
-SDL_LIBS := $(shell sdl-config --libs)
-
-# set base program pointers and flags
-CC = gcc
-CXX = g++
-LD = g++
-STRIP = strip
-
-# set base CFLAGS and LDFLAGS for all systems
+# local CFLAGS, LIBS, and LDFLAGS
 CFLAGS = -O2 -Wall -g -DGCC -DUSE_GTK $(SDL_CFLAGS) $(GTK_FLAGS) -Iwrapper/ -ffast-math -funroll-loops
 LDFLAGS	= -shared -Wl,-Bsymbolic -lGL -lGLU -L/usr/X11R6/lib $(SDL_LIBS)
 
@@ -136,7 +91,7 @@ GTKOBJECTS = \
 	messagebox.o
 
 OBJECTS	+= $(GTKOBJECTS) $(WRAPPEROBJECTS)
-TARGET	= Glide64.so
+TARGET	= glide64.so
 
 CFLAGS += -MMD -MP -MQ $@
 DEPS := $(OBJECTS:.o=.d)
@@ -186,7 +141,7 @@ instruction: $(TARGET)
 	$(warning please copy $(TARGET) AND Glide64.ini in the plugins/ folder of the emulator)
 
 clean:
-	rm -rf $(OBJECTS) $(ALL) $(DEPS) compiletex compiletex.o font.h cursor.h
+	rm -rf $(OBJECTS) $(TARGET) $(DEPS) compiletex compiletex.o font.h cursor.h
 	rm -rf *.ii *.i *.s
 
 rebuild: clean $(TARGET) instruction
