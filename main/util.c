@@ -1,0 +1,316 @@
+/**
+ * Mupen64 - util.c
+ * Copyright (C) 2002 Hacktarux
+ *
+ * Mupen64 homepage: http://mupen64.emulation64.com
+ * email address: hacktarux@yahoo.fr
+ * 
+ * If you want to contribute to the project please contact
+ * me first (maybe someone is already making what you are
+ * planning to do).
+ *
+ *
+ * This program is free software; you can redistribute it and/
+ * or modify it under the terms of the GNU General Public Li-
+ * cence as published by the Free Software Foundation; either
+ * version 2 of the Licence, or any later version.
+ *
+ * This program is distributed in the hope that it will be use-
+ * ful, but WITHOUT ANY WARRANTY; without even the implied war-
+ * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public Licence for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * Licence along with this program; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
+ * USA.
+ *
+**/
+
+/**
+ * Provides common utilities to the rest of the code:
+ *  -String functions
+ *  -Doubly-linked list
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <string.h>
+#include <sys/stat.h>
+
+#include "util.h"
+
+/** trim
+ *    Removes leading and trailing whitespace from str. Function modifies str
+ *    and also returns modified string.
+ */
+char *trim(char *str)
+{
+	char *p = str;
+
+	while (isspace(*p))
+		p++;
+
+	if(str != p)
+		strcpy(str, p);
+
+	p = str + strlen(str) - 1;
+	if (p > str)
+	{
+		while (isspace(*p))
+			p--;
+		*(++p) = '\0';
+	}
+
+	return str;
+}
+
+/** file utilities **/
+
+/** isfile
+ *    Returns TRUE if given file path exists and is a regular file
+ */
+int isfile(char *path)
+{
+	struct stat sbuf;
+
+	return (stat(path, &sbuf) == 0) && S_ISREG(sbuf.st_mode);
+}
+
+/** isdir
+ *    Returns TRUE if given file path exists and is a directory
+ */
+int isdir(char *path)
+{
+	struct stat sbuf;
+
+	return (stat(path, &sbuf) == 0) && S_ISDIR(sbuf.st_mode);
+}
+
+/** copyfile
+ *    copies file at src to a new file dest. If dest exists, its contents will be truncated and replaced.
+ */
+int copyfile(char *src, char *dest)
+{
+	FILE *to, *from;
+	char c;
+
+	if((from = fopen(src, "r")) == NULL)
+		return -1;
+
+	if((to = fopen(dest, "w")) == NULL)
+	{
+		fclose(from);
+		return -2;
+	}
+
+	while(!feof(from))
+	{
+		c = fgetc(from);
+		if(ferror(from))
+		{
+			fclose(from);
+			fclose(to);
+			unlink(dest);
+			return -3;
+		}
+		fputc(c, to);
+		if(ferror(to))
+		{
+			fclose(from);
+			fclose(to);
+			unlink(dest);
+			return -4;
+		}
+	}
+
+	fclose(from);
+	fclose(to);
+
+	return 0;
+}
+
+/** linked list functions **/
+
+/** list_append
+ *    Allocates a new list node, attaches it to the end of list and sets the
+ *    node data pointer to data.
+ *    Returns - the new list node.
+ */
+list_node_t *list_append(list_t *list, void *data)
+{
+	list_node_t *new_node,
+		    *last_node;
+
+	if(list_empty(*list))
+	{
+		(*list) = malloc(sizeof(list_node_t));
+		(*list)->data = data;
+		(*list)->prev = NULL;
+		(*list)->next = NULL;
+		return *list;
+	}
+
+	// find end of list
+	last_node = *list;
+	while(last_node->next != NULL)
+		last_node = last_node->next;
+
+	// create new node and return it
+	last_node->next = new_node = malloc(sizeof(list_node_t));
+	new_node->data = data;
+	new_node->prev = last_node;
+	new_node->next = NULL;
+
+	return new_node;
+}
+
+/** list_node_delete
+ *    Deallocates and removes given node from the given list. It is up to the
+ *    user to free any memory allocated for the node data before calling this
+ *    function. Also, it is assumed that node is an element of list.
+ */
+void list_node_delete(list_t *list, list_node_t *node)
+{
+	if(node == NULL || *list == NULL) return;
+
+	if(node->prev != NULL)
+		node->prev->next = node->next;
+	else
+		*list = node->next; // node is first node, update list pointer
+
+	if(node->next != NULL)
+		node->next->prev = node->prev;
+
+	free(node);
+}
+
+/** list_delete
+ *    Deallocates and removes all nodes from the given list. It is up to the
+ *    user to free any memory allocated for all node data before calling this
+ *    function.
+ */
+void list_delete(list_t *list)
+{
+	list_node_t *prev = NULL,
+		    *curr = NULL;
+
+	// delete all list nodes in the list
+	list_foreach(*list, curr)
+	{
+		if(prev != NULL)
+			free(prev);
+
+		// if we're on the last node, delete it
+		if(curr->next == NULL)
+			free(curr);
+		else
+			prev = curr;
+	}
+
+	*list = NULL;
+}
+
+/** list_node_move_front
+ *    Moves the given node to the first position of list. It is assumed that
+ *    node is an element of list.
+ */
+void list_node_move_front(list_t *list, list_node_t *node)
+{
+	list_node_t *tmp;
+
+	if(node == NULL ||
+	   *list == NULL ||
+	   node == *list)
+		return;
+
+	tmp = *list;
+	node->prev->next = node->next;
+	if(node->next != NULL)
+		node->next->prev = node->prev;
+	node->prev = NULL;
+	node->next = *list;
+	(*list)->prev = node;
+	*list = node;
+}
+
+/** list_node_move_back
+ *    Moves the given node to the last position of list. It is assumed that
+ *    node is an element of list.
+ */
+void list_node_move_back(list_t *list, list_node_t *node)
+{
+	list_node_t *tmp;
+
+	tmp = list_last_node(*list);
+
+	if(node == NULL ||
+	   *list == NULL ||
+	   node == tmp)
+		return;
+
+	node->next->prev = node->prev;
+	if(node->prev != NULL)
+		node->prev->next = node->next;
+	else
+		*list = node->next; // first node is being moved, update list pointer
+	tmp->next = node;
+	node->prev = tmp;
+	node->next = NULL;
+}
+
+/** list_nth_node
+ *    Returns the nth node in list. If n is out of range, NULL is returned.
+ */
+list_node_t *list_nth_node(list_t list, int n)
+{
+	list_node_t *curr = NULL;
+
+	list_foreach(list, curr)
+	{
+		if(n-- == 0)
+			break;
+	}
+
+	return curr;
+}
+
+/** list_last_node
+ *    Returns the last node in list.
+ */
+list_node_t *list_last_node(list_t list)
+{
+	if(list != NULL)
+	{
+		while(list->next != NULL)
+			list = list->next;
+	}
+
+	return list;
+}
+
+/** list_empty
+ *    Returns 1 if list is empty, else 0.
+ */
+int inline list_empty(list_t list)
+{
+	return list == NULL;
+}
+
+/** list_length
+ *    Returns the number of elements in list
+ */
+int list_length(list_t list)
+{
+	int len = 0;
+	list_node_t *curr;
+
+	list_foreach(list, curr)
+	{
+		len++;
+	}
+
+	return len;
+}

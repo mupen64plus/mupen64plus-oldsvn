@@ -1,0 +1,79 @@
+Mupen64Plus Build and Install Guide
+-----------------------------------
+
+The Mupen64Plus package contains the mupen64 emulator program plus graphics, sound, input, and RSP plugins. To build from source, unzip and cd into the source directory, then build using make:
+
+ $ unzip Mupen64Plus-x.y.zip
+ $ cd Mupen64Plus-x.y
+ $ make all
+
+Type 'make' by itself to view all available build options:
+
+ $ make
+ Mupen64Plus makefile. 
+   Targets:
+     all           == Build Mupen64 and all plugins
+     clean         == remove object files
+     rebuild       == clean and re-build all
+     install       == Install Mupen64 and all plugins
+     uninstall     == Uninstall Mupen64 and all plugins
+   Options:
+     BITS=32       == build 32-bit binaries on 64-bit machine
+     VCR=1         == enable video recording
+     LIRC=1        == enable LIRC support
+     NOGUI_ONLY=1  == build without GUI support
+     PREFIX=path   == specify install prefix (default: /usr/local)
+   Debugging Options:
+     PROFILE=1     == build gprof instrumentation into binaries for profiling
+     DBGSYM=1      == add debugging symbols to binaries
+     DBG=1         == build graphical debugger
+     DBG_CORE=1    == print debugging info in r4300 core
+     DBG_COUNT=1   == print R4300 instruction count totals (64-bit dynarec only)
+     DBG_COMPARE=1 == enable core-synchronized r4300 debugging
+     DBG_PROFILE=1 == dump profiling data for r4300 dynarec to data file
+
+Previous to version 1.3, building mupen64 built two programs: mupen64 and mupen64_nogui. mupen64 had a gtk graphical frontend including a rom browser. mupen64_nogui contained no graphical frontend and all options were specified via the commandline. As of version 1.3, the mupen64 and mupen64_nogui codebases have been combined and as a result, there is no more mupen64_nogui executable. The combined mupen64 executable can either be run with a gui (default) or without a gui by specifying --nogui at the commandline. For backwards compatability, if a symbolic link to the mupen64 executable called mupen64_nogui is created, running the mupen64_nogui symlink is equivalent to running mupen64 with the --nogui flag.
+
+NOTE: If you want to build a nogui-only version of mupen64, i.e. without gtk+ dependencies, pass the NOGUI_ONLY=1 option to make, like this:
+
+ $ make NOGUI_ONLY=1 all
+
+Installation
+------------
+
+After building mupen64 and all plugins, su to root and type 'make install' to install Mupen64Plus. The install process will copy the executable to $PREFIX/bin and a directory called $PREFIX/share/mupen64 will be created to hold plugins, icons, and language translation files used by mupen64. By default, PREFIX is set to /usr/local. This can be changed by passing the PREFIX option to make. NOTE: you must pass the prefix, when building AND when running 'make install'. For example, to install mupen64 to /usr, do this:
+
+ $ make PREFIX=/usr all
+ $ su
+ # make PREFIX=/usr install
+ # exit
+ $
+
+Multi-user Support
+------------------
+
+As of version 1.3, Mupen64Plus now has support for multi-user environments.
+
+The mupen64 program will look for user configuration files in a .mupen64 directory in the user's home directory. If the directory does not exist, it will be created and a default mupen64.conf file will be written to that directory on exit. An alternate config directory can be specified using the --configdir commandline option.
+
+By default, the mupen64 program will look for plugins, icons, and language translation files in the install directory $PREFIX/share/mupen64 (see Installation section for details). If this directory does not exist, mupen64 will try to look in the user configuration directory. An alternate installation directory can be specified using the --installdir commandline option.
+
+Run 'mupen64 --help' for a complete list of commandline options:
+
+ $ mupen64 --help
+ Usage: mupen64 [parameter(s)] rom
+
+ Parameters:
+         --nogui                 : do not display GUI
+         --fullscreen            : turn fullscreen mode on
+         --gfx (path)            : use gfx plugin given by (path)
+         --audio (path)          : use audio plugin given by (path)
+         --input (path)          : use input plugin given by (path)
+         --rsp (path)            : use rsp plugin given by (path)
+         --emumode (number)      : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter
+         --sshotdir (dir)        : set screenshot directory to (dir)
+         --configdir (dir)       : force config dir (must contain mupen64.conf)
+         --installdir (dir)      : force install dir (place to look for plugins, icons, lang, etc)
+         --noask                 : don't ask to force load on bad dumps
+         -h, --help              : see this help message
+
