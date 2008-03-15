@@ -175,7 +175,7 @@ void config_read( void )
 
 	config_set_section( "Default" );
 
-	snprintf( filename, PATH_MAX, "%smupen64.conf", get_configpath() );
+	snprintf( filename, PATH_MAX, "%smupen64plus.conf", get_configpath() );
 	f = fopen( filename, "r" );
 	if( f == NULL )
 	{
@@ -222,7 +222,7 @@ void config_write( void )
 	SConfigSection *sec;
 	SConfigValue *val;
 
-	snprintf( filename, PATH_MAX, "%smupen64.conf", get_configpath() );
+	snprintf( filename, PATH_MAX, "%smupen64plus.conf", get_configpath() );
 	f = fopen( filename, "w" );
 	if( !f )
 		return;

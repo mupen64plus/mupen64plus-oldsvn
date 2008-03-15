@@ -1,4 +1,4 @@
-# Makefile for Mupen64
+# Makefile for Mupen64Plus
 
 # include pre-make file with a bunch of definitions
 include ./pre.mk
@@ -150,14 +150,14 @@ PLUGINS	= plugins/blight_input.so \
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
-# set primary objects and libraries for all outputs (mupen64, mupen64_dbg)
-ALL = mupen64 $(PLUGINS)
+# set primary objects and libraries for all outputs
+ALL = mupen64plus $(PLUGINS)
 OBJECTS = $(OBJ_CORE) $(OBJ_X86)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
 ifeq ($(DBG), 1)
-  ALL += mupen64_dbg
+  ALL += mupen64plus_dbg
   OBJECTS += $(OBJ_DBG)
 endif
 ifeq ($(VCR), 1)
@@ -174,13 +174,13 @@ endif
 
 # build targets
 targets:
-	@echo "Mupen64-amd64 makefile. "
+	@echo "Mupen64Plus makefile. "
 	@echo "  Targets:"
-	@echo "    all           == Build Mupen64 and all plugins"
+	@echo "    all           == Build Mupen64Plus and all plugins"
 	@echo "    clean         == remove object files"
 	@echo "    rebuild       == clean and re-build all"
-	@echo "    install       == Install Mupen64 and all plugins"
-	@echo "    uninstall     == Uninstall Mupen64 and all plugins"
+	@echo "    install       == Install Mupen64Plus and all plugins"
+	@echo "    uninstall     == Uninstall Mupen64Plus and all plugins"
 	@echo "  Options:"
 	@echo "    BITS=32       == build 32-bit binaries on 64-bit machine"
 	@echo "    VCR=1         == enable video recording"
@@ -198,29 +198,29 @@ targets:
 
 all: $(ALL)
 
-mupen64: $(OBJECTS)
+mupen64plus: $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 	$(STRIP) $@
 
-mupen64_dbg: $(OBJECTS) main/main_gtk.o
+mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
 	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 
 install:
-	$(INSTALL) -D -s -m 0755 mupen64 "$(PREFIX)/bin/mupen64"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64"
-	$(INSTALL) -m 0644 mupen64.conf mupen64.ini "$(PREFIX)/share/mupen64"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64/doc"
-	$(INSTALL) -m 0644 doc/* "$(PREFIX)/share/mupen64/doc"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64/icons"
-	$(INSTALL) -m 0644 icons/* "$(PREFIX)/share/mupen64/icons"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64/lang"
-	$(INSTALL) -m 0644 lang/* "$(PREFIX)/share/mupen64/lang"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64/plugins"
-	$(INSTALL) -m 0755 plugins/* "$(PREFIX)/share/mupen64/plugins"
+	$(INSTALL) -D -s -m 0755 mupen64plus "$(PREFIX)/bin/mupen64plus"
+	$(INSTALL) -d "$(PREFIX)/share/mupen64plus"
+	$(INSTALL) -m 0644 mupen64plus.conf mupen64plus.ini "$(PREFIX)/share/mupen64plus"
+	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/doc"
+	$(INSTALL) -m 0644 doc/* "$(PREFIX)/share/mupen64plus/doc"
+	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/icons"
+	$(INSTALL) -m 0644 icons/* "$(PREFIX)/share/mupen64plus/icons"
+	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/lang"
+	$(INSTALL) -m 0644 lang/* "$(PREFIX)/share/mupen64plus/lang"
+	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/plugins"
+	$(INSTALL) -m 0755 plugins/* "$(PREFIX)/share/mupen64plus/plugins"
 
 uninstall:
-	$(RM) -f "$(PREFIX)/bin/mupen64"
-	$(RM) -rf "$(PREFIX)/share/mupen64"
+	$(RM) -f "$(PREFIX)/bin/mupen64plus"
+	$(RM) -rf "$(PREFIX)/share/mupen64plus"
 
 clean:
 	$(MAKE) -C blight_input clean
@@ -231,7 +231,7 @@ clean:
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o
-	$(RM) -f mupen64 mupen64_dbg plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so plugins/dummyaudio.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so
+	$(RM) -f mupen64plus mupen64plus_dbg plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so plugins/dummyaudio.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so
 
 rebuild: clean all
 

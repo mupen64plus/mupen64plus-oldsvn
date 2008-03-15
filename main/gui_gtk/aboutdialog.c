@@ -67,13 +67,13 @@ create_aboutDialog( void )
 	gtk_container_set_border_width( GTK_CONTAINER(frame), 10 );
 	gtk_box_pack_start( GTK_BOX(hbox), frame, TRUE, TRUE, 0 );
 
-	label = gtk_label_new(	tr("Mupen64 by Hacktarux\n"
+	label = gtk_label_new(	tr("About Mupen64Plus\n"
+                "Original Mupen64 code by Hacktarux\n"
 				"Gtk GUI by blight\n"
-				"Debugger by DavFR\n"
-				"\n"
-				"64-bit port work and cleanup by Richard42 and nmn\n"
-				"\n"
-				"Thanks to CodeX, Shadowprince and Olivieryuyu for their support.") );
+				"Mupen and RiceVideo 64-bit port by Richard42 and nmn\n"
+                "Glide64 port by Gunther\n"
+                "Fixes and features by Ebenblues, DarkJezter, nmn, Richard42, and others\n"
+				"\n") );
 	gtk_misc_set_padding( GTK_MISC(label), 10, 10 );
 	gtk_container_add( GTK_CONTAINER(frame), label );
 

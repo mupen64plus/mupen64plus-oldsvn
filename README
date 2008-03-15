@@ -12,11 +12,11 @@ Type 'make' by itself to view all available build options:
  $ make
  Mupen64Plus makefile. 
    Targets:
-     all           == Build Mupen64 and all plugins
+     all           == Build Mupen64Plus and all plugins
      clean         == remove object files
      rebuild       == clean and re-build all
-     install       == Install Mupen64 and all plugins
-     uninstall     == Uninstall Mupen64 and all plugins
+     install       == Install Mupen64Plus and all plugins
+     uninstall     == Uninstall Mupen64Plus and all plugins
    Options:
      BITS=32       == build 32-bit binaries on 64-bit machine
      VCR=1         == enable video recording

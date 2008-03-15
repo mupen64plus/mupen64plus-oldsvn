@@ -759,7 +759,7 @@ static void printUsage(const char *progname)
 	       "	--rsp (path)		: use rsp plugin given by (path)\n"
 	       "	--emumode (number)	: set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter\n"
 	       "	--sshotdir (dir)	: set screenshot directory to (dir)\n"
-	       "	--configdir (dir)	: force config dir (must contain mupen64.conf)\n"
+	       "	--configdir (dir)	: force config dir (must contain mupen64plus.conf)\n"
 	       "	--installdir (dir)	: force install dir (place to look for plugins, icons, lang, etc)\n"
 	       "	--noask			: don't ask to force load on bad dumps\n"
 	       "	-h, --help		: see this help message\n"
@@ -905,7 +905,7 @@ void parseCommandLine(int argc, char **argv)
 	}
 
 	// if executable name contains "_nogui", set g_GuiEnabled to FALSE.
-	// This allows creation of a mupen64_nogui symlink to mupen64 instead of passing --nogui
+	// This allows creation of a mupen64plus_nogui symlink to mupen64plus instead of passing --nogui
 	// for backwards compatability with old mupen64_nogui program name.
 	str = strdup(argv[0]);
 	basename(str);
@@ -918,21 +918,21 @@ void parseCommandLine(int argc, char **argv)
 
 /** setPaths
  *	setup paths to config/install directories. The config dir is the dir where all user
- *	config information is stored, e.g. mupen64.conf, save files, and plugin conf files.
- *	The install dir is where mupen64 looks for common files, e.g. plugins, icons, language
+ *	config information is stored, e.g. mupen64plus.conf, save files, and plugin conf files.
+ *	The install dir is where mupen64plus looks for common files, e.g. plugins, icons, language
  *	tranlation files.
  */
 static void setPaths(void)
 {
 	char buf[PATH_MAX], buf2[PATH_MAX];
 
-	// if the config dir was not specified at the commandline, look for ~/.mupen64 dir
+	// if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
 	if (strlen(g_ConfigDir) == 0)
 	{
 		strncpy(g_ConfigDir, getenv("HOME"), PATH_MAX);
-		strncat(g_ConfigDir, "/.mupen64", PATH_MAX - strlen(g_ConfigDir));
+		strncat(g_ConfigDir, "/.mupen64plus", PATH_MAX - strlen(g_ConfigDir));
 
-		// if ~/.mupen64 dir is not found, create it
+		// if ~/.mupen64plus dir is not found, create it
 		if(!isdir(g_ConfigDir))
 		{
 			printf("Creating %s to store user data\n", g_ConfigDir);
@@ -963,7 +963,7 @@ static void setPaths(void)
 	if(strlen(g_InstallDir) == 0)
 	{
 		strncpy(g_InstallDir, PREFIX, PATH_MAX);
-		strncat(g_InstallDir, "/share/mupen64/", PATH_MAX - strlen(g_InstallDir));
+		strncat(g_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(g_InstallDir));
         
 		// if install dir is not in the default location, set it to the current working dir
 		if(!isdir(g_InstallDir))
@@ -983,14 +983,14 @@ static void setPaths(void)
 		exit(1);
 	}
 
-	// check config dir for mupen64.conf file
+	// check config dir for mupen64plus.conf file
 	strncpy(buf, g_ConfigDir, PATH_MAX);
-	strncat(buf, "mupen64.conf", PATH_MAX - strlen(buf));
+	strncat(buf, "mupen64plus.conf", PATH_MAX - strlen(buf));
 	if(!isfile(buf))
 	{
 		// if no config dir is found, try copying default from install directory
 		strncpy(buf2, g_InstallDir, PATH_MAX);
-		strncat(buf2, "mupen64.conf", PATH_MAX - strlen(buf2));
+		strncat(buf2, "mupen64plus.conf", PATH_MAX - strlen(buf2));
 		if(isfile(buf2))
 		{
 			printf("Copying %s to %s\n", buf2, g_ConfigDir);
@@ -1001,7 +1001,7 @@ static void setPaths(void)
 		else
 		{
 			getcwd(buf2, PATH_MAX);
-			strncat(buf2, "/mupen64.conf", PATH_MAX - strlen(buf2));
+			strncat(buf2, "/mupen64plus.conf", PATH_MAX - strlen(buf2));
 			if(isfile(buf2))
 			{
 				printf("Copying %s to %s\n", buf2, g_ConfigDir);

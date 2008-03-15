@@ -608,7 +608,7 @@ int create_configDialog( void )
 
 	// Create Mupen64 configuration page
 	{
-		label = gtk_label_new( "Mupen64" );
+		label = gtk_label_new( "Mupen64Plus Configuration" );
 		g_ConfigDialog.configMupen = gtk_vbox_new( FALSE, 6 );
 		gtk_container_set_border_width( GTK_CONTAINER(g_ConfigDialog.configMupen), 10 );
 		gtk_notebook_append_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configMupen, label );

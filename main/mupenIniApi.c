@@ -66,10 +66,10 @@ static int split_property(char *s)
 
 static char* get_ini_path()
 {
-   char *path = malloc(strlen(get_configpath())+1+strlen("mupen64.ini"));
+   char *path = malloc(strlen(get_configpath())+1+strlen("mupen64plus.ini"));
 
    strcpy(path, get_configpath());
-   strcat(path, "mupen64.ini");
+   strcat(path, "mupen64plus.ini");
 
    return path;
 }

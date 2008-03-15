@@ -1,31 +1,31 @@
-How to profile R4300 instructions with mupen64-amd64:
+How to profile R4300 instructions with mupen64plus:
 
 Pre-requisites:
  - either 32-bit (x86) or 64-bit (amd64) Linux system
  - Lots of memory.  It doesn't cause swapping in a machine with 2GB of ram, but it probably would with 1GB
  - OProfile (http://oprofile.sourceforge.net/)
- - Mupen64-amd64 source code
+ - Mupen64plus source code
 
 Procedure:
  1. Install OProfile linux tool
 
  2. Build r4300 profile tool with "gcc -o r4300prof r4300prof.c"
 
- 3. Build mupen64 with "make DBGSYM=1 DBG_PROFILE=1"
+ 3. Build mupen64plus with "make DBGSYM=1 DBG_PROFILE=1"
 
  4. Delete any pre-existing profiling files: "rm instructionaddrs.dat"
 
  5. Clear any residual profiling data in oprofile: "sudo opcontrol --reset"
 
  6. Make profiling run by typing in console:
-    sudo opcontrol --start ; ./mupen64_nogui --emumode 2 --audio ./plugins/dummyaudio.so <path-to-n64-rom> ; sudo opcontrol --stop
+    sudo opcontrol --start ; ./mupen64plus --nogui --emumode 2 --audio ./plugins/dummyaudio.so <path-to-n64-rom> ; sudo opcontrol --stop
 
  7. Exit emulator with Escape key after running for desired time
 
  7. Move data file into tools folder: "mv instructionaddrs.dat tools/"
 
- 8. Dump instruction-level profiling data for mupen64 with oprofile:
-    opreport -d -l ./mupen64_nogui > ./tools/prof-mupen64-detail.txt
+ 8. Dump instruction-level profiling data for mupen64plus with oprofile:
+    opreport -d -l ./mupen64plus > ./tools/prof-mupen64-detail.txt
 
  9. Run tool to generate r4300 instruction profile report:
     cd tools ; ./r4300prof instructionaddrs.dat prof-mupen64-detail.txt
