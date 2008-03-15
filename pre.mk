@@ -45,6 +45,7 @@ GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 # set base program pointers and flags
 CC      = gcc
 CXX     = g++
+LD      = g++
 STRIP   = strip --strip-all
 RM      = rm
 MV      = mv

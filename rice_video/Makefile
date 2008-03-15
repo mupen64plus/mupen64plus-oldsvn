@@ -1,89 +1,13 @@
-# detect system architecture: i386, x86_64, or PPC/PPC64
-UNAME = $(shell uname -m)
-ifeq ("$(UNAME)","x86_64")
-  CPU = X86
-  ifeq ("$(BITS)", "32")
-    ARCH = 64BITS_32
-  else
-    ARCH = 64BITS
-  endif
-endif
-ifneq ("$(filter i%86,$(UNAME))","")
-  CPU = X86
-  ARCH = 32BITS
-endif
-ifeq ("$(UNAME)","ppc")
-  CPU = PPC
-  ARCH = 32BITS
-endif
-ifeq ("$(UNAME)","ppc64")
-  CPU = PPC
-  ARCH = 64BITS
-endif
+# Makefile for RiceVideoLinux, in Mupen64Plus
 
-# test for presence of SDL
-ifeq ("$(shell which sdl-config 2>&1 | head -c 9)", "which: no")
-  # throw error
-  $(error No SDL development libraries found!)
-endif
+# include pre-make file with a bunch of definitions
+include ../pre.mk
 
-# test for presence of GTK 2.0
-ifeq ("$(shell which pkg-config 2>&1 | head -c 9)", "which: no")
-  # throw error
-  $(error No GTK 2.x development libraries found!)
-endif
-ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
-  # throw error
-  $(error No GTK 2.x development libraries found!)
-endif
-
-# set GTK flags and libraries
-GTK_FLAGS	= `pkg-config gtk+-2.0 --cflags` -D_GTK2
-GTK_LIBS	= `pkg-config gtk+-2.0 --libs`
-GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
-
-# set base program pointers and flags
-CC = gcc
-CXX = g++
-LD = g++
-STRIP = strip
-
-# set base CFLAGS and LDFLAGS for all systems
-CFLAGS = -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC -O3 -ffast-math -funroll-loops
-LDFLAGS	= -L/usr/X11R6/lib `sdl-config --libs` -lGL -shared -Wl,-Bsymbolic
-
-# set special flags per-system
-ifeq ($(CPU), X86)
-  ifeq ($(ARCH), 64BITS)
-    CFLAGS += -march=athlon64
-  else
-    CFLAGS += -march=i686 -mtune=pentium-m -mmmx -msse
-    ifneq ($(PROFILE), 1)
-      CFLAGS += -fomit-frame-pointer
-    endif
-  endif
-  # tweak flags for 32-bit build on 64-bit system
-  ifeq ($(ARCH), 64BITS_32)
-    CFLAGS += -m32
-    LDFLAGS += -m32 -m elf_i386
-  endif
-endif
-ifeq ($(CPU), PPC)
-  CFLAGS += -mcpu=powerpc
-endif
+# local CFLAGS, LIBS, and LDFLAGS
+CFLAGS += -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC
+LDFLAGS	+= -L/usr/X11R6/lib `sdl-config --libs` -lGL -shared -Wl,-Bsymbolic
 
 # set options
-
-ifeq ($(PROFILE), 1)
-  CFLAGS += -pg -g
-  LDFLAGS += -pg
-  STRIP = true
-else
-  ifeq ($(DBGSYM), 1)
-    CFLAGS += -g
-    STRIP = true
-  endif
-endif
 
 ifeq ($(DBG), 1)
   CFLAGS += -D_DEBUG
@@ -184,7 +108,7 @@ instruction:
 	$(warning please copy ricevideo.so AND RiceVideoLinux.ini in the plugins/ folder of the emulator)
 
 clean:
-	rm -rf $(OBJECTS) $(ALL)
+	rm -rf ricevideo.so $(OBJECTS)
 
 rebuild: clean $(ALL)
 
