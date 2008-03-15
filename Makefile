@@ -146,8 +146,7 @@ PLUGINS	= plugins/blight_input.so \
           plugins/jttl_audio.so \
           plugins/mupen64_audio.so \
           plugins/mupen64_hle_rsp_azimer.so \
-          plugins/mupen64_input.so \
-          plugins/mupen64_soft_gfx.so \
+          plugins/mupen64_input.so
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -231,9 +230,8 @@ clean:
 	$(MAKE) -C mupen64_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
-	$(MAKE) -C mupen64_soft_gfx clean
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o
-	$(RM) -f mupen64 mupen64_dbg plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so plugins/dummyaudio.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/mupen64_soft_gfx.so plugins/glN64.so
+	$(RM) -f mupen64 mupen64_dbg plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so plugins/dummyaudio.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so
 
 rebuild: clean all
 
@@ -274,10 +272,6 @@ plugins/mupen64_hle_rsp_azimer.so: FORCE
 plugins/mupen64_input.so: FORCE
 	$(MAKE) -C mupen64_input all
 	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
-
-plugins/mupen64_soft_gfx.so: FORCE
-	$(MAKE) -C mupen64_soft_gfx all
-	@$(CP) ./mupen64_soft_gfx/mupen64_soft_gfx.so ./plugins/mupen64_soft_gfx.so
 
 FORCE:
 
