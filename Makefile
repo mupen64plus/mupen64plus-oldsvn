@@ -266,10 +266,12 @@ plugins/glN64.so: FORCE
 plugins/ricevideo.so: FORCE
 	$(MAKE) -C rice_video all
 	@$(CP) ./rice_video/ricevideo.so ./plugins/ricevideo.so
+	@$(CP) ./rice_video/RiceVideoLinux.ini ./plugins/RiceVideoLinux.ini
 
 plugins/glide64.so: FORCE
 	$(MAKE) -C glide64 all
 	@$(CP) ./glide64/glide64.so ./plugins/glide64.so
+	@$(CP) ./glide64/Glide64.ini ./plugins/Glide64.ini
 
 plugins/jttl_audio.so: FORCE
 	$(MAKE) -C jttl_audio all
