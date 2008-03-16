@@ -114,7 +114,7 @@ targets:
 	@echo "    RDP_LOG=1     == Dump out RDP instruction data"
 	@echo "    RDP_LOG_ERR=1 == Dump out RDP instruction data + errors"
 
-all: $(TARGET) instruction
+all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
@@ -137,14 +137,11 @@ Tmem_nasm.o: Tmem_nasm.asm
 
 rdp.o: ucode06.h
 
-instruction: $(TARGET)
-	$(warning please copy $(TARGET) AND Glide64.ini in the plugins/ folder of the emulator)
-
 clean:
-	rm -rf $(OBJECTS) $(TARGET) $(DEPS) compiletex compiletex.o font.h cursor.h
-	rm -rf *.ii *.i *.s
+	$(RM) -rf $(OBJECTS) $(TARGET) $(DEPS) compiletex compiletex.o font.h cursor.h
+	$(RM) -rf *.ii *.i *.s
 
-rebuild: clean $(TARGET) instruction
+rebuild: clean $(TARGET)
 
 
 # build rules
@@ -160,5 +157,5 @@ rebuild: clean $(TARGET) instruction
 	@rm -f $@
 	$(CC) -o $@ $(CFLAGS) -c $<
 
-.PHONY: all instruction clean rebuild
+.PHONY: all clean rebuild
 

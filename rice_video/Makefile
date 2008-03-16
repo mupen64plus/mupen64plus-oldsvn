@@ -98,19 +98,16 @@ targets:
 	@echo "    DBG=1      == turn on debugging functions"
 	@echo "    DBGSYM=1   == add debugging symbols to binaries"
 
-all: ricevideo.so instruction
+all: ricevideo.so
 
 ricevideo.so: $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
 	$(STRIP) --strip-all $@
 
-instruction:
-	$(warning please copy ricevideo.so AND RiceVideoLinux.ini in the plugins/ folder of the emulator)
-
 clean:
-	rm -rf ricevideo.so $(OBJECTS)
+	$(RM) -rf ricevideo.so $(OBJECTS)
 
-rebuild: clean $(ALL)
+rebuild: clean all
 
 # build rules
 
