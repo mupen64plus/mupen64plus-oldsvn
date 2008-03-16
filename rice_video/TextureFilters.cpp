@@ -1085,7 +1085,7 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
 
 			type = RGB_PNG;
 
-			char filename2[256];
+			char filename2[PATH_MAX];
 			strcpy(filename2,texturefilename);
 			strcpy(filename2+strlen(filename2)-8,"_a.png");
 			if( PathFileExists(filename2) )
@@ -1235,7 +1235,7 @@ char *subfolders[] = {
 
 void FindAllDumpedTextures(void)
 {
-	char	foldername[256];
+	char	foldername[PATH_MAX];
 	GetPluginDir(foldername);
 	if(foldername[strlen(foldername) - 1] != '/') strcat(foldername, "/");
 	strcat(foldername,"texture_dump/");
@@ -1249,7 +1249,7 @@ void FindAllDumpedTextures(void)
 	if( !PathFileExists(foldername) )
 	{
 		CheckAndCreateFolder(foldername);
-		char	foldername2[256];
+		char	foldername2[PATH_MAX];
 		for( int i=0; i<5; i++)
 		{
 			strcpy(foldername2,foldername);
@@ -1263,7 +1263,7 @@ void FindAllDumpedTextures(void)
 		gTxtrDumpInfos.clear();
 		FindAllTexturesFromFolder(foldername,gTxtrDumpInfos, false, true);
 
-		char	foldername2[256];
+		char	foldername2[PATH_MAX];
 		for( int i=0; i<5; i++)
 		{
 			strcpy(foldername2,foldername);
@@ -1276,7 +1276,7 @@ void FindAllDumpedTextures(void)
 
 void FindAllHiResTextures(void)
 {
-	char	foldername[256];
+	char	foldername[PATH_MAX];
 	GetPluginDir(foldername);
 	if(foldername[strlen(foldername) - 1] != '/') strcat(foldername, "/");
 	strcat(foldername,"hires_texture/");
@@ -1441,10 +1441,10 @@ void DumpCachedTexture( TxtrCacheEntry &entry )
 		if( CheckTextureInfos(gTxtrDumpInfos,entry,ciidx,true) >= 0 )
 			return;		// This texture has been dumpped
 
-		char filename1[256];
-		char filename2[256];
-		char filename3[256];
-		char gamefolder[256];
+		char filename1[PATH_MAX];
+		char filename2[PATH_MAX];
+		char filename3[PATH_MAX];
+		char gamefolder[PATH_MAX];
 		GetPluginDir(gamefolder);
 		
 		strcat(gamefolder,"texture_dump/");
@@ -1760,8 +1760,8 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
 	}
 
 	// Load the bitmap file
-	char filename_rgb[256];
-	char filename_a[256];
+	char filename_rgb[PATH_MAX];
+	char filename_a[PATH_MAX];
 
 
 	//GetPluginDir(filename_rgb);
@@ -1778,8 +1778,8 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
 
 	//{
 	//	extern uint32 dwAsmCRC2;
-	//	char filename_rgb_new[256];
-	//	char filename_a_new[256];
+	//	char filename_rgb_new[PATH_MAX];
+	//	char filename_a_new[PATH_MAX];
 	//	GetPluginDir(filename_rgb_new);
 	//	strcat(filename_rgb_new,"hires_texture\\");
 	//	strcat(filename_rgb_new,g_curRomInfo.szGameName);

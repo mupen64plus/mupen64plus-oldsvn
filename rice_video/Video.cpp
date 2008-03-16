@@ -33,6 +33,8 @@ uint32* g_pRDRAMu32 = NULL;
 signed char *g_pRDRAMs8 = NULL;
 unsigned char *g_pRDRAMu8 = NULL;
 
+static char g_ConfigDir[PATH_MAX] = {0};
+
 CCritSect g_CritialSection;
 
 ///#define USING_THREAD
@@ -62,46 +64,56 @@ std::vector<uint32> frameWriteRecord;
 
 void GetPluginDir( char * Directory ) 
 {
-   char path[MAX_PATH];
-   int n = readlink("/proc/self/exe", path, MAX_PATH);
-   if(n == -1) strcpy(path, "./");
+   if(strlen(g_ConfigDir) > 0)
+   {
+      strncpy(Directory, g_ConfigDir, PATH_MAX);
+      // make sure there's a trailing '/'
+      if(Directory[strlen(Directory)-1] != '/')
+	      strncat(Directory, "/", PATH_MAX - strlen(Directory));
+   }
    else
-     {
-	char path2[MAX_PATH];
-	int i;
-	
-	path[n] = '\0';
-	strcpy(path2, path);
-	for (i=strlen(path2)-1; i>0; i--)
-	  {
-	     if(path2[i] == '/') break;
-	  }
-	if(i == 0) strcpy(path, "./");
-	else
-	  {
-	     DIR *dir;
-	     struct dirent *entry;
-	     int gooddir = 0;
-	     
-	     path2[i+1] = '\0';
-	     dir = opendir(path2);
-	     while((entry = readdir(dir)) != NULL)
-	       {
-		  if(!strcmp(entry->d_name, "plugins"))
-		    gooddir = 1;
-	       }
-	     closedir(dir);
-	     if(!gooddir) strcpy(path, "./");
-	  }
-     }
-   int i;
-   for(i=strlen(path)-1; i>0; i--)
-     {
-	if(path[i] == '/') break;
-     }
-   path[i+1] = '\0';
-   strcat(path, "plugins/");
-   strcpy(Directory, path);
+   {
+      char path[PATH_MAX];
+      int n = readlink("/proc/self/exe", path, PATH_MAX);
+      if(n == -1) strcpy(path, "./");
+      else
+        {
+           char path2[PATH_MAX];
+           int i;
+           
+           path[n] = '\0';
+           strcpy(path2, path);
+           for (i=strlen(path2)-1; i>0; i--)
+             {
+                if(path2[i] == '/') break;
+             }
+           if(i == 0) strcpy(path, "./");
+           else
+             {
+                DIR *dir;
+                struct dirent *entry;
+                int gooddir = 0;
+                
+                path2[i+1] = '\0';
+                dir = opendir(path2);
+                while((entry = readdir(dir)) != NULL)
+                  {
+           	  if(!strcmp(entry->d_name, "plugins"))
+           	    gooddir = 1;
+                  }
+                closedir(dir);
+                if(!gooddir) strcpy(path, "./");
+             }
+        }
+      int i;
+      for(i=strlen(path)-1; i>0; i--)
+        {
+           if(path[i] == '/') break;
+        }
+      path[i+1] = '\0';
+      strcat(path, "plugins/");
+      strcpy(Directory, path);
+   }
 }
 
 //-------------------------------------------------------------------------------------
@@ -1065,3 +1077,16 @@ FUNC_TYPE(void) NAME_DEFINE(ReadScreen)(void **dest, int *width, int *height)
    glReadBuffer( oldMode );
 }
     
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetConfigDir
+  Purpose:  To pass the location where config files should be read/
+            written to.
+  input:    path to config directory
+  output:   none
+*******************************************************************/
+FUNC_TYPE(void) NAME_DEFINE(SetConfigDir)(char *configDir)
+{
+	strncpy(g_ConfigDir, configDir, PATH_MAX);
+}

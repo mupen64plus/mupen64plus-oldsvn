@@ -319,7 +319,7 @@ void GenerateFrameBufferOptions(void)
 BOOL TestRegistry(void)
 {
    FILE *f;
-   char name[MAX_PATH];
+   char name[PATH_MAX];
    GetPluginDir(name);
    strcat(name, CONFIG_FILE);
    f = fopen(name, "rb");
@@ -330,7 +330,7 @@ BOOL TestRegistry(void)
 
 void WriteConfiguration(void)
 {
-   char name[MAX_PATH];
+   char name[PATH_MAX];
    GetPluginDir(name);
    strcat(name, CONFIG_FILE);
    FILE *f = fopen(name, "rb");
@@ -487,7 +487,7 @@ void WriteConfiguration(void)
 
 uint32 ReadRegistryDwordVal(char *Field)
 {
-   char name[MAX_PATH];
+   char name[PATH_MAX];
    GetPluginDir(name);
    strcat(name, CONFIG_FILE);
    FILE *f = fopen(name, "rb");
@@ -1564,7 +1564,7 @@ BOOL ReadIniFile()
 	std::ifstream inifile;
 	char readinfo[100];
 
-	char filename[256];
+	char filename[PATH_MAX];
 	GetPluginDir(filename);
 	strcat(filename,szIniFileName);
 	inifile.open(filename);
@@ -1729,9 +1729,9 @@ std::ifstream & getline(std::ifstream & is, char *str)
 
 void WriteIniFile()
 {
-	TCHAR szFileNameOut[MAX_PATH+1];
-	TCHAR szFileNameDelete[MAX_PATH+1];
-	TCHAR filename[MAX_PATH+1];
+	TCHAR szFileNameOut[PATH_MAX+1];
+	TCHAR szFileNameDelete[PATH_MAX+1];
+	TCHAR filename[PATH_MAX+1];
 	uint32 i;
 	FILE * fhIn;
 	FILE * fhOut;

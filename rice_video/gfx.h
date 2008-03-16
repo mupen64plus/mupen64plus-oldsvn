@@ -369,6 +369,17 @@ EXPORT void CALL SetOnScreenText(char *msg);
 
 EXPORT void CALL ReadScreen(void **dest, int *width, int *height);
 
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetConfigDir
+  Purpose:  To pass the location where config files should be read/
+            written to.
+  input:    path to config directory
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetConfigDir(char *configDir);
+
 FUNC_TYPE(void) NAME_DEFINE(SetMaxTextureMem)(DWORD mem);
 
 #if defined(__cplusplus)
