@@ -210,7 +210,8 @@ mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
 install:
 	$(INSTALL) -D -s -m 0755 mupen64plus "$(PREFIX)/bin/mupen64plus"
 	$(INSTALL) -d "$(PREFIX)/share/mupen64plus"
-	$(INSTALL) -m 0644 mupen64plus.conf mupen64plus.ini "$(PREFIX)/share/mupen64plus"
+	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/config"
+	$(INSTALL) -m 0644 config/* "$(PREFIX)/share/mupen64plus/config"
 	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/doc"
 	$(INSTALL) -m 0644 doc/* "$(PREFIX)/share/mupen64plus/doc"
 	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/icons"
@@ -266,12 +267,10 @@ plugins/glN64.so: FORCE
 plugins/ricevideo.so: FORCE
 	$(MAKE) -C rice_video all
 	@$(CP) ./rice_video/ricevideo.so ./plugins/ricevideo.so
-	@$(CP) ./rice_video/RiceVideoLinux.ini ./plugins/RiceVideoLinux.ini
 
 plugins/glide64.so: FORCE
 	$(MAKE) -C glide64 all
 	@$(CP) ./glide64/glide64.so ./plugins/glide64.so
-	@$(CP) ./glide64/Glide64.ini ./plugins/Glide64.ini
 
 plugins/jttl_audio.so: FORCE
 	$(MAKE) -C jttl_audio all

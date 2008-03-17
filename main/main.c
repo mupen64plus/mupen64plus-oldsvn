@@ -920,7 +920,7 @@ void parseCommandLine(int argc, char **argv)
  *	setup paths to config/install directories. The config dir is the dir where all user
  *	config information is stored, e.g. mupen64plus.conf, save files, and plugin conf files.
  *	The install dir is where mupen64plus looks for common files, e.g. plugins, icons, language
- *	tranlation files.
+ *	translation files.
  */
 static void setPaths(void)
 {
@@ -955,7 +955,7 @@ static void setPaths(void)
 		}
 	}
 
-	// make sure it has a '/' on the end.
+	// make sure config dir has a '/' on the end.
 	if(g_ConfigDir[strlen(g_ConfigDir)-1] != '/')
 		strncat(g_ConfigDir, "/", PATH_MAX - strlen(g_ConfigDir));
 
@@ -970,45 +970,58 @@ static void setPaths(void)
 			getcwd(g_InstallDir, PATH_MAX);
 	}
 
-	// make sure it has a '/' on the end.
+	// make sure install dir has a '/' on the end.
 	if(g_InstallDir[strlen(g_InstallDir)-1] != '/')
 		strncat(g_InstallDir, "/", PATH_MAX - strlen(g_InstallDir));
 
 	// make sure install dir is valid
 	strncpy(buf, g_InstallDir, PATH_MAX);
-	strncat(buf, "icons/logo.png", PATH_MAX - strlen(buf));
+	strncat(buf, "config/mupen64plus.conf", PATH_MAX - strlen(buf));
 	if(!isfile(buf))
 	{
 		printf("%s: Invalid install directory\n", g_InstallDir);
 		exit(1);
 	}
 
-	// check config dir for mupen64plus.conf file
+	// check user config dir for mupen64plus.conf file. If it's not there, copy all
+	// config files from install dir over to user dir.
 	strncpy(buf, g_ConfigDir, PATH_MAX);
 	strncat(buf, "mupen64plus.conf", PATH_MAX - strlen(buf));
 	if(!isfile(buf))
 	{
-		// if no config dir is found, try copying default from install directory
-		strncpy(buf2, g_InstallDir, PATH_MAX);
-		strncat(buf2, "mupen64plus.conf", PATH_MAX - strlen(buf2));
-		if(isfile(buf2))
+		DIR *dir;
+		struct dirent *entry;
+
+		strncpy(buf, g_InstallDir, PATH_MAX);
+		strncat(buf, "config", PATH_MAX - strlen(buf));
+		dir = opendir(buf);
+
+		// should never hit this error because of previous checks
+		if(!dir)
 		{
-			printf("Copying %s to %s\n", buf2, g_ConfigDir);
-			if(copyfile(buf2, buf) != 0)
-				printf("Error copying file\n");
+			perror(buf);
+			return;
 		}
-		// if there's no default in the install dir, try copying from cwd
-		else
+
+		while((entry = readdir(dir)) != NULL)
 		{
-			getcwd(buf2, PATH_MAX);
-			strncat(buf2, "/mupen64plus.conf", PATH_MAX - strlen(buf2));
-			if(isfile(buf2))
+			strncpy(buf, g_InstallDir, PATH_MAX);
+			strncat(buf, "config/", PATH_MAX - strlen(buf));
+			strncat(buf, entry->d_name, PATH_MAX - strlen(buf));
+
+			// only copy regular files
+			if(isfile(buf))
 			{
-				printf("Copying %s to %s\n", buf2, g_ConfigDir);
-				if(copyfile(buf2, buf) != 0)
+				strncpy(buf2, g_ConfigDir, PATH_MAX);
+				strncat(buf2, entry->d_name, PATH_MAX - strlen(buf2));
+                                
+				printf("Copying %s to %s\n", buf, g_ConfigDir);
+				if(copyfile(buf, buf2) != 0)
 					printf("Error copying file\n");
 			}
 		}
+
+		closedir(dir);
 	}
 
 	chdir(g_ConfigDir);

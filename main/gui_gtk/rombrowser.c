@@ -145,7 +145,7 @@ rombrowser_readCache( void )
 	int i;
 	SRomEntry *entry;
 
-	snprintf( filename, PATH_MAX, "%srombrowser.cache", get_installpath() );
+	snprintf( filename, PATH_MAX, "%srombrowser.cache", get_configpath() );
 	f = gzopen( filename, "rb" );
 	if( !f )
 		return;
@@ -195,7 +195,7 @@ void rombrowser_writeCache( void )
 	int i=0;
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romTreeView));
 
-	snprintf( filename, PATH_MAX, "%srombrowser.cache", get_installpath() );
+	snprintf( filename, PATH_MAX, "%srombrowser.cache", get_configpath() );
 	f = gzopen( filename, "wb" );
 	if( !f )
 		return;
