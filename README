@@ -1,10 +1,20 @@
-Mupen64Plus Build and Install Guide
------------------------------------
+Mupen64Plus README
+------------------
 
-Mupen64Plus is based off of mupen64 originally created by Hacktarux. The Mupen64Plus package contains the mupen64 emulator program (renamed mupen64plus) plus graphics, sound, input, and RSP plugins. To build from source, unzip and cd into the source directory, then build using make:
+Mupen64Plus is based off of mupen64, originally created by Hacktarux. The Mupen64Plus package contains the mupen64 emulator program (renamed mupen64plus) plus graphics, sound, input, and RSP plugins.
 
- $ unzip Mupen64Plus-x.y.zip
- $ cd Mupen64Plus-x.y
+README Sections
+  1. Building From Source
+  2. Installation
+  3. Multi-user Support
+
+1. Building From Source
+-----------------------
+
+If you downloaded the binary distribution of Mupen64Plus, skip to the Installation section. To build the source distribution, unzip and cd into the source directory, then build using make:
+
+ $ unzip Mupen64Plus-x-y-z-src.zip
+ $ cd Mupen64Plus-x-y-z-src
  $ make all
 
 Type 'make' by itself to view all available build options:
@@ -32,16 +42,31 @@ Type 'make' by itself to view all available build options:
      DBG_COMPARE=1 == enable core-synchronized r4300 debugging
      DBG_PROFILE=1 == dump profiling data for r4300 dynarec to data file
 
-Previous to version 1.3, building mupen64 built two programs: mupen64 and mupen64_nogui. mupen64 had a gtk graphical frontend including a rom browser. mupen64_nogui contained no graphical frontend and all options were specified via the commandline. As of version 1.3, the mupen64 and mupen64_nogui codebases have been combined. Now, building mupen64plus results in one executable called mupen64plus that can either be run with a gui (default) or without a gui, by specifying --nogui at the commandline. For backwards compatability, if a symbolic link to the mupen64plus executable called mupen64_nogui is created, running the mupen64_nogui symlink is equivalent to running mupen64plus with the --nogui flag.
+Previous to version 1.3, building mupen64 built two programs: mupen64 and mupen64_nogui. mupen64 had a gtk graphical frontend including a rom browser. mupen64_nogui contained no graphical frontend and all options were specified via the commandline. As of version 1.3, the mupen64 and mupen64_nogui codebases have been combined. Now, building mupen64plus results in one executable called mupen64plus that can either be run with a gui (default) or without a gui, by specifying --nogui at the commandline. For backwards compatability, if a symbolic link to the mupen64plus executable called mupen64plus_nogui (or mupen64_nogui) is created, running the mupen64plus_nogui symlink is equivalent to running mupen64plus with the --nogui flag.
 
 NOTE: If you want to build a nogui-only version of mupen64plus, i.e. without gtk+ dependencies, pass the NOGUI_ONLY=1 option to make, like this:
 
  $ make NOGUI_ONLY=1 all
 
-Installation
-------------
+2. Installation
+---------------
 
-After building mupen64plus and all plugins, su to root and type 'make install' to install Mupen64Plus. The install process will copy the executable to $PREFIX/bin and a directory called $PREFIX/share/mupen64plus will be created to hold plugins, icons, and language translation files used by mupen64plus. By default, PREFIX is set to /usr/local. This can be changed by passing the PREFIX option to make. NOTE: you must pass the prefix, when building AND when running 'make install'. For example, to install mupen64 to /usr, do this:
+*Binary Distribution*
+
+To install the binary distribution of Mupen64Plus, su to root and run the provided install.sh script:
+
+ $ su
+ # ./install.sh
+ # exit
+ $
+
+The install script will copy the executable to /usr/local/bin and a directory called /usr/local/share/mupen64plus will be created to hold plugins and other files used by mupen64plus.
+
+NOTE: By default, install.sh uses /usr/local for the install prefix. Although the user can specify an alternate prefix to install.sh at the commandline, the mupen64plus binary was compiled to look for the install directory in /usr/local, so specifying an alternate prefix to install.sh will cause problems (mupen64plus will not find the install directory). If you want to use a prefix other than /usr/local, you will have to download the source package and build with the PREFIX option (see below).
+
+*Source Distribution*
+
+After building mupen64plus and all plugins, su to root and type 'make install' to install Mupen64Plus. The install process will copy the executable to $PREFIX/bin and a directory called $PREFIX/share/mupen64plus will be created to hold plugins and other files used by mupen64plus. By default, PREFIX is set to /usr/local. This can be changed by passing the PREFIX option to make. NOTE: you must pass the prefix, when building AND installing. For example, to install mupen64plus to /usr, do this:
 
  $ make PREFIX=/usr all
  $ su
@@ -49,8 +74,8 @@ After building mupen64plus and all plugins, su to root and type 'make install' t
  # exit
  $
 
-Multi-user Support
-------------------
+3. Multi-user Support
+---------------------
 
 As of version 1.3, Mupen64Plus now has support for multi-user environments.
 

@@ -63,20 +63,22 @@ bin-32: FORCE
 	rm -rf ../$(BINNAME_32)
 	rm -f ../$(BINNAME_32).zip
 	mkdir ../$(BINNAME_32)
+	mkdir ../$(BINNAME_32)/config
+	mkdir ../$(BINNAME_32)/doc
 	mkdir ../$(BINNAME_32)/icons
+	mkdir ../$(BINNAME_32)/lang
 	mkdir ../$(BINNAME_32)/plugins
-	mkdir ../$(BINNAME_32)/save
 	# copy files into binary structure
-	cp ./*.conf ../$(BINNAME_32)/
-	cp ./*.TXT ../$(BINNAME_32)/
-	cp ./mupen64plus.ini ../$(BINNAME_32)/
 	cp ./mupen64plus ../$(BINNAME_32)/
+	cp ./*.sh ../$(BINNAME_32)/
+	cp ./*.TXT ../$(BINNAME_32)/
+	cp ./README ../$(BINNAME_32)/
+	cp ./RELEASE ../$(BINNAME_32)/
+	cp ./config/* ../$(BINNAME_32)/config
+	cp ./doc/* ../$(BINNAME_32)/doc
 	cp ./icons/* ../$(BINNAME_32)/icons
+	cp ./lang/* ../$(BINNAME_32)/lang
 	cp ./plugins/*.so ../$(BINNAME_32)/plugins
-	cp ./plugins/RiceVideo*.* ../$(BINNAME_32)/plugins
-	cp ./plugins/Glide64.ini ../$(BINNAME_32)/plugins
-	cp ./README ../$(BINNAME_32)/README
-	cp ./RELEASE ../$(BINNAME_32)/RELEASE
 	# zip it up and delete the directory
 	cd .. ; zip -r $(BINNAME_32).zip $(BINNAME_32)
 	rm -rf ../$(BINNAME_32)
@@ -88,20 +90,22 @@ bin-64: FORCE
 	rm -rf ../$(BINNAME_64)
 	rm -f ../$(BINNAME_64).zip
 	mkdir ../$(BINNAME_64)
+	mkdir ../$(BINNAME_64)/config
+	mkdir ../$(BINNAME_64)/doc
 	mkdir ../$(BINNAME_64)/icons
+	mkdir ../$(BINNAME_64)/lang
 	mkdir ../$(BINNAME_64)/plugins
-	mkdir ../$(BINNAME_64)/save
 	# copy files into binary structure
-	cp ./*.conf ../$(BINNAME_64)/
-	cp ./*.TXT ../$(BINNAME_64)/
-	cp ./mupen64plus.ini ../$(BINNAME_64)/
 	cp ./mupen64plus ../$(BINNAME_64)/
+	cp ./*.sh ../$(BINNAME_64)/
+	cp ./*.TXT ../$(BINNAME_64)/
+	cp ./README ../$(BINNAME_64)/
+	cp ./RELEASE ../$(BINNAME_64)/
+	cp ./config/* ../$(BINNAME_64)/config
+	cp ./doc/* ../$(BINNAME_64)/doc
 	cp ./icons/* ../$(BINNAME_64)/icons
+	cp ./lang/* ../$(BINNAME_64)/lang
 	cp ./plugins/*.so ../$(BINNAME_64)/plugins
-	cp ./plugins/RiceVideo*.* ../$(BINNAME_64)/plugins
-	cp ./plugins/Glide64.ini ../$(BINNAME_64)/plugins
-	cp ./README ../$(BINNAME_64)/README
-	cp ./RELEASE ../$(BINNAME_64)/RELEASE
 	# zip it up and delete the directory
 	cd .. ; zip -r $(BINNAME_64).zip $(BINNAME_64)
 	rm -rf ../$(BINNAME_64)
