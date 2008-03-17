@@ -116,7 +116,9 @@ int copyfile(char *src, char *dest)
 			unlink(dest);
 			return -3;
 		}
-		fputc(c, to);
+		if(!feof(from))
+			fputc(c, to);
+
 		if(ferror(to))
 		{
 			fclose(from);
