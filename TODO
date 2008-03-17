@@ -15,7 +15,6 @@ Known problems as of v1.2:
  - After loading a ROM and closing it / loading a ROM and restarting the emulator, the ROM appears
    as an invalid dump in the Good Name. You need to refresh the ROM list to reset it back to its
    normal Good Name
- - add install.sh script to facilitate multi-user installation
 
 
 Feature Requests:
