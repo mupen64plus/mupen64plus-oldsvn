@@ -22,7 +22,7 @@ Type 'make' by itself to view all available build options:
      VCR=1         == enable video recording
      LIRC=1        == enable LIRC support
      NOGUI_ONLY=1  == build without GUI support
-     PREFIX=path   == specify install prefix (default: /usr/local)
+     PREFIX=path   == specify install/uninstall prefix (default: /usr/local)
    Debugging Options:
      PROFILE=1     == build gprof instrumentation into binaries for profiling
      DBGSYM=1      == add debugging symbols to binaries
@@ -72,7 +72,7 @@ Run 'mupen64plus --help' for a complete list of commandline options:
          --rsp (path)            : use rsp plugin given by (path)
          --emumode (number)      : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter
          --sshotdir (dir)        : set screenshot directory to (dir)
-         --configdir (dir)       : force config dir (must contain mupen64.conf)
+         --configdir (dir)       : force config dir (must contain mupen64plus.conf)
          --installdir (dir)      : force install dir (place to look for plugins, icons, lang, etc)
          --noask                 : don't ask to force load on bad dumps
          -h, --help              : see this help message

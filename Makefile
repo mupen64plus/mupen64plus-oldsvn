@@ -188,7 +188,7 @@ targets:
 	@echo "    VCR=1         == enable video recording"
 	@echo "    LIRC=1        == enable LIRC support"
 	@echo "    NOGUI_ONLY=1  == build without GUI support"
-	@echo "    PREFIX=path   == specify install prefix (default: /usr/local)"
+	@echo "    PREFIX=path   == specify install/uninstall prefix (default: /usr/local)"
 	@echo "  Debugging Options:"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
 	@echo "    DBGSYM=1      == add debugging symbols to binaries"
@@ -208,22 +208,10 @@ mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
 	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 
 install:
-	$(INSTALL) -D -s -m 0755 mupen64plus "$(PREFIX)/bin/mupen64plus"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64plus"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/config"
-	$(INSTALL) -m 0644 config/* "$(PREFIX)/share/mupen64plus/config"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/doc"
-	$(INSTALL) -m 0644 doc/* "$(PREFIX)/share/mupen64plus/doc"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/icons"
-	$(INSTALL) -m 0644 icons/* "$(PREFIX)/share/mupen64plus/icons"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/lang"
-	$(INSTALL) -m 0644 lang/* "$(PREFIX)/share/mupen64plus/lang"
-	$(INSTALL) -d "$(PREFIX)/share/mupen64plus/plugins"
-	$(INSTALL) -m 0755 plugins/* "$(PREFIX)/share/mupen64plus/plugins"
+	./install.sh $(PREFIX)
 
 uninstall:
-	$(RM) -f "$(PREFIX)/bin/mupen64plus"
-	$(RM) -rf "$(PREFIX)/share/mupen64plus"
+	./uninstall.sh $(PREFIX)
 
 clean:
 	$(MAKE) -C blight_input clean
