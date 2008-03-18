@@ -1,6 +1,17 @@
 Mupen64Plus TODO:
 
-Known problems as of v1.2:
+To-do prior to v1.3 official release:
+------------------------------------
+ - Don't print "Info: Loading Rom: XX%" 100 times
+ - Glide64 doesn't handle --fullscreen command-line option or F1 key
+ - Glide64 uses Window resolution for fullscreen instead of Fullscreen resolution (check config dialog)
+ - Default plugins are blank when Mupen64plus is loaded for the first time
+ - Glide64 compilation dies for yasm v0.5, but "yasm -f elf -DBITS=$(BITS) $< -o $@" works
+ - "--noask" command-line switch does not work
+ - RiceVideoLinux config dialog always resets resolution to 320x240
+
+
+Known problems as of v1.3:
 ---------------------------------------
  - GTK GUI: Fullscreen button / F11 doesn't toggle fullscreen with RiceVideo
  - GTK GUI: crashes if input plugin doesn't load, ie if SDL_ttf not found
