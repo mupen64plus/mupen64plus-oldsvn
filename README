@@ -81,7 +81,7 @@ As of version 1.3, Mupen64Plus now has support for multi-user environments.
 
 The mupen64plus program will look for user configuration files in a .mupen64plus directory in the user's home directory. If the directory does not exist, it will be created and a default mupen64plus.conf file will be written to that directory on exit. If desired, an alternate config directory can be specified using the --configdir commandline option.
 
-By default, the mupen64plus program will look for plugins, icons, and language translation files in the install directory $PREFIX/share/mupen64plus (see Installation section for details). If this directory does not exist, mupen64plus will try to look in the user configuration directory. An alternate installation directory can be specified using the --installdir commandline option.
+By default, the mupen64plus program will look for plugins, icons, and language translation files in the install directory $PREFIX/share/mupen64plus (see Installation section for details). If this directory does not exist, mupen64plus will try to use the current working directory. An alternate installation directory can be specified using the --installdir commandline option.
 
 Run 'mupen64plus --help' for a complete list of commandline options:
 
