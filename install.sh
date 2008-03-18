@@ -16,9 +16,6 @@ else
 	INSTALL=install
 fi
 
-echo "DEBUG: INSTALL=$INSTALL"
-exit 0
-
 usage()
 {
 	echo "usage: $(basename $0) [prefix]"
