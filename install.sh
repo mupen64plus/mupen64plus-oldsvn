@@ -4,7 +4,20 @@
 # mupen64plus install script
 #
 
-INSTALL=ginstall
+if [ -x /usr/bin/ginstall ]; then
+	INSTALL=/usr/bin/ginstall
+elif [ -x /bin/ginstall ]; then
+	INSTALL=/bin/ginstall
+elif [ -x /usr/bin/install ]; then
+	INSTALL=/usr/bin/install
+elif [ -x /bin/install ]; then
+	INSTALL=/bin/install
+else
+	INSTALL=install
+fi
+
+echo "DEBUG: INSTALL=$INSTALL"
+exit 0
 
 usage()
 {
