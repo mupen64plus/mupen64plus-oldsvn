@@ -7,6 +7,8 @@ README Sections
   1. Building From Source
   2. Installation
   3. Multi-user Support
+  4. Known Issues
+
 
 1. Building From Source
 -----------------------
@@ -101,4 +103,11 @@ Run 'mupen64plus --help' for a complete list of commandline options:
          --installdir (dir)      : force install dir (place to look for plugins, icons, lang, etc)
          --noask                 : don't ask to force load on bad dumps
          -h, --help              : see this help message
+
+
+4. Known Issues
+-----------------------
+As of March 2008, the RiceVideoLinux plugin may be unstable with users of the open source drivers for an ATI Radeon graphics adapter when fog is enabled.  If you have are using the open source Radeon driver, you should set the "EnableFog" value in RiceVideo.cfg to 0.
+
+
 
