@@ -484,6 +484,11 @@ static int sdl_event_filter( const SDL_Event *event )
 {
 	switch( event->type )
 	{
+		// user clicked on window close button
+		case SDL_QUIT:
+			rompause = 0;
+			stop_it();
+			break;
 		case SDL_KEYDOWN:
 			switch( event->key.keysym.sym )
 			{

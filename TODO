@@ -10,11 +10,9 @@ To-do prior to v1.3 official release:
  - Glide64 compilation dies for yasm v0.5, but "yasm -f elf -DBITS=$(BITS) $< -o $@" works
  - RiceVideoLinux config dialog always resets resolution to 320x240
  - mupen64plus won't execute from Konqueror, but works fine from the commandline.
- - The X for windowed plugins should close the window (by ending emulation).
 
 Possibly do prior to v1.3 official release:
 ------------------------------------------
- - use "Alt-Enter" for fullscreen toggle
  - GTK accelerators don't work
  - Rice should have fog disabled by default so open source Radeon 3D drivers work by default (not recommended)
 
