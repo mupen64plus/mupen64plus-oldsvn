@@ -984,9 +984,30 @@ static void setPaths(void)
 		strncpy(g_InstallDir, PREFIX, PATH_MAX);
 		strncat(g_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(g_InstallDir));
         
-		// if install dir is not in the default location, set it to the current working dir
+		// if install dir is not in the default location, try the same dir as the binary
 		if(!isdir(g_InstallDir))
-			getcwd(g_InstallDir, PATH_MAX);
+		{
+			int n = readlink("/proc/self/exe", buf, PATH_MAX);
+
+			if(n > 0)
+			{
+				buf[n] = '\0';
+				dirname(buf);
+				strncpy(g_InstallDir, buf, PATH_MAX);
+
+				strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
+				if(!isfile(buf))
+				{
+					// try cwd as last resort
+					getcwd(g_InstallDir, PATH_MAX);
+				}
+			}
+			else
+			{
+				// try cwd as last resort
+				getcwd(g_InstallDir, PATH_MAX);
+			}
+		}
 	}
 
 	// make sure install dir has a '/' on the end.
@@ -998,7 +1019,7 @@ static void setPaths(void)
 	strncat(buf, "config/mupen64plus.conf", PATH_MAX - strlen(buf));
 	if(!isfile(buf))
 	{
-		printf("%s: Invalid install directory\n", g_InstallDir);
+		printf("Could not locate valid install directory\n");
 		exit(1);
 	}
 
