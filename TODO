@@ -1,10 +1,5 @@
 Mupen64Plus TODO:
 
-Updates made:
-
-- RiceVideoLinux config dialog always resets resolution to 320x240 (okaygo) 
-
-
 To-do prior to v1.3 official release:
 ------------------------------------
  - Glide64 doesn't handle --fullscreen command-line option or F1 key
@@ -15,7 +10,6 @@ To-do prior to v1.3 official release:
 Possibly do prior to v1.3 official release:
 ------------------------------------------
  - GTK accelerators don't work
- - Rice should have fog disabled by default so open source Radeon 3D drivers work by default (not recommended)
 
 
 Known problems as of v1.3:
@@ -32,6 +26,7 @@ Known problems as of v1.3:
  - After loading a ROM and closing it / loading a ROM and restarting the emulator, the ROM appears
    as an invalid dump in the Good Name. You need to refresh the ROM list to reset it back to its
    normal Good Name
+ - RiceVideo crashes when fog enabled with the open source radeon drivers
 
 
 Feature Requests:
