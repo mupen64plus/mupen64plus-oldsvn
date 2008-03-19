@@ -589,7 +589,9 @@ static void * emulationThread( void *_arg )
 
 	// init sdl
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_SetVideoMode(10, 10, 0, 0);
+	// this line removes the window bars in my distro...
+	// i do not think we call it correctly.
+	// SDL_SetVideoMode(10, 10, 0, 0);
 	SDL_ShowCursor(0);
 	SDL_EnableKeyRepeat(0, 0);
 
