@@ -4,11 +4,20 @@ To-do prior to v1.3 official release:
 ------------------------------------
  - Don't print "Info: Loading Rom: XX%" 100 times
  - Glide64 doesn't handle --fullscreen command-line option or F1 key
+   - Wonder Plus starts fullscreen, it should start windowed
  - Glide64 uses Window resolution for fullscreen instead of Fullscreen resolution (check config dialog)
  - Default plugins are blank when Mupen64plus is loaded for the first time
  - Glide64 compilation dies for yasm v0.5, but "yasm -f elf -DBITS=$(BITS) $< -o $@" works
  - "--noask" command-line switch does not work
  - RiceVideoLinux config dialog always resets resolution to 320x240
+ - mupen64plus won't execute from Konqueror, but works fine from the commandline.
+ - The X for windowed plugins should close the window (by ending emulation).
+
+Possibly do prior to v1.3 official release:
+------------------------------------------
+ - use "Alt-Enter" for fullscreen toggle
+ - GTK accelerators don't work
+ - Rice should have fog disabled by default so open source Radeon 3D drivers work by default (not recommended)
 
 
 Known problems as of v1.3:
