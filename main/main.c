@@ -1095,8 +1095,9 @@ int main(int argc, char *argv[])
 	// init multi-language support
 	tr_init();
 
-	// look for plugins in "plugins" subfolder of install dir
-	plugin_scan_directory(get_installpath());
+	// look for plugins in the install dir and set plugin config dir
+	plugin_scan_installdir();
+	plugin_set_configdir(g_ConfigDir);
 
 	/* TODO: autoinc_save_slot acts differently in the gui version than it does in the nogui version. Here, it's a bool, in nogui version, it's a pointer to the current autoinc_slot. Need to research this */
 	*autoinc_save_slot = config_get_bool("AutoIncSaveSlot", FALSE);

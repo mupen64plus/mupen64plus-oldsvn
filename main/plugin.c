@@ -142,7 +142,8 @@ void plugin_delete_list(void)
 
 /* plugin_scan_file
  *  If given filename is a valid plugin, inserts it into the plugin list and returns TRUE.
- *   file_name - string containing full path to plugin file
+ *   file_name - string containing either full path to plugin file or, if just the filename is given, it is assumed that the
+ *               plugin is in the plugins/ subfolder of the installdir.
  *   plugin_type - if nonzero, plugin_scan_file will check that the given plugin's type matches plugin_type. If it doesn't, the
  *                 plugin will not be added to the list.
  */
@@ -151,8 +152,23 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
 	PLUGIN_INFO pluginInfo;
 	void *handle;
 	plugin *p;
+	char *bname = NULL;
+	char filepath[PATH_MAX];
 
-	handle = dlopen(file_name, RTLD_NOW);
+	if(strstr(file_name, "/"))
+		realpath(file_name, filepath);
+	else
+		strncpy(filepath, file_name, PATH_MAX);
+
+	// if this is not an absolute path, assume plugin file is in install dir
+	if(filepath[0] != '/')
+	{
+		bname = strdup(filepath);
+		basename(bname);
+		snprintf(filepath, PATH_MAX, "%splugins/%s", get_installpath(), bname);
+	}
+
+	handle = dlopen(filepath, RTLD_NOW);
 	if(handle)
 	{
 		getDllInfo = dlsym(handle, "GetDllInfo");
@@ -169,13 +185,7 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
 
 			}
 			else
-			{
 				plugin_type = pluginInfo.Type;
-				// if plugin provides ability to set a config dir, set it now.
-				setConfigDir = dlsym(handle, "SetConfigDir");
-				if(setConfigDir)
-					setConfigDir(get_configpath());
-			}
 		}
 		else
 		{
@@ -193,25 +203,27 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
 	p = malloc(sizeof(plugin));
 	p->type = plugin_type;
 	p->handle = handle;
-	p->file_name = strdup(file_name);
+	if(bname)
+		p->file_name = bname;
+	else
+		p->file_name = strdup(file_name);
 	p->plugin_name = strdup(pluginInfo.Name);
 	list_append(&g_PluginList, p);
 
 	return TRUE;
 }
 
-/* plugin_scan_directory
+/* plugin_scan_installdir
  *  Populates plugin list with any valid plugins found in the "plugins" folder
- *  of the given directory
+ *  of the install directory
  */
-void plugin_scan_directory(const char *directory)
+void plugin_scan_installdir(void)
 {
 	DIR *dir;
 	char cwd[PATH_MAX];
 	struct dirent *entry;
-	char *name;
 
-	strncpy(cwd, directory, PATH_MAX);
+	strncpy(cwd, get_installpath(), PATH_MAX);
 	strncat(cwd, "plugins", PATH_MAX - strlen(cwd));
 	dir = opendir(cwd);
 
@@ -226,18 +238,32 @@ void plugin_scan_directory(const char *directory)
 		if (strcmp(entry->d_name + strlen(entry->d_name) - 3, ".so") != 0)
 		  continue;
         
-		name = malloc(strlen(cwd)+1+strlen(entry->d_name)+1);
-		strcpy(name, cwd);
-		strcat(name, "/");
-		strcat(name, entry->d_name);
-
-		plugin_scan_file(name, 0);
-
-		// plugin_scan_file allocates its own mem for the filename
-		free(name);
+		plugin_scan_file(entry->d_name, 0);
 	}
 
 	closedir(dir);
+}
+
+/* plugin_set_configdir
+ *  Sets config dir of all plugins that support the SetConfigDir API call to the given dir.
+ */
+void plugin_set_configdir(char *configdir)
+{
+	plugin *p = NULL;
+	list_node_t *node;
+
+	list_foreach(g_PluginList, node)
+	{
+		p = (plugin *)node->data;
+
+		if(p->handle)
+		{
+			// if plugin provides ability to set a config dir, set it.
+			setConfigDir = dlsym(p->handle, "SetConfigDir");
+			if(setConfigDir)
+				setConfigDir(configdir);
+		}
+	}
 }
 
 plugin *plugin_get_by_name(const char *name)
