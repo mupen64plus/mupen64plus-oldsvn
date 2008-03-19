@@ -500,8 +500,10 @@ static int sdl_event_filter( const SDL_Event *event )
 					stop_it();
 					break;
 
-				case SDLK_F1:
-					changeWindow();
+				case SDLK_RETURN:
+					// Alt+Enter toggles fullscreen
+					if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
+						changeWindow();
 					break;
 
 				default:
@@ -543,8 +545,6 @@ static int sdl_event_filter( const SDL_Event *event )
 				case SDLK_ESCAPE:
 					break;
 
-				case SDLK_F1:
-					break;
 				default:
 					keyUp( 0, event->key.keysym.sym );
 			}
