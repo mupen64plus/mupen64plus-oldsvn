@@ -6,7 +6,7 @@ To-do prior to v1.3 official release:
    - Wonder Plus starts fullscreen, it should start windowed
  - Glide64 uses Window resolution for fullscreen instead of Fullscreen resolution (check config dialog)
  - Glide64 compilation dies for yasm v0.5, but "yasm -f elf -DBITS=$(BITS) $< -o $@" works
- - RiceVideoLinux config dialog always resets resolution to 320x240
+ - RiceVideoLinux config dialog always resets resolution to 320x240 (okaygo will look into this)
  - mupen64plus won't execute from Konqueror, but works fine from the commandline.
 
 Possibly do prior to v1.3 official release:
