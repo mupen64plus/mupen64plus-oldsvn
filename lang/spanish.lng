@@ -102,8 +102,10 @@ Emulation stopped.=Emulación parada.
 
 ; Message Boxes
 Bad dump?=¿Volcado incorrecto?
+The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\n=¿La ROM que está intentando cargar es probablemente un volcado incorrecto\nTenga en cuenta que esto puede llevar a resultados inesperados.\n
 The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=¿La ROM que está intentando cargar es probablemente un volcado incorrecto\nTenga en cuenta que esto puede llevar a resultados inesperados.\n¿Desea continuar con la ejecución?
 Hack?=¿Hack?
+The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\n=¿La ROM que está intentando cargar es probablemente un hack!\nTenga en cuenta que esto puede llevar a resultados inesperados.\n
 The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=¿La ROM que está intentando cargar es probablemente un hack!\nTenga en cuenta que esto puede llevar a resultados inesperados.\n¿Desea continuar con la ejecución?
 Emulation is running. Do you want to\nstop it and load the selected rom?=Emulación en proceso. ¿Desea pararla y cargar la ROM seleccionada?
 Emulation is running. Do you want to\nstop it and load a rom?=Emulación en proceso. ¿Desea pararla y cargar una ROM?

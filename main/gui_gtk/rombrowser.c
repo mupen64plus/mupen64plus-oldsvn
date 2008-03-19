@@ -507,8 +507,8 @@ static gboolean callback_rowSelected(GtkTreeView *tree_view, GtkTreePath *path, 
 	gtk_tree_model_get_iter(model, &iter, path);
 	gtk_tree_model_get (model, &iter, 5, &entry, -1);
 
-    open_rom( entry->cFilename );
-    startEmulation();
+	if(open_rom( entry->cFilename ) == 0)
+		startEmulation();
 	
 	return FALSE;
 }
@@ -564,8 +564,8 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
     g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (list);
 
-	open_rom( entry->cFilename );
-	startEmulation();
+	if(open_rom( entry->cFilename ) == 0)
+		startEmulation();
 }
 
 // rom properties

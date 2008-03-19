@@ -103,8 +103,10 @@ Emulation stopped.=Emulação parada.
 
 ; Message Boxes
 Bad dump?=Dump incorrecto?
+The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\n=A ROM que você está tentando carregar provavelmente está em um formato incorreto\nTenha em conta que isto pode levar a resultados inesperados.\n
 The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=A ROM que você está tentando carregar provavelmente está em um formato incorreto\nTenha em conta que isto pode levar a resultados inesperados.\nDeseja continuar com a execução?
 Hack?=Hack?
+The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\n=A ROM que você está tentando carregar é provavelmente um hack!\nTenha em conta que isto pode levar a resultados inesperados.\n
 The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=A ROM que você está tentando carregar é provavelmente um hack!\nTenha em conta que isto pode levar a resultados inesperados.\nDeseja continuar com a execução?
 Emulation is running. Do you want to\nstop it and load the selected rom?=Emulação em andamento. Deseja para-la e carregar a ROM selecionada?
 Emulation is running. Do you want to\nstop it and load a rom?=Emulação em andamento. Deseja para-la e carregar uma ROM?

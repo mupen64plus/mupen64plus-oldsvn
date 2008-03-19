@@ -83,6 +83,8 @@ static void sighandler( int signal, siginfo_t *info, void *context ); // signal 
 // TODO: Improve the auto-incrementing savestate system.
 int 		autoinc_slot = 0;
 int 		*autoinc_save_slot = &autoinc_slot;
+int		g_Noask = 0;			// don't ask to force load on bad dumps
+int		g_NoaskParam = 0;		// was --noask passed at the commandline?
 pthread_t	g_EmulationThread = 0;		// core thread handle
 char		*g_GfxPlugin = NULL;		// pointer to graphics plugin specified at commandline (if any)
 char		*g_AudioPlugin = NULL;		// pointer to audio plugin specified at commandline (if any)
@@ -101,7 +103,6 @@ static char	g_InstallDir[PATH_MAX];
 static int	g_DebuggerEnabled = 0;		// wether the debugger is enabled or not
 #endif
 static int	g_Fullscreen = 0;		// fullscreen enabled?
-static int	g_Noask = 0;			// don't ask to force load on bad dumps
 static int	g_EmuMode = 0;			// emumode specified at commandline?
 static char	*g_SshotDir = NULL;		// pointer to screenshot dir specified at commandline (if any)
 static char	*g_Filename = NULL;		// filename to load & run at startup (if given at command line)
@@ -284,11 +285,13 @@ void checkLircInput() { }
 
 int open_rom( const char *filename )
 {
+	int rc;
+
 	if(g_EmulationThread)
 	{
 		if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
 		{
-			return 0;
+			return -1;
 		}
 		stopEmulation();
 	}
@@ -311,13 +314,18 @@ int open_rom( const char *filename )
 	if(!fill_header(filename))
 	{
 		alert_message(tr("Couldn't load Rom!"));
-		return -1;
+		return -2;
 	}
 
-	if(rom_read(filename))
+	if((rc = rom_read(filename)) != 0)
 	{
-		alert_message(tr("Couldn't load Rom!"));
-		return -2;
+		// rc of -3 means rom file was a hack or bad dump and the user did not want to load it.
+		if(rc == -3)
+			info_message(tr("Rom closed."));
+		else
+			alert_message(tr("Couldn't load Rom!"));
+
+		return -3;
 	}
 	InitTimer();
 
@@ -789,7 +797,8 @@ void parseCommandLine(int argc, char **argv)
 		OPT_EMUMODE,
 		OPT_SSHOTDIR,
 		OPT_CONFIGDIR,
-		OPT_INSTALLDIR
+		OPT_INSTALLDIR,
+		OPT_NOASK
 	};
 	struct option long_options[] =
 	{
@@ -803,7 +812,7 @@ void parseCommandLine(int argc, char **argv)
 		{"sshotdir", required_argument, NULL, OPT_SSHOTDIR},
 		{"configdir", required_argument, NULL, OPT_CONFIGDIR},
 		{"installdir", required_argument, NULL, OPT_INSTALLDIR},
-		{"noask", no_argument, &g_Noask, TRUE},
+		{"noask", no_argument, NULL, OPT_NOASK},
 		{"help", no_argument, NULL, 'h'},
 		{0, 0, 0, 0}	// last opt must be empty
 	};
@@ -887,6 +896,9 @@ void parseCommandLine(int argc, char **argv)
 					strncpy(g_InstallDir, optarg, PATH_MAX);
 				else
 					printf("***Warning: Install directory '%s' is not accessible or not a directory.\n", optarg);
+				break;
+			case OPT_NOASK:
+				g_Noask = g_NoaskParam = TRUE;
 				break;
 			// print help
 			case 'h':
@@ -1083,6 +1095,10 @@ int main(int argc, char *argv[])
 
 	/* TODO: autoinc_save_slot acts differently in the gui version than it does in the nogui version. Here, it's a bool, in nogui version, it's a pointer to the current autoinc_slot. Need to research this */
 	*autoinc_save_slot = config_get_bool("AutoIncSaveSlot", FALSE);
+
+	// if --noask was not specified at the commandline, try config file
+	if(!g_NoaskParam)
+		g_Noask = config_get_bool("No Ask", FALSE);
 
 	/* TODO: nogui version does not use ini file */
 	ini_openFile();

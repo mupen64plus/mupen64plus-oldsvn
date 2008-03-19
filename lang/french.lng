@@ -102,8 +102,10 @@ Emulation stopped.=Emulation arrétée.
 
 ; Message Boxes
 Bad dump?=Mauvais dump?
+The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\n=La Rom que vous êtes en train de chargée est probablement un mauvais dump!\nSoyez prévenus que cela peut probablement causer des erreurs inattendues.\n
 The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=La Rom que vous êtes en train de chargée est probablement un mauvais dump!\nSoyez prévenus que cela peut probablement causer des erreurs inattendues.\nEst-ce-que vous voulez toujours la chargée ?
 Hack?=Hack?
+The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\n=La Rom que vous êtes en train de chargée est probablement hackée!\nSoyez prévenus que cela peut probablement causer des erreurs inattendues.\n
 The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=La Rom que vous êtes en train de chargée est probablement hackée!\nSoyez prévenus que cela peut probablement causer des erreurs inattendues.\nEst-ce-que vous voulez toujours la chargée ?
 Emulation is running. Do you want to\nstop it and load the selected rom?=L'émulation n'est pas arrétée. Voulez vous\nl'arréter et charger la rom sélectionnée?
 Emulation is running. Do you want to\nstop it and load a rom?=L'émulation n'est pas arrétée. Voulez vous\nl'arréter et charger une rom?

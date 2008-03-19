@@ -102,8 +102,10 @@ Emulation stopped.=Emulatie gestopt.
 
 ; Message Boxes
 Bad dump?=Slechte dump?
+The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\n=De Rom die u wilt laden is waarschijnlijk een slechte dump!\nWees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten zal opleveren.\n
 The rom you are trying to load is probably a bad dump!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=De Rom die u wilt laden is waarschijnlijk een slechte dump!\nWees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten zal opleveren.\nWilt u deze Rom nog steeds opstarten ?\n
 Hack?=Hack?
+The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\n=De Rom die u wilt laden is waarschijnlijk een hack!\nWees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten zal opleveren.\n
 The rom you are trying to load is probably a hack!\nBe warned that this will probably give unexpected results.\nDo you still want to run it?=De Rom die u wilt laden is waarschijnlijk een hack!\nWees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten zal opleveren.\nWilt u deze Rom nog steeds opstarten ?\n
 Emulation is running. Do you want to\nstop it and load the selected rom?=De emulatie draait nog. Wilt u\nl'arréter et charger la rom sélectionnée?
 Emulation is running. Do you want to\nstop it and load a rom?=De emulatie draait nog. Wilt u\ndeze stoppen en een rom inladen?

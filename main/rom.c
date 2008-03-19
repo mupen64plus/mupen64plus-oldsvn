@@ -46,6 +46,7 @@
 #include "mupenIniApi.h"
 #include "guifuncs.h"
 #include "translate.h"
+#include "main.h"
 #include "util.h"
 
 static FILE *rom_file;
@@ -150,6 +151,13 @@ static int find_file(char *argv)
 
 static int ask_bad(void)
 {
+	if(g_Noask)
+	{
+		printf(tr("The rom you are trying to load is probably a bad dump!\n"
+	                  "Be warned that this will probably give unexpected results.\n"));
+		return 1;
+	}
+
 	return confirm_message(tr("The rom you are trying to load is probably a bad dump!\n"
 	                       "Be warned that this will probably give unexpected results.\n"
 	                       "Do you still want to run it?"));
@@ -157,6 +165,12 @@ static int ask_bad(void)
 
 static int ask_hack(void)
 {
+	if(g_Noask)
+	{
+		printf(tr("The rom you are trying to load is probably a hack!\n"
+	                  "Be warned that this will probably give unexpected results.\n"));
+		return 1;
+	}
 	return confirm_message(tr("The rom you are trying to load is probably a hack!\n"
 	                       "Be warned that this will probably give unexpected results.\n"
 	                       "Do you still want to run it?"));
@@ -192,7 +206,7 @@ int rom_read(const char *argv)
 	     if (find_file(strcat(buf, arg)))
 	       {
 		  printf ("file not found or wrong path\n");
-		  return 1;
+		  return -1;
 	       }
 	  }
      }
@@ -271,7 +285,7 @@ int rom_read(const char *argv)
 	printf("wrong file format !\n");
 	free(rom);
 	rom = NULL;
-	return 1;
+	return -2;
      }
    printf("rom loaded successfully\n");
   
@@ -351,7 +365,7 @@ int rom_read(const char *argv)
 		  free(ROM_HEADER);
 		  ROM_HEADER = NULL;
                   ini_closeFile();
-		  return 1;
+		  return -3;
 	       }
 	     strcpy(ROM_SETTINGS.goodname, entry->goodname);
 	     strcat(ROM_SETTINGS.goodname, " (bad dump)");
@@ -375,7 +389,7 @@ int rom_read(const char *argv)
 		  free(ROM_HEADER);
 		  ROM_HEADER = NULL;
                   ini_closeFile();
-		  return 1;
+		  return -3;
 	       }
 	  }
 	if (s[i] == 'b')
@@ -387,7 +401,7 @@ int rom_read(const char *argv)
 		  free(ROM_HEADER);
 		  ROM_HEADER = NULL;
                   ini_closeFile();
-		  return 1;
+		  return -3;
 	       }
 	  }
      }
