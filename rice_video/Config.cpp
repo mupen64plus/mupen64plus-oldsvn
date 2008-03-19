@@ -3402,16 +3402,15 @@ void ShowConfigBox()
 	windowSetting.uWindowDisplayHeight = 480;
      }
    
-   if(status.bGameIsRunning)
-     {
-      for (int i=0; i<numberOfResolutions; i++)
-        {
+
+   for (int i=0; i<numberOfResolutions; i++)
+   {
            if (windowSetting.uWindowDisplayWidth == resolutions[i][0])
-	      gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->windowModeCombo)->entry), resolutionsS[i]);
-	   if (windowSetting.uFullScreenDisplayWidth == resolutions[i][0])
+	    	  gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->windowModeCombo)->entry), resolutionsS[i]);
+ 		   if (windowSetting.uFullScreenDisplayWidth == resolutions[i][0])
               gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->fullScreenCombo)->entry), resolutionsS[i]);
-        }
-     }
+   }
+
    
    for (int i=0; i<sizeof(colorQualitySettings)/sizeof(SettingInfo); i++)
      {
