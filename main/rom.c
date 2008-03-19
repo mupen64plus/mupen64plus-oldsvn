@@ -178,7 +178,10 @@ static int ask_hack(void)
 
 static void display_loading_progress(int p)
 {
-	info_message(tr("Loading Rom: %d%%"), p);
+	// this info can clutter up the console
+	if(gui_enabled())
+		info_message(tr("Loading Rom: %d%%"), p);
+
 	if(p == 100)
 	{
 		info_message(tr("Rom \"%s\" loaded."), ROM_HEADER->nom);
