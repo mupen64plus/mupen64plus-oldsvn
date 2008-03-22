@@ -85,7 +85,10 @@ int 		autoinc_slot = 0;
 int 		*autoinc_save_slot = &autoinc_slot;
 int		g_Noask = 0;			// don't ask to force load on bad dumps
 int		g_NoaskParam = 0;		// was --noask passed at the commandline?
+
 pthread_t	g_EmulationThread = 0;		// core thread handle
+int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
+
 char		*g_GfxPlugin = NULL;		// pointer to graphics plugin specified at commandline (if any)
 char		*g_AudioPlugin = NULL;		// pointer to audio plugin specified at commandline (if any)
 char		*g_InputPlugin = NULL;		// pointer to input plugin specified at commandline (if any)
@@ -432,20 +435,24 @@ void startEmulation(void)
 	// in nogui mode, just start the emulator in the main thread
 	if(!g_GuiEnabled)
 	{
+        g_EmulatorRunning = 1;
 		emulationThread(NULL);
 	}
 	else if(!g_EmulationThread)
 	{
 		// spawn emulation thread
+        g_EmulatorRunning = 1;
 		if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
 		{
 			g_EmulationThread = 0;
+            g_EmulatorRunning = 0;
 			alert_message(tr("Couldn't spawn core thread!"));
 			return;
 		}
 		pthread_detach(g_EmulationThread);
 		info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
 	}
+
 }
 
 void stopEmulation(void)
@@ -460,16 +467,18 @@ void stopEmulation(void)
 		if(g_EmulationThread)
 			pthread_join(g_EmulationThread, NULL);
 
+        g_EmulatorRunning = 1;
+
 		info_message(tr("Emulation stopped."));
 	}
 }
 
 void pauseContinueEmulation(void)
 {
-	if(!g_EmulationThread)
+	if (!g_EmulatorRunning)
 		return;
 
-	if(rompause)
+	if (rompause)
 		info_message(tr("Emulation continued."));
 	else
 		info_message(tr("Emulation paused."));
@@ -750,6 +759,7 @@ static void sighandler(int signal, siginfo_t *info, void *context)
 		}
 		pthread_cancel(g_EmulationThread);
 		g_EmulationThread = 0;
+        g_EmulatorRunning = 0;
 	}
 	else
 	{
