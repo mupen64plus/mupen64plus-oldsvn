@@ -300,7 +300,6 @@ void ReadSettings ()
   
   settings.logging = (BOOL)INI_ReadInt ("logging", 0);
   settings.log_clear = (BOOL)INI_ReadInt ("log_clear", 0);
-  settings.run_in_window = (BOOL)INI_ReadInt ("run_in_window", 0);
   settings.elogging = (BOOL)INI_ReadInt ("elogging", 0);
   settings.filter_cache = (BOOL)INI_ReadInt ("filter_cache", 0);
   settings.cpu_write_hack = (BOOL)INI_ReadInt ("detect_cpu_write", 0);
@@ -545,7 +544,6 @@ void WriteSettings ()
   
   INI_WriteInt ("logging", settings.logging);
   INI_WriteInt ("log_clear", settings.log_clear);
-  INI_WriteInt ("run_in_window", settings.run_in_window);
   INI_WriteInt ("elogging", settings.elogging);
   INI_WriteInt ("filter_cache", settings.filter_cache);
   INI_WriteInt ("detect_cpu_write", settings.cpu_write_hack);
@@ -1133,7 +1131,7 @@ output:   none
 EXPORT void CALL ChangeWindow (void)
 {
   LOG ("ChangeWindow()\n");
-  
+
   if (evoodoo)
   {
 	if (!ev_fullscreen)
@@ -1165,7 +1163,7 @@ EXPORT void CALL ChangeWindow (void)
         settings.scr_res_x = settings.res_x = resolutions[settings.res_data][0];
         settings.scr_res_y = settings.res_y = resolutions[settings.res_data][1];
       }
-	  InitGfx (settings.run_in_window);
+	  InitGfx(TRUE);
 #ifdef _WN32
 	  ShowCursor( TRUE );
       if (gfx.hStatusBar)
@@ -1586,7 +1584,7 @@ EXPORT void CALL RomOpen (void)
 	  evoodoo = 0;
 	
 	if (evoodoo)
-	  InitGfx (settings.run_in_window);
+	  InitGfx (TRUE);
   }
   
   if (strstr (extensions, "ROMNAME"))

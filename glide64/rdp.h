@@ -178,7 +178,6 @@ typedef struct {
   BOOL  logging;
   BOOL  elogging;
   BOOL  log_clear;
-  BOOL  run_in_window;
   BOOL  filter_cache;
 
   BOOL  unk_as_red;

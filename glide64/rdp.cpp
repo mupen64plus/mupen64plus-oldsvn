@@ -989,8 +989,6 @@ EXPORT void CALL ProcessDList(void)
 #endif // _WIN32
 	}
 	
-	if (!fullscreen && !settings.run_in_window) return;
-	
 	// Clear out the RDP log
 #ifdef RDP_LOGGING
     if (settings.logging && settings.log_clear)
@@ -3684,13 +3682,9 @@ EXPORT void CALL ProcessRDPList(void)
   }
   LOG ("ProcessRDPList ()\n");
 
-
-
-
-
-	no_dlist = FALSE;
+  no_dlist = FALSE;
   update_screen_count = 0;
-	ChangeSize ();
+  ChangeSize ();
 	
 #ifdef ALTTAB_FIX
 	if (!hhkLowLevelKybd)
@@ -3751,8 +3745,6 @@ EXPORT void CALL ProcessRDPList(void)
 	    ShowCursor( FALSE );
 #endif // _WIN32
 	}
-	
-	if (!fullscreen && !settings.run_in_window) return;
 	
 	// Clear out the RDP log
 #ifdef RDP_LOGGING

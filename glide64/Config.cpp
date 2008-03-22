@@ -425,7 +425,6 @@ BOOL CALLBACK DebugPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	  // Debug/misc options
 	  GETBN (IDC_LOGGING, settings.logging);
 	  GETBN (IDC_LOGCLEAR, settings.log_clear);
-	  GETBN (IDC_RUNINWINDOW, settings.run_in_window);
 
 	  GETBN (IDC_CPU_HACK, settings.cpu_write_hack);
 
@@ -454,7 +453,6 @@ BOOL CALLBACK DebugPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		// Debug/misc options
 		CHECKBN (IDC_LOGGING, settings.logging);
 		CHECKBN (IDC_LOGCLEAR, settings.log_clear);
-		CHECKBN (IDC_RUNINWINDOW, settings.run_in_window);
 		CHECKBN (IDC_LOG_E, settings.elogging);
 	    CHECKBN (IDC_CPU_HACK, settings.cpu_write_hack);
 		CHECKBN (IDC_CACHEFILTER, settings.filter_cache);
