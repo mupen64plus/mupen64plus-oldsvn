@@ -10,7 +10,6 @@ Possibly do prior to v1.3 official release:
 
 Known problems as of v1.3:
 ---------------------------------------
- - GTK GUI: Fullscreen button / F11 doesn't toggle fullscreen with RiceVideo
  - GTK GUI: crashes if input plugin doesn't load, ie if SDL_ttf not found
  - glN64: Mario Kart w/ intel 855 - screen flickers black intermittently
  - Blight Input: doesn't recognize logitech dual action on Gentoo desktop PC [RG]
