@@ -2,7 +2,6 @@ Mupen64Plus TODO:
 
 To-do prior to v1.3 official release:
 ------------------------------------
- - Glide64 uses Window resolution for fullscreen instead of Fullscreen resolution (check config dialog)
  - Glide64 compilation dies for yasm v0.5, but "yasm -f elf -DBITS=$(BITS) $< -o $@" works
 
 Possibly do prior to v1.3 official release:

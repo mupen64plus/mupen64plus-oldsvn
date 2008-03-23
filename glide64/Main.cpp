@@ -1544,9 +1544,7 @@ EXPORT void CALL RomOpen (void)
 
   
   rdp_reset ();
-  printf("test1\n");
   ClearCache ();
-  printf("test2\n");
 
 /* JOSH FIXME: Needed in non-WIN32 case? */ 
 #ifndef GCC
@@ -1563,15 +1561,12 @@ EXPORT void CALL RomOpen (void)
   OPEN_RDP_LOG ();
   OPEN_RDP_E_LOG ();
   
-  
-  printf("test3\n");
   // ** EVOODOO EXTENSIONS **
   if (!fullscreen)
   {
     grGlideInit ();
     grSstSelect (0);
   }
-  printf("test4\n");
   const char *extensions = grGetString (GR_EXTENSION);
   printf("extensions '%s'\n", extensions);
   if (!fullscreen)
