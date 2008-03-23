@@ -6,8 +6,10 @@ include ../pre.mk
 # set BITS
 ifeq ("$(ARCH)","64BITS")
   BITS=64
+  MOPT=-m amd64
 else
   BITS=32
+  MOPT=
 endif
 
 # local CFLAGS, LIBS, and LDFLAGS
@@ -133,7 +135,7 @@ compiletex: compiletex.c
 	$(LD) -o $@ compiletex.o
 
 Tmem_nasm.o: Tmem_nasm.asm
-	yasm -f elf$(BITS) -DBITS=$(BITS) $< -o $@
+	yasm -f elf $(MOPT) -DBITS=$(BITS) $< -o $@
 
 rdp.o: ucode06.h
 
