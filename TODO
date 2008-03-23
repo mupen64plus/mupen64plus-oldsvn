@@ -1,36 +1,6 @@
 Mupen64Plus TODO:
 
-To-do prior to v1.3 official release:
-------------------------------------
+The Mupen64Plus issues are now tracked on the Google Code site:
 
-Possibly do prior to v1.3 official release:
-------------------------------------------
- - GTK accelerators don't work
-
-
-Known problems as of v1.3:
----------------------------------------
- - GTK GUI: crashes if input plugin doesn't load, ie if SDL_ttf not found
- - glN64: Mario Kart w/ intel 855 - screen flickers black intermittently
- - Blight Input: doesn't recognize logitech dual action on Gentoo desktop PC [RG]
- - crash after running Asteroids Hyper 64 from GUI build 3 times in a row w/ 64-bit dynarec
- - Blight Input: Some games continuously register up-direction movement
- - If a ROM is highlighted when play button pressed, this ROM should be played
- - Blight Input: config dialog eats 100% CPU when open
- - Blight Input: Config interface depends on libSDL_ttf-2.0.so.0 which doesn't exist on all systems.
- - After loading a ROM and closing it / loading a ROM and restarting the emulator, the ROM appears
-   as an invalid dump in the Good Name. You need to refresh the ROM list to reset it back to its
-   normal Good Name
- - RiceVideo crashes when fog enabled with the open source radeon drivers
-
-
-Feature Requests:
------------------
- - cheat system
- - turn audio on/off to run at >100% speed to skip cut-scenes, loading, etc
-   - Add fast-forward function similar to zsnes
- - Blight input: map special functions such as exit, fastforward, etc to controller buttons/keys
- - Blight Input: fake analog stick for controllers that don't have analog control sticks (walk/run)
- - Network play, including in-game voice chat
- - Blight Input: rumble and deadzone configuration
+http://code.google.com/p/mupen64plus/issues/list
 
