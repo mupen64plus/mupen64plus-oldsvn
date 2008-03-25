@@ -1,6 +1,10 @@
 Mupen64Plus README
 ------------------
 
+The most current version of this README and more documentation can be found on the Mupen64Plus wiki:
+
+http://code.google.com/p/mupen64plus/wiki/README
+
 Mupen64Plus is based off of mupen64, originally created by Hacktarux. The Mupen64Plus package contains the mupen64 emulator program (renamed mupen64plus) plus graphics, sound, input, and RSP plugins.
 
 README Sections
