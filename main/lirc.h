@@ -17,12 +17,8 @@
 #ifndef __LIRC_H__
 #define __LIRC_H__
 
-#include <sys/poll.h>
-#include <string.h>
-#include <lirc/lirc_client.h>
-
-
-void checkLircInput();
-
+extern void lircStart(void);
+extern void lircStop(void);
+extern void lircCheckInput(void);
 
 #endif //__LIRC_H__

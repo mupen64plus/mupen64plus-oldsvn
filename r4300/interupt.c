@@ -345,6 +345,9 @@ void gen_interupt()
         ts.tv_nsec = 10000000;
         nanosleep(&ts, NULL); // sleep for 10 milliseconds
         SDL_PumpEvents();
+#ifdef WITH_LIRC
+	lircCheckInput();
+#endif //WITH_LIRC
    }
 
    if (stop == 1) dyna_stop();
@@ -399,7 +402,7 @@ void gen_interupt()
 	updateScreen();
 #endif
 #ifdef WITH_LIRC
-       checkLircInput();
+       lircCheckInput();
 #endif //WITH_LIRC
 
 #ifndef __WIN32__
@@ -442,7 +445,7 @@ void gen_interupt()
 	
       case SI_INT:
 #ifdef WITH_LIRC
-       checkLircInput();
+       lircCheckInput();
 #endif //WITH_LIRC
 
 #ifndef __WIN32__

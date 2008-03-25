@@ -30,6 +30,7 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
+#include "winlnxdefs.h"
 #include "util.h" // list_t type
 
 //--------------------- plugin storage type ----------------

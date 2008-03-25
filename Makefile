@@ -114,6 +114,9 @@ OBJ_VCR	= \
 	main/vcr_resample.o \
 	main/gui_gtk/vcrcomp_dialog.o
 
+OBJ_LIRC = \
+	main/lirc.o
+
 OBJ_GTK_GUI = \
 	main/gui_gtk/main_gtk.o \
 	main/gui_gtk/aboutdialog.o \
@@ -167,6 +170,7 @@ ifeq ($(VCR), 1)
   LIBS += $(AVIFILE_LIBS)
 endif
 ifeq ($(LIRC), 1)
+  OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
 endif
 ifneq ($(NOGUI_ONLY), 1)

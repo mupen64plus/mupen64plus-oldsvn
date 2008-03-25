@@ -43,10 +43,6 @@ Email                : blight@Ashitaka
 #include "../../debugger/debugger.h"
 #endif
 
-#ifdef WITH_LIRC
-#include "../lirc.h"
-#endif //WITH_LIRC
-
 #include <gtk/gtk.h>
 
 #include <SDL.h>
@@ -302,10 +298,6 @@ int confirm_message(const char *fmt, ...)
 		}
 	}
 }
-
-#ifdef WITH_LIRC
-void checkLircInput(void) { }
-#endif //WITH_LIRC
 
 /*********************************************************************************************************
 * internal gui funcs

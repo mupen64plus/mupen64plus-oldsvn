@@ -87,7 +87,7 @@ int		g_Noask = 0;			// don't ask to force load on bad dumps
 int		g_NoaskParam = 0;		// was --noask passed at the commandline?
 
 pthread_t	g_EmulationThread = 0;		// core thread handle
-int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
+int		g_EmulatorRunning = 0;		// need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 
 char		*g_GfxPlugin = NULL;		// pointer to graphics plugin specified at commandline (if any)
 char		*g_AudioPlugin = NULL;		// pointer to audio plugin specified at commandline (if any)
@@ -282,10 +282,6 @@ void new_vi(void)
 	end_section(IDLE_SECTION);
 }
 
-#ifdef WITH_LIRC
-void checkLircInput() { }
-#endif //WITH_LIRC
-
 int open_rom( const char *filename )
 {
 	int rc;
@@ -435,17 +431,14 @@ void startEmulation(void)
 	// in nogui mode, just start the emulator in the main thread
 	if(!g_GuiEnabled)
 	{
-        g_EmulatorRunning = 1;
 		emulationThread(NULL);
 	}
 	else if(!g_EmulationThread)
 	{
 		// spawn emulation thread
-        g_EmulatorRunning = 1;
 		if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
 		{
 			g_EmulationThread = 0;
-            g_EmulatorRunning = 0;
 			alert_message(tr("Couldn't spawn core thread!"));
 			return;
 		}
@@ -457,7 +450,7 @@ void startEmulation(void)
 
 void stopEmulation(void)
 {
-	if(g_EmulationThread)
+	if(g_EmulationThread || g_EmulatorRunning)
 	{
 		info_message(tr("Stopping emulation."));
 		rompause = 0;
@@ -467,7 +460,7 @@ void stopEmulation(void)
 		if(g_EmulationThread)
 			pthread_join(g_EmulationThread, NULL);
 
-        g_EmulatorRunning = 1;
+		g_EmulatorRunning = 0;
 
 		info_message(tr("Emulation stopped."));
 	}
@@ -486,6 +479,11 @@ void pauseContinueEmulation(void)
 	rompause = !rompause;
 }
 
+void screenshot(void)
+{
+	captureScreen(g_SshotDir);
+}
+
 /*********************************************************************************************************
 * sdl event filter
 */
@@ -495,8 +493,7 @@ static int sdl_event_filter( const SDL_Event *event )
 	{
 		// user clicked on window close button
 		case SDL_QUIT:
-			rompause = 0;
-			stop_it();
+			stopEmulation();
 			break;
 		case SDL_KEYDOWN:
 			switch( event->key.keysym.sym )
@@ -510,8 +507,7 @@ static int sdl_event_filter( const SDL_Event *event )
 					break;
 
 				case SDLK_ESCAPE:
-					rompause = 0;
-					stop_it();
+					stopEmulation();
 					break;
 
 				case SDLK_RETURN:
@@ -589,6 +585,8 @@ static void * emulationThread( void *_arg )
 	sigaction( SIGFPE, &sa, NULL );
 	sigaction( SIGCHLD, &sa, NULL );
 
+	g_EmulatorRunning = 1;
+
 	// if emu mode wasn't specified at the commandline, set from config file
 	if(!g_EmuMode)
 		dynacore = config_get_number( "Core", CORE_DYNAREC );
@@ -651,6 +649,10 @@ static void * emulationThread( void *_arg )
 	if (g_Fullscreen)
 		changeWindow();
 
+#ifdef WITH_LIRC
+	lircStart();
+#endif // WITH_LIRC
+
 #ifdef DBG
 	if( g_DebuggerEnabled )
 		init_debugger();
@@ -658,14 +660,7 @@ static void * emulationThread( void *_arg )
 	go();	/* core func */
 
 #ifdef WITH_LIRC
-  if(g_lircfd!=-1)
-    {
-    printf("Terminating LIRC...");
-    if(g_config != NULL)
-      lirc_freeconfig(g_config);
-    lirc_deinit();
-    printf("done.\n");
-    }
+	lircStop();
 #endif // WITH_LIRC
 
 	romClosed_RSP();
@@ -759,7 +754,7 @@ static void sighandler(int signal, siginfo_t *info, void *context)
 		}
 		pthread_cancel(g_EmulationThread);
 		g_EmulationThread = 0;
-        g_EmulatorRunning = 0;
+		g_EmulatorRunning = 0;
 	}
 	else
 	{
