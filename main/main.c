@@ -107,7 +107,7 @@ static int	g_DebuggerEnabled = 0;		// wether the debugger is enabled or not
 #endif
 static int	g_Fullscreen = 0;		// fullscreen enabled?
 static int	g_EmuMode = 0;			// emumode specified at commandline?
-static char	*g_SshotDir = NULL;		// pointer to screenshot dir specified at commandline (if any)
+static char	g_SshotDir[PATH_MAX];		// pointer to screenshot dir specified at commandline (if any)
 static char	*g_Filename = NULL;		// filename to load & run at startup (if given at command line)
 static int	g_MemHasBeenBSwapped = 0;	// store byte-swapped flag so we don't swap twice when re-playing game
 
@@ -893,7 +893,7 @@ void parseCommandLine(int argc, char **argv)
 				break;
 			case OPT_SSHOTDIR:
 				if(isdir(optarg))
-					g_SshotDir = optarg;
+					strncpy(g_SshotDir, optarg, PATH_MAX);
 				else
 					printf("***Warning: Screen shot directory '%s' is not accessible or not a directory.\n", optarg);
 				break;
@@ -941,8 +941,8 @@ void parseCommandLine(int argc, char **argv)
 }
 
 /** setPaths
- *	setup paths to config/install directories. The config dir is the dir where all user
- *	config information is stored, e.g. mupen64plus.conf, save files, and plugin conf files.
+ *	setup paths to config/install/screenshot directories. The config dir is the dir where all
+ *	user config information is stored, e.g. mupen64plus.conf, save files, and plugin conf files.
  *	The install dir is where mupen64plus looks for common files, e.g. plugins, icons, language
  *	translation files.
  */
@@ -973,8 +973,16 @@ static void setPaths(void)
 			if(mkdir(buf, (mode_t)0755) != 0)
 			{
 				// report error, but don't exit
-				printf("Warning: Could not create %s: ", buf);
-				perror(NULL);
+				printf("Warning: Could not create %s: %s", buf, strerror(errno));
+			}
+
+			// create screenshots subdir
+			strncpy(buf, g_ConfigDir, PATH_MAX);
+			strncat(buf, "/screenshots", PATH_MAX - strlen(buf));
+			if(mkdir(buf, (mode_t)0755) != 0)
+			{
+				// report error, but don't exit
+				printf("Warning: Could not create %s: %s", buf, strerror(errno));
 			}
 		}
 	}
@@ -1069,6 +1077,21 @@ static void setPaths(void)
 		closedir(dir);
 	}
 
+	// set screenshot dir if it wasn't specified by the user
+	if(strlen(g_SshotDir) == 0)
+	{
+		snprintf(g_SshotDir, PATH_MAX, "%sscreenshots/", g_ConfigDir);
+		if(!isdir(g_SshotDir))
+		{
+			printf("Warning: Could not find screenshot dir: %s\n", g_SshotDir);
+			g_SshotDir[0] = '\0';
+		}
+	}
+
+	// make sure screenshots dir has a '/' on the end.
+	if(g_SshotDir[strlen(g_SshotDir)-1] != '/')
+		strncat(g_SshotDir, "/", PATH_MAX - strlen(g_SshotDir));
+
 	chdir(g_ConfigDir);
 }
 
@@ -1084,6 +1107,7 @@ int main(int argc, char *argv[])
 
 	g_ConfigDir[0] = '\0';
 	g_InstallDir[0] = '\0';
+	g_SshotDir[0] = '\0';
 
 	// parse gui-specific commandline args first
 	if(g_GuiEnabled)
