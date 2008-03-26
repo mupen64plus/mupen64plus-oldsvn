@@ -102,7 +102,7 @@ all: ricevideo.so
 
 ricevideo.so: $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
-	$(STRIP) --strip-all $@
+	$(STRIP) $@
 
 clean:
 	$(RM) -rf ricevideo.so $(OBJECTS)

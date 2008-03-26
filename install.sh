@@ -48,5 +48,5 @@ $INSTALL -m 0644 icons/* "${INSTALLDIR}/icons" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/lang" || exit $?
 $INSTALL -m 0644 lang/* "${INSTALLDIR}/lang" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/plugins" || exit $?
-$INSTALL -m 0755 plugins/* "${INSTALLDIR}/plugins" || exit $?
+$INSTALL -s -m 0755 plugins/* "${INSTALLDIR}/plugins" || exit $?
 echo "Done."
