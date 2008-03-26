@@ -46,7 +46,6 @@ void gui_parseArgs(int *argc, char ***argv) { }
 void gui_build(void) { }
 void gui_display(void) { }
 void gui_main_loop(void) { }
-void gui_load_rom(void) { }
 
 // print info message to console
 void info_message(const char *fmt, ...)

@@ -372,14 +372,10 @@ void startEmulation(void)
 		   *input_plugin = NULL,
 		   *RSP_plugin = NULL;
 
-	// perform error checking before spawning emulation thread
+	// make sure rom is loaded before running
 	if(!rom)
 	{
-		if(confirm_message(tr("There is no Rom loaded.\nDo you want to load one?")))
-		{
-			// Note: should never get here in nogui mode
-			gui_load_rom();
-		}
+		alert_message(tr("There is no Rom loaded."));
 		return;
 	}
 

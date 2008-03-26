@@ -135,14 +135,6 @@ void gui_main_loop(void)
 	gtk_main();
 }
 
-/** gui_load_rom
- *    Open file selector window to choose rom to load
- */
-void gui_load_rom(void)
-{
-	callback_openRom(NULL, NULL);
-}
-
 // prints informational message to status bar
 void info_message(const char *fmt, ...)
 {
@@ -428,6 +420,13 @@ void reload()
 // start emulation
 static void callback_startEmulation(GtkWidget *widget, gpointer data)
 {
+	if(!rom)
+	{
+		if(confirm_message(tr("There is no Rom loaded.\nDo you want to load one?")))
+			callback_openRom(NULL, NULL);
+
+		return;
+	}
 	startEmulation();
 }
 

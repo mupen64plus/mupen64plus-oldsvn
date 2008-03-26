@@ -40,9 +40,6 @@ void gui_display(void);
 // Give control of thread to the gui
 void gui_main_loop(void);
 
-// displays load rom dialog window
-void gui_load_rom(void);
-
 // prints informational message to user
 void info_message(const char *fmt, ...);
 
