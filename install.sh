@@ -37,7 +37,7 @@ BINDIR=${PREFIX}/bin
 INSTALLDIR=${PREFIX}/share/mupen64plus
 
 echo "Installing Mupen64Plus to $PREFIX"
-$INSTALL -D -s -m 0755 mupen64plus "${BINDIR}/mupen64plus" || exit $?
+$INSTALL -D -m 0755 mupen64plus "${BINDIR}/mupen64plus" || exit $?
 $INSTALL -d -v "${INSTALLDIR}" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/config" || exit $?
 $INSTALL -m 0644 config/* "${INSTALLDIR}/config" || exit $?
@@ -48,5 +48,5 @@ $INSTALL -m 0644 icons/* "${INSTALLDIR}/icons" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/lang" || exit $?
 $INSTALL -m 0644 lang/* "${INSTALLDIR}/lang" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/plugins" || exit $?
-$INSTALL -s -m 0755 plugins/* "${INSTALLDIR}/plugins" || exit $?
+$INSTALL -m 0755 plugins/* "${INSTALLDIR}/plugins" || exit $?
 echo "Done."
