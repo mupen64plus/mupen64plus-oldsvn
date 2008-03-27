@@ -512,7 +512,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
 		break;
 	}
 	
-	switch(config_get_number( "ToolbarStyle", 1 ))
+	switch(config_get_number( "ToolbarStyle", 0 ))
 	{
 		case 0:
 			gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), 0);
