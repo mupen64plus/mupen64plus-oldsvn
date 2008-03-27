@@ -17,10 +17,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#ifndef PATH_MAX
-#  define PATH_MAX 1024
-#endif
-
 #ifndef _DLLINTERFACE_H_
 #define _DLLINTERFACE_H_
 
