@@ -159,6 +159,28 @@ int gui_enabled(void)
 static float VILimit = 60.0;
 static double VILimitMilliseconds = 1000.0/60.0;
 
+/* The following section of code is movable to the API portion of the
+ * core.
+ */
+double SpeedModifier = 0;
+
+static void set_speedmod(double foo)
+{
+	SpeedModifier = foo;
+	VILimitMilliseconds = (double) 1000.0/(VILimit * get_speedmod() / 100); 
+}
+
+static void inc_speedmod(double bar)
+{
+	SpeedModifier += bar;
+	VILimitMilliseconds = (double) 1000.0/(VILimit * get_speedmod() / 100); 
+}
+
+static double get_speedmod()
+{
+	return SpeedModifier;
+}
+
 static int GetVILimit(void)
 {
 	switch (ROM_HEADER->Country_code&0xFF)
@@ -192,7 +214,10 @@ static int GetVILimit(void)
 static void InitTimer(void)
 {
 	VILimit = GetVILimit();
-	VILimitMilliseconds = (double) 1000.0/VILimit; 
+	if (get_speedmod() <= 0) {
+		set_speedmod(100);
+	}
+	VILimitMilliseconds = (double) 1000.0/(VILimit * get_speedmod() / 100); 
 	printf("init timer!\n");
 }
 
@@ -264,7 +289,7 @@ void new_vi(void)
 	{
 		CalculatedTime = CounterTime + (double)VILimitMilliseconds * (double)VI_Counter;
 		time = (int)(CalculatedTime - CurrentFPSTime);
-		if (time>0) 
+		if (time>0 && time < 1000) 
 		{
 			usleep(time * 1000);
 		}
