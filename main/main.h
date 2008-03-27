@@ -49,7 +49,7 @@ int open_rom(const char *filename);
 int close_rom(void);
 void startEmulation(void);
 void stopEmulation(void);
-void pauseContinueEmulation(void);
+int pauseContinueEmulation(void);
 void screenshot(void);
 
 #endif // __MAIN_H__

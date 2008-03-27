@@ -36,6 +36,7 @@
 // INI code v1.1
 
 #include "Gfx1.3.h"
+#include "Ini.h"
 
 FILE *ini;
 int sectionstart;

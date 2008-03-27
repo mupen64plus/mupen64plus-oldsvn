@@ -433,7 +433,20 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
 // pause/continue emulation
 static void callback_pauseContinueEmulation(GtkWidget *widget, gpointer data)
 {
-	pauseContinueEmulation();
+	int isRunning = pauseContinueEmulation();
+
+	if(widget && GTK_IS_TOOL_BUTTON (widget))
+	{
+		GtkToolButton *widget = GTK_TOOL_BUTTON(widget);
+		if(isRunning)
+		{
+			gtk_tool_button_set_label(widget, tr("Pause"));
+		}
+		else
+		{
+			gtk_tool_button_set_label(widget, tr("Resume"));
+		}
+	}
 }
 
 // stop emulation
@@ -1279,7 +1292,20 @@ static int create_toolBar( void )
 
 	g_MainWindow.toolBar = gtk_toolbar_new();
 	gtk_toolbar_set_orientation( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ORIENTATION_HORIZONTAL );
-	gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
+	switch(config_get_number( "ToolbarStyle", 0 ))
+	{
+		case 0:
+			gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
+		break;
+		case 1:
+			gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_TEXT );
+		break;
+		case 2:
+			gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_BOTH );
+		break;
+		default:
+			gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
+	}
 	gtk_toolbar_set_tooltips( GTK_TOOLBAR(g_MainWindow.toolBar), TRUE );
 	gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.toolBar, FALSE, FALSE, 0 );
 
@@ -1304,15 +1330,15 @@ static int create_toolBar( void )
 	}
 
 	// add icons to toolbar
-	gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar),NULL,tr("Open Rom"),"",openImage,GTK_SIGNAL_FUNC(callback_openRom),NULL);
+	gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar),tr("Open"),tr("Open Rom"),"",openImage,GTK_SIGNAL_FUNC(callback_openRom),NULL);
 	gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
-	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),NULL,tr("Start Emulation"),"",playImage,GTK_SIGNAL_FUNC(callback_startEmulation),NULL);
-	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),NULL,tr("Pause/continue Emulation"),"",pauseImage,GTK_SIGNAL_FUNC(callback_pauseContinueEmulation),NULL );
-	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),NULL,tr("Stop Emulation"),"",stopImage,GTK_SIGNAL_FUNC(callback_stopEmulation),NULL );
+	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Start"),tr("Start Emulation"),"",playImage,GTK_SIGNAL_FUNC(callback_startEmulation),NULL);
+	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Pause"),tr("Pause/continue Emulation"),"",pauseImage,GTK_SIGNAL_FUNC(callback_pauseContinueEmulation),NULL );
+	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Stop"),tr("Stop Emulation"),"",stopImage,GTK_SIGNAL_FUNC(callback_stopEmulation),NULL );
 	gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
-	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),NULL,tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );
+	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Fullscreen"),tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );
 	gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
-	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),NULL,tr("Configure"),"",configureImage,GTK_SIGNAL_FUNC(callback_configure),NULL );
+	gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Configure"),tr("Configure"),"",configureImage,GTK_SIGNAL_FUNC(callback_configure),NULL );
 
 	return 0;
 }

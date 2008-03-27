@@ -487,17 +487,18 @@ void stopEmulation(void)
 	}
 }
 
-void pauseContinueEmulation(void)
+int pauseContinueEmulation(void)
 {
 	if (!g_EmulatorRunning)
-		return;
+		return 1;
 
 	if (rompause)
 		info_message(tr("Emulation continued."));
 	else
 		info_message(tr("Emulation paused."));
-
+	
 	rompause = !rompause;
+	return rompause;
 }
 
 void screenshot(void)

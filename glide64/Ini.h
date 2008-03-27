@@ -33,6 +33,11 @@
 //
 //****************************************************************
 
+
+#ifndef PATH_MAX
+#  define PATH_MAX 1024
+#endif
+
 BOOL INI_Open ();
 void INI_Close ();
 void INI_InsertSpace(int space);

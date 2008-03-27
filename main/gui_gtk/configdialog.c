@@ -334,6 +334,40 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
 		break;
 	}
 
+	switch(gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo)))
+	{
+		case 0:
+			if(config_get_number( "ToolbarStyle", 0 ) != 0)
+			{
+				config_put_number( "ToolbarStyle", 0 );
+				gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
+				reload();
+			}
+		break;
+		case 1:
+			if(config_get_number( "ToolbarStyle", 0 ) != 1)
+			{
+				config_put_number( "ToolbarStyle", 1 );
+				gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_TEXT );
+				reload();
+			}
+		break;
+		case 2:
+			if(config_get_number( "ToolbarStyle", 0 ) != 2)
+			{
+				config_put_number( "ToolbarStyle", 2 );
+				gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_BOTH );
+				reload();
+			}
+		break;
+		default:
+			if(config_get_number( "ToolbarStyle", 0 ) != 0)
+			{
+				config_put_number( "ToolbarStyle", 0 );
+				gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
+				reload();
+			}
+	}
 	// write configuration
 	config_write();
 }
@@ -478,7 +512,22 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
 		break;
 	}
 	
-	
+	switch(config_get_number( "ToolbarStyle", 1 ))
+	{
+		case 0:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), 0);
+		break;
+		case 1:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), 1);
+		break;
+		case 2:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), 2);
+		break;
+		default:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), 0);
+		break;
+	}
+
 	switch(config_get_number( "ToolbarSize", 1 ))
 	{
 		case 0:
@@ -486,6 +535,9 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
 		break;
 		case 1:
 			gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 1);
+		break;
+		default:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 0);
 		break;
 	}
 
