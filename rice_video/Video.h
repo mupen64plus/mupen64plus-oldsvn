@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _DLLINTERFACE_H_
 
 #include "typedefs.h"
+#include <limits.h> // PATH_MAX
 
 typedef struct {
 	float	fViWidth, fViHeight;
