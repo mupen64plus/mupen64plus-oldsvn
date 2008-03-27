@@ -164,6 +164,11 @@ static double VILimitMilliseconds = 1000.0/60.0;
  */
 double SpeedModifier = 0;
 
+static double get_speedmod()
+{
+	return SpeedModifier;
+}
+
 static void set_speedmod(double foo)
 {
 	SpeedModifier = foo;
@@ -174,11 +179,6 @@ static void inc_speedmod(double bar)
 {
 	SpeedModifier += bar;
 	VILimitMilliseconds = (double) 1000.0/(VILimit * get_speedmod() / 100); 
-}
-
-static double get_speedmod()
-{
-	return SpeedModifier;
 }
 
 static int GetVILimit(void)
