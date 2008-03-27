@@ -33,10 +33,8 @@
 //
 //****************************************************************
 
-
-#ifndef PATH_MAX
-#  define PATH_MAX 1024
-#endif
+//nmn: Fix for MAX_PATH
+#include <limits.h>
 
 BOOL INI_Open ();
 void INI_Close ();
