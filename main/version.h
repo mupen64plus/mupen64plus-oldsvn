@@ -28,5 +28,5 @@
 **/
 
 #define MUPEN_NAME    "Mupen64Plus"
-#define MUPEN_VERSION "1.3"
+#define MUPEN_VERSION "1.3-development"
 
