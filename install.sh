@@ -34,6 +34,7 @@ else
 fi
 
 BINDIR=${PREFIX}/bin
+MANDIR=${PREFIX}/man/man1
 INSTALLDIR=${PREFIX}/share/mupen64plus
 
 echo "Installing Mupen64Plus to $PREFIX"
@@ -42,7 +43,9 @@ $INSTALL -d -v "${INSTALLDIR}" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/config" || exit $?
 $INSTALL -m 0644 config/* "${INSTALLDIR}/config" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/doc" || exit $?
-$INSTALL -m 0644 doc/* "${INSTALLDIR}/doc" || exit $?
+$INSTALL -m 0644 doc/HiRezTexture.txt "${INSTALLDIR}/doc" || exit $?
+$INSTALL -m 0644 doc/readme.pdf "${INSTALLDIR}/doc" || exit $?
+$INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/icons" || exit $?
 $INSTALL -m 0644 icons/* "${INSTALLDIR}/icons" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/lang" || exit $?
