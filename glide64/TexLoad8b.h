@@ -253,11 +253,11 @@ end_y_loop:
        long lTempX, lTempY, lHeight = (long) height;
        intptr_t fake_eax, fake_edx;
 	   asm volatile (
-			 "y_loop4:                \n"
+			 "1:                     \n"  // y_loop4
              "mov %[c], %[tempy]     \n"
 				
 			 "mov %[wid_64], %%ecx   \n"
-			 "x_loop4:                \n"
+			 "2:                     \n"  // x_loop4
              "mov %[c], %[tempx]     \n"
 			 
 			 "mov (%[src]), %%eax      \n"		// read all 4 pixels
@@ -343,18 +343,18 @@ end_y_loop:
              "mov %[tempx], %[c]     \n"
 
 			 "dec %%ecx               \n"
-			 "jnz x_loop4             \n"
+			 "jnz 2b                  \n"  // x_loop4
 			 
-             "mov %[tempy], %[c]     \n"
+             "mov %[tempy], %[c]      \n"
 			 "dec %%ecx               \n"
-			 "jz end_y_loop4          \n"
-             "mov %[c], %[tempy]     \n"
+			 "jz 4f                   \n"  // end_y_loop4
+             "mov %[c], %[tempy]      \n"
 			 
 			 "add %[line], %[src]     \n"
 			 "add %[ext], %[dst]      \n"
 			 
 			 "mov %[wid_64], %%ecx   \n"
-			 "x_loop_24:              \n"
+			 "3:                     \n"  // x_loop_24
              "mov %[c], %[tempx]     \n"
 			 
 			 "mov 4(%[src]), %%eax     \n"		// read all 4 pixels
@@ -436,18 +436,18 @@ end_y_loop:
 			 // }
 			 // *
 			 
-             "mov %[tempx], %[c]     \n"
+             "mov %[tempx], %[c]      \n"
 			 "dec %%ecx               \n"
-			 "jnz x_loop_24           \n"
+			 "jnz 3b                  \n"  // x_loop_24
 			 
 			 "add %[line], %[src]     \n"
 			 "add %[ext], %[dst]      \n"
 			 
-             "mov %[tempy], %[c]     \n"
+             "mov %[tempy], %[c]      \n"
 			 "dec %%ecx               \n"
-			 "jnz y_loop4             \n"
+			 "jnz 1b                  \n"  // y_loop4
 			 
-			 "end_y_loop4:            \n"
+			 "4:                      \n"  // end_y_loop4
 			 : [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [a] "=&a" (fake_eax), [d] "=&d" (fake_edx), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
 			 : [pal] "r" (pal), [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
 			 : "memory", "cc"
@@ -667,11 +667,11 @@ ia_end_y_loop:
        long lTempX, lTempY, lHeight = (long) height;
 		intptr_t fake_eax, fake_edx;
 	   asm volatile (
-			 "ia_y_loop2:             \n"
-             "mov %[c], %[tempy]     \n"
+			 "1:                      \n"  // ia_y_loop2
+             "mov %[c], %[tempy]      \n"
 				
 			 "mov %[wid_64], %%ecx   \n"
-			 "ia_x_loop2:             \n"
+			 "2:                     \n"  // ia_x_loop2
              "mov %[c], %[tempx]     \n"
 			 
 			 "mov (%[src]), %%eax      \n"		// read all 4 pixels
@@ -754,21 +754,21 @@ ia_end_y_loop:
 			 // }
 			 // *
 				
-             "mov %[tempx], %[c]     \n"
+             "mov %[tempx], %[c]      \n"
 			 "dec %%ecx               \n"
-			 "jnz ia_x_loop2          \n"
+			 "jnz 2b                  \n"  // ia_x_loop2
 			 
-             "mov %[tempy], %[c]     \n"
+             "mov %[tempy], %[c]      \n"
 			 "dec %%ecx               \n"
-			 "jz ia_end_y_loop2       \n"
-             "mov %[c], %[tempy]     \n"
+			 "jz 4f                   \n"  // ia_end_y_loop2
+             "mov %[c], %[tempy]      \n"
 				
 			 "add %[line], %[src]     \n"
 			 "add %[ext], %[dst]      \n"
 			 
-			 "mov %[wid_64], %%ecx   \n"
-			 "ia_x_loop_22:           \n"
-             "mov %[c], %[tempx]     \n"
+			 "mov %[wid_64], %%ecx    \n"
+			 "3:                      \n"  // ia_x_loop_22
+             "mov %[c], %[tempx]      \n"
 			 
 			 "mov 4(%[src]), %%eax     \n"		// read all 4 pixels
 			 "bswap %%eax             \n"
@@ -849,18 +849,18 @@ ia_end_y_loop:
 			 // }
 			 // *
 
-             "mov %[tempx], %[c]     \n"
+             "mov %[tempx], %[c]      \n"
 			 "dec %%ecx               \n"
-			 "jnz ia_x_loop_22        \n"
+			 "jnz 3b                  \n"  // ia_x_loop_22
 			 
 			 "add %[line], %[src]     \n"
 			 "add %[ext], %[dst]      \n"
 			 
-             "mov %[tempy], %[c]     \n"
+             "mov %[tempy], %[c]      \n"
 			 "dec %%ecx               \n"
-			 "jnz ia_y_loop2          \n"
+			 "jnz 1b                  \n"  // ia_y_loop2
 			 
-			 "ia_end_y_loop2:         \n"
+			 "4:                      \n"  // ia_end_y_loop2
 			 : [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [a] "=&a" (fake_eax), [d] "=&d" (fake_edx), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
              : [pal] "r" (pal), [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
 			 : "memory", "cc"
@@ -990,11 +990,11 @@ end_y_loop:
    //printf("Load8bIA\n");
    long lTemp, lHeight = (long) height;
    asm volatile (
-		 "y_loop5:               \n"
+		 "1:                     \n"  // y_loop5
 		 "mov %[c], %[temp]      \n"
 			
-		 "mov %[wid_64], %%ecx  \n"
-		 "x_loop5:               \n"
+		 "mov %[wid_64], %%ecx    \n"
+		 "2:                      \n"  // x_loop5
 		 "mov (%[src]), %%eax     \n"          // read all 4 pixels  
 		 "add $4, %[src]          \n"
 		 
@@ -1029,18 +1029,18 @@ end_y_loop:
 		 // *  
 			
 		 "dec %%ecx              \n"
-		 "jnz x_loop5            \n"
+		 "jnz 2b                 \n"  // x_loop5
 		 
 		 "mov %[temp], %[c]      \n"
 		 "dec %%ecx              \n"
-		 "jz end_y_loop5         \n"
+		 "jz 4f                  \n"  // end_y_loop5
 		 "mov %[c], %[temp]      \n"
 		 
 		 "add %[line], %[src]    \n"
 		 "add %[ext], %[dst]     \n"
 		 
-		 "mov %[wid_64], %%ecx  \n"
-		 "x_loop_25:             \n"
+		 "mov %[wid_64], %%ecx    \n"
+		 "3:                      \n"  // x_loop_25
 		 "mov 4(%[src]), %%eax    \n"          // read both pixels  
 		 
 		 "xor %%ebx, %%ebx       \n"
@@ -1074,16 +1074,16 @@ end_y_loop:
 		 // *  
 		 
 		 "dec %%ecx              \n"
-		 "jnz x_loop_25          \n"
+		 "jnz 3b                 \n"  // x_loop_25
 		 
 		 "add %[line], %[src]    \n"
 		 "add %[ext], %[dst]     \n"
 		 
 		 "mov %[temp], %[c]      \n"
 		 "dec %%ecx              \n"
-		 "jnz y_loop5            \n"
+		 "jnz 1b                 \n"  // y_loop5
 		 
-		 "end_y_loop5:           \n"
+		 "4:                     \n"  // end_y_loop5
 		   : [temp]"=m"(lTemp), [src] "+S"(src), [dst] "+D"(dst), [c] "+c"(lHeight)
 		   : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
 		   : "memory", "cc", "eax", "edx", "ebx"
@@ -1170,11 +1170,11 @@ end_y_loop:
    //printf("Load8bI\n");
    long lTemp, lHeight = (long) height;
    asm volatile (
-		 "y_loop6:              \n"
+		 "1:                    \n"  // y_loop6
          "mov %[c], %[temp]     \n"
 			
-		 "mov %[wid_64], %%ecx \n"
-		 "x_loop6:              \n"
+		 "mov %[wid_64], %%ecx   \n"
+		 "2:                     \n"  // x_loop6
 		 "mov (%[src]), %%eax    \n"          // read all 4 pixels  
 		 "add $4, %[src]         \n"
 		 
@@ -1189,18 +1189,18 @@ end_y_loop:
 		 // *  
 		 
 		 "dec %%ecx             \n"
-		 "jnz x_loop6           \n"
+		 "jnz 2b                \n" // x_loop6
 		 
          "mov %[temp], %[c]     \n"
 		 "dec %%ecx             \n"
-		 "jz end_y_loop6        \n"
+		 "jz 4f                 \n" // end_y_loop6
          "mov %[c], %[temp]     \n"
 			
 		 "add %[line], %[src]   \n"
 		 "add %[ext], %[dst]    \n"
 		 
-		 "mov %[wid_64], %%ecx \n"
-		 "x_loop_26:            \n"
+		 "mov %[wid_64], %%ecx   \n"
+		 "3:                     \n"  // x_loop_26
 		 "mov 4(%[src]), %%eax   \n"          // read both pixels  
 		 
 		 "mov %%eax, (%[dst])    \n" //save dword 
@@ -1214,16 +1214,16 @@ end_y_loop:
 		 // *  
 		 
 		 "dec %%ecx             \n"
-		 "jnz x_loop_26         \n"
+		 "jnz 3b                \n"  // x_loop_26
 		 
 		 "add %[line], %[src]   \n"
 		 "add %[ext], %[dst]    \n"
 		 
          "mov %[temp], %[c]     \n"
 		 "dec %%ecx             \n"
-		 "jnz y_loop6           \n"
+		 "jnz 1b                \n"  // y_loop6
 		 
-		 "end_y_loop6:          \n"
+		 "4:                    \n"  // end_y_loop6
 		 : [temp]"=m"(lTemp), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
 		 : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
 		 : "memory", "cc", "eax", "edx", "ebx"

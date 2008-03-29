@@ -400,11 +400,11 @@ end_y_loop:
         long lTempX, lTempY, lHeight = (long) height;
 		intptr_t fake_eax, fake_edx;
 	   asm volatile (
-		"y_loop:                 \n"
+		"1:                 \n" // y_loop
              "mov %[c], %[tempy]            \n"
 			 
 			 "mov %[wid_64], %%ecx    \n"
-		"x_loop:                 \n"
+		"2:                 \n" // x_loop
              "mov %[c], %[tempx]            \n"
 			 
 			 "mov (%[src]), %%eax      \n"		// read all 8 pixels
@@ -562,18 +562,18 @@ end_y_loop:
              "mov %[tempx], %[c]       \n"
 			 
 			 "dec %%ecx               \n"
-             "jnz x_loop              \n"
+             "jnz 2b                  \n" // x_loop
 			 
              "mov %[tempy], %[c]       \n"
 			 "dec %%ecx               \n"
-             "jz end_y_loop           \n"
+             "jz 4f                    \n" // end_y_loop
              "mov %[c], %[tempy]       \n"
 
 			 "add %[line], %[src]      \n"
 			 "add %[ext], %[dst]       \n"
 
 			 "mov %[wid_64], %%ecx    \n"
-		"x_loop_2:               \n"
+             "3:                      \n" // x_loop_2
              "mov %[c], %[tempx]       \n"
 			 
 			 "mov 4(%[src]), %%eax     \n"		// read all 8 pixels
@@ -730,16 +730,16 @@ end_y_loop:
              "mov %[tempx], %[c]       \n"
 			 
 			 "dec %%ecx               \n"
-		"jnz x_loop_2            \n"
+             "jnz 3b                  \n" // x_loop_2
 			 
 			 "add %[line], %[src]     \n"
 			 "add %[ext], %[dst]      \n"
 			 
              "mov %[tempy], %[c]       \n"
 			 "dec %%ecx               \n"
-		"jnz y_loop              \n"
-			 
-		"end_y_loop:             \n"
+             "jnz 1b                  \n" // y_loop
+
+             "4:                      \n" // end_y_loop
 			 : [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [a] "=&a"(fake_eax), [d] "=&d"(fake_edx), [src] "+S"(src), [dst] "+D"(dst), [c] "+c"(lHeight)
 			 // pal needs to be in a register because its used in mov (%[pal],...), ...
 			 : [pal] "r" (pal), [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
@@ -1103,11 +1103,11 @@ ia_end_y_loop:
        long lTempX, lTempY, lHeight = (long) height;
        intptr_t fake_eax, fake_edx;
 	   asm volatile (
-			 "ia_y_loop:              \n"
+			 "1:                     \n"  // ia_y_loop
 			 "mov %[c], %[tempy]     \n"
 
 			 "mov %[wid_64], %%ecx   \n"
-			 "ia_x_loop:              \n"
+			 "2:                     \n"  // ia_x_loop
 			 "mov %[c], %[tempx]     \n"
 			 
 			 "mov (%[src]), %%eax      \n"		// read all 8 pixels
@@ -1265,18 +1265,18 @@ ia_end_y_loop:
 			 "mov %[tempx], %[c]     \n"
 			 
 			 "dec %%ecx               \n"
-			 "jnz ia_x_loop           \n"
+			 "jnz 2b                  \n"  // ia_x_loop
 			 
 			 "mov %[tempy], %[c]     \n"
 			 "dec %%ecx               \n"
-			 "jz ia_end_y_loop        \n"
+			 "jz 4f                  \n"  // ia_end_y_loop
 			 "mov %[c], %[tempy]     \n"
 			 
 			 "add %[line], %[src]     \n"
 			 "add %[ext], %[dst]      \n"
 
 			 "mov %[wid_64], %%ecx   \n"
-			 "ia_x_loop_2:            \n"
+			 "3:                     \n"  // ia_x_loop_2
 			 "mov %[c], %[tempx]     \n"
 			 
 			 "mov 4(%[src]), %%eax     \n"		// read all 8 pixels
@@ -1433,16 +1433,16 @@ ia_end_y_loop:
 			 "mov %[tempx], %[c]     \n"
 			 
 			 "dec %%ecx               \n"
-			 "jnz ia_x_loop_2         \n"
+			 "jnz 3b                  \n"  // ia_x_loop_2
 			 
 			 "add %[line], %[src]     \n"
 			 "add %[ext], %[dst]      \n"
 			 
 			 "mov %[tempy], %[c]     \n"
 			 "dec %%ecx               \n"
-			 "jnz ia_y_loop           \n"
+			 "jnz 1b                  \n"  // ia_y_loop
 			 
-			 "ia_end_y_loop:          \n"
+			 "4:                      \n"  // ia_end_y_loop
 			 : [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [a] "=&a"(fake_eax), [d] "=&d"(fake_edx), [src] "+S"(src), [dst] "+D"(dst), [c] "+c"(lHeight)
 			 // pal needs to be in a register because its used in mov (%[pal],...), ...
 			 : [pal] "r" (pal), [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
@@ -2266,11 +2266,11 @@ end_y_loop:
    //printf("Load4bIA\n");
    long lTempX, lTempY, lHeight = (long) height;
    asm volatile (
-	"y_loop2:               \n"
+	"1:                     \n"  // y_loop2
     "mov %[c], %[tempy]     \n"
 
 	"mov %[wid_64], %%ecx  \n"
-	"x_loop2:               \n"
+	"2:                    \n"  // x_loop2
     "mov %[c], %[tempx]     \n"
 	
 	"mov (%[src]), %%eax     \n"		// read all 8 pixels
@@ -2652,18 +2652,18 @@ end_y_loop:
 
     "mov %[tempx], %[c]     \n"
 	"dec %%ecx              \n"
-	"jnz x_loop2            \n"
+	"jnz 2b                 \n"  // x_loop2
 	
     "mov %[tempy], %[c]     \n"
 	"dec %%ecx              \n"
-	"jz end_y_loop2         \n"
+	"jz 4f                  \n"  // end_y_loop2
     "mov %[c], %[tempy]     \n"
 
 	"add %[line], %[src]    \n"
 	"add %[ext], %[dst]     \n"
 
-	"mov %[wid_64], %%ecx  \n"
-	"x_loop_22:             \n"
+	"mov %[wid_64], %%ecx   \n"
+	"3:                     \n"  // x_loop_22
     "mov %[c], %[tempx]     \n"
 	
 	"mov 4(%[src]), %%eax    \n"		// read all 8 pixels
@@ -3043,16 +3043,16 @@ end_y_loop:
 
     "mov %[tempx], %[c]     \n"
 	"dec %%ecx              \n"
-	"jnz x_loop_22          \n"
+	"jnz 3b                 \n"  // x_loop_22
 	
 	"add %[line], %[src]    \n"
 	"add %[ext], %[dst]     \n"
 	
     "mov %[tempy], %[c]     \n"
 	"dec %%ecx              \n"
-	"jnz y_loop2            \n"
+	"jnz 1b                 \n"  // y_loop2
 	
-	"end_y_loop2:           \n"
+	"4:                     \n"  // end_y_loop2
 	: [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
 	: [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
 	: "memory", "cc", "eax", "edx", "ebx"
@@ -3398,11 +3398,11 @@ end_y_loop:
    //printf("Load4bI\n");
    long lTempX, lTempY, lHeight = (long) height;
    asm volatile (
-		 "y_loop3:               \n"
+		 "1:                     \n"  // y_loop3
          "mov %[c], %[tempy]     \n"
 		 
-		 "mov %[wid_64], %%ecx  \n"
-		 "x_loop3:               \n"
+		 "mov %[wid_64], %%ecx   \n"
+		 "2:                     \n"  // x_loop3
          "mov %[c], %[tempx]     \n"
 		 
 		 "mov (%[src]), %%eax     \n"		// read all 8 pixels
@@ -3547,18 +3547,18 @@ end_y_loop:
 
          "mov %[tempx], %[c]     \n"
 		 "dec %%ecx              \n"
-		 "jnz x_loop3            \n"
+		 "jnz 2b                 \n"  // x_loop3
 		 
          "mov %[tempy], %[c]     \n"
 		 "dec %%ecx              \n"
-		 "jz end_y_loop3         \n"
+		 "jz 4f                  \n"  // end_y_loop3
          "mov %[c], %[tempy]     \n"
 		 
 		 "add %[line], %[src]    \n"
 		 "add %[ext], %[dst]     \n"
 		 
-		 "mov %[wid_64], %%ecx  \n"
-		 "x_loop_23:              \n"
+		 "mov %[wid_64], %%ecx   \n"
+		 "3:                     \n"  // x_loop_23
          "mov %[c], %[tempx]     \n"
 		 
 		 "mov 4(%[src]), %%eax    \n"		// read all 8 pixels
@@ -3702,16 +3702,16 @@ end_y_loop:
 
          "mov %[tempx], %[c]     \n"
 		 "dec %%ecx              \n"
-		 "jnz x_loop_23           \n"
+		 "jnz 3b                 \n"  // x_loop_23
 		 
 		 "add %[line], %[src]    \n"
 		 "add %[ext], %[dst]     \n"
 		 
          "mov %[tempy], %[c]     \n"
 		 "dec %%ecx              \n"
-		 "jnz y_loop3            \n"
+		 "jnz 1b                 \n"  // y_loop3
 		 
-		 "end_y_loop3:           \n"
+		 "4:                     \n"  // end_y_loop3
 		 : [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [src] "+S"(src), [dst] "+D"(dst), [c]"+c"(lHeight)
 		 : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
 		 : "memory", "cc", "eax", "edx", "ebx"
