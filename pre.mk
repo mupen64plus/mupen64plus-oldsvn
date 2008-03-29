@@ -21,6 +21,18 @@ ifeq ("$(UNAME)","ppc64")
   ARCH = 64BITS
 endif
 
+# find installed assembler: yasm or nasm
+ifneq ("$(shell which yasm 2>&1 | head -c 9)", "which: no")
+  ASM=yasm
+else
+  ifneq ("$(shell which nasm 2>&1 | head -c 9)", "which: no")
+    ASM=nasm
+  else
+    # throw error
+    $(error No yasm or nasm found!)
+  endif
+endif
+
 # test for presence of SDL
 ifeq ("$(shell which sdl-config 2>&1 | head -c 9)", "which: no")
   # throw error

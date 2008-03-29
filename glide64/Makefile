@@ -135,7 +135,7 @@ compiletex: compiletex.c
 	$(LD) -o $@ compiletex.o
 
 Tmem_nasm.o: Tmem_nasm.asm
-	yasm -f elf $(MOPT) -DBITS=$(BITS) $< -o $@
+	$(ASM) -f elf $(MOPT) -DBITS=$(BITS) $< -o $@
 
 rdp.o: ucode06.h
 
