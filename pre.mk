@@ -39,6 +39,7 @@ ifeq ("$(shell which sdl-config 2>&1 | head -c 9)", "which: no")
   $(error No SDL development libraries found!)
 endif
 
+
 # test for presence of GTK 2.0
 ifeq ("$(shell which pkg-config 2>&1 | head -c 9)", "which: no")
   # throw error
@@ -54,6 +55,21 @@ GTK_FLAGS	= `pkg-config gtk+-2.0 --cflags` -D_GTK2
 GTK_LIBS	= `pkg-config gtk+-2.0 --libs`
 GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 
+
+# test for presence of libsamplerate
+ifneq ("$(shell pkg-config samplerate --modversion | head -c 2)", "0.")
+  # throw error
+  $(error No libsamplerate development libraries found!)
+  # set libsamplerate flags and libraries
+  SRC_FLAGS	= 
+  SRC_LIBS	= 
+else
+  # set libsamplerate flags and libraries
+  SRC_FLAGS	= `pkg-config samplerate --cflags` -DUSE_SRC
+  SRC_LIBS	= `pkg-config samplerate --libs`
+endif
+
+
 # set base program pointers and flags
 CC      = gcc
 CXX     = g++
@@ -68,7 +84,7 @@ PROF    = gprof
 INSTALL = ginstall
 
 # set base CFLAGS and LDFLAGS for all systems
-CFLAGS = -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
+CFLAGS = -pipe -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
 LDFLAGS =
 
 # set special flags per-system

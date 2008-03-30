@@ -4,7 +4,7 @@
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC
+CFLAGS += -fpic -DPIC -g
 
 # list of object files to generate
 OBJECTS = main.o
@@ -17,9 +17,9 @@ clean:
 
 # build rules
 .c.o:
-	$(CC) $(CFLAGS) $(SDL_FLAGS) $(GTK_FLAGS) -DUSE_GTK -c -o $@ $<
+	$(CC) $(CFLAGS) $(SDL_FLAGS) $(GTK_FLAGS) $(SRC_FLAGS) -DUSE_GTK -c -o $@ $<
 
 jttl_audio.so: $(OBJECTS)
-	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(GTK_LIBS) -o $@
+	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(GTK_LIBS) $(SRC_LIBS) -o $@
 	$(STRIP) $@
 
