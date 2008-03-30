@@ -2,19 +2,13 @@
 
 #include "vcr_compress.h"
 
-#include <malloc.h>
-#include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdint.h>
-#include <videoencoder.h>
 #include <avifile.h>
 #include <aviplay.h>
 #include <version.h>
 #include <avm_creators.h>
-#include <avm_fourcc.h>
 #include <avm_except.h>
 #include <iostream>
 #define __MODULE__		"mupen64-vcr_compress"

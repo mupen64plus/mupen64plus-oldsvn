@@ -2,19 +2,6 @@
 
 #include "vcr_resample.h"
 
-#include <errno.h>
-#include <limits.h>
-#include <malloc.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <zlib.h>
-#include <stdint.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 static const volatile unsigned char Four2Eight[16] =
 {
@@ -36,9 +23,7 @@ static const volatile unsigned char Four2Eight[16] =
 	255  // 1111 = 11111111
 };
 
-int
-VCR_resample( short **dst, int dst_freq,
-              const short *src, int src_freq, int src_bitrate, int src_len )
+int VCR_resample( short **dst, int dst_freq, const short *src, int src_freq, int src_bitrate, int src_len )
 {
 	int dst_len, i;
 	float ratio;

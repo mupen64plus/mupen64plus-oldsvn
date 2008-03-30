@@ -11,11 +11,7 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <malloc.h>
-#include <math.h>
 #include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 #include <zlib.h>
 
 enum ETask
