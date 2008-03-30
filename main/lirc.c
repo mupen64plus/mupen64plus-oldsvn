@@ -27,89 +27,96 @@
 #include "main.h"
 #include "savestates.h"
 #include "plugin.h"
+#include "volume.h"
 
 static struct lirc_config *g_config;
 static int g_lircfd = 0;
 
 void lircStart(void)
 {
-	printf("Launching LIRC...");
+    printf("Launching LIRC...");
 
-	if((g_lircfd = lirc_init("mupen64plus", 1)) != -1)
-	{
-		g_config = NULL;
-		if(lirc_readconfig(NULL, &g_config, NULL) == 0)
-			printf("OK!\n");
-		else
-			printf("Error reading lircrc!\n");
-	}
-	else
-		printf("Error contacting daemon!\n");
+    if((g_lircfd = lirc_init("mupen64plus", 1)) != -1)
+    {
+        g_config = NULL;
+        if(lirc_readconfig(NULL, &g_config, NULL) == 0)
+            printf("OK!\n");
+        else
+            printf("Error reading lircrc!\n");
+    }
+    else
+        printf("Error contacting daemon!\n");
 }
 
 void lircStop(void)
 {
-	if(g_lircfd!=-1)
-	{
-		printf("Terminating LIRC...");
-		if(g_config != NULL)
-		{
-			lirc_freeconfig(g_config);
-			g_config = NULL;
-		}
-		lirc_deinit();
-		printf("done.\n");
-	}
+    if(g_lircfd!=-1)
+    {
+        printf("Terminating LIRC...");
+        if(g_config != NULL)
+        {
+            lirc_freeconfig(g_config);
+            g_config = NULL;
+        }
+        lirc_deinit();
+        printf("done.\n");
+    }
 }
 
 void lircCheckInput(void)
 {
-	struct pollfd lircpoll;
-	lircpoll.fd = g_lircfd;
-	lircpoll.events = POLLIN;
+    struct pollfd lircpoll;
+    lircpoll.fd = g_lircfd;
+    lircpoll.events = POLLIN;
 
-	if(poll(&lircpoll, 1, 0) > 0)
-	{
-		char *code;
-		char *c;
-		int ret;
+    if(poll(&lircpoll, 1, 0) > 0)
+    {
+        char *code;
+        char *c;
+        int ret;
 
-		if(lirc_nextcode(&code) == 0 && code != NULL)
-		{
-			while((ret = lirc_code2char(g_config, code, &c)) == 0 && c!=NULL)
-			{
-				char *c_ind = c;
-				while(*c_ind != '\0')
-				{
-					*c_ind = toupper(*c_ind);
-					c_ind++;
-				}
+        if(lirc_nextcode(&code) == 0 && code != NULL)
+        {
+            while((ret = lirc_code2char(g_config, code, &c)) == 0 && c!=NULL)
+            {
+                char *c_ind = c;
+                while(*c_ind != '\0')
+                {
+                    *c_ind = toupper(*c_ind);
+                    c_ind++;
+                }
 #ifdef DEBUG
-				printf("LIRC Execing command \"%s\"\n", c);
+                printf("LIRC Execing command \"%s\"\n", c);
 #endif //DEBUG
 
-				if(strcmp(c, "SAVE") == 0)
-					savestates_job |= SAVESTATE;
-				else if(strcmp(c, "LOAD") == 0)
-					savestates_job |= LOADSTATE;
-				else if(strcmp(c, "QUIT") == 0)
-					stopEmulation();
-				else if(strcmp(c, "FULLSCREEN") == 0)
-					changeWindow();
-				else if(strcmp(c, "PAUSE") == 0)
-					pauseContinueEmulation();
-				else if(strcmp(c, "SCREENSHOT") == 0)
-					screenshot();
-				else
-				{
-					int val = ((int)c[0])-((int) '0');
-					if (val >= 0 && val <= 9)
-						savestates_select_slot( val );
-				}
-			}
-			free(code);
-		}
-	}
+                if(strcmp(c, "SAVE") == 0)
+                    savestates_job |= SAVESTATE;
+                else if(strcmp(c, "LOAD") == 0)
+                    savestates_job |= LOADSTATE;
+                else if(strcmp(c, "QUIT") == 0)
+                    stopEmulation();
+                else if(strcmp(c, "FULLSCREEN") == 0)
+                    changeWindow();
+                else if(strcmp(c, "PAUSE") == 0)
+                    pauseContinueEmulation();
+                else if(strcmp(c, "MUTE") == 0)
+                    volMute();
+                else if(strcmp(c, "VOL+") == 0)
+                    volChange(2);
+                else if(strcmp(c, "VOL-") == 0)
+                    volChange(-2);
+                else if(strcmp(c, "SCREENSHOT") == 0)
+                    screenshot();
+                else
+                {
+                    int val = ((int)c[0])-((int) '0');
+                    if (val >= 0 && val <= 9)
+                        savestates_select_slot( val );
+                }
+            }
+            free(code);
+        }
+    }
 }
 
 #endif //WITH_LIRC

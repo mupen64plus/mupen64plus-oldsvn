@@ -62,6 +62,7 @@
 #include "guifuncs.h" // gui-specific functions
 #include "util.h"
 #include "translate.h"
+#include "volume.h"
 
 #ifdef DBG
 #include <glib.h>
@@ -100,14 +101,14 @@ static int	g_GuiEnabled = 0;		// GUI enabled?
 static int	g_GuiEnabled = 1;		// GUI enabled?
 #endif
 
-static char	g_ConfigDir[PATH_MAX];
-static char	g_InstallDir[PATH_MAX];
+static char	g_ConfigDir[PATH_MAX] = {0};
+static char	g_InstallDir[PATH_MAX] = {0};
 #ifdef DBG
 static int	g_DebuggerEnabled = 0;		// wether the debugger is enabled or not
 #endif
 static int	g_Fullscreen = 0;		// fullscreen enabled?
 static int	g_EmuMode = 0;			// emumode specified at commandline?
-static char	g_SshotDir[PATH_MAX];		// pointer to screenshot dir specified at commandline (if any)
+static char	g_SshotDir[PATH_MAX] = {0};	// pointer to screenshot dir specified at commandline (if any)
 static char	*g_Filename = NULL;		// filename to load & run at startup (if given at command line)
 static int	g_MemHasBeenBSwapped = 0;	// store byte-swapped flag so we don't swap twice when re-playing game
 
@@ -537,6 +538,22 @@ static int sdl_event_filter( const SDL_Event *event )
 						case 'p':
 						case 'P':
 							pauseContinueEmulation();
+							break;
+
+						// volume mute/unmute
+						case 'm':
+						case 'M':
+							volMute();
+							break;
+
+						// increase volume
+						case ']':
+							volChange(2);
+							break;
+
+						// decrease volume
+						case '[':
+							volChange(-2);
 							break;
 
 						default:
@@ -1102,10 +1119,6 @@ int main(int argc, char *argv[])
 	const char *p;
 #endif
 
-	g_ConfigDir[0] = '\0';
-	g_InstallDir[0] = '\0';
-	g_SshotDir[0] = '\0';
-
 	// parse gui-specific commandline args first
 	if(g_GuiEnabled)
 	{
@@ -1113,10 +1126,7 @@ int main(int argc, char *argv[])
 	}
 
 	parseCommandLine(argc, argv);
-
-	// set config/install dir paths
 	setPaths();
-
 	config_read();
 
 #ifdef VCR_SUPPORT
@@ -1159,21 +1169,19 @@ int main(int argc, char *argv[])
 	ini_openFile();
 
 	// build gui, but do not display
-	// NOTE: you need to call this even if gui is not enabled. Otherwise, functions like confirm_message will cause errors
-	gui_build();
+	if(g_GuiEnabled)
+		gui_build();
 
+	// must be called after building gui
 	info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), g_ConfigDir, g_InstallDir);
 
 	// only display gui if user wants it
 	if(g_GuiEnabled)
-	{
 		gui_display();
-	}
 
-	// go!
+	// if rom file was specified, run it
 	if (g_Filename)
 	{
-		// now load the rom
 		if(open_rom(g_Filename) < 0 &&
 		   !g_GuiEnabled)
 		{
@@ -1185,7 +1193,6 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-		// and start emulation
 		startEmulation();
 	}
 	// Rom file must be specified in nogui mode
@@ -1202,11 +1209,9 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	// give control of this thread to the gui
 	if(g_GuiEnabled)
-	{
-		// give control of this thread to the gui
 		gui_main_loop();
-	}
 
 	// cleanup and exit
 	stopEmulation();
