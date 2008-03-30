@@ -19,7 +19,6 @@ Email                : blight@Ashitaka
 
 #include "main_gtk.h"
 #include "../config.h"
-#include "support.h"
 #include "../translate.h"
 
 #include "../vcr_compress.h"

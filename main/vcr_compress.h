@@ -14,7 +14,7 @@ extern "C" {
 
 void VCRComp_init();
 
-void VCRComp_startFile( const char *filename, int width, int height, int fps );
+void VCRComp_startFile( const char *filename, long width, long height, int fps );
 void VCRComp_finishFile();
 void VCRComp_addVideoFrame( const unsigned char *data );
 void VCRComp_addAudioData( const unsigned char *data, int len );

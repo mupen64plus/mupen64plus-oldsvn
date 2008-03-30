@@ -2,6 +2,13 @@
 
 #include "vcr_compress.h"
 
+#include <malloc.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdint.h>
 #include <videoencoder.h>
 #include <avifile.h>
 #include <aviplay.h>
@@ -30,7 +37,7 @@ static int m_selectedVideoCodec = 0;
 static int m_selectedAudioCodec = 0;
 
 
-void
+extern "C" void
 VCRComp_init()
 {
 	CodecInfo::Get( m_videoCodecs, CodecInfo::Video, CodecInfo::Encode );
@@ -38,7 +45,7 @@ VCRComp_init()
 }
 
 
-void
+extern "C" void
 VCRComp_startFile( const char *filename, long width, long height, int fps )
 {
 	if (GetAvifileVersion() != AVIFILE_VERSION)
@@ -96,7 +103,7 @@ VCRComp_startFile( const char *filename, long width, long height, int fps )
 }
 
 
-void
+extern "C" void
 VCRComp_finishFile()
 {
 	if (m_file == 0)
@@ -122,7 +129,7 @@ VCRComp_finishFile()
 }
 
 
-void VCRComp_addVideoFrame( const unsigned char *data )
+extern "C" void VCRComp_addVideoFrame( const unsigned char *data )
 {
 	static int count = 0;
 	if (m_videoFormat == 0 || m_file == 0 || m_videoStream == 0)
@@ -166,7 +173,7 @@ void VCRComp_addVideoFrame( const unsigned char *data )
 }
 
 
-void
+extern "C" void
 VCRComp_addAudioData( const unsigned char *data, int len )
 {
 	try
@@ -194,13 +201,13 @@ VCRComp_addAudioData( const unsigned char *data, int len )
 
 
 // codec stuff
-int
+extern "C" int
 VCRComp_numVideoCodecs()
 {
 	return m_videoCodecs.size();
 }
 
-const char *
+extern "C" const char *
 VCRComp_videoCodecName( int index )
 {
 	if (index < 0 || index >= (int)m_videoCodecs.size())
@@ -209,7 +216,7 @@ VCRComp_videoCodecName( int index )
 	return m_videoCodecs[index]->GetName();
 }
 
-int
+extern "C" int
 VCRComp_numVideoCodecAttribs( int index )
 {
 	if (index < 0 || index >= (int)m_videoCodecs.size())
@@ -218,7 +225,7 @@ VCRComp_numVideoCodecAttribs( int index )
 	return m_videoCodecs[index]->encoder_info.size();
 }
 
-const char *
+extern "C" const char *
 VCRComp_videoCodecAttribName( int cindex, int aindex )
 {
 	if (cindex < 0 || cindex >= (int)m_videoCodecs.size())
@@ -229,7 +236,7 @@ VCRComp_videoCodecAttribName( int cindex, int aindex )
 	return m_videoCodecs[cindex]->encoder_info[aindex].GetName();
 }
 
-int
+extern "C" int
 VCRComp_videoCodecAttribKind( int cindex, int aindex )
 {
 	if (cindex < 0 || cindex >= (int)m_videoCodecs.size())
@@ -259,7 +266,7 @@ VCRComp_videoCodecAttribKind( int cindex, int aindex )
 	return -1;
 }
 
-const char *
+extern "C" const char *
 VCRComp_videoCodecAttribValue( int cindex, int aindex )
 {
 	static char buf[256];
@@ -307,7 +314,7 @@ VCRComp_videoCodecAttribValue( int cindex, int aindex )
 	return buf;
 }
 
-void
+extern "C" void
 VCRComp_videoCodecAttribSetValue( int cindex, int aindex, const char *val )
 {
 	int i;
@@ -343,7 +350,7 @@ VCRComp_videoCodecAttribSetValue( int cindex, int aindex, const char *val )
 	}
 }
 
-int
+extern "C" int
 VCRComp_numVideoCodecAttribOptions( int cindex, int aindex )
 {
 	if (cindex < 0 || cindex >= (int)m_videoCodecs.size())
@@ -354,7 +361,7 @@ VCRComp_numVideoCodecAttribOptions( int cindex, int aindex )
 	return m_videoCodecs[cindex]->encoder_info[aindex].options.size();
 }
 
-const char *
+extern "C" const char *
 VCRComp_videoCodecAttribOption( int cindex, int aindex, int oindex )
 {
 	if (cindex < 0 || cindex >= (int)m_videoCodecs.size())
@@ -367,7 +374,7 @@ VCRComp_videoCodecAttribOption( int cindex, int aindex, int oindex )
 	return m_videoCodecs[cindex]->encoder_info[aindex].options[oindex].c_str();
 }
 
-void
+extern "C" void
 VCRComp_selectVideoCodec( int index )
 {
 	if (index < 0 || index >= (int)m_videoCodecs.size())
@@ -378,13 +385,13 @@ VCRComp_selectVideoCodec( int index )
 
 
 
-int
+extern "C" int
 VCRComp_numAudioCodecs()
 {
 	return m_audioCodecs.size();
 }
 
-const char *
+extern "C" const char *
 VCRComp_audioCodecName( int index )
 {
 	if (index < 0 || index >= (int)m_audioCodecs.size())
@@ -393,7 +400,7 @@ VCRComp_audioCodecName( int index )
 	return m_audioCodecs[index]->GetName();
 }
 
-int
+extern "C" int
 VCRComp_numAudioCodecAttribs( int index )
 {
 	if (index < 0 || index >= (int)m_audioCodecs.size())
@@ -402,7 +409,7 @@ VCRComp_numAudioCodecAttribs( int index )
 	return m_audioCodecs[index]->encoder_info.size();
 }
 
-const char *
+extern "C" const char *
 VCRComp_audioCodecAttribName( int cindex, int aindex )
 {
 	if (cindex < 0 || cindex >= (int)m_audioCodecs.size())
@@ -413,7 +420,7 @@ VCRComp_audioCodecAttribName( int cindex, int aindex )
 	return m_audioCodecs[cindex]->encoder_info[aindex].GetName();
 }
 
-int
+extern "C" int
 VCRComp_audioCodecAttribKind( int cindex, int aindex )
 {
 	if (cindex < 0 || cindex >= (int)m_audioCodecs.size())
@@ -443,7 +450,7 @@ VCRComp_audioCodecAttribKind( int cindex, int aindex )
 	return -1;
 }
 
-const char *
+extern "C" const char *
 VCRComp_audioCodecAttribValue( int cindex, int aindex )
 {
 	static char buf[256];
@@ -491,7 +498,7 @@ VCRComp_audioCodecAttribValue( int cindex, int aindex )
 	return buf;
 }
 
-void
+extern "C" void
 VCRComp_audioCodecAttribSetValue( int cindex, int aindex, const char *val )
 {
 	int i;
@@ -527,7 +534,7 @@ VCRComp_audioCodecAttribSetValue( int cindex, int aindex, const char *val )
 	}
 }
 
-int
+extern "C" int
 VCRComp_numAudioCodecAttribOptions( int cindex, int aindex )
 {
 	if (cindex < 0 || cindex >= (int)m_audioCodecs.size())
@@ -538,7 +545,7 @@ VCRComp_numAudioCodecAttribOptions( int cindex, int aindex )
         return m_audioCodecs[cindex]->encoder_info[aindex].options.size();
 }
 
-const char *
+extern "C" const char *
 VCRComp_audioCodecAttribOption( int cindex, int aindex, int oindex )
 {
 	if (cindex < 0 || cindex >= (int)m_audioCodecs.size())
@@ -551,7 +558,7 @@ VCRComp_audioCodecAttribOption( int cindex, int aindex, int oindex )
 	return m_audioCodecs[cindex]->encoder_info[aindex].options[oindex].c_str();
 }
 
-void
+extern "C" void
 VCRComp_selectAudioCodec( int index )
 {
 	if (index < 0 || index >= (int)m_audioCodecs.size())
