@@ -325,25 +325,9 @@ void statusbar_message(const char *section, const char *fmt, ...)
 */
 /** rom **/
 // open rom
-static void callback_openRomFileSelected(GtkWidget *widget, gpointer data)
-{
-	const gchar *filename = gtk_file_selection_get_filename( GTK_FILE_SELECTION(data) );
-
-	gtk_widget_hide( GTK_WIDGET(data) );
-	// really hide dialog (let gtk work)
-	while( g_main_iteration( FALSE ) );
-
-	if(open_rom(filename) == 0)
-	{
-		char buf[300];
-		snprintf(buf, 300, MUPEN_NAME " v" MUPEN_VERSION " - %s", ROM_HEADER->nom);
-		gtk_window_set_title(GTK_WINDOW(g_MainWindow.window), buf);
-	}
-}
-
 static void callback_openRom(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *file_selector;
+	GtkWidget *file_chooser;
 
 	if( g_EmulationThread )
 	{
@@ -352,24 +336,34 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
 		callback_stopEmulation( NULL, NULL );
 	}
 
-	/* Create the selector */
-	file_selector = gtk_file_selection_new( tr("Open Rom...") );
+	/* get rom file from user */
+	file_chooser = gtk_file_chooser_dialog_new( tr("Open Rom..."),
+	                                            GTK_WINDOW(g_MainWindow.window),
+						    GTK_FILE_CHOOSER_ACTION_OPEN,
+				                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+				                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+				                    NULL);
 
-	// set main window as parent of file selection window
-	gtk_window_set_transient_for(GTK_WINDOW(file_selector), GTK_WINDOW(g_MainWindow.window));
+	if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
 
-	gtk_signal_connect( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked",
-			    GTK_SIGNAL_FUNC(callback_openRomFileSelected), (gpointer)file_selector );
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
 
-	/* Ensure that the dialog box is destroyed when the user clicks a button. */
-	gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked",
-				   GTK_SIGNAL_FUNC (gtk_widget_destroy), (gpointer)file_selector );
+		// hide dialog while rom is loading
+		gtk_widget_hide(file_chooser);
 
-	gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->cancel_button), "clicked",
-				   GTK_SIGNAL_FUNC(gtk_widget_destroy), (gpointer)file_selector );
+		if(open_rom(filename) == 0)
+		{
+			char buf[300];
+			snprintf(buf, 300, MUPEN_NAME " v" MUPEN_VERSION " - %s", ROM_HEADER->nom);
+			gtk_window_set_title(GTK_WINDOW(g_MainWindow.window), buf);
+		}
 
-	/* Display that dialog */
-	gtk_widget_show( file_selector );
+		g_free(filename);
+	}
+
+	gtk_widget_destroy (file_chooser);
 }
 
 // close rom
