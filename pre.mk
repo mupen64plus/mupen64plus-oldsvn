@@ -57,9 +57,9 @@ GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 
 
 # test for presence of libsamplerate
-ifneq ("$(shell pkg-config samplerate --modversion | head -c 2)", "0.")
-  # throw error
-  $(error No libsamplerate development libraries found!)
+ifneq ($(shell pkg-config samplerate --exists), 0)
+  # warn user
+  $(warning No libsamplerate development libraries found!)
   # set libsamplerate flags and libraries
   SRC_FLAGS	= 
   SRC_LIBS	= 
@@ -124,8 +124,16 @@ endif
 SDL_FLAGS	= `sdl-config --cflags`
 SDL_LIBS	= `sdl-config --libs`
 
-AVIFILE_FLAGS	= `avifile-config --cflags`
-AVIFILE_LIBS	= `avifile-config --libs`
+ifeq ($(VCR), 1)
+  # test for presence of avifile
+  ifneq ($(shell avifile-config --version), 0)
+    # throw error
+    $(error VCR support requires avifile library)
+  else
+    AVIFILE_FLAGS	= `avifile-config --cflags`
+    AVIFILE_LIBS	= `avifile-config --libs`
+  endif
+endif
 
 FREETYPE_LIBS	= `freetype-config --libs`
 FREETYPE_FLAGS	= `freetype-config --cflags`
