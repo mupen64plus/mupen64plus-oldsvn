@@ -300,7 +300,7 @@ GetDllInfo( PLUGIN_INFO * PluginInfo )
 {
    PluginInfo->Version = 0x0101;
    PluginInfo->Type    = PLUGIN_TYPE_AUDIO;
-   sprintf(PluginInfo->Name,"mupen64 audio plugin");
+   sprintf(PluginInfo->Name,"Mupen64 Audio Plugin");
    PluginInfo->NormalMemory  = TRUE;
    PluginInfo->MemoryBswaped = TRUE;
 }
