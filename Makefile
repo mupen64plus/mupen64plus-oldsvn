@@ -146,6 +146,7 @@ OBJ_DBG = \
 
 PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
+          plugins/dummyvideo.so \
           plugins/glN64.so \
           plugins/ricevideo.so \
           plugins/glide64.so \
@@ -231,7 +232,7 @@ clean:
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o
 	$(RM) -f mupen64plus mupen64plus_dbg 
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
-	$(RM) -f plugins/dummyaudio.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
+	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
 
 rebuild: clean all
 
@@ -252,6 +253,10 @@ plugins/blight_input.so: FORCE
 plugins/dummyaudio.so: FORCE
 	$(MAKE) -C dummy_audio all
 	@$(CP) ./dummy_audio/dummyaudio.so ./plugins/dummyaudio.so
+
+plugins/dummyvideo.so: FORCE
+	$(MAKE) -C dummy_video all
+	@$(CP) ./dummy_video/dummyvideo.so ./plugins/dummyvideo.so
 
 plugins/glN64.so: FORCE
 	$(MAKE) -C glN64 all
