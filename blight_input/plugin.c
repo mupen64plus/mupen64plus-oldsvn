@@ -806,7 +806,7 @@ GetKeys( int Control, BUTTONS *Keys )
 			if( controller[Control].axis[b].axis >= 0 )
 				axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis ) / 409;
 
-			if( controller[Control].button[b].hat >= 0 )
+			if( controller[Control].axis[b].hat >= 0 )
 			{
 				if( controller[Control].axis[b].hat_pos_a >= 0 )
 					if( SDL_JoystickGetHat( controller[Control].joystick, controller[Control].axis[b].hat ) & controller[Control].axis[b].hat_pos_a )
