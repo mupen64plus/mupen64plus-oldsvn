@@ -328,6 +328,7 @@ void statusbar_message(const char *section, const char *fmt, ...)
 static void callback_openRom(GtkWidget *widget, gpointer data)
 {
 	GtkWidget *file_chooser;
+	GtkFileFilter *file_filter;
 
 	if( g_EmulationThread )
 	{
@@ -344,11 +345,26 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
 				                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
 				                    NULL);
 
+	// add filter for rom file types
+	file_filter = gtk_file_filter_new();
+	gtk_file_filter_set_name(file_filter, "N64 ROM (*.z64, *.zip)");
+	gtk_file_filter_add_mime_type(file_filter, "application/zip");
+	gtk_file_filter_add_pattern(file_filter, "*.[zZ]64");
+
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
+	                            file_filter);
+
+	// add filter for "all files"
+	file_filter = gtk_file_filter_new();
+	gtk_file_filter_set_name(file_filter, "All files (*.*)");
+	gtk_file_filter_add_pattern(file_filter, "*");
+
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
+	                            file_filter);
+
 	if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-
-		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
+		gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
 
 		// hide dialog while rom is loading
 		gtk_widget_hide(file_chooser);
@@ -457,45 +473,34 @@ static void callback_Save( GtkWidget *widget, gpointer data )
 }
 
 // Save As
-static void callback_saveAsFileSelected( GtkWidget *widget, gpointer data )
-{
-	if( g_EmulationThread )
-	{
-		const gchar *filename = gtk_file_selection_get_filename( GTK_FILE_SELECTION(data) );
-
-		gtk_widget_hide( GTK_WIDGET(data) );
-		// really hide dialog (let gtk work)
-		while( g_main_iteration( FALSE ) );
-
-		savestates_select_filename( filename );
-		savestates_job |= SAVESTATE;
-	}
-}
-
 static void callback_SaveAs( GtkWidget *widget, gpointer data )
 {
 	if( g_EmulationThread )
 	{
-		GtkWidget *file_selector;
+		GtkWidget *file_chooser;
 
-		/* Create the selector */
-		file_selector = gtk_file_selection_new( tr("Save as...") );
+		file_chooser = gtk_file_chooser_dialog_new( tr("Save as..."),
+		                                            GTK_WINDOW(g_MainWindow.window),
+							    GTK_FILE_CHOOSER_ACTION_SAVE,
+					                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					                    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					                    NULL);
 
-		// set main window as parent of file selection window
-		gtk_window_set_transient_for(GTK_WINDOW(file_selector), GTK_WINDOW(g_MainWindow.window));
+		if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+		{
+			gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
+        
+			savestates_select_filename( filename );
+			savestates_job |= SAVESTATE;
 
-		gtk_signal_connect( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked",
-				    GTK_SIGNAL_FUNC(callback_saveAsFileSelected), (gpointer)file_selector );
-
-		/* Ensure that the dialog box is destroyed when the user clicks a button. */
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked",
-					   GTK_SIGNAL_FUNC (gtk_widget_destroy), (gpointer)file_selector );
-
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->cancel_button), "clicked",
-					   GTK_SIGNAL_FUNC(gtk_widget_destroy), (gpointer)file_selector );
-
-		/* Display that dialog */
-		gtk_widget_show( file_selector );
+			g_free(filename);
+		}
+        
+		gtk_widget_destroy (file_chooser);
+	}
+	else
+	{
+		alert_message(tr("Emulation is not running."));
 	}
 }
 
@@ -507,42 +512,34 @@ static void callback_Restore( GtkWidget *widget, gpointer data )
 }
 
 // Load
-static void callback_loadFileSelected( GtkWidget *widget, gpointer data )
-{
-	if( g_EmulationThread )
-	{
-		const gchar *filename = gtk_file_selection_get_filename( GTK_FILE_SELECTION(data) );
-
-		gtk_widget_hide( GTK_WIDGET(data) );
-		// really hide dialog (let gtk work)
-		while( g_main_iteration( FALSE ) );
-
-		savestates_select_filename( filename );
-		savestates_job |= LOADSTATE;
-	}
-}
-
 static void callback_Load( GtkWidget *widget, gpointer data )
 {
 	if( g_EmulationThread )
 	{
-		GtkWidget *file_selector;
+		GtkWidget *file_chooser;
 
-		/* Create the selector */
-		file_selector = gtk_file_selection_new( tr("Load...") );
+		file_chooser = gtk_file_chooser_dialog_new( tr("Load..."),
+		                                            GTK_WINDOW(g_MainWindow.window),
+							    GTK_FILE_CHOOSER_ACTION_SAVE,
+					                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					                    NULL);
+        
+		if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+		{
+			gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
+        
+			savestates_select_filename( filename );
+			savestates_job |= LOADSTATE;
 
-		// set main window as parent of file selection window
-		gtk_window_set_transient_for(GTK_WINDOW(file_selector), GTK_WINDOW(g_MainWindow.window));
-
-		gtk_signal_connect( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC(callback_loadFileSelected), (gpointer)file_selector );
-
-		/* Ensure that the dialog box is destroyed when the user clicks a button. */
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC (gtk_widget_destroy), (gpointer)file_selector );
-
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->cancel_button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), (gpointer)file_selector );
-
-		/* Display that dialog */
-		gtk_widget_show( file_selector );
+			g_free(filename);
+		}
+        
+		gtk_widget_destroy (file_chooser);
+	}
+	else
+	{
+		alert_message(tr("Emulation is not running."));
 	}
 }
 
@@ -664,46 +661,43 @@ static void callback_fullScreen( GtkWidget *widget, gpointer data )
 
 /** VCR **/
 #ifdef VCR_SUPPORT
-static void callback_vcrStartRecord_fileSelected( GtkWidget *widget, gpointer data )
-{
-	if( g_EmulationThread )
-	{
-		gchar *filename = gtk_file_selection_get_filename( GTK_FILE_SELECTION(data) );
-
-		gtk_widget_hide( GTK_WIDGET(data) );
-
-		// Allow GTK to process everything (Causing the widget to truely disappear)
-		while( g_main_iteration( FALSE ) );
-
-		if (VCR_startRecord( filename ) < 0)
-			alert_message(tr("Couldn't start recording."));
-	}
-}
-
-
 static void callback_vcrStartRecord( GtkWidget *widget, gpointer data )
 {
 	if( g_EmulationThread )
 	{
-		GtkWidget *file_selector;
+		GtkWidget *file_chooser;
 
-		/* Create the selector */
-		file_selector = gtk_file_selection_new( tr("Save .rec file") );
+		// get save file from user
+		file_chooser = gtk_file_chooser_dialog_new( tr("Save Recording"),
+		                                            GTK_WINDOW(g_MainWindow.window),
+							    GTK_FILE_CHOOSER_ACTION_SAVE,
+					                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					                    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					                    NULL);
+        
+		if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+		{
+			gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
+			char full_filename[PATH_MAX];
 
-		// set main window as parent of file selection window
-		gtk_window_set_transient_for(GTK_WINDOW(file_selector), GTK_WINDOW(g_MainWindow.window));
+			strncpy(full_filename, filename, PATH_MAX);
 
-		gtk_signal_connect( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC(callback_vcrStartRecord_fileSelected), (gpointer)file_selector );
+			// if user didn't provide suffix, append .rec
+			if(!strstr(filename, "."))
+				strncat(full_filename, ".rec", PATH_MAX - strlen(full_filename));
+        
+			if (VCR_startRecord( full_filename ) < 0)
+				alert_message(tr("Couldn't start recording."));
 
-		/* Ensure that the dialog box is destroyed when the user clicks a button. */
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC (gtk_widget_destroy), (gpointer)file_selector );
-
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->cancel_button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), (gpointer)file_selector );
-
-		/* Display that dialog */
-		gtk_widget_show( file_selector );
+			g_free(filename);
+		}
+        
+		gtk_widget_destroy (file_chooser);
 	}
-	// else maybe display alert_message
+	else
+	{
+		alert_message(tr("Emulation is not running."));
+	}
 }
 
 
@@ -714,21 +708,9 @@ static void callback_vcrStopRecord( GtkWidget *widget, gpointer data )
 		if (VCR_stopRecord() < 0)
 			alert_message(tr("Couldn't stop recording."));
 	}
-}
-
-
-static void callback_vcrStartPlayback_fileSelected( GtkWidget *widget, gpointer data )
-{
-	if( g_EmulationThread )
+	else
 	{
-		gchar *filename = gtk_file_selection_get_filename( GTK_FILE_SELECTION(data) );
-
-		gtk_widget_hide( GTK_WIDGET(data) );
-		// really hide dialog (let gtk work)
-		while( g_main_iteration( FALSE ) );
-
-		if (VCR_startPlayback( filename ) < 0)
-			alert_message(tr("Couldn't start playback."));
+		alert_message(tr("Emulation is not running."));
 	}
 }
 
@@ -737,25 +719,49 @@ static void callback_vcrStartPlayback( GtkWidget *widget, gpointer data )
 {
 	if( g_EmulationThread )
 	{
-		GtkWidget *file_selector;
+		GtkWidget *file_chooser;
+		GtkFileFilter *file_filter;
 
-		/* Create the selector */
-		file_selector = gtk_file_selection_new( tr("Load .rec file") );
+		// get recording file from user to playback
+		file_chooser = gtk_file_chooser_dialog_new( tr("Load Recording"),
+		                                            GTK_WINDOW(g_MainWindow.window),
+							    GTK_FILE_CHOOSER_ACTION_OPEN,
+					                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					                    NULL);
+        
+		// add filter for recording file types
+		file_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(file_filter, "Recording file (*.rec)");
+		gtk_file_filter_add_pattern(file_filter, "*.[rR][eE][cC]");
+        
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
+		                            file_filter);
+        
+		// add filter for "all files"
+		file_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(file_filter, "All files (*.*)");
+		gtk_file_filter_add_pattern(file_filter, "*");
+        
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
+		                            file_filter);
 
-		// set main window as parent of file selection window
-		gtk_window_set_transient_for(GTK_WINDOW(file_selector), GTK_WINDOW(g_MainWindow.window));
-
-		gtk_signal_connect( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC(callback_vcrStartPlayback_fileSelected), (gpointer)file_selector );
-
-		/* Ensure that the dialog box is destroyed when the user clicks a button. */
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC (gtk_widget_destroy), (gpointer)file_selector );
-
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->cancel_button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), (gpointer)file_selector );
-
-		/* Display that dialog */
-		gtk_widget_show( file_selector );
+		if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+		{
+			gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
+        
+			if (VCR_startPlayback( filename ) < 0)
+				alert_message(tr("Couldn't start playback."));
+        
+			g_free(filename);
+		}
+        
+		gtk_widget_destroy (file_chooser);
 	}
-	// else maybe display alert_message
+	else
+	{
+		alert_message(tr("Emulation is not running."));
+	}
 }
 
 
@@ -766,55 +772,9 @@ static void callback_vcrStopPlayback( GtkWidget *widget, gpointer data )
 		if (VCR_stopPlayback() < 0)
 			alert_message(tr("Couldn't stop playback."));
 	}
-}
-
-
-static char m_startCaptureRecFilename[PATH_MAX];
-
-static void callback_vcrStartCapture_aviFileSelected( GtkWidget *widget, gpointer data )
-{
-	if( g_EmulationThread )
+	else
 	{
-		gchar *filename = gtk_file_selection_get_filename( GTK_FILE_SELECTION(data) );
-
-		gtk_widget_hide( GTK_WIDGET(data) );
-		// really hide dialog (let gtk work)
-		while( g_main_iteration( FALSE ) );
-
-		if (VCR_startCapture( m_startCaptureRecFilename, filename ) < 0)
-			alert_message(tr("Couldn't start capturing."));
-	}
-}
-
-static void callback_vcrStartCapture_recFileSelected( GtkWidget *widget, gpointer data )
-{
-	GtkWidget *file_selector;
-
-	if( g_EmulationThread )
-	{
-		gchar *filename = gtk_file_selection_get_filename( GTK_FILE_SELECTION(data) );
-
-		gtk_widget_hide( GTK_WIDGET(data) );
-		// really hide dialog (let gtk work)
-		while( g_main_iteration( FALSE ) );
-
-		strncpy( m_startCaptureRecFilename, filename, PATH_MAX );
-
-		/* Create the selector */
-		file_selector = gtk_file_selection_new( tr("Save .avi file") );
-
-		// set main window as parent of file selection window
-		gtk_window_set_transient_for(GTK_WINDOW(file_selector), GTK_WINDOW(g_MainWindow.window));
-
-		gtk_signal_connect( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC(callback_vcrStartCapture_aviFileSelected), (gpointer)file_selector );
-
-		/* Ensure that the dialog box is destroyed when the user clicks a button. */
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC (gtk_widget_destroy), (gpointer)file_selector );
-
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->cancel_button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), (gpointer)file_selector );
-
-		/* Display that dialog */
-		gtk_widget_show( file_selector );
+		alert_message(tr("Emulation is not running."));
 	}
 }
 
@@ -823,25 +783,66 @@ static void callback_vcrStartCapture( GtkWidget *widget, gpointer data )
 {
 	if( g_EmulationThread )
 	{
-		GtkWidget *file_selector;
+		GtkWidget *file_chooser;
+		GtkFileFilter *file_filter;
 
-		/* Create the selector */
-		file_selector = gtk_file_selection_new( tr("Load .rec file") );
+		// load recording file to capture
+		file_chooser = gtk_file_chooser_dialog_new( tr("Load Recording"),
+		                                            GTK_WINDOW(g_MainWindow.window),
+							    GTK_FILE_CHOOSER_ACTION_OPEN,
+					                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					                    NULL);
+        
+		// add filter for recording file types
+		file_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(file_filter, "Recording file (*.rec)");
+		gtk_file_filter_add_pattern(file_filter, "*.[rR][eE][cC]");
+        
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
+		                            file_filter);
+        
+		// add filter for "all files"
+		file_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(file_filter, "All files (*.*)");
+		gtk_file_filter_add_pattern(file_filter, "*");
+        
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
+		                            file_filter);
 
-		// set main window as parent of file selection window
-		gtk_window_set_transient_for(GTK_WINDOW(file_selector), GTK_WINDOW(g_MainWindow.window));
+		if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+		{
+			gchar *rec_filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
 
-		gtk_signal_connect( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC(callback_vcrStartCapture_recFileSelected), (gpointer)file_selector );
+			gtk_widget_destroy(file_chooser);
 
-		/* Ensure that the dialog box is destroyed when the user clicks a button. */
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->ok_button), "clicked", GTK_SIGNAL_FUNC (gtk_widget_destroy), (gpointer)file_selector );
+			// get avi filename from user to save recording to.
+			file_chooser = gtk_file_chooser_dialog_new( tr("Save as..."),
+		                                                    GTK_WINDOW(g_MainWindow.window),
+							            GTK_FILE_CHOOSER_ACTION_SAVE,
+					                            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					                            GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					                            NULL);
 
-		gtk_signal_connect_object( GTK_OBJECT(GTK_FILE_SELECTION(file_selector)->cancel_button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), (gpointer)file_selector );
+			if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+			{
+				gchar *avi_filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
 
-		/* Display that dialog */
-		gtk_widget_show( file_selector );
+				if (VCR_startCapture( rec_filename, avi_filename ) < 0)
+					alert_message(tr("Couldn't start capturing."));
+
+				g_free(avi_filename);
+			}
+        
+			g_free(rec_filename);
+		}
+        
+		gtk_widget_destroy (file_chooser);
 	}
-	// else maybe display alert_message
+	else
+	{
+		alert_message(tr("Emulation is not running."));
+	}
 }
 
 
@@ -851,6 +852,10 @@ static void callback_vcrStopCapture( GtkWidget *widget, gpointer data )
 	{
 		if (VCR_stopCapture() < 0)
 			alert_message(tr("Couldn't stop capturing."));
+	}
+	else
+	{
+		alert_message(tr("Emulation is not running."));
 	}
 }
 

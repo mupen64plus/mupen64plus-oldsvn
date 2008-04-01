@@ -1105,8 +1105,6 @@ static void setPaths(void)
 	// make sure screenshots dir has a '/' on the end.
 	if(g_SshotDir[strlen(g_SshotDir)-1] != '/')
 		strncat(g_SshotDir, "/", PATH_MAX - strlen(g_SshotDir));
-
-	chdir(g_ConfigDir);
 }
 
 /*********************************************************************************************************
