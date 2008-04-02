@@ -924,6 +924,8 @@ configure_thread( void *_arg )
 				break;
 			}
 		}
+		// don't use 100% CPU
+		usleep(100000);
 	}
 
 	return 0;
