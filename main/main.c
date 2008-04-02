@@ -479,7 +479,8 @@ int pauseContinueEmulation(void)
 
 void screenshot(void)
 {
-	captureScreen(g_SshotDir);
+	if(g_EmulationThread || g_EmulatorRunning)
+		captureScreen(g_SshotDir);
 }
 
 /*********************************************************************************************************
@@ -512,6 +513,10 @@ static int sdl_event_filter( const SDL_Event *event )
 					// Alt+Enter toggles fullscreen
 					if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
 						changeWindow();
+					break;
+
+				case SDLK_PRINT:
+					screenshot();
 					break;
 
 				default:
