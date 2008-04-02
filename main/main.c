@@ -515,7 +515,7 @@ static int sdl_event_filter( const SDL_Event *event )
 						changeWindow();
 					break;
 
-				case SDLK_PRINT:
+				case SDLK_F12:
 					screenshot();
 					break;
 
