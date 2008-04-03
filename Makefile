@@ -109,6 +109,32 @@ else
   OBJ_X86 =
 endif
 
+ifeq ($(CPU), PPC)
+  ifeq ($(ARCH), 64BITS)
+    DYNAREC = ppc
+  else
+    DYNAREC = ppc
+  endif
+  OBJ_PPC = \
+	r4300/$(DYNAREC)/assemble.o \
+	r4300/$(DYNAREC)/debug.o \
+	r4300/$(DYNAREC)/gbc.o \
+	r4300/$(DYNAREC)/gcop0.o \
+	r4300/$(DYNAREC)/gcop1.o \
+	r4300/$(DYNAREC)/gcop1_d.o \
+	r4300/$(DYNAREC)/gcop1_l.o \
+	r4300/$(DYNAREC)/gcop1_s.o \
+	r4300/$(DYNAREC)/gcop1_w.o \
+	r4300/$(DYNAREC)/gr4300.o \
+	r4300/$(DYNAREC)/gregimm.o \
+	r4300/$(DYNAREC)/gspecial.o \
+	r4300/$(DYNAREC)/gtlb.o \
+	r4300/$(DYNAREC)/regcache.o \
+	r4300/$(DYNAREC)/rjump.o
+else
+  OBJ_PPC =
+endif
+
 OBJ_VCR	= \
 	main/vcr.o \
 	main/vcr_compress.o \
@@ -159,7 +185,14 @@ SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
 ALL = mupen64plus $(PLUGINS)
+
+ifeq ($(CPU), X86)
 OBJECTS = $(OBJ_CORE) $(OBJ_X86)
+endif
+ifeq ($(CPU), PPC)
+OBJECTS = $(OBJ_CORE) $(OBJ_PPC)
+endif
+
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
