@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <SDL.h>
 
 #include "util.h"
 
@@ -65,6 +66,50 @@ char *trim(char *str)
 	}
 
 	return str;
+}
+
+/** event_to_str
+ *    Creates a string representation of an SDL input event. If the event is
+ *    not supported by this function, NULL is returned.
+ *
+ *    Notes:
+ *     -This function assumes SDL events are already initialized.
+ *     -It is up to the caller to free the string memory allocated by this
+ *      function.
+ */
+char *event_to_str(const SDL_Event *event)
+{
+	char *event_str = NULL;
+
+	switch(event->type)
+	{
+		case SDL_JOYAXISMOTION:
+			if(event->jaxis.value >= 15000 || event->jaxis.value <= -15000)
+			{
+				event_str = malloc(10);
+				snprintf(event_str, 10, "J%dA%d%c",
+				         event->jaxis.which,
+					 event->jaxis.axis,
+					 event->jaxis.value > 0? '+' : '-');
+			}
+			break;
+
+		case SDL_JOYBUTTONDOWN:
+			event_str = malloc(10);
+			snprintf(event_str, 10, "J%dB%d",
+			         event->jbutton.which,
+			         event->jbutton.button);
+			break;
+
+		case SDL_JOYHATMOTION:
+			event_str = malloc(10);
+			snprintf(event_str, 10, "J%dH%d",
+			         event->jhat.which,
+			         event->jhat.value);
+			break;
+	}
+
+	return event_str;
 }
 
 /** file utilities **/

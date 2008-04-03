@@ -28,6 +28,7 @@ typedef struct
 	GtkWidget	*configMupen;
 	GtkWidget	*configPlugins;
 	GtkWidget	*configRomBrowser;
+	GtkWidget	*configInputMappings;
 
 	GtkWidget	*coreInterpreterCheckButton;
 	GtkWidget	*coreDynaRecCheckButton;

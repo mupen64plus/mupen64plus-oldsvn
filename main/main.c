@@ -488,6 +488,8 @@ void screenshot(void)
 */
 static int sdl_event_filter( const SDL_Event *event )
 {
+	char *event_str = NULL;
+
 	switch( event->type )
 	{
 		// user clicked on window close button
@@ -579,6 +581,42 @@ static int sdl_event_filter( const SDL_Event *event )
 			}
 			return 0;
 			break;
+
+		// if joystick action is detected, check if it's mapped to a special function
+		case SDL_JOYAXISMOTION:
+			// axis events have to be above a certain threshold to be valid
+			if(event->jaxis.value > -15000 && event->jaxis.value < 15000)
+				break;
+		case SDL_JOYBUTTONDOWN:
+		case SDL_JOYHATMOTION:
+			event_str = event_to_str(event);
+
+			if(!event_str) return 0;
+
+			if(strcmp(event_str, config_get_string("Joy Mapping Fullscreen", "")) == 0)
+				changeWindow();
+			else if(strcmp(event_str, config_get_string("Joy Mapping Stop", "")) == 0)
+				stopEmulation();
+			else if(strcmp(event_str, config_get_string("Joy Mapping Pause", "")) == 0)
+				pauseContinueEmulation();
+			else if(strcmp(event_str, config_get_string("Joy Mapping Save State", "")) == 0)
+				savestates_job |= SAVESTATE;
+			else if(strcmp(event_str, config_get_string("Joy Mapping Load State", "")) == 0)
+				savestates_job |= LOADSTATE;
+			else if(strcmp(event_str, config_get_string("Joy Mapping Increment Slot", "")) == 0)
+				;// TODO: Will add after reviewing statesave slot function (Issue 35)
+			else if(strcmp(event_str, config_get_string("Joy Mapping Screenshot", "")) == 0)
+				screenshot();
+			else if(strcmp(event_str, config_get_string("Joy Mapping Mute", "")) == 0)
+				volMute();
+			else if(strcmp(event_str, config_get_string("Joy Mapping Decrease Volume", "")) == 0)
+				volChange(-2);
+			else if(strcmp(event_str, config_get_string("Joy Mapping Increase Volume", "")) == 0)
+				volChange(2);
+
+			free(event_str);
+			return 0;
+			break;
 	}
 
 	return 1;
@@ -615,9 +653,6 @@ static void * emulationThread( void *_arg )
 
 	// init sdl
 	SDL_Init(SDL_INIT_VIDEO);
-	// this line removes the window bars in my distro...
-	// i do not think we call it correctly.
-	// SDL_SetVideoMode(10, 10, 0, 0);
 	SDL_ShowCursor(0);
 	SDL_EnableKeyRepeat(0, 0);
 

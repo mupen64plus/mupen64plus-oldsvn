@@ -34,8 +34,11 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#include <SDL.h>
+
 /** string utilities **/
 char *trim(char *str);
+char *event_to_str(const SDL_Event *event);
 
 /** file utilities **/
 int isfile(char *path);

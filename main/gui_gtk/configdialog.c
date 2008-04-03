@@ -30,6 +30,7 @@ Email                : blight@Ashitaka
 #include "../plugin.h"
 
 #include <gtk/gtk.h>
+#include <SDL.h>
 
 #include <limits.h>
 #include <stdio.h>
@@ -40,6 +41,81 @@ Email                : blight@Ashitaka
 SConfigDialog g_ConfigDialog;
 static int g_RefreshRomBrowser; // refresh the rombrowser when ok is clicked?
                                 // (true if rom directories were changed)
+
+struct input_mapping {
+	char *name;			// human-readable name of emulation special function
+	char *key_mapping;		// keyboard mapping of function
+	char *joy_config_name;		// name of joystick mapping in config file
+	GtkWidget *joy_mapping_textbox;	// textbox displaying string representation of joystick mapping
+};
+
+#define mapping_foreach(mapping) for(mapping = mappings; mapping->name; mapping++)
+
+// special function input mappings
+static struct input_mapping mappings[] =
+	{
+		{
+			"Toggle Fullscreen",
+			"Alt+Enter",
+			"Joy Mapping Fullscreen",
+			NULL
+		},
+		{
+			"Stop Emulation",
+			"Esc",
+			"Joy Mapping Stop",
+			NULL
+		},
+		{
+			"Pause Emulation",
+			"P",
+			"Joy Mapping Pause",
+			NULL
+		},
+		{
+			"Save State",
+			"F5",
+			"Joy Mapping Save State",
+			NULL
+		},
+		{
+			"Load State",
+			"F7",
+			"Joy Mapping Load State",
+			NULL
+		},
+		{
+			"Increment Save Slot",
+			"0-9",
+			"Joy Mapping Increment Slot",
+			NULL
+		},
+		{
+			"Save Screenshot",
+			"F12",
+			"Joy Mapping Screenshot",
+			NULL
+		},
+		{
+			"Mute/unmute volume",
+			"M",
+			"Joy Mapping Mute",
+			NULL
+		},
+		{
+			"Decrease volume",
+			"[",
+			"Joy Mapping Decrease Volume",
+			NULL
+		},
+		{
+			"Increase volume",
+			"]",
+			"Joy Mapping Increase Volume",
+			NULL
+		},
+		{ 0, 0, 0, 0 } // last entry
+	};
 
 /** callbacks **/
 // gfx
@@ -368,6 +444,22 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
 				reload();
 			}
 	}
+
+	struct input_mapping *mapping;
+	gchar *text;
+
+	// update special function input mappings
+	mapping_foreach(mapping)
+	{
+		if(mapping->joy_mapping_textbox)
+		{
+			text = gtk_editable_get_chars(GTK_EDITABLE(mapping->joy_mapping_textbox), 0, -1);
+			if(strcmp(text, config_get_string(mapping->joy_config_name, "")) != 0)
+				config_put_string(mapping->joy_config_name, text);
+			g_free(text);
+		}
+	}
+
 	// write configuration
 	config_write();
 }
@@ -383,6 +475,9 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
 {
 	int i;
 	char *name;
+
+	// reset back to first tab
+	gtk_notebook_set_current_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), 0 );
 
 	// Load configuration
 
@@ -551,6 +646,21 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
 	gtk_widget_set_sensitive( g_ConfigDialog.noaskCheckButton, !g_NoaskParam );
 
 	g_RefreshRomBrowser = 0;
+
+	struct input_mapping *mapping;
+
+	// set special function input mapping textbox values
+	mapping_foreach(mapping)
+	{
+		if(mapping->joy_mapping_textbox)
+		{
+			gtk_editable_delete_text(GTK_EDITABLE(mapping->joy_mapping_textbox), 0, -1);
+			gtk_editable_insert_text(GTK_EDITABLE(mapping->joy_mapping_textbox),
+			                         config_get_string(mapping->joy_config_name, ""),
+						 strlen(config_get_string(mapping->joy_config_name, "")),
+						 &i);
+		}
+	}
 }
 
 /** hide on delete **/
@@ -583,6 +693,132 @@ static void setup_view (GtkWidget *view)
 	
 	gtk_tree_view_set_model (GTK_TREE_VIEW (view), model);
 	g_object_unref (model);
+}
+
+static int sdl_loop = 0;
+
+static void callback_cancelSetInput(GtkWidget *widget, gint response, GtkWidget *textbox)
+{
+	// If user clicked the clear button, clear current input mapping
+	if(response == GTK_RESPONSE_NO)
+		gtk_editable_delete_text(GTK_EDITABLE(textbox), 0, -1);
+
+	sdl_loop = 0;
+	gtk_widget_destroy(widget);
+}
+
+static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct input_mapping *mapping )
+{
+	int i;
+	char *mapping_str = NULL;
+	char buf[512] = {0};
+	SDL_Joystick *joys[10] = {0};
+	SDL_Event sdl_event;
+	GtkWidget *dialog;
+	GtkWidget *label;
+	GdkColor color;
+
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
+	{
+		printf("%s: Could not init SDL video or joystick subsystem\n", __FUNCTION__);
+		return;
+	}
+
+	SDL_JoystickEventState(SDL_ENABLE);
+
+	// open all joystick devices (max of 10)
+	for(i = 0; i < SDL_NumJoysticks() && i < 10; i++)
+	{
+		joys[i] = SDL_JoystickOpen(i);
+		if(joys[i] == NULL)
+		{
+			printf("%s: Could not open joystick %d (%s): %s\n",
+			       __FUNCTION__, i, SDL_JoystickName(i), SDL_GetError());
+		}
+	}
+
+	// highlight mapping to change
+	color.red = color.blue = 0;
+	color.green = 0xffff;
+	gtk_widget_modify_base(widget, GTK_STATE_NORMAL, &color);
+	// fix cursor position
+	gtk_editable_select_region(GTK_EDITABLE(widget), 0, 0);
+
+	// pop up dialog window telling user what to do
+	dialog = gtk_dialog_new_with_buttons(tr("Map Special Function"),
+		                             GTK_WINDOW(g_ConfigDialog.dialog),
+					     GTK_DIALOG_MODAL,
+					     GTK_STOCK_CLEAR,
+					     GTK_RESPONSE_NO, // response ID for clear
+					     GTK_STOCK_CANCEL,
+					     GTK_RESPONSE_NONE,
+					     NULL);
+	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+	g_signal_connect(dialog,
+	                 "response",
+			 G_CALLBACK(callback_cancelSetInput),
+			 widget);
+
+	snprintf(buf, 512, tr("Press a controller button for:\n\"%s\""), mapping->name);
+	label = gtk_label_new(buf);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+	gtk_widget_set_size_request(label, 165, -1);
+
+	gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(dialog)->vbox), label);
+	gtk_widget_show_all(dialog);
+
+        // capture joystick input from user
+	sdl_loop = 1;
+	while(sdl_loop)
+	{
+		// let gtk work if it needs to. Need this so user can click cancel on the dialog.
+		while(g_main_iteration(FALSE));
+
+		if(SDL_PollEvent(&sdl_event))
+		{
+			// only accept joystick events
+			if(sdl_event.type == SDL_JOYAXISMOTION ||
+			   sdl_event.type == SDL_JOYBUTTONDOWN ||
+			   sdl_event.type == SDL_JOYHATMOTION)
+			{
+				if((mapping_str = event_to_str(&sdl_event)) != NULL)
+				{
+					// change textbox to reflect new joystick input mapping
+					gtk_editable_delete_text(GTK_EDITABLE(widget), 0, -1);
+					gtk_editable_insert_text(GTK_EDITABLE(widget), mapping_str, strlen(mapping_str), &i);
+
+					struct input_mapping *mapping;
+
+					// if another function has the same input mapped to it, remove it
+					mapping_foreach(mapping)
+					{
+						gchar *text;
+
+						if(mapping->joy_mapping_textbox &&
+						   mapping->joy_mapping_textbox != widget)
+						{
+							text = gtk_editable_get_chars(GTK_EDITABLE(mapping->joy_mapping_textbox), 0, -1);
+							if(strcmp(text, mapping_str) == 0)
+								gtk_editable_delete_text(GTK_EDITABLE(mapping->joy_mapping_textbox), 0, -1);
+
+							g_free(text);
+						}
+					}
+
+					free(mapping_str);
+                                
+					sdl_loop = 0;
+					gtk_widget_destroy(dialog);
+				}
+			}
+		}
+		usleep(50000); // don't melt the cpu
+	}
+
+	// remove highlight on mapping to change
+	gtk_widget_modify_base(widget, GTK_STATE_NORMAL, NULL);
+
+	SDL_Quit();
 }
 
 /** create dialog **/
@@ -1002,6 +1238,77 @@ int create_configDialog( void )
 
 		// Initalize the widgets.
 		callback_dialogShow( NULL, NULL );
+	}
+
+	// Create Hotkey Configuration page
+	{
+		label = gtk_label_new( "Hotkeys" );
+		g_ConfigDialog.configInputMappings = gtk_vbox_new( FALSE, 6 );
+		gtk_container_set_border_width( GTK_CONTAINER(g_ConfigDialog.configInputMappings), 10 );
+		gtk_notebook_append_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configInputMappings, label );
+	
+		// Create a frame for shortcut key config
+		{
+			struct input_mapping *mapping;
+			GtkTooltips *tooltips;
+
+			tooltips = gtk_tooltips_new();
+
+			frame = gtk_frame_new( tr("Input Mappings") );
+			gtk_box_pack_start( GTK_BOX(g_ConfigDialog.configInputMappings), frame, FALSE, FALSE, 0 );
+
+			hbox1 = gtk_hbox_new(FALSE, 5);
+			gtk_container_add( GTK_CONTAINER(frame), hbox1 );
+
+			vbox = gtk_vbox_new( TRUE, 6 );
+			gtk_container_set_border_width( GTK_CONTAINER(vbox), 10 );
+
+			// create column of all mapping names
+			gtk_box_pack_start( GTK_BOX(vbox), gtk_label_new(""), FALSE, FALSE, 0 );
+			mapping_foreach(mapping)
+			{
+				gtk_box_pack_start( GTK_BOX(vbox), gtk_label_new(tr(mapping->name)), FALSE, FALSE, 0 );
+			}
+
+			gtk_box_pack_start( GTK_BOX(hbox1), vbox, FALSE, FALSE, 0 );
+
+			vbox = gtk_vbox_new( TRUE, 6 );
+			gtk_container_set_border_width( GTK_CONTAINER(vbox), 10 );
+
+			// create column of all keyboard shortcuts
+			gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new(tr("Keyboard")), FALSE, FALSE, 0);
+			mapping_foreach(mapping)
+			{
+				gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new(mapping->key_mapping), FALSE, FALSE, 0);
+			}
+
+			gtk_box_pack_start( GTK_BOX(hbox1), vbox, FALSE, FALSE, 0 );
+
+			vbox = gtk_vbox_new( TRUE, 6 );
+			gtk_container_set_border_width( GTK_CONTAINER(vbox), 10 );
+
+			// create column of joystick mappings
+			gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new(tr("Controller")), FALSE, FALSE, 0);
+			mapping_foreach(mapping)
+			{
+				mapping->joy_mapping_textbox = gtk_entry_new();
+				gtk_widget_set_size_request(mapping->joy_mapping_textbox, 12, -1);
+				gtk_editable_set_editable(GTK_EDITABLE(mapping->joy_mapping_textbox), FALSE);
+				g_signal_connect(GTK_OBJECT(mapping->joy_mapping_textbox),
+				                 "button-release-event",
+				                 GTK_SIGNAL_FUNC(callback_setInput),
+						 mapping);
+
+				gtk_tooltips_set_tip(GTK_TOOLTIPS(tooltips),
+				                     mapping->joy_mapping_textbox,
+				                     tr("Click to change"),
+						     "");
+
+				gtk_box_pack_start(GTK_BOX(vbox), mapping->joy_mapping_textbox, FALSE, FALSE, 0);
+			}
+
+			gtk_box_pack_start( GTK_BOX(hbox1), vbox, FALSE, FALSE, 0 );
+		}
 	}
 	return 0;
 }
