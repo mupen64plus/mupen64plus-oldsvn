@@ -1559,6 +1559,18 @@ bool LoadRGBBufferFromPNGFile(char *filename, unsigned char **pbuf, int &width, 
 				*pDst++ = 0;
 			}
 		}
+		else if (img.bits_per_pixel == 32 && bits_per_pixel == 24)
+		{
+			unsigned char *pSrc = img.bits;
+			unsigned char *pDst = *pbuf;
+			for (int i = 0; i < img.width * img.height; i++)
+			{
+				*pDst++ = *pSrc++;
+				*pDst++ = *pSrc++;
+				*pDst++ = *pSrc++;
+				pSrc++;
+			}
+		}
 		else
 		{
 			printf("Error: PNG file is %i bpp but texture is %i bpp.\n", img.bits_per_pixel, bits_per_pixel);
@@ -1866,6 +1878,8 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
 		scale = 4;
 	else if (width == 8 * entry.ti.WidthToCreate && height == 8 * entry.ti.HeightToCreate)
 		scale = 8;
+	else if (width == 16 * entry.ti.WidthToCreate && height == 16 * entry.ti.HeightToCreate)
+		scale =16;
 	else printf("Non-integral hi-res texture scale.  Orig = (%i,%i)  Hi-res = (%i,%i)\n", 
 		    entry.ti.WidthToCreate, entry.ti.HeightToCreate, width, height);
 	// Create new texture
