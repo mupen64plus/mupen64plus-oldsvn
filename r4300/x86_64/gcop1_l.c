@@ -1,15 +1,11 @@
 /**
- * Mupen64 - gcop1_l.c
- * Copyright (C) 2002 Hacktarux
+ * Mupen64 - r4300/x86_64/gcop1_l.c
+ * Copyright (C) 2007 Richard Goedeken, Hacktarux
+ * Based on code written by Hacktarux, Copyright (C) 2002
  *
  * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
+ * Forum homepage: http://www.emutalk.net/forumdisplay.php?f=50
  * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
  * cence as published by the Free Software Foundation; either
@@ -27,6 +23,7 @@
  *
 **/
 
+
 #include "../recomph.h"
 #include "assemble.h"
 #include "../r4300.h"
@@ -35,8 +32,32 @@
 
 void gencvt_s_l()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[117]);
+#endif
+#ifdef INTERPRET_CVT_S_L
+   gencallinterp((unsigned long long)CVT_S_L, 0);
+#else
+   gencheck_cop1_unusable();
+   mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_double[dst->f.cf.fs]));
+   fild_preg64_qword(RAX);
+   mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_simple[dst->f.cf.fd]));
+   fstp_preg64_dword(RAX);
+#endif
 }
 
 void gencvt_d_l()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[117]);
+#endif
+#ifdef INTERPRET_CVT_D_L
+   gencallinterp((unsigned long long)CVT_D_L, 0);
+#else
+   gencheck_cop1_unusable();
+   mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_double[dst->f.cf.fs]));
+   fild_preg64_qword(RAX);
+   mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_double[dst->f.cf.fd]));
+   fstp_preg64_qword(RAX);
+#endif
 }

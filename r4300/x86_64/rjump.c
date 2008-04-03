@@ -34,6 +34,10 @@
 
 void dyna_jump()
 {
+   if (PC->reg_cache_infos.need_map)
+     *return_address = (unsigned long) (PC->reg_cache_infos.jump_wrapper);
+   else
+	 *return_address = (unsigned long) (actual->code + PC->local_addr);
 }
 
 static long save_rbp = 0;
@@ -42,9 +46,44 @@ static long save_rip = 0;
 
 void dyna_start(void (*code)())
 {
+  /* save the base and stack pointers */
+  /* make a call and a pop to retrieve the instruction pointer and save it too */
+  /* then call the code(), which should theoretically never return.  */
+  /* When dyna_stop() sets the *return_address to the saved RIP, the emulator thread will come back here. */
+  /* It will jump to label 2, restore the base and stack pointers, and exit this function */
+  printf("R4300 core: starting 64-bit dynamic recompiler at: 0x%lx.\n", (unsigned long) code);
+#if defined(__GNUC__) && defined(__x86_64__)
+   asm volatile 
+      (" mov  %%rbp, save_rbp \n"
+       " mov  %%rsp, save_rsp \n"
+       " call 1f              \n"
+       " jmp 2f               \n"
+       "1:                    \n"
+       " pop  %%rax           \n"
+       " mov  %%rax, save_rip \n"
+       " call *%%rbx          \n"
+       "2:                    \n"
+       " mov  save_rbp, %%rbp \n"
+       " mov  save_rsp, %%rsp \n"
+       :
+       : "b" (code)
+       : "%rax", "memory"
+       );
+#endif
+
+   /* clear the registers so we don't return here a second time; that would be a bug */
+   save_rbp=0;
+   save_rsp=0;
+   save_rip=0;
 }
 
 void dyna_stop()
 {
+  if (save_rip == 0)
+    printf("Warning: instruction pointer is 0 at dyna_stop()\n");
+  else
+  {
+	*return_address = (unsigned long) save_rip;
+  }
 }
 

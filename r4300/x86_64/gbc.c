@@ -33,56 +33,264 @@
 
 void genbc1f_test()
 {
+   test_m32abs_imm32((unsigned int*)&FCR31, 0x800000);
+   sete_m8abs((unsigned char *) &branch_taken);
 }
 
 void genbc1f()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[100]);
+#endif
+#ifdef INTERPRET_BC1F
+   gencallinterp((unsigned long long)BC1F, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1F, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1f_test();
+   gendelayslot();
+   gentest();
+#endif
 }
 
 void genbc1f_out()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[100]);
+#endif
+#ifdef INTERPRET_BC1F_OUT
+   gencallinterp((unsigned long long)BC1F_OUT, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1F_OUT, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1f_test();
+   gendelayslot();
+   gentest_out();
+#endif
 }
 
 void genbc1f_idle()
 {
+#ifdef INTERPRET_BC1F_IDLE
+   gencallinterp((unsigned long long)BC1F_IDLE, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1F_IDLE, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1f_test();
+   gentest_idle();
+   genbc1f();
+#endif
 }
 
 void genbc1t_test()
 {
+   test_m32abs_imm32((unsigned int*)&FCR31, 0x800000);
+   setne_m8abs((unsigned char *) &branch_taken);
 }
 
 void genbc1t()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[101]);
+#endif
+#ifdef INTERPRET_BC1T
+   gencallinterp((unsigned long long)BC1T, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1T, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1t_test();
+   gendelayslot();
+   gentest();
+#endif
 }
 
 void genbc1t_out()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[101]);
+#endif
+#ifdef INTERPRET_BC1T_OUT
+   gencallinterp((unsigned long long)BC1T_OUT, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1T_OUT, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1t_test();
+   gendelayslot();
+   gentest_out();
+#endif
 }
 
 void genbc1t_idle()
 {
+#ifdef INTERPRET_BC1T_IDLE
+   gencallinterp((unsigned long long)BC1T_IDLE, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1T_IDLE, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1t_test();
+   gentest_idle();
+   genbc1t();
+#endif
 }
 
 void genbc1fl()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[102]);
+#endif
+#ifdef INTERPRET_BC1FL
+   gencallinterp((unsigned long long)BC1FL, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1FL, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1f_test();
+   free_all_registers();
+   gentestl();
+#endif
 }
 
 void genbc1fl_out()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[102]);
+#endif
+#ifdef INTERPRET_BC1FL_OUT
+   gencallinterp((unsigned long long)BC1FL_OUT, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1FL_OUT, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1f_test();
+   free_all_registers();
+   gentestl_out();
+#endif
 }
 
 void genbc1fl_idle()
 {
+#ifdef INTERPRET_BC1FL_IDLE
+   gencallinterp((unsigned long long)BC1FL_IDLE, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1FL_IDLE, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1f_test();
+   gentest_idle();
+   genbc1fl();
+#endif
 }
 
 void genbc1tl()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[103]);
+#endif
+#ifdef INTERPRET_BC1TL
+   gencallinterp((unsigned long long)BC1TL, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1TL, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1t_test();
+   free_all_registers();
+   gentestl();
+#endif
 }
 
 void genbc1tl_out()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[103]);
+#endif
+#ifdef INTERPRET_BC1TL_OUT
+   gencallinterp((unsigned long long)BC1TL_OUT, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1TL_OUT, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1t_test();
+   free_all_registers();
+   gentestl_out();
+#endif
 }
 
 void genbc1tl_idle()
 {
+#ifdef INTERPRET_BC1TL_IDLE
+   gencallinterp((unsigned long long)BC1TL_IDLE, 1);
+#else
+   if (((dst->addr & 0xFFF) == 0xFFC &&
+       (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
+     {
+	gencallinterp((unsigned long long)BC1TL_IDLE, 1);
+	return;
+     }
+   
+   gencheck_cop1_unusable();
+   genbc1t_test();
+   gentest_idle();
+   genbc1tl();
+#endif
 }

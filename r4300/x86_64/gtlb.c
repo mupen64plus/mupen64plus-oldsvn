@@ -32,20 +32,62 @@
 
 void gentlbwi()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[104]);
+#endif
+   gencallinterp((unsigned long long)TLBWI, 0);
+   /*dst->local_addr = code_length;
+   mov_m32_imm32((void *)(&PC), (unsigned int)(dst));
+   mov_reg32_imm32(EAX, (unsigned int)(TLBWI));
+   call_reg32(EAX);
+   genupdate_system(0);*/
 }
 
 void gentlbp()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[105]);
+#endif
+   gencallinterp((unsigned long long)TLBP, 0);
+   /*dst->local_addr = code_length;
+   mov_m32_imm32((void *)(&PC), (unsigned int)(dst));
+   mov_reg32_imm32(EAX, (unsigned int)(TLBP));
+   call_reg32(EAX);
+   genupdate_system(0);*/
 }
 
 void gentlbr()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[106]);
+#endif
+   gencallinterp((unsigned long long)TLBR, 0);
+   /*dst->local_addr = code_length;
+   mov_m32_imm32((void *)(&PC), (unsigned int)(dst));
+   mov_reg32_imm32(EAX, (unsigned int)(TLBR));
+   call_reg32(EAX);
+   genupdate_system(0);*/
 }
 
 void generet()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[108]);
+#endif
+   gencallinterp((unsigned long long)ERET, 1);
+   /*dst->local_addr = code_length;
+   mov_m32_imm32((void *)(&PC), (unsigned int)(dst));
+   genupdate_system(0);
+   mov_reg32_imm32(EAX, (unsigned int)(ERET));
+   call_reg32(EAX);
+   mov_reg32_imm32(EAX, (unsigned int)(jump_code));
+   jmp_reg32(EAX);*/
 }
 
 void gentlbwr()
 {
+#if defined(COUNT_INSTR)
+   inc_m32abs(&instr_count[107]);
+#endif
+   gencallinterp((unsigned long long)TLBWR, 0);
 }
