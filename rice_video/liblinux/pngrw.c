@@ -118,7 +118,7 @@ BMGError ReadPNG( const char *filename,
 	unsigned int        Width, Height;
 
 	unsigned char      *bits, *p, *q;
-	unsigned char     **rows = NULL;
+	unsigned char**     rows = NULL;
 	int                 NumColors = 0;
 	unsigned char       BgdRed;
 	unsigned char       BgdGreen;
@@ -378,13 +378,13 @@ BMGError ReadPNG( const char *filename,
 		{
 			case 1:
 			case 4:
-				memcpy( (void *)bits, (void *)p, DIBLineWidth );
+				memcpy((void *)bits, (void *)p, DIBLineWidth);
 				break;
 			case 2:
 				for ( j = 0; j < (int)(Width/2); j += 2 )
-					Expand2to4( &bits[j], p[j/2], 2 );
+					Expand2to4((char*)&bits[j], p[j/2], 2);
 				if ( Width % 2 )
-					Expand2to4( &bits[Width/2+1], p[Width/4+1], 1 );
+					Expand2to4((char*)&bits[Width/2+1], p[Width/4+1], 1);
 				break;
 			case 8:
 				/* 16-bit images were converted to 8-bit */

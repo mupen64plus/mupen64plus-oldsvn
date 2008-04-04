@@ -665,7 +665,7 @@ uint32 DLParser_CheckUcode(uint32 ucStart, uint32 ucDStart, uint32 ucSize, uint3
 			UsedUcodes[usedUcodeIndex].ucDStart == ucDStart /*&& UsedUcodes[usedUcodeIndex].ucDSize == ucDSize*/ )
 		{
 #ifdef _DEBUG
-			if( gRSP.ucode != UsedUcodes[usedUcodeIndex].ucode && logMicrocode)
+			if(gRSP.ucode != (int)UsedUcodes[usedUcodeIndex].ucode && logMicrocode)
 			{
 				DebuggerAppendMsg("Check, ucode = %d, crc = %08X, %s", UsedUcodes[usedUcodeIndex].ucode, 
 					UsedUcodes[usedUcodeIndex].crc_800 , UsedUcodes[usedUcodeIndex].rspstr);

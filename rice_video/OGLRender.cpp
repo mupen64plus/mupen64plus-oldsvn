@@ -25,9 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 UVFlagMap OGLXUVFlagMaps[] =
 {
-	TEXTURE_UV_FLAG_WRAP,	GL_REPEAT,
-	TEXTURE_UV_FLAG_MIRROR,	GL_MIRRORED_REPEAT_ARB,
-	TEXTURE_UV_FLAG_CLAMP,	GL_CLAMP,
+{TEXTURE_UV_FLAG_WRAP, GL_REPEAT},
+{TEXTURE_UV_FLAG_MIRROR, GL_MIRRORED_REPEAT_ARB},
+{TEXTURE_UV_FLAG_CLAMP, GL_CLAMP},
 };
 
 //===================================================================

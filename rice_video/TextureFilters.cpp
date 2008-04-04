@@ -1008,7 +1008,8 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
 	dir = opendir(foldername);
 	struct dirent *entry;
 
-	unsigned int crc, fmt, siz, palcrc32;
+	int crc, palcrc32;
+	unsigned int fmt, siz;
 	//char name[256];
 	char crcstr[16], crcstr2[16];
 
@@ -1352,26 +1353,31 @@ InitHiresTextures();
 InitTextureDump();
 }
 
+/*
+ExtTxtrInfo.height ExtTxtrInfo.width are ints.
+TxtrInfo.HeightToLoad TxtrInfo.WidthToLoad (ti of TxtrCacheEntry 
+is of type TxtrInfo) are uint32.
+*/
 int FindScaleFactor(const ExtTxtrInfo &info, TxtrCacheEntry &entry)
 {
 	int scaleShift = -1;
-	if( info.height == entry.ti.HeightToLoad && info.width == entry.ti.WidthToLoad )
+	if( info.height == (int)entry.ti.HeightToLoad && info.width == (int)entry.ti.WidthToLoad )
 	{
 		scaleShift = 0;
 	}
-	else if (info.height == entry.ti.HeightToLoad*2 && info.width == entry.ti.WidthToLoad*2 )
+	else if (info.height == (int)entry.ti.HeightToLoad*2 && info.width == (int)entry.ti.WidthToLoad*2 )
 	{
 		scaleShift = 1;
 	}
-	else if (info.height == entry.ti.HeightToLoad*4 && info.width == entry.ti.WidthToLoad*4)
+	else if (info.height == (int)entry.ti.HeightToLoad*4 && info.width == (int)entry.ti.WidthToLoad*4)
 	{
 		scaleShift = 2;
 	}
-	else if (info.height == entry.ti.HeightToLoad*8 && info.width == entry.ti.WidthToLoad*8)
+	else if (info.height == (int)entry.ti.HeightToLoad*8 && info.width == (int)entry.ti.WidthToLoad*8)
 	{
 		scaleShift = 3;
 	}
-	else if (info.height == entry.ti.HeightToLoad*16 && info.width == entry.ti.WidthToLoad*16)
+	else if (info.height == (int)entry.ti.HeightToLoad*16 && info.width == (int)entry.ti.WidthToLoad*16)
 	{
 		scaleShift = 4;
 	}
@@ -1381,7 +1387,7 @@ int FindScaleFactor(const ExtTxtrInfo &info, TxtrCacheEntry &entry)
 
 int CheckTextureInfos( CSortedList<uint64,ExtTxtrInfo> &infos, TxtrCacheEntry &entry, int &indexa, bool bForDump = false )
 {
-	if( entry.ti.WidthToCreate/entry.ti.WidthToLoad > 2 || entry.ti.HeightToCreate/entry.ti.HeightToLoad > 2 )
+	if(entry.ti.WidthToCreate/entry.ti.WidthToLoad > 2 || entry.ti.HeightToCreate/entry.ti.HeightToLoad > 2 )
 	{
 		//TRACE0("Hires texture does not support extreme texture replication");
 		return -1;
@@ -1547,7 +1553,7 @@ bool LoadRGBBufferFromPNGFile(char *filename, unsigned char **pbuf, int &width, 
 		{
 			unsigned char *pSrc = img.bits;
 			unsigned char *pDst = *pbuf;
-			for (int i = 0; i < img.width * img.height; i++)
+			for (int i = 0; i < (int)(img.width*img.height); i++)
 			{
 				*pDst++ = *pSrc++;
 				*pDst++ = *pSrc++;
@@ -1559,7 +1565,7 @@ bool LoadRGBBufferFromPNGFile(char *filename, unsigned char **pbuf, int &width, 
 		{
 			unsigned char *pSrc = img.bits;
 			unsigned char *pDst = *pbuf;
-			for (int i = 0; i < img.width * img.height; i++)
+			for (int i = 0; i < (int)(img.width*img.height); i++)
 			{
 				*pDst++ = *pSrc++;
 				*pDst++ = *pSrc++;
@@ -1866,15 +1872,15 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
 
 // calculate the texture size magnification by comparing the N64 texture size and the hi-res texture size
 	int scale = 1;
-	if (width == 1 * entry.ti.WidthToCreate && height == 1 * entry.ti.HeightToCreate)
+	if (width == 1 * (int)entry.ti.WidthToCreate && height == 1 * (int)entry.ti.HeightToCreate)
 		scale = 1;
-	else if (width == 2 * entry.ti.WidthToCreate && height == 2 * entry.ti.HeightToCreate)
+	else if (width == 2 * (int)entry.ti.WidthToCreate && height == 2 * (int)entry.ti.HeightToCreate)
 		scale = 2;
-	else if (width == 4 * entry.ti.WidthToCreate && height == 4 * entry.ti.HeightToCreate)
+	else if (width == 4 * (int)entry.ti.WidthToCreate && height == 4 * (int)entry.ti.HeightToCreate)
 		scale = 4;
-	else if (width == 8 * entry.ti.WidthToCreate && height == 8 * entry.ti.HeightToCreate)
+	else if (width == 8 * (int)entry.ti.WidthToCreate && height == 8 * (int)entry.ti.HeightToCreate)
 		scale = 8;
-	else if (width == 16 * entry.ti.WidthToCreate && height == 16 * entry.ti.HeightToCreate)
+	else if (width == 16 * (int)entry.ti.WidthToCreate && height == 16 * (int)entry.ti.HeightToCreate)
 		scale =16;
 	else printf("Non-integral hi-res texture scale.  Orig = (%i,%i)  Hi-res = (%i,%i)\n", 
 		    entry.ti.WidthToCreate, entry.ti.HeightToCreate, width, height);
@@ -1898,7 +1904,7 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
 			// Update the texture by using the buffer
 			for( int i=height-1; i>=0; i--)
 			{
-				BYTE *pdst = (BYTE*)info.lpSurface + i*info.lPitch;
+				BYTE* pdst = (BYTE*)info.lpSurface + i*info.lPitch;
 				for( int j=0; j<width; j++)
 				{
 					*pdst++ = *pRGB++;		// R

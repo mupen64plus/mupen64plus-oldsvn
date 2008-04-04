@@ -414,22 +414,22 @@ void TexRectToN64FrameBuffer_YUV_16b(uint32 x0, uint32 y0, uint32 width, uint32 
 extern uObjMtxReal gObjMtxReal;
 void DLParser_OgreBatter64BG(Gfx *gfx)
 {
-	uint32 dwAddr = RSPSegmentAddr((gfx->words.w1));
-	uObjTxSprite *ptr = (uObjTxSprite*)(g_pRDRAMu8+dwAddr);
+#ifdef _DEBUG
+uint32 dwAddr = RSPSegmentAddr((gfx->words.w1));
+uObjTxSprite *ptr = (uObjTxSprite*)(g_pRDRAMu8+dwAddr);
+#endif
 
-	PrepareTextures();
+PrepareTextures();
 
-	CTexture *ptexture = g_textures[0].m_pCTexture;
-	TexRectToN64FrameBuffer_16b( (uint32)gObjMtxReal.X, (uint32)gObjMtxReal.Y, ptexture->m_dwWidth, ptexture->m_dwHeight, gRSP.curTile);
+CTexture *ptexture = g_textures[0].m_pCTexture;
+TexRectToN64FrameBuffer_16b( (uint32)gObjMtxReal.X, (uint32)gObjMtxReal.Y, ptexture->m_dwWidth, ptexture->m_dwHeight, gRSP.curTile);
 
 #ifdef _DEBUG
-	CRender::g_pRender->DrawSpriteR(*ptr, false);
+CRender::g_pRender->DrawSpriteR(*ptr, false);
 
-	DEBUGGER_PAUSE_AT_COND_AND_DUMP_COUNT_N((pauseAtNext && (eventToPause==NEXT_OBJ_TXT_CMD|| eventToPause==NEXT_FLUSH_TRI)),
-	{
-		DebuggerAppendMsg("OgreBatter 64 BG: Addr=%08X\n", dwAddr);
-	}
-	);
+DEBUGGER_PAUSE_AT_COND_AND_DUMP_COUNT_N((pauseAtNext && 
+(eventToPause==NEXT_OBJ_TXT_CMD|| eventToPause==NEXT_FLUSH_TRI)),
+{DebuggerAppendMsg("OgreBatter 64 BG: Addr=%08X\n", dwAddr);});
 #endif
 }
 
@@ -1016,220 +1016,220 @@ void DLParser_RS_0xbe(Gfx *gfx)
 
 void DLParser_Ucode8_EndDL(Gfx *gfx)
 {
-	uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-	RDP_GFX_PopDL();
-	DEBUGGER_PAUSE_AND_DUMP(NEXT_DLIST, DebuggerAppendMsg("PC=%08X: EndDL, return to %08X\n\n", dwPC, gDlistStack[gDlistStackPointer].pc));
+#ifdef _DEBUG
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+#endif
+
+RDP_GFX_PopDL();
+DEBUGGER_PAUSE_AND_DUMP(NEXT_DLIST, DebuggerAppendMsg("PC=%08X: EndDL, return to %08X\n\n", dwPC, gDlistStack[gDlistStackPointer].pc));
 }
 
 void DLParser_Ucode8_DL(Gfx *gfx)	// DL Function Call
 {
-    uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+#ifdef _DEBUG
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+#endif
 
-	uint32 dwAddr = RSPSegmentAddr((gfx->words.w1));
-	uint32 dwCmd2 = *(uint32 *)(g_pRDRAMu8 + dwAddr);
-	uint32 dwCmd3 = *(uint32 *)(g_pRDRAMu8 + dwAddr+4);
+uint32 dwAddr = RSPSegmentAddr((gfx->words.w1));
+uint32 dwCmd2 = *(uint32 *)(g_pRDRAMu8 + dwAddr);
+uint32 dwCmd3 = *(uint32 *)(g_pRDRAMu8 + dwAddr+4);
 
-	if( dwAddr > g_dwRamSize )
-	{
-		TRACE0("DL, addr is wrong");
-		dwAddr = (gfx->words.w1)&(g_dwRamSize-1);
-	}
+if( dwAddr > g_dwRamSize )
+    {
+    TRACE0("DL, addr is wrong");
+    dwAddr = (gfx->words.w1)&(g_dwRamSize-1);
+    }
 
-	// Detect looping
-	/*
-	if(gDlistStackPointer>0 )
-	{
-		for( int i=0; i<gDlistStackPointer; i++ )
-		{
-			if( gDlistStack[i].addr == dwAddr+8 )
-			{
-				TRACE1("Detected DL looping, PC=%08X", dwPC );
-				DLParser_Ucode8_EndDL(0,0);
-				return;
-			}
-		}
-	}
-	*/
+// Detect looping
+/*if(gDlistStackPointer>0 )
+   {
+   for( int i=0; i<gDlistStackPointer; i++ )
+       {
+       if(gDlistStack[i].addr == dwAddr+8)
+           {
+           TRACE1("Detected DL looping, PC=%08X", dwPC );
+           DLParser_Ucode8_EndDL(0,0);
+           return;
+           }
+       }
+    }*/
 
-	if( gDlistStackPointer < MAX_DL_STACK_SIZE-1 )
-	{
-		gDlistStackPointer++;
-		gDlistStack[gDlistStackPointer].pc = dwAddr+16;
-		gDlistStack[gDlistStackPointer].countdown = MAX_DL_COUNT;
-	}
-	else
-	{
-		DebuggerAppendMsg("Error, gDlistStackPointer overflow");
-		RDP_GFX_PopDL();
-	}
+if( gDlistStackPointer < MAX_DL_STACK_SIZE-1 )
+    {
+    gDlistStackPointer++;
+    gDlistStack[gDlistStackPointer].pc = dwAddr+16;
+    gDlistStack[gDlistStackPointer].countdown = MAX_DL_COUNT;
+    }
+else
+    {
+    DebuggerAppendMsg("Error, gDlistStackPointer overflow");
+    RDP_GFX_PopDL();
+    }
 
-	GSBlkAddrSaves[gDlistStackPointer][0]=GSBlkAddrSaves[gDlistStackPointer][1]=0;
-	if( (dwCmd2>>24) == 0x80 )
-	{
-		GSBlkAddrSaves[gDlistStackPointer][0] = dwCmd2;
-		GSBlkAddrSaves[gDlistStackPointer][1] = dwCmd3;
-	}
+GSBlkAddrSaves[gDlistStackPointer][0]=GSBlkAddrSaves[gDlistStackPointer][1]=0;
+if( (dwCmd2>>24) == 0x80 )
+    {
+    GSBlkAddrSaves[gDlistStackPointer][0] = dwCmd2;
+    GSBlkAddrSaves[gDlistStackPointer][1] = dwCmd3;
+    }
 
-	DEBUGGER_PAUSE_AND_DUMP(NEXT_DLIST, 
-		DebuggerAppendMsg("\nPC=%08X: Call DL at Address %08X - %08X, %08X\n\n", dwPC, dwAddr, dwCmd2, dwCmd3)
-	);
+DEBUGGER_PAUSE_AND_DUMP(NEXT_DLIST, 
+DebuggerAppendMsg("\nPC=%08X: Call DL at Address %08X - %08X, %08X\n\n", 
+dwPC, dwAddr, dwCmd2, dwCmd3));
 }
 
 void DLParser_Ucode8_JUMP(Gfx *gfx)	// DL Function Call
 {
-	
-	
+if( ((gfx->words.w0)&0x00FFFFFF) == 0 )
+    {
+    #ifdef _DEBUG
+    uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+    #endif
 
-	if( ((gfx->words.w0)&0x00FFFFFF) == 0 )
-	{
-		uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-		uint32 dwAddr = RSPSegmentAddr((gfx->words.w1));
+    uint32 dwAddr = RSPSegmentAddr((gfx->words.w1));
 
-		if( dwAddr > g_dwRamSize )
-		{
-			TRACE0("DL, addr is wrong");
-			dwAddr = (gfx->words.w1)&(g_dwRamSize-1);
-		}
+    if( dwAddr > g_dwRamSize )
+        {
+        TRACE0("DL, addr is wrong");
+        dwAddr = (gfx->words.w1)&(g_dwRamSize-1);
+        }
 
-		uint32 dwCmd2 = *(uint32 *)(g_pRDRAMu8 + dwAddr);
-		uint32 dwCmd3 = *(uint32 *)(g_pRDRAMu8 + dwAddr+4);
+    #ifdef _DEBUG
+    uint32 dwCmd2 = *(uint32 *)(g_pRDRAMu8 + dwAddr);
+    uint32 dwCmd3 = *(uint32 *)(g_pRDRAMu8 + dwAddr+4);
+    #endif
 
-		gDlistStack[gDlistStackPointer].pc = dwAddr+8;		// Jump to new address
-		DEBUGGER_PAUSE_AND_DUMP(NEXT_DLIST, 
-			DebuggerAppendMsg("\nPC=%08X: Jump to Address %08X - %08X, %08X\n\n", dwPC, dwAddr, dwCmd2, dwCmd3)
-		);
-	}
-	else
-	{
-		uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-		LOG_UCODE("ucode 0x07 at PC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
-	}
+    gDlistStack[gDlistStackPointer].pc = dwAddr+8; // Jump to new address
+    DEBUGGER_PAUSE_AND_DUMP(NEXT_DLIST, 
+    DebuggerAppendMsg("\nPC=%08X: Jump to Address %08X - %08X, %08X\n\n", dwPC, dwAddr, dwCmd2, dwCmd3));
+    }
+else
+    {
+    uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+    LOG_UCODE("ucode 0x07 at PC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
+    }
 }
-
-
 
 void DLParser_Ucode8_Unknown(Gfx *gfx)
 {
-	
-	
-
-	uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-	LOG_UCODE("ucode %02X at PC=%08X: 0x%08x 0x%08x\n", ((gfx->words.w0)>>24), dwPC, (gfx->words.w0), (gfx->words.w1));
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+LOG_UCODE("ucode %02X at PC=%08X: 0x%08x 0x%08x\n", ((gfx->words.w0)>>24), dwPC, (gfx->words.w0), (gfx->words.w1));
 }
 
 void DLParser_Unknown_Skip1(Gfx *gfx)
 {
-	uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-	LOG_UCODE("ucode %02X, skip 1", ((gfx->words.w0)>>24));
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
-	gDlistStack[gDlistStackPointer].pc += 8;
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+LOG_UCODE("ucode %02X, skip 1", ((gfx->words.w0)>>24));
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
+gDlistStack[gDlistStackPointer].pc += 8;
 }
 
 void DLParser_Unknown_Skip2(Gfx *gfx)
 {
-	uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-	LOG_UCODE("ucode %02X, skip 2", ((gfx->words.w0)>>24));
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
-	gDlistStack[gDlistStackPointer].pc += 16;
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+LOG_UCODE("ucode %02X, skip 2", ((gfx->words.w0)>>24));
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
+gDlistStack[gDlistStackPointer].pc += 16;
 }
 
 void DLParser_Unknown_Skip3(Gfx *gfx)
 {
-	uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-	LOG_UCODE("ucode %02X, skip 3", ((gfx->words.w0)>>24));
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
-	gDlistStack[gDlistStackPointer].pc += 24;
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+LOG_UCODE("ucode %02X, skip 3", ((gfx->words.w0)>>24));
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
+gDlistStack[gDlistStackPointer].pc += 24;
 }
 
 void DLParser_Unknown_Skip4(Gfx *gfx)
 {
-	uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
-	LOG_UCODE("ucode %02X, skip 4", ((gfx->words.w0)>>24));
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
-	dwPC+=8;
-	gfx++;
-	LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
-	gDlistStack[gDlistStackPointer].pc += 32;
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc-8;
+LOG_UCODE("ucode %02X, skip 4", ((gfx->words.w0)>>24));
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x", dwPC, (gfx->words.w0), (gfx->words.w1));
+dwPC+=8;
+gfx++;
+LOG_UCODE("\tPC=%08X: 0x%08x 0x%08x\n", dwPC, (gfx->words.w0), (gfx->words.w1));
+gDlistStack[gDlistStackPointer].pc += 32;
 }
 
 void DLParser_Ucode8_0x05(Gfx *gfx)
 {
-	// Be careful, 0x05 is variable length ucode
-	/*
-	0028E4E0: 05020088, 04D0000F - Reserved1
-	0028E4E8: 6BDC0306, 00000000 - G_NOTHING
-	0028E4F0: 05010130, 01B0000F - Reserved1
-	0028E4F8: 918A01CA, 1EC5FF3B - G_NOTHING
-	0028E500: 05088C68, F5021809 - Reserved1
-	0028E508: 04000405, 00000000 - RSP_VTX
-	0028E510: 102ECE60, 202F2AA0 - G_NOTHING
-	0028E518: 05088C90, F5021609 - Reserved1
-	0028E520: 04050405, F0F0F0F0 - RSP_VTX
-	0028E528: 102ED0C0, 202F2D00 - G_NOTHING
-	0028E530: B5000000, 00000000 - RSP_LINE3D
-	0028E538: 8028E640, 8028E430 - G_NOTHING
-	0028E540: 00000000, 00000000 - RSP_SPNOOP
-	*/
+// Be careful, 0x05 is variable length ucode
+/*
+0028E4E0: 05020088, 04D0000F - Reserved1
+0028E4E8: 6BDC0306, 00000000 - G_NOTHING
+0028E4F0: 05010130, 01B0000F - Reserved1
+0028E4F8: 918A01CA, 1EC5FF3B - G_NOTHING
+0028E500: 05088C68, F5021809 - Reserved1
+0028E508: 04000405, 00000000 - RSP_VTX
+0028E510: 102ECE60, 202F2AA0 - G_NOTHING
+0028E518: 05088C90, F5021609 - Reserved1
+0028E520: 04050405, F0F0F0F0 - RSP_VTX
+0028E528: 102ED0C0, 202F2D00 - G_NOTHING
+0028E530: B5000000, 00000000 - RSP_LINE3D
+0028E538: 8028E640, 8028E430 - G_NOTHING
+0028E540: 00000000, 00000000 - RSP_SPNOOP
+*/
 
-	if( (gfx->words.w1) == 0 )
-	{
-		return;
-	}
-	else
-	{
-		DLParser_Unknown_Skip4(gfx);
-	}
+if((gfx->words.w1) == 0)
+    { return; }
+else
+    { DLParser_Unknown_Skip4(gfx); }
 }
 
 void DLParser_Ucode8_0xb4(Gfx *gfx)
 {
-	uint32 dwPC = gDlistStack[gDlistStackPointer].pc;
-
-	if( ((gfx->words.w0)&0xFF) == 0x06 )
-		DLParser_Unknown_Skip3(gfx);
-	else if( ((gfx->words.w0)&0xFF) == 0x04 )
-		DLParser_Unknown_Skip1(gfx);
-	else if( ((gfx->words.w0)&0xFFF) == 0x600 )
-		DLParser_Unknown_Skip3(gfx);
-	else
-	{
 #ifdef _DEBUG
-		if( pauseAtNext )
-			DebuggerAppendMsg("ucode 0xb4 at PC=%08X: 0x%08x 0x%08x\n", dwPC-8, (gfx->words.w0), (gfx->words.w1));
+uint32 dwPC = gDlistStack[gDlistStackPointer].pc;
 #endif
-		DLParser_Unknown_Skip3(gfx);
-	}
+
+if(((gfx->words.w0)&0xFF) == 0x06)
+    { DLParser_Unknown_Skip3(gfx); }
+else if(((gfx->words.w0)&0xFF) == 0x04)
+    { DLParser_Unknown_Skip1(gfx); }
+else if(((gfx->words.w0)&0xFFF) == 0x600)
+    { DLParser_Unknown_Skip3(gfx); }
+else
+    {
+    #ifdef _DEBUG
+    if(pauseAtNext)
+        {
+        DebuggerAppendMsg("ucode 0xb4 at PC=%08X: 0x%08x 0x%08x\n", dwPC-8,
+        (gfx->words.w0), (gfx->words.w1));
+        }
+    #endif
+    DLParser_Unknown_Skip3(gfx);
+    }
 }
 
 void DLParser_Ucode8_0xb5(Gfx *gfx)
@@ -1364,10 +1364,10 @@ void DLParser_Ucode8_0xb5(Gfx *gfx)
 		}
 	}
 
-	uint32 dwAddr1 = RSPSegmentAddr(dwCmd2);
-	uint32 dwAddr2 = RSPSegmentAddr(dwCmd3);
-
 #ifdef _DEBUG
+uint32 dwAddr1 = RSPSegmentAddr(dwCmd2);
+uint32 dwAddr2 = RSPSegmentAddr(dwCmd3);
+
 	if( (gfx->words.w1) != 0 )
 	{
 		DebuggerAppendMsg("!!!! PC=%08X: 0xB5 - %08X : %08X, %08X\n", dwPC, (gfx->words.w1), dwCmd2, dwCmd3);

@@ -405,7 +405,8 @@ void CRender::DrawSpriteR(uObjTxSprite &sprite, bool initCombiner, uint32 tile, 
 	}
 
 	//RECT src = {left,top,width, height};
-	float depth = ( gRDP.otherMode.depth_source == 1 ) ? depth = gRDP.fPrimitiveDepth : 0;
+	float depth;
+	(gRDP.otherMode.depth_source==1) ? depth = gRDP.fPrimitiveDepth : depth = 0;
 
 	float x0 = sprite.sprite.objX/4.0f;
 	float y0 = sprite.sprite.objY/4.0f;

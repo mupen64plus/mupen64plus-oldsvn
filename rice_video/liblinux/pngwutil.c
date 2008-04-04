@@ -936,7 +936,7 @@ png_write_cHRM_fixed(png_structp png_ptr, png_fixed_point white_x,
    {
       png_warning(png_ptr, "Invalid fixed cHRM white point specified");
 #if !defined(PNG_NO_CONSOLE_IO)
-      fprintf(stderr,"white_x=%ld, white_y=%ld\n",white_x, white_y);
+      fprintf(stderr,"white_x=%ld, white_y=%ld\n",(long int)white_x,(long int)white_y);
 #endif
       return;
    }

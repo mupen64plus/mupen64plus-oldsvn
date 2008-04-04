@@ -335,7 +335,6 @@ static const char *rgbdithertype[4]		= {"MagicSQ", "Bayer", "Noise", "Disable"};
 static const char *convtype[8]			= {"Conv", "?", "?", "?",   "?", "FiltConv", "Filt", "?"};
 static const char *filtertype[4]		= {"Point", "?", "Bilinear", "Average"};
 static const char *cycletype[4]			= {"1Cycle", "2Cycle", "Copy", "Fill"};
-static const char *detailtype[4]		= {"Clamp", "Sharpen", "Detail", "?"};
 static const char *alphacomptype[4]		= {"None", "Threshold", "?", "Dither"};
 static const char * szCvgDstMode[4]		= { "Clamp", "Wrap", "Full", "Save" };
 static const char * szZMode[4]			= { "Opa", "Inter", "XLU", "Decal" };
@@ -662,30 +661,30 @@ uint32 StrToHex(char *HexStr)
 
 void DEBUGGER_PAUSE_COUNT_N(uint32 val)
 {
-	if (eventToPause == val)
-	{	
-		if( debuggerPauseCount > 0 ) 
-			debuggerPauseCount--;	
-		
-		if( debuggerPauseCount == 0 )	{
-			CGraphicsContext::Get()->UpdateFrame();
-			debuggerPause = true;	
-		}	
-	}
+if (eventToPause == (int)val)
+    {	
+    if(debuggerPauseCount>0) 
+        { debuggerPauseCount--;	}
+    if(debuggerPauseCount==0)
+        {
+        CGraphicsContext::Get()->UpdateFrame();
+        debuggerPause = true;
+        }	
+    }
 }
 
 void DEBUGGER_PAUSE_COUNT_N_WITHOUT_UPDATE(uint32 val)
 {
-	if(eventToPause == val)
-	{
-		if( debuggerPauseCount > 0 ) 
-			debuggerPauseCount--;	
-		
-		if( debuggerPauseCount == 0 )	{
-            debuggerPauseCount = countToPause;
-			debuggerPause = true;
-		}	
-	}
+if(eventToPause == (int)val)
+    {
+    if(debuggerPauseCount>0) 
+        { debuggerPauseCount--;	}
+    if(debuggerPauseCount==0)
+        {
+        debuggerPauseCount = countToPause;
+        debuggerPause = true;
+        }	
+    }
 }
 
 void DumpMatrix2(const Matrix &mat, const char* prompt)

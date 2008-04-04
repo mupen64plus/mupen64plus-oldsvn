@@ -90,8 +90,7 @@ void CGeneralCombiner::General_DisplayBlendingStageInfo(GeneralCombinerInfo &gci
 	{
 		GeneralCombineStage &s = gci.stages[i];
 		DebuggerAppendMsg("%d:Color: %s - %s, %s, %s%s\n", i,
-			cmopstrs[s.colorOp.op], DecodedMux::FormatStr((uint8)s.colorOp.Arg1, str1), 
-			s.colorOp.Arg2==CM_IGNORE?"":DecodedMux::FormatStr((uint8)s.colorOp.Arg2, str2), 
+			cmopstrs[s.colorOp.op], DecodedMux::FormatStr((uint8)s.colorOp.Arg1, str1), 	s.colorOp.Arg2==CM_IGNORE?"":DecodedMux::FormatStr((uint8)s.colorOp.Arg2, str2), 
 			s.colorOp.Arg0==CM_IGNORE?"":DecodedMux::FormatStr((uint8)s.colorOp.Arg0, str3),
 			s.dwTexture!=0?" -Tex1":"");
 	}

@@ -159,7 +159,6 @@ void COGLColorCombiner::InitCombinerCycle12(void)
 #endif
 
 	bool texIsUsed = m_pDecodedMux->isUsed(MUX_TEXEL0);
-	bool shadeIsUsed = m_pDecodedMux->isUsed(MUX_SHADE);
 	bool shadeIsUsedInColor = m_pDecodedMux->isUsedInCycle(MUX_SHADE, 0, COLOR_CHANNEL);
 	bool texIsUsedInColor = m_pDecodedMux->isUsedInCycle(MUX_TEXEL0, 0, COLOR_CHANNEL);
 

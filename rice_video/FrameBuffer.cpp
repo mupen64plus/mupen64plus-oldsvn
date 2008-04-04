@@ -332,7 +332,7 @@ bool FrameBufferManager::IsDIaRenderTexture()
 					continue;
 				}
 
-				if( x1 == g_CI.dwWidth - 1 )
+				if(x1 == (unsigned int)(g_CI.dwWidth-1))
 				{
 					height = y1+1;
 					foundFillRect = true;
@@ -549,13 +549,6 @@ extern uint32 dwAsmPitch;
 extern uint32 dwAsmdwBytesPerLine;
 extern uint32 dwAsmCRC;
 extern uint8* pAsmStart;
-
-static uint32 g_xinc;
-static uint32 g_yinc;
-static uint32 *g_pStart;
-static uint32 g_height;
-static uint32 g_realWidthInDWORD;
-static uint32 g_pitch;
 
 uint32 CalculateRDRAMCRC(void *pPhysicalAddress, uint32 left, uint32 top, uint32 width, uint32 height, uint32 size, uint32 pitchInBytes )
 {
@@ -1101,7 +1094,7 @@ uint32 FrameBufferManager::ComputeCImgHeight(SetImgInfo &info, uint32 &height)
 					return RDP_FILLRECT;
 				}
 
-				if( x1 == info.dwWidth - 1 )
+				if(x1 == (unsigned int)(info.dwWidth-1))
 				{
 					height = y1+1;
 					TXTRBUF_DETAIL_DUMP(TRACE1("buffer height = %d", height));

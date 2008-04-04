@@ -848,16 +848,16 @@ enum ShadeConstMergeType
 	SHADE_MOD_ENV,
 };
 
-typedef struct {
-	uint64						mux;	// simplified
-	ShadeConstMergeType		op;
+typedef struct 
+{
+uint64 mux; // simplified
+ShadeConstMergeType op;
 } ShadeConstMergeMapType;
-
 
 ShadeConstMergeMapType MergeShadeWithConstantsMaps[] =
 {
-	0,	SHADE_DO_NOTHING,
-	0x0007000600070006LL,	SHADE_MOD_ENV,		// SHADE * ENV
+{0, SHADE_DO_NOTHING},
+{0x0007000600070006LL, SHADE_MOD_ENV}, // SHADE * ENV
 };
 
 // 0x05070501, 0x00070006		//(1 - PRIM) * ENV + PRIM

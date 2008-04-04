@@ -112,7 +112,7 @@ enum CombinerOp
 	CM_MULTIPLYADD,			// For DirectX only
 };
 
-#define CM_IGNORE ~0
+#define CM_IGNORE 0
 #define CM_IGNORE_BYTE 0xFF
 
 /************************************************************************/

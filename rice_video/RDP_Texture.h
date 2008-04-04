@@ -87,11 +87,6 @@ inline uint32 ReverseDXT(uint32 val, uint32 lrs, uint32 width, uint32 size)
 // rewrite these routine by myself.
 // Rice, 02/24/2004
 
-static void *g_src;
-static void *g_dest;
-static uint32 g_numBytes;
-static void *g_mem;
-static uint32 g_numDWords;
 static uint32 g_value;
 static uint16 g_value16;
 
@@ -1331,96 +1326,90 @@ void PrepareTextures()
 	}
 }
 
-/************************************************************************/
-/*                                                                      */
-/************************************************************************/
 extern uint32 g_TxtLoadBy;;
 
 void DLParser_LoadTLut(Gfx *gfx)
 {
-	gRDP.textureIsChanged = true;
+gRDP.textureIsChanged = true;
 
-	uint32 tileno	= gfx->loadtile.tile;
-	uint32 uls		= gfx->loadtile.sl/4;
-	uint32 ult		= gfx->loadtile.tl/4;
-	uint32 lrs		= gfx->loadtile.sh/4;
-	uint32 lrt		= gfx->loadtile.th/4;
-
-	uint32 dwTLutFmt = (gRDP.otherModeH >> RSP_SETOTHERMODE_SHIFT_TEXTLUT)&0x3;
-
-	uint32 dwCount;
-
-	uint32 dwTMEMOffset = gRDP.tiles[tileno].dwTMem - 256;				// starting location in the palettes
-	dwCount = ((uint16)((gfx->words.w1) >> 14) & 0x03FF) + 1;		// number to copy
-	uint32 dwRDRAMOffset = 0;
-
-
-	Tile &tile = gRDP.tiles[tileno];
-	tile.bForceWrapS = tile.bForceWrapT = tile.bForceClampS = tile.bForceClampT = false;
-
-	tile.hilite_sl = tile.sl = uls;
-	tile.hilite_tl = tile.tl = ult;
-	tile.sh = lrs;
-	tile.th = lrt;
-	tile.bSizeIsValid = true;
-
-	tile.lastTileCmd = CMD_LOADTLUT;
+uint32 tileno = gfx->loadtile.tile;
+uint32 uls = gfx->loadtile.sl/4;
+uint32 ult = gfx->loadtile.tl/4;
+uint32 lrs = gfx->loadtile.sh/4;
+uint32 lrt = gfx->loadtile.th/4;
 
 #ifdef _DEBUG
-	if( (((gfx->words.w0)>>12)&0x3) != 0 || (((gfx->words.w0))&0x3) != 0 || (((gfx->words.w1)>>12)&0x3) != 0 || (((gfx->words.w1))&0x3) != 0 )
-	{
-		//TRACE0("Load tlut, sl,tl,sh,th are not integers");
-	}
+uint32 dwTLutFmt = (gRDP.otherModeH >> RSP_SETOTHERMODE_SHIFT_TEXTLUT)&0x3;
 #endif
 
-	dwCount = (lrs - uls)+1;
-	dwRDRAMOffset = (uls + ult*g_TI.dwWidth )*2;
-	uint32 dwPalAddress = g_TI.dwAddr + dwRDRAMOffset;
+uint32 dwCount;
+// starting location in the palettes
+uint32 dwTMEMOffset = gRDP.tiles[tileno].dwTMem - 256;	
+// number to copy
+dwCount = ((uint16)((gfx->words.w1) >> 14) & 0x03FF) + 1;
+uint32 dwRDRAMOffset = 0;
 
-	//Copy PAL to the PAL memory
-	uint16 *srcPal = (uint16*)(g_pRDRAMu8 + (dwPalAddress& (g_dwRamSize-1)) );
-	for (uint32 i=0; i<dwCount && i<0x100; i++)
-	{
-		g_wRDPTlut[(i+dwTMEMOffset)^1] = srcPal[i^1];
-	}
+Tile &tile = gRDP.tiles[tileno];
+tile.bForceWrapS = tile.bForceWrapT = tile.bForceClampS = tile.bForceClampT = false;
 
-	if( options.bUseFullTMEM )
-	{
-		for (uint32 i=0; i<dwCount && i+tile.dwTMem<0x200; i++)
-		{
-			*(uint16*)(&g_Tmem.g_Tmem64bit[tile.dwTMem+i]) = srcPal[i^1];
-		}
-	}
+tile.hilite_sl = tile.sl = uls;
+tile.hilite_tl = tile.tl = ult;
+tile.sh = lrs;
+tile.th = lrt;
+tile.bSizeIsValid = true;
 
-	LOG_TEXTURE(
-	{	
-		DebuggerAppendMsg("LoadTLut Tile: %d Start: 0x%X+0x%X, Count: 0x%X\nFmt is %s, TMEM=0x%X\n", 
-		tileno, g_TI.dwAddr, dwRDRAMOffset, dwCount,textluttype[dwTLutFmt], dwTMEMOffset);
-		DebuggerAppendMsg("    :ULS: 0x%X, ULT:0x%X, LRS: 0x%X, LRT:0x%X\n", 
-		uls, ult, lrs,lrt);
+tile.lastTileCmd = CMD_LOADTLUT;
 
-		if( pauseAtNext && eventToPause == NEXT_LOADTLUT && dwCount == 16 ) 
-		{
-			char buf[2000];
-			strcpy(buf, "Data:\n");
-			for(uint32 i=0; i<16; i++ )
-			{
-				sprintf(buf+strlen(buf), "%04X ", g_wRDPTlut[dwTMEMOffset+i]);
-				if( i%4 == 3 )
-				{
-					sprintf(buf+strlen(buf), "\n");
-				}
-			}
-			sprintf(buf+strlen(buf), "\n");
-			TRACE0(buf);
-		}
-	});
+#ifdef _DEBUG
+/*
+if((((gfx->words.w0)>>12)&0x3) != 0 || (((gfx->words.w0))&0x3) != 0 || (((gfx->words.w1)>>12)&0x3) != 0 || (((gfx->words.w1))&0x3) != 0)
+    { TRACE0("Load tlut, sl,tl,sh,th are not integers"); }
+*/
+#endif
 
-	DEBUGGER_PAUSE_COUNT_N(NEXT_LOADTLUT);
+dwCount = (lrs - uls)+1;
+dwRDRAMOffset = (uls + ult*g_TI.dwWidth )*2;
+uint32 dwPalAddress = g_TI.dwAddr + dwRDRAMOffset;
 
-	extern bool RevTlutTableNeedUpdate;
-	RevTlutTableNeedUpdate = true;
-	g_TxtLoadBy = CMD_LOADTLUT;
+//Copy PAL to the PAL memory
+uint16 *srcPal = (uint16*)(g_pRDRAMu8 + (dwPalAddress& (g_dwRamSize-1)) );
+for (uint32 i=0; i<dwCount && i<0x100; i++)
+    { g_wRDPTlut[(i+dwTMEMOffset)^1] = srcPal[i^1]; }
+
+if( options.bUseFullTMEM )
+    {
+    for (uint32 i=0; i<dwCount && i+tile.dwTMem<0x200; i++)
+        { *(uint16*)(&g_Tmem.g_Tmem64bit[tile.dwTMem+i]) = srcPal[i^1]; }
+    }
+
+LOG_TEXTURE(
+{
+DebuggerAppendMsg("LoadTLut Tile: %d Start: 0x%X+0x%X, Count: 0x%X\nFmt is %s, TMEM=0x%X\n", 
+                 tileno, g_TI.dwAddr, dwRDRAMOffset, dwCount,textluttype[dwTLutFmt],
+                 dwTMEMOffset);
+
+DebuggerAppendMsg("    :ULS: 0x%X, ULT:0x%X, LRS: 0x%X, LRT:0x%X\n", uls, ult, lrs,lrt);
+
+if( pauseAtNext && eventToPause == NEXT_LOADTLUT && dwCount == 16 ) 
+    {
+    char buf[2000];
+    strcpy(buf, "Data:\n");
+    for(uint32 i=0; i<16; i++ )
+        {
+        sprintf(buf+strlen(buf), "%04X ", g_wRDPTlut[dwTMEMOffset+i]);
+        if(i%4 == 3)
+            { sprintf(buf+strlen(buf), "\n"); }
+        }
+    sprintf(buf+strlen(buf), "\n");
+    TRACE0(buf);
+    }
+});
+
+DEBUGGER_PAUSE_COUNT_N(NEXT_LOADTLUT);
+
+extern bool RevTlutTableNeedUpdate;
+RevTlutTableNeedUpdate = true;
+g_TxtLoadBy = CMD_LOADTLUT;
 }
 
 
@@ -2180,7 +2169,7 @@ typedef struct TmemInfoEntry{
 } TmemInfoEntry;
 
 const int tmenMaxEntry=20;
-TmemInfoEntry tmenEntryBuffer[20]={0};
+TmemInfoEntry tmenEntryBuffer[20]={{0}};
 TmemInfoEntry *g_pTMEMInfo=NULL;
 TmemInfoEntry *g_pTMEMFreeList=tmenEntryBuffer;
 
