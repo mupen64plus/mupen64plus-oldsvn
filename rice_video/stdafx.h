@@ -90,8 +90,8 @@
 
 extern WindowSettingStruct windowSetting;
 
-void __cdecl MsgInfo (char * Message, ...);
-void __cdecl ErrorMsg (char * Message, ...);
+void __cdecl MsgInfo (char* Message, ...);
+void __cdecl ErrorMsg (const char* Message, ...);
 
 #define MI_INTR_DP          0x00000020  
 #define MI_INTR_SP          0x00000001  
@@ -104,6 +104,6 @@ extern unsigned char *g_pRDRAMu8;
 
 extern GFX_INFO g_GraphicsInfo;
 
-extern char *project_name;
+extern const char *project_name;
 #endif
 

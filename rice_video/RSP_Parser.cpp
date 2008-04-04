@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 UcodeInfo ucodeInfo[MAX_UCODE_INFO];
 
 RDPInstruction LoadedUcodeMap[256];
-LPCSTR LoadedUcodeNameMap[256];
+char* LoadedUcodeNameMap[256];
 
 OSTask *g_pOSTask = NULL;
 UcodeInfo lastUcodeInfo;
@@ -245,7 +245,7 @@ TMEMLoadMapInfo g_tmemLoadAddrMap[0x200];	// Totally 4KB TMEM
 TMEMLoadMapInfo g_tmemInfo0;				// Info for Tmem=0
 TMEMLoadMapInfo g_tmemInfo1;				// Info for Tmem=0x100
 
-char *pszImgSize[4] = {"4", "8", "16", "32"};
+const char *pszImgSize[4] = {"4", "8", "16", "32"};
 const char *textluttype[4] = {"RGB16", "I16?", "RGBA16", "IA16"};
 uint16	g_wRDPTlut[0x200];
 uint32	g_dwRDPPalCrc[16];
@@ -917,7 +917,7 @@ void DLParser_Process(OSTask * pTask)
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 
-void RDP_NOIMPL_Real(LPCTSTR op, uint32 word0, uint32 word1) 
+void RDP_NOIMPL_Real(const char* op, uint32 word0, uint32 word1) 
 {
 #ifdef _DEBUG
 	if( logWarning )
@@ -935,7 +935,7 @@ void RDP_NOIMPL_Real(LPCTSTR op, uint32 word0, uint32 word1)
 #endif
 }
 
-void RDP_NOIMPL_WARN(LPCTSTR op)
+void RDP_NOIMPL_WARN(const char* op)
 {
 #ifdef _DEBUG
 	if(logWarning)

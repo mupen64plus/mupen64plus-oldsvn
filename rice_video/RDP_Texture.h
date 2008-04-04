@@ -1713,7 +1713,7 @@ void DLParser_LoadTile(Gfx *gfx)
 }
 
 
-static char *pszOnOff[2]     = {"Off", "On"};
+const char *pszOnOff[2] = {"Off", "On"};
 uint32 lastSetTile;
 void DLParser_SetTile(Gfx *gfx)
 {
@@ -1893,8 +1893,8 @@ void DLParser_SetTileSize(Gfx *gfx)
 		((sh/4) - (sl/4)) + 1, ((th/4) - (tl/4)) + 1);
 }
 
-extern char *pszImgFormat[8];// = {"RGBA", "YUV", "CI", "IA", "I", "?1", "?2", "?3"};
-extern char *pszImgSize[4];// = {"4", "8", "16", "32"};
+extern const char *pszImgFormat[8];// = {"RGBA", "YUV", "CI", "IA", "I", "?1", "?2", "?3"};
+extern const char *pszImgSize[4];// = {"4", "8", "16", "32"};
 void DLParser_SetTImg(Gfx *gfx)
 {
 	gRDP.textureIsChanged = true;

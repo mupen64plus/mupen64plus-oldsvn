@@ -145,7 +145,7 @@ FUNC_TYPE(void) NAME_DEFINE(DllAbout) ( HWND hParent )
 
 FUNC_TYPE(void) NAME_DEFINE(DllTest) ( HWND hParent )
 {
-	MsgInfo("TODO: Test");
+	MsgInfo((char*)"TODO: Test");
 }
 
 FUNC_TYPE(void) NAME_DEFINE(DllConfig) ( HWND hParent )
@@ -766,7 +766,7 @@ void __cdecl MsgInfo (char * Message, ...)
    messagebox(generalText, MB_OK|MB_ICONINFORMATION, Msg);
 }
 
-void __cdecl ErrorMsg (char * Message, ...)
+void __cdecl ErrorMsg (const char* Message, ...)
 {
 	char Msg[400];
 	va_list ap;

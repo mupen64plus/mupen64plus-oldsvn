@@ -405,14 +405,14 @@ typedef struct
 } TextureFilterMap;
 
 typedef struct {
-	char	*description;
-	int		number;
+	const char* description;
+	int number;
 	uint32	setting;
 } BufferSettingInfo;
 
 typedef struct {
-	char	*description;
-	uint32	setting;
+	const char* description;
+	uint32 setting;
 } SettingInfo;
 
 typedef union {

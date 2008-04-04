@@ -577,10 +577,10 @@ typedef struct
 extern uint16 g_wRDPTlut[];
 extern const char *textluttype[4];
 
-extern char *pszImgFormat[8];
-extern char *pszImgSize[4];
+extern const char *pszImgFormat[8];
+extern const char *pszImgSize[4];
 extern uint8 pnImgSize[4];
-extern char *textlutname[4];
+extern const char *textlutname[4];
 
 extern SetImgInfo g_CI;
 extern SetImgInfo g_ZI;
@@ -602,7 +602,7 @@ void RDP_InitRenderState();
 void DisplayVertexInfo(uint32 dwAddr, uint32 dwV0, uint32 dwN);
 void RSP_MoveMemLight(uint32 dwLight, uint32 dwAddr);
 void RSP_MoveMemViewport(uint32 dwAddr);
-void RDP_NOIMPL_WARN(LPCTSTR op);
+void RDP_NOIMPL_WARN(const char* op);
 void RSP_GFX_Force_Matrix(uint32 dwAddr);
 void RSP_GFX_InitGeometryMode();
 void RSP_SetUcode(int ucode, uint32 ucStart=0, uint32 ucDStart=0, uint32 cdSize=0);
@@ -621,7 +621,7 @@ uint32 DLParser_CheckUcode(uint32 ucStart, uint32 ucDStart, uint32 ucSize, uint3
 bool IsUsedAsDI(uint32 addr);
 
 #if defined(_DEBUG)
-  void __cdecl LOG_UCODE(LPCTSTR szFormat, ...);
+  void __cdecl LOG_UCODE(const char* szFormat, ...);
 #else
   inline void LOG_UCODE(...) {}
 #endif

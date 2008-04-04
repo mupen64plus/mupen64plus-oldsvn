@@ -24,14 +24,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define INI_FILE		"RiceVideoLinux.ini"
 #define CONFIG_FILE     "RiceVideo.cfg"
-char *project_name =	"Rice's Video Plugin";
+const char *project_name =	"Rice's Video Plugin";
 
 void GetPluginDir(char *Directory);
 
 // Disable the config dialog box to allow Vtune call graph feature to work
 #define ENABLE_CONFIG_DIALOG
 
-char *frameBufferSettings[] =
+const char *frameBufferSettings[] =
 {
 	"None (default)",
 	"Hide Framebuffer Effects",
@@ -47,40 +47,40 @@ char *frameBufferSettings[] =
 
 const int resolutions[][2] =
 {
-	{320, 240},
-	{400, 300},
-	{480, 360},
-	{512, 384},
-	{640, 480},
-	{800, 600},
-	{1024, 768},
-	{1152, 864},
-	{1280, 960},
-	{1400, 1050},
-	{1600, 1200},
-	{1920, 1440},
-	{2048, 1536},
+{320, 240},
+{400, 300},
+{480, 360},
+{512, 384},
+{640, 480},
+{800, 600},
+{1024, 768},
+{1152, 864},
+{1280, 960},
+{1400, 1050},
+{1600, 1200},
+{1920, 1440},
+{2048, 1536},
 };
 const int numberOfResolutions = sizeof(resolutions)/sizeof(int)/2;
 
-static char * resolutionsS[] =
+const char* resolutionsS[] =
 {
-   "320 x 240",
-     "400 x 300",
-     "480 x 360",
-     "512 x 384",
-     "640 x 480",
-     "800 x 600",
-     "1024 x 768",
-     "1152 x 864",
-     "1280 x 960",
-     "1400 x 1050",
-     "1600 x 1200",
-     "1920 x 1440",
-     "2048 x 1536"
+"320 x 240",
+"400 x 300",
+"480 x 360",
+"512 x 384",
+"640 x 480",
+"800 x 600",
+"1024 x 768",
+"1152 x 864",
+"1280 x 960",
+"1400 x 1050",
+"1600 x 1200",
+"1920 x 1440",
+"2048 x 1536"
 };
 
-char *frameBufferWriteBackControlSettings[] =
+const char *frameBufferWriteBackControlSettings[] =
 {
 	"Every Frame (default)",
 	"Every 2 Frames",
@@ -92,7 +92,7 @@ char *frameBufferWriteBackControlSettings[] =
 	"Every 8 Frames",
 };
 
-char *renderToTextureSettings[] =
+const char *renderToTextureSettings[] =
 {
 	"None (default)",
 	"Hide Render-to-texture Effects",
@@ -123,22 +123,20 @@ char	szIniFileName[300];
 
 //=======================================================
 
-const RenderEngineSetting RenderEngineSettings[] =
+RenderEngineSetting RenderEngineSettings[] =
 {
 	"DirectX",	DIRECTX_DEVICE,
 	"OpenGL", OGL_DEVICE,
 };
 
-const SettingInfo TextureQualitySettings[] =
+SettingInfo TextureQualitySettings[] =
 {
 	"Default",			FORCE_DEFAULT_FILTER,
 	"32-bit Texture",	FORCE_POINT_FILTER,
 	"16-bit Texture",	FORCE_LINEAR_FILTER,
 };
 
-
-
-const SettingInfo ForceTextureFilterSettings[] =
+SettingInfo ForceTextureFilterSettings[] =
 {
 	"N64 Default Texture Filter",	FORCE_DEFAULT_FILTER,
 	"Force Nearest Filter (faster, low quality)",	FORCE_POINT_FILTER,
@@ -146,7 +144,7 @@ const SettingInfo ForceTextureFilterSettings[] =
 	//"Force Bilinear Filter (slower, best quality)", FORCE_BILINEAR_FILTER,
 };
 
-const SettingInfo TextureEnhancementSettings[] =
+SettingInfo TextureEnhancementSettings[] =
 {
 	"N64 original texture (No enhancement)",	TEXTURE_NO_ENHANCEMENT,
 	"2x (Double the texture size)",	TEXTURE_2X_ENHANCEMENT,
@@ -158,7 +156,7 @@ const SettingInfo TextureEnhancementSettings[] =
 	"Sharpen More", TEXTURE_SHARPEN_MORE_ENHANCEMENT,
 };
 
-const SettingInfo TextureEnhancementControlSettings[] =
+SettingInfo TextureEnhancementControlSettings[] =
 {
 	"Normal",	TEXTURE_ENHANCEMENT_NORMAL,
 	"Smooth",	TEXTURE_ENHANCEMENT_WITH_SMOOTH_FILTER_1,
@@ -167,21 +165,21 @@ const SettingInfo TextureEnhancementControlSettings[] =
 	"Less 2xSaI smooth", TEXTURE_ENHANCEMENT_WITH_SMOOTH_FILTER_4,
 };
 
-const SettingInfo colorQualitySettings[] =
+SettingInfo colorQualitySettings[] =
 {
 	"16-bit",	TEXTURE_FMT_A4R4G4B4,
 	"32-bit (def)",	TEXTURE_FMT_A8R8G8B8,
 };
 
-const char*	strDXDeviceDescs[] = { "HAL", "REF" };
+const char* strDXDeviceDescs[] = { "HAL", "REF" };
 
-const SettingInfo openGLDepthBufferSettings[] =
+SettingInfo openGLDepthBufferSettings[] =
 {
 	"16-bit (def)",	16,
 	"32-bit",	32,
 };
 
-const RenderEngineSetting OpenGLRenderSettings[] =
+RenderEngineSetting OpenGLRenderSettings[] =
 {
 	"To Fit Your Video Card",	OGL_DEVICE,
 	"OpenGL 1.1 (Lowest)",		OGL_1_1_DEVICE,
@@ -206,7 +204,7 @@ BufferSettingInfo DirectXCombinerSettings[] =
 	"Semi-Pixel Shader",				DX_SEMI_PIXEL_SHADER,	DX_SEMI_PIXEL_SHADER,
 };
 
-const SettingInfo OnScreenDisplaySettings[] =
+SettingInfo OnScreenDisplaySettings[] =
 {
 	"Display Nothing",							ONSCREEN_DISPLAY_NOTHING,
 	"Display DList Per Second",					ONSCREEN_DISPLAY_DLIST_PER_SECOND,
@@ -487,7 +485,7 @@ void WriteConfiguration(void)
    fclose(f);
 }
 
-uint32 ReadRegistryDwordVal(char *Field)
+uint32 ReadRegistryDwordVal(const char *Field)
 {
    char name[PATH_MAX];
    GetPluginDir(name);
@@ -757,7 +755,7 @@ BOOL InitConfiguration(void)
 
 	if (!ReadIniFile())
 		{
-			ErrorMsg("Unable to read ini file from disk");
+		ErrorMsg("Unable to read ini file from disk");
 		WriteIniFile();
 			return FALSE;
 		}
@@ -1145,8 +1143,8 @@ void Ini_StoreRomOptions(LPGAMESETTING pGameSetting)
 }
 
 typedef struct {
-	char *title;
-	char *text;
+	const char *title;
+	const char *text;
 } ToolTipMsg;
 
 ToolTipMsg ttmsg[] = {
@@ -1932,7 +1930,7 @@ void OutputSectionDetails(uint32 i, FILE * fh)
 // If the rom is not found, a new entry is created
 // The resulting value is returned
 void __cdecl DebuggerAppendMsg (const char * Message, ...);
-int FindIniEntry(uint32 dwCRC1, uint32 dwCRC2, uint8 nCountryID, LPCTSTR szName)
+int FindIniEntry(uint32 dwCRC1, uint32 dwCRC2, uint8 nCountryID, char* szName)
 {
 	uint32 i;
 	CHAR szCRC[50+1];
@@ -3121,7 +3119,7 @@ static ConfigDialog *CreateConfigDialog()
    gtk_container_add(GTK_CONTAINER(advancedOptionsRContainer), useCICombo);
 
    // Filling lists
-   
+
    // windowModeCombo list
    GList *windowModeComboList = NULL;
    for (int i=0; i<numberOfResolutions; i++)
@@ -3129,85 +3127,85 @@ static ConfigDialog *CreateConfigDialog()
 	if(CGraphicsContext::m_FullScreenResolutions[CGraphicsContext::m_numOfResolutions - 1][0] <= resolutions[i][0] &&
 	   CGraphicsContext::m_FullScreenResolutions[CGraphicsContext::m_numOfResolutions - 1][1] <= resolutions[i][1])
 	  break;
-	windowModeComboList = g_list_append(windowModeComboList, resolutionsS[i]);
+	windowModeComboList = g_list_append(windowModeComboList,(char*)resolutionsS[i]);
      }
    gtk_combo_set_popdown_strings(GTK_COMBO(windowModeCombo), windowModeComboList);
 
    // fullScreenCombo list
    GList *fullScreenComboList = NULL;
    for (int i=0; i<numberOfResolutions; i++)
-     fullScreenComboList = g_list_append(fullScreenComboList, resolutionsS[i]);
+     fullScreenComboList = g_list_append(fullScreenComboList,(char*)resolutionsS[i]);
    gtk_combo_set_popdown_strings(GTK_COMBO(fullScreenCombo), fullScreenComboList);
-   
+
    // ColorBufferDepthCombo list
    GList *ColorBufferDepthComboList = NULL;
    for (int i=0; i<sizeof(colorQualitySettings)/sizeof(SettingInfo); i++)
      ColorBufferDepthComboList = g_list_append(ColorBufferDepthComboList,
-					       colorQualitySettings[i].description);
+                                               (char*)colorQualitySettings[i].description);
    gtk_combo_set_popdown_strings(GTK_COMBO(colorBufferDepthCombo), ColorBufferDepthComboList);
-   
+
    // combinerTypeCombo list
    GList *combinerTypeComboList = NULL;
    for (int i=0; i<numberOfOpenGLRenderEngineSettings; i++)
      combinerTypeComboList = g_list_append(combinerTypeComboList,
-					   OpenGLRenderSettings[i].name);
+                                           (char*)OpenGLRenderSettings[i].name);
    gtk_combo_set_popdown_strings(GTK_COMBO(combinerTypeCombo), combinerTypeComboList);
-   
+
    // depthBufferSettingCombo list
    GList *depthBufferSettingComboList = NULL;
    for (int i=0; i<sizeof(openGLDepthBufferSettings)/sizeof(SettingInfo); i++)
      depthBufferSettingComboList = g_list_append(depthBufferSettingComboList,
-						 openGLDepthBufferSettings[i].description);
+                                                 (char*)openGLDepthBufferSettings[i].description);
    gtk_combo_set_popdown_strings(GTK_COMBO(depthBufferSettingCombo), depthBufferSettingComboList);
-   
+
    // textureQualityCombo list
    GList *textureQualityComboList = NULL;
    for (int i=0; i<sizeof(TextureQualitySettings)/sizeof(SettingInfo); i++)
      textureQualityComboList = g_list_append(textureQualityComboList,
-					     TextureQualitySettings[i].description);
+                                             (char*)TextureQualitySettings[i].description);
    gtk_combo_set_popdown_strings(GTK_COMBO(textureQualityCombo), textureQualityComboList);
-   
+
    // forceTextureFilterCombo list
    GList *forceTextureFilterComboList = NULL;
    for (int i=0; i<sizeof(ForceTextureFilterSettings)/sizeof(SettingInfo); i++)
      forceTextureFilterComboList = g_list_append(forceTextureFilterComboList,
-						 ForceTextureFilterSettings[i].description);
+                                                 (char*)ForceTextureFilterSettings[i].description);
    gtk_combo_set_popdown_strings(GTK_COMBO(forceTextureFilterCombo), forceTextureFilterComboList);
-   
+
    // textureEnhancementCombo list
    GList *textureEnhancementComboList = NULL;
    for (int i=0; i<sizeof(TextureEnhancementSettings)/sizeof(SettingInfo); i++)
      textureEnhancementComboList = g_list_append(textureEnhancementComboList,
-						 TextureEnhancementSettings[i].description);
+                                                 (char*)TextureEnhancementSettings[i].description);
    gtk_combo_set_popdown_strings(GTK_COMBO(textureEnhancementCombo), textureEnhancementComboList);
-   
+
    // enhancementControl list
    GList *enhancementControlComboList = NULL;
    for (int i=0; i<sizeof(TextureEnhancementControlSettings)/sizeof(SettingInfo); i++)
      enhancementControlComboList = g_list_append(enhancementControlComboList,
-						 TextureEnhancementControlSettings[i].description);
+                                                 (char*)TextureEnhancementControlSettings[i].description);
    gtk_combo_set_popdown_strings(GTK_COMBO(enhancementControlCombo), enhancementControlComboList);
-   
+
    // renderingToTextureEmulation list
    GList *renderingToTextureEmulationComboList = NULL;
    for (int i=0; i<sizeof(renderToTextureSettings)/sizeof(char*); i++)
      renderingToTextureEmulationComboList = g_list_append(renderingToTextureEmulationComboList,
-							  renderToTextureSettings[i]);
+                                                          (char*)renderToTextureSettings[i]);
    gtk_combo_set_popdown_strings(GTK_COMBO(renderingToTextureEmulationCombo), renderingToTextureEmulationComboList);
-   
+
    // frameUpdateAtCombo list
    GList *frameBufferSettingsList = NULL;
    frameBufferSettingsList = g_list_append(frameBufferSettingsList, (void*)"Default");
    for (int i=0; i<sizeof(screenUpdateSettings)/sizeof(char*); i++)
      frameBufferSettingsList = g_list_append(frameBufferSettingsList,
-					     (void*)screenUpdateSettings[i]);
+                                             (void*)screenUpdateSettings[i]);
    gtk_combo_set_popdown_strings(GTK_COMBO(frameUpdateAtCombo), frameBufferSettingsList);
    
    // renderingToTextureEmulation list
    GList *renderingToTextureEmulationRComboList = NULL;
    for (int i=0; i<sizeof(renderToTextureSettings)/sizeof(char*); i++)
      renderingToTextureEmulationRComboList = g_list_append(renderingToTextureEmulationRComboList,
-							  renderToTextureSettings[i]);
+                                                           (char*)renderToTextureSettings[i]);
    gtk_combo_set_popdown_strings(GTK_COMBO(renderingToTextureEmulationRCombo), renderingToTextureEmulationRComboList);
    
    // useCI list

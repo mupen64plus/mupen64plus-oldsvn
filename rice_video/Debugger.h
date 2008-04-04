@@ -126,7 +126,7 @@ extern void DEBUGGER_PAUSE_COUNT_N_WITHOUT_UPDATE(uint32 val);
 	if(pauseAtNext && (cond) )	\
 {	if( debuggerPauseCount > 0 ) debuggerPauseCount--; if( debuggerPauseCount == 0 ){pauseAtNext = false;debuggerPause = true; CGraphicsContext::Get()->UpdateFrame(); dumpfuc;}}
 
-void RDP_NOIMPL_Real(LPCTSTR op,uint32,uint32) ;
+void RDP_NOIMPL_Real(const char* op,uint32,uint32) ;
 #define RSP_RDP_NOIMPL RDP_NOIMPL_Real
 #define DEBUGGER_IF_DUMP(cond, dumpfunc)	{if(cond) {dumpfunc}}
 #define TXTRBUF_DUMP(dumpfunc)			DEBUGGER_IF_DUMP((logTextureBuffer), dumpfunc)

@@ -100,5 +100,4 @@ public:
 	static bool needCleanScene;
 };
 
-void OutputText(char *msg, RECT *prect, uint32 flag = 0 );
 #endif

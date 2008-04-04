@@ -919,7 +919,7 @@ BOOL PathIsDirectory(char* name)
 #define SURFFMT_P8 41
 #define SURFFMT_X8R8G8B8 SURFFMT_A8R8G8B8
 
-int GetImageInfoFromFile(LPCSTR pSrcFile, IMAGE_INFO *pSrcInfo)
+int GetImageInfoFromFile(char* pSrcFile, IMAGE_INFO *pSrcInfo)
 {
 	unsigned char sig[8];
 	FILE *f;
@@ -984,7 +984,7 @@ int GetImageInfoFromFile(LPCSTR pSrcFile, IMAGE_INFO *pSrcInfo)
 	return 1;
 }
 
-BOOL PathFileExists(LPCTSTR pszPath)
+BOOL PathFileExists(char* pszPath)
 {
 	FILE *f;
 	f = fopen(pszPath, "rb");
@@ -1226,7 +1226,7 @@ bool CheckAndCreateFolder(const char* pathname)
 // Fmt:				0 - 4
 // Siz:				0 - 3
 
-char *subfolders[] = {
+const char *subfolders[] = {
 	"png_all",
 	"png_by_rgb_a",
 	"ci_bmp",
@@ -1327,33 +1327,29 @@ void CloseExternalTextures(void)
 
 void InitHiresTextures(void)
 {
-	if( options.bLoadHiResTextures )
+if( options.bLoadHiResTextures )
 	{
-		RECT rect={0,100,windowSetting.uDisplayWidth,200};
-		OutputText("Texture loading option is enabled",&rect);
-		RECT rect2={0,150,windowSetting.uDisplayWidth,250};
-		OutputText("Finding all hires textures",&rect2);
-		FindAllHiResTextures();
+	printf("Texture loading option is enabled");
+	printf("Finding all hires textures");
+	FindAllHiResTextures();
 	}
 }
 
 void InitTextureDump(void)
 {
-	if( options.bDumpTexturesToFiles )
+if( options.bDumpTexturesToFiles )
 	{
-		RECT rect={0,100,windowSetting.uDisplayWidth,200};
-		OutputText("Texture dump option is enabled",&rect);
-		RECT rect2={0,150,windowSetting.uDisplayWidth,250};
-		OutputText("Finding all dumpped textures",&rect2);
-		FindAllDumpedTextures();
+	printf("Texture dump option is enabled");
+	printf("Finding all dumpped textures");
+	FindAllDumpedTextures();
 	}
 }
 void InitExternalTextures(void)
 {
-	printf("InitExternalTextures\n");
-	CloseExternalTextures();
-	InitHiresTextures();
-	InitTextureDump();
+printf("InitExternalTextures\n");
+CloseExternalTextures();
+InitHiresTextures();
+InitTextureDump();
 }
 
 int FindScaleFactor(const ExtTxtrInfo &info, TxtrCacheEntry &entry)

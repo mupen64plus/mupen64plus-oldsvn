@@ -169,7 +169,7 @@ UcodeFunc(RDP_TriShadeTxtr);
 UcodeFunc(RDP_TriShadeTxtrZ);
 
 #ifdef _DEBUG
-LPCSTR ucodeNames_GBI1[256] =
+const char* ucodeNames_GBI1[256] =
 {
 	"RSP_SPNOOP",	 "RSP_MTX",     "Reserved0", "RSP_MOVEMEM",
 		"RSP_VTX",	 "Reserved1",  "RSP_DL",     "Reserved2",
@@ -257,7 +257,7 @@ LPCSTR ucodeNames_GBI1[256] =
 };
 
 
-LPCSTR ucodeNames_GBI2[256] =
+const char* ucodeNames_GBI2[256] =
 {
 	"NOOP",	"GBI2_Vtx", "ModifyVtx", "GBI2_CullDL",
 	"BranchZ", "GBI2_Tri1", "GBI2_Tri2","GBI2_Line3D",

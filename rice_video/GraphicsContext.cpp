@@ -184,8 +184,4 @@ void CGraphicsContext::InitDeviceParameters(void)
 	COGLGraphicsContext::InitDeviceParameters();
 }
 
-void OutputText(char *msg, RECT *prect, uint32 flag)
-{
-    printf(msg);
-}
 

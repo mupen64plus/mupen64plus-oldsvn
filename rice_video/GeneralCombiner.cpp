@@ -57,7 +57,7 @@ bool isComb(uint32 val)
 }
 
 #ifdef _DEBUG
-char* BlendFuncStr[] = {
+const char* BlendFuncStr[] = {
 	"Enable both",
 	"Disable alpha",
 	"Disable color",
@@ -65,7 +65,7 @@ char* BlendFuncStr[] = {
 	"Color one",
 	"Alpha one",
 };
-char* cmopstrs[] = {
+const char* cmopstrs[] = {
 	"Sel",
 	"Mod",
 	"Add",

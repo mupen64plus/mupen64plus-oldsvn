@@ -128,34 +128,31 @@ void COGL_FragmentProgramCombiner::InitCombinerCycleFill(void)
 	COGLColorCombiner4::InitCombinerCycleFill();
 }
 
-
-char *muxToFP_Maps[][2] = {
+const char *muxToFP_Maps[][2] = {
 	// color   --		alpha
 	"0",				"0",	//MUX_0 = 0,
 	"1",				"1",	//MUX_1,
-	"comb",				"comb.a",			//MUX_COMBINED,
-	"t0",				"t0.a",				//MUX_TEXEL0,
-	"t1",				"t1.a",				//MUX_TEXEL1,
+	"comb",				"comb.a",	//MUX_COMBINED,
+	"t0",				"t0.a",		//MUX_TEXEL0,
+	"t1",				"t1.a",		//MUX_TEXEL1,
 	"program.env[2]",	"program.env[2].a",	//MUX_PRIM,
 	"fragment.color",	"fragment.color.a",	//MUX_SHADE,
 	"program.env[1]",	"program.env[1].a",	//MUX_ENV,
 
-	"comb.a",			"comb.a",			//MUX_COMBALPHA,		
-	"t0.a",				"t0.a",				//MUX_T0_ALPHA,			
-	"t1.a",				"t1.a",				//MUX_T1_ALPHA,			
-	"primcolor.a",		"primcolor.a",		//MUX_PRIM_ALPHA,		
-	"fragment.color.a",	"fragment.color.a",	//MUX_SHADE_ALPHA,		
-	"envcolor.a",		"envcolor.a",		//MUX_ENV_ALPHA,		
-
+	"comb.a",			"comb.a",	//MUX_COMBALPHA,
+	"t0.a",				"t0.a",		//MUX_T0_ALPHA,	
+	"t1.a",				"t1.a",		//MUX_T1_ALPHA,	
+	"primcolor.a",		"primcolor.a",		//MUX_PRIM_ALPHA,	
+	"fragment.color.a",	"fragment.color.a",	//MUX_SHADE_ALPHA,	
+	"envcolor.a",		"envcolor.a",		//MUX_ENV_ALPHA,	
 	"program.env[3]",	"program.env[3]",	//MUX_LODFRAC,
 	"program.env[4]",	"program.env[4]",	//MUX_PRIMLODFRAC,
-	"1",				"1",				//MUX_K5,
-
-	"1",				"1",				//MUX_UNK,				// Should not be used
+	"1",				"1",		//MUX_K5,
+	"1",				"1",		//MUX_UNK,	// Should not be used
 };
 
 
-char *oglFPTest = 
+const char *oglFPTest = 
 "!!ARBfp1.0\n"
 "#Declarations\n"
 "TEMP t0;\n"
@@ -185,21 +182,17 @@ char oglNewFP[4092];
 
 char* MuxToOC(uint8 val)
 {
-	// For color channel
-	if( val&MUX_ALPHAREPLICATE )
-	{
-		return muxToFP_Maps[val&0x1F][1];
-	}
-	else
-	{
-		return muxToFP_Maps[val&0x1F][0];
-	}
+// For color channel
+if( val&MUX_ALPHAREPLICATE )
+	{ return (char*)muxToFP_Maps[val&0x1F][1]; }
+else
+	{ return (char*)muxToFP_Maps[val&0x1F][0]; }
 }
 
 char* MuxToOA(uint8 val)
 {
-	// For alpha channel
-	return muxToFP_Maps[val&0x1F][0];
+// For alpha channel
+return (char*)muxToFP_Maps[val&0x1F][0];
 }
 
 void COGL_FragmentProgramCombiner::GenerateProgramStr()
@@ -209,7 +202,7 @@ void COGL_FragmentProgramCombiner::GenerateProgramStr()
 	mux.splitType[0] = mux.splitType[1] = mux.splitType[2] = mux.splitType[3] = CM_FMT_TYPE_NOT_CHECKED;
 	m_pDecodedMux->Reformat(false);
 
-	char *leadstr = "!!ARBfp1.0\n"
+	const char *leadstr = "!!ARBfp1.0\n"
 		"#Declarations\n"
 		"%s\n" //"OPTION ARB_fog_linear;\n"
 		"TEMP t0;\n"

@@ -83,7 +83,7 @@ const char * translatedCombTypes[] =
 	"ENV_X_ENV",
 };
 
-char* muxTypeStrs[] = {
+const char* muxTypeStrs[] = {
 	"CM_FMT_TYPE_NOT_USED",
 	"CM_FMT_TYPE1_D",
 	"CM_FMT_TYPE2_A_ADD_D",
@@ -696,7 +696,7 @@ void DecodedMux::Reformat(bool do_complement)
 	mType = max(max(max(splitType[0], splitType[1]),splitType[2]),splitType[3]);
 }
 
-char* MuxGroupStr[4] =
+const char* MuxGroupStr[4] =
 {
 	"Color0",
 	"Alpha0",

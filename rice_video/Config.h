@@ -60,8 +60,8 @@ enum DirectXCombinerType
 
 typedef struct
 {
-	char *	name;
-	SupportedDeviceType		type;
+	const char* name;
+	SupportedDeviceType type;
 } RenderEngineSetting;
 
 enum {
@@ -338,7 +338,7 @@ extern char	szIniFileName[300];
 	void WriteIniFile();
 BOOL ReadIniFile();
 	void OutputSectionDetails(uint32 i, FILE * fh);
-int FindIniEntry(uint32 dwCRC1, uint32 dwCRC2, uint8 nCountryID, LPCTSTR szName); 
+int FindIniEntry(uint32 dwCRC1, uint32 dwCRC2, uint8 nCountryID, char* szName); 
 
 
 struct ROMHeader
@@ -408,7 +408,7 @@ typedef struct
 typedef struct
 {
 	s8	nCountryID;
-	LPCTSTR szName;
+	char* szName;
 	uint32 nTvType;
 } CountryIDInfo;
 

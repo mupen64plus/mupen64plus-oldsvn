@@ -71,7 +71,7 @@ extern FiddledVtx * g_pVtxBase;
 
 uint32 CachedTexIndex = 0;
 
-char* otherNexts[] = {
+const char* otherNexts[] = {
 	"Frame",
 	"Flush Tri",
 	"TextRect",
@@ -100,7 +100,7 @@ char* otherNexts[] = {
 };
 int numberOfNextOthers = sizeof(otherNexts)/sizeof(char*);
 
-char* thingsToDump[] = {
+const char* thingsToDump[] = {
 	"Cur Texture RGBA",
 	"Cur+1 Texture RGBA",
 	"Colors",
@@ -222,7 +222,7 @@ uint32 StrToHex(char *HexStr);
 
 void DumpTileInfo(uint32 dwTile)
 {
-	char *pszOnOff[2]     = {"Off", "On"};
+	const char *pszOnOff[2] = {"Off", "On"};
 
 	DebuggerAppendMsg("Tile: %d\nFmt: %s/%s Line:%d (Pitch %d) TMem:0x%04x Palette:%d\n",
 		dwTile, pszImgFormat[gRDP.tiles[dwTile].dwFormat], pszImgSize[gRDP.tiles[dwTile].dwSize],
@@ -271,13 +271,13 @@ void DumpTlut(uint16* palAddr)
 	}
 }
 
-extern LPCSTR ucodeNames_GBI1[256];
-extern LPCSTR ucodeNames_GBI2[256];
+extern char ucodeNames_GBI1[256];
+extern char ucodeNames_GBI2[256];
 
 void DumpDlistAt(uint32 dwPC)
 {
 	uint32 word0, word1, opcode;
-	LPCSTR *name;
+	char *name;
 	switch( gRSP.ucode )
 	{
 	case 2:
@@ -603,7 +603,7 @@ void DebuggerPause()
 	sprintf(temp,"%s Debug %s",project_name, FILE_VERSION) ;
 }
 
-void __cdecl LOG_UCODE(LPCTSTR szFormat, ...)
+void __cdecl LOG_UCODE(const char* szFormat, ...)
 {
 	if( logUcodes)
 	{

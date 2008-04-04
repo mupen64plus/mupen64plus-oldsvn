@@ -25,10 +25,6 @@ DWORD g_maxTextureMemUsage = (5*1024*1024);
 DWORD g_amountToFree = (512*1024);
 bool g_bUseSetTextureMem = false;
 
-void OutputDebugString(LPCTSTR lpOutputString)
-{
-}
-
 // Returns the first prime greater than or equal to nFirst
 inline LONG GetNextPrime(LONG nFirst)
 {
@@ -489,7 +485,7 @@ TxtrCacheEntry * CTextureManager::CreateNewCacheEntry(uint32 dwAddr, uint32 dwWi
 
 			m_pOldestTexture = nextYoungest;
 
-			OutputDebugString("Freeing Texture\n");
+		//printf("Freeing Texture\n");
 		}
 
 		m_currentTextureMemUsage += widthToCreate * heightToCreate * 4;
@@ -824,9 +820,9 @@ TxtrCacheEntry * CTextureManager::GetTexture(TxtrInfo * pgti, bool fromTMEM, boo
 
 
 
-char *pszImgFormat[8] = {"RGBA", "YUV", "CI", "IA", "I", "?1", "?2", "?3"};
+const char *pszImgFormat[8] = {"RGBA", "YUV", "CI", "IA", "I", "?1", "?2", "?3"};
 uint8 pnImgSize[4]   = {4, 8, 16, 32};
-char *textlutname[4] = {"RGB16", "I16?", "RGBA16", "IA16"};
+const char *textlutname[4] = {"RGB16", "I16?", "RGBA16", "IA16"};
 
 extern uint16 g_wRDPTlut[];
 extern ConvertFunction	gConvertFunctions_FullTMEM[ 8 ][ 4 ];

@@ -60,7 +60,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //};
 
 #ifdef _DEBUG
-char *constStrs[] = {
+const char *constStrs[] = {
 	"MUX_0",
 	"MUX_1",
 	"MUX_COMBINED",
@@ -80,22 +80,20 @@ char *constStrs[] = {
 	"MUX_K5",
 	"MUX_UNK",
 };
-char *cycleTypeStrs[] = {
+
+const char *cycleTypeStrs[] = {
 	"1 Cycle",
 	"2 Cycle",
 	"Copy Mode",
 	"Fill Mode"
 };
-char* constStr(uint32 op)
+
+const char* constStr(uint32 op)
 {
-	if( op<= MUX_UNK )
-	{
-		return constStrs[op];
-	}
-	else
-	{
-		return "Invalid-Const";
-	}
+if(op<=MUX_UNK)
+    { return constStrs[op]; }
+else
+   { return "Invalid-Const"; }
 }
 #endif
 

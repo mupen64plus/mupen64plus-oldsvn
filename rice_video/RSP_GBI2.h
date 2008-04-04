@@ -795,6 +795,7 @@ void RSP_GBI2_MoveMem(Gfx *gfx)
 
 	case RSP_GBI2_MV_MEM__POINT:
 		LOG_UCODE("Zelda Move Point");
+		void RDP_NOIMPL_WARN(const char* op);
 		RDP_NOIMPL_WARN("Zelda Move Point");
 		break;
 
