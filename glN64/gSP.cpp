@@ -68,7 +68,7 @@ void gSPLoadUcodeEx( u32 uc_start, u32 uc_dstart, u16 uc_dsize )
 	}
 
 	MicrocodeInfo *ucode = GBI_DetectMicrocode( uc_start, uc_dstart, uc_dsize );
-	if (ucode->type != -1) last_good_ucode = ucode->type;
+	if (ucode->type != (unsigned int)-1) last_good_ucode = ucode->type;
 	if (ucode->type != NONE)
 		GBI_MakeCurrent( ucode );
 	else

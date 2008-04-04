@@ -19,25 +19,24 @@
 #ifdef MAINDEF
 const char *MicrocodeTypes[] =
 {
-	"Fast3D", 
-	"F3DEX", 
-	"F3DEX2", 
-	"Line3D",
-	"L3DEX",
-	"L3DEX2",
-	"S2DEX",
-	"S2DEX2",
-	"Perfect Dark",
-	"DKR/JFG",
-	"Waverace US",
-	"None"
+"Fast3D", 
+"F3DEX", 
+"F3DEX2", 
+"Line3D",
+"L3DEX",
+"L3DEX2",
+"S2DEX",
+"S2DEX2",
+"Perfect Dark",
+"DKR/JFG",
+"Waverace US",
+"None",
 };
 #else
 extern const char *MicrocodeTypes[];
 #endif
 
 static const int numMicrocodeTypes = 11;
-
 
 // Fixed point conversion factors
 #define FIXED2FLOATRECIP1	0.5f
@@ -710,10 +709,10 @@ typedef void (*GBIFunc)( u32 w0, u32 w1 );
 
 struct SpecialMicrocodeInfo
 {
-	u32 type;
-	u32 NoN;
-	u32 crc;
-	char *text;
+u32 type;
+u32 NoN;
+u32 crc;
+const char *text;
 };
 
 struct MicrocodeInfo

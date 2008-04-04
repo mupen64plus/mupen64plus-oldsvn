@@ -4,7 +4,7 @@
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM
+CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -Wall 
 
 # list of object files to generate
 OBJECTS = \
