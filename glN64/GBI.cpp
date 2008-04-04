@@ -438,7 +438,7 @@ MicrocodeInfo *GBI_DetectMicrocode( u32 uc_start, u32 uc_dstart, u16 uc_dsize )
 	current->type = DialogBox( hInstance, MAKEINTRESOURCE( IDD_MICROCODEDLG ), hWnd, MicrocodeDlgProc );
 #else // !__LINUX__
 	printf( "glN64: Warning - unknown ucode!!!\n" );
-	if(last_good_ucode != (unsigned int)-1) {
+	if(last_good_ucode != (u32)-1) {
 		current->type=last_good_ucode;
 	} else {
 		current->type = MicrocodeDialog();
