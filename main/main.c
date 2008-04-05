@@ -86,6 +86,7 @@ int 		autoinc_slot = 0;
 int 		*autoinc_save_slot = &autoinc_slot;
 int		g_Noask = 0;			// don't ask to force load on bad dumps
 int		g_NoaskParam = 0;		// was --noask passed at the commandline?
+int		g_LimitFPS = 1;
 
 pthread_t	g_EmulationThread = 0;		// core thread handle
 int		g_EmulatorRunning = 0;		// need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
@@ -247,6 +248,8 @@ void new_vi(void)
 	static unsigned int CalculatedTime ;
 	static int VI_Counter = 0;
 	int time;
+	
+	if(!g_LimitFPS) return;
 
 	start_section(IDLE_SECTION);
 	VI_Counter++;
@@ -643,6 +646,7 @@ static void * emulationThread( void *_arg )
 	sigaction( SIGCHLD, &sa, NULL );
 
 	g_EmulatorRunning = 1;
+	g_LimitFPS = config_get_bool("LimitFPS", TRUE);
 
 	// if emu mode wasn't specified at the commandline, set from config file
 	if(!g_EmuMode)

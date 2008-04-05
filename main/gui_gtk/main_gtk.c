@@ -866,6 +866,12 @@ static void callback_vcrSetup( GtkWidget *widget, gpointer data )
 }
 #endif // VCR_SUPPORT
 
+static void callback_LimitFPS(GtkWidget *widget, gpointer user_data)
+{
+	g_LimitFPS = GTK_CHECK_MENU_ITEM(widget)->active;
+	config_put_bool( "LimitFPS", g_LimitFPS);
+}
+
 /** debugger **/
 #ifdef DBG
 // show
@@ -938,6 +944,18 @@ static GtkWidget *menu_item_new_with_accelerator( GtkAccelGroup *group, const ch
 
 	return item;
 }
+// create a check menu item with an accelerator
+static GtkWidget *check_menu_item_new_with_accelerator( GtkAccelGroup *group, const char *label )
+{
+	GtkWidget *item;
+	gint key;
+
+	item = gtk_check_menu_item_new_with_label( "" );
+	key = gtk_label_parse_uline( GTK_LABEL(GTK_BIN(item)->child), label );
+//  gtk_widget_add_accelerator( item, "activate_item", group, key, GDK_MOD1_MASK, 0 );
+
+	return item;
+}
 
 // static widgets to change their state from emulation thread
 static GtkWidget       *slotDefaultItem;
@@ -975,11 +993,13 @@ static int create_menuBar( void )
 	GtkWidget	*emulationPauseContinueItem;
 	GtkWidget	*emulationStopItem;
 	GtkWidget	*emulationSeparator1;
+	GtkWidget	*emulationLimitFPSItem;
+	GtkWidget	*emulationSeparator2;
 	GtkWidget	*emulationSaveItem;
 	GtkWidget	*emulationSaveAsItem;
 	GtkWidget	*emulationRestoreItem;
 	GtkWidget	*emulationLoadItem;
-	GtkWidget	*emulationSeparator2;
+	GtkWidget	*emulationSeparator3;
 	GtkWidget	*emulationSlotItem;
 	GtkWidget	*emulationSlotMenu;
 
@@ -1114,27 +1134,33 @@ static int create_menuBar( void )
 	emulationPauseContinueItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Pause/_Continue") );
 	emulationStopItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Sto_p") );
 	emulationSeparator1 = gtk_menu_item_new();
+	emulationLimitFPSItem = check_menu_item_new_with_accelerator( emulationAccelGroup, tr("Limit _FPS") );
+	emulationSeparator2 = gtk_menu_item_new();
 	emulationSaveItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Save State") );
 	emulationSaveAsItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Save State As") );
 	emulationRestoreItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Restore State") );
 	emulationLoadItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Load State") );
-	emulationSeparator2 = gtk_menu_item_new();
+	emulationSeparator3 = gtk_menu_item_new();
 	emulationSlotItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Current save state") );
 
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationStartItem );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationPauseContinueItem );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationStopItem );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationSeparator1 );
+	gtk_menu_append( GTK_MENU(emulationMenu), emulationLimitFPSItem );
+	gtk_menu_append( GTK_MENU(emulationMenu), emulationSeparator2 );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationSaveItem );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationSaveAsItem );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationRestoreItem );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationLoadItem );
-	gtk_menu_append( GTK_MENU(emulationMenu), emulationSeparator2 );
+	gtk_menu_append( GTK_MENU(emulationMenu), emulationSeparator3 );
 	gtk_menu_append( GTK_MENU(emulationMenu), emulationSlotItem);
 
 	gtk_signal_connect_object( GTK_OBJECT(emulationStartItem), "activate", GTK_SIGNAL_FUNC(callback_startEmulation), (gpointer)NULL );
 	gtk_signal_connect_object( GTK_OBJECT(emulationPauseContinueItem), "activate", GTK_SIGNAL_FUNC(callback_pauseContinueEmulation), (gpointer)NULL );
 	gtk_signal_connect_object( GTK_OBJECT(emulationStopItem), "activate", GTK_SIGNAL_FUNC(callback_stopEmulation), (gpointer)NULL );
+
+	gtk_signal_connect_object( GTK_OBJECT(emulationLimitFPSItem), "toggled", GTK_SIGNAL_FUNC(callback_LimitFPS), (gpointer)emulationLimitFPSItem );
 	gtk_signal_connect_object( GTK_OBJECT(emulationSaveItem), "activate", GTK_SIGNAL_FUNC(callback_Save), (gpointer)NULL );
 	gtk_signal_connect_object( GTK_OBJECT(emulationSaveAsItem), "activate", GTK_SIGNAL_FUNC(callback_SaveAs), (gpointer)NULL );
 	gtk_signal_connect_object( GTK_OBJECT(emulationRestoreItem), "activate", GTK_SIGNAL_FUNC(callback_Restore), (gpointer)NULL );
@@ -1275,7 +1301,9 @@ static int create_menuBar( void )
 	gtk_menu_set_accel_group( GTK_MENU(debuggerMenu), debuggerAccelGroup );
 #endif
 	gtk_menu_set_accel_group( GTK_MENU(helpMenu), helpAccelGroup );*/
-
+	
+	GTK_CHECK_MENU_ITEM(emulationLimitFPSItem)->active = config_get_bool( "LimitFPS", TRUE );
+	
 	return 0;
 }
 
