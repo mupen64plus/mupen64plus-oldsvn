@@ -57,7 +57,7 @@ GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 
 
 # test for presence of libsamplerate
-ifneq ($(shell pkg-config samplerate --exists), 0)
+ifeq ($(strip $(shell pkg-config samplerate --modversion 2> /dev/null)),)
   # warn user
   $(warning No libsamplerate development libraries found!)
   # set libsamplerate flags and libraries
