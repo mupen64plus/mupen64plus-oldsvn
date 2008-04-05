@@ -546,7 +546,9 @@ void DrawImage (DRAWIMAGE *d)
 			// increment whatever caused this split
 			tb_u += x_size - (x_size-(nlr_u-cb_u));
 			cb_u = nlr_u;
-			if (nlr_u == cur_wrap_u*d->imageW) {
+			if (!d || (void *)d == (void *)0x1) return;
+			if (nlr_u == cur_wrap_u*d->imageW) 
+			{
 				cur_wrap_u ++;
 				tb_u = 0;
 			}
