@@ -96,7 +96,7 @@ char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at 
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)
 char        *g_RspPlugin = NULL;        // pointer to rsp plugin specified at commandline (if any)
 
-#ifdef NOGUI_ONLY
+#ifdef NO_GUI
 static int  g_GuiEnabled = 0;           // GUI enabled?
 #else
 static int  g_GuiEnabled = 1;           // GUI enabled?

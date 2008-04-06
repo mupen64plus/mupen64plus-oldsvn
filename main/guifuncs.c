@@ -30,7 +30,7 @@
 /* This file defines "gui" functions for the nogui-only build of mupen64
  */
 
-#ifdef NOGUI_ONLY
+#ifdef NO_GUI
 
 #include <unistd.h>
 #include <stdarg.h>
@@ -97,4 +97,4 @@ int confirm_message(const char *fmt, ...)
     }
 }
 
-#endif // NOGUI_ONLY
+#endif // NO_GUI

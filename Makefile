@@ -33,8 +33,8 @@ endif
 ifeq ($(LIRC), 1)
   CFLAGS += -DWITH_LIRC
 endif
-ifeq ($(NOGUI_ONLY), 1)
-  CFLAGS += -DNOGUI_ONLY
+ifeq ($(NO_GUI), 1)
+  CFLAGS += -DNO_GUI
 else
   CFLAGS += $(GTK_FLAGS)
 endif
@@ -175,7 +175,7 @@ ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
 endif
-ifneq ($(NOGUI_ONLY), 1)
+ifneq ($(NO_GUI), 1)
   OBJECTS += $(OBJ_GTK_GUI)
   LIBS += $(GTK_LIBS)
 endif
@@ -194,7 +194,7 @@ targets:
 	@echo "    VCR=1         == enable video recording"
 	@echo "    LIRC=1        == enable LIRC support"
 	@echo "    NO_RESAMP=1   == disable libsamplerate support in jttl_audio"
-	@echo "    NOGUI_ONLY=1  == build without GUI support"
+	@echo "    NO_GUI=1      == build without GUI support"
 	@echo "    PREFIX=path   == specify install/uninstall prefix (default: /usr/local)"
 	@echo "  Debugging Options:"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
