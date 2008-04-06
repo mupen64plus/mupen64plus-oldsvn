@@ -215,92 +215,92 @@ static int old_ucode = -1;
 // rdp_reset - resets the RDP_E
 void rdp_reset ()
 {
-	reset = 1;
-	
-	rdp.model_i = 0;
-	
-	rdp.n_cached[0] = 0;
-	rdp.n_cached[1] = 0;
-	rdp.cur_cache[0] = NULL;
-	rdp.cur_cache[1] = NULL;
+    reset = 1;
+    
+    rdp.model_i = 0;
+    
+    rdp.n_cached[0] = 0;
+    rdp.n_cached[1] = 0;
+    rdp.cur_cache[0] = NULL;
+    rdp.cur_cache[1] = NULL;
   /*
-	rdp.tmem_ptr[0] = offset_textures;
-	rdp.tmem_ptr[1] = offset_textures;
-	if (grTextureBufferExt)
-	  rdp.tmem_ptr[1] = TEXMEM_2MB_EDGE * 2;
+    rdp.tmem_ptr[0] = offset_textures;
+    rdp.tmem_ptr[1] = offset_textures;
+    if (grTextureBufferExt)
+      rdp.tmem_ptr[1] = TEXMEM_2MB_EDGE * 2;
   */
-	rdp.c_a0  = 0;
-	rdp.c_b0  = 0;
-	rdp.c_c0  = 0;
-	rdp.c_d0  = 0;
-	rdp.c_Aa0 = 0;
-	rdp.c_Ab0 = 0;
-	rdp.c_Ac0 = 0;
-	rdp.c_Ad0 = 0;
-	
-	rdp.c_a1  = 0;
-	rdp.c_b1  = 0;
-	rdp.c_c1  = 0;
-	rdp.c_d1  = 0;
-	rdp.c_Aa1 = 0;
-	rdp.c_Ab1 = 0;
-	rdp.c_Ac1 = 0;
-	rdp.c_Ad1 = 0;
-	
-	// Clear the palette CRC
-	int i;
-	for (i=0; i<16; i++)
-		rdp.pal_8_crc[i] = 0;
-	
-	// Clear the palettes
-	for (i=0; i<256; i++)
-		rdp.pal_8[i] = 0;
-	
-	rdp.tlut_mode = 0;
-	
-	// Clear all segments ** VERY IMPORTANT FOR ZELDA **
-	for (i=0; i<16; i++)
-		rdp.segment[i] = 0;
-	
-	for (i=0; i<512; i++)
-		rdp.addr[i] = 0;
-	
-	// set all vertex numbers
-	for (i=0; i<MAX_VTX; i++)
-		rdp.vtx[i].number = i;
+    rdp.c_a0  = 0;
+    rdp.c_b0  = 0;
+    rdp.c_c0  = 0;
+    rdp.c_d0  = 0;
+    rdp.c_Aa0 = 0;
+    rdp.c_Ab0 = 0;
+    rdp.c_Ac0 = 0;
+    rdp.c_Ad0 = 0;
+    
+    rdp.c_a1  = 0;
+    rdp.c_b1  = 0;
+    rdp.c_c1  = 0;
+    rdp.c_d1  = 0;
+    rdp.c_Aa1 = 0;
+    rdp.c_Ab1 = 0;
+    rdp.c_Ac1 = 0;
+    rdp.c_Ad1 = 0;
+    
+    // Clear the palette CRC
+    int i;
+    for (i=0; i<16; i++)
+        rdp.pal_8_crc[i] = 0;
+    
+    // Clear the palettes
+    for (i=0; i<256; i++)
+        rdp.pal_8[i] = 0;
+    
+    rdp.tlut_mode = 0;
+    
+    // Clear all segments ** VERY IMPORTANT FOR ZELDA **
+    for (i=0; i<16; i++)
+        rdp.segment[i] = 0;
+    
+    for (i=0; i<512; i++)
+        rdp.addr[i] = 0;
+    
+    // set all vertex numbers
+    for (i=0; i<MAX_VTX; i++)
+        rdp.vtx[i].number = i;
 
-	rdp.scissor_o.ul_x = 0;
-	rdp.scissor_o.ul_y = 0;
-	rdp.scissor_o.lr_x = 320;
-	rdp.scissor_o.lr_y = 240;
-	rdp.num_lights = 0;
+    rdp.scissor_o.ul_x = 0;
+    rdp.scissor_o.ul_y = 0;
+    rdp.scissor_o.lr_x = 320;
+    rdp.scissor_o.lr_y = 240;
+    rdp.num_lights = 0;
   rdp.lookat[0][0] = rdp.lookat[1][1] = 1.0f;
   rdp.lookat[0][1] = rdp.lookat[0][2] = rdp.lookat[1][0] = rdp.lookat[1][2] = 0.0f;
-	rdp.texrecting = 0;
-	rdp.rm = 0;
-	rdp.render_mode_changed = 0;
-	rdp.othermode_h = 0;
-	rdp.othermode_l = 0;
-	
-	rdp.tex_ctr = 0;
-	
-	rdp.tex = 0;
-	
-	rdp.cimg = 0;
-	rdp.ocimg = 0;
-	rdp.zimg = 0;
-	rdp.ci_width = 0;
-	rdp.cycle_mode = 2;
-	
-	rdp.allow_combine = 1;
-	
+    rdp.texrecting = 0;
+    rdp.rm = 0;
+    rdp.render_mode_changed = 0;
+    rdp.othermode_h = 0;
+    rdp.othermode_l = 0;
+    
+    rdp.tex_ctr = 0;
+    
+    rdp.tex = 0;
+    
+    rdp.cimg = 0;
+    rdp.ocimg = 0;
+    rdp.zimg = 0;
+    rdp.ci_width = 0;
+    rdp.cycle_mode = 2;
+    
+    rdp.allow_combine = 1;
+    
   rdp.fog_coord_enabled = FALSE;
-	rdp.skip_drawing = FALSE;
+    rdp.skip_drawing = FALSE;
 
-	memset(rdp.frame_buffers, 0, sizeof(rdp.frame_buffers));
-	rdp.main_ci_index = 0;
+    memset(rdp.frame_buffers, 0, sizeof(rdp.frame_buffers));
+    rdp.main_ci_index = 0;
   rdp.maincimg[0].addr = rdp.maincimg[1].addr = rdp.last_drawn_ci_addr = 0x7FFFFFFF;
-	rdp.read_previous_ci = FALSE;
+    rdp.read_previous_ci = FALSE;
     rdp.yuv_ul_x = rdp.yuv_ul_y = rdp.yuv_lr_x = rdp.yuv_lr_y = 0;
     rdp.yuv_im_begin = 0x00FFFFFF; 
     rdp.yuv_image = FALSE;
@@ -310,14 +310,14 @@ void rdp_reset ()
     rdp.hires_tex = 0;
 
     hotkey_info.fb_always = 0; 
-  	hotkey_info.fb_motionblur = (settings.buff_clear == 0)?0:60; 
-  	hotkey_info.filtering = hotkey_info.fb_motionblur; 
-  	hotkey_info.corona = hotkey_info.fb_motionblur; 
+    hotkey_info.fb_motionblur = (settings.buff_clear == 0)?0:60; 
+    hotkey_info.filtering = hotkey_info.fb_motionblur; 
+    hotkey_info.corona = hotkey_info.fb_motionblur; 
 #ifdef _WIN32
-	GetAsyncKeyState (VK_BACK);
-	GetAsyncKeyState(0x42);
-	GetAsyncKeyState(0x56);
-	GetAsyncKeyState(0x43);
+    GetAsyncKeyState (VK_BACK);
+    GetAsyncKeyState(0x42);
+    GetAsyncKeyState(0x56);
+    GetAsyncKeyState(0x43);
 #endif // _WIN32
     for (i = 0; i < num_tmu; i++)
       rdp.texbufs[i].count = 0;
@@ -338,95 +338,95 @@ void rdp_reset ()
 # define _Read8Endian(array, address) (*((BYTE *)(array+ByteEndian(address))))
 __inline static DWORD searchrdram(const char *ct)
 {
-	DWORD pos, pos2;
-	const char *t;
-	t = ct;
-	for (pos=0; pos<0x400000; pos++) {
-		for (pos2=pos, t=ct; *ct != 0; t++, pos2++) {
-			if (_Read8Endian(gfx.RDRAM, pos2) != *t)
-				break;
-			else
-				if (*(t + 1) == 0)
-					return pos;
-		}
-	}
-	return 0;
+    DWORD pos, pos2;
+    const char *t;
+    t = ct;
+    for (pos=0; pos<0x400000; pos++) {
+        for (pos2=pos, t=ct; *ct != 0; t++, pos2++) {
+            if (_Read8Endian(gfx.RDRAM, pos2) != *t)
+                break;
+            else
+                if (*(t + 1) == 0)
+                    return pos;
+        }
+    }
+    return 0;
 }
 
 void microcheck ()
 {
-	DWORD i;
-	uc_crc = 0;
-	
-	// Check first 3k of ucode, because the last 1k sometimes contains trash
-	for (i=0; i<3072>>2; i++)
-	{
-		uc_crc += ((DWORD*)microcode)[i];
-	}
-	
-	FRDP_E ("crc: %08lx\n", uc_crc);
-	
+    DWORD i;
+    uc_crc = 0;
+    
+    // Check first 3k of ucode, because the last 1k sometimes contains trash
+    for (i=0; i<3072>>2; i++)
+    {
+        uc_crc += ((DWORD*)microcode)[i];
+    }
+    
+    FRDP_E ("crc: %08lx\n", uc_crc);
+    
 #ifdef LOG_UCODE
-	std::ofstream ucf;
-	ucf.open ("ucode.txt", ios::out | ios::binary);
-	char d;
-	for (i=0; i<0x400000; i++)
-	{
-		d = ((char*)gfx.RDRAM)[i^3];
-		ucf.write (&d, 1);
-	}
-	ucf.close ();
+    std::ofstream ucf;
+    ucf.open ("ucode.txt", ios::out | ios::binary);
+    char d;
+    for (i=0; i<0x400000; i++)
+    {
+        d = ((char*)gfx.RDRAM)[i^3];
+        ucf.write (&d, 1);
+    }
+    ucf.close ();
 #endif
-	
-	char str[9];
+    
+    char str[9];
   sprintf (str, "%08lx", (unsigned long)uc_crc);
-	
-	INI_Open ();
-	INI_FindSection ("UCODE");
-	FRDP("ucode = %s\n", str);
-	int uc = INI_ReadInt (str, -2, 0);
-	
-	if (uc == -2 && ucode_error_report)
-	{
-		INI_FindSection ("SETTINGS");
-		settings.ucode = INI_ReadInt ("ucode", 0);
-		INI_Close ();
-		
-		ReleaseGfx ();
-		sprintf (out_buf, "Error: uCode crc not found in INI, using currently selected uCode\n\n%08lx", (unsigned long)uc_crc);
+    
+    INI_Open ();
+    INI_FindSection ("UCODE");
+    FRDP("ucode = %s\n", str);
+    int uc = INI_ReadInt (str, -2, 0);
+    
+    if (uc == -2 && ucode_error_report)
+    {
+        INI_FindSection ("SETTINGS");
+        settings.ucode = INI_ReadInt ("ucode", 0);
+        INI_Close ();
+        
+        ReleaseGfx ();
+        sprintf (out_buf, "Error: uCode crc not found in INI, using currently selected uCode\n\n%08lx", (unsigned long)uc_crc);
 #ifdef _WIN32
-		MessageBox (gfx.hWnd, out_buf, "Error", MB_OK|MB_ICONEXCLAMATION);
+        MessageBox (gfx.hWnd, out_buf, "Error", MB_OK|MB_ICONEXCLAMATION);
 #else // _WIN32
-	   messagebox("Error", MB_OK|MB_ICONEXCLAMATION, out_buf);
+       messagebox("Error", MB_OK|MB_ICONEXCLAMATION, out_buf);
 #endif // _WIN32
-		
-		ucode_error_report = FALSE;	// don't report any more ucode errors from this game
-	}
-	else if (uc == -1 && ucode_error_report)
-	{
-		INI_FindSection ("SETTINGS");
-		settings.ucode = INI_ReadInt ("ucode", 0);
-		INI_Close ();
-		
-		ReleaseGfx ();
-		sprintf (out_buf, "Error: Unsupported uCode!\n\ncrc: %08lx", (unsigned long)uc_crc);
+        
+        ucode_error_report = FALSE; // don't report any more ucode errors from this game
+    }
+    else if (uc == -1 && ucode_error_report)
+    {
+        INI_FindSection ("SETTINGS");
+        settings.ucode = INI_ReadInt ("ucode", 0);
+        INI_Close ();
+        
+        ReleaseGfx ();
+        sprintf (out_buf, "Error: Unsupported uCode!\n\ncrc: %08lx", (unsigned long)uc_crc);
 #ifdef _WIN32
-		MessageBox (gfx.hWnd, out_buf, "Error", MB_OK|MB_ICONEXCLAMATION);
+        MessageBox (gfx.hWnd, out_buf, "Error", MB_OK|MB_ICONEXCLAMATION);
 #else // _WIN32
-	   messagebox("Error", MB_OK|MB_ICONEXCLAMATION, out_buf);
+       messagebox("Error", MB_OK|MB_ICONEXCLAMATION, out_buf);
 #endif // _WIN32
-		
-		ucode_error_report = FALSE;	// don't report any more ucode errors from this game
-	}
-	else
-	{
-		old_ucode = settings.ucode;
-		settings.ucode = uc;
-		FRDP("microcheck: old ucode: %d,  new ucode: %d\n", old_ucode, uc);
-		//INI_FindSection ("SETTINGS");
-		//INI_WriteInt ("ucode", uc);
-		INI_Close ();
-	}
+        
+        ucode_error_report = FALSE; // don't report any more ucode errors from this game
+    }
+    else
+    {
+        old_ucode = settings.ucode;
+        settings.ucode = uc;
+        FRDP("microcheck: old ucode: %d,  new ucode: %d\n", old_ucode, uc);
+        //INI_FindSection ("SETTINGS");
+        //INI_WriteInt ("ucode", uc);
+        INI_Close ();
+    }
 }
 
 #ifdef _WIN32
@@ -435,69 +435,69 @@ RECT prev_rect;
 
 void drawNoFullscreenMessage()
 {
-	LOG ("drawNoFullscreenMessage ()\n");
+    LOG ("drawNoFullscreenMessage ()\n");
 #ifdef _WIN32
     SIZE str_size;
     RECT win_rect;
     HWND active_wnd = GetForegroundWindow ();
-	
+    
     GetClientRect (gfx.hWnd, &win_rect);
     if (win_rect.bottom != prev_rect.bottom ||
-		win_rect.right != prev_rect.right ||
-		rdp.window_changed)
+        win_rect.right != prev_rect.right ||
+        rdp.window_changed)
     {
-		rdp.window_changed = FALSE;
-		
-		prev_rect.bottom = win_rect.bottom;
-		prev_rect.right = win_rect.right;
-		
-		HDC hdc = GetDC(gfx.hWnd);
-		SetBkMode (hdc, TRANSPARENT);
-		SetTextColor (hdc, RGB(255,255,255));
-		
-		FillRect (hdc, &win_rect, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
-		
-		win_rect.bottom >>= 1;
-		win_rect.right >>= 1;
-		
-		sprintf (out_buf, "Glide64");
-		GetTextExtentPoint32 (hdc, out_buf, strlen(out_buf), &str_size);
-		TextOut (hdc, win_rect.right - (str_size.cx>>1),
-			win_rect.bottom - str_size.cy - 32, out_buf, strlen(out_buf));
-		
-		sprintf (out_buf, "Gfx cannot be drawn in windowed mode");
-		GetTextExtentPoint32 (hdc, out_buf, strlen(out_buf), &str_size);
-		TextOut (hdc, win_rect.right - (str_size.cx>>1),
-			win_rect.bottom - str_size.cy - 2, out_buf, strlen(out_buf));
-		
-		sprintf (out_buf, "Press Alt+Enter to switch to fullscreen");
-		GetTextExtentPoint32 (hdc, out_buf, strlen(out_buf), &str_size);
-		TextOut (hdc, win_rect.right - (str_size.cx>>1),
-			win_rect.bottom + 2, out_buf, strlen(out_buf));
+        rdp.window_changed = FALSE;
+        
+        prev_rect.bottom = win_rect.bottom;
+        prev_rect.right = win_rect.right;
+        
+        HDC hdc = GetDC(gfx.hWnd);
+        SetBkMode (hdc, TRANSPARENT);
+        SetTextColor (hdc, RGB(255,255,255));
+        
+        FillRect (hdc, &win_rect, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
+        
+        win_rect.bottom >>= 1;
+        win_rect.right >>= 1;
+        
+        sprintf (out_buf, "Glide64");
+        GetTextExtentPoint32 (hdc, out_buf, strlen(out_buf), &str_size);
+        TextOut (hdc, win_rect.right - (str_size.cx>>1),
+            win_rect.bottom - str_size.cy - 32, out_buf, strlen(out_buf));
+        
+        sprintf (out_buf, "Gfx cannot be drawn in windowed mode");
+        GetTextExtentPoint32 (hdc, out_buf, strlen(out_buf), &str_size);
+        TextOut (hdc, win_rect.right - (str_size.cx>>1),
+            win_rect.bottom - str_size.cy - 2, out_buf, strlen(out_buf));
+        
+        sprintf (out_buf, "Press Alt+Enter to switch to fullscreen");
+        GetTextExtentPoint32 (hdc, out_buf, strlen(out_buf), &str_size);
+        TextOut (hdc, win_rect.right - (str_size.cx>>1),
+            win_rect.bottom + 2, out_buf, strlen(out_buf));
     }
 #endif // _WIN32
 }
 
 static WORD yuv_to_rgb(BYTE y, BYTE u, BYTE v)
 {
-   	float r = y + (1.370705f * (v-128));
-   	float g = y - (0.698001f * (v-128)) - (0.337633f * (u-128));
-   	float b = y + (1.732446f * (u-128));
-   	r *= 0.125f;
-   	g *= 0.125f;
-   	b *= 0.125f;
-   	//clipping the result
-   	if (r > 32) r = 32;
-   	if (g > 32) g = 32;
-   	if (b > 32) b = 32;
-   	if (r < 0) r = 0;
-   	if (g < 0) g = 0;
-   	if (b < 0) b = 0;
-   	
-   	WORD c = (WORD)(((WORD)(r) << 11) |
-   	          ((WORD)(g) << 6) |
-   			  ((WORD)(b) << 1) | 1);
-   	return c;
+    float r = y + (1.370705f * (v-128));
+    float g = y - (0.698001f * (v-128)) - (0.337633f * (u-128));
+    float b = y + (1.732446f * (u-128));
+    r *= 0.125f;
+    g *= 0.125f;
+    b *= 0.125f;
+    //clipping the result
+    if (r > 32) r = 32;
+    if (g > 32) g = 32;
+    if (b > 32) b = 32;
+    if (r < 0) r = 0;
+    if (g < 0) g = 0;
+    if (b < 0) b = 0;
+    
+    WORD c = (WORD)(((WORD)(r) << 11) |
+              ((WORD)(g) << 6) |
+              ((WORD)(b) << 1) | 1);
+    return c;
 }
 
 static void DrawYUVImageToFrameBuffer()
@@ -516,16 +516,16 @@ static void DrawYUVImageToFrameBuffer()
        {
           for (WORD w = 0; w < 8; w++)
           {
-           	DWORD t = *(mb++); //each DWORD contains 2 pixels
-           	if ((x < rdp.ci_width) && (y < rdp.ci_height)) //clipping. texture image may be larger than color image
-           	{
-            	BYTE y0 = (BYTE)t&0xFF;
-            	BYTE v  = (BYTE)(t>>8)&0xFF;
-            	BYTE y1 = (BYTE)(t>>16)&0xFF;
-            	BYTE u  = (BYTE)(t>>24)&0xFF;
-            	*(dst++) = yuv_to_rgb(y0, u, v);
-            	*(dst++) = yuv_to_rgb(y1, u, v);
-           	}
+            DWORD t = *(mb++); //each DWORD contains 2 pixels
+            if ((x < rdp.ci_width) && (y < rdp.ci_height)) //clipping. texture image may be larger than color image
+            {
+                BYTE y0 = (BYTE)t&0xFF;
+                BYTE v  = (BYTE)(t>>8)&0xFF;
+                BYTE y1 = (BYTE)(t>>16)&0xFF;
+                BYTE u  = (BYTE)(t>>24)&0xFF;
+                *(dst++) = yuv_to_rgb(y0, u, v);
+                *(dst++) = yuv_to_rgb(y1, u, v);
+            }
           }
           dst += rdp.ci_width - 16;
        }
@@ -550,7 +550,7 @@ static void DrawPart(int scr_ul_x, int scr_ul_y, int prt_ul_x, int prt_ul_y, int
   {
     for (int x=0; x < width; x++)
     {
-  	  c = src[(int(x*scale_x)+int(y*scale_y)*rdp.ci_width)^1];
+      c = src[(int(x*scale_x)+int(y*scale_y)*rdp.ci_width)^1];
         dst[x+y*width] = c?((c >> 1) | 0x8000):0;
     }
   }
@@ -573,15 +573,15 @@ static void DrawFrameBufferToScreen()
   if (!fullscreen)
     return;
   grColorCombine (GR_COMBINE_FUNCTION_SCALE_OTHER,
-  	GR_COMBINE_FACTOR_ONE,
-  	GR_COMBINE_LOCAL_NONE,
-  	GR_COMBINE_OTHER_TEXTURE,
-  	FXFALSE);
+    GR_COMBINE_FACTOR_ONE,
+    GR_COMBINE_LOCAL_NONE,
+    GR_COMBINE_OTHER_TEXTURE,
+    FXFALSE);
   grAlphaCombine (GR_COMBINE_FUNCTION_SCALE_OTHER,
-  	GR_COMBINE_FACTOR_ONE,
-  	GR_COMBINE_LOCAL_NONE,
-  	GR_COMBINE_OTHER_TEXTURE,
- 	FXFALSE);
+    GR_COMBINE_FACTOR_ONE,
+    GR_COMBINE_LOCAL_NONE,
+    GR_COMBINE_OTHER_TEXTURE,
+    FXFALSE);
   grConstantColorValue (0xFFFFFFFF);
   grAlphaBlendFunction( GR_BLEND_SRC_ALPHA, 
     GR_BLEND_ONE_MINUS_SRC_ALPHA, 
@@ -810,8 +810,8 @@ static void CopyFrameBuffer (GrBuffer_t buffer = GR_BUFFER_BACKBUFFER)
     if (rdp.motionblur && settings.fb_hires)
     {
       return;
-   	}	
-   	else
+    }   
+    else
     {
       float scale_x = (float)settings.scr_res_x / rdp.vi_width;//(float)max(rdp.frame_buffers[rdp.main_ci_index].width, rdp.ci_width);
       float scale_y = (float)settings.scr_res_y / rdp.vi_height;//(float)max(rdp.frame_buffers[rdp.main_ci_index].height, rdp.ci_lower_bound);
@@ -823,87 +823,87 @@ static void CopyFrameBuffer (GrBuffer_t buffer = GR_BUFFER_BACKBUFFER)
 
       // VP 888 disconnected for now
       if (1||rdp.ci_size <= 2) {
-	if (grLfbLock (GR_LFB_READ_ONLY,
-		       buffer,
-		       GR_LFBWRITEMODE_565,
-		       GR_ORIGIN_UPPER_LEFT,
-		       FXFALSE,
-		       &info))
-	  {
-	    WORD *ptr_src = (WORD*)info.lfbPtr;
-	    WORD *ptr_dst = (WORD*)(gfx.RDRAM+rdp.cimg);
-	    DWORD *ptr_dst32 = (DWORD*)(gfx.RDRAM+rdp.cimg);
-	    WORD c;
-	    DWORD stride = info.strideInBytes>>1;
-	    
-	    BOOL read_alpha = settings.fb_read_alpha;
-	    if (settings.PM && rdp.frame_buffers[rdp.ci_count-1].status != ci_aux)
-	      read_alpha = FALSE;
-	    for (int y=0; y<height; y++)
-	      {
-		for (int x=0; x<width; x++)
-		  {
-		    c = ptr_src[int(x*scale_x) + int(y * scale_y) * stride];
-		    c = (c&0xFFC0) | ((c&0x001F) << 1) | 1;
-		    if (read_alpha && c == 1)
-		      c = 0;
-		    if (rdp.ci_size <= 2)
-		      ptr_dst[(x + y * width)^1] = c;
-		    else
-		      ptr_dst32[x + y * width] = RGBA16TO32(c);
-		  }
-	      }
-	    
-	    // Unlock the backbuffer
-	    grLfbUnlock (GR_LFB_READ_ONLY, buffer);
-	    RDP ("LfbLock.  Framebuffer copy complete.\n");
-	  }
-	  else
-	  {
-	    RDP ("Framebuffer copy failed.\n");
-	  }
-	printf("erf\n");
-      } else {
-	printf("youhou\n");
-	if (grLfbLock (GR_LFB_READ_ONLY,
-		       buffer,
-		       GR_LFBWRITEMODE_888,
-		       GR_ORIGIN_UPPER_LEFT,
-		       FXFALSE,
-		       &info))
-	  {
-	    DWORD *ptr_src = (DWORD*)info.lfbPtr;
-	    //FIXME: Why unused?
-	    //WORD *ptr_dst = (WORD*)(gfx.RDRAM+rdp.cimg);
-	    DWORD *ptr_dst32 = (DWORD*)(gfx.RDRAM+rdp.cimg);
-	    DWORD c;
-	    DWORD stride = info.strideInBytes>>1;
-	    
-	    BOOL read_alpha = settings.fb_read_alpha;
-	    if (settings.PM && rdp.frame_buffers[rdp.ci_count-1].status != ci_aux)
-	      read_alpha = FALSE;
-	    for (int y=0; y<height; y++)
-	      {
-		for (int x=0; x<width; x++)
-		  {
-		    c = ptr_src[int(x*scale_x) + int(y * scale_y) * stride];
-//		    c = (c&0xFFC0) | ((c&0x001F) << 1) | 1;
-//		    if (read_alpha && c == 1)
-//		      c = 0;
-		    ptr_dst32[x + y * width] = c;
-		  }
-	      }
-	    
-	    // Unlock the backbuffer
-	    grLfbUnlock (GR_LFB_READ_ONLY, buffer);
-	    RDP ("LfbLock.  Framebuffer copy complete.\n");
-	  }
-	  else
-	  {
-	    RDP ("Framebuffer copy failed.\n");
-	  }
+    if (grLfbLock (GR_LFB_READ_ONLY,
+               buffer,
+               GR_LFBWRITEMODE_565,
+               GR_ORIGIN_UPPER_LEFT,
+               FXFALSE,
+               &info))
+      {
+        WORD *ptr_src = (WORD*)info.lfbPtr;
+        WORD *ptr_dst = (WORD*)(gfx.RDRAM+rdp.cimg);
+        DWORD *ptr_dst32 = (DWORD*)(gfx.RDRAM+rdp.cimg);
+        WORD c;
+        DWORD stride = info.strideInBytes>>1;
+        
+        BOOL read_alpha = settings.fb_read_alpha;
+        if (settings.PM && rdp.frame_buffers[rdp.ci_count-1].status != ci_aux)
+          read_alpha = FALSE;
+        for (int y=0; y<height; y++)
+          {
+        for (int x=0; x<width; x++)
+          {
+            c = ptr_src[int(x*scale_x) + int(y * scale_y) * stride];
+            c = (c&0xFFC0) | ((c&0x001F) << 1) | 1;
+            if (read_alpha && c == 1)
+              c = 0;
+            if (rdp.ci_size <= 2)
+              ptr_dst[(x + y * width)^1] = c;
+            else
+              ptr_dst32[x + y * width] = RGBA16TO32(c);
+          }
+          }
+        
+        // Unlock the backbuffer
+        grLfbUnlock (GR_LFB_READ_ONLY, buffer);
+        RDP ("LfbLock.  Framebuffer copy complete.\n");
       }
-    }	
+      else
+      {
+        RDP ("Framebuffer copy failed.\n");
+      }
+    printf("erf\n");
+      } else {
+    printf("youhou\n");
+    if (grLfbLock (GR_LFB_READ_ONLY,
+               buffer,
+               GR_LFBWRITEMODE_888,
+               GR_ORIGIN_UPPER_LEFT,
+               FXFALSE,
+               &info))
+      {
+        DWORD *ptr_src = (DWORD*)info.lfbPtr;
+        //FIXME: Why unused?
+        //WORD *ptr_dst = (WORD*)(gfx.RDRAM+rdp.cimg);
+        DWORD *ptr_dst32 = (DWORD*)(gfx.RDRAM+rdp.cimg);
+        DWORD c;
+        DWORD stride = info.strideInBytes>>1;
+        
+        BOOL read_alpha = settings.fb_read_alpha;
+        if (settings.PM && rdp.frame_buffers[rdp.ci_count-1].status != ci_aux)
+          read_alpha = FALSE;
+        for (int y=0; y<height; y++)
+          {
+        for (int x=0; x<width; x++)
+          {
+            c = ptr_src[int(x*scale_x) + int(y * scale_y) * stride];
+//          c = (c&0xFFC0) | ((c&0x001F) << 1) | 1;
+//          if (read_alpha && c == 1)
+//            c = 0;
+            ptr_dst32[x + y * width] = c;
+          }
+          }
+        
+        // Unlock the backbuffer
+        grLfbUnlock (GR_LFB_READ_ONLY, buffer);
+        RDP ("LfbLock.  Framebuffer copy complete.\n");
+      }
+      else
+      {
+        RDP ("Framebuffer copy failed.\n");
+      }
+      }
+    }   
   }
 }
 
@@ -925,85 +925,85 @@ BOOL CI_SET = TRUE;
 
 EXPORT void CALL ProcessDList(void)
 {
-	no_dlist = FALSE;
+    no_dlist = FALSE;
   update_screen_count = 0;
-	ChangeSize ();
-	
+    ChangeSize ();
+    
 #ifdef ALTTAB_FIX
-	if (!hhkLowLevelKybd)
-	{
-		hhkLowLevelKybd = SetWindowsHookEx(WH_KEYBOARD_LL, 
-			LowLevelKeyboardProc, hInstance, 0);
-	}
+    if (!hhkLowLevelKybd)
+    {
+        hhkLowLevelKybd = SetWindowsHookEx(WH_KEYBOARD_LL, 
+            LowLevelKeyboardProc, hInstance, 0);
+    }
 #endif
-	
-	LOG ("ProcessDList ()\n");
-	
-	if (!fullscreen)
+    
+    LOG ("ProcessDList ()\n");
+    
+    if (!fullscreen)
   {
-		drawNoFullscreenMessage();
+        drawNoFullscreenMessage();
     // Set an interrupt to allow the game to continue
     *gfx.MI_INTR_REG |= 0x20;
     gfx.CheckInterrupts();
   }
-	
-	if (reset)
-	{
-		reset = 0;
-		
-		memset (microcode, 0, 4096);
-		if (settings.autodetect_ucode)
-		{
-			// Thanks to ZeZu for ucode autodetection!!!
-			
-			DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
-			memcpy (microcode, gfx.RDRAM+startUcode, 4096);
-			microcheck ();
-			
-		}
-	}
+    
+    if (reset)
+    {
+        reset = 0;
+        
+        memset (microcode, 0, 4096);
+        if (settings.autodetect_ucode)
+        {
+            // Thanks to ZeZu for ucode autodetection!!!
+            
+            DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
+            memcpy (microcode, gfx.RDRAM+startUcode, 4096);
+            microcheck ();
+            
+        }
+    }
   else if ( ((old_ucode == 6) && (settings.ucode == 1)) || settings.force_microcheck)
-	{
-		DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
-		memcpy (microcode, gfx.RDRAM+startUcode, 4096);
-		microcheck ();
-	}
-	
-	if (exception) return;
-	
-	// Switch to fullscreen?
-	if (to_fullscreen)
-	{
-		to_fullscreen = FALSE;
-		
-		if (!InitGfx (FALSE))
-		{
-			LOG ("FAILED!!!\n");
-			return;
-		}
-		fullscreen = TRUE;
+    {
+        DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
+        memcpy (microcode, gfx.RDRAM+startUcode, 4096);
+        microcheck ();
+    }
+    
+    if (exception) return;
+    
+    // Switch to fullscreen?
+    if (to_fullscreen)
+    {
+        to_fullscreen = FALSE;
+        
+        if (!InitGfx (FALSE))
+        {
+            LOG ("FAILED!!!\n");
+            return;
+        }
+        fullscreen = TRUE;
 #ifdef _WIN32
-	    if (gfx.hStatusBar)
-	      ShowWindow( gfx.hStatusBar, SW_HIDE );
-	    ShowCursor( FALSE );
+        if (gfx.hStatusBar)
+          ShowWindow( gfx.hStatusBar, SW_HIDE );
+        ShowCursor( FALSE );
 #endif // _WIN32
-	}
-	
-	// Clear out the RDP log
+    }
+    
+    // Clear out the RDP log
 #ifdef RDP_LOGGING
     if (settings.logging && settings.log_clear)
     {
-		CLOSE_RDP_LOG ();
-		OPEN_RDP_LOG ();
+        CLOSE_RDP_LOG ();
+        OPEN_RDP_LOG ();
     }
 #endif
-	
+    
 #ifdef UNIMP_LOG
     if (settings.log_unk && settings.unk_clear)
     {
-		std::ofstream unimp;
-		unimp.open("unimp.txt");
-		unimp.close();
+        std::ofstream unimp;
+        unimp.open("unimp.txt");
+        unimp.close();
     }
 #endif
   
@@ -1012,28 +1012,28 @@ EXPORT void CALL ProcessDList(void)
     SwapOK = TRUE;
   rdp.updatescreen = 1;
   
-	rdp.tri_n = 0;  // 0 triangles so far this frame
-	rdp.debug_n = 0;
-	
-	rdp.model_i = 0; // 0 matrices so far in stack
-	//stack_size can be less then 32! Important for Silicon Vally. Thanks Orkin!
-	rdp.model_stack_size = min(32, (*(DWORD*)(gfx.DMEM+0x0FE4))>>6);
-	if (rdp.model_stack_size == 0)
+    rdp.tri_n = 0;  // 0 triangles so far this frame
+    rdp.debug_n = 0;
+    
+    rdp.model_i = 0; // 0 matrices so far in stack
+    //stack_size can be less then 32! Important for Silicon Vally. Thanks Orkin!
+    rdp.model_stack_size = min(32, (*(DWORD*)(gfx.DMEM+0x0FE4))>>6);
+    if (rdp.model_stack_size == 0)
       rdp.model_stack_size = 32;
   rdp.fb_drawn = rdp.fb_drawn_front = FALSE; 
-	rdp.update = 0x7FFFFFFF;  // All but clear cache
-	rdp.geom_mode = 0;
+    rdp.update = 0x7FFFFFFF;  // All but clear cache
+    rdp.geom_mode = 0;
   rdp.acmp = 0;
-	rdp.maincimg[1] = rdp.maincimg[0];
-	rdp.skip_drawing = FALSE;
-	rdp.s2dex_tex_loaded = FALSE;
+    rdp.maincimg[1] = rdp.maincimg[0];
+    rdp.skip_drawing = FALSE;
+    rdp.s2dex_tex_loaded = FALSE;
   fbreads_front = fbreads_back = 0;
   rdp.fog_multiplier = rdp.fog_offset = 0;
   rdp.zsrc = 0;
-	
-	if (cpu_fb_write == TRUE)
-	  DrawFrameBufferToScreen();
-	cpu_fb_write = FALSE;
+    
+    if (cpu_fb_write == TRUE)
+      DrawFrameBufferToScreen();
+    cpu_fb_write = FALSE;
   cpu_fb_read_called = FALSE;
   cpu_fb_write_called = FALSE;
   cpu_fb_ignore = FALSE;
@@ -1041,121 +1041,121 @@ EXPORT void CALL ProcessDList(void)
     d_ul_y = 0xffff;
     d_lr_x = 0;
     d_lr_y = 0;
-	
-	//analize possible frame buffer usage
-	if (settings.fb_smart)
-		DetectFrameBufferUsage();
+    
+    //analize possible frame buffer usage
+    if (settings.fb_smart)
+        DetectFrameBufferUsage();
   if (!settings.lego || rdp.num_of_ci > 1)
     rdp.last_bg = 0;
   //* End of set states *//
   
-	
-	// Get the start of the display list and the length of it
-	DWORD dlist_start = *(DWORD*)(gfx.DMEM+0xFF0);
-	DWORD dlist_length = *(DWORD*)(gfx.DMEM+0xFF4);
+    
+    // Get the start of the display list and the length of it
+    DWORD dlist_start = *(DWORD*)(gfx.DMEM+0xFF0);
+    DWORD dlist_length = *(DWORD*)(gfx.DMEM+0xFF4);
   FRDP("--- NEW DLIST --- crc: %08lx, ucode: %d, fbuf: %08lx, fbuf_width: %d, dlist start: %08lx, dlist_lenght: %d\n", uc_crc, settings.ucode, *gfx.VI_ORIGIN_REG, *gfx.VI_WIDTH_REG, dlist_start, dlist_length);
-	FRDP_E("--- NEW DLIST --- crc: %08lx, ucode: %d, fbuf: %08lx\n", uc_crc, settings.ucode, *gfx.VI_ORIGIN_REG);
-	
-	if (settings.tonic && dlist_length < 16)
-	{
+    FRDP_E("--- NEW DLIST --- crc: %08lx, ucode: %d, fbuf: %08lx\n", uc_crc, settings.ucode, *gfx.VI_ORIGIN_REG);
+    
+    if (settings.tonic && dlist_length < 16)
+    {
     rdp_fullsync();
-		FRDP_E("DLIST is too short!\n");
-		return;
-	}
-	
-	// Start executing at the start of the display list
-	rdp.pc_i = 0;
-	rdp.pc[rdp.pc_i] = dlist_start;
-	rdp.dl_count = -1;
-	rdp.halt = 0;
+        FRDP_E("DLIST is too short!\n");
+        return;
+    }
+    
+    // Start executing at the start of the display list
+    rdp.pc_i = 0;
+    rdp.pc[rdp.pc_i] = dlist_start;
+    rdp.dl_count = -1;
+    rdp.halt = 0;
   DWORD a;
-	
-	// catches exceptions so that it doesn't freeze
+    
+    // catches exceptions so that it doesn't freeze
 #ifdef CATCH_EXCEPTIONS
-	try {
+    try {
 #endif
-		
-		// MAIN PROCESSING LOOP
-		do {
-			
-			// Get the address of the next command
-			a = rdp.pc[rdp.pc_i] & BMASK;
-			
-			// Load the next command and its input
-			rdp.cmd0 = ((DWORD*)gfx.RDRAM)[a>>2];   // \ Current command, 64 bit
-			rdp.cmd1 = ((DWORD*)gfx.RDRAM)[(a>>2)+1]; // /
-			// cmd2 and cmd3 are filled only when needed, by the function that needs them
-			
-			// Output the address before the command
+        
+        // MAIN PROCESSING LOOP
+        do {
+            
+            // Get the address of the next command
+            a = rdp.pc[rdp.pc_i] & BMASK;
+            
+            // Load the next command and its input
+            rdp.cmd0 = ((DWORD*)gfx.RDRAM)[a>>2];   // \ Current command, 64 bit
+            rdp.cmd1 = ((DWORD*)gfx.RDRAM)[(a>>2)+1]; // /
+            // cmd2 and cmd3 are filled only when needed, by the function that needs them
+            
+            // Output the address before the command
 #ifdef LOG_COMMANDS
-			FRDP ("%08lx (c0:%08lx, c1:%08lx): ", a, rdp.cmd0, rdp.cmd1);
+            FRDP ("%08lx (c0:%08lx, c1:%08lx): ", a, rdp.cmd0, rdp.cmd1);
 #else
-			FRDP ("%08lx: ", a);
+            FRDP ("%08lx: ", a);
 #endif
-			
-			// Go to the next instruction
-			rdp.pc[rdp.pc_i] = (a+8) & BMASK;
-			
+            
+            // Go to the next instruction
+            rdp.pc[rdp.pc_i] = (a+8) & BMASK;
+            
 #ifdef PERFORMANCE
-			QueryPerformanceCounter ((LARGE_INTEGER*)&perf_cur);
+            QueryPerformanceCounter ((LARGE_INTEGER*)&perf_cur);
 #endif
-			// Process this instruction
-			gfx_instruction[settings.ucode][rdp.cmd0>>24] ();
-			
-			// check DL counter
-			if (rdp.dl_count != -1)
-			{
-				rdp.dl_count --;
-				if (rdp.dl_count == 0)
-				{
-					rdp.dl_count = -1;
-					
-					RDP ("End of DL\n");
-					rdp.pc_i --;
-				}
-			}
-			
+            // Process this instruction
+            gfx_instruction[settings.ucode][rdp.cmd0>>24] ();
+            
+            // check DL counter
+            if (rdp.dl_count != -1)
+            {
+                rdp.dl_count --;
+                if (rdp.dl_count == 0)
+                {
+                    rdp.dl_count = -1;
+                    
+                    RDP ("End of DL\n");
+                    rdp.pc_i --;
+                }
+            }
+            
 #ifdef PERFORMANCE
-			QueryPerformanceCounter ((LARGE_INTEGER*)&perf_next);
-			__int64 t = perf_next-perf_cur;
-			sprintf (out_buf, "perf %08lx: %016I64d\n", a-8, t);
-			rdp_log << out_buf;
+            QueryPerformanceCounter ((LARGE_INTEGER*)&perf_next);
+            __int64 t = perf_next-perf_cur;
+            sprintf (out_buf, "perf %08lx: %016I64d\n", a-8, t);
+            rdp_log << out_buf;
 #endif
-			
-		} while (!rdp.halt);
+            
+        } while (!rdp.halt);
 #ifdef CATCH_EXCEPTIONS
-	} catch (...) {
-		
-		if (fullscreen) ReleaseGfx ();
+    } catch (...) {
+        
+        if (fullscreen) ReleaseGfx ();
 # ifdef _WIN32
-		if (MessageBox (gfx.hWnd, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?", "Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION) == IDNO)
-			exception = TRUE;
+        if (MessageBox (gfx.hWnd, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?", "Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION) == IDNO)
+            exception = TRUE;
 # else // _WIN32
-	   if (messagebox("Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?") == 2)
-	     exception = TRUE;
+       if (messagebox("Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?") == 2)
+         exception = TRUE;
 # endif // _WIN32
-	}
+    }
 #endif
-	
-	if (settings.fb_smart)
-	{
-		rdp.scale_x = rdp.scale_x_bak;
-		rdp.scale_y = rdp.scale_y_bak;
-	}
+    
+    if (settings.fb_smart)
+    {
+        rdp.scale_x = rdp.scale_x_bak;
+        rdp.scale_y = rdp.scale_y_bak;
+    }
     if (settings.fb_read_always)
     {
     CopyFrameBuffer ();
     }
     if (rdp.yuv_image)
     {
-  	  DrawYUVImageToFrameBuffer();
-  	  rdp.yuv_image = FALSE;
-//  	  FRDP("yuv image draw. ul_x: %f, ul_y: %f, lr_x: %f, lr_y: %f, begin: %08lx\n", 
-//  	  rdp.yuv_ul_x, rdp.yuv_ul_y, rdp.yuv_lr_x, rdp.yuv_lr_y, rdp.yuv_im_begin);
+      DrawYUVImageToFrameBuffer();
+      rdp.yuv_image = FALSE;
+//        FRDP("yuv image draw. ul_x: %f, ul_y: %f, lr_x: %f, lr_y: %f, begin: %08lx\n", 
+//        rdp.yuv_ul_x, rdp.yuv_ul_y, rdp.yuv_lr_x, rdp.yuv_lr_y, rdp.yuv_im_begin);
       rdp.yuv_ul_x = rdp.yuv_ul_y = rdp.yuv_lr_x = rdp.yuv_lr_y = 0;
       rdp.yuv_im_begin = 0x00FFFFFF; 
     }
-	if (rdp.cur_image)
+    if (rdp.cur_image)
     CloseTextureBuffer(rdp.read_whole_frame && (settings.PM || rdp.swap_ci_index >= 0));
 
   if (settings.TGR2 && rdp.vi_org_reg != *gfx.VI_ORIGIN_REG && CI_SET)
@@ -1169,51 +1169,51 @@ EXPORT void CALL ProcessDList(void)
 // undef - undefined instruction, always ignore
 static void undef()
 {
-	FRDP_E("** undefined ** (%08lx)\n", rdp.cmd0);
-	FRDP("** undefined ** (%08lx) - IGNORED\n", rdp.cmd0);
+    FRDP_E("** undefined ** (%08lx)\n", rdp.cmd0);
+    FRDP("** undefined ** (%08lx) - IGNORED\n", rdp.cmd0);
   #ifdef _FINAL_RELEASE_
   *gfx.MI_INTR_REG |= 0x20;
   gfx.CheckInterrupts();
-	rdp.halt = 1;
-  #endif	
+    rdp.halt = 1;
+  #endif    
 }
 
 // spnoop - no operation, always ignore
 static void spnoop()
 {
-	RDP("spnoop\n");
+    RDP("spnoop\n");
 }
 
 // noop - no operation, always ignore
 static void rdp_noop()
 {
-	RDP("noop\n");
+    RDP("noop\n");
 }
 
 static void ys_memrect ()
 {
-	DWORD tile = (WORD)((rdp.cmd1 & 0x07000000) >> 24);
-	
-	DWORD lr_x = (WORD)((rdp.cmd0 & 0x00FFF000) >> 14);
-	DWORD lr_y = (WORD)((rdp.cmd0 & 0x00000FFF) >> 2);
-	DWORD ul_x = (WORD)((rdp.cmd1 & 0x00FFF000) >> 14);
-	DWORD ul_y = (WORD)((rdp.cmd1 & 0x00000FFF) >> 2);
-	
-	rdp.pc[rdp.pc_i] += 16;	// texrect is 196-bit
-	
-	if (lr_y > rdp.scissor_o.lr_y) lr_y = rdp.scissor_o.lr_y;
-	
-	FRDP ("memrect (%d, %d, %d, %d), ci_width: %d\n", ul_x, ul_y, lr_x, lr_y, rdp.ci_width);
-	
-	DWORD y, width = lr_x - ul_x;
-	DWORD texaddr = rdp.addr[rdp.tiles[tile].t_mem];
-	DWORD tex_width = rdp.tiles[tile].line << 3;
-	
-	for (y = ul_y; y < lr_y; y++) {
-		BYTE *src = gfx.RDRAM + texaddr + (y - ul_y) * tex_width;
-		BYTE *dst = gfx.RDRAM + rdp.cimg + ul_x + y * rdp.ci_width;
-		memcpy (dst, src, width);
-	}
+    DWORD tile = (WORD)((rdp.cmd1 & 0x07000000) >> 24);
+    
+    DWORD lr_x = (WORD)((rdp.cmd0 & 0x00FFF000) >> 14);
+    DWORD lr_y = (WORD)((rdp.cmd0 & 0x00000FFF) >> 2);
+    DWORD ul_x = (WORD)((rdp.cmd1 & 0x00FFF000) >> 14);
+    DWORD ul_y = (WORD)((rdp.cmd1 & 0x00000FFF) >> 2);
+    
+    rdp.pc[rdp.pc_i] += 16; // texrect is 196-bit
+    
+    if (lr_y > rdp.scissor_o.lr_y) lr_y = rdp.scissor_o.lr_y;
+    
+    FRDP ("memrect (%d, %d, %d, %d), ci_width: %d\n", ul_x, ul_y, lr_x, lr_y, rdp.ci_width);
+    
+    DWORD y, width = lr_x - ul_x;
+    DWORD texaddr = rdp.addr[rdp.tiles[tile].t_mem];
+    DWORD tex_width = rdp.tiles[tile].line << 3;
+    
+    for (y = ul_y; y < lr_y; y++) {
+        BYTE *src = gfx.RDRAM + texaddr + (y - ul_y) * tex_width;
+        BYTE *dst = gfx.RDRAM + rdp.cimg + ul_x + y * rdp.ci_width;
+        memcpy (dst, src, width);
+    }
 }
 
 static void pm_palette_mod ()
@@ -1236,23 +1236,23 @@ static void pm_palette_mod ()
 
 static void rdp_texrect()
 {
-	DWORD a = rdp.pc[rdp.pc_i];
-	rdp.cmd2 = ((DWORD*)gfx.RDRAM)[(a>>2)+1];
-	rdp.cmd3 = ((DWORD*)gfx.RDRAM)[(a>>2)+3];
+    DWORD a = rdp.pc[rdp.pc_i];
+    rdp.cmd2 = ((DWORD*)gfx.RDRAM)[(a>>2)+1];
+    rdp.cmd3 = ((DWORD*)gfx.RDRAM)[(a>>2)+3];
 
-	if (settings.ASB) //modified Rice's hack for All-Star Baseball games
-	{
-    	DWORD dwHalf1 = (((DWORD*)gfx.RDRAM)[(a>>2)+0]) >> 24;
-    	if ((dwHalf1 != 0xF1)  && (dwHalf1 != 0xb3))
-    	{
-    		rdp.pc[rdp.pc_i] += 16; 
-    	}
-    	else
-    	{
-        	rdp.pc[rdp.pc_i] += 8;
-    		rdp.cmd3 = rdp.cmd2;
-    		rdp.cmd2 = 0;
-    	}
+    if (settings.ASB) //modified Rice's hack for All-Star Baseball games
+    {
+        DWORD dwHalf1 = (((DWORD*)gfx.RDRAM)[(a>>2)+0]) >> 24;
+        if ((dwHalf1 != 0xF1)  && (dwHalf1 != 0xb3))
+        {
+            rdp.pc[rdp.pc_i] += 16; 
+        }
+        else
+        {
+            rdp.pc[rdp.pc_i] += 8;
+            rdp.cmd3 = rdp.cmd2;
+            rdp.cmd2 = 0;
+        }
     }
   else if (settings.yoshi && settings.ucode == 6)
   {
@@ -1261,8 +1261,8 @@ static void rdp_texrect()
   }
     else
     {
-		rdp.pc[rdp.pc_i] += 16; // texrect is 196-bit
-	}
+        rdp.pc[rdp.pc_i] += 16; // texrect is 196-bit
+    }
 
   if (rdp.skip_drawing || (!settings.fb_smart && (rdp.cimg == rdp.zimg)))
   {
@@ -1271,25 +1271,25 @@ static void rdp_texrect()
       pm_palette_mod ();
     }
     else
-	{
-		RDP("Texrect skipped\n");
+    {
+        RDP("Texrect skipped\n");
     }
-		return;
-	}
+        return;
+    }
 
   if ((settings.ucode == 8) && rdp.cur_image && rdp.cur_image->format)
-	{
+    {
     //FRDP("Wrong Texrect. texaddr: %08lx, cimg: %08lx, cimg_end: %08lx\n", rdp.timg.addr, rdp.maincimg[1].addr, rdp.maincimg[1].addr+rdp.ci_width*rdp.ci_height*rdp.ci_size);
     RDP("Shadow texrect is skipped.\n");
-		rdp.tri_n += 2;
-		return;
-	}
+        rdp.tri_n += 2;
+        return;
+    }
 
-	WORD ul_x = (WORD)((rdp.cmd1 & 0x00FFF000) >> 14);
-	WORD ul_y = (WORD)((rdp.cmd1 & 0x00000FFF) >> 2);
-	WORD lr_x = (WORD)((rdp.cmd0 & 0x00FFF000) >> 14);
-	WORD lr_y = (WORD)((rdp.cmd0 & 0x00000FFF) >> 2);
-	if (ul_x >= lr_x) return;
+    WORD ul_x = (WORD)((rdp.cmd1 & 0x00FFF000) >> 14);
+    WORD ul_y = (WORD)((rdp.cmd1 & 0x00000FFF) >> 2);
+    WORD lr_x = (WORD)((rdp.cmd0 & 0x00FFF000) >> 14);
+    WORD lr_y = (WORD)((rdp.cmd0 & 0x00000FFF) >> 2);
+    if (ul_x >= lr_x) return;
   if (rdp.cycle_mode > 1 || settings.increase_texrect_edge)
   {
     lr_x++;
@@ -1300,159 +1300,159 @@ static void rdp_texrect()
     lr_y ++;
   }
 
-  //*	
+  //*   
   if (rdp.hires_tex && settings.fb_optimize_texrect)
     {
        if (!rdp.hires_tex->drawn)
        {
-         	DRAWIMAGE d;
-        	d.imageX	= 0;
-        	d.imageW	= (WORD)rdp.hires_tex->width;
-      d.frameX	= ul_x;
-        	d.frameW	= (WORD)(rdp.hires_tex->width);//(WORD)(ul_x + rdp.hires_tex->width);//lr_x;
+            DRAWIMAGE d;
+            d.imageX    = 0;
+            d.imageW    = (WORD)rdp.hires_tex->width;
+      d.frameX  = ul_x;
+            d.frameW    = (WORD)(rdp.hires_tex->width);//(WORD)(ul_x + rdp.hires_tex->width);//lr_x;
 
-        	d.imageY	= 0;
-        	d.imageH	= (WORD)rdp.hires_tex->height;
-      d.frameY	= ul_y;
-        	d.frameH	= (WORD)(rdp.hires_tex->height);//(ul_y + rdp.hires_tex->height);
-        	FRDP("texrect. ul_x: %d, ul_y: %d, lr_x: %d, lr_y: %d, width: %d, height: %d\n", ul_x, ul_y, lr_x, lr_y, rdp.hires_tex->width, rdp.hires_tex->height);
-        	d.scaleX	= 1.0f;
-        	d.scaleY	= 1.0f;
+            d.imageY    = 0;
+            d.imageH    = (WORD)rdp.hires_tex->height;
+      d.frameY  = ul_y;
+            d.frameH    = (WORD)(rdp.hires_tex->height);//(ul_y + rdp.hires_tex->height);
+            FRDP("texrect. ul_x: %d, ul_y: %d, lr_x: %d, lr_y: %d, width: %d, height: %d\n", ul_x, ul_y, lr_x, lr_y, rdp.hires_tex->width, rdp.hires_tex->height);
+            d.scaleX    = 1.0f;
+            d.scaleY    = 1.0f;
       DrawHiresImage(&d, rdp.hires_tex->width == rdp.ci_width);
             rdp.hires_tex->drawn = TRUE;
-	   }
-	   return;
-	}
+       }
+       return;
+    }
 //*/
-	// framebuffer workaround for Zelda: MM LOT
-	if ((rdp.othermode_l & 0xFFFF0000) == 0x0f5a0000)
-		return;
-	
-	/*Gonetz*/
-	//hack for Zelda MM. it removes black texrects which cover all geometry in "Link meets Zelda" cut scene
-	if (settings.zelda && rdp.timg.addr >= rdp.cimg && rdp.timg.addr < rdp.ci_end)
-	{
+    // framebuffer workaround for Zelda: MM LOT
+    if ((rdp.othermode_l & 0xFFFF0000) == 0x0f5a0000)
+        return;
+    
+    /*Gonetz*/
+    //hack for Zelda MM. it removes black texrects which cover all geometry in "Link meets Zelda" cut scene
+    if (settings.zelda && rdp.timg.addr >= rdp.cimg && rdp.timg.addr < rdp.ci_end)
+    {
     FRDP("Wrong Texrect. texaddr: %08lx, cimg: %08lx, cimg_end: %08lx\n", rdp.cur_cache[0]->addr, rdp.cimg, rdp.cimg+rdp.ci_width*rdp.ci_height*2);
-		rdp.tri_n += 2;
-		return;
-	}
-//*	
-	//hack for Banjo2. it removes black texrects under Banjo
-	if (!settings.fb_hires && ((rdp.cycle1 << 16) | (rdp.cycle2 & 0xFFFF)) == 0xFFFFFFFF && (rdp.othermode_l & 0xFFFF0000) == 0x00500000)
-	{
-		rdp.tri_n += 2;
-		return;
-	}
-//*/	
+        rdp.tri_n += 2;
+        return;
+    }
+//* 
+    //hack for Banjo2. it removes black texrects under Banjo
+    if (!settings.fb_hires && ((rdp.cycle1 << 16) | (rdp.cycle2 & 0xFFFF)) == 0xFFFFFFFF && (rdp.othermode_l & 0xFFFF0000) == 0x00500000)
+    {
+        rdp.tri_n += 2;
+        return;
+    }
+//*/    
   //*
   //remove motion blur in night vision
   if ((settings.ucode == 7) && (rdp.maincimg[1].addr != rdp.maincimg[0].addr) && (rdp.timg.addr >= rdp.maincimg[1].addr) && (rdp.timg.addr < (rdp.maincimg[1].addr+rdp.ci_width*rdp.ci_height*rdp.ci_size)))
-	{
-		if (settings.fb_smart)
-		  if (rdp.frame_buffers[rdp.ci_count-1].status == ci_copy_self || !settings.fb_motionblur)
-		  {
-        //			FRDP("Wrong Texrect. texaddr: %08lx, cimg: %08lx, cimg_end: %08lx\n", rdp.timg.addr, rdp.maincimg[1], rdp.maincimg[1]+rdp.ci_width*rdp.ci_height*rdp.ci_size);
+    {
+        if (settings.fb_smart)
+          if (rdp.frame_buffers[rdp.ci_count-1].status == ci_copy_self || !settings.fb_motionblur)
+          {
+        //          FRDP("Wrong Texrect. texaddr: %08lx, cimg: %08lx, cimg_end: %08lx\n", rdp.timg.addr, rdp.maincimg[1], rdp.maincimg[1]+rdp.ci_width*rdp.ci_height*rdp.ci_size);
         RDP("Wrong Texrect.\n");
-			rdp.tri_n += 2;
-			return;
-		  }
-	}
-//*/	
+            rdp.tri_n += 2;
+            return;
+          }
+    }
+//*/    
 
-	int i;
-	
-	DWORD tile = (WORD)((rdp.cmd1 & 0x07000000) >> 24);
-	
-	// update MUST be at the beginning, b/c of update_scissor
-	if (rdp.cycle_mode == 2)
-	{
-		rdp.tex = 1;
-		rdp.allow_combine = 0;
-		
+    int i;
+    
+    DWORD tile = (WORD)((rdp.cmd1 & 0x07000000) >> 24);
+    
+    // update MUST be at the beginning, b/c of update_scissor
+    if (rdp.cycle_mode == 2)
+    {
+        rdp.tex = 1;
+        rdp.allow_combine = 0;
+        
     cmb.tmu1_func = cmb.tmu0_func = GR_COMBINE_FUNCTION_LOCAL;
     cmb.tmu1_fac = cmb.tmu0_fac = GR_COMBINE_FACTOR_NONE;
     cmb.tmu1_a_func = cmb.tmu0_a_func = GR_COMBINE_FUNCTION_LOCAL;
     cmb.tmu1_a_fac = cmb.tmu0_a_fac = GR_COMBINE_FACTOR_NONE;
     cmb.tmu1_invert = cmb.tmu0_invert = FXFALSE;
     cmb.tmu1_a_invert = cmb.tmu0_a_invert = FXFALSE;
-	}
+    }
 
-	rdp.texrecting = 1;
-	
-	DWORD prev_tile = rdp.cur_tile;
-	rdp.cur_tile = tile;
-	rdp.update |= UPDATE_COMBINE;
-	update ();
-	
-	rdp.texrecting = 0;
-	rdp.allow_combine = 1;
+    rdp.texrecting = 1;
+    
+    DWORD prev_tile = rdp.cur_tile;
+    rdp.cur_tile = tile;
+    rdp.update |= UPDATE_COMBINE;
+    update ();
+    
+    rdp.texrecting = 0;
+    rdp.allow_combine = 1;
 
-	if (!rdp.cur_cache[0]) 
-	{
-		rdp.cur_tile = prev_tile;
-		rdp.tri_n += 2;
-		return;
-	}
-	// ****
-	// ** Texrect offset by Gugaman **
-	float off_x = (float)((short)((rdp.cmd2 & 0xFFFF0000) >> 16)) / 32.0f;
-	if ((int(off_x) == 512) && (rdp.timg.width < 512)) off_x = 0.0f;
-	float off_y = (float)((short)(rdp.cmd2 & 0x0000FFFF)) / 32.0f;
-	float dsdx = (float)((short)((rdp.cmd3 & 0xFFFF0000) >> 16)) / 1024.0f;
-	float dtdy = (float)((short)(rdp.cmd3 & 0x0000FFFF)) / 1024.0f;
+    if (!rdp.cur_cache[0]) 
+    {
+        rdp.cur_tile = prev_tile;
+        rdp.tri_n += 2;
+        return;
+    }
+    // ****
+    // ** Texrect offset by Gugaman **
+    float off_x = (float)((short)((rdp.cmd2 & 0xFFFF0000) >> 16)) / 32.0f;
+    if ((int(off_x) == 512) && (rdp.timg.width < 512)) off_x = 0.0f;
+    float off_y = (float)((short)(rdp.cmd2 & 0x0000FFFF)) / 32.0f;
+    float dsdx = (float)((short)((rdp.cmd3 & 0xFFFF0000) >> 16)) / 1024.0f;
+    float dtdy = (float)((short)(rdp.cmd3 & 0x0000FFFF)) / 1024.0f;
 
-	if (rdp.cycle_mode == 2) dsdx /= 4.0f;
-	
-	float s_ul_x = ul_x * rdp.scale_x + rdp.offset_x;
-	float s_lr_x = lr_x * rdp.scale_x + rdp.offset_x;
-	float s_ul_y = ul_y * rdp.scale_y + rdp.offset_y;
-	float s_lr_y = lr_y * rdp.scale_y + rdp.offset_y;
-	
-	FRDP("texrect (%d, %d, %d, %d), tile: %d, #%d, #%d\n", ul_x, ul_y, lr_x, lr_y, tile, rdp.tri_n, rdp.tri_n+1);
-	FRDP ("(%f, %f) -> (%f, %f), s: (%d, %d) -> (%d, %d)\n", s_ul_x, s_ul_y, s_lr_x, s_lr_y, rdp.scissor.ul_x, rdp.scissor.ul_y, rdp.scissor.lr_x, rdp.scissor.lr_y);
-	FRDP("\toff_x: %f, off_y: %f, dsdx: %f, dtdy: %f\n", off_x, off_y, dsdx, dtdy);
-	
-	float off_size_x;
-	float off_size_y;
+    if (rdp.cycle_mode == 2) dsdx /= 4.0f;
+    
+    float s_ul_x = ul_x * rdp.scale_x + rdp.offset_x;
+    float s_lr_x = lr_x * rdp.scale_x + rdp.offset_x;
+    float s_ul_y = ul_y * rdp.scale_y + rdp.offset_y;
+    float s_lr_y = lr_y * rdp.scale_y + rdp.offset_y;
+    
+    FRDP("texrect (%d, %d, %d, %d), tile: %d, #%d, #%d\n", ul_x, ul_y, lr_x, lr_y, tile, rdp.tri_n, rdp.tri_n+1);
+    FRDP ("(%f, %f) -> (%f, %f), s: (%d, %d) -> (%d, %d)\n", s_ul_x, s_ul_y, s_lr_x, s_lr_y, rdp.scissor.ul_x, rdp.scissor.ul_y, rdp.scissor.lr_x, rdp.scissor.lr_y);
+    FRDP("\toff_x: %f, off_y: %f, dsdx: %f, dtdy: %f\n", off_x, off_y, dsdx, dtdy);
+    
+    float off_size_x;
+    float off_size_y;
 
-	if ( ((rdp.cmd0>>24)&0xFF) == 0xE5 ) //texrectflip
-	{
-	  off_size_x = (float)((lr_y - ul_y - 1) * dsdx);
-	  off_size_y = (float)((lr_x - ul_x - 1) * dtdy);
-	}
-	else
-	{
-	  off_size_x = (float)((lr_x - ul_x - 1) * dsdx);
-	  off_size_y = (float)((lr_y - ul_y - 1) * dtdy);
-	}
+    if ( ((rdp.cmd0>>24)&0xFF) == 0xE5 ) //texrectflip
+    {
+      off_size_x = (float)((lr_y - ul_y - 1) * dsdx);
+      off_size_y = (float)((lr_x - ul_x - 1) * dtdy);
+    }
+    else
+    {
+      off_size_x = (float)((lr_x - ul_x - 1) * dsdx);
+      off_size_y = (float)((lr_y - ul_y - 1) * dtdy);
+    }
 
-	float lr_u0, lr_v0, ul_u0, ul_v0, lr_u1, lr_v1, ul_u1, ul_v1;
-	
-	if (rdp.cur_cache[0] && (rdp.tex & 1))
-	{
-		float sx=1, sy=1;
-		if (rdp.tiles[rdp.cur_tile].shift_s)
-		{
-			if (rdp.tiles[rdp.cur_tile].shift_s > 10)
-				sx = (float)(1 << (16 - rdp.tiles[rdp.cur_tile].shift_s));
-			else
-				sx = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile].shift_s);
-		}
-		if (rdp.tiles[rdp.cur_tile].shift_t)
-		{
-			if (rdp.tiles[rdp.cur_tile].shift_t > 10)
-				sy = (float)(1 << (16 - rdp.tiles[rdp.cur_tile].shift_t));
-			else
-				sy = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile].shift_t);
-		}
+    float lr_u0, lr_v0, ul_u0, ul_v0, lr_u1, lr_v1, ul_u1, ul_v1;
+    
+    if (rdp.cur_cache[0] && (rdp.tex & 1))
+    {
+        float sx=1, sy=1;
+        if (rdp.tiles[rdp.cur_tile].shift_s)
+        {
+            if (rdp.tiles[rdp.cur_tile].shift_s > 10)
+                sx = (float)(1 << (16 - rdp.tiles[rdp.cur_tile].shift_s));
+            else
+                sx = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile].shift_s);
+        }
+        if (rdp.tiles[rdp.cur_tile].shift_t)
+        {
+            if (rdp.tiles[rdp.cur_tile].shift_t > 10)
+                sy = (float)(1 << (16 - rdp.tiles[rdp.cur_tile].shift_t));
+            else
+                sy = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile].shift_t);
+        }
     if (rdp.hires_tex && rdp.hires_tex->tile == 0)
     {
       off_x += rdp.hires_tex->u_shift;// + rdp.tiles[0].ul_s; //commented for Paper Mario motion blur
       off_y += rdp.hires_tex->v_shift;// + rdp.tiles[0].ul_t;
       FRDP("hires_tex ul_s: %d, ul_t: %d, off_x: %f, off_y: %f\n", rdp.tiles[0].ul_s, rdp.tiles[0].ul_t, off_x, off_y);
-		ul_u0 = off_x * sx;
-		ul_v0 = off_y * sy;
-		
+        ul_u0 = off_x * sx;
+        ul_v0 = off_y * sy;
+        
         lr_u0 = ul_u0 + off_size_x * sx;
         lr_v0 = ul_v0 + off_size_y * sy;
         
@@ -1464,50 +1464,50 @@ static void rdp_texrect()
     }
     else
     {
-    		ul_u0 = off_x * sx;
+            ul_u0 = off_x * sx;
         ul_v0 = off_y * sy;
         
-		ul_u0 -= rdp.tiles[rdp.cur_tile].f_ul_s;
-		ul_v0 -= rdp.tiles[rdp.cur_tile].f_ul_t;
-		
-		lr_u0 = ul_u0 + off_size_x * sx;
-		lr_v0 = ul_v0 + off_size_y * sy;
-		
-			ul_u0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_x * ul_u0;
-			lr_u0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_x * lr_u0;
-			ul_v0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_y * ul_v0;
-			lr_v0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_y * lr_v0;
-		}
-	}
-	else
-	{
-		ul_u0 = ul_v0 = lr_u0 = lr_v0 = 0;
-	}
-	if (rdp.cur_cache[1] && (rdp.tex & 2))
-	{
-		float sx=1, sy=1;
-		
-		if (rdp.tiles[rdp.cur_tile+1].shift_s)
-		{
-			if (rdp.tiles[rdp.cur_tile+1].shift_s > 10)
-				sx = (float)(1 << (16 - rdp.tiles[rdp.cur_tile+1].shift_s));
-			else
-				sx = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile+1].shift_s);
-		}
-		if (rdp.tiles[rdp.cur_tile+1].shift_t)
-		{
-			if (rdp.tiles[rdp.cur_tile+1].shift_t > 10)
-				sy = 1;//(float)(1 << (16 - rdp.tiles[rdp.cur_tile+1].shift_t));
-			else
-				sy = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile+1].shift_t);
-		}
-		
+        ul_u0 -= rdp.tiles[rdp.cur_tile].f_ul_s;
+        ul_v0 -= rdp.tiles[rdp.cur_tile].f_ul_t;
+        
+        lr_u0 = ul_u0 + off_size_x * sx;
+        lr_v0 = ul_v0 + off_size_y * sy;
+        
+            ul_u0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_x * ul_u0;
+            lr_u0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_x * lr_u0;
+            ul_v0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_y * ul_v0;
+            lr_v0 = rdp.cur_cache[0]->c_off + rdp.cur_cache[0]->c_scl_y * lr_v0;
+        }
+    }
+    else
+    {
+        ul_u0 = ul_v0 = lr_u0 = lr_v0 = 0;
+    }
+    if (rdp.cur_cache[1] && (rdp.tex & 2))
+    {
+        float sx=1, sy=1;
+        
+        if (rdp.tiles[rdp.cur_tile+1].shift_s)
+        {
+            if (rdp.tiles[rdp.cur_tile+1].shift_s > 10)
+                sx = (float)(1 << (16 - rdp.tiles[rdp.cur_tile+1].shift_s));
+            else
+                sx = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile+1].shift_s);
+        }
+        if (rdp.tiles[rdp.cur_tile+1].shift_t)
+        {
+            if (rdp.tiles[rdp.cur_tile+1].shift_t > 10)
+                sy = 1;//(float)(1 << (16 - rdp.tiles[rdp.cur_tile+1].shift_t));
+            else
+                sy = (float)1.0f/(1 << rdp.tiles[rdp.cur_tile+1].shift_t);
+        }
+        
     if (rdp.hires_tex && rdp.hires_tex->tile == 1)
     {
       off_x += rdp.hires_tex->u_shift;// + rdp.tiles[0].ul_s; //commented for Paper Mario motion blur
       off_y += rdp.hires_tex->v_shift;// + rdp.tiles[0].ul_t;
       FRDP("hires_tex ul_s: %d, ul_t: %d, off_x: %f, off_y: %f\n", rdp.tiles[0].ul_s, rdp.tiles[0].ul_t, off_x, off_y);
-    		ul_u1 = off_x * sx;
+            ul_u1 = off_x * sx;
         ul_v1 = off_y * sy;
         
         lr_u1 = ul_u1 + off_size_x * sx;
@@ -1522,297 +1522,297 @@ static void rdp_texrect()
     }
     else
     {
-		ul_u1 = off_x * sx;
-		ul_v1 = off_y * sy;
-		
-		ul_u1 -= rdp.tiles[rdp.cur_tile+1].f_ul_s;
-		ul_v1 -= rdp.tiles[rdp.cur_tile+1].f_ul_t;
-		
-		lr_u1 = ul_u1 + off_size_x * sx;
-		lr_v1 = ul_v1 + off_size_y * sy;
-		
-		ul_u1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_x * ul_u1;
-		lr_u1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_x * lr_u1;
-		ul_v1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_y * ul_v1;
-		lr_v1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_y * lr_v1;
-	}
+        ul_u1 = off_x * sx;
+        ul_v1 = off_y * sy;
+        
+        ul_u1 -= rdp.tiles[rdp.cur_tile+1].f_ul_s;
+        ul_v1 -= rdp.tiles[rdp.cur_tile+1].f_ul_t;
+        
+        lr_u1 = ul_u1 + off_size_x * sx;
+        lr_v1 = ul_v1 + off_size_y * sy;
+        
+        ul_u1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_x * ul_u1;
+        lr_u1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_x * lr_u1;
+        ul_v1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_y * ul_v1;
+        lr_v1 = rdp.cur_cache[1]->c_off + rdp.cur_cache[1]->c_scl_y * lr_v1;
+    }
   }
-	else
-	{
-		ul_u1 = ul_v1 = lr_u1 = lr_v1 = 0;
-	}
-   	rdp.cur_tile = prev_tile;
+    else
+    {
+        ul_u1 = ul_v1 = lr_u1 = lr_v1 = 0;
+    }
+    rdp.cur_tile = prev_tile;
 
-	// ****
-	
-	FRDP ("  scissor: (%d, %d) -> (%d, %d)\n", rdp.scissor.ul_x, rdp.scissor.ul_y, rdp.scissor.lr_x, rdp.scissor.lr_y);
-	
-	CCLIP2 (s_ul_x, s_lr_x, ul_u0, lr_u0, ul_u1, lr_u1, (float)rdp.scissor.ul_x, (float)rdp.scissor.lr_x);
-	CCLIP2 (s_ul_y, s_lr_y, ul_v0, lr_v0, ul_v1, lr_v1, (float)rdp.scissor.ul_y, (float)rdp.scissor.lr_y);
-//	CCLIP2 (s_lr_y, s_ul_y, lr_v0, ul_v0, lr_v1, ul_v1, (float)rdp.scissor.ul_y, (float)rdp.scissor.lr_y);
-	
-	FRDP ("  draw at: (%f, %f) -> (%f, %f)\n", s_ul_x, s_ul_y, s_lr_x, s_lr_y);
-	
-	// DO NOT SET CLAMP MODE HERE
-	
-	float Z = 1.0f;
-	if (rdp.zsrc == 1 && (rdp.othermode_l & 0x00000030))  // othermode check makes sure it
-		// USES the z-buffer.  Otherwise it returns bad (unset) values for lot and telescope
-		//in zelda:mm.
-	{
-			FRDP ("prim_depth = %d\n", rdp.prim_depth);
-		Z = rdp.prim_depth;
+    // ****
+    
+    FRDP ("  scissor: (%d, %d) -> (%d, %d)\n", rdp.scissor.ul_x, rdp.scissor.ul_y, rdp.scissor.lr_x, rdp.scissor.lr_y);
+    
+    CCLIP2 (s_ul_x, s_lr_x, ul_u0, lr_u0, ul_u1, lr_u1, (float)rdp.scissor.ul_x, (float)rdp.scissor.lr_x);
+    CCLIP2 (s_ul_y, s_lr_y, ul_v0, lr_v0, ul_v1, lr_v1, (float)rdp.scissor.ul_y, (float)rdp.scissor.lr_y);
+//  CCLIP2 (s_lr_y, s_ul_y, lr_v0, ul_v0, lr_v1, ul_v1, (float)rdp.scissor.ul_y, (float)rdp.scissor.lr_y);
+    
+    FRDP ("  draw at: (%f, %f) -> (%f, %f)\n", s_ul_x, s_ul_y, s_lr_x, s_lr_y);
+    
+    // DO NOT SET CLAMP MODE HERE
+    
+    float Z = 1.0f;
+    if (rdp.zsrc == 1 && (rdp.othermode_l & 0x00000030))  // othermode check makes sure it
+        // USES the z-buffer.  Otherwise it returns bad (unset) values for lot and telescope
+        //in zelda:mm.
+    {
+            FRDP ("prim_depth = %d\n", rdp.prim_depth);
+        Z = rdp.prim_depth;
     if (settings.increase_primdepth)
-		  Z += 8.0f;
+          Z += 8.0f;
     Z = ScaleZ(Z);
 
-			grDepthBufferFunction (GR_CMP_LEQUAL);
-			rdp.update |= UPDATE_ZBUF_ENABLED;
-		}
-	else
-	{
-		RDP ("no prim_depth used, using 1.0\n");
-	}
-	
-	VERTEX vstd[4] = {
+            grDepthBufferFunction (GR_CMP_LEQUAL);
+            rdp.update |= UPDATE_ZBUF_ENABLED;
+        }
+    else
+    {
+        RDP ("no prim_depth used, using 1.0\n");
+    }
+    
+    VERTEX vstd[4] = {
     { s_ul_x, s_ul_y, Z, 1.0f, ul_u0, ul_v0, ul_u1, ul_v1, { 0, 0, 0, 0}, 255 },
     { s_lr_x, s_ul_y, Z, 1.0f, lr_u0, ul_v0, lr_u1, ul_v1, { 0, 0, 0, 0}, 255 },
     { s_ul_x, s_lr_y, Z, 1.0f, ul_u0, lr_v0, ul_u1, lr_v1, { 0, 0, 0, 0}, 255 },
     { s_lr_x, s_lr_y, Z, 1.0f, lr_u0, lr_v0, lr_u1, lr_v1, { 0, 0, 0, 0}, 255 } };
-		
-		if ( ((rdp.cmd0>>24)&0xFF) == 0xE5 ) //texrectflip
-		{
-			vstd[1].u0 = ul_u0;
-			vstd[1].v0 = lr_v0;
-			vstd[1].u1 = ul_u1;
-			vstd[1].v1 = lr_v1;
-			
-			vstd[2].u0 = lr_u0;
-			vstd[2].v0 = ul_v0;
-			vstd[2].u1 = lr_u1;
-			vstd[2].v1 = ul_v1;
-		}
+        
+        if ( ((rdp.cmd0>>24)&0xFF) == 0xE5 ) //texrectflip
+        {
+            vstd[1].u0 = ul_u0;
+            vstd[1].v0 = lr_v0;
+            vstd[1].u1 = ul_u1;
+            vstd[1].v1 = lr_v1;
+            
+            vstd[2].u0 = lr_u0;
+            vstd[2].v0 = ul_v0;
+            vstd[2].u1 = lr_u1;
+            vstd[2].v1 = ul_v1;
+        }
 
-		VERTEX *vptr = vstd;
-		int n_vertices = 4;
-		
+        VERTEX *vptr = vstd;
+        int n_vertices = 4;
+        
     VERTEX *vnew = 0;
-//		for (int j =0; j < 4; j++)
-//		  FRDP("v[%d]  u0: %f, v0: %f, u1: %f, v1: %f\n", j, vstd[j].u0, vstd[j].v0, vstd[j].u1, vstd[j].v1);
+//      for (int j =0; j < 4; j++)
+//        FRDP("v[%d]  u0: %f, v0: %f, u1: %f, v1: %f\n", j, vstd[j].u0, vstd[j].v0, vstd[j].u1, vstd[j].v1);
 
 
-		if (!rdp.hires_tex && rdp.cur_cache[0]->splits != 1)
-		{
-			// ** LARGE TEXTURE HANDLING **
-			// *VERY* simple algebra for texrects
-			float min_u, min_x, max_u, max_x;
-			if (vstd[0].u0 < vstd[1].u0)
-			{
-				min_u = vstd[0].u0;
-				min_x = vstd[0].x;
-				max_u = vstd[1].u0;
-				max_x = vstd[1].x;
-			}
-			else
-			{
-				min_u = vstd[1].u0;
-				min_x = vstd[1].x;
-				max_u = vstd[0].u0;
-				max_x = vstd[0].x;
-			}
-			
-			int start_u_256, end_u_256;
-		
-			if (settings.ucode == 7)
-			{
-			  start_u_256 = 0;
-			  end_u_256 = (lr_x - ul_x - 1)>>8;
-			}
-			else
-			{
-			  start_u_256 = (int)min_u >> 8;
-			  end_u_256 = (int)max_u >> 8;
-			}
-		  	//FRDP(" min_u: %f, max_u: %f start: %d, end: %d\n", min_u, max_u, start_u_256, end_u_256);
+        if (!rdp.hires_tex && rdp.cur_cache[0]->splits != 1)
+        {
+            // ** LARGE TEXTURE HANDLING **
+            // *VERY* simple algebra for texrects
+            float min_u, min_x, max_u, max_x;
+            if (vstd[0].u0 < vstd[1].u0)
+            {
+                min_u = vstd[0].u0;
+                min_x = vstd[0].x;
+                max_u = vstd[1].u0;
+                max_x = vstd[1].x;
+            }
+            else
+            {
+                min_u = vstd[1].u0;
+                min_x = vstd[1].x;
+                max_u = vstd[0].u0;
+                max_x = vstd[0].x;
+            }
+            
+            int start_u_256, end_u_256;
+        
+            if (settings.ucode == 7)
+            {
+              start_u_256 = 0;
+              end_u_256 = (lr_x - ul_x - 1)>>8;
+            }
+            else
+            {
+              start_u_256 = (int)min_u >> 8;
+              end_u_256 = (int)max_u >> 8;
+            }
+            //FRDP(" min_u: %f, max_u: %f start: %d, end: %d\n", min_u, max_u, start_u_256, end_u_256);
 
-			int splitheight = rdp.cur_cache[0]->splitheight;
-			
-			int num_verts_line = 2 + ((end_u_256-start_u_256)<<1);
-			vnew = new VERTEX [num_verts_line << 1];
-			
-			n_vertices = num_verts_line << 1;
-			vptr = vnew;
-			
-			vnew[0] = vstd[0];
-			vnew[0].u0 -= 256.0f * start_u_256;
-			vnew[0].v0 += splitheight * start_u_256;
+            int splitheight = rdp.cur_cache[0]->splitheight;
+            
+            int num_verts_line = 2 + ((end_u_256-start_u_256)<<1);
+            vnew = new VERTEX [num_verts_line << 1];
+            
+            n_vertices = num_verts_line << 1;
+            vptr = vnew;
+            
+            vnew[0] = vstd[0];
+            vnew[0].u0 -= 256.0f * start_u_256;
+            vnew[0].v0 += splitheight * start_u_256;
       vnew[0].u1 -= 256.0f * start_u_256;
       vnew[0].v1 += splitheight * start_u_256;
-			vnew[1] = vstd[2];
-			vnew[1].u0 -= 256.0f * start_u_256;
-			vnew[1].v0 += splitheight * start_u_256;
+            vnew[1] = vstd[2];
+            vnew[1].u0 -= 256.0f * start_u_256;
+            vnew[1].v0 += splitheight * start_u_256;
       vnew[1].u1 -= 256.0f * start_u_256;
       vnew[1].v1 += splitheight * start_u_256;
-			vnew[n_vertices-2] = vstd[1];
-			vnew[n_vertices-2].u0 -= 256.0f * end_u_256;
-			vnew[n_vertices-2].v0 += splitheight * end_u_256;
+            vnew[n_vertices-2] = vstd[1];
+            vnew[n_vertices-2].u0 -= 256.0f * end_u_256;
+            vnew[n_vertices-2].v0 += splitheight * end_u_256;
       vnew[n_vertices-2].u1 -= 256.0f * end_u_256;
       vnew[n_vertices-2].v1 += splitheight * end_u_256;
-			vnew[n_vertices-1] = vstd[3];
-			vnew[n_vertices-1].u0 -= 256.0f * end_u_256;
-			vnew[n_vertices-1].v0 += splitheight * end_u_256;
+            vnew[n_vertices-1] = vstd[3];
+            vnew[n_vertices-1].u0 -= 256.0f * end_u_256;
+            vnew[n_vertices-1].v0 += splitheight * end_u_256;
       vnew[n_vertices-1].u1 -= 256.0f * end_u_256;
       vnew[n_vertices-1].v1 += splitheight * end_u_256;
-			
-			// find the equation of the line of u,x
-			float m = (max_x - min_x) / (max_u - min_u);  // m = delta x / delta u
-			float b = min_x - m * min_u;          // b = y - m * x
-			
-			for (i=start_u_256; i<end_u_256; i++)
-			{
-				// Find where x = current 256 multiple
-				float x = m * ((i<<8)+256) + b;
-				
-				int vn = 2 + ((i-start_u_256)<<2);
-				vnew[vn] = vnew[0];
-				vnew[vn].x = x;
-				vnew[vn].u0 = 255.5f;
-				vnew[vn].v0 += (float)splitheight * i;
+            
+            // find the equation of the line of u,x
+            float m = (max_x - min_x) / (max_u - min_u);  // m = delta x / delta u
+            float b = min_x - m * min_u;          // b = y - m * x
+            
+            for (i=start_u_256; i<end_u_256; i++)
+            {
+                // Find where x = current 256 multiple
+                float x = m * ((i<<8)+256) + b;
+                
+                int vn = 2 + ((i-start_u_256)<<2);
+                vnew[vn] = vnew[0];
+                vnew[vn].x = x;
+                vnew[vn].u0 = 255.5f;
+                vnew[vn].v0 += (float)splitheight * i;
         vnew[vn].u1 = 255.5f;
         vnew[vn].v1 += (float)splitheight * i;
-				
-				vn ++;
-				vnew[vn] = vnew[1];
-				vnew[vn].x = x;
-				vnew[vn].u0 = 255.5f;
-				vnew[vn].v0 += (float)splitheight * i;
+                
+                vn ++;
+                vnew[vn] = vnew[1];
+                vnew[vn].x = x;
+                vnew[vn].u0 = 255.5f;
+                vnew[vn].v0 += (float)splitheight * i;
         vnew[vn].u1 = 255.5f;
         vnew[vn].v1 += (float)splitheight * i;
-				
-				vn ++;
-				vnew[vn] = vnew[vn-2];
-				vnew[vn].u0 = 0.5f;
-				vnew[vn].v0 += (float)splitheight;
+                
+                vn ++;
+                vnew[vn] = vnew[vn-2];
+                vnew[vn].u0 = 0.5f;
+                vnew[vn].v0 += (float)splitheight;
         vnew[vn].u1 = 0.5f;
         vnew[vn].v1 += (float)splitheight;
-				
-				vn ++;
-				vnew[vn] = vnew[vn-2];
-				vnew[vn].u0 = 0.5f;
-				vnew[vn].v0 += (float)splitheight;
+                
+                vn ++;
+                vnew[vn] = vnew[vn-2];
+                vnew[vn].u0 = 0.5f;
+                vnew[vn].v0 += (float)splitheight;
         vnew[vn].u1 = 0.5f;
         vnew[vn].v1 += (float)splitheight;
-			}
-		}
-		
+            }
+        }
+        
     AllowShadeMods (vptr, n_vertices);
-		for (i=0; i<n_vertices; i++)
-		{
-			VERTEX *z = &vptr[i];
-			
-			z->u0 *= z->q;
-			z->v0 *= z->q;
-			z->u1 *= z->q;
-			z->v1 *= z->q;
-			
-			apply_shade_mods (z);
-		}
-		                       
-		if (fullscreen)
-		{
-			grFogMode (GR_FOG_DISABLE);
-			
-			grClipWindow (0, 0, settings.res_x, settings.res_y);
-			
-			grCullMode (GR_CULL_DISABLE);
-			
-			if (rdp.cycle_mode == 2)
-			{
-				grColorCombine (GR_COMBINE_FUNCTION_SCALE_OTHER,
-					GR_COMBINE_FACTOR_ONE,
-					GR_COMBINE_LOCAL_NONE,
-					GR_COMBINE_OTHER_TEXTURE,
-					FXFALSE);
-				grAlphaCombine (GR_COMBINE_FUNCTION_SCALE_OTHER,
-					GR_COMBINE_FACTOR_ONE,
-					GR_COMBINE_LOCAL_NONE,
-					GR_COMBINE_OTHER_TEXTURE,
-					FXFALSE);
-				grAlphaBlendFunction (GR_BLEND_ONE,
-					GR_BLEND_ZERO,
-					GR_BLEND_ZERO,
-					GR_BLEND_ZERO);
-				if (rdp.othermode_l & 1)
-				{
-					grAlphaTestFunction (GR_CMP_GEQUAL);
-					grAlphaTestReferenceValue (0x80);
-				}
-				else
-					grAlphaTestFunction (GR_CMP_ALWAYS);
-				
-				rdp.update |= UPDATE_ALPHA_COMPARE | UPDATE_COMBINE;
-			}
-			
-			ConvertCoordsConvert (vptr, n_vertices);
-			
-			if (settings.wireframe)
-			{
-				SetWireframeCol ();
-				grDrawLine (&vstd[0], &vstd[2]);
-				grDrawLine (&vstd[2], &vstd[1]);
-				grDrawLine (&vstd[1], &vstd[0]);
-				grDrawLine (&vstd[2], &vstd[3]);
-				grDrawLine (&vstd[3], &vstd[1]);
-			}
-			else
-			{
-				grDrawVertexArrayContiguous (GR_TRIANGLE_STRIP, n_vertices, vptr, sizeof(VERTEX));
-			}
-			
-			if (debug.capture)
-			{
-				VERTEX vl[3];
-				vl[0] = vstd[0];
-				vl[1] = vstd[2];
-				vl[2] = vstd[1];
-				add_tri (vl, 3, TRI_TEXRECT);
-				rdp.tri_n ++;
-				vl[0] = vstd[2];
-				vl[1] = vstd[3];
-				vl[2] = vstd[1];
-				add_tri (vl, 3, TRI_TEXRECT);
-				rdp.tri_n ++;
-			}
-			else
-				rdp.tri_n += 2;
-			
+        for (i=0; i<n_vertices; i++)
+        {
+            VERTEX *z = &vptr[i];
+            
+            z->u0 *= z->q;
+            z->v0 *= z->q;
+            z->u1 *= z->q;
+            z->v1 *= z->q;
+            
+            apply_shade_mods (z);
+        }
+                               
+        if (fullscreen)
+        {
+            grFogMode (GR_FOG_DISABLE);
+            
+            grClipWindow (0, 0, settings.res_x, settings.res_y);
+            
+            grCullMode (GR_CULL_DISABLE);
+            
+            if (rdp.cycle_mode == 2)
+            {
+                grColorCombine (GR_COMBINE_FUNCTION_SCALE_OTHER,
+                    GR_COMBINE_FACTOR_ONE,
+                    GR_COMBINE_LOCAL_NONE,
+                    GR_COMBINE_OTHER_TEXTURE,
+                    FXFALSE);
+                grAlphaCombine (GR_COMBINE_FUNCTION_SCALE_OTHER,
+                    GR_COMBINE_FACTOR_ONE,
+                    GR_COMBINE_LOCAL_NONE,
+                    GR_COMBINE_OTHER_TEXTURE,
+                    FXFALSE);
+                grAlphaBlendFunction (GR_BLEND_ONE,
+                    GR_BLEND_ZERO,
+                    GR_BLEND_ZERO,
+                    GR_BLEND_ZERO);
+                if (rdp.othermode_l & 1)
+                {
+                    grAlphaTestFunction (GR_CMP_GEQUAL);
+                    grAlphaTestReferenceValue (0x80);
+                }
+                else
+                    grAlphaTestFunction (GR_CMP_ALWAYS);
+                
+                rdp.update |= UPDATE_ALPHA_COMPARE | UPDATE_COMBINE;
+            }
+            
+            ConvertCoordsConvert (vptr, n_vertices);
+            
+            if (settings.wireframe)
+            {
+                SetWireframeCol ();
+                grDrawLine (&vstd[0], &vstd[2]);
+                grDrawLine (&vstd[2], &vstd[1]);
+                grDrawLine (&vstd[1], &vstd[0]);
+                grDrawLine (&vstd[2], &vstd[3]);
+                grDrawLine (&vstd[3], &vstd[1]);
+            }
+            else
+            {
+                grDrawVertexArrayContiguous (GR_TRIANGLE_STRIP, n_vertices, vptr, sizeof(VERTEX));
+            }
+            
+            if (debug.capture)
+            {
+                VERTEX vl[3];
+                vl[0] = vstd[0];
+                vl[1] = vstd[2];
+                vl[2] = vstd[1];
+                add_tri (vl, 3, TRI_TEXRECT);
+                rdp.tri_n ++;
+                vl[0] = vstd[2];
+                vl[1] = vstd[3];
+                vl[2] = vstd[1];
+                add_tri (vl, 3, TRI_TEXRECT);
+                rdp.tri_n ++;
+            }
+            else
+                rdp.tri_n += 2;
+            
       if (settings.fog && (rdp.flags & FOG_ENABLED))
       {
         grFogMode (GR_FOG_WITH_TABLE_ON_FOGCOORD_EXT);
       }
-			rdp.update |= UPDATE_CULL_MODE | UPDATE_VIEWPORT;
-		}
-		else
-		{
-			rdp.tri_n += 2;
-		}
-		
+            rdp.update |= UPDATE_CULL_MODE | UPDATE_VIEWPORT;
+        }
+        else
+        {
+            rdp.tri_n += 2;
+        }
+        
     delete[] vnew;
 }
 
 static void rdp_loadsync()
 {
-	RDP("loadsync - ignored\n");
+    RDP("loadsync - ignored\n");
 }
 
 static void rdp_pipesync()
 {
-	RDP("pipesync - ignored\n");
+    RDP("pipesync - ignored\n");
 }
 
 static void rdp_tilesync()
 {
-	RDP("tilesync - ignored\n");
+    RDP("tilesync - ignored\n");
 }
 
 static void rdp_fullsync()
@@ -1825,28 +1825,28 @@ static void rdp_fullsync()
 
 static void rdp_setkeygb()
 {
-	RDP_E("setkeygb - IGNORED\n");
-	RDP("setkeygb - IGNORED\n");
+    RDP_E("setkeygb - IGNORED\n");
+    RDP("setkeygb - IGNORED\n");
 }
 
 static void rdp_setkeyr()
 {
-	RDP_E("setkeyr - IGNORED\n");
-	RDP("setkeyr - IGNORED\n");
+    RDP_E("setkeyr - IGNORED\n");
+    RDP("setkeyr - IGNORED\n");
 }
 
 static void rdp_setconvert()
 {
-	/*
-	rdp.YUV_C0 = 1.1647f  ;
-	rdp.YUV_C1 = 0.79931f ;
-	rdp.YUV_C2 = -0.1964f ;
-	rdp.YUV_C3 = -0.40651f;
-	rdp.YUV_C4 = 1.014f   ;
-	*/
-	rdp.K5 = (BYTE)(rdp.cmd1&0x1FF);
-	RDP_E("setconvert - IGNORED\n");
-	RDP("setconvert - IGNORED\n");
+    /*
+    rdp.YUV_C0 = 1.1647f  ;
+    rdp.YUV_C1 = 0.79931f ;
+    rdp.YUV_C2 = -0.1964f ;
+    rdp.YUV_C3 = -0.40651f;
+    rdp.YUV_C4 = 1.014f   ;
+    */
+    rdp.K5 = (BYTE)(rdp.cmd1&0x1FF);
+    RDP_E("setconvert - IGNORED\n");
+    RDP("setconvert - IGNORED\n");
 }
 
 //
@@ -1855,26 +1855,26 @@ static void rdp_setconvert()
 
 static void rdp_setscissor()
 {
-	// clipper resolution is 320x240, scale based on computer resolution
-	rdp.scissor_o.ul_x = /*min(*/(DWORD)(((rdp.cmd0 & 0x00FFF000) >> 14))/*, 320)*/;
-	rdp.scissor_o.ul_y = /*min(*/(DWORD)(((rdp.cmd0 & 0x00000FFF) >> 2))/*, 240)*/;
-	rdp.scissor_o.lr_x = /*min(*/(DWORD)(((rdp.cmd1 & 0x00FFF000) >> 14))/*, 320)*/;
-	rdp.scissor_o.lr_y = /*min(*/(DWORD)(((rdp.cmd1 & 0x00000FFF) >> 2))/*, 240)*/;
-	
-	rdp.ci_upper_bound = rdp.scissor_o.ul_y;
-	rdp.ci_lower_bound = rdp.scissor_o.lr_y;
-	
-	FRDP("setscissor: (%d,%d) -> (%d,%d)\n", rdp.scissor_o.ul_x, rdp.scissor_o.ul_y,
-		rdp.scissor_o.lr_x, rdp.scissor_o.lr_y);
-	
-	rdp.update |= UPDATE_SCISSOR;
+    // clipper resolution is 320x240, scale based on computer resolution
+    rdp.scissor_o.ul_x = /*min(*/(DWORD)(((rdp.cmd0 & 0x00FFF000) >> 14))/*, 320)*/;
+    rdp.scissor_o.ul_y = /*min(*/(DWORD)(((rdp.cmd0 & 0x00000FFF) >> 2))/*, 240)*/;
+    rdp.scissor_o.lr_x = /*min(*/(DWORD)(((rdp.cmd1 & 0x00FFF000) >> 14))/*, 320)*/;
+    rdp.scissor_o.lr_y = /*min(*/(DWORD)(((rdp.cmd1 & 0x00000FFF) >> 2))/*, 240)*/;
+    
+    rdp.ci_upper_bound = rdp.scissor_o.ul_y;
+    rdp.ci_lower_bound = rdp.scissor_o.lr_y;
+    
+    FRDP("setscissor: (%d,%d) -> (%d,%d)\n", rdp.scissor_o.ul_x, rdp.scissor_o.ul_y,
+        rdp.scissor_o.lr_x, rdp.scissor_o.lr_y);
+    
+    rdp.update |= UPDATE_SCISSOR;
 }
 
 static void rdp_setprimdepth()
 {
-	rdp.prim_depth = (WORD)((rdp.cmd1 >> 16) & 0x7FFF);
-	
-	FRDP("setprimdepth: %d\n", rdp.prim_depth);
+    rdp.prim_depth = (WORD)((rdp.cmd1 >> 16) & 0x7FFF);
+    
+    FRDP("setprimdepth: %d\n", rdp.prim_depth);
 }
 
 static void rdp_setothermode()
@@ -1889,125 +1889,125 @@ static void rdp_setothermode()
     rdp.cmd1 = data; \
     gfx_instruction[settings.ucode][cmd] (); \
 }
-	
-	RDP("rdp_setothermode\n");
-	
+    
+    RDP("rdp_setothermode\n");
+    
     if ((settings.ucode == 2) || (settings.ucode == 8))
     {
-		int cmd0 = rdp.cmd0;
-		F3DEX2_SETOTHERMODE(0xE2, 0, 32, rdp.cmd1);         // SETOTHERMODE_L
-		F3DEX2_SETOTHERMODE(0xE3, 0, 32, cmd0 & 0x00FFFFFF);    // SETOTHERMODE_H
-	}
-	else
-	{
-		int cmd0 = rdp.cmd0;
-		SETOTHERMODE(0xB9, 0, 32, rdp.cmd1);            // SETOTHERMODE_L
-		SETOTHERMODE(0xBA, 0, 32, cmd0 & 0x00FFFFFF);       // SETOTHERMODE_H
-	}
+        int cmd0 = rdp.cmd0;
+        F3DEX2_SETOTHERMODE(0xE2, 0, 32, rdp.cmd1);         // SETOTHERMODE_L
+        F3DEX2_SETOTHERMODE(0xE3, 0, 32, cmd0 & 0x00FFFFFF);    // SETOTHERMODE_H
+    }
+    else
+    {
+        int cmd0 = rdp.cmd0;
+        SETOTHERMODE(0xB9, 0, 32, rdp.cmd1);            // SETOTHERMODE_L
+        SETOTHERMODE(0xBA, 0, 32, cmd0 & 0x00FFFFFF);       // SETOTHERMODE_H
+    }
 }
 
 void load_palette (DWORD addr, WORD start, WORD count)
 {
-	RDP ("Loading palette... ");
-	WORD *dpal = rdp.pal_8 + start;
-	WORD end = start+count;
-	//  WORD *spal = (WORD*)(gfx.RDRAM + (addr & BMASK));
-	
-	for (WORD i=start; i<end; i++)
-	{
-		*(dpal++) = *(WORD *)(gfx.RDRAM + (addr^2));
-		addr += 2;
-		
+    RDP ("Loading palette... ");
+    WORD *dpal = rdp.pal_8 + start;
+    WORD end = start+count;
+    //  WORD *spal = (WORD*)(gfx.RDRAM + (addr & BMASK));
+    
+    for (WORD i=start; i<end; i++)
+    {
+        *(dpal++) = *(WORD *)(gfx.RDRAM + (addr^2));
+        addr += 2;
+        
 #ifdef TLUT_LOGGING
-		FRDP ("%d: %08lx\n", i, *(WORD *)(gfx.RDRAM + (addr^2)));
+        FRDP ("%d: %08lx\n", i, *(WORD *)(gfx.RDRAM + (addr^2)));
 #endif
-	}
-	start >>= 4;
-	end = start + (count >> 4);
-	for (WORD p = start; p < end; p++)
-	{
-	  rdp.pal_8_crc[p] = CRC_Calculate( 0xFFFFFFFF, &rdp.pal_8[(p << 4)], 32 );
-	}
-	rdp.pal_256_crc = CRC_Calculate( 0xFFFFFFFF, rdp.pal_8_crc, 64 );
-	RDP ("Done.\n");
+    }
+    start >>= 4;
+    end = start + (count >> 4);
+    for (WORD p = start; p < end; p++)
+    {
+      rdp.pal_8_crc[p] = CRC_Calculate( 0xFFFFFFFF, &rdp.pal_8[(p << 4)], 32 );
+    }
+    rdp.pal_256_crc = CRC_Calculate( 0xFFFFFFFF, rdp.pal_8_crc, 64 );
+    RDP ("Done.\n");
 }
 
 static void rdp_loadtlut()
 {
-	DWORD tile = (rdp.cmd1 >> 24) & 0x07;
-	WORD start = rdp.tiles[tile].t_mem - 256; // starting location in the palettes
-	//  WORD start = ((WORD)(rdp.cmd1 >> 2) & 0x3FF) + 1;
-	WORD count = ((WORD)(rdp.cmd1 >> 14) & 0x3FF) + 1;    // number to copy
-	
-	if (rdp.timg.addr + (count<<1) > BMASK)
-		count = (WORD)((BMASK - rdp.timg.addr) >> 1);
-	
-	if (start+count > 256) count = 256-start;
-	
-	FRDP("loadtlut: tile: %d, start: %d, count: %d, from: %08lx\n", tile, start, count,
-		rdp.timg.addr);
-	
-	load_palette (rdp.timg.addr, start, count);
-	
-	rdp.timg.addr += count << 1;
+    DWORD tile = (rdp.cmd1 >> 24) & 0x07;
+    WORD start = rdp.tiles[tile].t_mem - 256; // starting location in the palettes
+    //  WORD start = ((WORD)(rdp.cmd1 >> 2) & 0x3FF) + 1;
+    WORD count = ((WORD)(rdp.cmd1 >> 14) & 0x3FF) + 1;    // number to copy
+    
+    if (rdp.timg.addr + (count<<1) > BMASK)
+        count = (WORD)((BMASK - rdp.timg.addr) >> 1);
+    
+    if (start+count > 256) count = 256-start;
+    
+    FRDP("loadtlut: tile: %d, start: %d, count: %d, from: %08lx\n", tile, start, count,
+        rdp.timg.addr);
+    
+    load_palette (rdp.timg.addr, start, count);
+    
+    rdp.timg.addr += count << 1;
 }
 
 BOOL tile_set = 0;
 static void rdp_settilesize()
 {
-	DWORD tile = (rdp.cmd1 >> 24) & 0x07;
-	rdp.last_tile_size = tile;
-	
-	rdp.tiles[tile].f_ul_s = (float)((rdp.cmd0 >> 12) & 0xFFF) / 4.0f;
-	rdp.tiles[tile].f_ul_t = (float)(rdp.cmd0 & 0xFFF) / 4.0f;
-	
-	int ul_s = (((WORD)(rdp.cmd0 >> 14)) & 0x03ff);
-	int ul_t = (((WORD)(rdp.cmd0 >> 2 )) & 0x03ff);
-	int lr_s = (((WORD)(rdp.cmd1 >> 14)) & 0x03ff);
-	int lr_t = (((WORD)(rdp.cmd1 >> 2 )) & 0x03ff);
-	
-	if (lr_s == 0 && ul_s == 0)  //pokemon puzzle league set such tile size
-		wrong_tile = tile;
-	else if (wrong_tile == (int)tile)
-		wrong_tile = -1;
-	
-	if (settings.use_sts1_only)
-	{
-		// ** USE FIRST SETTILESIZE ONLY **
-		// This option helps certain textures while using the 'Alternate texture size method',
-		//  but may break others.  (should help more than break)
-		
-		if (tile_set)
-		{
-			// coords in 10.2 format
-			rdp.tiles[tile].ul_s = ul_s;
-			rdp.tiles[tile].ul_t = ul_t;
-			rdp.tiles[tile].lr_s = lr_s;
-			rdp.tiles[tile].lr_t = lr_t;
-			tile_set = 0;
-		}
-	}
-	else
-	{
-		// coords in 10.2 format
-		rdp.tiles[tile].ul_s = ul_s;
-		rdp.tiles[tile].ul_t = ul_t;
-		rdp.tiles[tile].lr_s = lr_s;
-		rdp.tiles[tile].lr_t = lr_t;
-	}
-	
-	// handle wrapping
-	if (rdp.tiles[tile].lr_s < rdp.tiles[tile].ul_s) rdp.tiles[tile].lr_s += 0x400;
-	if (rdp.tiles[tile].lr_t < rdp.tiles[tile].ul_t) rdp.tiles[tile].lr_t += 0x400;
+    DWORD tile = (rdp.cmd1 >> 24) & 0x07;
+    rdp.last_tile_size = tile;
+    
+    rdp.tiles[tile].f_ul_s = (float)((rdp.cmd0 >> 12) & 0xFFF) / 4.0f;
+    rdp.tiles[tile].f_ul_t = (float)(rdp.cmd0 & 0xFFF) / 4.0f;
+    
+    int ul_s = (((WORD)(rdp.cmd0 >> 14)) & 0x03ff);
+    int ul_t = (((WORD)(rdp.cmd0 >> 2 )) & 0x03ff);
+    int lr_s = (((WORD)(rdp.cmd1 >> 14)) & 0x03ff);
+    int lr_t = (((WORD)(rdp.cmd1 >> 2 )) & 0x03ff);
+    
+    if (lr_s == 0 && ul_s == 0)  //pokemon puzzle league set such tile size
+        wrong_tile = tile;
+    else if (wrong_tile == (int)tile)
+        wrong_tile = -1;
+    
+    if (settings.use_sts1_only)
+    {
+        // ** USE FIRST SETTILESIZE ONLY **
+        // This option helps certain textures while using the 'Alternate texture size method',
+        //  but may break others.  (should help more than break)
+        
+        if (tile_set)
+        {
+            // coords in 10.2 format
+            rdp.tiles[tile].ul_s = ul_s;
+            rdp.tiles[tile].ul_t = ul_t;
+            rdp.tiles[tile].lr_s = lr_s;
+            rdp.tiles[tile].lr_t = lr_t;
+            tile_set = 0;
+        }
+    }
+    else
+    {
+        // coords in 10.2 format
+        rdp.tiles[tile].ul_s = ul_s;
+        rdp.tiles[tile].ul_t = ul_t;
+        rdp.tiles[tile].lr_s = lr_s;
+        rdp.tiles[tile].lr_t = lr_t;
+    }
+    
+    // handle wrapping
+    if (rdp.tiles[tile].lr_s < rdp.tiles[tile].ul_s) rdp.tiles[tile].lr_s += 0x400;
+    if (rdp.tiles[tile].lr_t < rdp.tiles[tile].ul_t) rdp.tiles[tile].lr_t += 0x400;
 
-	rdp.update |= UPDATE_TEXTURE;
-	
-	rdp.first = 1;
-	
-	if (tile == 0 && rdp.hires_tex)
-	  //if ((rdp.tiles[tile].size != 2) || ((rdp.timg.width == 1) && (rdp.hires_tex->width != (DWORD)(lr_s+1))))
-	  if (((rdp.tiles[tile].format == 0) && (rdp.tiles[tile].size != 2)) || ((rdp.timg.width == 1) && (rdp.hires_tex->width != (DWORD)(lr_s+1))))
-	    rdp.hires_tex = 0;
+    rdp.update |= UPDATE_TEXTURE;
+    
+    rdp.first = 1;
+    
+    if (tile == 0 && rdp.hires_tex)
+      //if ((rdp.tiles[tile].size != 2) || ((rdp.timg.width == 1) && (rdp.hires_tex->width != (DWORD)(lr_s+1))))
+      if (((rdp.tiles[tile].format == 0) && (rdp.tiles[tile].size != 2)) || ((rdp.timg.width == 1) && (rdp.hires_tex->width != (DWORD)(lr_s+1))))
+        rdp.hires_tex = 0;
     if (rdp.hires_tex)
     {
       if (rdp.tiles[tile].format == 0 && rdp.hires_tex->format == 0)
@@ -2023,373 +2023,373 @@ static void rdp_settilesize()
         rdp.hires_tex->info.format = GR_TEXFMT_ALPHA_INTENSITY_88;
       }
     }
-	FRDP ("settilesize: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, lr_t: %d\n",
-		tile, ul_s, ul_t, lr_s, lr_t);
+    FRDP ("settilesize: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, lr_t: %d\n",
+        tile, ul_s, ul_t, lr_s, lr_t);
 }
 
 static void rdp_loadblock()
 {
-	if (rdp.skip_drawing)
-	{
-	   RDP("loadblock skipped\n");
-		return;
-	}
-	DWORD tile = (DWORD)((rdp.cmd1 >> 24) & 0x07);
-	DWORD dxt = (DWORD)(rdp.cmd1 & 0x0FFF);
-	
-	rdp.addr[rdp.tiles[tile].t_mem] = rdp.timg.addr;
-	
-	// ** DXT is used for swapping every other line
-	/*  double fdxt = (double)0x8000000F/(double)((DWORD)(2047/(dxt-1))); // F for error
-	DWORD _dxt = (DWORD)fdxt;*/
-	
-	// 0x00000800 -> 0x80000000 (so we can check the sign bit instead of the 11th bit)
-	DWORD _dxt = dxt << 20;
-	
-	DWORD addr = segoffset(rdp.timg.addr) & BMASK;
-	
-	// lr_s specifies number of 64-bit words to copy
-	// 10.2 format
-	WORD ul_s = (WORD)(rdp.cmd0 >> 14) & 0x3FF;
-	WORD ul_t = (WORD)(rdp.cmd0 >>  2) & 0x3FF;
-	WORD lr_s = (WORD)(rdp.cmd1 >> 14) & 0x3FF;
-	
-	rdp.tiles[tile].ul_s = ul_s;
-	rdp.tiles[tile].ul_t = ul_t;
-	rdp.tiles[tile].lr_s = lr_s;
-	
-	rdp.timg.set_by = 0;  // load block
+    if (rdp.skip_drawing)
+    {
+       RDP("loadblock skipped\n");
+        return;
+    }
+    DWORD tile = (DWORD)((rdp.cmd1 >> 24) & 0x07);
+    DWORD dxt = (DWORD)(rdp.cmd1 & 0x0FFF);
+    
+    rdp.addr[rdp.tiles[tile].t_mem] = rdp.timg.addr;
+    
+    // ** DXT is used for swapping every other line
+    /*  double fdxt = (double)0x8000000F/(double)((DWORD)(2047/(dxt-1))); // F for error
+    DWORD _dxt = (DWORD)fdxt;*/
+    
+    // 0x00000800 -> 0x80000000 (so we can check the sign bit instead of the 11th bit)
+    DWORD _dxt = dxt << 20;
+    
+    DWORD addr = segoffset(rdp.timg.addr) & BMASK;
+    
+    // lr_s specifies number of 64-bit words to copy
+    // 10.2 format
+    WORD ul_s = (WORD)(rdp.cmd0 >> 14) & 0x3FF;
+    WORD ul_t = (WORD)(rdp.cmd0 >>  2) & 0x3FF;
+    WORD lr_s = (WORD)(rdp.cmd1 >> 14) & 0x3FF;
+    
+    rdp.tiles[tile].ul_s = ul_s;
+    rdp.tiles[tile].ul_t = ul_t;
+    rdp.tiles[tile].lr_s = lr_s;
+    
+    rdp.timg.set_by = 0;  // load block
 
-	// do a quick boundary check before copying to eliminate the possibility for exception
-	if (ul_s >= 512) {
-		lr_s = 1;	// 1 so that it doesn't die on memcpy
-		ul_s = 511;
-	}
-	if (ul_s+lr_s > 512)
-		lr_s = 512-ul_s;
-	
-	if (addr+(lr_s<<3) > BMASK+1)
-		lr_s = (WORD)((BMASK-addr)>>3);
-	
-	DWORD off = rdp.timg.addr;
-	uintptr_t dst = (uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3);
-	DWORD cnt = lr_s+1;
-	if (rdp.tiles[tile].size == 3)
-		cnt <<= 1;
+    // do a quick boundary check before copying to eliminate the possibility for exception
+    if (ul_s >= 512) {
+        lr_s = 1;   // 1 so that it doesn't die on memcpy
+        ul_s = 511;
+    }
+    if (ul_s+lr_s > 512)
+        lr_s = 512-ul_s;
+    
+    if (addr+(lr_s<<3) > BMASK+1)
+        lr_s = (WORD)((BMASK-addr)>>3);
+    
+    DWORD off = rdp.timg.addr;
+    uintptr_t dst = (uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3);
+    DWORD cnt = lr_s+1;
+    if (rdp.tiles[tile].size == 3)
+        cnt <<= 1;
   //FIXME: unused? DWORD start_line = 0;
-	
-	// Since it's not loading 32-bit textures as the N64 would, 32-bit textures need to
-	//  be swapped by 64-bits, not 32.
-	uintptr_t SwapMethod = (rdp.tiles[tile].size==3)?(uintptr_t)SwapBlock64:(uintptr_t)SwapBlock32;
-	
-  //	if (lr_s > 0)
-	rdp.timg.addr += cnt << 3;
+    
+    // Since it's not loading 32-bit textures as the N64 would, 32-bit textures need to
+    //  be swapped by 64-bits, not 32.
+    uintptr_t SwapMethod = (rdp.tiles[tile].size==3)?(uintptr_t)SwapBlock64:(uintptr_t)SwapBlock32;
+    
+  //    if (lr_s > 0)
+    rdp.timg.addr += cnt << 3;
 #ifndef GCC
-	__asm {
-		// copy the data
-		mov edi,dword ptr [dst]
-			mov esi,dword ptr [gfx.RDRAM]
-			mov ecx,dword ptr [cnt]
-			mov edx,dword ptr [off]
-			call CopyBlock
-			
-			// now swap it
-			mov eax,dword ptr [cnt]   // eax = count remaining
-			xor edx,edx         // edx = dxt counter
-			mov edi,dword ptr [dst]
-			mov ebx,dword ptr [_dxt]
-			
-			xor ecx,ecx     // ecx = how much to copy
+    __asm {
+        // copy the data
+        mov edi,dword ptr [dst]
+            mov esi,dword ptr [gfx.RDRAM]
+            mov ecx,dword ptr [cnt]
+            mov edx,dword ptr [off]
+            call CopyBlock
+            
+            // now swap it
+            mov eax,dword ptr [cnt]   // eax = count remaining
+            xor edx,edx         // edx = dxt counter
+            mov edi,dword ptr [dst]
+            mov ebx,dword ptr [_dxt]
+            
+            xor ecx,ecx     // ecx = how much to copy
 dxt_test:
-		add edi,8
-			dec eax
-			jz end_dxt_test
-			add edx,ebx
-			jns dxt_test
-			
+        add edi,8
+            dec eax
+            jz end_dxt_test
+            add edx,ebx
+            jns dxt_test
+            
 dxt_s_test:
-		inc ecx
-			dec eax
-			jz end_dxt_test
-			add edx,ebx
-			js dxt_s_test
-			
-			// swap this data (ecx set, dst set)
-			call dword ptr [SwapMethod] // (ecx reset to 0 after)
-			
-			jmp dxt_test  // and repeat
-			
+        inc ecx
+            dec eax
+            jz end_dxt_test
+            add edx,ebx
+            js dxt_s_test
+            
+            // swap this data (ecx set, dst set)
+            call dword ptr [SwapMethod] // (ecx reset to 0 after)
+            
+            jmp dxt_test  // and repeat
+            
 end_dxt_test:
-		// swap any remaining data
-		call dword ptr [SwapMethod]
-	}
+        // swap any remaining data
+        call dword ptr [SwapMethod]
+    }
 #else // _WIN32
-	uintptr_t dst_arg = dst;
-	DWORD cnt_arg = cnt;
-	asm volatile(
-		// copy the data
-		// ;edi = dest_addr -> end of dest; ecx = num_words; esi = base_addr (preserved); edx = offset (preserved)
-		"call CopyBlock"
-		: "+&D"(dst_arg)
-		: "S"(gfx.RDRAM), "c"(cnt_arg), "d"(off)
-		: "memory", "cc"
-		);
+    uintptr_t dst_arg = dst;
+    DWORD cnt_arg = cnt;
+    asm volatile(
+        // copy the data
+        // ;edi = dest_addr -> end of dest; ecx = num_words; esi = base_addr (preserved); edx = offset (preserved)
+        "call CopyBlock"
+        : "+&D"(dst_arg)
+        : "S"(gfx.RDRAM), "c"(cnt_arg), "d"(off)
+        : "memory", "cc"
+        );
    asm volatile(
-		// now swap it
-		"xor %%edx,%%edx           \n"         // edx = dxt counter
-			
-		"xor %%ecx, %%ecx          \n"     // ecx = how much to copy
-		"0:                        \n" // dxt_test:
-		"add $8, %[dst]            \n"
-		"dec %[cnt]                \n"
-		"jz 2f                     \n" // jz end_dxt_test
-		"add %[_dxt], %%edx        \n"
-		"jns 0b                    \n" // jns dxt_test
-			
-		"1:                        \n" // dxt_s_test:
-		"inc %%ecx                 \n"
-		"dec %[cnt]                \n"
-		"jz 2f                     \n" // jz end_dxt_test
-		"add %[_dxt], %%edx        \n"
-		"js 1b                     \n" // js dxt_s_test
-		
-		// swap this data (ecx: count, edi: dst)
-		//	call dword ptr [SwapMethod] 
-		"call *%[SwapMethod]       \n"
-		// (ecx reset to 0 after)		
+        // now swap it
+        "xor %%edx,%%edx           \n"         // edx = dxt counter
+            
+        "xor %%ecx, %%ecx          \n"     // ecx = how much to copy
+        "0:                        \n" // dxt_test:
+        "add $8, %[dst]            \n"
+        "dec %[cnt]                \n"
+        "jz 2f                     \n" // jz end_dxt_test
+        "add %[_dxt], %%edx        \n"
+        "jns 0b                    \n" // jns dxt_test
+            
+        "1:                        \n" // dxt_s_test:
+        "inc %%ecx                 \n"
+        "dec %[cnt]                \n"
+        "jz 2f                     \n" // jz end_dxt_test
+        "add %[_dxt], %%edx        \n"
+        "js 1b                     \n" // js dxt_s_test
+        
+        // swap this data (ecx: count, edi: dst)
+        //  call dword ptr [SwapMethod] 
+        "call *%[SwapMethod]       \n"
+        // (ecx reset to 0 after)       
 
-		"jmp 0b                    \n" // jmp dxt_test  // and repeat
-		
-		"2:                        \n" //end_dxt_test:
-		// swap any remaining data
-		//call dword ptr [SwapMethod]
-		"call *%[SwapMethod]       \n"
-		: [cnt] "+&r"(cnt), [dst] "+&D" (dst)
-		: [_dxt] "r" (_dxt), [SwapMethod] "g" (SwapMethod)
-		: "memory", "cc", "ecx", "edx"
-		);
+        "jmp 0b                    \n" // jmp dxt_test  // and repeat
+        
+        "2:                        \n" //end_dxt_test:
+        // swap any remaining data
+        //call dword ptr [SwapMethod]
+        "call *%[SwapMethod]       \n"
+        : [cnt] "+&r"(cnt), [dst] "+&D" (dst)
+        : [_dxt] "r" (_dxt), [SwapMethod] "g" (SwapMethod)
+        : "memory", "cc", "ecx", "edx"
+        );
 #endif // _WIN32
-	
-	rdp.update |= UPDATE_TEXTURE;
-	
-	FRDP ("loadblock: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, dxt: %08lx -> %08lx\n",
-		tile, ul_s, ul_t, lr_s,
-		dxt, _dxt);
+    
+    rdp.update |= UPDATE_TEXTURE;
+    
+    FRDP ("loadblock: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, dxt: %08lx -> %08lx\n",
+        tile, ul_s, ul_t, lr_s,
+        dxt, _dxt);
 }
 
 static void rdp_loadtile()
 {
-	if (rdp.skip_drawing)
-		return;
-	rdp.timg.set_by = 1;  // load tile
-	
-	DWORD tile = (DWORD)((rdp.cmd1 >> 24) & 0x07);
-	if (rdp.tiles[tile].format == 1)
-	{
+    if (rdp.skip_drawing)
+        return;
+    rdp.timg.set_by = 1;  // load tile
+    
+    DWORD tile = (DWORD)((rdp.cmd1 >> 24) & 0x07);
+    if (rdp.tiles[tile].format == 1)
+    {
         rdp.yuv_image = TRUE;
-		if (rdp.timg.addr < rdp.yuv_im_begin) rdp.yuv_im_begin = rdp.timg.addr;
-		return;
-	}
-	
-	rdp.addr[rdp.tiles[tile].t_mem] = rdp.timg.addr;
-	
-	WORD ul_s = (WORD)((rdp.cmd0 >> 14) & 0x03FF);
-	WORD ul_t = (WORD)((rdp.cmd0 >> 2 ) & 0x03FF);
-	WORD lr_s = (WORD)((rdp.cmd1 >> 14) & 0x03FF);
-	WORD lr_t = (WORD)((rdp.cmd1 >> 2 ) & 0x03FF);
-	
-	if (lr_s < ul_s || lr_t < ul_t) return;
-	
-	if (wrong_tile >= 0)  //there was a tile with zero length
-	{
-		rdp.tiles[wrong_tile].lr_s = lr_s;
-		
-		if (rdp.tiles[tile].size > rdp.tiles[wrong_tile].size)
-			rdp.tiles[wrong_tile].lr_s <<= (rdp.tiles[tile].size - rdp.tiles[wrong_tile].size);
-		else if (rdp.tiles[tile].size < rdp.tiles[wrong_tile].size)
-			rdp.tiles[wrong_tile].lr_s >>= (rdp.tiles[wrong_tile].size - rdp.tiles[tile].size);
-		rdp.tiles[wrong_tile].lr_t = lr_t;
-		//     wrong_tile = -1;
-	}
-	
+        if (rdp.timg.addr < rdp.yuv_im_begin) rdp.yuv_im_begin = rdp.timg.addr;
+        return;
+    }
+    
+    rdp.addr[rdp.tiles[tile].t_mem] = rdp.timg.addr;
+    
+    WORD ul_s = (WORD)((rdp.cmd0 >> 14) & 0x03FF);
+    WORD ul_t = (WORD)((rdp.cmd0 >> 2 ) & 0x03FF);
+    WORD lr_s = (WORD)((rdp.cmd1 >> 14) & 0x03FF);
+    WORD lr_t = (WORD)((rdp.cmd1 >> 2 ) & 0x03FF);
+    
+    if (lr_s < ul_s || lr_t < ul_t) return;
+    
+    if (wrong_tile >= 0)  //there was a tile with zero length
+    {
+        rdp.tiles[wrong_tile].lr_s = lr_s;
+        
+        if (rdp.tiles[tile].size > rdp.tiles[wrong_tile].size)
+            rdp.tiles[wrong_tile].lr_s <<= (rdp.tiles[tile].size - rdp.tiles[wrong_tile].size);
+        else if (rdp.tiles[tile].size < rdp.tiles[wrong_tile].size)
+            rdp.tiles[wrong_tile].lr_s >>= (rdp.tiles[wrong_tile].size - rdp.tiles[tile].size);
+        rdp.tiles[wrong_tile].lr_t = lr_t;
+        //     wrong_tile = -1;
+    }
+    
   if (rdp.hires_tex)// && (rdp.tiles[tile].format == 0))
   {
     FRDP("loadtile: hires_tex ul_s: %d, ul_t:%d\n", ul_s, ul_t);
       rdp.hires_tex->tile_uls = ul_s;
       rdp.hires_tex->tile_ult = ul_t;
-	}
+    }
 
-	if (settings.tonic && tile == 7)
-	{
-		rdp.tiles[0].ul_s = ul_s;
-		rdp.tiles[0].ul_t = ul_t;
-		rdp.tiles[0].lr_s = lr_s;
-		rdp.tiles[0].lr_t = lr_t;
-	}
+    if (settings.tonic && tile == 7)
+    {
+        rdp.tiles[0].ul_s = ul_s;
+        rdp.tiles[0].ul_t = ul_t;
+        rdp.tiles[0].lr_s = lr_s;
+        rdp.tiles[0].lr_t = lr_t;
+    }
 
-	DWORD height = lr_t - ul_t + 1;   // get height
-	DWORD width = lr_s - ul_s + 1;
-	
-	DWORD wid_64 = rdp.tiles[tile].line;
-	
-	// CHEAT: it's very unlikely that it loads more than 1 32-bit texture in one command,
-	//   so i don't bother to write in two different places at once.  Just load once with
-	//   twice as much data.
-	if (rdp.tiles[tile].size == 3)
-		wid_64 <<= 1;
-	
-	int line_n = rdp.timg.width;
-	if (rdp.tiles[tile].size == 0)
-		line_n >>= 1;
-	else
-		line_n <<= (rdp.tiles[tile].size-1);
-	
-	int offs = ul_t * line_n;
+    DWORD height = lr_t - ul_t + 1;   // get height
+    DWORD width = lr_s - ul_s + 1;
+    
+    DWORD wid_64 = rdp.tiles[tile].line;
+    
+    // CHEAT: it's very unlikely that it loads more than 1 32-bit texture in one command,
+    //   so i don't bother to write in two different places at once.  Just load once with
+    //   twice as much data.
+    if (rdp.tiles[tile].size == 3)
+        wid_64 <<= 1;
+    
+    int line_n = rdp.timg.width;
+    if (rdp.tiles[tile].size == 0)
+        line_n >>= 1;
+    else
+        line_n <<= (rdp.tiles[tile].size-1);
+    
+    int offs = ul_t * line_n;
   offs += ul_s << rdp.tiles[tile].size >> 1;
-	offs += rdp.timg.addr;
+    offs += rdp.timg.addr;
   if ((unsigned int) offs >= BMASK)
     return;
-	
-	// check if points to bad location
+    
+    // check if points to bad location
   DWORD size = width * height;
-	if (rdp.tiles[tile].size == 0)
-		size >>= 1;
-	else
-		size <<= (rdp.tiles[tile].size-1);
-	
+    if (rdp.tiles[tile].size == 0)
+        size >>= 1;
+    else
+        size <<= (rdp.tiles[tile].size-1);
+    
   if (offs + line_n*height > BMASK)
     height = (BMASK - offs) / line_n;
-	
-	uintptr_t SwapMethod = (rdp.tiles[tile].size==3)?(uintptr_t)SwapBlock64:(uintptr_t)SwapBlock32;
-	
-	uintptr_t dst = (uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3);
-	uintptr_t end = (uintptr_t)rdp.tmem+4096 - (wid_64<<3);
+    
+    uintptr_t SwapMethod = (rdp.tiles[tile].size==3)?(uintptr_t)SwapBlock64:(uintptr_t)SwapBlock32;
+    
+    uintptr_t dst = (uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3);
+    uintptr_t end = (uintptr_t)rdp.tmem+4096 - (wid_64<<3);
 #ifndef GCC
-	__asm {
-		// set initial values
-		mov edi,dword ptr [dst]
-			mov ecx,dword ptr [wid_64]
-			mov esi,dword ptr [gfx.RDRAM]
-			mov edx,dword ptr [offs]
-			xor ebx,ebx         // swap this line?
-			mov eax,dword ptr [height]
-			
+    __asm {
+        // set initial values
+        mov edi,dword ptr [dst]
+            mov ecx,dword ptr [wid_64]
+            mov esi,dword ptr [gfx.RDRAM]
+            mov edx,dword ptr [offs]
+            xor ebx,ebx         // swap this line?
+            mov eax,dword ptr [height]
+            
 loadtile_loop:
-		cmp dword ptr [end],edi   // end of tmem: error
-			jc loadtile_end
-			
-			// copy this line
-			push edi
-			push ecx
-			call CopyBlock
-			pop ecx
-			
-			// swap it?
-			xor ebx,1
-			jnz loadtile_no_swap
-			
-			// (ecx set, restore edi)
-			pop edi
-			push ecx
-			call dword ptr [SwapMethod]
-			pop ecx
-			jmp loadtile_swap_end
+        cmp dword ptr [end],edi   // end of tmem: error
+            jc loadtile_end
+            
+            // copy this line
+            push edi
+            push ecx
+            call CopyBlock
+            pop ecx
+            
+            // swap it?
+            xor ebx,1
+            jnz loadtile_no_swap
+            
+            // (ecx set, restore edi)
+            pop edi
+            push ecx
+            call dword ptr [SwapMethod]
+            pop ecx
+            jmp loadtile_swap_end
 loadtile_no_swap:
-		add sp,4  // forget edi, we are already at the next position
+        add sp,4  // forget edi, we are already at the next position
 loadtile_swap_end:
-		
-		add edx,dword ptr [line_n]
-			
-			dec eax
-			jnz loadtile_loop
-			
+        
+        add edx,dword ptr [line_n]
+            
+            dec eax
+            jnz loadtile_loop
+            
 loadtile_end:
-	}
+    }
 #else // _WIN32
-	DWORD save_wid_64;
-	uintptr_t save_dst;
+    DWORD save_wid_64;
+    uintptr_t save_dst;
    asm volatile (
-		 // set initial values
-		 "xor %%ebx,%%ebx           \n"         // swap this line?
-			
-		 "0:                        \n" // loadtile_loop:
-		 "cmp %[dst], %[end]         \n"   // end of tmem: error
-		 "jc 3f                     \n" // jc loadtile_end
-		 
-		 // copy this line
-		 "mov %[dst], %[save_dst]    \n"
-		 "mov %[wid_64], %[save_wid_64]\n"
-		 "call CopyBlock            \n"
-		 "mov %[save_wid_64], %[wid_64]\n"
-		 
-		 // swap it?
-		 "xor $1, %%ebx             \n"
-		 "jnz 1f                    \n" // jnz loadtile_no_swap
-		 
-		 // (ecx/wid64 set, restore edi/dst)
-		 "mov %[save_dst], %[dst]   \n"
-		 "mov %[wid_64], %[save_wid_64]\n"
-		 //call dword ptr [SwapMethod]
-		 "call *%[SwapMethod]       \n"
-		 
-		 "mov %[save_wid_64], %[wid_64]\n"
-		 "jmp 2f                    \n" // jmp loadtile_swap_end
-		 "1:                        \n" // loadtile_no_swap:
-		 // forget edi, we are already at the next position
-		 "2:                        \n" // loadtile_swap_end:
-		 
-		 "add %[line_n], %%edx     \n"
-		 
-		 "dec %%eax                 \n"
-		 "jnz 0b                    \n" // jnz loadtile_loop
-		 
-		 "3:                        \n" // loadtile_end:
-		 // &+ is necessary so gcc does not use the same register for both
-		 : [save_wid_64] "=&g" (save_wid_64), [save_dst] "=&g" (save_dst)
-		 : [dst] "D" (dst), [wid_64] "c" (wid_64), "S" (gfx.RDRAM), "d" (offs), "a" (height),
-		 [end] "g" (end), [SwapMethod] "g" (SwapMethod), [line_n] "g" (line_n)
-		 : "memory", "cc", "ebx"
-		 );
+         // set initial values
+         "xor %%ebx,%%ebx           \n"         // swap this line?
+            
+         "0:                        \n" // loadtile_loop:
+         "cmp %[dst], %[end]         \n"   // end of tmem: error
+         "jc 3f                     \n" // jc loadtile_end
+         
+         // copy this line
+         "mov %[dst], %[save_dst]    \n"
+         "mov %[wid_64], %[save_wid_64]\n"
+         "call CopyBlock            \n"
+         "mov %[save_wid_64], %[wid_64]\n"
+         
+         // swap it?
+         "xor $1, %%ebx             \n"
+         "jnz 1f                    \n" // jnz loadtile_no_swap
+         
+         // (ecx/wid64 set, restore edi/dst)
+         "mov %[save_dst], %[dst]   \n"
+         "mov %[wid_64], %[save_wid_64]\n"
+         //call dword ptr [SwapMethod]
+         "call *%[SwapMethod]       \n"
+         
+         "mov %[save_wid_64], %[wid_64]\n"
+         "jmp 2f                    \n" // jmp loadtile_swap_end
+         "1:                        \n" // loadtile_no_swap:
+         // forget edi, we are already at the next position
+         "2:                        \n" // loadtile_swap_end:
+         
+         "add %[line_n], %%edx     \n"
+         
+         "dec %%eax                 \n"
+         "jnz 0b                    \n" // jnz loadtile_loop
+         
+         "3:                        \n" // loadtile_end:
+         // &+ is necessary so gcc does not use the same register for both
+         : [save_wid_64] "=&g" (save_wid_64), [save_dst] "=&g" (save_dst)
+         : [dst] "D" (dst), [wid_64] "c" (wid_64), "S" (gfx.RDRAM), "d" (offs), "a" (height),
+         [end] "g" (end), [SwapMethod] "g" (SwapMethod), [line_n] "g" (line_n)
+         : "memory", "cc", "ebx"
+         );
 #endif // _WIN32
-	
-	FRDP("loadtile: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, lr_t: %d\n", tile,
-		ul_s, ul_t, lr_s, lr_t);
+    
+    FRDP("loadtile: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, lr_t: %d\n", tile,
+        ul_s, ul_t, lr_s, lr_t);
 }
 
 static void rdp_settile()
 {
-	tile_set = 1; // used to check if we only load the first settilesize
-	
-	rdp.first = 0;
-	
-	//rdp.cur_tile_n = (DWORD)((rdp.cmd1 >> 24) & 0x07);
-	//rdp.cur_tile = &rdp.tiles[rdp.cur_tile_n];
-	
-	rdp.last_tile = (DWORD)((rdp.cmd1 >> 24) & 0x07);
-	TILE *tile = &rdp.tiles[rdp.last_tile];
-	
-	tile->format = (BYTE)((rdp.cmd0 >> 21) & 0x07);
-	tile->size = (BYTE)((rdp.cmd0 >> 19) & 0x03);
-	tile->line = (WORD)((rdp.cmd0 >> 9) & 0x01FF);
-	tile->t_mem = (WORD)(rdp.cmd0 & 0x1FF);
-	tile->palette = (BYTE)((rdp.cmd1 >> 20) & 0x0F);
-	tile->clamp_t = (BYTE)((rdp.cmd1 >> 19) & 0x01);
-	tile->mirror_t = (BYTE)((rdp.cmd1 >> 18) & 0x01);
-	tile->mask_t = (BYTE)((rdp.cmd1 >> 14) & 0x0F);
-	tile->shift_t = (BYTE)((rdp.cmd1 >> 10) & 0x0F);
-	tile->clamp_s = (BYTE)((rdp.cmd1 >> 9) & 0x01);
-	tile->mirror_s = (BYTE)((rdp.cmd1 >> 8) & 0x01);
-	tile->mask_s = (BYTE)((rdp.cmd1 >> 4) & 0x0F);
-	tile->shift_s = (BYTE)(rdp.cmd1 & 0x0F);
-	
-	rdp.update |= UPDATE_TEXTURE;
-	
-	FRDP ("settile: tile: %d, format: %s, size: %s, line: %d, "
-		"t_mem: %08lx, palette: %d, clamp_t/mirror_t: %s, mask_t: %d, "
-		"shift_t: %d, clamp_s/mirror_s: %s, mask_s: %d, shift_s: %d\n",
-		rdp.last_tile, str_format[tile->format], str_size[tile->size], tile->line,
-		tile->t_mem, tile->palette, str_cm[(tile->clamp_t<<1)|tile->mirror_t], tile->mask_t,
-		tile->shift_t, str_cm[(tile->clamp_s<<1)|tile->mirror_s], tile->mask_s, tile->shift_s);
+    tile_set = 1; // used to check if we only load the first settilesize
+    
+    rdp.first = 0;
+    
+    //rdp.cur_tile_n = (DWORD)((rdp.cmd1 >> 24) & 0x07);
+    //rdp.cur_tile = &rdp.tiles[rdp.cur_tile_n];
+    
+    rdp.last_tile = (DWORD)((rdp.cmd1 >> 24) & 0x07);
+    TILE *tile = &rdp.tiles[rdp.last_tile];
+    
+    tile->format = (BYTE)((rdp.cmd0 >> 21) & 0x07);
+    tile->size = (BYTE)((rdp.cmd0 >> 19) & 0x03);
+    tile->line = (WORD)((rdp.cmd0 >> 9) & 0x01FF);
+    tile->t_mem = (WORD)(rdp.cmd0 & 0x1FF);
+    tile->palette = (BYTE)((rdp.cmd1 >> 20) & 0x0F);
+    tile->clamp_t = (BYTE)((rdp.cmd1 >> 19) & 0x01);
+    tile->mirror_t = (BYTE)((rdp.cmd1 >> 18) & 0x01);
+    tile->mask_t = (BYTE)((rdp.cmd1 >> 14) & 0x0F);
+    tile->shift_t = (BYTE)((rdp.cmd1 >> 10) & 0x0F);
+    tile->clamp_s = (BYTE)((rdp.cmd1 >> 9) & 0x01);
+    tile->mirror_s = (BYTE)((rdp.cmd1 >> 8) & 0x01);
+    tile->mask_s = (BYTE)((rdp.cmd1 >> 4) & 0x0F);
+    tile->shift_s = (BYTE)(rdp.cmd1 & 0x0F);
+    
+    rdp.update |= UPDATE_TEXTURE;
+    
+    FRDP ("settile: tile: %d, format: %s, size: %s, line: %d, "
+        "t_mem: %08lx, palette: %d, clamp_t/mirror_t: %s, mask_t: %d, "
+        "shift_t: %d, clamp_s/mirror_s: %s, mask_s: %d, shift_s: %d\n",
+        rdp.last_tile, str_format[tile->format], str_size[tile->size], tile->line,
+        tile->t_mem, tile->palette, str_cm[(tile->clamp_t<<1)|tile->mirror_t], tile->mask_t,
+        tile->shift_t, str_cm[(tile->clamp_s<<1)|tile->mirror_s], tile->mask_s, tile->shift_s);
 }
 
 //
@@ -2402,58 +2402,58 @@ static void rdp_fillrect()
   DWORD ul_y = (rdp.cmd1 & 0x00000FFF) >> 2;
   DWORD lr_x = ((rdp.cmd0 & 0x00FFF000) >> 14) + 1;
   DWORD lr_y = ((rdp.cmd0 & 0x00000FFF) >> 2) + 1;
-	if ((rdp.cimg == rdp.zimg) || (settings.fb_smart && rdp.frame_buffers[rdp.ci_count-1].status == ci_zimg))
-	{
-		RDP ("Fillrect - cleared the depth buffer\n");
-		if (fullscreen)
-		{
-			
-			grDepthMask (FXTRUE);
-			grColorMask (FXFALSE, FXFALSE);
-			grBufferClear (0, 0, 0xFFFF);
-			grColorMask (FXTRUE, FXTRUE);
-			rdp.update |= UPDATE_ZBUF_ENABLED;
-			if (settings.fb_depth_clear)
-			{
+    if ((rdp.cimg == rdp.zimg) || (settings.fb_smart && rdp.frame_buffers[rdp.ci_count-1].status == ci_zimg))
+    {
+        RDP ("Fillrect - cleared the depth buffer\n");
+        if (fullscreen)
+        {
+            
+            grDepthMask (FXTRUE);
+            grColorMask (FXFALSE, FXFALSE);
+            grBufferClear (0, 0, 0xFFFF);
+            grColorMask (FXTRUE, FXTRUE);
+            rdp.update |= UPDATE_ZBUF_ENABLED;
+            if (settings.fb_depth_clear)
+            {
         ul_x = min(max(ul_x, rdp.scissor_o.ul_x), rdp.scissor_o.lr_x);
         lr_x = min(max(lr_x, rdp.scissor_o.ul_x), rdp.scissor_o.lr_x);
         ul_y = min(max(ul_y, rdp.scissor_o.ul_y), rdp.scissor_o.lr_y);
         lr_y = min(max(lr_y, rdp.scissor_o.ul_y), rdp.scissor_o.lr_y);
         //FIXME:unused? DWORD zi_height = lr_y - ul_y - 1;
-        //				rdp.zi_nb_pixels = rdp.zi_width * zi_height;
+        //              rdp.zi_nb_pixels = rdp.zi_width * zi_height;
         rdp.zi_lry = lr_y - 1;
         rdp.zi_lrx = lr_x - 1;
-        //		        FRDP ("zi_width: %d, zi_height: %d\n", rdp.zi_width, zi_height);
+        //              FRDP ("zi_width: %d, zi_height: %d\n", rdp.zi_width, zi_height);
         DWORD fillrect_width_in_dwords = (lr_x-ul_x) >> 1;
         DWORD zi_width_in_dwords = rdp.zi_width >> 1;
         ul_x >>= 1;
-				DWORD * dst = (DWORD*)(gfx.RDRAM+rdp.cimg);
+                DWORD * dst = (DWORD*)(gfx.RDRAM+rdp.cimg);
         dst += ul_y * zi_width_in_dwords;
         for (DWORD y = ul_y; y < lr_y; y++)
         {
           for (DWORD x = ul_x; x < fillrect_width_in_dwords; x++)
           {
             dst[x] = rdp.fill_color;
-          }	
+          } 
           dst += zi_width_in_dwords;
         }
-			}
-		}
-		return;
-	}
-	
-	if (rdp.skip_drawing)
-	{
-		RDP("Fillrect skipped\n");
-		return;
-	}
-	
-	// Update scissor
-	update_scissor ();
-	
-	if ((ul_x > lr_x) || (ul_y > lr_y)) return;
-	if (settings.bomberman64 && (lr_x == rdp.ci_width) && (rdp.cimg == rdp.ocimg)) //bomberman64 hack
-		return;
+            }
+        }
+        return;
+    }
+    
+    if (rdp.skip_drawing)
+    {
+        RDP("Fillrect skipped\n");
+        return;
+    }
+    
+    // Update scissor
+    update_scissor ();
+    
+    if ((ul_x > lr_x) || (ul_y > lr_y)) return;
+    if (settings.bomberman64 && (lr_x == rdp.ci_width) && (rdp.cimg == rdp.ocimg)) //bomberman64 hack
+        return;
 
   if (rdp.cur_image && (rdp.cur_image->format != 0) && (rdp.cycle_mode == 3) && (rdp.cur_image->width == lr_x))
   {
@@ -2465,62 +2465,62 @@ static void rdp_fillrect()
         grDepthMask (FXFALSE);
         grBufferClear (color, 0, 0xFFFF);
         grDepthMask (FXTRUE);
-		rdp.update |= UPDATE_ZBUF_ENABLED;
-		return;
+        rdp.update |= UPDATE_ZBUF_ENABLED;
+        return;
     }
-	
+    
   if (settings.decrease_fillrect_edge && rdp.cycle_mode == 0)
-	{
-		lr_x--; lr_y--;
-	}
-	FRDP("fillrect (%d,%d) -> (%d,%d), cycle mode: %d, #%d, #%d\n", ul_x, ul_y, lr_x, lr_y, rdp.cycle_mode,
-		rdp.tri_n, rdp.tri_n+1);
-	
-	FRDP("scissor (%d,%d) -> (%d,%d)\n", rdp.scissor.ul_x, rdp.scissor.ul_y, rdp.scissor.lr_x,
-		rdp.scissor.lr_y);
-	
-	// KILL the floating point error with 0.01f
-	DWORD s_ul_x = (DWORD)min(max(ul_x * rdp.scale_x + rdp.offset_x + 0.01f, rdp.scissor.ul_x), rdp.scissor.lr_x);
-	DWORD s_lr_x = (DWORD)min(max(lr_x * rdp.scale_x + rdp.offset_x + 0.01f, rdp.scissor.ul_x), rdp.scissor.lr_x);
-	DWORD s_ul_y = (DWORD)min(max(ul_y * rdp.scale_y + rdp.offset_y + 0.01f, rdp.scissor.ul_y), rdp.scissor.lr_y);
-	DWORD s_lr_y = (DWORD)min(max(lr_y * rdp.scale_y + rdp.offset_y + 0.01f, rdp.scissor.ul_y), rdp.scissor.lr_y);
-	
-	if (s_lr_x < 0.0f) s_lr_x = 0;
-	if (s_lr_y < 0.0f) s_lr_y = 0;
-	if (s_ul_x > (float)settings.res_x) s_ul_x = settings.res_x;
-	if (s_ul_y > (float)settings.res_y) s_ul_y = settings.res_y;
-	
-	FRDP (" - %d, %d, %d, %d\n", s_ul_x, s_ul_y, s_lr_x, s_lr_y);
-	
-	if (fullscreen)
-	{
-		grFogMode (GR_FOG_DISABLE);
-		
-		grClipWindow (0, 0, settings.res_x, settings.res_y);
-		
+    {
+        lr_x--; lr_y--;
+    }
+    FRDP("fillrect (%d,%d) -> (%d,%d), cycle mode: %d, #%d, #%d\n", ul_x, ul_y, lr_x, lr_y, rdp.cycle_mode,
+        rdp.tri_n, rdp.tri_n+1);
+    
+    FRDP("scissor (%d,%d) -> (%d,%d)\n", rdp.scissor.ul_x, rdp.scissor.ul_y, rdp.scissor.lr_x,
+        rdp.scissor.lr_y);
+    
+    // KILL the floating point error with 0.01f
+    DWORD s_ul_x = (DWORD)min(max(ul_x * rdp.scale_x + rdp.offset_x + 0.01f, rdp.scissor.ul_x), rdp.scissor.lr_x);
+    DWORD s_lr_x = (DWORD)min(max(lr_x * rdp.scale_x + rdp.offset_x + 0.01f, rdp.scissor.ul_x), rdp.scissor.lr_x);
+    DWORD s_ul_y = (DWORD)min(max(ul_y * rdp.scale_y + rdp.offset_y + 0.01f, rdp.scissor.ul_y), rdp.scissor.lr_y);
+    DWORD s_lr_y = (DWORD)min(max(lr_y * rdp.scale_y + rdp.offset_y + 0.01f, rdp.scissor.ul_y), rdp.scissor.lr_y);
+    
+    if (s_lr_x < 0.0f) s_lr_x = 0;
+    if (s_lr_y < 0.0f) s_lr_y = 0;
+    if (s_ul_x > (float)settings.res_x) s_ul_x = settings.res_x;
+    if (s_ul_y > (float)settings.res_y) s_ul_y = settings.res_y;
+    
+    FRDP (" - %d, %d, %d, %d\n", s_ul_x, s_ul_y, s_lr_x, s_lr_y);
+    
+    if (fullscreen)
+    {
+        grFogMode (GR_FOG_DISABLE);
+        
+        grClipWindow (0, 0, settings.res_x, settings.res_y);
+        
     float Z = 1.0f;
     if (rdp.zsrc == 1 && (rdp.othermode_l & 0x00000030))
     {
-    		Z = ScaleZ(rdp.prim_depth);
+            Z = ScaleZ(rdp.prim_depth);
         grDepthBufferFunction (GR_CMP_LEQUAL);
-        //			grDepthMask (FXTRUE);
+        //          grDepthMask (FXTRUE);
         FRDP ("prim_depth = %d\n", rdp.prim_depth);
     }
     else
     {
       grDepthBufferFunction (GR_CMP_ALWAYS);
       grDepthMask (FXFALSE);
-    		RDP ("no prim_depth used, using 1.0\n");
+            RDP ("no prim_depth used, using 1.0\n");
     }
-		// Draw the rectangle
-		VERTEX v[4] = {
+        // Draw the rectangle
+        VERTEX v[4] = {
       { (float)s_ul_x, (float)s_ul_y, Z, 1.0f,  0,0,0,0, { 0,0,0,0 }, 0,0, 0,0,0,0 },
       { (float)s_lr_x, (float)s_ul_y, Z, 1.0f,  0,0,0,0, { 0,0,0,0 }, 0,0, 0,0,0,0 },
       { (float)s_ul_x, (float)s_lr_y, Z, 1.0f,  0,0,0,0, { 0,0,0,0 }, 0,0, 0,0,0,0 },
       { (float)s_lr_x, (float)s_lr_y, Z, 1.0f,  0,0,0,0, { 0,0,0,0 }, 0,0, 0,0,0,0 } };
-			
-			if (rdp.cycle_mode == 3)
-			{
+            
+            if (rdp.cycle_mode == 3)
+            {
         DWORD color = (settings.fillcolor_fix) ? rdp.fill_color : (rdp.fill_color >> 16);
 
         if (settings.PM && rdp.frame_buffers[rdp.ci_count-1].status == ci_aux)
@@ -2536,28 +2536,28 @@ static void rdp_fillrect()
             ((DWORD)((float)((color&0x07C0) >> 6) / 31.0f * 255.0f) << 16) |
             ((DWORD)((float)((color&0x003E) >> 1) / 31.0f * 255.0f) << 8);
         }
-				grConstantColorValue (color);
-				
-				grColorCombine (GR_COMBINE_FUNCTION_LOCAL,
-					GR_COMBINE_FACTOR_NONE,
-					GR_COMBINE_LOCAL_CONSTANT,
-					GR_COMBINE_OTHER_NONE,
-					FXFALSE);
-				
-				grAlphaCombine (GR_COMBINE_FUNCTION_LOCAL,
-					GR_COMBINE_FACTOR_NONE,
-					GR_COMBINE_LOCAL_CONSTANT,
-					GR_COMBINE_OTHER_NONE,
-					FXFALSE);
-				
-				grAlphaBlendFunction (GR_BLEND_ONE, GR_BLEND_ZERO, GR_BLEND_ONE, GR_BLEND_ZERO);
-				
-				rdp.update |= UPDATE_COMBINE;
-			}
-			else
-			{
-				Combine ();
-				TexCache ();  // (to update combiner)
+                grConstantColorValue (color);
+                
+                grColorCombine (GR_COMBINE_FUNCTION_LOCAL,
+                    GR_COMBINE_FACTOR_NONE,
+                    GR_COMBINE_LOCAL_CONSTANT,
+                    GR_COMBINE_OTHER_NONE,
+                    FXFALSE);
+                
+                grAlphaCombine (GR_COMBINE_FUNCTION_LOCAL,
+                    GR_COMBINE_FACTOR_NONE,
+                    GR_COMBINE_LOCAL_CONSTANT,
+                    GR_COMBINE_OTHER_NONE,
+                    FXFALSE);
+                
+                grAlphaBlendFunction (GR_BLEND_ONE, GR_BLEND_ZERO, GR_BLEND_ONE, GR_BLEND_ZERO);
+                
+                rdp.update |= UPDATE_COMBINE;
+            }
+            else
+            {
+                Combine ();
+                TexCache ();  // (to update combiner)
         DWORD cmb_mode_c = (rdp.cycle1 << 16) | (rdp.cycle2 & 0xFFFF);
         DWORD cmb_mode_a = (rdp.cycle1 & 0x0FFF0000) | ((rdp.cycle2 >> 16) & 0x00000FFF);
         if (cmb_mode_c == 0x9fff9fff || cmb_mode_a == 0x09ff09ff) //shade
@@ -2565,57 +2565,57 @@ static void rdp_fillrect()
           AllowShadeMods (v, 4);
           for (int k = 0; k < 4; k++)
             apply_shade_mods (&v[k]);
-			}
-			}
-			
-			grAlphaTestFunction (GR_CMP_ALWAYS);
+            }
+            }
+            
+            grAlphaTestFunction (GR_CMP_ALWAYS);
       if (grStippleModeExt)
         grStippleModeExt(GR_STIPPLE_DISABLE);
-			
-			grCullMode(GR_CULL_DISABLE);
-			
-			if (settings.wireframe)
-			{
-				SetWireframeCol ();
-				grDrawLine (&v[0], &v[2]);
-				grDrawLine (&v[2], &v[1]);
-				grDrawLine (&v[1], &v[0]);
-				grDrawLine (&v[2], &v[3]);
-				grDrawLine (&v[3], &v[1]);
-				//grDrawLine (&v[1], &v[2]);
-			}
-			else
-			{
-				grDrawTriangle (&v[0], &v[2], &v[1]);
-				grDrawTriangle (&v[2], &v[3], &v[1]);
-			}
-			
-			if (debug.capture)
-			{
-				VERTEX v1[3];
-				v1[0] = v[0];
-				v1[1] = v[2];
-				v1[2] = v[1];
-				add_tri (v1, 3, TRI_FILLRECT);
-				rdp.tri_n ++;
-				v1[0] = v[2];
-				v1[1] = v[3];
-				add_tri (v1, 3, TRI_FILLRECT);
-				rdp.tri_n ++;
-			}
-			else
-				rdp.tri_n += 2;
-			
+            
+            grCullMode(GR_CULL_DISABLE);
+            
+            if (settings.wireframe)
+            {
+                SetWireframeCol ();
+                grDrawLine (&v[0], &v[2]);
+                grDrawLine (&v[2], &v[1]);
+                grDrawLine (&v[1], &v[0]);
+                grDrawLine (&v[2], &v[3]);
+                grDrawLine (&v[3], &v[1]);
+                //grDrawLine (&v[1], &v[2]);
+            }
+            else
+            {
+                grDrawTriangle (&v[0], &v[2], &v[1]);
+                grDrawTriangle (&v[2], &v[3], &v[1]);
+            }
+            
+            if (debug.capture)
+            {
+                VERTEX v1[3];
+                v1[0] = v[0];
+                v1[1] = v[2];
+                v1[2] = v[1];
+                add_tri (v1, 3, TRI_FILLRECT);
+                rdp.tri_n ++;
+                v1[0] = v[2];
+                v1[1] = v[3];
+                add_tri (v1, 3, TRI_FILLRECT);
+                rdp.tri_n ++;
+            }
+            else
+                rdp.tri_n += 2;
+            
       if (settings.fog && (rdp.flags & FOG_ENABLED)) 
       {
         grFogMode (GR_FOG_WITH_TABLE_ON_FOGCOORD_EXT);
       }
-			
-			rdp.update |= UPDATE_CULL_MODE | UPDATE_ALPHA_COMPARE | UPDATE_ZBUF_ENABLED;
+            
+            rdp.update |= UPDATE_CULL_MODE | UPDATE_ALPHA_COMPARE | UPDATE_ZBUF_ENABLED;
   }
   else
   {
-	  rdp.tri_n += 2;
+      rdp.tri_n += 2;
   }
 }
 
@@ -2626,78 +2626,78 @@ static void rdp_fillrect()
 static void rdp_setfillcolor()
 {
   rdp.fill_color = rdp.cmd1;
-	rdp.update |= UPDATE_ALPHA_COMPARE | UPDATE_COMBINE;
-	
-	FRDP("setfillcolor: %08lx\n", rdp.cmd1);
+    rdp.update |= UPDATE_ALPHA_COMPARE | UPDATE_COMBINE;
+    
+    FRDP("setfillcolor: %08lx\n", rdp.cmd1);
 }
 
 static void rdp_setfogcolor()
 {
   rdp.fog_color = rdp.cmd1;
-	rdp.update |= UPDATE_COMBINE | UPDATE_FOG_ENABLED;
-	
-	FRDP("setfogcolor - %08lx\n", rdp.cmd1);
+    rdp.update |= UPDATE_COMBINE | UPDATE_FOG_ENABLED;
+    
+    FRDP("setfogcolor - %08lx\n", rdp.cmd1);
 }
 
 static void rdp_setblendcolor()
 {
   rdp.blend_color = rdp.cmd1;
-	rdp.update |= UPDATE_COMBINE;
-	
-	FRDP("setblendcolor: %08lx\n", rdp.cmd1);
+    rdp.update |= UPDATE_COMBINE;
+    
+    FRDP("setblendcolor: %08lx\n", rdp.cmd1);
 }
 
 static void rdp_setprimcolor()
 {
   rdp.prim_color = rdp.cmd1;
-	rdp.prim_lodmin = (rdp.cmd0 >> 8) & 0xFF;
+    rdp.prim_lodmin = (rdp.cmd0 >> 8) & 0xFF;
   rdp.prim_lodfrac = max(rdp.cmd0 & 0xFF, rdp.prim_lodmin);
-	rdp.update |= UPDATE_COMBINE;
-	
-	FRDP("setprimcolor: %08lx, lodmin: %d, lodfrac: %d\n", rdp.cmd1, rdp.prim_lodmin,
-		rdp.prim_lodfrac);
+    rdp.update |= UPDATE_COMBINE;
+    
+    FRDP("setprimcolor: %08lx, lodmin: %d, lodfrac: %d\n", rdp.cmd1, rdp.prim_lodmin,
+        rdp.prim_lodfrac);
 }
 
 static void rdp_setenvcolor()
 {
   rdp.env_color = rdp.cmd1;
-	rdp.update |= UPDATE_COMBINE;
-	
-	FRDP("setenvcolor: %08lx\n", rdp.cmd1);
+    rdp.update |= UPDATE_COMBINE;
+    
+    FRDP("setenvcolor: %08lx\n", rdp.cmd1);
 }
 
 static void rdp_setcombine()
 {
-	rdp.c_a0  = (BYTE)((rdp.cmd0 >> 20) & 0xF); 
-	rdp.c_b0  = (BYTE)((rdp.cmd1 >> 28) & 0xF);
-	rdp.c_c0  = (BYTE)((rdp.cmd0 >> 15) & 0x1F);
-	rdp.c_d0  = (BYTE)((rdp.cmd1 >> 15) & 0x7);
-	rdp.c_Aa0 = (BYTE)((rdp.cmd0 >> 12) & 0x7); 
-	rdp.c_Ab0 = (BYTE)((rdp.cmd1 >> 12) & 0x7);
-	rdp.c_Ac0 = (BYTE)((rdp.cmd0 >> 9)  & 0x7); 
-	rdp.c_Ad0 = (BYTE)((rdp.cmd1 >> 9)  & 0x7);
-	
-	rdp.c_a1  = (BYTE)((rdp.cmd0 >> 5)  & 0xF);
-	rdp.c_b1  = (BYTE)((rdp.cmd1 >> 24) & 0xF);
-	rdp.c_c1  = (BYTE)((rdp.cmd0 >> 0)  & 0x1F);
-	rdp.c_d1  = (BYTE)((rdp.cmd1 >> 6)  & 0x7);
-	rdp.c_Aa1 = (BYTE)((rdp.cmd1 >> 21) & 0x7);
-	rdp.c_Ab1 = (BYTE)((rdp.cmd1 >> 3)  & 0x7);
-	rdp.c_Ac1 = (BYTE)((rdp.cmd1 >> 18) & 0x7);
-	rdp.c_Ad1 = (BYTE)((rdp.cmd1 >> 0)  & 0x7);
-	
-	rdp.cycle1 = (rdp.c_a0<<0)  | (rdp.c_b0<<4)  | (rdp.c_c0<<8)  | (rdp.c_d0<<13)| 
-		(rdp.c_Aa0<<16)| (rdp.c_Ab0<<19)| (rdp.c_Ac0<<22)| (rdp.c_Ad0<<25);
-	rdp.cycle2 = (rdp.c_a1<<0)  | (rdp.c_b1<<4)  | (rdp.c_c1<<8)  | (rdp.c_d1<<13)| 
-		(rdp.c_Aa1<<16)| (rdp.c_Ab1<<19)| (rdp.c_Ac1<<22)| (rdp.c_Ad1<<25);
-	
-	rdp.update |= UPDATE_COMBINE;
-	
-	FRDP("setcombine\na0=%s b0=%s c0=%s d0=%s\nAa0=%s Ab0=%s Ac0=%s Ad0=%s\na1=%s b1=%s c1=%s d1=%s\nAa1=%s Ab1=%s Ac1=%s Ad1=%s\n",
-		Mode0[rdp.c_a0], Mode1[rdp.c_b0], Mode2[rdp.c_c0], Mode3[rdp.c_d0],
-		Alpha0[rdp.c_Aa0], Alpha1[rdp.c_Ab0], Alpha2[rdp.c_Ac0], Alpha3[rdp.c_Ad0],
-		Mode0[rdp.c_a1], Mode1[rdp.c_b1], Mode2[rdp.c_c1], Mode3[rdp.c_d1],
-		Alpha0[rdp.c_Aa1], Alpha1[rdp.c_Ab1], Alpha2[rdp.c_Ac1], Alpha3[rdp.c_Ad1]);
+    rdp.c_a0  = (BYTE)((rdp.cmd0 >> 20) & 0xF); 
+    rdp.c_b0  = (BYTE)((rdp.cmd1 >> 28) & 0xF);
+    rdp.c_c0  = (BYTE)((rdp.cmd0 >> 15) & 0x1F);
+    rdp.c_d0  = (BYTE)((rdp.cmd1 >> 15) & 0x7);
+    rdp.c_Aa0 = (BYTE)((rdp.cmd0 >> 12) & 0x7); 
+    rdp.c_Ab0 = (BYTE)((rdp.cmd1 >> 12) & 0x7);
+    rdp.c_Ac0 = (BYTE)((rdp.cmd0 >> 9)  & 0x7); 
+    rdp.c_Ad0 = (BYTE)((rdp.cmd1 >> 9)  & 0x7);
+    
+    rdp.c_a1  = (BYTE)((rdp.cmd0 >> 5)  & 0xF);
+    rdp.c_b1  = (BYTE)((rdp.cmd1 >> 24) & 0xF);
+    rdp.c_c1  = (BYTE)((rdp.cmd0 >> 0)  & 0x1F);
+    rdp.c_d1  = (BYTE)((rdp.cmd1 >> 6)  & 0x7);
+    rdp.c_Aa1 = (BYTE)((rdp.cmd1 >> 21) & 0x7);
+    rdp.c_Ab1 = (BYTE)((rdp.cmd1 >> 3)  & 0x7);
+    rdp.c_Ac1 = (BYTE)((rdp.cmd1 >> 18) & 0x7);
+    rdp.c_Ad1 = (BYTE)((rdp.cmd1 >> 0)  & 0x7);
+    
+    rdp.cycle1 = (rdp.c_a0<<0)  | (rdp.c_b0<<4)  | (rdp.c_c0<<8)  | (rdp.c_d0<<13)| 
+        (rdp.c_Aa0<<16)| (rdp.c_Ab0<<19)| (rdp.c_Ac0<<22)| (rdp.c_Ad0<<25);
+    rdp.cycle2 = (rdp.c_a1<<0)  | (rdp.c_b1<<4)  | (rdp.c_c1<<8)  | (rdp.c_d1<<13)| 
+        (rdp.c_Aa1<<16)| (rdp.c_Ab1<<19)| (rdp.c_Ac1<<22)| (rdp.c_Ad1<<25);
+    
+    rdp.update |= UPDATE_COMBINE;
+    
+    FRDP("setcombine\na0=%s b0=%s c0=%s d0=%s\nAa0=%s Ab0=%s Ac0=%s Ad0=%s\na1=%s b1=%s c1=%s d1=%s\nAa1=%s Ab1=%s Ac1=%s Ad1=%s\n",
+        Mode0[rdp.c_a0], Mode1[rdp.c_b0], Mode2[rdp.c_c0], Mode3[rdp.c_d0],
+        Alpha0[rdp.c_Aa0], Alpha1[rdp.c_Ab0], Alpha2[rdp.c_Ac0], Alpha3[rdp.c_Ad0],
+        Mode0[rdp.c_a1], Mode1[rdp.c_b1], Mode2[rdp.c_c1], Mode3[rdp.c_d1],
+        Alpha0[rdp.c_Aa1], Alpha1[rdp.c_Ab1], Alpha2[rdp.c_Ac1], Alpha3[rdp.c_Ad1]);
 }
 
 //
@@ -2706,59 +2706,59 @@ static void rdp_setcombine()
 
 static void rdp_settextureimage()
 {
-	static const char *format[]   = { "RGBA", "YUV", "CI", "IA", "I", "?", "?", "?" };
-	static const char *size[]     = { "4bit", "8bit", "16bit", "32bit" };
-	
-	rdp.timg.format = (BYTE)((rdp.cmd0 >> 21) & 0x07);
-	rdp.timg.size = (BYTE)((rdp.cmd0 >> 19) & 0x03);
-	rdp.timg.width = (WORD)(1 + (rdp.cmd0 & 0x00000FFF));
-	rdp.timg.addr = segoffset(rdp.cmd1);
-	rdp.s2dex_tex_loaded = TRUE;	
-	rdp.update |= UPDATE_TEXTURE;
-	
+    static const char *format[]   = { "RGBA", "YUV", "CI", "IA", "I", "?", "?", "?" };
+    static const char *size[]     = { "4bit", "8bit", "16bit", "32bit" };
+    
+    rdp.timg.format = (BYTE)((rdp.cmd0 >> 21) & 0x07);
+    rdp.timg.size = (BYTE)((rdp.cmd0 >> 19) & 0x03);
+    rdp.timg.width = (WORD)(1 + (rdp.cmd0 & 0x00000FFF));
+    rdp.timg.addr = segoffset(rdp.cmd1);
+    rdp.s2dex_tex_loaded = TRUE;    
+    rdp.update |= UPDATE_TEXTURE;
+    
   if (rdp.frame_buffers[rdp.ci_count-1].status == ci_copy_self && (rdp.timg.addr >= rdp.cimg) && (rdp.timg.addr < rdp.ci_end)) 
-		{
-			if (!rdp.fb_drawn)
-			{
-   			if (!rdp.cur_image)
+        {
+            if (!rdp.fb_drawn)
+            {
+            if (!rdp.cur_image)
           CopyFrameBuffer();
         else if (rdp.frame_buffers[rdp.ci_count].status != ci_copy)
           CloseTextureBuffer(TRUE);
-				rdp.fb_drawn = TRUE;
-			}
-	}
-	
-	if (settings.fb_hires) //search this texture among drawn texture buffers
-	{
-	  if (settings.zelda)
-	  {
-	     if (rdp.timg.size == 2) 
-	       FindTextureBuffer(rdp.timg.addr, rdp.timg.width);
-	  }
-	  else
-	       FindTextureBuffer(rdp.timg.addr, rdp.timg.width);
+                rdp.fb_drawn = TRUE;
+            }
+    }
+    
+    if (settings.fb_hires) //search this texture among drawn texture buffers
+    {
+      if (settings.zelda)
+      {
+         if (rdp.timg.size == 2) 
+           FindTextureBuffer(rdp.timg.addr, rdp.timg.width);
+      }
+      else
+           FindTextureBuffer(rdp.timg.addr, rdp.timg.width);
     }
 
-	FRDP("settextureimage: format: %s, size: %s, width: %d, addr: %08lx\n",
-		format[rdp.timg.format], size[rdp.timg.size],
-		rdp.timg.width, rdp.timg.addr);
+    FRDP("settextureimage: format: %s, size: %s, width: %d, addr: %08lx\n",
+        format[rdp.timg.format], size[rdp.timg.size],
+        rdp.timg.width, rdp.timg.addr);
 }
 
 static void rdp_setdepthimage()
 {
-	rdp.zimg = segoffset(rdp.cmd1) & BMASK;
+    rdp.zimg = segoffset(rdp.cmd1) & BMASK;
   rdp.zi_width = rdp.ci_width;
-	FRDP("setdepthimage - %08lx\n", rdp.zimg);
+    FRDP("setdepthimage - %08lx\n", rdp.zimg);
 }
 
 
 BOOL SwapOK = TRUE;
 static void RestoreScale()
 {
- 	FRDP("Return to original scale: x = %f, y = %f\n", rdp.scale_x_bak, rdp.scale_y_bak);
- 	rdp.scale_x = rdp.scale_x_bak;
- 	rdp.scale_y = rdp.scale_y_bak;
-  // 	update_scissor();
+    FRDP("Return to original scale: x = %f, y = %f\n", rdp.scale_x_bak, rdp.scale_y_bak);
+    rdp.scale_x = rdp.scale_x_bak;
+    rdp.scale_y = rdp.scale_y_bak;
+  //    update_scissor();
   rdp.view_scale[0] *= rdp.scale_x;
   rdp.view_scale[1] *= rdp.scale_y;
   rdp.view_trans[0] *= rdp.scale_x;
@@ -2780,41 +2780,41 @@ static void rdp_setcolorimage()
 {
   render_depth_mode = 0;
   if (settings.fb_smart && (rdp.num_of_ci < NUMTEXBUF))
-	{
+    {
     COLOR_IMAGE & cur_fb = rdp.frame_buffers[rdp.ci_count];
     COLOR_IMAGE & prev_fb = rdp.frame_buffers[rdp.ci_count-1];
     COLOR_IMAGE & next_fb = rdp.frame_buffers[rdp.ci_count+1];
     switch (cur_fb.status)
-		{
-		case ci_main:
-			{
+        {
+        case ci_main:
+            {
 
-			    if (rdp.ci_count == 0)
-			    {
-      				if ((rdp.ci_status == ci_aux)) //for PPL
-      				{
-       					float sx = rdp.scale_x;
-       					float sy = rdp.scale_y;
-       					rdp.scale_x = 1.0f;
-       					rdp.scale_y = 1.0f;
+                if (rdp.ci_count == 0)
+                {
+                    if ((rdp.ci_status == ci_aux)) //for PPL
+                    {
+                        float sx = rdp.scale_x;
+                        float sy = rdp.scale_y;
+                        rdp.scale_x = 1.0f;
+                        rdp.scale_y = 1.0f;
                 CopyFrameBuffer ();
-       					rdp.scale_x = sx;
-       					rdp.scale_y = sy;
-      				}
-    				if (!settings.fb_hires)
-    				{
-        				if ((rdp.num_of_ci > 1) && 
+                        rdp.scale_x = sx;
+                        rdp.scale_y = sy;
+                    }
+                    if (!settings.fb_hires)
+                    {
+                        if ((rdp.num_of_ci > 1) && 
                   (next_fb.status == ci_aux) && 
                   (next_fb.width >= cur_fb.width))
-        				{
-        					rdp.scale_x = 1.0f;
-        					rdp.scale_y = 1.0f;
-        				}
-        			}
+                        {
+                            rdp.scale_x = 1.0f;
+                            rdp.scale_y = 1.0f;
+                        }
+                    }
               else if (rdp.copy_ci_index && settings.PM) //tidal wave
                 OpenTextureBuffer(rdp.frame_buffers[rdp.main_ci_index]);
-        		}
-        		else if (!rdp.motionblur && settings.fb_hires && !SwapOK && (rdp.ci_count <= rdp.copy_ci_index))
+                }
+                else if (!rdp.motionblur && settings.fb_hires && !SwapOK && (rdp.ci_count <= rdp.copy_ci_index))
         {
           if (next_fb.status == ci_aux_copy)
             OpenTextureBuffer(rdp.frame_buffers[rdp.main_ci_index]);
@@ -2825,33 +2825,33 @@ static void rdp_setcolorimage()
         {
           OpenTextureBuffer(rdp.frame_buffers[rdp.main_ci_index]);
         }
-        		//else if (rdp.ci_status == ci_aux && !rdp.copy_ci_index)
+                //else if (rdp.ci_status == ci_aux && !rdp.copy_ci_index)
                 //  CloseTextureBuffer();
 
-				rdp.skip_drawing = FALSE;
-			}
-			break;
-		case ci_copy:
-			{
-				if (!rdp.motionblur || settings.fb_motionblur)
-				{
+                rdp.skip_drawing = FALSE;
+            }
+            break;
+        case ci_copy:
+            {
+                if (!rdp.motionblur || settings.fb_motionblur)
+                {
           if (cur_fb.width == rdp.ci_width)
           {
             if (CopyTextureBuffer(prev_fb, cur_fb))
               //                      if (CloseTextureBuffer(TRUE))
-	    		      ;
+                      ;
             else 
-					{
+                    {
               if (!rdp.fb_drawn || prev_fb.status == ci_copy_self)
-						{
+                        {
                 CopyFrameBuffer ();
-							rdp.fb_drawn = TRUE;
-						}
+                            rdp.fb_drawn = TRUE;
+                        }
               memcpy(gfx.RDRAM+cur_fb.addr,gfx.RDRAM+rdp.cimg, (cur_fb.width*cur_fb.height)<<cur_fb.size>>1);
-					}
+                    }
           }
           else
-					{
+                    {
             CloseTextureBuffer(TRUE);
           }
         }
@@ -2864,73 +2864,73 @@ static void rdp_setcolorimage()
       break;
     case ci_aux_copy:
       {
-					rdp.skip_drawing = FALSE;
+                    rdp.skip_drawing = FALSE;
         if (CloseTextureBuffer(prev_fb.status != ci_aux_copy))
           ;
         else if (!rdp.fb_drawn)
         {
           CopyFrameBuffer ();
           rdp.fb_drawn = TRUE;
-					}
+                    }
         if (settings.fb_hires) 
           OpenTextureBuffer(cur_fb);
-			}
-			break;
-		case ci_old_copy:
-			{
-				if (!rdp.motionblur || settings.fb_motionblur)
-				{
+            }
+            break;
+        case ci_old_copy:
+            {
+                if (!rdp.motionblur || settings.fb_motionblur)
+                {
           if (cur_fb.width == rdp.ci_width)
-					{
+                    {
             memcpy(gfx.RDRAM+cur_fb.addr,gfx.RDRAM+rdp.maincimg[1].addr, (cur_fb.width*cur_fb.height)<<cur_fb.size>>1);
-					}
-				    //rdp.skip_drawing = TRUE;
-				}
-				else
-				{
+                    }
+                    //rdp.skip_drawing = TRUE;
+                }
+                else
+                {
           memset(gfx.RDRAM+cur_fb.addr, 0, (cur_fb.width*cur_fb.height)<<rdp.ci_size>>1);
-				}
-			}
-			break;
-			/*
-			else if (rdp.frame_buffers[rdp.ci_count].status == ci_main_i)
-			{
+                }
+            }
+            break;
+            /*
+            else if (rdp.frame_buffers[rdp.ci_count].status == ci_main_i)
+            {
       //       CopyFrameBuffer ();
-			rdp.scale_x = rdp.scale_x_bak;
-			rdp.scale_y = rdp.scale_y_bak;
-			rdp.skip_drawing = FALSE;
-			}
-			*/
-		case ci_aux:
-			{
+            rdp.scale_x = rdp.scale_x_bak;
+            rdp.scale_y = rdp.scale_y_bak;
+            rdp.skip_drawing = FALSE;
+            }
+            */
+        case ci_aux:
+            {
         if (!settings.fb_hires && cur_fb.format != 0)
-					rdp.skip_drawing = TRUE;
-				else
-				{
-					rdp.skip_drawing = FALSE;
+                    rdp.skip_drawing = TRUE;
+                else
+                {
+                    rdp.skip_drawing = FALSE;
           if (settings.fb_hires && OpenTextureBuffer(cur_fb))
-				      ;
-    				else
-    				{
-    				    if (cur_fb.format != 0)
+                      ;
+                    else
+                    {
+                        if (cur_fb.format != 0)
                   rdp.skip_drawing = TRUE;
-    					if (rdp.ci_count == 0) 
-    					{
-    						//           if (rdp.num_of_ci > 1)
-    						//           {
-    						rdp.scale_x = 1.0f;
-    						rdp.scale_y = 1.0f;
-    						//           }
-    					}
+                        if (rdp.ci_count == 0) 
+                        {
+                            //           if (rdp.num_of_ci > 1)
+                            //           {
+                            rdp.scale_x = 1.0f;
+                            rdp.scale_y = 1.0f;
+                            //           }
+                        }
                 else if (!settings.fb_hires && (prev_fb.status == ci_main) && 
                   (prev_fb.width == cur_fb.width)) // for Pokemon Stadium
                   CopyFrameBuffer ();
-    				}
-				}
+                    }
+                }
         cur_fb.status = ci_aux;
-			}
-			break;
-		case ci_zimg:
+            }
+            break;
+        case ci_zimg:
           // ZIGGY
           // Zelda LoT effect save/restore depth buffer
           if (cur_fb.addr == rdp.zimg) {
@@ -2940,111 +2940,111 @@ static void rdp_setcolorimage()
           }
           rdp.skip_drawing = TRUE;
           break;
-		case ci_useless:
-			//case ci_zcopy:
-			rdp.skip_drawing = TRUE;
-			break;
-		case ci_copy_self:
+        case ci_useless:
+            //case ci_zcopy:
+            rdp.skip_drawing = TRUE;
+            break;
+        case ci_copy_self:
       if (settings.fb_hires && (rdp.ci_count <= rdp.copy_ci_index) && (!SwapOK || settings.swapmode == 2))
         OpenTextureBuffer(cur_fb);
-			rdp.skip_drawing = FALSE;
-			/*
-			if (settings.fb_hires)
-			{
-			  if (SwapOK)
-			  {
-			    rdp.cimg = rdp.frame_buffers[rdp.ci_count].addr;
+            rdp.skip_drawing = FALSE;
+            /*
+            if (settings.fb_hires)
+            {
+              if (SwapOK)
+              {
+                rdp.cimg = rdp.frame_buffers[rdp.ci_count].addr;
       rdp.maincimg[0].addr = rdp.cimg;
-		  		newSwapBuffers();
-		  		SwapOK = FALSE;
-			    OpenTextureBuffer(rdp.frame_buffers[rdp.ci_count]);
-			  }
-			}
-			*/
-			break;
-		default:
-			rdp.skip_drawing = FALSE;
-		}
-		
+                newSwapBuffers();
+                SwapOK = FALSE;
+                OpenTextureBuffer(rdp.frame_buffers[rdp.ci_count]);
+              }
+            }
+            */
+            break;
+        default:
+            rdp.skip_drawing = FALSE;
+        }
+        
     if ((rdp.ci_count > 0) && (prev_fb.status >= ci_aux)) //for Pokemon Stadium
-		{
+        {
       if (!settings.fb_hires && prev_fb.format == 0)
         CopyFrameBuffer ();
-		}
+        }
     if (!settings.fb_hires && cur_fb.status == ci_copy)
-		{
+        {
       if (!rdp.motionblur && (rdp.num_of_ci > rdp.ci_count+1) && (next_fb.status != ci_aux))
-			{
+            {
         RestoreScale();
-			}
-		}
+            }
+        }
     if (!settings.fb_hires && cur_fb.status == ci_aux)
-		{
+        {
       if (cur_fb.format == 0)
-			{
-				if (settings.PPL && (rdp.scale_x < 1.1f))  //need to put current image back to frame buffer
-				{
+            {
+                if (settings.PPL && (rdp.scale_x < 1.1f))  //need to put current image back to frame buffer
+                {
           int width = cur_fb.width;
           int height = cur_fb.height;
-					WORD *ptr_dst = new WORD[width*height];
+                    WORD *ptr_dst = new WORD[width*height];
           WORD *ptr_src = (WORD*)(gfx.RDRAM+cur_fb.addr);
-					WORD c;
-					
-					for (int y=0; y<height; y++)
-					{
-						for (int x=0; x<width; x++)
-						{
-							c = ((ptr_src[(x + y * width)^1]) >> 1) | 0x8000;
-							ptr_dst[x + y * width] = c;
-						}
-					}
-					grLfbWriteRegion(GR_BUFFER_BACKBUFFER,
-						0,
-						0,
-						GR_LFB_SRC_FMT_555,
-						width,
-						height,
-						FXFALSE,
-						width<<1,
-						ptr_dst);
-					delete[] ptr_dst;
-				}
-				/*
-				else  //just clear buffer
-				{
-				
-				  grColorMask(FXTRUE, FXTRUE);
-				  grBufferClear (0, 0, 0xFFFF);
-				  }
-				*/
-			}
-		}
-		
+                    WORD c;
+                    
+                    for (int y=0; y<height; y++)
+                    {
+                        for (int x=0; x<width; x++)
+                        {
+                            c = ((ptr_src[(x + y * width)^1]) >> 1) | 0x8000;
+                            ptr_dst[x + y * width] = c;
+                        }
+                    }
+                    grLfbWriteRegion(GR_BUFFER_BACKBUFFER,
+                        0,
+                        0,
+                        GR_LFB_SRC_FMT_555,
+                        width,
+                        height,
+                        FXFALSE,
+                        width<<1,
+                        ptr_dst);
+                    delete[] ptr_dst;
+                }
+                /*
+                else  //just clear buffer
+                {
+                
+                  grColorMask(FXTRUE, FXTRUE);
+                  grBufferClear (0, 0, 0xFFFF);
+                  }
+                */
+            }
+        }
+        
     if ((cur_fb.status == ci_main) && (rdp.ci_count > 0))
-		{
-			BOOL to_org_res = TRUE;
-			for (int i = rdp.ci_count + 1; i < rdp.num_of_ci; i++)
-			{
+        {
+            BOOL to_org_res = TRUE;
+            for (int i = rdp.ci_count + 1; i < rdp.num_of_ci; i++)
+            {
         if ((rdp.frame_buffers[i].status != ci_main) && (rdp.frame_buffers[i].status != ci_zimg) && (rdp.frame_buffers[i].status != ci_zcopy))
-				{
-					to_org_res = FALSE;
-					break;
-				}
-			}
-			if (to_org_res)
-			{
+                {
+                    to_org_res = FALSE;
+                    break;
+                }
+            }
+            if (to_org_res)
+            {
         RDP("return to original scale\n");
-				rdp.scale_x = rdp.scale_x_bak;
-				rdp.scale_y = rdp.scale_y_bak;
+                rdp.scale_x = rdp.scale_x_bak;
+                rdp.scale_y = rdp.scale_y_bak;
         if (settings.fb_hires && !rdp.read_whole_frame)
-				  CloseTextureBuffer();
-			}
+                  CloseTextureBuffer();
+            }
       if (settings.fb_hires && !rdp.read_whole_frame && (prev_fb.status >= ci_aux) && (rdp.ci_count > rdp.copy_ci_index))
-				  CloseTextureBuffer();
+                  CloseTextureBuffer();
 
-		}
+        }
     rdp.ci_status = cur_fb.status;
-		rdp.ci_count++;
+        rdp.ci_count++;
   }
   
   rdp.ocimg = rdp.cimg;
@@ -3073,194 +3073,194 @@ static void rdp_setcolorimage()
       if (settings.fb_hires && rdp.ci_width <= 64)
         OpenTextureBuffer(rdp.frame_buffers[rdp.ci_count - 1]);
       else if (format > 2)
-	    rdp.skip_drawing = TRUE;
-	  return;
+        rdp.skip_drawing = TRUE;
+      return;
   }
   else
   {
-	  if (!settings.fb_smart)
-		  rdp.skip_drawing = FALSE;
+      if (!settings.fb_smart)
+          rdp.skip_drawing = FALSE;
   }
 
   CI_SET = TRUE;
   if (settings.swapmode > 0)
   {
-	  if (rdp.zimg == rdp.cimg)
-		  rdp.updatescreen = 1;
-	  
+      if (rdp.zimg == rdp.cimg)
+          rdp.updatescreen = 1;
+      
     BOOL viSwapOK = ((settings.swapmode == 2) && (rdp.vi_org_reg == *gfx.VI_ORIGIN_REG)) ? FALSE : TRUE;
-	  if ((rdp.zimg != rdp.cimg) && (rdp.ocimg != rdp.cimg) && SwapOK && viSwapOK && !rdp.cur_image)
-	  {
-	      if (settings.fb_smart)
+      if ((rdp.zimg != rdp.cimg) && (rdp.ocimg != rdp.cimg) && SwapOK && viSwapOK && !rdp.cur_image)
+      {
+          if (settings.fb_smart)
         rdp.maincimg[0] = rdp.frame_buffers[rdp.main_ci_index];
-		  else
+          else
         rdp.maincimg[0].addr = rdp.cimg;
       rdp.last_drawn_ci_addr = (settings.swapmode == 2) ? swapped_addr : rdp.maincimg[0].addr;
       swapped_addr = rdp.cimg;
-		  newSwapBuffers();
+          newSwapBuffers();
       rdp.vi_org_reg = *gfx.VI_ORIGIN_REG;
-		  SwapOK = FALSE;
+          SwapOK = FALSE;
       if (settings.fb_hires)
-		  {
+          {
         if (rdp.copy_ci_index && (rdp.frame_buffers[rdp.ci_count-1].status != ci_zimg))
         {
-    		    int idx = (rdp.frame_buffers[rdp.ci_count].status == ci_aux_copy) ? rdp.main_ci_index : rdp.copy_ci_index;
+                int idx = (rdp.frame_buffers[rdp.ci_count].status == ci_aux_copy) ? rdp.main_ci_index : rdp.copy_ci_index;
             FRDP("attempt open tex buffer. status: %s, addr: %08lx\n", CIStatus[rdp.frame_buffers[idx].status], rdp.frame_buffers[idx].addr);
             OpenTextureBuffer(rdp.frame_buffers[idx]);
             if (rdp.frame_buffers[rdp.copy_ci_index].status == ci_main) //tidal wave
               rdp.copy_ci_index = 0;
-		  }
+          }
         else if (rdp.read_whole_frame && !rdp.cur_image)
         {
           OpenTextureBuffer(rdp.frame_buffers[rdp.main_ci_index]);
-      		}
-      }	
-	  }
+            }
+      } 
+      }
   }
 }
 
 static void rdp_trifill()
 {
-	RDP_E("trifill - IGNORED\n");
-	RDP("trifill - IGNORED\n");
+    RDP_E("trifill - IGNORED\n");
+    RDP("trifill - IGNORED\n");
 }
 
 static void rdp_trishade()
 {
-	RDP_E("trishade - IGNORED\n");
-	RDP("trishade - IGNORED\n");
+    RDP_E("trishade - IGNORED\n");
+    RDP("trishade - IGNORED\n");
 }
 
 static void rdp_tritxtr()
 {
-	RDP_E("tritxtr - IGNORED\n");
-	RDP("tritxtr - IGNORED\n");
+    RDP_E("tritxtr - IGNORED\n");
+    RDP("tritxtr - IGNORED\n");
 }
 
 static void rdp_trishadetxtr()
 {
-	RDP_E("trishadetxtr - IGNORED\n");
-	RDP("trishadetxtr - IGNORED\n");
+    RDP_E("trishadetxtr - IGNORED\n");
+    RDP("trishadetxtr - IGNORED\n");
 }
 
 static void rdp_trifillz()
 {
-	RDP_E("trifillz - IGNORED\n");
-	RDP("trifillz - IGNORED\n");
+    RDP_E("trifillz - IGNORED\n");
+    RDP("trifillz - IGNORED\n");
 }
 
 static void rdp_trishadez()
 {
-	RDP_E("trishadez - IGNORED\n");
-	RDP("trishadez - IGNORED\n");
+    RDP_E("trishadez - IGNORED\n");
+    RDP("trishadez - IGNORED\n");
 }
 
 static void rdp_tritxtrz()
 {
-	RDP_E("tritxtrz - IGNORED\n");
-	RDP("tritxtrz - IGNORED\n");
+    RDP_E("tritxtrz - IGNORED\n");
+    RDP("tritxtrz - IGNORED\n");
 }
 
 static void rdp_trishadetxtrz()
 {
-	RDP_E("trishadetxtrz - IGNORED\n");
-	RDP("trishadetxtrz - IGNORED\n");
+    RDP_E("trishadetxtrz - IGNORED\n");
+    RDP("trishadetxtrz - IGNORED\n");
 }
 
 static void rsp_reserved0()
 {
-	RDP_E("reserved0 - IGNORED\n");
-	RDP("reserved0 - IGNORED\n");
+    RDP_E("reserved0 - IGNORED\n");
+    RDP("reserved0 - IGNORED\n");
 }
 
 static void rsp_reserved1()
 {
-	RDP("reserved1 - ignored\n");
+    RDP("reserved1 - ignored\n");
 }
 
 static void rsp_reserved2()
 {
-	RDP("reserved2\n");
+    RDP("reserved2\n");
 }
 
 static void rsp_reserved3()
 {
-	RDP("reserved3 - ignored\n");
+    RDP("reserved3 - ignored\n");
 }
 
 void SetWireframeCol ()
 {
-	if (!fullscreen) return;
-	
-	switch (settings.wfmode)
-	{
-		//case 0: // normal colors, don't do anything
-	case 1: // vertex colors
-		grColorCombine (GR_COMBINE_FUNCTION_LOCAL,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_LOCAL_ITERATED,
-			GR_COMBINE_OTHER_NONE,
-			FXFALSE);
-		grAlphaCombine (GR_COMBINE_FUNCTION_LOCAL,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_LOCAL_ITERATED,
-			GR_COMBINE_OTHER_NONE,
-			FXFALSE);
-		grAlphaBlendFunction (GR_BLEND_ONE,
-			GR_BLEND_ZERO,
-			GR_BLEND_ZERO,
-			GR_BLEND_ZERO);
-		grTexCombine (GR_TMU0,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			FXFALSE, FXFALSE);
-		grTexCombine (GR_TMU1,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			FXFALSE, FXFALSE);
-		break;
-	case 2: // red only
-		grColorCombine (GR_COMBINE_FUNCTION_LOCAL,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_LOCAL_CONSTANT,
-			GR_COMBINE_OTHER_NONE,
-			FXFALSE);
-		grAlphaCombine (GR_COMBINE_FUNCTION_LOCAL,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_LOCAL_CONSTANT,
-			GR_COMBINE_OTHER_NONE,
-			FXFALSE);
+    if (!fullscreen) return;
+    
+    switch (settings.wfmode)
+    {
+        //case 0: // normal colors, don't do anything
+    case 1: // vertex colors
+        grColorCombine (GR_COMBINE_FUNCTION_LOCAL,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_LOCAL_ITERATED,
+            GR_COMBINE_OTHER_NONE,
+            FXFALSE);
+        grAlphaCombine (GR_COMBINE_FUNCTION_LOCAL,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_LOCAL_ITERATED,
+            GR_COMBINE_OTHER_NONE,
+            FXFALSE);
+        grAlphaBlendFunction (GR_BLEND_ONE,
+            GR_BLEND_ZERO,
+            GR_BLEND_ZERO,
+            GR_BLEND_ZERO);
+        grTexCombine (GR_TMU0,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            FXFALSE, FXFALSE);
+        grTexCombine (GR_TMU1,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            FXFALSE, FXFALSE);
+        break;
+    case 2: // red only
+        grColorCombine (GR_COMBINE_FUNCTION_LOCAL,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_LOCAL_CONSTANT,
+            GR_COMBINE_OTHER_NONE,
+            FXFALSE);
+        grAlphaCombine (GR_COMBINE_FUNCTION_LOCAL,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_LOCAL_CONSTANT,
+            GR_COMBINE_OTHER_NONE,
+            FXFALSE);
     grConstantColorValue (0xFF0000FF);
-		grAlphaBlendFunction (GR_BLEND_ONE,
-			GR_BLEND_ZERO,
-			GR_BLEND_ZERO,
-			GR_BLEND_ZERO);
-		grTexCombine (GR_TMU0,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			FXFALSE, FXFALSE);
-		grTexCombine (GR_TMU1,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			GR_COMBINE_FUNCTION_ZERO,
-			GR_COMBINE_FACTOR_NONE,
-			FXFALSE, FXFALSE);
-		break;
-	}
-	
-	grAlphaTestFunction (GR_CMP_ALWAYS);
-	grCullMode (GR_CULL_DISABLE);
-	
-	//grDepthBufferFunction (GR_CMP_ALWAYS);
-	//grDepthMask (FXFALSE);
-	
-	rdp.update |= UPDATE_COMBINE | UPDATE_ALPHA_COMPARE;
+        grAlphaBlendFunction (GR_BLEND_ONE,
+            GR_BLEND_ZERO,
+            GR_BLEND_ZERO,
+            GR_BLEND_ZERO);
+        grTexCombine (GR_TMU0,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            FXFALSE, FXFALSE);
+        grTexCombine (GR_TMU1,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            GR_COMBINE_FUNCTION_ZERO,
+            GR_COMBINE_FACTOR_NONE,
+            FXFALSE, FXFALSE);
+        break;
+    }
+    
+    grAlphaTestFunction (GR_CMP_ALWAYS);
+    grCullMode (GR_CULL_DISABLE);
+    
+    //grDepthBufferFunction (GR_CMP_ALWAYS);
+    //grDepthMask (FXFALSE);
+    
+    rdp.update |= UPDATE_COMBINE | UPDATE_ALPHA_COMPARE;
 }
 
 /******************************************************************
@@ -3273,16 +3273,16 @@ DLL is responsible to maintain its own frame buffer memory addr list
 DLL should copy 4KB block content back to RDRAM frame buffer.
 Emulator should not call this function again if other memory
 is read within the same 4KB range
-input:    addr		rdram address
-val			val
-size		1 = BYTE, 2 = WORD, 4 = DWORD
+input:    addr      rdram address
+val         val
+size        1 = BYTE, 2 = WORD, 4 = DWORD
 output:   none
 *******************************************************************/ 
 EXPORT void CALL FBRead(DWORD addr)
 {
   printf("FBRead\n");
-	LOG ("FBRead ()\n");
-	
+    LOG ("FBRead ()\n");
+    
   if (cpu_fb_ignore)
     return;
   if (cpu_fb_write_called)
@@ -3292,15 +3292,15 @@ EXPORT void CALL FBRead(DWORD addr)
     return;
   }
   cpu_fb_read_called = TRUE;
-	DWORD a = segoffset(addr);
-	FRDP("FBRead. addr: %08lx\n", a);
-	if (!rdp.fb_drawn && (a >= rdp.cimg) && (a < rdp.ci_end))
-	{
+    DWORD a = segoffset(addr);
+    FRDP("FBRead. addr: %08lx\n", a);
+    if (!rdp.fb_drawn && (a >= rdp.cimg) && (a < rdp.ci_end))
+    {
     fbreads_back++;
     //if (fbreads_back > 2) //&& (rdp.ci_width <= 320))
     {
       CopyFrameBuffer ();
-			rdp.fb_drawn = TRUE;
+            rdp.fb_drawn = TRUE;
     }
   }
   if (!rdp.fb_drawn_front && (a >= rdp.maincimg[1].addr) && (a < rdp.maincimg[1].addr + rdp.ci_width*rdp.ci_height*2))
@@ -3308,7 +3308,7 @@ EXPORT void CALL FBRead(DWORD addr)
     fbreads_front++;
     //if (fbreads_front > 2)//&& (rdp.ci_width <= 320))
     {
-		    DWORD cimg = rdp.cimg;
+            DWORD cimg = rdp.cimg;
         rdp.cimg = rdp.maincimg[1].addr;
         if (settings.fb_smart)
         {
@@ -3325,8 +3325,8 @@ EXPORT void CALL FBRead(DWORD addr)
         }
         rdp.cimg = cimg;
         rdp.fb_drawn_front = TRUE;
-		}
-	}
+        }
+    }
 }
 
 /******************************************************************
@@ -3339,9 +3339,9 @@ output:   none
 *******************************************************************/ 
 EXPORT void CALL FBWList(FrameBufferModifyEntry *plist, DWORD size)
 {
-	LOG ("FBWList ()\n");
-	FRDP("FBWList. size: %d\n", size);
-	printf("FBWList. size: %d\n", size);
+    LOG ("FBWList ()\n");
+    FRDP("FBWList. size: %d\n", size);
+    printf("FBWList. size: %d\n", size);
 }
 
 
@@ -3349,14 +3349,14 @@ EXPORT void CALL FBWList(FrameBufferModifyEntry *plist, DWORD size)
 Function: FrameBufferWrite
 Purpose:  This function is called to notify the dll that the
 frame buffer has been modified by CPU at the given address.
-input:    addr		rdram address
-val			val
-size		1 = BYTE, 2 = WORD, 4 = DWORD
+input:    addr      rdram address
+val         val
+size        1 = BYTE, 2 = WORD, 4 = DWORD
 output:   none
 *******************************************************************/ 
 EXPORT void CALL FBWrite(DWORD addr, DWORD size)
 {
-	LOG ("FBWrite ()\n");
+    LOG ("FBWrite ()\n");
   if (cpu_fb_ignore)
     return;
   if (cpu_fb_read_called)
@@ -3366,14 +3366,14 @@ EXPORT void CALL FBWrite(DWORD addr, DWORD size)
     return;
   }
   cpu_fb_write_called = TRUE;
-	DWORD a = segoffset(addr);
-	FRDP("FBWrite. addr: %08lx\n", a);
+    DWORD a = segoffset(addr);
+    FRDP("FBWrite. addr: %08lx\n", a);
     // ZIGGY : added a test on ci_width, otherwise we crash on zero division below
-	if (!rdp.ci_width || a < rdp.cimg || a > rdp.ci_end)
-	  return;
-	cpu_fb_write = TRUE;
-	DWORD shift_l = (a-rdp.cimg) >> 1;
-	DWORD shift_r = shift_l+2;
+    if (!rdp.ci_width || a < rdp.cimg || a > rdp.ci_end)
+      return;
+    cpu_fb_write = TRUE;
+    DWORD shift_l = (a-rdp.cimg) >> 1;
+    DWORD shift_r = shift_l+2;
 
     d_ul_x = min(d_ul_x, shift_l%rdp.ci_width);
     d_ul_y = min(d_ul_y, shift_l/rdp.ci_width);
@@ -3385,43 +3385,43 @@ EXPORT void CALL FBWrite(DWORD addr, DWORD size)
 /************************************************************************
 Function: FBGetFrameBufferInfo
 Purpose:  This function is called by the emulator core to retrieve frame
-		  buffer information from the video plugin in order to be able
-		  to notify the video plugin about CPU frame buffer read/write
-		  operations
+          buffer information from the video plugin in order to be able
+          to notify the video plugin about CPU frame buffer read/write
+          operations
 
-		  size:
-			= 1		byte
-			= 2		word (16 bit) <-- this is N64 default depth buffer format
-			= 4		dword (32 bit)
+          size:
+            = 1     byte
+            = 2     word (16 bit) <-- this is N64 default depth buffer format
+            = 4     dword (32 bit)
 
-		  when frame buffer information is not available yet, set all values
-		  in the FrameBufferInfo structure to 0
+          when frame buffer information is not available yet, set all values
+          in the FrameBufferInfo structure to 0
 
 input:    FrameBufferInfo pinfo[6]
-		  pinfo is pointed to a FrameBufferInfo structure which to be
-		  filled in by this function
+          pinfo is pointed to a FrameBufferInfo structure which to be
+          filled in by this function
 output:   Values are return in the FrameBufferInfo structure
-		  Plugin can return up to 6 frame buffer info
+          Plugin can return up to 6 frame buffer info
 ************************************************************************/
 ///*
 typedef struct
 {
-	DWORD addr;
-	DWORD size;
-	DWORD width;
-	DWORD height;
+    DWORD addr;
+    DWORD size;
+    DWORD width;
+    DWORD height;
 } FrameBufferInfo;
 EXPORT void CALL FBGetFrameBufferInfo(void *p)
 {
   LOG ("FBGetFrameBufferInfo ()\n");
-	FrameBufferInfo * pinfo = (FrameBufferInfo *)p;
-		memset(pinfo,0,sizeof(FrameBufferInfo)*6);
+    FrameBufferInfo * pinfo = (FrameBufferInfo *)p;
+        memset(pinfo,0,sizeof(FrameBufferInfo)*6);
   if (!settings.fb_get_info)
     return;
   RDP("FBGetFrameBufferInfo ()\n");
   //*
-	if (settings.fb_smart)
-	{
+    if (settings.fb_smart)
+    {
     pinfo[0].addr   = rdp.maincimg[1].addr;
     pinfo[0].size   = rdp.maincimg[1].size;
     pinfo[0].width  = rdp.maincimg[1].width;
@@ -3451,7 +3451,7 @@ EXPORT void CALL FBGetFrameBufferInfo(void *p)
     pinfo[1].size   = rdp.ci_size;
     pinfo[1].width  = rdp.ci_width;
     pinfo[1].height = rdp.ci_width*3/4;
-	}
+    }
 //*/
 }
 //*/
@@ -3459,70 +3459,70 @@ EXPORT void CALL FBGetFrameBufferInfo(void *p)
 
 void DetectFrameBufferUsage ()
 {
-	RDP("DetectFrameBufferUsage\n");
-	
-	DWORD dlist_start = *(DWORD*)(gfx.DMEM+0xFF0);
+    RDP("DetectFrameBufferUsage\n");
+    
+    DWORD dlist_start = *(DWORD*)(gfx.DMEM+0xFF0);
 #ifdef _WIN32
-	DWORD dlist_length = *(DWORD*)(gfx.DMEM+0xFF4);
+    DWORD dlist_length = *(DWORD*)(gfx.DMEM+0xFF4);
 #endif // _WIN32
-	DWORD a;
-	
+    DWORD a;
+    
   BOOL tidal = FALSE;
   if (settings.PM && (rdp.copy_ci_index || rdp.frame_buffers[rdp.copy_ci_index].status == ci_copy_self))
     tidal = TRUE;
-	DWORD ci = rdp.cimg, zi = rdp.zimg; // ci_width = rdp.ci_width;
+    DWORD ci = rdp.cimg, zi = rdp.zimg; // ci_width = rdp.ci_width;
   rdp.main_ci = rdp.main_ci_end = rdp.main_ci_bg = rdp.ci_count = 0;
   rdp.main_ci_index = rdp.copy_ci_index = 0;
-	rdp.zimg_end = 0;
-	rdp.tmpzimg = 0;
-	rdp.motionblur = FALSE;
+    rdp.zimg_end = 0;
+    rdp.tmpzimg = 0;
+    rdp.motionblur = FALSE;
   rdp.main_ci_last_tex_addr = 0;
-	BOOL previous_ci_was_read = rdp.read_previous_ci;
-	rdp.read_previous_ci = FALSE;
+    BOOL previous_ci_was_read = rdp.read_previous_ci;
+    rdp.read_previous_ci = FALSE;
   rdp.read_whole_frame = FALSE;
   rdp.swap_ci_index = rdp.black_ci_index = -1;
   SwapOK = TRUE;
 
-	// Start executing at the start of the display list
-	rdp.pc_i = 0;
-	rdp.pc[rdp.pc_i] = dlist_start;
-	rdp.dl_count = -1;
-	rdp.halt = 0;
-	rdp.scale_x_bak = rdp.scale_x;
-	rdp.scale_y_bak = rdp.scale_y;
-	
-	// MAIN PROCESSING LOOP
-	do {
-		
-		// Get the address of the next command
-		a = rdp.pc[rdp.pc_i] & BMASK;
-		
-		// Load the next command and its input
-		rdp.cmd0 = ((DWORD*)gfx.RDRAM)[a>>2];   // \ Current command, 64 bit
-		rdp.cmd1 = ((DWORD*)gfx.RDRAM)[(a>>2)+1]; // /
-		
-		// Output the address before the command
-		
-		// Go to the next instruction
-		rdp.pc[rdp.pc_i] = (a+8) & BMASK;
-		
-		if ((intptr_t)(gfx_instruction_lite[settings.ucode][rdp.cmd0>>24]))
-			gfx_instruction_lite[settings.ucode][rdp.cmd0>>24] ();
-		
-		// check DL counter
-		if (rdp.dl_count != -1)
-		{
-			rdp.dl_count --;
-			if (rdp.dl_count == 0)
-			{
-				rdp.dl_count = -1;
-				
-				RDP ("End of DL\n");
-				rdp.pc_i --;
-			}
-		}
-		
-	} while (!rdp.halt);
+    // Start executing at the start of the display list
+    rdp.pc_i = 0;
+    rdp.pc[rdp.pc_i] = dlist_start;
+    rdp.dl_count = -1;
+    rdp.halt = 0;
+    rdp.scale_x_bak = rdp.scale_x;
+    rdp.scale_y_bak = rdp.scale_y;
+    
+    // MAIN PROCESSING LOOP
+    do {
+        
+        // Get the address of the next command
+        a = rdp.pc[rdp.pc_i] & BMASK;
+        
+        // Load the next command and its input
+        rdp.cmd0 = ((DWORD*)gfx.RDRAM)[a>>2];   // \ Current command, 64 bit
+        rdp.cmd1 = ((DWORD*)gfx.RDRAM)[(a>>2)+1]; // /
+        
+        // Output the address before the command
+        
+        // Go to the next instruction
+        rdp.pc[rdp.pc_i] = (a+8) & BMASK;
+        
+        if ((intptr_t)(gfx_instruction_lite[settings.ucode][rdp.cmd0>>24]))
+            gfx_instruction_lite[settings.ucode][rdp.cmd0>>24] ();
+        
+        // check DL counter
+        if (rdp.dl_count != -1)
+        {
+            rdp.dl_count --;
+            if (rdp.dl_count == 0)
+            {
+                rdp.dl_count = -1;
+                
+                RDP ("End of DL\n");
+                rdp.pc_i --;
+            }
+        }
+        
+    } while (!rdp.halt);
   SwapOK = TRUE;
   if (rdp.ci_count > NUMTEXBUF) //overflow
   {
@@ -3533,66 +3533,66 @@ void DetectFrameBufferUsage ()
     rdp.scale_y = rdp.scale_y_bak;
     return;
   }
-	
+    
   if (rdp.black_ci_index > 0 && rdp.black_ci_index < rdp.copy_ci_index)
     rdp.frame_buffers[rdp.black_ci_index].status = ci_main;
-	
-	if (rdp.frame_buffers[rdp.ci_count-1].status == ci_unknown)
-	{
-		if (rdp.ci_count > 1)
-			rdp.frame_buffers[rdp.ci_count-1].status = ci_aux;
-		else
-			rdp.frame_buffers[rdp.ci_count-1].status = ci_main;
-	}
-	
-	if ((rdp.frame_buffers[rdp.ci_count-1].status == ci_aux) &&
-		(rdp.frame_buffers[rdp.main_ci_index].width < 320) &&
-		(rdp.frame_buffers[rdp.ci_count-1].width > rdp.frame_buffers[rdp.main_ci_index].width))
-	{
-		for (int i = 0; i < rdp.ci_count; i++)
-		{
-			if (rdp.frame_buffers[i].status == ci_main)
-				rdp.frame_buffers[i].status = ci_aux;
-			else if (rdp.frame_buffers[i].addr == rdp.frame_buffers[rdp.ci_count-1].addr)
-				rdp.frame_buffers[i].status = ci_main;
-//			FRDP("rdp.frame_buffers[%d].status = %d\n", i, rdp.frame_buffers[i].status);
-		}
-		rdp.main_ci_index = rdp.ci_count-1;
-	}
-	
-	BOOL all_zimg = TRUE;
+    
+    if (rdp.frame_buffers[rdp.ci_count-1].status == ci_unknown)
+    {
+        if (rdp.ci_count > 1)
+            rdp.frame_buffers[rdp.ci_count-1].status = ci_aux;
+        else
+            rdp.frame_buffers[rdp.ci_count-1].status = ci_main;
+    }
+    
+    if ((rdp.frame_buffers[rdp.ci_count-1].status == ci_aux) &&
+        (rdp.frame_buffers[rdp.main_ci_index].width < 320) &&
+        (rdp.frame_buffers[rdp.ci_count-1].width > rdp.frame_buffers[rdp.main_ci_index].width))
+    {
+        for (int i = 0; i < rdp.ci_count; i++)
+        {
+            if (rdp.frame_buffers[i].status == ci_main)
+                rdp.frame_buffers[i].status = ci_aux;
+            else if (rdp.frame_buffers[i].addr == rdp.frame_buffers[rdp.ci_count-1].addr)
+                rdp.frame_buffers[i].status = ci_main;
+//          FRDP("rdp.frame_buffers[%d].status = %d\n", i, rdp.frame_buffers[i].status);
+        }
+        rdp.main_ci_index = rdp.ci_count-1;
+    }
+    
+    BOOL all_zimg = TRUE;
         int i;
-   	for (i = 0; i < rdp.ci_count; i++)
-   	{
-   		if (rdp.frame_buffers[i].status != ci_zimg)
-   		{
-   		  all_zimg = FALSE;
-   		  break;
-   		}
-   	}
-   	if (all_zimg)
-   	{
-   	  for (i = 0; i < rdp.ci_count; i++)
-   		rdp.frame_buffers[i].status = ci_main;
-   	}
+    for (i = 0; i < rdp.ci_count; i++)
+    {
+        if (rdp.frame_buffers[i].status != ci_zimg)
+        {
+          all_zimg = FALSE;
+          break;
+        }
+    }
+    if (all_zimg)
+    {
+      for (i = 0; i < rdp.ci_count; i++)
+        rdp.frame_buffers[i].status = ci_main;
+    }
 
-	RDP("detect fb final results: \n");
-	for (i = 0; i < rdp.ci_count; i++)
-	{
+    RDP("detect fb final results: \n");
+    for (i = 0; i < rdp.ci_count; i++)
+    {
     FRDP("rdp.frame_buffers[%d].status = %s, addr: %08lx, height: %d\n", i, CIStatus[rdp.frame_buffers[i].status], rdp.frame_buffers[i].addr, rdp.frame_buffers[i].height);
-	}
-	
-	rdp.cimg = ci; 
-	rdp.zimg = zi;
-	rdp.num_of_ci = rdp.ci_count;
+    }
+    
+    rdp.cimg = ci; 
+    rdp.zimg = zi;
+    rdp.num_of_ci = rdp.ci_count;
   if (rdp.read_previous_ci && previous_ci_was_read)
     if (!settings.fb_hires || !rdp.copy_ci_index)
-	  rdp.motionblur = TRUE;
+      rdp.motionblur = TRUE;
     if (rdp.motionblur || settings.fb_hires || (rdp.frame_buffers[rdp.copy_ci_index].status == ci_aux_copy))
-	{
-		rdp.scale_x = rdp.scale_x_bak;
-		rdp.scale_y = rdp.scale_y_bak;
-	}
+    {
+        rdp.scale_x = rdp.scale_x_bak;
+        rdp.scale_y = rdp.scale_y_bak;
+    }
 
     if ((rdp.read_previous_ci || previous_ci_was_read) && !rdp.copy_ci_index)
       rdp.read_whole_frame = TRUE;
@@ -3607,12 +3607,12 @@ void DetectFrameBufferUsage ()
         }
       }
       else
-	{
-	  if (rdp.motionblur)
-	  {
-	    if (settings.fb_motionblur)
+    {
+      if (rdp.motionblur)
+      {
+        if (settings.fb_motionblur)
             CopyFrameBuffer();
-		else
+        else
           memset(gfx.RDRAM+rdp.cimg, 0, rdp.ci_width*rdp.ci_height*rdp.ci_size);
       }
         else //if (ci_width == rdp.frame_buffers[rdp.main_ci_index].width)
@@ -3631,9 +3631,9 @@ void DetectFrameBufferUsage ()
           {
             CopyFrameBuffer();
           }
-        }	
+        }   
       }
-	}
+    }
 
     if (settings.fb_hires)
     {
@@ -3645,21 +3645,21 @@ void DetectFrameBufferUsage ()
           rdp.texbufs[i].images[j].drawn = FALSE;
           rdp.texbufs[i].images[j].clear = TRUE;
         }
- 	  }
+      }
       if (tidal)
       {
         //RDP("Tidal wave!\n");
         rdp.copy_ci_index = rdp.main_ci_index;
       }
-	}
-	rdp.ci_count = 0;
+    }
+    rdp.ci_count = 0;
     if (settings.fb_ignore_previous)
       rdp.read_whole_frame = FALSE;
     else
       rdp.maincimg[0] = rdp.frame_buffers[rdp.main_ci_index];
-    //	rdp.scale_x = rdp.scale_x_bak;
-    //	rdp.scale_y = rdp.scale_y_bak;
-	RDP("DetectFrameBufferUsage End\n");
+    //  rdp.scale_x = rdp.scale_x_bak;
+    //  rdp.scale_y = rdp.scale_y_bak;
+    RDP("DetectFrameBufferUsage End\n");
 }
 
 
@@ -3685,82 +3685,82 @@ EXPORT void CALL ProcessRDPList(void)
   no_dlist = FALSE;
   update_screen_count = 0;
   ChangeSize ();
-	
+    
 #ifdef ALTTAB_FIX
-	if (!hhkLowLevelKybd)
-	{
-		hhkLowLevelKybd = SetWindowsHookEx(WH_KEYBOARD_LL, 
-			LowLevelKeyboardProc, hInstance, 0);
-	}
+    if (!hhkLowLevelKybd)
+    {
+        hhkLowLevelKybd = SetWindowsHookEx(WH_KEYBOARD_LL, 
+            LowLevelKeyboardProc, hInstance, 0);
+    }
 #endif
-	
-	LOG ("ProcessDList ()\n");
-	
-	if (!fullscreen)
+    
+    LOG ("ProcessDList ()\n");
+    
+    if (!fullscreen)
   {
-		drawNoFullscreenMessage();
+        drawNoFullscreenMessage();
     // Set an interrupt to allow the game to continue
     *gfx.MI_INTR_REG |= 0x20;
     gfx.CheckInterrupts();
   }
-	
-	if (reset)
-	{
-		reset = 0;
-		
-		memset (microcode, 0, 4096);
-		if (settings.autodetect_ucode)
-		{
-			// Thanks to ZeZu for ucode autodetection!!!
-			
-			DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
-			memcpy (microcode, gfx.RDRAM+startUcode, 4096);
-			microcheck ();
-			
-		}
-	}
+    
+    if (reset)
+    {
+        reset = 0;
+        
+        memset (microcode, 0, 4096);
+        if (settings.autodetect_ucode)
+        {
+            // Thanks to ZeZu for ucode autodetection!!!
+            
+            DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
+            memcpy (microcode, gfx.RDRAM+startUcode, 4096);
+            microcheck ();
+            
+        }
+    }
   else if ( ((old_ucode == 6) && (settings.ucode == 1)) || settings.force_microcheck)
-	{
-		DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
-		memcpy (microcode, gfx.RDRAM+startUcode, 4096);
-		microcheck ();
-	}
-	
-	if (exception) return;
-	
-	// Switch to fullscreen?
-	if (to_fullscreen)
-	{
-		to_fullscreen = FALSE;
-		
-		if (!InitGfx (FALSE))
-		{
-			LOG ("FAILED!!!\n");
-			return;
-		}
-		fullscreen = TRUE;
+    {
+        DWORD startUcode = *(DWORD*)(gfx.DMEM+0xFD0);
+        memcpy (microcode, gfx.RDRAM+startUcode, 4096);
+        microcheck ();
+    }
+    
+    if (exception) return;
+    
+    // Switch to fullscreen?
+    if (to_fullscreen)
+    {
+        to_fullscreen = FALSE;
+        
+        if (!InitGfx (FALSE))
+        {
+            LOG ("FAILED!!!\n");
+            return;
+        }
+        fullscreen = TRUE;
 #ifdef _WIN32
-	    if (gfx.hStatusBar)
-	      ShowWindow( gfx.hStatusBar, SW_HIDE );
-	    ShowCursor( FALSE );
+        if (gfx.hStatusBar)
+          ShowWindow( gfx.hStatusBar, SW_HIDE );
+        ShowCursor( FALSE );
 #endif // _WIN32
-	}
-	
-	// Clear out the RDP log
+    }
+    
+    // Clear out the RDP log
 #ifdef RDP_LOGGING
     if (settings.logging && settings.log_clear)
     {
-		CLOSE_RDP_LOG ();
-		OPEN_RDP_LOG ();
+        CLOSE_RDP_LOG ();
+        OPEN_RDP_LOG ();
     }
 #endif
-	
+    
 #ifdef UNIMP_LOG
     if (settings.log_unk && settings.unk_clear)
     {
-		std::ofstream unimp;
-		unimp.open("unimp.txt");
-		unimp.close();
+        std::ofstream unimp;
+        unimp.open("unimp.txt");
+        unimp.close();
     }
 #endif
   
@@ -3769,28 +3769,28 @@ EXPORT void CALL ProcessRDPList(void)
     SwapOK = TRUE;
   rdp.updatescreen = 1;
   
-	rdp.tri_n = 0;  // 0 triangles so far this frame
-	rdp.debug_n = 0;
-	
-	rdp.model_i = 0; // 0 matrices so far in stack
-	//stack_size can be less then 32! Important for Silicon Vally. Thanks Orkin!
-	rdp.model_stack_size = min(32, (*(DWORD*)(gfx.DMEM+0x0FE4))>>6);
-	if (rdp.model_stack_size == 0)
+    rdp.tri_n = 0;  // 0 triangles so far this frame
+    rdp.debug_n = 0;
+    
+    rdp.model_i = 0; // 0 matrices so far in stack
+    //stack_size can be less then 32! Important for Silicon Vally. Thanks Orkin!
+    rdp.model_stack_size = min(32, (*(DWORD*)(gfx.DMEM+0x0FE4))>>6);
+    if (rdp.model_stack_size == 0)
       rdp.model_stack_size = 32;
   rdp.fb_drawn = rdp.fb_drawn_front = FALSE; 
-	rdp.update = 0x7FFFFFFF;  // All but clear cache
-	rdp.geom_mode = 0;
+    rdp.update = 0x7FFFFFFF;  // All but clear cache
+    rdp.geom_mode = 0;
   rdp.acmp = 0;
-	rdp.maincimg[1] = rdp.maincimg[0];
-	rdp.skip_drawing = FALSE;
-	rdp.s2dex_tex_loaded = FALSE;
+    rdp.maincimg[1] = rdp.maincimg[0];
+    rdp.skip_drawing = FALSE;
+    rdp.s2dex_tex_loaded = FALSE;
   fbreads_front = fbreads_back = 0;
   rdp.fog_multiplier = rdp.fog_offset = 0;
   rdp.zsrc = 0;
-	
-	if (cpu_fb_write == TRUE)
-	  DrawFrameBufferToScreen();
-	cpu_fb_write = FALSE;
+    
+    if (cpu_fb_write == TRUE)
+      DrawFrameBufferToScreen();
+    cpu_fb_write = FALSE;
   cpu_fb_read_called = FALSE;
   cpu_fb_write_called = FALSE;
   cpu_fb_ignore = FALSE;
@@ -3798,123 +3798,123 @@ EXPORT void CALL ProcessRDPList(void)
     d_ul_y = 0xffff;
     d_lr_x = 0;
     d_lr_y = 0;
-	
-	//analize possible frame buffer usage
-	if (settings.fb_smart)
-		DetectFrameBufferUsage();
+    
+    //analize possible frame buffer usage
+    if (settings.fb_smart)
+        DetectFrameBufferUsage();
   if (!settings.lego || rdp.num_of_ci > 1)
     rdp.last_bg = 0;
   //* End of set states *//
   
-	
-	// Get the start of the display list and the length of it
-// 	DWORD dlist_start = *(DWORD*)(gfx.DMEM+0xFF0);
-// 	DWORD dlist_length = *(DWORD*)(gfx.DMEM+0xFF4);
+    
+    // Get the start of the display list and the length of it
+//  DWORD dlist_start = *(DWORD*)(gfx.DMEM+0xFF0);
+//  DWORD dlist_length = *(DWORD*)(gfx.DMEM+0xFF4);
   DWORD dlist_start = *gfx.DPC_CURRENT_REG;
- 	DWORD dlist_length = *gfx.DPC_END_REG - *gfx.DPC_CURRENT_REG;
+    DWORD dlist_length = *gfx.DPC_END_REG - *gfx.DPC_CURRENT_REG;
   FRDP("--- NEW DLIST --- crc: %08lx, ucode: %d, fbuf: %08lx, fbuf_width: %d, dlist start: %08lx, dlist_lenght: %d\n", uc_crc, settings.ucode, *gfx.VI_ORIGIN_REG, *gfx.VI_WIDTH_REG, dlist_start, dlist_length);
-	FRDP_E("--- NEW DLIST --- crc: %08lx, ucode: %d, fbuf: %08lx\n", uc_crc, settings.ucode, *gfx.VI_ORIGIN_REG);
-	
-	if (settings.tonic && dlist_length < 16)
-	{
+    FRDP_E("--- NEW DLIST --- crc: %08lx, ucode: %d, fbuf: %08lx\n", uc_crc, settings.ucode, *gfx.VI_ORIGIN_REG);
+    
+    if (settings.tonic && dlist_length < 16)
+    {
     rdp_fullsync();
-		FRDP_E("DLIST is too short!\n");
-		return;
-	}
-	
-	// Start executing at the start of the display list
-	rdp.pc_i = 0;
-	rdp.pc[rdp.pc_i] = dlist_start;
-	rdp.dl_count = -1;
-	rdp.halt = 0;
+        FRDP_E("DLIST is too short!\n");
+        return;
+    }
+    
+    // Start executing at the start of the display list
+    rdp.pc_i = 0;
+    rdp.pc[rdp.pc_i] = dlist_start;
+    rdp.dl_count = -1;
+    rdp.halt = 0;
   DWORD a;
-	
-	// catches exceptions so that it doesn't freeze
+    
+    // catches exceptions so that it doesn't freeze
 #ifdef CATCH_EXCEPTIONS
-	try {
+    try {
 #endif
-		
-		// MAIN PROCESSING LOOP
-		do {
-			
-			// Get the address of the next command
-			a = rdp.pc[rdp.pc_i] & BMASK;
-			
-			// Load the next command and its input
-			rdp.cmd0 = ((DWORD*)gfx.RDRAM)[a>>2];   // \ Current command, 64 bit
-			rdp.cmd1 = ((DWORD*)gfx.RDRAM)[(a>>2)+1]; // /
-			// cmd2 and cmd3 are filled only when needed, by the function that needs them
-			
-			// Output the address before the command
+        
+        // MAIN PROCESSING LOOP
+        do {
+            
+            // Get the address of the next command
+            a = rdp.pc[rdp.pc_i] & BMASK;
+            
+            // Load the next command and its input
+            rdp.cmd0 = ((DWORD*)gfx.RDRAM)[a>>2];   // \ Current command, 64 bit
+            rdp.cmd1 = ((DWORD*)gfx.RDRAM)[(a>>2)+1]; // /
+            // cmd2 and cmd3 are filled only when needed, by the function that needs them
+            
+            // Output the address before the command
 #ifdef LOG_COMMANDS
-			FRDP ("%08lx (c0:%08lx, c1:%08lx): ", a, rdp.cmd0, rdp.cmd1);
+            FRDP ("%08lx (c0:%08lx, c1:%08lx): ", a, rdp.cmd0, rdp.cmd1);
 #else
-			FRDP ("%08lx: ", a);
+            FRDP ("%08lx: ", a);
 #endif
-			
-			// Go to the next instruction
-			rdp.pc[rdp.pc_i] = (a+8) & BMASK;
-			
+            
+            // Go to the next instruction
+            rdp.pc[rdp.pc_i] = (a+8) & BMASK;
+            
 #ifdef PERFORMANCE
-			QueryPerformanceCounter ((LARGE_INTEGER*)&perf_cur);
+            QueryPerformanceCounter ((LARGE_INTEGER*)&perf_cur);
 #endif
-			// Process this instruction
-			gfx_instruction[settings.ucode][((rdp.cmd0>>24)&0x3f) + 0x100-0x40] ();
-			
-			// check DL counter
-			if (rdp.dl_count != -1)
-			{
-				rdp.dl_count --;
-				if (rdp.dl_count == 0)
-				{
-					rdp.dl_count = -1;
-					
-					RDP ("End of DL\n");
-					rdp.pc_i --;
-				}
-			}
-			
+            // Process this instruction
+            gfx_instruction[settings.ucode][((rdp.cmd0>>24)&0x3f) + 0x100-0x40] ();
+            
+            // check DL counter
+            if (rdp.dl_count != -1)
+            {
+                rdp.dl_count --;
+                if (rdp.dl_count == 0)
+                {
+                    rdp.dl_count = -1;
+                    
+                    RDP ("End of DL\n");
+                    rdp.pc_i --;
+                }
+            }
+            
 #ifdef PERFORMANCE
-			QueryPerformanceCounter ((LARGE_INTEGER*)&perf_next);
-			__int64 t = perf_next-perf_cur;
-			sprintf (out_buf, "perf %08lx: %016I64d\n", a-8, t);
-			rdp_log << out_buf;
+            QueryPerformanceCounter ((LARGE_INTEGER*)&perf_next);
+            __int64 t = perf_next-perf_cur;
+            sprintf (out_buf, "perf %08lx: %016I64d\n", a-8, t);
+            rdp_log << out_buf;
 #endif
-			
-		} while (0);
+            
+        } while (0);
 #ifdef CATCH_EXCEPTIONS
-	} catch (...) {
-		
-		if (fullscreen) ReleaseGfx ();
+    } catch (...) {
+        
+        if (fullscreen) ReleaseGfx ();
 # ifdef _WIN32
-		if (MessageBox (gfx.hWnd, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?", "Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION) == IDNO)
-			exception = TRUE;
+        if (MessageBox (gfx.hWnd, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?", "Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION) == IDNO)
+            exception = TRUE;
 # else // _WIN32
-	   if (messagebox("Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?") == 2)
-	     exception = TRUE;
+       if (messagebox("Glide64 Exception", MB_YESNO|MB_ICONEXCLAMATION, "The GFX plugin caused an exception and has been disabled.\nWould you like to turn it back on and attempt to continue?") == 2)
+         exception = TRUE;
 # endif // _WIN32
-	}
+    }
 #endif
-	
-	if (settings.fb_smart)
-	{
-		rdp.scale_x = rdp.scale_x_bak;
-		rdp.scale_y = rdp.scale_y_bak;
-	}
+    
+    if (settings.fb_smart)
+    {
+        rdp.scale_x = rdp.scale_x_bak;
+        rdp.scale_y = rdp.scale_y_bak;
+    }
     if (settings.fb_read_always)
     {
     CopyFrameBuffer ();
     }
     if (rdp.yuv_image)
     {
-  	  DrawYUVImageToFrameBuffer();
-  	  rdp.yuv_image = FALSE;
-//  	  FRDP("yuv image draw. ul_x: %f, ul_y: %f, lr_x: %f, lr_y: %f, begin: %08lx\n", 
-//  	  rdp.yuv_ul_x, rdp.yuv_ul_y, rdp.yuv_lr_x, rdp.yuv_lr_y, rdp.yuv_im_begin);
+      DrawYUVImageToFrameBuffer();
+      rdp.yuv_image = FALSE;
+//        FRDP("yuv image draw. ul_x: %f, ul_y: %f, lr_x: %f, lr_y: %f, begin: %08lx\n", 
+//        rdp.yuv_ul_x, rdp.yuv_ul_y, rdp.yuv_lr_x, rdp.yuv_lr_y, rdp.yuv_im_begin);
       rdp.yuv_ul_x = rdp.yuv_ul_y = rdp.yuv_lr_x = rdp.yuv_lr_y = 0;
       rdp.yuv_im_begin = 0x00FFFFFF; 
     }
-	if (rdp.cur_image)
+    if (rdp.cur_image)
     CloseTextureBuffer(rdp.read_whole_frame && (settings.PM || rdp.swap_ci_index >= 0));
 
   if (settings.TGR2 && rdp.vi_org_reg != *gfx.VI_ORIGIN_REG && CI_SET)

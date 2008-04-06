@@ -70,29 +70,29 @@ void savestates_save()
    
    if (*autoinc_save_slot)
      {
-	if (++slot == 10)
-	  {
-	     slot = 0;
-	  }
+    if (++slot == 10)
+      {
+         slot = 0;
+      }
      }
    
    if (slot <= 9)
      {
-	filename = malloc(strlen(get_savespath())+
-			  strlen(ROM_SETTINGS.goodname)+4+1);
-	strcpy(filename, get_savespath());
-	strcat(filename, ROM_SETTINGS.goodname);
-	strcat(filename, ".st");
-	sprintf(buf, "%d", slot);
-	strcat(filename, buf);
+    filename = malloc(strlen(get_savespath())+
+              strlen(ROM_SETTINGS.goodname)+4+1);
+    strcpy(filename, get_savespath());
+    strcat(filename, ROM_SETTINGS.goodname);
+    strcat(filename, ".st");
+    sprintf(buf, "%d", slot);
+    strcat(filename, buf);
      }
    else
      {
-	filename = malloc(strlen(fname)+1);
-	strcpy(filename, fname);
-	slot -= 10;
+    filename = malloc(strlen(fname)+1);
+    strcpy(filename, fname);
+    slot -= 10;
      }
-   	
+    
    f = gzopen(filename, "wb");
    free(filename);
    
@@ -150,36 +150,36 @@ void savestates_load()
    
    if (slot <= 9)
      {
-	filename = malloc(strlen(get_savespath())+
-			  strlen(ROM_SETTINGS.goodname)+4+1);
-	strcpy(filename, get_savespath());
-	strcat(filename, ROM_SETTINGS.goodname);
-	strcat(filename, ".st");
-	sprintf(buf, "%d", slot);
-	strcat(filename, buf);
+    filename = malloc(strlen(get_savespath())+
+              strlen(ROM_SETTINGS.goodname)+4+1);
+    strcpy(filename, get_savespath());
+    strcat(filename, ROM_SETTINGS.goodname);
+    strcat(filename, ".st");
+    sprintf(buf, "%d", slot);
+    strcat(filename, buf);
      }
    else
      {
-	filename = malloc(strlen(fname)+1);
-	strcpy(filename, fname);
-	slot -= 10;
+    filename = malloc(strlen(fname)+1);
+    strcpy(filename, fname);
+    slot -= 10;
      }
    f = gzopen(filename, "rb");
    free(filename);
    
    if (f == NULL)
      {
-	alert_message(tr("The save state you're trying to load doesn't exist"));
-	return;
+    alert_message(tr("The save state you're trying to load doesn't exist"));
+    return;
      }
    
    gzread(f, buf, 32);
    if (memcmp(buf, ROM_SETTINGS.MD5, 32))
      {
-	alert_message(tr("You're trying to load a save state from either another rom\n"
-	              "or another dump."));
-	gzclose(f);
-	return;
+    alert_message(tr("You're trying to load a save state from either another rom\n"
+                  "or another dump."));
+    gzclose(f);
+    return;
      }
    
    gzread(f, &rdram_register, sizeof(RDRAM_register));
@@ -208,8 +208,8 @@ void savestates_load()
    gzread(f, reg, 32*8);
    for (i=0; i<32; i++) 
      {
-	gzread(f, reg_cop0+i, 4);
-	gzread(f, buf, 4); // for compatibility with old versions purpose
+    gzread(f, reg_cop0+i, 4);
+    gzread(f, buf, 4); // for compatibility with old versions purpose
      }
    gzread(f, &lo, 8);
    gzread(f, &hi, 8);
@@ -220,10 +220,10 @@ void savestates_load()
    if (!dynacore && interpcore) gzread(f, &interp_addr, 4);
    else
      {
-	int i;
-	gzread(f, &len, 4);
-	for (i=0; i<0x100000; i++) invalid_code[i] = 1;
-	jump_to(len);
+    int i;
+    gzread(f, &len, 4);
+    for (i=0; i<0x100000; i++) invalid_code[i] = 1;
+    jump_to(len);
      }
    
    gzread(f, &next_interupt, 4);
@@ -233,10 +233,10 @@ void savestates_load()
    len = 0;
    while(1)
      {
-	gzread(f, buf+len, 4);
-	if (*((unsigned int*)&buf[len]) == 0xFFFFFFFF) break;
-	gzread(f, buf+len+4, 4);
-	len += 8;
+    gzread(f, buf+len, 4);
+    if (*((unsigned int*)&buf[len]) == 0xFFFFFFFF) break;
+    gzread(f, buf+len+4, 4);
+    len += 8;
      }
    load_eventqueue_infos(buf);
    

@@ -2,53 +2,53 @@
 
 struct CombinerInput
 {
-	GLenum input;
-	GLenum mapping;
-	GLenum usage;
+    GLenum input;
+    GLenum mapping;
+    GLenum usage;
 };
 
 struct CombinerVariable
 {
-	GLenum input;
-	GLenum mapping;
-	GLenum usage;
-	BOOL used;
+    GLenum input;
+    GLenum mapping;
+    GLenum usage;
+    BOOL used;
 };
 
 struct GeneralCombiner
 {
-	CombinerVariable A, B, C, D;
+    CombinerVariable A, B, C, D;
 
-	struct
-	{
-		GLenum ab;
-		GLenum cd;
-		GLenum sum;
-	} output;
+    struct
+    {
+        GLenum ab;
+        GLenum cd;
+        GLenum sum;
+    } output;
 };
 
 struct RegisterCombiners
 {
-	GeneralCombiner color[8];
-	GeneralCombiner alpha[8];
+    GeneralCombiner color[8];
+    GeneralCombiner alpha[8];
 
-	struct
-	{
-		CombinerVariable A, B, C, D, E, F, G;
-	} final;
+    struct
+    {
+        CombinerVariable A, B, C, D, E, F, G;
+    } final;
 
-	struct 
-	{
-		WORD color, alpha;
-	} constant[2];
+    struct 
+    {
+        WORD color, alpha;
+    } constant[2];
 
-	struct
-	{
-		WORD color, secondaryColor, alpha;
-	} vertex;
+    struct
+    {
+        WORD color, secondaryColor, alpha;
+    } vertex;
 
-	WORD numCombiners;
-	BOOL usesT0, usesT1, usesNoise;
+    WORD numCombiners;
+    BOOL usesT0, usesT1, usesNoise;
 };
 
 void Init_NV_register_combiners();

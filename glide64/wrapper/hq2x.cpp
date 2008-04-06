@@ -175,8 +175,8 @@ void hq2x_32( unsigned char * pIn, unsigned char * pOut, int Xres, int Yres, int
   static int lut_initialized = 0;
   if(!lut_initialized)
   {
-	  InitLUTs();
-	  lut_initialized = 1;
+      InitLUTs();
+      lut_initialized = 1;
   }
   unsigned char *pOut1 = pOut;
   unsigned char *pIn1 = pIn;
@@ -196,7 +196,7 @@ void hq2x_32( unsigned char * pIn, unsigned char * pOut, int Xres, int Yres, int
   {
     /*if (j>0)      prevline = -Xres*2; else prevline = 0;
     if (j<Yres-1) nextline =  Xres*2; else nextline = 0;*/
-	if (j>0)      prevline = -Xres*4; else prevline = 0;
+    if (j>0)      prevline = -Xres*4; else prevline = 0;
     if (j<Yres-1) nextline =  Xres*4; else nextline = 0;
 
     for (i=0; i<Xres; i++)
@@ -204,24 +204,24 @@ void hq2x_32( unsigned char * pIn, unsigned char * pOut, int Xres, int Yres, int
       /*w[2] = *((unsigned short*)(pIn + prevline));
       w[5] = *((unsigned short*)pIn);
       w[8] = *((unsigned short*)(pIn + nextline));*/
-	  w[2] = *((unsigned int*)(pIn + prevline));
-	  w[5] = *((unsigned int*)pIn);
-	  w[8] = *((unsigned int*)(pIn + nextline));
-	  w[2] = (((w[2] >> 3) & 0x1F) << 11) | (((w[2] >> 10) & 0x3F) << 5) | ((w[2] >> 19) & 0x1F);
-	  w[5] = (((w[5] >> 3) & 0x1F) << 11) | (((w[5] >> 10) & 0x3F) << 5) | ((w[5] >> 19) & 0x1F);
-	  w[8] = (((w[8] >> 3) & 0x1F) << 11) | (((w[8] >> 10) & 0x3F) << 5) | ((w[8] >> 19) & 0x1F);
+      w[2] = *((unsigned int*)(pIn + prevline));
+      w[5] = *((unsigned int*)pIn);
+      w[8] = *((unsigned int*)(pIn + nextline));
+      w[2] = (((w[2] >> 3) & 0x1F) << 11) | (((w[2] >> 10) & 0x3F) << 5) | ((w[2] >> 19) & 0x1F);
+      w[5] = (((w[5] >> 3) & 0x1F) << 11) | (((w[5] >> 10) & 0x3F) << 5) | ((w[5] >> 19) & 0x1F);
+      w[8] = (((w[8] >> 3) & 0x1F) << 11) | (((w[8] >> 10) & 0x3F) << 5) | ((w[8] >> 19) & 0x1F);
 
       if (i>0)
       {
         /*w[1] = *((unsigned short*)(pIn + prevline - 2));
         w[4] = *((unsigned short*)(pIn - 2));
         w[7] = *((unsigned short*)(pIn + nextline - 2));*/
-		w[1] = *((unsigned int*)(pIn + prevline - 4));
-		w[4] = *((unsigned int*)(pIn - 4));
-		w[7] = *((unsigned int*)(pIn + nextline - 4));
-		w[1] = (((w[1] >> 3) & 0x1F) << 11) | (((w[1] >> 10) & 0x3F) << 5) | ((w[1] >> 19) & 0x1F);
-		w[4] = (((w[4] >> 3) & 0x1F) << 11) | (((w[4] >> 10) & 0x3F) << 5) | ((w[4] >> 19) & 0x1F);
-		w[7] = (((w[7] >> 3) & 0x1F) << 11) | (((w[7] >> 10) & 0x3F) << 5) | ((w[7] >> 19) & 0x1F);
+        w[1] = *((unsigned int*)(pIn + prevline - 4));
+        w[4] = *((unsigned int*)(pIn - 4));
+        w[7] = *((unsigned int*)(pIn + nextline - 4));
+        w[1] = (((w[1] >> 3) & 0x1F) << 11) | (((w[1] >> 10) & 0x3F) << 5) | ((w[1] >> 19) & 0x1F);
+        w[4] = (((w[4] >> 3) & 0x1F) << 11) | (((w[4] >> 10) & 0x3F) << 5) | ((w[4] >> 19) & 0x1F);
+        w[7] = (((w[7] >> 3) & 0x1F) << 11) | (((w[7] >> 10) & 0x3F) << 5) | ((w[7] >> 19) & 0x1F);
       }
       else
       {
@@ -235,12 +235,12 @@ void hq2x_32( unsigned char * pIn, unsigned char * pOut, int Xres, int Yres, int
         /*w[3] = *((unsigned short*)(pIn + prevline + 2));
         w[6] = *((unsigned short*)(pIn + 2));
         w[9] = *((unsigned short*)(pIn + nextline + 2));*/
-		w[3] = *((unsigned int*)(pIn + prevline + 4));
-		w[6] = *((unsigned int*)(pIn + 4));
-		w[9] = *((unsigned int*)(pIn + nextline + 4));
-		w[3] = (((w[3] >> 3) & 0x1F) << 11) | (((w[3] >> 10) & 0x3F) << 5) | ((w[3] >> 19) & 0x1F);
-		w[6] = (((w[6] >> 3) & 0x1F) << 11) | (((w[6] >> 10) & 0x3F) << 5) | ((w[6] >> 19) & 0x1F);
-		w[9] = (((w[9] >> 3) & 0x1F) << 11) | (((w[9] >> 10) & 0x3F) << 5) | ((w[9] >> 19) & 0x1F);
+        w[3] = *((unsigned int*)(pIn + prevline + 4));
+        w[6] = *((unsigned int*)(pIn + 4));
+        w[9] = *((unsigned int*)(pIn + nextline + 4));
+        w[3] = (((w[3] >> 3) & 0x1F) << 11) | (((w[3] >> 10) & 0x3F) << 5) | ((w[3] >> 19) & 0x1F);
+        w[6] = (((w[6] >> 3) & 0x1F) << 11) | (((w[6] >> 10) & 0x3F) << 5) | ((w[6] >> 19) & 0x1F);
+        w[9] = (((w[9] >> 3) & 0x1F) << 11) | (((w[9] >> 10) & 0x3F) << 5) | ((w[9] >> 19) & 0x1F);
       }
       else
       {
@@ -2915,7 +2915,7 @@ void hq2x_32( unsigned char * pIn, unsigned char * pOut, int Xres, int Yres, int
         }
       }
       //pIn+=2;
-	  pIn+=4;
+      pIn+=4;
       pOut+=8;
     }
     pOut+=BpL;
@@ -2923,33 +2923,33 @@ void hq2x_32( unsigned char * pIn, unsigned char * pOut, int Xres, int Yres, int
 
   for (j=0; j<Yres; j++)
   {
-	  for(i=0; i<Xres; i++)
-	  {
-		  unsigned char temp;
-		  temp = pOut1[(j*2)*Xres*2*4+(i*2)*4+0];
-		  pOut1[(j*2)*Xres*2*4+(i*2)*4+0] = pOut1[(j*2)*Xres*2*4+(i*2)*4+2];
-		  pOut1[(j*2)*Xres*2*4+(i*2)*4+2] = temp;
+      for(i=0; i<Xres; i++)
+      {
+          unsigned char temp;
+          temp = pOut1[(j*2)*Xres*2*4+(i*2)*4+0];
+          pOut1[(j*2)*Xres*2*4+(i*2)*4+0] = pOut1[(j*2)*Xres*2*4+(i*2)*4+2];
+          pOut1[(j*2)*Xres*2*4+(i*2)*4+2] = temp;
 
-		  pOut1[(j*2)*Xres*2*4+(i*2)*4+3] = pIn1[j*Xres*4+i*4+3];
+          pOut1[(j*2)*Xres*2*4+(i*2)*4+3] = pIn1[j*Xres*4+i*4+3];
 
-		  temp = pOut1[(j*2)*Xres*2*4+(i*2+1)*4+0];
-		  pOut1[(j*2)*Xres*2*4+(i*2+1)*4+0] = pOut1[(j*2)*Xres*2*4+(i*2+1)*4+2];
-		  pOut1[(j*2)*Xres*2*4+(i*2+1)*4+2] = temp;
+          temp = pOut1[(j*2)*Xres*2*4+(i*2+1)*4+0];
+          pOut1[(j*2)*Xres*2*4+(i*2+1)*4+0] = pOut1[(j*2)*Xres*2*4+(i*2+1)*4+2];
+          pOut1[(j*2)*Xres*2*4+(i*2+1)*4+2] = temp;
 
-		  pOut1[(j*2)*Xres*2*4+(i*2+1)*4+3] = pIn1[j*Xres*4+i*4+3];
+          pOut1[(j*2)*Xres*2*4+(i*2+1)*4+3] = pIn1[j*Xres*4+i*4+3];
 
-		  temp = pOut1[(j*2+1)*Xres*2*4+(i*2)*4+0];
-		  pOut1[(j*2+1)*Xres*2*4+(i*2)*4+0] = pOut1[(j*2+1)*Xres*2*4+(i*2)*4+2];
-		  pOut1[(j*2+1)*Xres*2*4+(i*2)*4+2] = temp;
+          temp = pOut1[(j*2+1)*Xres*2*4+(i*2)*4+0];
+          pOut1[(j*2+1)*Xres*2*4+(i*2)*4+0] = pOut1[(j*2+1)*Xres*2*4+(i*2)*4+2];
+          pOut1[(j*2+1)*Xres*2*4+(i*2)*4+2] = temp;
 
-		  pOut1[(j*2+1)*Xres*2*4+(i*2)*4+3] = pIn1[j*Xres*4+i*4+3];
+          pOut1[(j*2+1)*Xres*2*4+(i*2)*4+3] = pIn1[j*Xres*4+i*4+3];
 
-		  temp = pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+0];
-		  pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+0] = pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+2];
-		  pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+2] = temp;
+          temp = pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+0];
+          pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+0] = pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+2];
+          pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+2] = temp;
 
-		  pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+3] = pIn1[j*Xres*4+i*4+3];
-	  }
+          pOut1[(j*2+1)*Xres*2*4+(i*2+1)*4+3] = pIn1[j*Xres*4+i*4+3];
+      }
   }
 
 }

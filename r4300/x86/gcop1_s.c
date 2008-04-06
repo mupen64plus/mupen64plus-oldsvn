@@ -38,7 +38,7 @@
 void genadd_s()
 {
 #ifdef INTERPRET_ADD_S
-	gencallinterp((unsigned int)ADD_S, 0);
+    gencallinterp((unsigned int)ADD_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_eax_memoffs32((unsigned int *)(&reg_cop1_simple[dst->f.cf.fs]));
@@ -53,7 +53,7 @@ void genadd_s()
 void gensub_s()
 {
 #ifdef INTERPRET_SUB_S
-	gencallinterp((unsigned int)SUB_S, 0);
+    gencallinterp((unsigned int)SUB_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_eax_memoffs32((unsigned int *)(&reg_cop1_simple[dst->f.cf.fs]));
@@ -68,7 +68,7 @@ void gensub_s()
 void genmul_s()
 {
 #ifdef INTERPRET_MUL_S
-	gencallinterp((unsigned int)MUL_S, 0);
+    gencallinterp((unsigned int)MUL_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_eax_memoffs32((unsigned int *)(&reg_cop1_simple[dst->f.cf.fs]));
@@ -83,7 +83,7 @@ void genmul_s()
 void gendiv_s()
 {
 #ifdef INTERPRET_DIV_S
-	gencallinterp((unsigned int)DIV_S, 0);
+    gencallinterp((unsigned int)DIV_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_eax_memoffs32((unsigned int *)(&reg_cop1_simple[dst->f.cf.fs]));

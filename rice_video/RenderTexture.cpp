@@ -23,41 +23,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "glh_genext.h"
 
 COGLRenderTexture::COGLRenderTexture(int width, int height, RenderTextureInfo* pInfo, TextureUsage usage)
-	:	CRenderTexture(width, height, pInfo, usage),
-		m_pOGLTexture(NULL)
+    :   CRenderTexture(width, height, pInfo, usage),
+        m_pOGLTexture(NULL)
 {
-	if( usage == AS_BACK_BUFFER_SAVE )
-	{
-		m_pTexture = m_pOGLTexture = new COGLTexture(width, height, usage);
-		if( !m_pTexture )
-		{
-			TRACE0("Error to create OGL render_texture");
-			SAFE_DELETE(m_pTexture);
-		}
-	}
+    if( usage == AS_BACK_BUFFER_SAVE )
+    {
+        m_pTexture = m_pOGLTexture = new COGLTexture(width, height, usage);
+        if( !m_pTexture )
+        {
+            TRACE0("Error to create OGL render_texture");
+            SAFE_DELETE(m_pTexture);
+        }
+    }
 
-	m_width = width;
-	m_height = height;
-	m_beingRendered = false;
+    m_width = width;
+    m_height = height;
+    m_beingRendered = false;
 }
 
 COGLRenderTexture::~COGLRenderTexture()
 {
-	if( m_beingRendered )
-	{
-		g_pFrameBufferManager->CloseRenderTexture(false);
-		SetAsRenderTarget(false);
-	}
+    if( m_beingRendered )
+    {
+        g_pFrameBufferManager->CloseRenderTexture(false);
+        SetAsRenderTarget(false);
+    }
 
-	ShutdownPBuffer();
-	SAFE_DELETE(m_pTexture);
-	m_pOGLTexture = NULL;
-	m_beingRendered = false;
+    ShutdownPBuffer();
+    SAFE_DELETE(m_pTexture);
+    m_pOGLTexture = NULL;
+    m_beingRendered = false;
 }
 
 bool COGLRenderTexture::InitPBuffer( void )
 {
-	return true;
+    return true;
 }
 
 void COGLRenderTexture::ShutdownPBuffer(void)

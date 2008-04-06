@@ -23,18 +23,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class COGLTexture : public CTexture
 {
-	friend class COGLRenderTexture;
+    friend class COGLRenderTexture;
 public:
-	~COGLTexture();
+    ~COGLTexture();
 
-	bool StartUpdate(DrawInfo *di);
-	void EndUpdate(DrawInfo *di);
+    bool StartUpdate(DrawInfo *di);
+    void EndUpdate(DrawInfo *di);
 
-	GLuint m_dwTextureName;
-	GLuint m_glFmt;
+    GLuint m_dwTextureName;
+    GLuint m_glFmt;
 protected:
-	friend class OGLDeviceBuilder;
-	COGLTexture(uint32 dwWidth, uint32 dwHeight, TextureUsage usage = AS_NORMAL);
+    friend class OGLDeviceBuilder;
+    COGLTexture(uint32 dwWidth, uint32 dwHeight, TextureUsage usage = AS_NORMAL);
 };
 
 

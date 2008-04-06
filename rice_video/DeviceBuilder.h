@@ -25,50 +25,50 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CDeviceBuilder
 {
 public:
-	virtual CGraphicsContext * CreateGraphicsContext(void)=0;
-	virtual CRender * CreateRender(void)=0;
-	virtual CTexture * CreateTexture(uint32 dwWidth, uint32 dwHeight, TextureUsage usage = AS_NORMAL)=0;
-	virtual CColorCombiner * CreateColorCombiner(CRender *pRender)=0;
-	virtual CBlender * CreateAlphaBlender(CRender *pRender)=0;
+    virtual CGraphicsContext * CreateGraphicsContext(void)=0;
+    virtual CRender * CreateRender(void)=0;
+    virtual CTexture * CreateTexture(uint32 dwWidth, uint32 dwHeight, TextureUsage usage = AS_NORMAL)=0;
+    virtual CColorCombiner * CreateColorCombiner(CRender *pRender)=0;
+    virtual CBlender * CreateAlphaBlender(CRender *pRender)=0;
 
-	void DeleteGraphicsContext(void);
-	void DeleteRender(void);
-	void DeleteColorCombiner(void);
-	void DeleteAlphaBlender(void);
+    void DeleteGraphicsContext(void);
+    void DeleteRender(void);
+    void DeleteColorCombiner(void);
+    void DeleteAlphaBlender(void);
 
-	static void DeleteBuilder(void);
-	static CDeviceBuilder* GetBuilder(void);
-	static void SelectDeviceType(SupportedDeviceType type);
-	static SupportedDeviceType GetDeviceType(void);
-	static SupportedDeviceType GetGeneralDeviceType(void);
-	static SupportedDeviceType m_deviceGeneralType;
+    static void DeleteBuilder(void);
+    static CDeviceBuilder* GetBuilder(void);
+    static void SelectDeviceType(SupportedDeviceType type);
+    static SupportedDeviceType GetDeviceType(void);
+    static SupportedDeviceType GetGeneralDeviceType(void);
+    static SupportedDeviceType m_deviceGeneralType;
 protected:
-	CDeviceBuilder();
-	~CDeviceBuilder();
+    CDeviceBuilder();
+    ~CDeviceBuilder();
 
-	static CDeviceBuilder* CreateBuilder(SupportedDeviceType type);
-	static SupportedDeviceType m_deviceType;
-	static CDeviceBuilder* m_pInstance;
+    static CDeviceBuilder* CreateBuilder(SupportedDeviceType type);
+    static SupportedDeviceType m_deviceType;
+    static CDeviceBuilder* m_pInstance;
 
-	CRender* m_pRender;
-	CGraphicsContext* m_pGraphicsContext;
-	CColorCombiner* m_pColorCombiner;
-	CBlender* m_pAlphaBlender;
+    CRender* m_pRender;
+    CGraphicsContext* m_pGraphicsContext;
+    CColorCombiner* m_pColorCombiner;
+    CBlender* m_pAlphaBlender;
 };
 
 class OGLDeviceBuilder : public CDeviceBuilder
 {
-	friend class CDeviceBuilder;
+    friend class CDeviceBuilder;
 public:
-	CGraphicsContext * CreateGraphicsContext(void);
-	CRender * CreateRender(void);
-	CTexture * CreateTexture(uint32 dwWidth, uint32 dwHeight, TextureUsage usage = AS_NORMAL);
-	CColorCombiner * CreateColorCombiner(CRender *pRender);
-	CBlender * CreateAlphaBlender(CRender *pRender);
+    CGraphicsContext * CreateGraphicsContext(void);
+    CRender * CreateRender(void);
+    CTexture * CreateTexture(uint32 dwWidth, uint32 dwHeight, TextureUsage usage = AS_NORMAL);
+    CColorCombiner * CreateColorCombiner(CRender *pRender);
+    CBlender * CreateAlphaBlender(CRender *pRender);
 
 protected:
-	OGLDeviceBuilder() {};
-	~OGLDeviceBuilder() {};
+    OGLDeviceBuilder() {};
+    ~OGLDeviceBuilder() {};
 
 };
 

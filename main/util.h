@@ -47,9 +47,9 @@ int copyfile(char *src, char *dest);
 
 /** linked list utilities **/
 typedef struct _list_node {
-	void *data;
-	struct _list_node *prev;
-	struct _list_node *next;
+    void *data;
+    struct _list_node *prev;
+    struct _list_node *next;
 } list_node_t;
 
 typedef list_node_t * list_t;
@@ -66,6 +66,6 @@ int list_length(list_t list);
 
 // cycles through each listnode in list setting curr_node to current node.
 #define list_foreach(list, curr_node) \
-	for((curr_node) = (list); (curr_node) != NULL; (curr_node) = (curr_node)->next)
+    for((curr_node) = (list); (curr_node) != NULL; (curr_node) = (curr_node)->next)
 
 #endif // __UTIL_H__

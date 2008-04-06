@@ -37,7 +37,7 @@ void genadd_d()
    inc_m32abs(&instr_count[119]);
 #endif
 #ifdef INTERPRET_ADD_D
-	gencallinterp((unsigned long long)ADD_D, 0);
+    gencallinterp((unsigned long long)ADD_D, 0);
 #else
    gencheck_cop1_unusable();
    mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_double[dst->f.cf.fs]));

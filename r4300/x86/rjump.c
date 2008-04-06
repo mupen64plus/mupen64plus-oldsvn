@@ -40,7 +40,7 @@ void dyna_jump()
    if (PC->reg_cache_infos.need_map)
      *return_address = (unsigned long) (PC->reg_cache_infos.jump_wrapper);
    else
-	 *return_address = (unsigned long) (actual->code + PC->local_addr);
+     *return_address = (unsigned long) (actual->code + PC->local_addr);
 }
 
 static long save_ebp = 0;
@@ -101,7 +101,7 @@ void dyna_stop()
     printf("Warning: instruction pointer is 0 at dyna_stop()\n");
   else
   {
-	*return_address = (unsigned long) save_eip;
+    *return_address = (unsigned long) save_eip;
   }
 }
 

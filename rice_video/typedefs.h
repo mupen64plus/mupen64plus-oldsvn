@@ -25,12 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define uint32 unsigned int
 #define uint64 unsigned long long
 
-typedef unsigned char				uint8;
+typedef unsigned char               uint8;
 
-typedef signed char					s8;	
-typedef int						s32;
-typedef unsigned int				u32;
-typedef unsigned char				u8;
+typedef signed char                 s8; 
+typedef int                     s32;
+typedef unsigned int                u32;
+typedef unsigned char               u8;
 
 
 //Fix me, these macro should not be used anymore in DirectX 8
@@ -44,285 +44,285 @@ typedef void* LPRICETEXTURE ;
 
 typedef struct 
 {
-	uint32 dwRGBA, dwRGBACopy;
-	char x,y,z;			// Direction
-	uint8 pad;
+    uint32 dwRGBA, dwRGBACopy;
+    char x,y,z;         // Direction
+    uint8 pad;
 } N64Light;
 
 
 typedef struct
 {
-	unsigned int	dwFormat:3;
-	unsigned int	dwSize:2;
-	unsigned int	dwWidth:10;
-	uint32			dwAddr;
-	uint32			bpl;
+    unsigned int    dwFormat:3;
+    unsigned int    dwSize:2;
+    unsigned int    dwWidth:10;
+    uint32          dwAddr;
+    uint32          bpl;
 } SetImgInfo;
 
 typedef struct 
 {
-	// Set by RDP_SetTile
-	unsigned int dwFormat	:3;		// e.g. RGBA, YUV etc
-	unsigned int dwSize		:2;		// e.g 4/8/16/32bpp
-	unsigned int dwLine		:9;		// Ummm...
-	unsigned int dwPalette	:4;		// 0..15 - a palette index?
-	uint32 dwTMem;					// Texture memory location
+    // Set by RDP_SetTile
+    unsigned int dwFormat   :3;     // e.g. RGBA, YUV etc
+    unsigned int dwSize     :2;     // e.g 4/8/16/32bpp
+    unsigned int dwLine     :9;     // Ummm...
+    unsigned int dwPalette  :4;     // 0..15 - a palette index?
+    uint32 dwTMem;                  // Texture memory location
 
-	unsigned int bClampS	:1;
-	unsigned int bClampT	:1;
-	unsigned int bMirrorS	:1;
-	unsigned int bMirrorT	:1;
+    unsigned int bClampS    :1;
+    unsigned int bClampT    :1;
+    unsigned int bMirrorS   :1;
+    unsigned int bMirrorT   :1;
 
-	unsigned int dwMaskS	:4;
-	unsigned int dwMaskT	:4;
-	unsigned int dwShiftS	:4;
-	unsigned int dwShiftT	:4;
+    unsigned int dwMaskS    :4;
+    unsigned int dwMaskT    :4;
+    unsigned int dwShiftS   :4;
+    unsigned int dwShiftT   :4;
 
-	// Set by RDP_SetTileSize
-	int sl;		// Upper left S		- 8:3
-	int tl;		// Upper Left T		- 8:3
-	int sh;		// Lower Right S
-	int th;		// Lower Right T
+    // Set by RDP_SetTileSize
+    int sl;     // Upper left S     - 8:3
+    int tl;     // Upper Left T     - 8:3
+    int sh;     // Lower Right S
+    int th;     // Lower Right T
 
-	int   hilite_sl;
-	int	  hilite_tl;
-	int   hilite_sh;
-	int	  hilite_th;
+    int   hilite_sl;
+    int   hilite_tl;
+    int   hilite_sh;
+    int   hilite_th;
 
-	float fsl;		// Upper left S		- 8:3
-	float ftl;		// Upper Left T		- 8:3
-	float fsh;		// Lower Right S
-	float fth;		// Lower Right T
+    float fsl;      // Upper left S     - 8:3
+    float ftl;      // Upper Left T     - 8:3
+    float fsh;      // Lower Right S
+    float fth;      // Lower Right T
 
-	float   fhilite_sl;
-	float	fhilite_tl;
-	float   fhilite_sh;
-	float	fhilite_th;
+    float   fhilite_sl;
+    float   fhilite_tl;
+    float   fhilite_sh;
+    float   fhilite_th;
 
-	uint32 dwDXT;
+    uint32 dwDXT;
 
-	uint32 dwPitch;
+    uint32 dwPitch;
 
-	uint32 dwWidth;
-	uint32 dwHeight;
+    uint32 dwWidth;
+    uint32 dwHeight;
 
-	float fShiftScaleS;
-	float fShiftScaleT;
+    float fShiftScaleS;
+    float fShiftScaleT;
 
-	uint32   lastTileCmd;
-	bool  bSizeIsValid;
+    uint32   lastTileCmd;
+    bool  bSizeIsValid;
 
-	bool bForceWrapS;
-	bool bForceWrapT;
-	bool bForceClampS;
-	bool bForceClampT;
+    bool bForceWrapS;
+    bool bForceWrapT;
+    bool bForceClampS;
+    bool bForceClampT;
 
 } Tile;
 
 
 typedef struct
 {
-	float u;
-	float v;
+    float u;
+    float v;
 } TexCord;
 
 typedef struct VECTOR2
 {
-	float x;
-	float y;
-	VECTOR2( float newx, float newy )	{x=newx; y=newy;}
-	VECTOR2()	{x=0; y=0;}
+    float x;
+    float y;
+    VECTOR2( float newx, float newy )   {x=newx; y=newy;}
+    VECTOR2()   {x=0; y=0;}
 } VECTOR2;
 
 typedef struct
 {
-	short x;
-	short y;
+    short x;
+    short y;
 } IVector2;
 
 typedef struct 
 {
-	short x;
-	short y;
-	short z;
+    short x;
+    short y;
+    short z;
 } IVector3;
 
 typedef struct {
-	float x,y,z;
-	float rhw;
-	union {
-		COLOR  dcDiffuse;
-		struct {
-			uint8 b;
-			uint8 g;
-			uint8 r;
-			uint8 a;
-		};
-	};
-	COLOR  dcSpecular;
-	TexCord tcord[2];
+    float x,y,z;
+    float rhw;
+    union {
+        COLOR  dcDiffuse;
+        struct {
+            uint8 b;
+            uint8 g;
+            uint8 r;
+            uint8 a;
+        };
+    };
+    COLOR  dcSpecular;
+    TexCord tcord[2];
 } TLITVERTEX, *LPTLITVERTEX;
 
 typedef struct {
-	float x,y,z;
-	union {
-		COLOR  dcDiffuse;
-		struct {
-			uint8 b;
-			uint8 g;
-			uint8 r;
-			uint8 a;
-		};
-	};
-	COLOR  dcSpecular;
-	TexCord tcord[2];
+    float x,y,z;
+    union {
+        COLOR  dcDiffuse;
+        struct {
+            uint8 b;
+            uint8 g;
+            uint8 r;
+            uint8 a;
+        };
+    };
+    COLOR  dcSpecular;
+    TexCord tcord[2];
 } UTLITVERTEX, *LPUTLITVERTEX;
 
 typedef struct {
-	float x,y,z;
-	float rhw;
-	union {
-		COLOR  dcDiffuse;
-		struct {
-			uint8 b;
-			uint8 g;
-			uint8 r;
-			uint8 a;
-		};
-	};
-	COLOR  dcSpecular;
+    float x,y,z;
+    float rhw;
+    union {
+        COLOR  dcDiffuse;
+        struct {
+            uint8 b;
+            uint8 g;
+            uint8 r;
+            uint8 a;
+        };
+    };
+    COLOR  dcSpecular;
 } LITVERTEX, *LPLITVERTEX;
 
 
 
 typedef struct {
-	float	x,y,z;
-	float	rhw;
-	COLOR dcDiffuse;
+    float   x,y,z;
+    float   rhw;
+    COLOR dcDiffuse;
 } FILLRECTVERTEX, *LPFILLRECTVERTEX;
 
 #include "IColor.h"
 
 typedef struct
 {
-	float x,y,z;
-	float nx,ny,nz;
-	union {
-		COLOR  dcDiffuse;
-		struct {
-			uint8 b;
-			uint8 g;
-			uint8 r;
-			uint8 a;
-		};
-	};
-	float u,v;
+    float x,y,z;
+    float nx,ny,nz;
+    union {
+        COLOR  dcDiffuse;
+        struct {
+            uint8 b;
+            uint8 g;
+            uint8 r;
+            uint8 a;
+        };
+    };
+    float u,v;
 }EXTERNAL_VERTEX, *LPSHADERVERTEX;
 
 
 typedef struct
 {
-	union {
-		struct {
-			float x;
-			float y;
-			float z;
-			float range;		// Range == 0  for directional light
-								// Range != 0  for point light, Zelda MM
-		};
-	};
+    union {
+        struct {
+            float x;
+            float y;
+            float z;
+            float range;        // Range == 0  for directional light
+                                // Range != 0  for point light, Zelda MM
+        };
+    };
 
-	union {
-		struct {
-			uint8 r;
-			uint8 g;
-			uint8 b;
-			uint8 a;
-		};
-		uint32 col;
-	};
+    union {
+        struct {
+            uint8 r;
+            uint8 g;
+            uint8 b;
+            uint8 a;
+        };
+        uint32 col;
+    };
 
-	union {
-		struct {
-			float fr;
-			float fg;
-			float fb;
-			float fa;
-		};
-		float fcolors[4];
-	};
+    union {
+        struct {
+            float fr;
+            float fg;
+            float fb;
+            float fa;
+        };
+        float fcolors[4];
+    };
 
-	union {
-		struct {
-			float tx;
-			float ty;
-			float tz;
-			float tdummy;
-		};
-	};
+    union {
+        struct {
+            float tx;
+            float ty;
+            float tz;
+            float tdummy;
+        };
+    };
 
-	union {
-		struct {
-			float ox;
-			float oy;
-			float oz;
-			float odummy;
-		};
-	};
+    union {
+        struct {
+            float ox;
+            float oy;
+            float oz;
+            float odummy;
+        };
+    };
 } Light;
 
 typedef struct
 {
-	char na;
-	char nz;	// b
-	char ny;	//g
-	char nx;	//r
+    char na;
+    char nz;    // b
+    char ny;    //g
+    char nx;    //r
 }NormalStruct;
 
 typedef struct
 {
-	short y;
-	short x;
-	
-	short flag;
-	short z;
-	
-	short tv;
-	short tu;
-	
-	union {
-		struct {
-			uint8 a;
-			uint8 b;
-			uint8 g;
-			uint8 r;
-		} rgba;
-		NormalStruct norma;
-	};
+    short y;
+    short x;
+    
+    short flag;
+    short z;
+    
+    short tv;
+    short tu;
+    
+    union {
+        struct {
+            uint8 a;
+            uint8 b;
+            uint8 g;
+            uint8 r;
+        } rgba;
+        NormalStruct norma;
+    };
 } FiddledVtx;
 
 typedef struct
 {
-	short y;
-	short x;
-	
-	uint8 a;
-	uint8 b;
-	short z;
-	
-	uint8 g;
-	uint8 r;
-	
+    short y;
+    short x;
+    
+    uint8 a;
+    uint8 b;
+    short z;
+    
+    uint8 g;
+    uint8 r;
+    
 } FiddledVtxDKR;
 
 typedef struct 
 {
-	short y;
-	short	x;
-	uint16	cidx;
-	short z;
-	short t;
-	short s;
+    short y;
+    short   x;
+    uint16  cidx;
+    short z;
+    short t;
+    short s;
 } N64VtxPD;
 
 class CTexture;
@@ -331,117 +331,117 @@ class CDirectXTexture;
 struct TxtrCacheEntry;
 
 typedef struct {
-	LPRICETEXTURE m_lpsTexturePtr;
-	union {
-		CTexture *			m_pCTexture;
-		CDirectXTexture *	m_pCDirectXTexture;
-		COGLTexture *		m_pCOGLTexture;
-	};
-	
-	uint32 m_dwTileWidth;
-	uint32 m_dwTileHeight;
-	float m_fTexWidth;
-	float m_fTexHeight;		// Float to avoid converts when processing verts
-	TxtrCacheEntry *pTextureEntry;
+    LPRICETEXTURE m_lpsTexturePtr;
+    union {
+        CTexture *          m_pCTexture;
+        CDirectXTexture *   m_pCDirectXTexture;
+        COGLTexture *       m_pCOGLTexture;
+    };
+    
+    uint32 m_dwTileWidth;
+    uint32 m_dwTileHeight;
+    float m_fTexWidth;
+    float m_fTexHeight;     // Float to avoid converts when processing verts
+    TxtrCacheEntry *pTextureEntry;
 } RenderTexture;
 
 
 typedef struct
 {
-	unsigned __int32	dwFormat;
-	unsigned __int32	dwSize;
-	unsigned __int32	dwWidth;
-	unsigned __int32	dwAddr;
+    unsigned __int32    dwFormat;
+    unsigned __int32    dwSize;
+    unsigned __int32    dwWidth;
+    unsigned __int32    dwAddr;
 
-	unsigned __int32	dwLastWidth;
-	unsigned __int32	dwLastHeight;
+    unsigned __int32    dwLastWidth;
+    unsigned __int32    dwLastHeight;
 
-	unsigned __int32	dwHeight;
-	unsigned __int32	dwMemSize;
+    unsigned __int32    dwHeight;
+    unsigned __int32    dwMemSize;
 
-	bool				bCopied;
-	unsigned __int32	dwCopiedAtFrame;
+    bool                bCopied;
+    unsigned __int32    dwCopiedAtFrame;
 
-	unsigned __int32	dwCRC;
-	unsigned __int32	lastUsedFrame;
-	unsigned __int32	bUsedByVIAtFrame;
-	unsigned __int32	lastSetAtUcode;
+    unsigned __int32    dwCRC;
+    unsigned __int32    lastUsedFrame;
+    unsigned __int32    bUsedByVIAtFrame;
+    unsigned __int32    lastSetAtUcode;
 } RecentCIInfo;
 
 typedef struct
 {
-	uint32		addr;
-	uint32		FrameCount;
+    uint32      addr;
+    uint32      FrameCount;
 } RecentViOriginInfo;
 
 typedef enum {
-	SHADE_DISABLED,
-	SHADE_FLAT,
-	SHADE_SMOOTH,
+    SHADE_DISABLED,
+    SHADE_FLAT,
+    SHADE_SMOOTH,
 } RenderShadeMode;
 
 typedef enum {
-	TEXTURE_UV_FLAG_WRAP,
-	TEXTURE_UV_FLAG_MIRROR,
-	TEXTURE_UV_FLAG_CLAMP,
+    TEXTURE_UV_FLAG_WRAP,
+    TEXTURE_UV_FLAG_MIRROR,
+    TEXTURE_UV_FLAG_CLAMP,
 } TextureUVFlag;
 
 typedef struct
 {
-	TextureUVFlag	N64flag;
-	uint32			realFlag;
+    TextureUVFlag   N64flag;
+    uint32          realFlag;
 } UVFlagMap;
 
 
 typedef enum {
-	FILTER_POINT,
-	FILTER_LINEAR,
+    FILTER_POINT,
+    FILTER_LINEAR,
 } TextureFilter;
 
 typedef struct 
 {
-	TextureFilter	N64filter;
-	uint32					realFilter;
+    TextureFilter   N64filter;
+    uint32                  realFilter;
 } TextureFilterMap;
 
 typedef struct {
-	const char* description;
-	int number;
-	uint32	setting;
+    const char* description;
+    int number;
+    uint32  setting;
 } BufferSettingInfo;
 
 typedef struct {
-	const char* description;
-	uint32 setting;
+    const char* description;
+    uint32 setting;
 } SettingInfo;
 
 typedef union {
-	uint8	g_Tmem8bit[0x1000];
-	__int16	g_Tmem16bit[0x800];
-	uint32	g_Tmem32bit[0x300];
-	uint64	g_Tmem64bit[0x200];
+    uint8   g_Tmem8bit[0x1000];
+    __int16 g_Tmem16bit[0x800];
+    uint32  g_Tmem32bit[0x300];
+    uint64  g_Tmem64bit[0x200];
 } TmemType;
 
 
 typedef struct {
-	uint32 dwFormat;
-	uint32 dwSize;
-	BOOL  bSetBy;
+    uint32 dwFormat;
+    uint32 dwSize;
+    BOOL  bSetBy;
 
-	uint32 dwLoadAddress;
-	uint32 dwTotalWords;
-	uint32 dxt;
-	BOOL  bSwapped;
+    uint32 dwLoadAddress;
+    uint32 dwTotalWords;
+    uint32 dxt;
+    BOOL  bSwapped;
 
-	uint32 dwWidth;
-	uint32 dwLine;
+    uint32 dwWidth;
+    uint32 dwLine;
 
-	int sl;
-	int sh;
-	int tl;
-	int th;
+    int sl;
+    int sh;
+    int tl;
+    int th;
 
-	uint32 dwTmem;
+    uint32 dwTmem;
 } TMEMLoadMapInfo;
 
 #endif

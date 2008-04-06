@@ -32,39 +32,39 @@ void rombrowser_writeCache( void );
 /** global rom list */
 typedef struct
 {
-	char cFilename[PATH_MAX];
+    char cFilename[PATH_MAX];
 
-	char cName[100];
-	char cSize[20];
-	char cCountry[20];
+    char cName[100];
+    char cSize[20];
+    char cCountry[20];
 
-	// rom info
-	struct
-	{
-		char          cName[21];					// rom name
-		int           iSize;							// size in bytes
-		short         sCartID;						// cartridge id
-		int           iManufacturer;			// manufacturer
-		unsigned char cCountry;						// country id
-		unsigned int  iCRC1;							// crc part 1
-		unsigned int  iCRC2;							// crc part 2
-		char          cMD5[33];						// md5 code
-		char          cGoodName[100];			// from ini
-		char          cComments[200];			// from ini
+    // rom info
+    struct
+    {
+        char          cName[21];                    // rom name
+        int           iSize;                            // size in bytes
+        short         sCartID;                      // cartridge id
+        int           iManufacturer;            // manufacturer
+        unsigned char cCountry;                     // country id
+        unsigned int  iCRC1;                            // crc part 1
+        unsigned int  iCRC2;                            // crc part 2
+        char          cMD5[33];                     // md5 code
+        char          cGoodName[100];           // from ini
+        char          cComments[200];           // from ini
 
-//		char     Status[60];				// from ini
-//		char     FileName[200];
-//		char     PluginNotes[250];	// from ini
-//		char     CoreNotes[250];		// from ini
-//		char     UserNotes[250];		// from ini
-//		char     Developer[30];			// from ini
-//		char     ReleaseDate[30];		// from ini
-//		char     Genre[15];					// from ini
-	} info;	// data saved in cache
+//      char     Status[60];                // from ini
+//      char     FileName[200];
+//      char     PluginNotes[250];  // from ini
+//      char     CoreNotes[250];        // from ini
+//      char     UserNotes[250];        // from ini
+//      char     Developer[30];         // from ini
+//      char     ReleaseDate[30];       // from ini
+//      char     Genre[15];                 // from ini
+    } info; // data saved in cache
 
-	// other data
-	GdkPixbuf  *flag;	// flag GdkImage
-	mupenEntry *iniEntry;	// ini entry of this rom
+    // other data
+    GdkPixbuf  *flag;   // flag GdkImage
+    mupenEntry *iniEntry;   // ini entry of this rom
 } SRomEntry;
 extern GList *g_RomList;
 

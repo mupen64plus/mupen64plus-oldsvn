@@ -24,19 +24,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 enum ClearFlag
 {
-	CLEAR_COLOR_BUFFER=0x01,
-	CLEAR_DEPTH_BUFFER=0x02,
-	CLEAR_COLOR_AND_DEPTH_BUFFER=0x03,
+    CLEAR_COLOR_BUFFER=0x01,
+    CLEAR_DEPTH_BUFFER=0x02,
+    CLEAR_COLOR_AND_DEPTH_BUFFER=0x03,
 };
 
 
 typedef struct
 {
-	uint32	addr;	//N64 RDRAM address
-	uint32	size;	//N64 buffer size
-	uint32  format;	//N64 format
-	uint32	width;
-	uint32	height;
+    uint32  addr;   //N64 RDRAM address
+    uint32  size;   //N64 buffer size
+    uint32  format; //N64 format
+    uint32  width;
+    uint32  height;
 } TextureBufferShortInfo;
 
 
@@ -49,55 +49,55 @@ typedef struct
 
 class CGraphicsContext : public CCritSect
 {
-	friend class CDeviceBuilder;
-	
+    friend class CDeviceBuilder;
+    
 public:
-	bool Ready() { return m_bReady; }
-	bool IsWindowed() {return m_bWindowed;}
+    bool Ready() { return m_bReady; }
+    bool IsWindowed() {return m_bWindowed;}
 
-	virtual bool Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth, uint32 dwHeight, BOOL bWindowed );
-	virtual void CleanUp();
+    virtual bool Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth, uint32 dwHeight, BOOL bWindowed );
+    virtual void CleanUp();
 
-	virtual void Clear(ClearFlag flags, uint32 color=0xFF000000, float depth=1.0f) = 0;
-	virtual void UpdateFrame(bool swaponly=false) = 0;
-	virtual int ToggleFullscreen()=0;		// return 0 as the result is windowed
+    virtual void Clear(ClearFlag flags, uint32 color=0xFF000000, float depth=1.0f) = 0;
+    virtual void UpdateFrame(bool swaponly=false) = 0;
+    virtual int ToggleFullscreen()=0;       // return 0 as the result is windowed
 
-	static void InitWindowInfo();
-	static void InitDeviceParameters();
+    static void InitWindowInfo();
+    static void InitDeviceParameters();
 
-	bool m_supportTextureMirror;
+    bool m_supportTextureMirror;
 
 public:
-	static  int			m_maxFSAA;
-	static  int			m_maxAnisotropy;
-	static  UINT		m_FullScreenRefreshRates[40];
-	static  UINT		m_ColorBufferDepths[4];
-	static  int			m_FullScreenResolutions[40][2];
-	static  int			m_numOfResolutions;
+    static  int         m_maxFSAA;
+    static  int         m_maxAnisotropy;
+    static  UINT        m_FullScreenRefreshRates[40];
+    static  UINT        m_ColorBufferDepths[4];
+    static  int         m_FullScreenResolutions[40][2];
+    static  int         m_numOfResolutions;
 
 protected:
-    static	uint32      m_dwWindowStyle;     // Saved window style for mode switches
-    static	uint32      m_dwWindowExStyle;   // Saved window style for mode switches
-	static	uint32      m_dwStatusWindowStyle;     // Saved window style for mode switches
+    static  uint32      m_dwWindowStyle;     // Saved window style for mode switches
+    static  uint32      m_dwWindowExStyle;   // Saved window style for mode switches
+    static  uint32      m_dwStatusWindowStyle;     // Saved window style for mode switches
 
-	static  bool		m_deviceCapsIsInitialized;
+    static  bool        m_deviceCapsIsInitialized;
 
-	bool				m_bReady;
-	bool				m_bActive;
-	
-	bool				m_bWindowed;
-	RECT				m_rcWindowBounds;
+    bool                m_bReady;
+    bool                m_bActive;
+    
+    bool                m_bWindowed;
+    RECT                m_rcWindowBounds;
 
-    char				m_strDeviceStats[90];
+    char                m_strDeviceStats[90];
 
-	virtual ~CGraphicsContext();
-	CGraphicsContext();
-	
+    virtual ~CGraphicsContext();
+    CGraphicsContext();
+    
 public:
-	static CGraphicsContext *g_pGraphicsContext;
-	static CGraphicsContext * Get(void);
-	inline const char* GetDeviceStr() {return m_strDeviceStats;}
-	static bool needCleanScene;
+    static CGraphicsContext *g_pGraphicsContext;
+    static CGraphicsContext * Get(void);
+    inline const char* GetDeviceStr() {return m_strDeviceStats;}
+    static bool needCleanScene;
 };
 
 #endif

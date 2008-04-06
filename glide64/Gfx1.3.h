@@ -1,20 +1,20 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -82,7 +82,7 @@ the plugin
 #include <ostream>
 #include <fstream>
 
-#include <cstddef>		// offsetof
+#include <cstddef>      // offsetof
 #include <cmath>
 #ifdef _WIN32
 #include <io.h>
@@ -103,7 +103,7 @@ extern "C" {
 //  but I'd rather just disable tooltips altogether since nobody else should
 //  have the debug version anyway.
 #ifndef _DEBUG
-//#ifndef __INTEL_COMPILER	// tooltips don't work with intel compiler
+//#ifndef __INTEL_COMPILER  // tooltips don't work with intel compiler
 #define USE_TOOLTIPS
 //#endif
 #endif
@@ -122,25 +122,25 @@ extern "C" {
 
 // ********************************
 // ** TAKE OUT BEFORE RELEASE!!! **
-//#define LOGGING			// log of spec functions called
-//#define LOG_KEY			// says "Key!!!" in the log when space bar is pressed
+//#define LOGGING           // log of spec functions called
+//#define LOG_KEY           // says "Key!!!" in the log when space bar is pressed
 
 //#define LOG_UCODE
 
 //#define ALTTAB_FIX
-	
-//#define EXTREME_LOGGING		// lots of logging
-							//  note that some of these things are inserted/removed
-							//  from within the code & may not be changed by this define.
+    
+//#define EXTREME_LOGGING       // lots of logging
+                            //  note that some of these things are inserted/removed
+                            //  from within the code & may not be changed by this define.
 
-//#define TLUT_LOGGING		// log every entry of the TLUT?
+//#define TLUT_LOGGING      // log every entry of the TLUT?
 // ********************************
 
-#define FPS					// fps counter able? (not enabled necessarily)
+#define FPS                 // fps counter able? (not enabled necessarily)
 
-#define LOGNOTKEY			// Log if not pressing:
+#define LOGNOTKEY           // Log if not pressing:
 #ifdef WIN32
-#define LOGKEY		VK_LCONTROL		// this key
+#define LOGKEY      VK_LCONTROL     // this key
 #else
 #include <SDL/SDL.h>
 #define LOGKEY KMOD_LCTRL
@@ -149,28 +149,28 @@ inline int GetAsyncKeyState(int key) {
 }
 #endif
 
-#define LOG_COMMANDS		// log the whole 64-bit command as (0x........, 0x........)
+#define LOG_COMMANDS        // log the whole 64-bit command as (0x........, 0x........)
 
-#define CATCH_EXCEPTIONS	// catch exceptions so it doesn't freeze and will report
-							// "The gfx plugin has caused an exception" instead.
+#define CATCH_EXCEPTIONS    // catch exceptions so it doesn't freeze and will report
+                            // "The gfx plugin has caused an exception" instead.
 
-#define FLUSH				// flush the file buffer. slower logging, but makes sure
-							//  the command is logged before continuing (in case of
-							//  crash or exception, the log will not be cut short)
+#define FLUSH               // flush the file buffer. slower logging, but makes sure
+                            //  the command is logged before continuing (in case of
+                            //  crash or exception, the log will not be cut short)
 #ifndef _FINAL_RELEASE_
-#define RDP_LOGGING			// Allow logging (will not log unless checked, but allows the option)
-							//  Logging functions will not be compiled if this is not present.
+#define RDP_LOGGING         // Allow logging (will not log unless checked, but allows the option)
+                            //  Logging functions will not be compiled if this is not present.
 //#define RDP_ERROR_LOG
 #endif
 
-#define FPS_FRAMES	10		// Number of frames in which to make an FPS count
+#define FPS_FRAMES  10      // Number of frames in which to make an FPS count
 
-//#define SHOW_FULL_TEXVIEWER	// shows the entire contents of the texture in the cache viewer,
-								// usually used to debug clamping issues.
+//#define SHOW_FULL_TEXVIEWER   // shows the entire contents of the texture in the cache viewer,
+                                // usually used to debug clamping issues.
 
 
 // Usually enabled
-#define LARGE_TEXTURE_HANDLING	// allow large-textured objects to be split?
+#define LARGE_TEXTURE_HANDLING  // allow large-textured objects to be split?
 
 #ifdef ALTTAB_FIX
 extern HHOOK hhkLowLevelKybd;
@@ -191,25 +191,25 @@ extern std::ofstream extlog;
 #endif
 
 #ifndef _FINAL_RELEASE_
-#define UNIMP_LOG			// Keep enabled, option in dialog
-#define BRIGHT_RED			// Keep enabled, option in dialog
+#define UNIMP_LOG           // Keep enabled, option in dialog
+#define BRIGHT_RED          // Keep enabled, option in dialog
 #endif
 
-#define COLORED_DEBUGGER	// ;) pretty colors
+#define COLORED_DEBUGGER    // ;) pretty colors
 
 #ifdef FPS
 extern LARGE_INTEGER perf_freq;
 extern LARGE_INTEGER fps_last;
 extern LARGE_INTEGER fps_next;
-extern float			fps;
-extern DWORD			fps_count;
+extern float            fps;
+extern DWORD            fps_count;
 #endif
 
 // rdram mask at 0x400000 bytes (bah, not right for majora's mask)
-//#define BMASK	0x7FFFFF
+//#define BMASK 0x7FFFFF
 extern unsigned long BMASK;
-#define WMASK	0x3FFFFF
-#define DMASK	0x1FFFFF
+#define WMASK   0x3FFFFF
+#define DMASK   0x1FFFFF
 
 extern long num_tmu;
 extern long max_tex_size;
@@ -272,38 +272,38 @@ extern std::ofstream rdp_err;
 __inline void FRDP (const char *fmt, ...)
 {
 #ifdef RDP_LOGGING
-	if (!dumping || !settings.logging || !log_open) return;
+    if (!dumping || !settings.logging || !log_open) return;
 
 #ifdef LOGNOTKEY
-	if (GetAsyncKeyState(LOGKEY)&0x8000) return;
+    if (GetAsyncKeyState(LOGKEY)&0x8000) return;
 #endif
 
-	va_list ap;
-	va_start(ap, fmt);
-	vsprintf(out_buf, fmt, ap);
-	RDP (out_buf);
-	va_end(ap);
+    va_list ap;
+    va_start(ap, fmt);
+    vsprintf(out_buf, fmt, ap);
+    RDP (out_buf);
+    va_end(ap);
 #endif
 }
 __inline void FRDP_E (const char *fmt, ...)
 {
 #ifdef RDP_ERROR_LOG
-	if (!dumping || !settings.elogging || !elog_open) return;
+    if (!dumping || !settings.elogging || !elog_open) return;
 
 #ifdef LOGNOTKEY
-	if (GetAsyncKeyState(LOGKEY)&0x8000) return;
+    if (GetAsyncKeyState(LOGKEY)&0x8000) return;
 #endif
 
-	sprintf (out_buf, "%08x: (%08x, %08x) ", rdp.pc[rdp.pc_i]-8, rdp.cmd0, rdp.cmd1);
-	rdp_err << out_buf;
+    sprintf (out_buf, "%08x: (%08x, %08x) ", rdp.pc[rdp.pc_i]-8, rdp.cmd0, rdp.cmd1);
+    rdp_err << out_buf;
 
-	va_list ap2;
-	va_start(ap2, fmt);
-	vsprintf(out_buf, fmt, ap2);
-// 	rdp_err << out_buf;
-// 	rdp_err.flush();
+    va_list ap2;
+    va_start(ap2, fmt);
+    vsprintf(out_buf, fmt, ap2);
+//  rdp_err << out_buf;
+//  rdp_err.flush();
   fprintf(stderr, out_buf);
-	va_end(ap2);
+    va_end(ap2);
 #endif
 }
 
@@ -329,7 +329,7 @@ extern BOOL ev_fullscreen;
 
 extern BOOL exception;
 
-extern PROPSHEETHEADER	m_PropSheet;
+extern PROPSHEETHEADER  m_PropSheet;
 extern PROPSHEETPAGE m_psp[3];
 
 
@@ -341,70 +341,70 @@ void DrawFrameBuffer ();
 // add to it.
 __inline DWORD segoffset (DWORD so)
 {
-	return (rdp.segment[(so>>24)&0x0f] + (so&BMASK))&BMASK;
+    return (rdp.segment[(so>>24)&0x0f] + (so&BMASK))&BMASK;
 }
 
 /* Plugin types */
-#define PLUGIN_TYPE_GFX				2
+#define PLUGIN_TYPE_GFX             2
 
-#define EXPORT						__declspec(dllexport)
-#define CALL						_cdecl
+#define EXPORT                      __declspec(dllexport)
+#define CALL                        _cdecl
 
 /***** Structures *****/
 typedef struct {
-	WORD Version;        /* Set to 0x0103 */
-	WORD Type;           /* Set to PLUGIN_TYPE_GFX */
-	char Name[100];      /* Name of the DLL */
+    WORD Version;        /* Set to 0x0103 */
+    WORD Type;           /* Set to PLUGIN_TYPE_GFX */
+    char Name[100];      /* Name of the DLL */
 
-	/* If DLL supports memory these memory options then set them to TRUE or FALSE
-	   if it does not support it */
-	BOOL NormalMemory;    /* a normal BYTE array */ 
-	BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
-	                          bswap on a dword (32 bits) boundry */
+    /* If DLL supports memory these memory options then set them to TRUE or FALSE
+       if it does not support it */
+    BOOL NormalMemory;    /* a normal BYTE array */ 
+    BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
+                              bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
 
 typedef struct {
-	HWND hWnd;			/* Render window */
-	HWND hStatusBar;    /* if render window does not have a status bar then this is NULL */
+    HWND hWnd;          /* Render window */
+    HWND hStatusBar;    /* if render window does not have a status bar then this is NULL */
 
-	BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
-	                       //   bswap on a dword (32 bits) boundry 
-						   //	eg. the first 8 bytes are stored like this:
-	                       //        4 3 2 1   8 7 6 5
+    BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
+                           //   bswap on a dword (32 bits) boundry 
+                           //   eg. the first 8 bytes are stored like this:
+                           //        4 3 2 1   8 7 6 5
 
-	BYTE * HEADER;	// This is the rom header (first 40h bytes of the rom
-					// This will be in the same memory format as the rest of the memory.
-	BYTE * RDRAM;
-	BYTE * DMEM;
-	BYTE * IMEM;
+    BYTE * HEADER;  // This is the rom header (first 40h bytes of the rom
+                    // This will be in the same memory format as the rest of the memory.
+    BYTE * RDRAM;
+    BYTE * DMEM;
+    BYTE * IMEM;
 
-	DWORD * MI_INTR_REG;
+    DWORD * MI_INTR_REG;
 
-	DWORD * DPC_START_REG;
-	DWORD * DPC_END_REG;
-	DWORD * DPC_CURRENT_REG;
-	DWORD * DPC_STATUS_REG;
-	DWORD * DPC_CLOCK_REG;
-	DWORD * DPC_BUFBUSY_REG;
-	DWORD * DPC_PIPEBUSY_REG;
-	DWORD * DPC_TMEM_REG;
+    DWORD * DPC_START_REG;
+    DWORD * DPC_END_REG;
+    DWORD * DPC_CURRENT_REG;
+    DWORD * DPC_STATUS_REG;
+    DWORD * DPC_CLOCK_REG;
+    DWORD * DPC_BUFBUSY_REG;
+    DWORD * DPC_PIPEBUSY_REG;
+    DWORD * DPC_TMEM_REG;
 
-	DWORD * VI_STATUS_REG;
-	DWORD * VI_ORIGIN_REG;
-	DWORD * VI_WIDTH_REG;
-	DWORD * VI_INTR_REG;
-	DWORD * VI_V_CURRENT_LINE_REG;
-	DWORD * VI_TIMING_REG;
-	DWORD * VI_V_SYNC_REG;
-	DWORD * VI_H_SYNC_REG;
-	DWORD * VI_LEAP_REG;
-	DWORD * VI_H_START_REG;
-	DWORD * VI_V_START_REG;
-	DWORD * VI_V_BURST_REG;
-	DWORD * VI_X_SCALE_REG;
-	DWORD * VI_Y_SCALE_REG;
+    DWORD * VI_STATUS_REG;
+    DWORD * VI_ORIGIN_REG;
+    DWORD * VI_WIDTH_REG;
+    DWORD * VI_INTR_REG;
+    DWORD * VI_V_CURRENT_LINE_REG;
+    DWORD * VI_TIMING_REG;
+    DWORD * VI_V_SYNC_REG;
+    DWORD * VI_H_SYNC_REG;
+    DWORD * VI_LEAP_REG;
+    DWORD * VI_H_START_REG;
+    DWORD * VI_V_START_REG;
+    DWORD * VI_V_BURST_REG;
+    DWORD * VI_X_SCALE_REG;
+    DWORD * VI_Y_SCALE_REG;
 
-	void (*CheckInterrupts)( void );
+    void (*CheckInterrupts)( void );
 } GFX_INFO;
 
 extern GFX_INFO gfx;
@@ -419,13 +419,13 @@ typedef GrContext_t (FX_CALL *GRWINOPENEXT)( FxU32                   hWnd,
                                              int                     nColBuffers,
                                              int                     nAuxBuffers) ; 
 
-typedef void (FX_CALL *GRTEXBUFFEREXT)( GrChipID_t  		tmu, 
-										FxU32 				startAddress, 
-										GrLOD_t 			lodmin, 
-										GrLOD_t 			lodmax, 
-										GrAspectRatio_t 	aspect, 
-										GrTextureFormat_t 	fmt, 
-										FxU32 				evenOdd) ; 
+typedef void (FX_CALL *GRTEXBUFFEREXT)( GrChipID_t          tmu, 
+                                        FxU32               startAddress, 
+                                        GrLOD_t             lodmin, 
+                                        GrLOD_t             lodmax, 
+                                        GrAspectRatio_t     aspect, 
+                                        GrTextureFormat_t   fmt, 
+                                        FxU32               evenOdd) ; 
 
 typedef void (FX_CALL *GRAUXBUFFEREXT)( GrBuffer_t buffer ) ;
 
@@ -482,9 +482,9 @@ extern GRSTIPPLE            grStippleModeExt;
 extern GRSTIPPLE            grStipplePatternExt;
 
 #ifndef GR_STIPPLE_DISABLE
-#define GR_STIPPLE_DISABLE	0x0
-#define GR_STIPPLE_PATTERN	0x1
-#define GR_STIPPLE_ROTATE	0x2
+#define GR_STIPPLE_DISABLE  0x0
+#define GR_STIPPLE_PATTERN  0x1
+#define GR_STIPPLE_ROTATE   0x2
 #endif
 
 void ReadSettings ();
@@ -503,7 +503,7 @@ EXPORT void CALL CaptureScreen ( char * Directory );
   Function: ChangeWindow
   Purpose:  to change the window between fullscreen and window 
             mode. If the window was in fullscreen this should 
-			change the screen to window mode and vice vesa.
+            change the screen to window mode and vice vesa.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -552,7 +552,7 @@ EXPORT void CALL ReadScreen(void **dest, long *width, long *height);
   Function: DrawScreen
   Purpose:  This function is called when the emulator receives a
             WM_PAINT message. This allows the gfx to fit in when
-			it is being used in the desktop.
+            it is being used in the desktop.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -572,7 +572,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
   Function: InitiateGFX
   Purpose:  This function is called when the DLL is started to give
             information from the emulator that the n64 graphics
-			uses. This is not called from the emulation thread.
+            uses. This is not called from the emulation thread.
   Input:    Gfx_Info is passed to this function which is defined
             above.
   Output:   TRUE on success
@@ -589,11 +589,11 @@ EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info);
   Function: MoveScreen
   Purpose:  This function is called in response to the emulator
             receiving a WM_MOVE passing the xpos and ypos passed
-			from that message.
+            from that message.
   input:    xpos - the x-coordinate of the upper-left corner of the
             client area of the window.
-			ypos - y-coordinate of the upper-left corner of the
-			client area of the window. 
+            ypos - y-coordinate of the upper-left corner of the
+            client area of the window. 
   output:   none
 *******************************************************************/ 
 EXPORT void CALL MoveScreen (int xpos, int ypos);
@@ -637,7 +637,7 @@ EXPORT void CALL RomOpen (void);
   Function: ShowCFB
   Purpose:  Useally once Dlists are started being displayed, cfb is
             ignored. This function tells the dll to start displaying
-			them again.
+            them again.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -647,7 +647,7 @@ EXPORT void CALL ShowCFB (void);
   Function: UpdateScreen
   Purpose:  This function is called in response to a vsync of the
             screen were the VI bit in MI_INTR_REG has already been
-			set
+            set
   input:    none
   output:   none
 *******************************************************************/ 
@@ -676,18 +676,18 @@ EXPORT void CALL ViWidthChanged (void);
   Function: FrameBufferWrite
   Purpose:  This function is called to notify the dll that the
             frame buffer has been modified by CPU at the given address.
-  input:    addr		rdram address
-			val			val
-			size		1 = BYTE, 2 = WORD, 4 = DWORD
+  input:    addr        rdram address
+            val         val
+            size        1 = BYTE, 2 = WORD, 4 = DWORD
   output:   none
 *******************************************************************/ 
 EXPORT void CALL FBWrite(DWORD, DWORD);
 
 typedef struct
 {
-	DWORD addr;
-	DWORD val;
-	DWORD size;				// 1 = BYTE, 2 = WORD, 4=DWORD
+    DWORD addr;
+    DWORD val;
+    DWORD size;             // 1 = BYTE, 2 = WORD, 4=DWORD
 } FrameBufferModifyEntry;
 
 /******************************************************************
@@ -695,7 +695,7 @@ typedef struct
   Purpose:  This function is called to notify the dll that the
             frame buffer has been modified by CPU at the given address.
   input:    FrameBufferModifyEntry *plist
-			size = size of the plist, max = 1024
+            size = size of the plist, max = 1024
   output:   none
 *******************************************************************/ 
 EXPORT void CALL FBWList(FrameBufferModifyEntry *plist, DWORD size);
@@ -704,15 +704,15 @@ EXPORT void CALL FBWList(FrameBufferModifyEntry *plist, DWORD size);
   Function: FrameBufferRead
   Purpose:  This function is called to notify the dll that the
             frame buffer memory is beening read at the given address.
-			DLL should copy content from its render buffer to the frame buffer
-			in N64 RDRAM
-			DLL is responsible to maintain its own frame buffer memory addr list
-			DLL should copy 4KB block content back to RDRAM frame buffer.
-			Emulator should not call this function again if other memory
-			is read within the same 4KB range
-  input:    addr		rdram address
-			val			val
-			size		1 = BYTE, 2 = WORD, 4 = DWORD
+            DLL should copy content from its render buffer to the frame buffer
+            in N64 RDRAM
+            DLL is responsible to maintain its own frame buffer memory addr list
+            DLL should copy 4KB block content back to RDRAM frame buffer.
+            Emulator should not call this function again if other memory
+            is read within the same 4KB range
+  input:    addr        rdram address
+            val         val
+            size        1 = BYTE, 2 = WORD, 4 = DWORD
   output:   none
 *******************************************************************/ 
 EXPORT void CALL FBRead(DWORD addr);
@@ -725,9 +725,9 @@ to notify the video plugin about CPU depth buffer read/write
 operations
 
 size:
-= 1		byte
-= 2		word (16 bit) <-- this is N64 default depth buffer format
-= 4		dword (32 bit)
+= 1     byte
+= 2     word (16 bit) <-- this is N64 default depth buffer format
+= 4     dword (32 bit)
 
 when depth buffer information is not available yet, set all values
 in the FrameBufferInfo structure to 0

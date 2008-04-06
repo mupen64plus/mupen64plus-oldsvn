@@ -33,18 +33,18 @@ public:
     operator float* ();
     operator const float* () const;
 
-	// assignment operators
+    // assignment operators
     XMATRIX& operator *= ( const XMATRIX & );
     XMATRIX& operator += ( const XMATRIX & );
     XMATRIX& operator -= ( const XMATRIX & );
     XMATRIX& operator *= ( float );
     XMATRIX& operator /= ( float );
 
-	// unary operators
+    // unary operators
     XMATRIX operator + () const;
     XMATRIX operator - () const;
 
-	// binary operators
+    // binary operators
     XMATRIX operator * ( const XMATRIX & ) const;
     XMATRIX operator + ( const XMATRIX & ) const;
     XMATRIX operator - ( const XMATRIX & ) const;
@@ -61,44 +61,44 @@ public:
 
 typedef struct _VECTOR3
 {
-	float x;
-	float y;
-	float z;
+    float x;
+    float y;
+    float z;
 } VECTOR3;
 
 class XVECTOR3 : public VECTOR3
 {
 public:
-	XVECTOR3();
-	XVECTOR3( const float *f );
-	XVECTOR3( const VECTOR3 &v );
-	XVECTOR3( float _x, float _y, float _z );
+    XVECTOR3();
+    XVECTOR3( const float *f );
+    XVECTOR3( const VECTOR3 &v );
+    XVECTOR3( float _x, float _y, float _z );
 
-	// casting
-	inline operator float* ();
-	inline operator const float* () const;
+    // casting
+    inline operator float* ();
+    inline operator const float* () const;
 
-	// assignment operators
-	inline XVECTOR3& operator += ( const XVECTOR3 &op );
-	inline XVECTOR3& operator -= ( const XVECTOR3 &op );
-	inline XVECTOR3& operator *= ( float op );
+    // assignment operators
+    inline XVECTOR3& operator += ( const XVECTOR3 &op );
+    inline XVECTOR3& operator -= ( const XVECTOR3 &op );
+    inline XVECTOR3& operator *= ( float op );
         inline XVECTOR3& operator /= ( float op );
 
-	// unary operators
-	inline XVECTOR3 operator + () const;
-	inline XVECTOR3 operator - () const;
+    // unary operators
+    inline XVECTOR3 operator + () const;
+    inline XVECTOR3 operator - () const;
 
-	// binary operators
+    // binary operators
         inline XVECTOR3 operator + ( const XVECTOR3 &op ) const;
-	inline XVECTOR3 operator - ( const XVECTOR3 &op ) const;
-	inline XVECTOR3 operator * ( float op ) const;
-	inline XVECTOR3 operator / ( float op ) const;
+    inline XVECTOR3 operator - ( const XVECTOR3 &op ) const;
+    inline XVECTOR3 operator * ( float op ) const;
+    inline XVECTOR3 operator / ( float op ) const;
 
 
-	friend XVECTOR3 operator * ( float, const XVECTOR3& );
+    friend XVECTOR3 operator * ( float, const XVECTOR3& );
 
-	inline bool operator == ( const XVECTOR3 &op ) const;
-	inline bool operator != ( const XVECTOR3 &op ) const;
+    inline bool operator == ( const XVECTOR3 &op ) const;
+    inline bool operator != ( const XVECTOR3 &op ) const;
 };
 
 /******************************************************************************
@@ -107,44 +107,44 @@ public:
 
 typedef struct _VECTOR4
 {
-	float x;
-	float y;
-	float z;
-	float w;
+    float x;
+    float y;
+    float z;
+    float w;
 } VECTOR4;
 
 class XVECTOR4 : public VECTOR4
 {
 public:
-	XVECTOR4();
-	XVECTOR4( const float *f );
-	XVECTOR4( const VECTOR4 &v );
-	XVECTOR4( float _x, float _y, float _z, float _w );
+    XVECTOR4();
+    XVECTOR4( const float *f );
+    XVECTOR4( const VECTOR4 &v );
+    XVECTOR4( float _x, float _y, float _z, float _w );
 
-	// casting
+    // casting
         inline operator float* ();
-	inline operator const float* () const;
+    inline operator const float* () const;
 
-	// assignment operators
-	inline XVECTOR4& operator += ( const XVECTOR4 &op );
-	inline XVECTOR4& operator -= ( const XVECTOR4 &op );
-	inline XVECTOR4& operator *= ( float op );
-	inline XVECTOR4& operator /= ( float op );
+    // assignment operators
+    inline XVECTOR4& operator += ( const XVECTOR4 &op );
+    inline XVECTOR4& operator -= ( const XVECTOR4 &op );
+    inline XVECTOR4& operator *= ( float op );
+    inline XVECTOR4& operator /= ( float op );
 
-	// unary operators
-	inline XVECTOR4 operator + () const;
-	inline XVECTOR4 operator - () const;
+    // unary operators
+    inline XVECTOR4 operator + () const;
+    inline XVECTOR4 operator - () const;
 
-	// binary operators
-	inline XVECTOR4 operator + ( const XVECTOR4 &op ) const;
-	inline XVECTOR4 operator - ( const XVECTOR4 &op ) const;
-	inline XVECTOR4 operator * ( float op ) const;
-	inline XVECTOR4 operator / ( float op ) const;
+    // binary operators
+    inline XVECTOR4 operator + ( const XVECTOR4 &op ) const;
+    inline XVECTOR4 operator - ( const XVECTOR4 &op ) const;
+    inline XVECTOR4 operator * ( float op ) const;
+    inline XVECTOR4 operator / ( float op ) const;
 
-	friend XVECTOR4 operator * ( float, const XVECTOR4& );
+    friend XVECTOR4 operator * ( float, const XVECTOR4& );
 
-	inline bool operator == ( const XVECTOR4 &op ) const;
-	inline bool operator != ( const XVECTOR4 &op ) const;
+    inline bool operator == ( const XVECTOR4 &op ) const;
+    inline bool operator != ( const XVECTOR4 &op ) const;
 };
 
 XVECTOR4 Vec3Transform(XVECTOR4 *pOut, const XVECTOR3 *pV, const XMATRIX *pM);

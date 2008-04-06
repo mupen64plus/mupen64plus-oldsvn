@@ -1,20 +1,20 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -66,24 +66,24 @@ static void fb_bg_copy ()
     return;
   
   DWORD addr = segoffset(rdp.cmd1) >> 1;
-  BYTE imageFmt	= ((BYTE *)gfx.RDRAM)[(((addr+11)<<1)+0)^3];
-  BYTE imageSiz	= ((BYTE *)gfx.RDRAM)[(((addr+11)<<1)+1)^3];	
-  DWORD imagePtr	= segoffset(((DWORD*)gfx.RDRAM)[(addr+8)>>1]);	
+  BYTE imageFmt = ((BYTE *)gfx.RDRAM)[(((addr+11)<<1)+0)^3];
+  BYTE imageSiz = ((BYTE *)gfx.RDRAM)[(((addr+11)<<1)+1)^3];    
+  DWORD imagePtr    = segoffset(((DWORD*)gfx.RDRAM)[(addr+8)>>1]);  
   FRDP ("fb_bg_copy. fmt: %d, size: %d, imagePtr %08lx, main_ci: %08lx, cur_ci: %08lx \n", imageFmt, imageSiz, imagePtr, rdp.main_ci, rdp.frame_buffers[rdp.ci_count-1].addr);
   
   if (status == ci_main)
   {
-	WORD frameW	= ((WORD *)gfx.RDRAM)[(addr+3)^1] >> 2;	
-	WORD frameH	= ((WORD *)gfx.RDRAM)[(addr+7)^1] >> 2;	
-	if ( (frameW == rdp.frame_buffers[rdp.ci_count-1].width) && (frameH == rdp.frame_buffers[rdp.ci_count-1].height) )
-	  rdp.main_ci_bg = imagePtr;
+    WORD frameW = ((WORD *)gfx.RDRAM)[(addr+3)^1] >> 2; 
+    WORD frameH = ((WORD *)gfx.RDRAM)[(addr+7)^1] >> 2; 
+    if ( (frameW == rdp.frame_buffers[rdp.ci_count-1].width) && (frameH == rdp.frame_buffers[rdp.ci_count-1].height) )
+      rdp.main_ci_bg = imagePtr;
   }
   else if (imagePtr >= rdp.main_ci && imagePtr < rdp.main_ci_end) //addr within main frame buffer
   {
     rdp.copy_ci_index = rdp.ci_count-1;
     rdp.frame_buffers[rdp.copy_ci_index].status = ci_copy;
     FRDP("rdp.frame_buffers[%d].status = ci_copy\n", rdp.copy_ci_index);
-	
+    
     if (rdp.frame_buffers[rdp.copy_ci_index].addr != rdp.main_ci_bg)
     {
       rdp.scale_x = 1.0f;
@@ -94,7 +94,7 @@ static void fb_bg_copy ()
       RDP("motion blur!\n");
       rdp.motionblur = TRUE;
     }
-	
+    
     FRDP ("Detect FB usage. texture addr is inside framebuffer: %08lx - %08lx \n", imagePtr, rdp.main_ci);
   }
   else if (imagePtr == rdp.zimg)
@@ -169,17 +169,17 @@ static void fb_settextureimage()
     if ((addr >= rdp.main_ci) && (addr < rdp.main_ci_end)) //addr within main frame buffer
     {
         if (cur_fb.status == ci_main)
-    	  {
+          {
             rdp.copy_ci_index = rdp.ci_count-1;
           cur_fb.status = ci_copy_self;
           rdp.scale_x = rdp.scale_x_bak;
           rdp.scale_y = rdp.scale_y_bak;
             FRDP("rdp.frame_buffers[%d].status = ci_copy_self\n", rdp.ci_count-1);
-    	  }
-    	  else
-    	  {
+          }
+          else
+          {
           if (cur_fb.width == rdp.frame_buffers[rdp.main_ci_index].width)
-   	  	  {
+          {
             rdp.copy_ci_index = rdp.ci_count-1;
             cur_fb.status = ci_copy;
             FRDP("rdp.frame_buffers[%d].status = ci_copy\n", rdp.copy_ci_index);
@@ -187,12 +187,12 @@ static void fb_settextureimage()
               (rdp.main_ci_last_tex_addr < (cur_fb.addr + cur_fb.width*cur_fb.height*cur_fb.size)))
             {
               RDP("motion blur!\n");
-	  	      rdp.motionblur = TRUE;
-	  	    }
-	  	    else 
+              rdp.motionblur = TRUE;
+            }
+            else 
             {
-         	  rdp.scale_x = 1.0f;
-        	  rdp.scale_y = 1.0f;
+              rdp.scale_x = 1.0f;
+              rdp.scale_y = 1.0f;
             }
           }
           else if (!settings.fb_ignore_aux_copy && cur_fb.width < rdp.frame_buffers[rdp.main_ci_index].width)
@@ -209,7 +209,7 @@ static void fb_settextureimage()
             FRDP("rdp.frame_buffers[%d].status = ci_aux\n", rdp.copy_ci_index);
           }
         }
-    	FRDP ("Detect FB usage. texture addr is inside framebuffer: %08lx - %08lx \n", addr, rdp.main_ci);
+        FRDP ("Detect FB usage. texture addr is inside framebuffer: %08lx - %08lx \n", addr, rdp.main_ci);
     }
 ///*
       else if ((cur_fb.status != ci_main) && (addr >= rdp.zimg && addr < rdp.zimg_end))
@@ -238,7 +238,7 @@ static void fb_settextureimage()
         rdp.read_previous_ci = TRUE;
         RDP("read_previous_ci = TRUE\n");
       }
-    }	
+    }   
     else if (settings.fb_hires && (cur_fb.status == ci_main))
     {
       if ((addr >= rdp.main_ci) && (addr < rdp.main_ci_end)) //addr within main frame buffer
@@ -261,7 +261,7 @@ static void fb_loadtxtr()
 {
   if (rdp.frame_buffers[rdp.ci_count-1].status == ci_unknown)
   {
- 	  rdp.frame_buffers[rdp.ci_count-1].status = ci_aux;
+      rdp.frame_buffers[rdp.ci_count-1].status = ci_aux;
       FRDP("rdp.frame_buffers[%d].status = ci_aux\n", rdp.ci_count-1);
   }
 }
@@ -335,7 +335,7 @@ static void fb_setcolorimage()
   {
     if (rdp.cimg == rdp.main_ci) //switched to main fb again 
     {
-		    cur_fb.height = max(cur_fb.height, rdp.frame_buffers[rdp.main_ci_index].height);
+            cur_fb.height = max(cur_fb.height, rdp.frame_buffers[rdp.main_ci_index].height);
       rdp.main_ci_index = rdp.ci_count;
         rdp.main_ci_end = rdp.cimg + ((cur_fb.width * cur_fb.height) << cur_fb.size >> 1);
         cur_fb.status = ci_main;
@@ -361,7 +361,7 @@ static void fb_setcolorimage()
       cur_fb.status = ci_unknown;
     }
     
-  }	
+  } 
   if (rdp.frame_buffers[rdp.ci_count-1].status == ci_unknown) //status of previous fb was not changed - it is useless
   {
     if (settings.fb_hires && !settings.PM)
@@ -406,83 +406,83 @@ static void fb_setcolorimage()
 static rdp_instr gfx_instruction_lite[9][256] =
 {
   {
-	// uCode 0 - RSP SW 2.0X
-	// 00-3f
-	// games: Super Mario 64, Tetrisphere, Demos
-	0,                     0,             0,              0,
-	  0,             0,              uc0_displaylist,        0,
-	  0,              0,           0,                      0,
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  // 40-7f: Unused
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  // 80-bf: Immediate commands
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  uc0_enddl,              0,     					0,    					0,
-	  fb_uc0_moveword,           0,          			uc0_culldl,             0,
-	  // c0-ff: RDP commands
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                      0,                      0,                      0,        
-	  0,                  0,                  0,                  0,    
-	  0,                  0,                  0,                  0,    
-	  0,                  0,                  0,                  0,    
-	  0,                  0,                  0,                  0,    
-	  0,                  0,                  0,                  0,    
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+    // uCode 0 - RSP SW 2.0X
+    // 00-3f
+    // games: Super Mario 64, Tetrisphere, Demos
+    0,                     0,             0,              0,
+      0,             0,              uc0_displaylist,        0,
+      0,              0,           0,                      0,
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      // 40-7f: Unused
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      // 80-bf: Immediate commands
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      uc0_enddl,              0,                        0,                      0,
+      fb_uc0_moveword,           0,                     uc0_culldl,             0,
+      // c0-ff: RDP commands
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
+      0,                  0,                  0,                  0,    
+      0,                  0,                  0,                  0,    
+      0,                  0,                  0,                  0,    
+      0,                  0,                  0,                  0,    
+      0,                  0,                  0,                  0,    
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
   },
   
   // uCode 1 - F3DEX 1.XX
   // 00-3f
   // games: Mario Kart, Star Fox
   {
-	  0,                      0,                      0,                      0,        
+      0,                      0,                      0,                      0,        
         0,             0,              uc0_displaylist,        0,
         0,              0,           0,                      0,
         0,                      0,                      0,                      0,        
@@ -498,7 +498,7 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
-		// 40-7f: unused
+        // 40-7f: unused
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
@@ -515,7 +515,7 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
-		// 80-bf: Immediate commands
+        // 80-bf: Immediate commands
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
@@ -528,11 +528,11 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      uc6_loaducode,        
-        uc1_branch_z,           0,               0,		   0,
+        uc1_branch_z,           0,               0,        0,
         uc1_rdphalf_1,          0,             0,  0,
         uc0_enddl,              0,     0,     0,
         fb_uc0_moveword,           0,          uc2_culldl,             0,
-		// c0-ff: RDP commands
+        // c0-ff: RDP commands
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
@@ -542,387 +542,387 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                  0,                  0,                  0,    
         0,                  0,                  0,                  0,    
         0,                  0,                  0,                  0,    
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-	  },
-	  
-	  // uCode 2 - F3DEX 2.XX
-	  // games: Zelda 64
-	  {
-		// 00-3f
-		0,					0,				0,			uc2_culldl,
-		  uc1_branch_z,			0,				0,			0,
-		  0,				fb_bg_copy,			fb_bg_copy,			0,
-		  0,					0,					0,					0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  
-		  // 40-7f: unused
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  
-		  // 80-bf: unused
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  
-		  // c0-ff: RDP commands mixed with uc2 commands
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,			uc2_dlist_cnt,				0,					0,
-		  0,			0,			0,				fb_uc2_moveword,
-		  0/*fb_uc2_movemem*/,			uc2_load_ucode,			uc0_displaylist,	uc0_enddl,
-		  0,					uc1_rdphalf_1,			0, 		0,
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-		},
-		
-		// uCode 3 - "RSP SW 2.0D", but not really
-		// 00-3f
-		// games: Wave Race
-		// ** Added by Gonetz **
-		{
-		  0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			// 40-7f: unused
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			// 80-bf: Immediate commands
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                      0,                      0,                      0,        
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			uc0_enddl,              0,     0,     0,
-			fb_uc0_moveword,           0,          uc0_culldl,             0,
-			// c0-ff: RDP commands
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-			0,                  0,                  0,                  0,    
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-		  },
-		  
-		  {
-			// uCode 4 - RSP SW 2.0D EXT
-			// 00-3f
-			// games: Star Wars: Shadows of the Empire
-			0,                  0,                  0,                  0,    
-			  0,             0,              uc0_displaylist,        0,
-			  0,                  0,                  0,                  0,    
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  // 40-7f: Unused
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  // 80-bf: Immediate commands
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                      0,                      0,                      0,        
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  uc0_enddl,              0,     0,     0,
-			  fb_uc0_moveword,           0,          uc0_culldl,             0,
-			  // c0-ff: RDP commands
-			  rdp_noop,               0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-			  0,                  0,                  0,                  0,    
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-			},
-			
-			{
-			  // uCode 5 - RSP SW 2.0 Diddy
-			  // 00-3f
-			  // games: Diddy Kong Racing
-			  	0,         				0,         				0,       				0,
-				0,						0,			       uc0_displaylist,			 uc5_dl_in_mem,
-				0,              		0,           			0,                      0,
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				// 40-7f: Unused
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				// 80-bf: Immediate commands
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                      0,                      0,                      0,        
-				0,                  	0,                  	0,                  	0,    
-				uc0_enddl,              0,     					0,     					0,
-				fb_uc0_moveword,        0,          			uc0_culldl,             0,
-				// c0-ff: RDP commands
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-				0,                  0,                  0,                  0,    
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-			  },
-			  
-			  // uCode 6 - S2DEX 1.XX
-			  // games: Yoshi's Story
-			  {
-				0,                  0,                  0,                  0,    
-				  0,             0,         uc0_displaylist,        0,
-				  0,                  0,                  0,                  0,    
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  // 40-7f: unused
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  // 80-bf: Immediate commands
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      0,        
-				  0,                      0,                      0,                      uc6_loaducode,        
-				  uc6_select_dl,          0,         0,		0,
-				  0,                  0,                  0,                  0,    
-				  uc0_enddl,              0,     0,     0,
-				  fb_uc0_moveword,           0,          uc2_culldl,             0,
-				  // c0-ff: RDP commands
-        		  0,               fb_loadtxtr,       fb_loadtxtr,    fb_loadtxtr,
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+      },
+      
+      // uCode 2 - F3DEX 2.XX
+      // games: Zelda 64
+      {
+        // 00-3f
+        0,                  0,              0,          uc2_culldl,
+          uc1_branch_z,         0,              0,          0,
+          0,                fb_bg_copy,         fb_bg_copy,         0,
+          0,                    0,                  0,                  0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          
+          // 40-7f: unused
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          
+          // 80-bf: unused
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          
+          // c0-ff: RDP commands mixed with uc2 commands
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,            uc2_dlist_cnt,              0,                  0,
+          0,            0,          0,              fb_uc2_moveword,
+          0/*fb_uc2_movemem*/,          uc2_load_ucode,         uc0_displaylist,    uc0_enddl,
+          0,                    uc1_rdphalf_1,          0,      0,
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+        },
+        
+        // uCode 3 - "RSP SW 2.0D", but not really
+        // 00-3f
+        // games: Wave Race
+        // ** Added by Gonetz **
+        {
+          0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            // 40-7f: unused
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            // 80-bf: Immediate commands
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                      0,                      0,                      0,        
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            uc0_enddl,              0,     0,     0,
+            fb_uc0_moveword,           0,          uc0_culldl,             0,
+            // c0-ff: RDP commands
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+            0,                  0,                  0,                  0,    
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+          },
+          
+          {
+            // uCode 4 - RSP SW 2.0D EXT
+            // 00-3f
+            // games: Star Wars: Shadows of the Empire
+            0,                  0,                  0,                  0,    
+              0,             0,              uc0_displaylist,        0,
+              0,                  0,                  0,                  0,    
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              // 40-7f: Unused
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              // 80-bf: Immediate commands
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                      0,                      0,                      0,        
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              uc0_enddl,              0,     0,     0,
+              fb_uc0_moveword,           0,          uc0_culldl,             0,
+              // c0-ff: RDP commands
+              rdp_noop,               0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+              0,                  0,                  0,                  0,    
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+            },
+            
+            {
+              // uCode 5 - RSP SW 2.0 Diddy
+              // 00-3f
+              // games: Diddy Kong Racing
+                0,                      0,                      0,                      0,
+                0,                      0,                 uc0_displaylist,          uc5_dl_in_mem,
+                0,                      0,                      0,                      0,
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                // 40-7f: Unused
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                // 80-bf: Immediate commands
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,        
+                0,                      0,                      0,                      0,    
+                uc0_enddl,              0,                      0,                      0,
+                fb_uc0_moveword,        0,                      uc0_culldl,             0,
+                // c0-ff: RDP commands
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+                0,                  0,                  0,                  0,    
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+              },
+              
+              // uCode 6 - S2DEX 1.XX
+              // games: Yoshi's Story
+              {
+                0,                  0,                  0,                  0,    
+                  0,             0,         uc0_displaylist,        0,
+                  0,                  0,                  0,                  0,    
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  // 40-7f: unused
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  // 80-bf: Immediate commands
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      0,        
+                  0,                      0,                      0,                      uc6_loaducode,        
+                  uc6_select_dl,          0,         0,     0,
+                  0,                  0,                  0,                  0,    
+                  uc0_enddl,              0,     0,     0,
+                  fb_uc0_moveword,           0,          uc2_culldl,             0,
+                  // c0-ff: RDP commands
+                  0,               fb_loadtxtr,       fb_loadtxtr,    fb_loadtxtr,
                   fb_loadtxtr,        0,                  0,                  0,
-				  0,                  0,                  0,                  0,    
-				  0,                  0,                  0,                  0,    
-				  0,                  0,                  0,                  0,    
-				  0,                  0,                  0,                  0,    
-				  0,                  0,                  0,                  0,    
-				  0,                  0,                  0,                  0,    
-				  0,                  0,                  0,                  0,    
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-				},
-				
+                  0,                  0,                  0,                  0,    
+                  0,                  0,                  0,                  0,    
+                  0,                  0,                  0,                  0,    
+                  0,                  0,                  0,                  0,    
+                  0,                  0,                  0,                  0,    
+                  0,                  0,                  0,                  0,    
+                  0,                  0,                  0,                  0,    
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+                },
+                
   {
-	  	0,                      0,                      0,                      0,        
-        0,             			0,              		uc0_displaylist,        0,
-        0,              		0,           			0,                      0,
+        0,                      0,                      0,                      0,        
+        0,                      0,                      uc0_displaylist,        0,
+        0,                      0,                      0,                      0,
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
@@ -936,7 +936,7 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
-		// 40-7f: unused
+        // 40-7f: unused
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
@@ -953,7 +953,7 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
-		// 80-bf: Immediate commands
+        // 80-bf: Immediate commands
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
@@ -966,11 +966,11 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
-        0,           			0,               		0,		   				0,
-        0,          			0,             			0,  					0,
-        uc0_enddl,              0,     					0,     					0,
-        fb_uc0_moveword,        0,          			uc0_culldl,             0,
-		// c0-ff: RDP commands
+        0,                      0,                      0,                      0,
+        0,                      0,                      0,                      0,
+        uc0_enddl,              0,                      0,                      0,
+        fb_uc0_moveword,        0,                      uc0_culldl,             0,
+        // c0-ff: RDP commands
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
         0,                      0,                      0,                      0,        
@@ -980,86 +980,86 @@ static rdp_instr gfx_instruction_lite[9][256] =
         0,                  0,                  0,                  0,    
         0,                  0,                  0,                  0,    
         0,                  0,                  0,                  0,    
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-	  },
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+      },
 
-	  {
-		// 00-3f
-		0,					0,				0,			uc2_culldl,
-		  uc1_branch_z,			0,				0,			0,
-		  0,				fb_bg_copy,			fb_bg_copy,			0,
-		  0,					0,					0,					0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  
-		  // 40-7f: unused
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  
-		  // 80-bf: unused
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  0,					0,					0,					0,
-		  
-		  // c0-ff: RDP commands mixed with uc2 commands
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,			uc2_dlist_cnt,				0,					0,
-		  0,			0,			0,				fb_uc2_moveword,
-		  0,			uc2_load_ucode,			uc0_displaylist,	uc0_enddl,
-		  0,			uc1_rdphalf_1,			  0, 				  0,
-		  fb_rect,         fb_rect,         	  0,                  0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_setscissor,         0,       0,
-		  0,                  0,                  0,                  0,    
-		  0,                  0,            	fb_rect,              0,    
-		  0,                  0,                  0,                  0,    
-		  0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
-		}
+      {
+        // 00-3f
+        0,                  0,              0,          uc2_culldl,
+          uc1_branch_z,         0,              0,          0,
+          0,                fb_bg_copy,         fb_bg_copy,         0,
+          0,                    0,                  0,                  0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          
+          // 40-7f: unused
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          
+          // 80-bf: unused
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          0,                    0,                  0,                  0,
+          
+          // c0-ff: RDP commands mixed with uc2 commands
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,            uc2_dlist_cnt,              0,                  0,
+          0,            0,          0,              fb_uc2_moveword,
+          0,            uc2_load_ucode,         uc0_displaylist,    uc0_enddl,
+          0,            uc1_rdphalf_1,            0,                  0,
+          fb_rect,         fb_rect,               0,                  0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_setscissor,         0,       0,
+          0,                  0,                  0,                  0,    
+          0,                  0,                fb_rect,              0,    
+          0,                  0,                  0,                  0,    
+          0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
+        }
 };

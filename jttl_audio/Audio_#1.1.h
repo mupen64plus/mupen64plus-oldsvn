@@ -21,53 +21,53 @@ extern "C" {
 
 /* Note: BOOL, BYTE, WORD, DWORD, TRUE, FALSE are defined in windows.h */
 
-#define PLUGIN_TYPE_AUDIO			3
+#define PLUGIN_TYPE_AUDIO           3
 
-#define EXPORT						__declspec(dllexport)
-#define CALL						_cdecl
+#define EXPORT                      __declspec(dllexport)
+#define CALL                        _cdecl
 
-#define SYSTEM_NTSC					0
-#define SYSTEM_PAL					1
-#define SYSTEM_MPAL					2
+#define SYSTEM_NTSC                 0
+#define SYSTEM_PAL                  1
+#define SYSTEM_MPAL                 2
 
 /***** Structures *****/
 typedef struct {
-	WORD Version;        /* Should be set to 0x0101 */
-	WORD Type;           /* Set to PLUGIN_TYPE_AUDIO */
-	char Name[100];      /* Name of the DLL */
+    WORD Version;        /* Should be set to 0x0101 */
+    WORD Type;           /* Set to PLUGIN_TYPE_AUDIO */
+    char Name[100];      /* Name of the DLL */
 
-	/* If DLL supports memory these memory options then set them to TRUE or FALSE
-	   if it does not support it */
-	BOOL NormalMemory;   /* a normal BYTE array */ 
-	BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
-	                          bswap on a dword (32 bits) boundry */
+    /* If DLL supports memory these memory options then set them to TRUE or FALSE
+       if it does not support it */
+    BOOL NormalMemory;   /* a normal BYTE array */ 
+    BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
+                              bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
 
 
 typedef struct {
-	HWND hwnd;
-	HINSTANCE hinst;
+    HWND hwnd;
+    HINSTANCE hinst;
 
-	BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
-	                       //   bswap on a dword (32 bits) boundry 
-						   //	eg. the first 8 bytes are stored like this:
-	                       //        4 3 2 1   8 7 6 5
-	BYTE * HEADER;	// This is the rom header (first 40h bytes of the rom
-					// This will be in the same memory format as the rest of the memory.
-	BYTE * RDRAM;
-	BYTE * DMEM;
-	BYTE * IMEM;
+    BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
+                           //   bswap on a dword (32 bits) boundry 
+                           //   eg. the first 8 bytes are stored like this:
+                           //        4 3 2 1   8 7 6 5
+    BYTE * HEADER;  // This is the rom header (first 40h bytes of the rom
+                    // This will be in the same memory format as the rest of the memory.
+    BYTE * RDRAM;
+    BYTE * DMEM;
+    BYTE * IMEM;
 
-	DWORD * MI_INTR_REG;
+    DWORD * MI_INTR_REG;
 
-	DWORD * AI_DRAM_ADDR_REG;
-	DWORD * AI_LEN_REG;
-	DWORD * AI_CONTROL_REG;
-	DWORD * AI_STATUS_REG;
-	DWORD * AI_DACRATE_REG;
-	DWORD * AI_BITRATE_REG;
+    DWORD * AI_DRAM_ADDR_REG;
+    DWORD * AI_LEN_REG;
+    DWORD * AI_CONTROL_REG;
+    DWORD * AI_STATUS_REG;
+    DWORD * AI_DACRATE_REG;
+    DWORD * AI_BITRATE_REG;
 
-	void (*CheckInterrupts)( void );
+    void (*CheckInterrupts)( void );
 } AUDIO_INFO;
 
 /******************************************************************
@@ -75,9 +75,9 @@ typedef struct {
   Purpose:  This function is called to notify the dll that the
             AiDacrate registers value has been changed.
   input:    The System type:
-               SYSTEM_NTSC	0
-               SYSTEM_PAL	1
-               SYSTEM_MPAL	2
+               SYSTEM_NTSC  0
+               SYSTEM_PAL   1
+               SYSTEM_MPAL  2
   output:   none
 *******************************************************************/ 
 EXPORT void CALL AiDacrateChanged (int SystemType);
@@ -104,10 +104,10 @@ EXPORT DWORD CALL AiReadLength (void);
   Function: AiUpdate
   Purpose:  This function is called to allow the dll to update
             things on a regular basis (check how long to sound to
-			go, copy more stuff to the buffer, anyhting you like).
-			The function is designed to go in to the message loop
-			of the main window ... but can be placed anywhere you 
-			like.
+            go, copy more stuff to the buffer, anyhting you like).
+            The function is designed to go in to the message loop
+            of the main window ... but can be placed anywhere you 
+            like.
   input:    if Wait is set to true, then this function should wait
             till there is a messgae in the its message queue.
   output:   none
@@ -164,7 +164,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
   Function: InitiateSound
   Purpose:  This function is called when the DLL is started to give
             information from the emulator that the n64 audio 
-			interface needs
+            interface needs
   Input:    Audio_Info is passed to this function which is defined
             above.
   Output:   TRUE on success
@@ -181,7 +181,7 @@ EXPORT BOOL CALL InitiateAudio (AUDIO_INFO Audio_Info);
   Function: ProcessAList
   Purpose:  This function is called when there is a Alist to be
             processed. The Dll will have to work out all the info
-			about the AList itself.
+            about the AList itself.
   input:    none
   output:   none
 *******************************************************************/ 

@@ -43,21 +43,21 @@ DWORD pd_col_addr = 0;
 
 static void uc7_colorbase ()
 {
-	RDP("uc7_colorbase\n");
-	pd_col_addr = segoffset(rdp.cmd1);
+    RDP("uc7_colorbase\n");
+    pd_col_addr = segoffset(rdp.cmd1);
 }
 
 
 typedef struct 
 {
-	short y;
-	short x;
-	WORD idx;
+    short y;
+    short x;
+    WORD idx;
 
-	short z;
+    short z;
 
-	short t;
-	short s;
+    short t;
+    short s;
 
 } vtx_uc7;
 
@@ -77,7 +77,7 @@ static void uc7_vertex ()
     // Calculate light vectors
     for (DWORD l=0; l<rdp.num_lights; l++)
     {
-	  InverseTransformVector(&rdp.light[l].dir_x, rdp.light_vector[l], rdp.model);
+      InverseTransformVector(&rdp.light[l].dir_x, rdp.light_vector[l], rdp.model);
       NormalizeVector (rdp.light_vector[l]);
     }
   }
@@ -128,10 +128,10 @@ static void uc7_vertex ()
     if (v->y > v->w) v->scr_off |= 8;
     if (v->w < 0.1f) v->scr_off |= 16;
 
-	BYTE *color = &gfx.RDRAM[pd_col_addr + (vertex->idx & 0xff)];
+    BYTE *color = &gfx.RDRAM[pd_col_addr + (vertex->idx & 0xff)];
 
     v->a = color[0];
-	CalculateFog (v);
+    CalculateFog (v);
 
     if (rdp.geom_mode & 0x00020000)
     {

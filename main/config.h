@@ -18,9 +18,9 @@ Email                : blight@Ashitaka
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define CORE_INTERPRETER		(0)
-#define CORE_DYNAREC			(1)
-#define CORE_PURE_INTERPRETER		(2)
+#define CORE_INTERPRETER        (0)
+#define CORE_DYNAREC            (1)
+#define CORE_PURE_INTERPRETER       (2)
 
 void config_read( void );
 void config_write( void );

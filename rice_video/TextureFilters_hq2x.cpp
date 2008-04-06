@@ -38,80 +38,80 @@ static unsigned interp_bits_per_pixel;
 
 static inline uint16 hq2x_interp_16_521(uint16 p1, uint16 p2, uint16 p3)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*5 + INTERP_16_MASK_1_3(p2)*2 + INTERP_16_MASK_1_3(p3)*1) / 8)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*5 + INTERP_16_MASK_SHIFT_2_4(p2)*2 + INTERP_16_MASK_SHIFT_2_4(p3)*1) / 8);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*5 + INTERP_16_MASK_1_3(p2)*2 + INTERP_16_MASK_1_3(p3)*1) / 8)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*5 + INTERP_16_MASK_SHIFT_2_4(p2)*2 + INTERP_16_MASK_SHIFT_2_4(p3)*1) / 8);
 }
 
 static inline uint16 hq2x_interp_16_332(uint16 p1, uint16 p2, uint16 p3)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*3 + INTERP_16_MASK_1_3(p2)*3 + INTERP_16_MASK_1_3(p3)*2) / 8)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*3 + INTERP_16_MASK_SHIFT_2_4(p2)*3 + INTERP_16_MASK_SHIFT_2_4(p3)*2) / 8);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*3 + INTERP_16_MASK_1_3(p2)*3 + INTERP_16_MASK_1_3(p3)*2) / 8)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*3 + INTERP_16_MASK_SHIFT_2_4(p2)*3 + INTERP_16_MASK_SHIFT_2_4(p3)*2) / 8);
 }
 
 static inline uint16 hq2x_interp_16_611(uint16 p1, uint16 p2, uint16 p3)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*6 + INTERP_16_MASK_1_3(p2) + INTERP_16_MASK_1_3(p3)) / 8)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*6 + INTERP_16_MASK_SHIFT_2_4(p2) + INTERP_16_MASK_SHIFT_2_4(p3)) / 8);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*6 + INTERP_16_MASK_1_3(p2) + INTERP_16_MASK_1_3(p3)) / 8)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*6 + INTERP_16_MASK_SHIFT_2_4(p2) + INTERP_16_MASK_SHIFT_2_4(p3)) / 8);
 }
 
 static inline uint16 hq2x_interp_16_71(uint16 p1, uint16 p2)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*7 + INTERP_16_MASK_1_3(p2)) / 8)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*7 + INTERP_16_MASK_SHIFT_2_4(p2)) / 8);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*7 + INTERP_16_MASK_1_3(p2)) / 8)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*7 + INTERP_16_MASK_SHIFT_2_4(p2)) / 8);
 }
 
 static inline uint16 hq2x_interp_16_211(uint16 p1, uint16 p2, uint16 p3)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*2 + INTERP_16_MASK_1_3(p2) + INTERP_16_MASK_1_3(p3)) / 4)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*2 + INTERP_16_MASK_SHIFT_2_4(p2) + INTERP_16_MASK_SHIFT_2_4(p3)) / 4);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*2 + INTERP_16_MASK_1_3(p2) + INTERP_16_MASK_1_3(p3)) / 4)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*2 + INTERP_16_MASK_SHIFT_2_4(p2) + INTERP_16_MASK_SHIFT_2_4(p3)) / 4);
 }
 
 static inline uint16 hq2x_interp_16_772(uint16 p1, uint16 p2, uint16 p3)
 {
-	return INTERP_16_MASK_1_3(((INTERP_16_MASK_1_3(p1) + INTERP_16_MASK_1_3(p2))*7 + INTERP_16_MASK_1_3(p3)*2) / 16)
-		| INTERP_16_MASK_SHIFTBACK_2_4(((INTERP_16_MASK_SHIFT_2_4(p1) + INTERP_16_MASK_SHIFT_2_4(p2))*7 + INTERP_16_MASK_SHIFT_2_4(p3)*2) / 16);
+    return INTERP_16_MASK_1_3(((INTERP_16_MASK_1_3(p1) + INTERP_16_MASK_1_3(p2))*7 + INTERP_16_MASK_1_3(p3)*2) / 16)
+        | INTERP_16_MASK_SHIFTBACK_2_4(((INTERP_16_MASK_SHIFT_2_4(p1) + INTERP_16_MASK_SHIFT_2_4(p2))*7 + INTERP_16_MASK_SHIFT_2_4(p3)*2) / 16);
 }
 
 static inline uint16 hq2x_interp_16_11(uint16 p1, uint16 p2)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1) + INTERP_16_MASK_1_3(p2)) / 2)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1) + INTERP_16_MASK_SHIFT_2_4(p2)) / 2);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1) + INTERP_16_MASK_1_3(p2)) / 2)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1) + INTERP_16_MASK_SHIFT_2_4(p2)) / 2);
 }
 
 static inline uint16 hq2x_interp_16_31(uint16 p1, uint16 p2)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*3 + INTERP_16_MASK_1_3(p2)) / 4)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*3 + INTERP_16_MASK_SHIFT_2_4(p2)) / 4);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*3 + INTERP_16_MASK_1_3(p2)) / 4)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*3 + INTERP_16_MASK_SHIFT_2_4(p2)) / 4);
 }
 
 static inline uint16 hq2x_interp_16_1411(uint16 p1, uint16 p2, uint16 p3)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*14 + INTERP_16_MASK_1_3(p2) + INTERP_16_MASK_1_3(p3)) / 16)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*14 + INTERP_16_MASK_SHIFT_2_4(p2) + INTERP_16_MASK_SHIFT_2_4(p3)) / 16);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*14 + INTERP_16_MASK_1_3(p2) + INTERP_16_MASK_1_3(p3)) / 16)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*14 + INTERP_16_MASK_SHIFT_2_4(p2) + INTERP_16_MASK_SHIFT_2_4(p3)) / 16);
 }
 
 static inline uint16 hq2x_interp_16_431(uint16 p1, uint16 p2, uint16 p3)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*4 + INTERP_16_MASK_1_3(p2)*3 + INTERP_16_MASK_1_3(p3)) / 8)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*4 + INTERP_16_MASK_SHIFT_2_4(p2)*3 + INTERP_16_MASK_SHIFT_2_4(p3)) / 8);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*4 + INTERP_16_MASK_1_3(p2)*3 + INTERP_16_MASK_1_3(p3)) / 8)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*4 + INTERP_16_MASK_SHIFT_2_4(p2)*3 + INTERP_16_MASK_SHIFT_2_4(p3)) / 8);
 }
 
 static inline uint16 hq2x_interp_16_53(uint16 p1, uint16 p2)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*5 + INTERP_16_MASK_1_3(p2)*3) / 8)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*5 + INTERP_16_MASK_SHIFT_2_4(p2)*3) / 8);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*5 + INTERP_16_MASK_1_3(p2)*3) / 8)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*5 + INTERP_16_MASK_SHIFT_2_4(p2)*3) / 8);
 }
 
 static inline uint16 hq2x_interp_16_151(uint16 p1, uint16 p2)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*15 + INTERP_16_MASK_1_3(p2)) / 16)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*15 + INTERP_16_MASK_SHIFT_2_4(p2)) / 16);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*15 + INTERP_16_MASK_1_3(p2)) / 16)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*15 + INTERP_16_MASK_SHIFT_2_4(p2)) / 16);
 }
 
 static inline uint16 hq2x_interp_16_97(uint16 p1, uint16 p2)
 {
-	return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*9 + INTERP_16_MASK_1_3(p2)*7) / 16)
-		| INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*9 + INTERP_16_MASK_SHIFT_2_4(p2)*7) / 16);
+    return INTERP_16_MASK_1_3((INTERP_16_MASK_1_3(p1)*9 + INTERP_16_MASK_1_3(p2)*7) / 16)
+        | INTERP_16_MASK_SHIFTBACK_2_4((INTERP_16_MASK_SHIFT_2_4(p1)*9 + INTERP_16_MASK_SHIFT_2_4(p2)*7) / 16);
 }
 
 #define INTERP_32_MASK_1_3(v) ((v)&0x00FF00FF)
@@ -120,80 +120,80 @@ static inline uint16 hq2x_interp_16_97(uint16 p1, uint16 p2)
 
 static inline uint32 hq2x_interp_32_521(uint32 p1, uint32 p2, uint32 p3)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*5 + INTERP_32_MASK_1_3(p2)*2 + INTERP_32_MASK_1_3(p3)*1) / 8)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*5 + INTERP_32_MASK_SHIFT_2_4(p2)*2 + INTERP_32_MASK_SHIFT_2_4(p3)*1) / 8);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*5 + INTERP_32_MASK_1_3(p2)*2 + INTERP_32_MASK_1_3(p3)*1) / 8)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*5 + INTERP_32_MASK_SHIFT_2_4(p2)*2 + INTERP_32_MASK_SHIFT_2_4(p3)*1) / 8);
 }
 
 static inline uint32 hq2x_interp_32_332(uint32 p1, uint32 p2, uint32 p3)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*3 + INTERP_32_MASK_1_3(p2)*3 + INTERP_32_MASK_1_3(p3)*2) / 8)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*3 + INTERP_32_MASK_SHIFT_2_4(p2)*3 + INTERP_32_MASK_SHIFT_2_4(p3)*2) / 8);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*3 + INTERP_32_MASK_1_3(p2)*3 + INTERP_32_MASK_1_3(p3)*2) / 8)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*3 + INTERP_32_MASK_SHIFT_2_4(p2)*3 + INTERP_32_MASK_SHIFT_2_4(p3)*2) / 8);
 }
 
 static inline uint32 hq2x_interp_32_211(uint32 p1, uint32 p2, uint32 p3)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*2 + INTERP_32_MASK_1_3(p2) + INTERP_32_MASK_1_3(p3)) / 4)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*2 + INTERP_32_MASK_SHIFT_2_4(p2) + INTERP_32_MASK_SHIFT_2_4(p3)) / 4);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*2 + INTERP_32_MASK_1_3(p2) + INTERP_32_MASK_1_3(p3)) / 4)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*2 + INTERP_32_MASK_SHIFT_2_4(p2) + INTERP_32_MASK_SHIFT_2_4(p3)) / 4);
 }
 
 static inline uint32 hq2x_interp_32_611(uint32 p1, uint32 p2, uint32 p3)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*6 + INTERP_32_MASK_1_3(p2) + INTERP_32_MASK_1_3(p3)) / 8)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*6 + INTERP_32_MASK_SHIFT_2_4(p2) + INTERP_32_MASK_SHIFT_2_4(p3)) / 8);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*6 + INTERP_32_MASK_1_3(p2) + INTERP_32_MASK_1_3(p3)) / 8)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*6 + INTERP_32_MASK_SHIFT_2_4(p2) + INTERP_32_MASK_SHIFT_2_4(p3)) / 8);
 }
 
 static inline uint32 hq2x_interp_32_71(uint32 p1, uint32 p2)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*7 + INTERP_32_MASK_1_3(p2)) / 8)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*7 + INTERP_32_MASK_SHIFT_2_4(p2)) / 8);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*7 + INTERP_32_MASK_1_3(p2)) / 8)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*7 + INTERP_32_MASK_SHIFT_2_4(p2)) / 8);
 }
 
 static inline uint32 hq2x_interp_32_772(uint32 p1, uint32 p2, uint32 p3)
 {
-	return INTERP_32_MASK_1_3(((INTERP_32_MASK_1_3(p1) + INTERP_32_MASK_1_3(p2))*7 + INTERP_32_MASK_1_3(p3)*2) / 16)
-		| INTERP_32_MASK_SHIFTBACK_2_4(((INTERP_32_MASK_SHIFT_2_4(p1) + INTERP_32_MASK_SHIFT_2_4(p2))*7 + INTERP_32_MASK_SHIFT_2_4(p3)*2) / 16);
+    return INTERP_32_MASK_1_3(((INTERP_32_MASK_1_3(p1) + INTERP_32_MASK_1_3(p2))*7 + INTERP_32_MASK_1_3(p3)*2) / 16)
+        | INTERP_32_MASK_SHIFTBACK_2_4(((INTERP_32_MASK_SHIFT_2_4(p1) + INTERP_32_MASK_SHIFT_2_4(p2))*7 + INTERP_32_MASK_SHIFT_2_4(p3)*2) / 16);
 }
 
 static inline uint32 hq2x_interp_32_11(uint32 p1, uint32 p2)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1) + INTERP_32_MASK_1_3(p2)) / 2)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1) + INTERP_32_MASK_SHIFT_2_4(p2)) / 2);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1) + INTERP_32_MASK_1_3(p2)) / 2)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1) + INTERP_32_MASK_SHIFT_2_4(p2)) / 2);
 }
 
 static inline uint32 hq2x_interp_32_31(uint32 p1, uint32 p2)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*3 + INTERP_32_MASK_1_3(p2)) / 4)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*3 + INTERP_32_MASK_SHIFT_2_4(p2)) / 4);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*3 + INTERP_32_MASK_1_3(p2)) / 4)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*3 + INTERP_32_MASK_SHIFT_2_4(p2)) / 4);
 }
 
 static inline uint32 hq2x_interp_32_1411(uint32 p1, uint32 p2, uint32 p3)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*14 + INTERP_32_MASK_1_3(p2) + INTERP_32_MASK_1_3(p3)) / 16)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*14 + INTERP_32_MASK_SHIFT_2_4(p2) + INTERP_32_MASK_SHIFT_2_4(p3)) / 16);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*14 + INTERP_32_MASK_1_3(p2) + INTERP_32_MASK_1_3(p3)) / 16)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*14 + INTERP_32_MASK_SHIFT_2_4(p2) + INTERP_32_MASK_SHIFT_2_4(p3)) / 16);
 }
 
 static inline uint32 hq2x_interp_32_431(uint32 p1, uint32 p2, uint32 p3)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*4 + INTERP_32_MASK_1_3(p2)*3 + INTERP_32_MASK_1_3(p3)) / 8)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*4 + INTERP_32_MASK_SHIFT_2_4(p2)*3 + INTERP_32_MASK_SHIFT_2_4(p3)) / 8);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*4 + INTERP_32_MASK_1_3(p2)*3 + INTERP_32_MASK_1_3(p3)) / 8)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*4 + INTERP_32_MASK_SHIFT_2_4(p2)*3 + INTERP_32_MASK_SHIFT_2_4(p3)) / 8);
 }
 
 static inline uint32 hq2x_interp_32_53(uint32 p1, uint32 p2)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*5 + INTERP_32_MASK_1_3(p2)*3) / 8)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*5 + INTERP_32_MASK_SHIFT_2_4(p2)*3) / 8);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*5 + INTERP_32_MASK_1_3(p2)*3) / 8)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*5 + INTERP_32_MASK_SHIFT_2_4(p2)*3) / 8);
 }
 
 static inline uint32 hq2x_interp_32_151(uint32 p1, uint32 p2)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*15 + INTERP_32_MASK_1_3(p2)) / 16)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*15 + INTERP_32_MASK_SHIFT_2_4(p2)) / 16);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*15 + INTERP_32_MASK_1_3(p2)) / 16)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*15 + INTERP_32_MASK_SHIFT_2_4(p2)) / 16);
 }
 
 static inline uint32 hq2x_interp_32_97(uint32 p1, uint32 p2)
 {
-	return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*9 + INTERP_32_MASK_1_3(p2)*7) / 16)
-		| INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*9 + INTERP_32_MASK_SHIFT_2_4(p2)*7) / 16);
+    return INTERP_32_MASK_1_3((INTERP_32_MASK_1_3(p1)*9 + INTERP_32_MASK_1_3(p2)*7) / 16)
+        | INTERP_32_MASK_SHIFTBACK_2_4((INTERP_32_MASK_SHIFT_2_4(p1)*9 + INTERP_32_MASK_SHIFT_2_4(p2)*7) / 16);
 }
 
 /***************************************************************************/
@@ -205,117 +205,117 @@ static inline uint32 hq2x_interp_32_97(uint32 p1, uint32 p2)
 
 static int hq2x_interp_16_diff(uint16 p1, uint16 p2)
 {
-	int r, g, b;
-	int y, u, v;
+    int r, g, b;
+    int y, u, v;
 
-	if (p1 == p2)
-		return 0;
+    if (p1 == p2)
+        return 0;
 
-	b = (int)((p1 & 0x000F) - (p2 & 0x000F));
-	g = (int)((p1 & 0x00F0) - (p2 & 0x00F0)) >> 4;
-	r = (int)((p1 & 0x0F00) - (p2 & 0x0F00)) >> 8;
+    b = (int)((p1 & 0x000F) - (p2 & 0x000F));
+    g = (int)((p1 & 0x00F0) - (p2 & 0x00F0)) >> 4;
+    r = (int)((p1 & 0x0F00) - (p2 & 0x0F00)) >> 8;
 
-	y = r + g + b;
-	u = r - b;
-	v = -r + 2*g - b;
+    y = r + g + b;
+    u = r - b;
+    v = -r + 2*g - b;
 
-	if (y < -INTERP_Y_LIMIT || y > INTERP_Y_LIMIT)
-		return 1;
+    if (y < -INTERP_Y_LIMIT || y > INTERP_Y_LIMIT)
+        return 1;
 
-	if (u < -INTERP_U_LIMIT || u > INTERP_U_LIMIT)
-		return 1;
+    if (u < -INTERP_U_LIMIT || u > INTERP_U_LIMIT)
+        return 1;
 
-	if (v < -INTERP_V_LIMIT || v > INTERP_V_LIMIT)
-		return 1;
+    if (v < -INTERP_V_LIMIT || v > INTERP_V_LIMIT)
+        return 1;
 
-	return 0;
+    return 0;
 }
 
 static int hq2x_interp_32_diff(uint32 p1, uint32 p2)
 {
-	int r, g, b;
-	int y, u, v;
+    int r, g, b;
+    int y, u, v;
 
-	if ((p1 & 0xF8F8F8) == (p2 & 0xF8F8F8))
-		return 0;
+    if ((p1 & 0xF8F8F8) == (p2 & 0xF8F8F8))
+        return 0;
 
-	b = (int)((p1 & 0xFF) - (p2 & 0xFF));
-	g = (int)((p1 & 0xFF00) - (p2 & 0xFF00)) >> 8;
-	r = (int)((p1 & 0xFF0000) - (p2 & 0xFF0000)) >> 16;
+    b = (int)((p1 & 0xFF) - (p2 & 0xFF));
+    g = (int)((p1 & 0xFF00) - (p2 & 0xFF00)) >> 8;
+    r = (int)((p1 & 0xFF0000) - (p2 & 0xFF0000)) >> 16;
 
-	y = r + g + b;
-	u = r - b;
-	v = -r + 2*g - b;
+    y = r + g + b;
+    u = r - b;
+    v = -r + 2*g - b;
 
-	if (y < -INTERP_Y_LIMIT || y > INTERP_Y_LIMIT)
-		return 1;
+    if (y < -INTERP_Y_LIMIT || y > INTERP_Y_LIMIT)
+        return 1;
 
-	if (u < -INTERP_U_LIMIT || u > INTERP_U_LIMIT)
-		return 1;
+    if (u < -INTERP_U_LIMIT || u > INTERP_U_LIMIT)
+        return 1;
 
-	if (v < -INTERP_V_LIMIT || v > INTERP_V_LIMIT)
-		return 1;
+    if (v < -INTERP_V_LIMIT || v > INTERP_V_LIMIT)
+        return 1;
 
-	return 0;
+    return 0;
 }
 
 static void interp_set(unsigned bits_per_pixel)
 {
-	interp_bits_per_pixel = bits_per_pixel;
+    interp_bits_per_pixel = bits_per_pixel;
 }
 
 
 static void hq2x_16_def(uint16* dst0, uint16* dst1, const uint16* src0, const uint16* src1, const uint16* src2, unsigned count)
 {
-	unsigned i;
+    unsigned i;
 
-	for(i=0;i<count;++i) {
-		unsigned char mask;
+    for(i=0;i<count;++i) {
+        unsigned char mask;
 
-		uint16 c[9];
+        uint16 c[9];
 
-		c[1] = src0[0];
-		c[4] = src1[0];
-		c[7] = src2[0];
+        c[1] = src0[0];
+        c[4] = src1[0];
+        c[7] = src2[0];
 
-		if (i>0) {
-			c[0] = src0[-1];
-			c[3] = src1[-1];
-			c[6] = src2[-1];
-		} else {
-			c[0] = c[1];
-			c[3] = c[4];
-			c[6] = c[7];
-		}
+        if (i>0) {
+            c[0] = src0[-1];
+            c[3] = src1[-1];
+            c[6] = src2[-1];
+        } else {
+            c[0] = c[1];
+            c[3] = c[4];
+            c[6] = c[7];
+        }
 
-		if (i<count-1) {
-			c[2] = src0[1];
-			c[5] = src1[1];
-			c[8] = src2[1];
-		} else {
-			c[2] = c[1];
-			c[5] = c[4];
-			c[8] = c[7];
-		}
+        if (i<count-1) {
+            c[2] = src0[1];
+            c[5] = src1[1];
+            c[8] = src2[1];
+        } else {
+            c[2] = c[1];
+            c[5] = c[4];
+            c[8] = c[7];
+        }
 
-		mask = 0;
+        mask = 0;
 
-		if (hq2x_interp_16_diff(c[0], c[4]))
-			mask |= 1 << 0;
-		if (hq2x_interp_16_diff(c[1], c[4]))
-			mask |= 1 << 1;
-		if (hq2x_interp_16_diff(c[2], c[4]))
-			mask |= 1 << 2;
-		if (hq2x_interp_16_diff(c[3], c[4]))
-			mask |= 1 << 3;
-		if (hq2x_interp_16_diff(c[5], c[4]))
-			mask |= 1 << 4;
-		if (hq2x_interp_16_diff(c[6], c[4]))
-			mask |= 1 << 5;
-		if (hq2x_interp_16_diff(c[7], c[4]))
-			mask |= 1 << 6;
-		if (hq2x_interp_16_diff(c[8], c[4]))
-			mask |= 1 << 7;
+        if (hq2x_interp_16_diff(c[0], c[4]))
+            mask |= 1 << 0;
+        if (hq2x_interp_16_diff(c[1], c[4]))
+            mask |= 1 << 1;
+        if (hq2x_interp_16_diff(c[2], c[4]))
+            mask |= 1 << 2;
+        if (hq2x_interp_16_diff(c[3], c[4]))
+            mask |= 1 << 3;
+        if (hq2x_interp_16_diff(c[5], c[4]))
+            mask |= 1 << 4;
+        if (hq2x_interp_16_diff(c[6], c[4]))
+            mask |= 1 << 5;
+        if (hq2x_interp_16_diff(c[7], c[4]))
+            mask |= 1 << 6;
+        if (hq2x_interp_16_diff(c[8], c[4]))
+            mask |= 1 << 7;
 
 #define P0 dst0[0]
 #define P1 dst0[1]
@@ -340,9 +340,9 @@ static void hq2x_16_def(uint16* dst0, uint16* dst1, const uint16* src0, const ui
 #define I1411(p0,p1,p2) hq2x_interp_16_1411(c[p0], c[p1], c[p2])
 #define I151(p0,p1) hq2x_interp_16_151(c[p0], c[p1])
 
-		switch (mask) {
+        switch (mask) {
 #include "TextureFilters_hq2x.h"
-		}
+        }
 
 #undef P0
 #undef P1
@@ -367,65 +367,65 @@ static void hq2x_16_def(uint16* dst0, uint16* dst1, const uint16* src0, const ui
 #undef I1411
 #undef I151
 
-		src0 += 1;
-		src1 += 1;
-		src2 += 1;
-		dst0 += 2;
-		dst1 += 2;
-	}
+        src0 += 1;
+        src1 += 1;
+        src2 += 1;
+        dst0 += 2;
+        dst1 += 2;
+    }
 }
 
 static void hq2x_32_def(uint32* dst0, uint32* dst1, const uint32* src0, const uint32* src1, const uint32* src2, unsigned count)
 {
-	unsigned i;
+    unsigned i;
 
-	for(i=0;i<count;++i) {
-		unsigned char mask;
+    for(i=0;i<count;++i) {
+        unsigned char mask;
 
-		uint32 c[9];
+        uint32 c[9];
 
-		c[1] = src0[0];
-		c[4] = src1[0];
-		c[7] = src2[0];
+        c[1] = src0[0];
+        c[4] = src1[0];
+        c[7] = src2[0];
 
-		if (i>0) {
-			c[0] = src0[-1];
-			c[3] = src1[-1];
-			c[6] = src2[-1];
-		} else {
-			c[0] = src0[0];
-			c[3] = src1[0];
-			c[6] = src2[0];
-		}
+        if (i>0) {
+            c[0] = src0[-1];
+            c[3] = src1[-1];
+            c[6] = src2[-1];
+        } else {
+            c[0] = src0[0];
+            c[3] = src1[0];
+            c[6] = src2[0];
+        }
 
-		if (i<count-1) {
-			c[2] = src0[1];
-			c[5] = src1[1];
-			c[8] = src2[1];
-		} else {
-			c[2] = src0[0];
-			c[5] = src1[0];
-			c[8] = src2[0];
-		}
+        if (i<count-1) {
+            c[2] = src0[1];
+            c[5] = src1[1];
+            c[8] = src2[1];
+        } else {
+            c[2] = src0[0];
+            c[5] = src1[0];
+            c[8] = src2[0];
+        }
 
-		mask = 0;
+        mask = 0;
 
-		if (hq2x_interp_32_diff(c[0], c[4]))
-			mask |= 1 << 0;
-		if (hq2x_interp_32_diff(c[1], c[4]))
-			mask |= 1 << 1;
-		if (hq2x_interp_32_diff(c[2], c[4]))
-			mask |= 1 << 2;
-		if (hq2x_interp_32_diff(c[3], c[4]))
-			mask |= 1 << 3;
-		if (hq2x_interp_32_diff(c[5], c[4]))
-			mask |= 1 << 4;
-		if (hq2x_interp_32_diff(c[6], c[4]))
-			mask |= 1 << 5;
-		if (hq2x_interp_32_diff(c[7], c[4]))
-			mask |= 1 << 6;
-		if (hq2x_interp_32_diff(c[8], c[4]))
-			mask |= 1 << 7;
+        if (hq2x_interp_32_diff(c[0], c[4]))
+            mask |= 1 << 0;
+        if (hq2x_interp_32_diff(c[1], c[4]))
+            mask |= 1 << 1;
+        if (hq2x_interp_32_diff(c[2], c[4]))
+            mask |= 1 << 2;
+        if (hq2x_interp_32_diff(c[3], c[4]))
+            mask |= 1 << 3;
+        if (hq2x_interp_32_diff(c[5], c[4]))
+            mask |= 1 << 4;
+        if (hq2x_interp_32_diff(c[6], c[4]))
+            mask |= 1 << 5;
+        if (hq2x_interp_32_diff(c[7], c[4]))
+            mask |= 1 << 6;
+        if (hq2x_interp_32_diff(c[8], c[4]))
+            mask |= 1 << 7;
 
 #define P0 dst0[0]
 #define P1 dst0[1]
@@ -450,9 +450,9 @@ static void hq2x_32_def(uint32* dst0, uint32* dst1, const uint32* src0, const ui
 #define I1411(p0,p1,p2) hq2x_interp_32_1411(c[p0], c[p1], c[p2])
 #define I151(p0,p1) hq2x_interp_32_151(c[p0], c[p1])
 
-		switch (mask) {
+        switch (mask) {
 #include "TextureFilters_hq2x.h"
-		}
+        }
 
 #undef P0
 #undef P1
@@ -477,12 +477,12 @@ static void hq2x_32_def(uint32* dst0, uint32* dst1, const uint32* src0, const ui
 #undef I1411
 #undef I151
 
-		src0 += 1;
-		src1 += 1;
-		src2 += 1;
-		dst0 += 2;
-		dst1 += 2;
-	}
+        src0 += 1;
+        src1 += 1;
+        src2 += 1;
+        dst0 += 2;
+        dst1 += 2;
+    }
 }
 
 /***************************************************************************/
@@ -494,55 +494,55 @@ static void hq2x_32_def(uint32* dst0, uint32* dst1, const uint32* src0, const ui
 
 static void lq2x_16_def(uint16* dst0, uint16* dst1, const uint16* src0, const uint16* src1, const uint16* src2, unsigned count)
 {
-	unsigned i;
+    unsigned i;
 
-	for(i=0;i<count;++i) {
-		unsigned char mask;
+    for(i=0;i<count;++i) {
+        unsigned char mask;
 
-		uint16 c[9];
+        uint16 c[9];
 
-		c[1] = src0[0];
-		c[4] = src1[0];
-		c[7] = src2[0];
+        c[1] = src0[0];
+        c[4] = src1[0];
+        c[7] = src2[0];
 
-		if (i>0) {
-			c[0] = src0[-1];
-			c[3] = src1[-1];
-			c[6] = src2[-1];
-		} else {
-			c[0] = c[1];
-			c[3] = c[4];
-			c[6] = c[7];
-		}
+        if (i>0) {
+            c[0] = src0[-1];
+            c[3] = src1[-1];
+            c[6] = src2[-1];
+        } else {
+            c[0] = c[1];
+            c[3] = c[4];
+            c[6] = c[7];
+        }
 
-		if (i<count-1) {
-			c[2] = src0[1];
-			c[5] = src1[1];
-			c[8] = src2[1];
-		} else {
-			c[2] = c[1];
-			c[5] = c[4];
-			c[8] = c[7];
-		}
+        if (i<count-1) {
+            c[2] = src0[1];
+            c[5] = src1[1];
+            c[8] = src2[1];
+        } else {
+            c[2] = c[1];
+            c[5] = c[4];
+            c[8] = c[7];
+        }
 
-		mask = 0;
+        mask = 0;
 
-		if (c[0] != c[4])
-			mask |= 1 << 0;
-		if (c[1] != c[4])
-			mask |= 1 << 1;
-		if (c[2] != c[4])
-			mask |= 1 << 2;
-		if (c[3] != c[4])
-			mask |= 1 << 3;
-		if (c[5] != c[4])
-			mask |= 1 << 4;
-		if (c[6] != c[4])
-			mask |= 1 << 5;
-		if (c[7] != c[4])
-			mask |= 1 << 6;
-		if (c[8] != c[4])
-			mask |= 1 << 7;
+        if (c[0] != c[4])
+            mask |= 1 << 0;
+        if (c[1] != c[4])
+            mask |= 1 << 1;
+        if (c[2] != c[4])
+            mask |= 1 << 2;
+        if (c[3] != c[4])
+            mask |= 1 << 3;
+        if (c[5] != c[4])
+            mask |= 1 << 4;
+        if (c[6] != c[4])
+            mask |= 1 << 5;
+        if (c[7] != c[4])
+            mask |= 1 << 6;
+        if (c[8] != c[4])
+            mask |= 1 << 7;
 
 #define P0 dst0[0]
 #define P1 dst0[1]
@@ -567,9 +567,9 @@ static void lq2x_16_def(uint16* dst0, uint16* dst1, const uint16* src0, const ui
 #define I1411(p0,p1,p2) hq2x_interp_16_1411(c[p0], c[p1], c[p2])
 #define I151(p0,p1) hq2x_interp_16_151(c[p0], c[p1])
 
-		switch (mask) {
+        switch (mask) {
 #include "TextureFilters_lq2x.h"
-		}
+        }
 
 #undef P0
 #undef P1
@@ -594,65 +594,65 @@ static void lq2x_16_def(uint16* dst0, uint16* dst1, const uint16* src0, const ui
 #undef I1411
 #undef I151
 
-		src0 += 1;
-		src1 += 1;
-		src2 += 1;
-		dst0 += 2;
-		dst1 += 2;
-	}
+        src0 += 1;
+        src1 += 1;
+        src2 += 1;
+        dst0 += 2;
+        dst1 += 2;
+    }
 }
 
 static void lq2x_32_def(uint32* dst0, uint32* dst1, const uint32* src0, const uint32* src1, const uint32* src2, unsigned count)
 {
-	unsigned i;
+    unsigned i;
 
-	for(i=0;i<count;++i) {
-		unsigned char mask;
+    for(i=0;i<count;++i) {
+        unsigned char mask;
 
-		uint32 c[9];
+        uint32 c[9];
 
-		c[1] = src0[0];
-		c[4] = src1[0];
-		c[7] = src2[0];
+        c[1] = src0[0];
+        c[4] = src1[0];
+        c[7] = src2[0];
 
-		if (i>0) {
-			c[0] = src0[-1];
-			c[3] = src1[-1];
-			c[6] = src2[-1];
-		} else {
-			c[0] = c[1];
-			c[3] = c[4];
-			c[6] = c[7];
-		}
+        if (i>0) {
+            c[0] = src0[-1];
+            c[3] = src1[-1];
+            c[6] = src2[-1];
+        } else {
+            c[0] = c[1];
+            c[3] = c[4];
+            c[6] = c[7];
+        }
 
-		if (i<count-1) {
-			c[2] = src0[1];
-			c[5] = src1[1];
-			c[8] = src2[1];
-		} else {
-			c[2] = c[1];
-			c[5] = c[4];
-			c[8] = c[7];
-		}
+        if (i<count-1) {
+            c[2] = src0[1];
+            c[5] = src1[1];
+            c[8] = src2[1];
+        } else {
+            c[2] = c[1];
+            c[5] = c[4];
+            c[8] = c[7];
+        }
 
-		mask = 0;
+        mask = 0;
 
-		if (c[0] != c[4])
-			mask |= 1 << 0;
-		if (c[1] != c[4])
-			mask |= 1 << 1;
-		if (c[2] != c[4])
-			mask |= 1 << 2;
-		if (c[3] != c[4])
-			mask |= 1 << 3;
-		if (c[5] != c[4])
-			mask |= 1 << 4;
-		if (c[6] != c[4])
-			mask |= 1 << 5;
-		if (c[7] != c[4])
-			mask |= 1 << 6;
-		if (c[8] != c[4])
-			mask |= 1 << 7;
+        if (c[0] != c[4])
+            mask |= 1 << 0;
+        if (c[1] != c[4])
+            mask |= 1 << 1;
+        if (c[2] != c[4])
+            mask |= 1 << 2;
+        if (c[3] != c[4])
+            mask |= 1 << 3;
+        if (c[5] != c[4])
+            mask |= 1 << 4;
+        if (c[6] != c[4])
+            mask |= 1 << 5;
+        if (c[7] != c[4])
+            mask |= 1 << 6;
+        if (c[8] != c[4])
+            mask |= 1 << 7;
 
 #define P0 dst0[0]
 #define P1 dst0[1]
@@ -677,9 +677,9 @@ static void lq2x_32_def(uint32* dst0, uint32* dst1, const uint32* src0, const ui
 #define I1411(p0,p1,p2) hq2x_interp_32_1411(c[p0], c[p1], c[p2])
 #define I151(p0,p1) hq2x_interp_32_151(c[p0], c[p1])
 
-		switch (mask) {
+        switch (mask) {
 #include "TextureFilters_lq2x.h"
-		}
+        }
 
 #undef P0
 #undef P1
@@ -704,131 +704,131 @@ static void lq2x_32_def(uint32* dst0, uint32* dst1, const uint32* src0, const ui
 #undef I1411
 #undef I151
 
-		src0 += 1;
-		src1 += 1;
-		src2 += 1;
-		dst0 += 2;
-		dst1 += 2;
-	}
+        src0 += 1;
+        src1 += 1;
+        src2 += 1;
+        dst0 += 2;
+        dst1 += 2;
+    }
 }
 
 void hq2x_16(uint8 *srcPtr, uint32 srcPitch, uint8 *dstPtr, uint32 dstPitch, int width, int height)
 {
-	uint16 *dst0 = (uint16 *)dstPtr;
-	uint16 *dst1 = dst0 + (dstPitch >> 1);
+    uint16 *dst0 = (uint16 *)dstPtr;
+    uint16 *dst1 = dst0 + (dstPitch >> 1);
 
-	uint16 *src0 = (uint16 *)srcPtr;
-	uint16 *src1 = src0 + (srcPitch >> 1);
-	uint16 *src2 = src1 + (srcPitch >> 1);
+    uint16 *src0 = (uint16 *)srcPtr;
+    uint16 *src1 = src0 + (srcPitch >> 1);
+    uint16 *src2 = src1 + (srcPitch >> 1);
 
-	hq2x_16_def(dst0, dst1, src0, src0, src1, width);
-	if( height == 1 ) return;
+    hq2x_16_def(dst0, dst1, src0, src0, src1, width);
+    if( height == 1 ) return;
 
-	int count = height;
+    int count = height;
 
-	count -= 2;
-	while(count>0) {
-		dst0 += dstPitch;
-		dst1 += dstPitch;
-		hq2x_16_def(dst0, dst1, src0, src1, src2, width);
-		src0 = src1;
-		src1 = src2;
-		src2 += srcPitch >> 1;
-		--count;
-	}
-	dst0 += dstPitch;
-	dst1 += dstPitch;
-	hq2x_16_def(dst0, dst1, src0, src1, src1, width);
+    count -= 2;
+    while(count>0) {
+        dst0 += dstPitch;
+        dst1 += dstPitch;
+        hq2x_16_def(dst0, dst1, src0, src1, src2, width);
+        src0 = src1;
+        src1 = src2;
+        src2 += srcPitch >> 1;
+        --count;
+    }
+    dst0 += dstPitch;
+    dst1 += dstPitch;
+    hq2x_16_def(dst0, dst1, src0, src1, src1, width);
 }
 
 void hq2x_32(uint8 *srcPtr, uint32 srcPitch, uint8 *dstPtr, uint32 dstPitch, int width, int height)
 {
-	uint32 *dst0 = (uint32 *)dstPtr;
-	uint32 *dst1 = dst0 + (dstPitch >> 2);
+    uint32 *dst0 = (uint32 *)dstPtr;
+    uint32 *dst1 = dst0 + (dstPitch >> 2);
 
-	uint32 *src0 = (uint32 *)srcPtr;
-	uint32 *src1 = src0 + (srcPitch >> 2);
-	uint32 *src2 = src1 + (srcPitch >> 2);
-	hq2x_32_def(dst0, dst1, src0, src0, src1, width);
-	if( height == 1 ) return;
+    uint32 *src0 = (uint32 *)srcPtr;
+    uint32 *src1 = src0 + (srcPitch >> 2);
+    uint32 *src2 = src1 + (srcPitch >> 2);
+    hq2x_32_def(dst0, dst1, src0, src0, src1, width);
+    if( height == 1 ) return;
 
-	int count = height;
+    int count = height;
 
-	count -= 2;
-	while(count>0) {
-		dst0 += dstPitch >> 1;
-		dst1 += dstPitch >> 1;
-		hq2x_32_def(dst0, dst1, src0, src1, src2, width);
-		src0 = src1;
-		src1 = src2;
-		src2 += srcPitch >> 2;
-		--count;
-	}
-	dst0 += dstPitch >> 1;
-	dst1 += dstPitch >> 1;
-	hq2x_32_def(dst0, dst1, src0, src1, src1, width);
+    count -= 2;
+    while(count>0) {
+        dst0 += dstPitch >> 1;
+        dst1 += dstPitch >> 1;
+        hq2x_32_def(dst0, dst1, src0, src1, src2, width);
+        src0 = src1;
+        src1 = src2;
+        src2 += srcPitch >> 2;
+        --count;
+    }
+    dst0 += dstPitch >> 1;
+    dst1 += dstPitch >> 1;
+    hq2x_32_def(dst0, dst1, src0, src1, src1, width);
 }
 
 void lq2x_16(uint8 *srcPtr, uint32 srcPitch, uint8 *dstPtr, uint32 dstPitch, int width, int height)
 {
-	uint16 *dst0 = (uint16 *)dstPtr;
-	uint16 *dst1 = dst0 + (dstPitch >> 1);
+    uint16 *dst0 = (uint16 *)dstPtr;
+    uint16 *dst1 = dst0 + (dstPitch >> 1);
 
-	uint16 *src0 = (uint16 *)srcPtr;
-	uint16 *src1 = src0 + (srcPitch >> 1);
-	uint16 *src2 = src1 + (srcPitch >> 1);
+    uint16 *src0 = (uint16 *)srcPtr;
+    uint16 *src1 = src0 + (srcPitch >> 1);
+    uint16 *src2 = src1 + (srcPitch >> 1);
 
-	lq2x_16_def(dst0, dst1, src0, src0, src1, width);
-	if( height == 1 ) return;
+    lq2x_16_def(dst0, dst1, src0, src0, src1, width);
+    if( height == 1 ) return;
 
-	int count = height;
+    int count = height;
 
-	count -= 2;
-	while(count>0) {
-		dst0 += dstPitch;
-		dst1 += dstPitch;
-		hq2x_16_def(dst0, dst1, src0, src1, src2, width);
-		src0 = src1;
-		src1 = src2;
-		src2 += srcPitch >> 1;
-		--count;
-	}
-	dst0 += dstPitch;
-	dst1 += dstPitch;
-	lq2x_16_def(dst0, dst1, src0, src1, src1, width);
+    count -= 2;
+    while(count>0) {
+        dst0 += dstPitch;
+        dst1 += dstPitch;
+        hq2x_16_def(dst0, dst1, src0, src1, src2, width);
+        src0 = src1;
+        src1 = src2;
+        src2 += srcPitch >> 1;
+        --count;
+    }
+    dst0 += dstPitch;
+    dst1 += dstPitch;
+    lq2x_16_def(dst0, dst1, src0, src1, src1, width);
 }
 
 void lq2x_32(uint8 *srcPtr, uint32 srcPitch, uint8 *dstPtr, uint32 dstPitch, int width, int height)
 {
-	uint32 *dst0 = (uint32 *)dstPtr;
-	uint32 *dst1 = dst0 + (dstPitch >> 2);
+    uint32 *dst0 = (uint32 *)dstPtr;
+    uint32 *dst1 = dst0 + (dstPitch >> 2);
 
-	uint32 *src0 = (uint32 *)srcPtr;
-	uint32 *src1 = src0 + (srcPitch >> 2);
-	uint32 *src2 = src1 + (srcPitch >> 2);
-	lq2x_32_def(dst0, dst1, src0, src0, src1, width);
-	if( height == 1 ) return;
+    uint32 *src0 = (uint32 *)srcPtr;
+    uint32 *src1 = src0 + (srcPitch >> 2);
+    uint32 *src2 = src1 + (srcPitch >> 2);
+    lq2x_32_def(dst0, dst1, src0, src0, src1, width);
+    if( height == 1 ) return;
 
-	int count = height;
+    int count = height;
 
-	count -= 2;
-	while(count>0) {
-		dst0 += dstPitch >> 1;
-		dst1 += dstPitch >> 1;
-		hq2x_32_def(dst0, dst1, src0, src1, src2, width);
-		src0 = src1;
-		src1 = src2;
-		src2 += srcPitch >> 2;
-		--count;
-	}
-	dst0 += dstPitch >> 1;
-	dst1 += dstPitch >> 1;
-	lq2x_32_def(dst0, dst1, src0, src1, src1, width);
+    count -= 2;
+    while(count>0) {
+        dst0 += dstPitch >> 1;
+        dst1 += dstPitch >> 1;
+        hq2x_32_def(dst0, dst1, src0, src1, src2, width);
+        src0 = src1;
+        src1 = src2;
+        src2 += srcPitch >> 2;
+        --count;
+    }
+    dst0 += dstPitch >> 1;
+    dst1 += dstPitch >> 1;
+    lq2x_32_def(dst0, dst1, src0, src1, src1, width);
 }
 
 void hq2x_init(unsigned bits_per_pixel)
 {
-	interp_set(bits_per_pixel);
+    interp_set(bits_per_pixel);
 }
 
 /************************************************************************/

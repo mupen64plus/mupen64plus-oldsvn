@@ -16,14 +16,14 @@
 //#define RSPTHREAD
 
 #ifndef __LINUX__
-extern HWND			hWnd;
-//extern HWND			hFullscreen;
-extern HWND			hStatusBar;
-extern HWND			hToolBar;
-extern HINSTANCE	hInstance;
+extern HWND         hWnd;
+//extern HWND           hFullscreen;
+extern HWND         hStatusBar;
+extern HWND         hToolBar;
+extern HINSTANCE    hInstance;
 #endif // !__LINUX__
 
-extern char			pluginName[];
+extern char         pluginName[];
 
 extern void (*CheckInterrupts)( void );
 extern char *screenDirectory;

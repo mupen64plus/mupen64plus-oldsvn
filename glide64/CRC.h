@@ -1,21 +1,21 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
-*	Copyright (c) 2008  Günther <guenther.emu@freenet.de>
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
+*   Copyright (c) 2008  Günther <guenther.emu@freenet.de>
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -54,34 +54,34 @@ inline unsigned int CRC_Calculate( unsigned int crc, const void *buffer, unsigne
 #ifndef GCC
   unsigned int Crc32=crc;
   __asm {
-			mov	esi, buffer
-			mov	edx, count
-			add	edx, esi
-			mov	ecx, crc
+            mov esi, buffer
+            mov edx, count
+            add edx, esi
+            mov ecx, crc
 
 loop1:
-			mov	bl, byte ptr [esi]
-			movzx	eax, cl
-			inc	esi
-			xor	al, bl
-			shr	ecx, 8
-			mov	ebx, [CRCTable+eax*4]
-			xor	ecx, ebx
+            mov bl, byte ptr [esi]
+            movzx   eax, cl
+            inc esi
+            xor al, bl
+            shr ecx, 8
+            mov ebx, [CRCTable+eax*4]
+            xor ecx, ebx
 
-			cmp	edx, esi
-			jne	loop1
+            cmp edx, esi
+            jne loop1
 
-			xor	Crc32, ecx
+            xor Crc32, ecx
    }
    return Crc32;
 #else // _WIN32
     unsigned int result = crc;
     for (const char * p = (const char*)buffer; p != (const char*)buffer + count; ++p)
     {
-	unsigned char al = result;
-	al ^= *p;
-	result >>= 8;
-	result ^= CRCTable[al];
+    unsigned char al = result;
+    al ^= *p;
+    result >>= 8;
+    result ^= CRCTable[al];
     }
     result ^= crc;
     return result;

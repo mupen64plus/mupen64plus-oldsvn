@@ -53,14 +53,14 @@ BMGError AllocateBMGImage( struct BMGImageStruct *img )
 {
     unsigned int mempal;
 
-	SetLastBMGError( BMG_OK );
+    SetLastBMGError( BMG_OK );
 
     /* make sure that all REQUIRED parameters are valid */
     if ( img->width * img->height <= 0 )
-	{
-		SetLastBMGError(errInvalidSize);
+    {
+        SetLastBMGError(errInvalidSize);
         return errInvalidSize;
-	}
+    }
 
     switch( img->bits_per_pixel )
     {
@@ -72,7 +72,7 @@ BMGError AllocateBMGImage( struct BMGImageStruct *img )
         case 32:
             break;
         default:
-			SetLastBMGError( errInvalidPixelFormat );
+            SetLastBMGError( errInvalidPixelFormat );
             return errInvalidPixelFormat;
     }
 
@@ -111,10 +111,10 @@ BMGError AllocateBMGImage( struct BMGImageStruct *img )
         mempal = img->bytes_per_palette_entry * img->palette_size;
         img->palette = (unsigned char *)calloc( mempal, sizeof(unsigned char) );
         if ( img->palette == 0 )
-		{
-			SetLastBMGError(errMemoryAllocation);
+        {
+            SetLastBMGError(errMemoryAllocation);
             return errMemoryAllocation;
-		}
+        }
     }
     else
     {
@@ -142,15 +142,15 @@ BMGError AllocateBMGImage( struct BMGImageStruct *img )
                 free( img->palette );
                 img->palette = 0;
             }
-			SetLastBMGError(errMemoryAllocation);
+            SetLastBMGError(errMemoryAllocation);
             return errMemoryAllocation;
         }
     }
     else
-	{
-		SetLastBMGError(errInvalidSize);
+    {
+        SetLastBMGError(errInvalidSize);
         return errInvalidSize;
-	}
+    }
 
     return BMG_OK;
 }
@@ -173,7 +173,7 @@ BMGError CompressBMGImage( struct BMGImageStruct *img )
     unsigned char *end;
     unsigned short scale;
 
-	SetLastBMGError( BMG_OK );
+    SetLastBMGError( BMG_OK );
 
     /* if we cannot compress it then do no harm and return "true" */
     if ( img->palette == 0 ||
@@ -193,10 +193,10 @@ BMGError CompressBMGImage( struct BMGImageStruct *img )
     /* allocate & test memory */
     new_bits = (unsigned char *)calloc( new_bit_size, sizeof(unsigned char) );
     if ( new_bits == 0 )
-	{
-		SetLastBMGError( errMemoryAllocation );
+    {
+        SetLastBMGError( errMemoryAllocation );
         return errMemoryAllocation;
-	}
+    }
 
     old_row = img->bits;
     for ( new_row = new_bits; new_row < new_bits + new_bit_size;
@@ -276,8 +276,8 @@ void FreeBMGMemory( unsigned char *mem )
 // color[0] = blue, color[1] = green, color[2] = red */
 unsigned char CreateGrayScale( unsigned char *color )
 {
-	return (unsigned char)( 0.299f * color[2] + 0.587f * color[1]
-				               + 0.114f * color[0] + 0.5f );
+    return (unsigned char)( 0.299f * color[2] + 0.587f * color[1]
+                               + 0.114f * color[0] + 0.5f );
 }
 
 /*
@@ -292,111 +292,111 @@ unsigned char CreateGrayScale( unsigned char *color )
 */
 BMGError ConvertToGrayScale( struct BMGImageStruct *img )
 {
-	unsigned char *p, *q, *r, *end, gray;
+    unsigned char *p, *q, *r, *end, gray;
 
-	SetLastBMGError( BMG_OK );
+    SetLastBMGError( BMG_OK );
 
-	/* if this is a paletted image then we simply need to convert the
-	// palette entries */
-	switch ( img->bits_per_pixel )
-	{
-	default:
-		end = img->palette + img->palette_size * img->bytes_per_palette_entry;
-		for ( p = img->palette; p < end; p += img->bytes_per_palette_entry )
-		{
-			gray = CreateGrayScale( p );
-			memset( (void *)p, gray, 3 );
-		}
-		break;
-	/* 16 BPP image are converted to 24 BPP images */
-	case 16:
-	{
-		BMGError tmp = Convert16to24( img );
-		if ( tmp != BMG_OK )
-		{
-			SetLastBMGError( tmp );
-			return tmp;
-		}
-	}
-	case 24:
-	{
-		unsigned char *new_bits;
-		unsigned char *s, *s_end;
-		unsigned short i;
+    /* if this is a paletted image then we simply need to convert the
+    // palette entries */
+    switch ( img->bits_per_pixel )
+    {
+    default:
+        end = img->palette + img->palette_size * img->bytes_per_palette_entry;
+        for ( p = img->palette; p < end; p += img->bytes_per_palette_entry )
+        {
+            gray = CreateGrayScale( p );
+            memset( (void *)p, gray, 3 );
+        }
+        break;
+    /* 16 BPP image are converted to 24 BPP images */
+    case 16:
+    {
+        BMGError tmp = Convert16to24( img );
+        if ( tmp != BMG_OK )
+        {
+            SetLastBMGError( tmp );
+            return tmp;
+        }
+    }
+    case 24:
+    {
+        unsigned char *new_bits;
+        unsigned char *s, *s_end;
+        unsigned short i;
 
-		/* calculate the new scan width */
-		unsigned int new_scan_width = img->width;
-		if ( new_scan_width % 4 && img->opt_for_bmp )
-			new_scan_width += 4 - new_scan_width % 4;
+        /* calculate the new scan width */
+        unsigned int new_scan_width = img->width;
+        if ( new_scan_width % 4 && img->opt_for_bmp )
+            new_scan_width += 4 - new_scan_width % 4;
 
-		/* allocate memory for the new pixel values */
-		new_bits = (unsigned char *)calloc( new_scan_width * img->height,
+        /* allocate memory for the new pixel values */
+        new_bits = (unsigned char *)calloc( new_scan_width * img->height,
                     sizeof(unsigned char) );
-		if ( new_bits == 0 )
-		{
-			SetLastBMGError( errMemoryAllocation );
-			return errMemoryAllocation;
-		}
+        if ( new_bits == 0 )
+        {
+            SetLastBMGError( errMemoryAllocation );
+            return errMemoryAllocation;
+        }
 
-		/* allocate memory for a 256 gray scale palette */
-		img->bytes_per_palette_entry = img->opt_for_bmp == 1 ? 4 : 3;
-		img->palette_size = 256;
-		img->palette =
-			(unsigned char *)calloc(img->bytes_per_palette_entry *
+        /* allocate memory for a 256 gray scale palette */
+        img->bytes_per_palette_entry = img->opt_for_bmp == 1 ? 4 : 3;
+        img->palette_size = 256;
+        img->palette =
+            (unsigned char *)calloc(img->bytes_per_palette_entry *
                                     img->palette_size,
-			                        sizeof(unsigned char) );
-		if ( img->palette == 0 )
-		{
-			free( new_bits );
-			img->bytes_per_palette_entry = 0;
-			img->palette_size = 0;
-			SetLastBMGError( errMemoryAllocation );
-			return errMemoryAllocation;
-		}
+                                    sizeof(unsigned char) );
+        if ( img->palette == 0 )
+        {
+            free( new_bits );
+            img->bytes_per_palette_entry = 0;
+            img->palette_size = 0;
+            SetLastBMGError( errMemoryAllocation );
+            return errMemoryAllocation;
+        }
 
-		/* assign values to the gray scale palette */
-		for ( i = 0; i < 256; i++ )
-		{
-			p = img->palette + i * img->bytes_per_palette_entry;
-			memset( (void *)p, i, 3 );
-			if ( img->bytes_per_palette_entry == 4 )
-				p[3] = 0;
-		}
+        /* assign values to the gray scale palette */
+        for ( i = 0; i < 256; i++ )
+        {
+            p = img->palette + i * img->bytes_per_palette_entry;
+            memset( (void *)p, i, 3 );
+            if ( img->bytes_per_palette_entry == 4 )
+                p[3] = 0;
+        }
 
-		/* cycle through the pixels and convert them to gray scale values */
-		q = new_bits;
-		end = img->bits + img->scan_width * img->height;
+        /* cycle through the pixels and convert them to gray scale values */
+        q = new_bits;
+        end = img->bits + img->scan_width * img->height;
 
-		for ( p = img->bits; p < end; p += img->scan_width, q += new_scan_width )
-		{
-			s_end = p + 3 * img->width;
-			r = q;
-			for ( s = p; s < s_end; s += 3, r++ )
-				*r = CreateGrayScale( s );
-		}
+        for ( p = img->bits; p < end; p += img->scan_width, q += new_scan_width )
+        {
+            s_end = p + 3 * img->width;
+            r = q;
+            for ( s = p; s < s_end; s += 3, r++ )
+                *r = CreateGrayScale( s );
+        }
 
-		free( img->bits );
-		img->bits = new_bits;
-		img->scan_width = new_scan_width;
-		img->bits_per_pixel = 8;
+        free( img->bits );
+        img->bits = new_bits;
+        img->scan_width = new_scan_width;
+        img->bits_per_pixel = 8;
 
-		break;
-	}
-	case 32:
-		end = img->bits + img->scan_width * img->height;
-		for ( p = img->bits; p < end; p += img->scan_width )
-		{
-			r = p + img->scan_width;
-			for ( q = p; q < r; q += 4 )
-			{
-				gray = CreateGrayScale( q );
-				memset( (void *)q, gray, 3 );
-			}
-		}
-		break;
-	}
+        break;
+    }
+    case 32:
+        end = img->bits + img->scan_width * img->height;
+        for ( p = img->bits; p < end; p += img->scan_width )
+        {
+            r = p + img->scan_width;
+            for ( q = p; q < r; q += 4 )
+            {
+                gray = CreateGrayScale( q );
+                memset( (void *)q, gray, 3 );
+            }
+        }
+        break;
+    }
 
-	return BMG_OK;
+    return BMG_OK;
 }
 
 /*
@@ -413,27 +413,27 @@ BMGError ConvertToGrayScale( struct BMGImageStruct *img )
 */
 BMGError ConvertToPseudoGrayScale( struct BMGImageStruct *img )
 {
-	unsigned char *p, *p_end;
-	unsigned char *q, *q_end;
-	unsigned char gray;
-	unsigned int bytes_per_pixel;
+    unsigned char *p, *p_end;
+    unsigned char *q, *q_end;
+    unsigned char gray;
+    unsigned int bytes_per_pixel;
 
-	SetLastBMGError( errMemoryAllocation );
+    SetLastBMGError( errMemoryAllocation );
 
-	if ( img->bits_per_pixel <= 16 )
-	{
-		SetLastBMGError( errInvalidPixelFormat );
-		return errInvalidPixelFormat;
-	}
+    if ( img->bits_per_pixel <= 16 )
+    {
+        SetLastBMGError( errInvalidPixelFormat );
+        return errInvalidPixelFormat;
+    }
 
-	bytes_per_pixel = img->bits_per_pixel / 8;
-	p_end = img->bits + img->scan_width * img->height;
+    bytes_per_pixel = img->bits_per_pixel / 8;
+    p_end = img->bits + img->scan_width * img->height;
 
-	for ( p = img->bits; p < p_end; p += img->scan_width )
-	{
-		q_end = p + bytes_per_pixel * img->width;
-		for ( q = p; q < q_end; q += bytes_per_pixel )
-		{
+    for ( p = img->bits; p < p_end; p += img->scan_width )
+    {
+        q_end = p + bytes_per_pixel * img->width;
+        for ( q = p; q < q_end; q += bytes_per_pixel )
+        {
         /* Rich's code has 1 function that converts an RGB triplet to a float
         // bounded by 0 and 1.  He has a second function that converts a
         // float to a pseudo gray value.  Pseudo gray values are RGB triplets
@@ -442,29 +442,29 @@ BMGError ConvertToPseudoGrayScale( struct BMGImageStruct *img )
         // looks for pseudo gray RGB triplets.  If an RGB triplet meets this
         // criteria, I leave it unchanged; otherwise, I use the common intensity
         // conversion to create a grayscale value */
-			unsigned char cmin, cmax;
+            unsigned char cmin, cmax;
 
-			cmin = q[0];
-			if ( q[1] < cmin )
-				cmin = q[1];
-			if ( q[2] < cmin )
-				cmin = q[2];
+            cmin = q[0];
+            if ( q[1] < cmin )
+                cmin = q[1];
+            if ( q[2] < cmin )
+                cmin = q[2];
 
-			cmax = q[0];
-			if ( q[1] > cmax )
-				cmax = q[1];
-			if ( q[2] > cmax )
-				cmax = q[2];
+            cmax = q[0];
+            if ( q[1] > cmax )
+                cmax = q[1];
+            if ( q[2] > cmax )
+                cmax = q[2];
 
-			if ( cmax - cmin > 2 )
-			{
-				gray = CreateGrayScale( q );
-				memset( (void *)q, gray, 3 );
-			}
-		}
-	}
+            if ( cmax - cmin > 2 )
+            {
+                gray = CreateGrayScale( q );
+                memset( (void *)q, gray, 3 );
+            }
+        }
+    }
 
-	return BMG_OK;
+    return BMG_OK;
 }
 
 #ifdef _WIN32
@@ -478,7 +478,7 @@ BMGError ConvertToPseudoGrayScale( struct BMGImageStruct *img )
 // returns BMK_OK if successfull, and error state otherwise.
 ********************************************************************************/
 BMGError GetDataFromBitmap( HBITMAP hBitmap,
-					        struct BMGImageStruct *img,
+                            struct BMGImageStruct *img,
                             int remove_alpha )
 {
     unsigned int        DIBScanWidth;
@@ -487,16 +487,16 @@ BMGError GetDataFromBitmap( HBITMAP hBitmap,
     HDC                 hDC = NULL;
     HDC                 hMemDC = NULL;
     unsigned char       red, green, blue;
-	int                 FreelpBits = 0;
-	unsigned int        numBytes;
-	size_t              soDIBSECTION = sizeof(DIBSECTION);
-	size_t              soBITMAP = sizeof(BITMAP);
+    int                 FreelpBits = 0;
+    unsigned int        numBytes;
+    size_t              soDIBSECTION = sizeof(DIBSECTION);
+    size_t              soBITMAP = sizeof(BITMAP);
 
     unsigned char *p, *q, *lpBits, alpha;
 
     jmp_buf err_jmp;
     int error;
-	BMGError bmgerr;
+    BMGError bmgerr;
 
     /* error handler */
     error = setjmp( err_jmp );
@@ -506,14 +506,14 @@ BMGError GetDataFromBitmap( HBITMAP hBitmap,
             DeleteDC( hMemDC );
         if ( hDC != NULL )
             ReleaseDC( hWnd, hDC );
-		if ( FreelpBits )
-			free( lpBits );
-		FreeBMGImage( img );
-		SetLastBMGError( (BMGError)error );
+        if ( FreelpBits )
+            free( lpBits );
+        FreeBMGImage( img );
+        SetLastBMGError( (BMGError)error );
         return (BMGError)error;
     }
 
-	SetLastBMGError( BMG_OK );
+    SetLastBMGError( BMG_OK );
     /* check for valid bitmap*/
     if ( !hBitmap )
         longjmp( err_jmp, (int)errInvalidBitmapHandle );
@@ -522,60 +522,60 @@ BMGError GetDataFromBitmap( HBITMAP hBitmap,
     // soDIBSECTION (84) if hBitmap is a handle to a DIBSECTION (DIB).
     // numBytes will equal soBITMAP (24) if hBitmap is a handle to a
     // BITMAP (DDB). */
-	numBytes = GetObject( hBitmap, sizeof(DIBSECTION), &DS );
+    numBytes = GetObject( hBitmap, sizeof(DIBSECTION), &DS );
     if ( numBytes == 0 )
         longjmp( err_jmp, (int)errWindowsAPI );
 
-	img->opt_for_bmp = 1;
-	if ( numBytes == soDIBSECTION )
-	{
-    	img->width = DS.dsBmih.biWidth;
-		img->height = DS.dsBmih.biHeight;
-		img->bits_per_pixel = (unsigned char)DS.dsBmih.biBitCount;
-		if ( img->bits_per_pixel <= 8 && DS.dsBmih.biClrUsed > 0 )
-			img->palette_size = (unsigned short)DS.dsBmih.biClrUsed;
-	    lpBits = (unsigned char *)DS.dsBm.bmBits;
-	}
-	/* this may be a DDB which must be handled differently */
-	else if ( numBytes == soBITMAP )
-	{
+    img->opt_for_bmp = 1;
+    if ( numBytes == soDIBSECTION )
+    {
+        img->width = DS.dsBmih.biWidth;
+        img->height = DS.dsBmih.biHeight;
+        img->bits_per_pixel = (unsigned char)DS.dsBmih.biBitCount;
+        if ( img->bits_per_pixel <= 8 && DS.dsBmih.biClrUsed > 0 )
+            img->palette_size = (unsigned short)DS.dsBmih.biClrUsed;
+        lpBits = (unsigned char *)DS.dsBm.bmBits;
+    }
+    /* this may be a DDB which must be handled differently */
+    else if ( numBytes == soBITMAP )
+    {
         BITMAP bm;
-		BITMAPINFO bmi;
+        BITMAPINFO bmi;
 
-	    if ( GetObject( hBitmap, sizeof(BITMAP), &bm ) == 0 )
-		    longjmp( err_jmp, (int)errWindowsAPI );
+        if ( GetObject( hBitmap, sizeof(BITMAP), &bm ) == 0 )
+            longjmp( err_jmp, (int)errWindowsAPI );
 
-		/* DDB with a palette */
-		if ( bm.bmBitsPixel <= 8 )
-		    longjmp( err_jmp, (int)errInvalidPixelFormat );
+        /* DDB with a palette */
+        if ( bm.bmBitsPixel <= 8 )
+            longjmp( err_jmp, (int)errInvalidPixelFormat );
 
-		img->width = bm.bmWidth;
-		img->height = bm.bmHeight;
-		img->bits_per_pixel = (unsigned char)bm.bmBitsPixel;
-		bmi = InternalCreateBMI( bm.bmWidth, bm.bmHeight, bm.bmBitsPixel,
+        img->width = bm.bmWidth;
+        img->height = bm.bmHeight;
+        img->bits_per_pixel = (unsigned char)bm.bmBitsPixel;
+        bmi = InternalCreateBMI( bm.bmWidth, bm.bmHeight, bm.bmBitsPixel,
                                  BI_RGB );
 
-		lpBits = (unsigned char *)calloc( bm.bmHeight * bm.bmWidthBytes,
+        lpBits = (unsigned char *)calloc( bm.bmHeight * bm.bmWidthBytes,
                                           sizeof(unsigned char) );
-		if ( lpBits == 0 )
-			longjmp( err_jmp, (int)errMemoryAllocation );
-		FreelpBits = 1;
+        if ( lpBits == 0 )
+            longjmp( err_jmp, (int)errMemoryAllocation );
+        FreelpBits = 1;
         hDC = GetDC( hWnd );
-		if ( GetDIBits(hDC, hBitmap, 0, bm.bmHeight, (void *)lpBits, &bmi,
+        if ( GetDIBits(hDC, hBitmap, 0, bm.bmHeight, (void *)lpBits, &bmi,
                        DIB_RGB_COLORS ) == 0 )
-	        longjmp( err_jmp, (int)errWindowsAPI );
+            longjmp( err_jmp, (int)errWindowsAPI );
         ReleaseDC( hWnd, hDC );
-		hDC = NULL;
-	}
-	else /* I have no idea what this is */
-		longjmp( err_jmp, (int)errInvalidBitmapHandle );
+        hDC = NULL;
+    }
+    else /* I have no idea what this is */
+        longjmp( err_jmp, (int)errInvalidBitmapHandle );
 
-	/* allocate memory */
-	bmgerr = AllocateBMGImage( img );
-	if ( bmgerr != BMG_OK )
-		longjmp( err_jmp, (int)bmgerr );
+    /* allocate memory */
+    bmgerr = AllocateBMGImage( img );
+    if ( bmgerr != BMG_OK )
+        longjmp( err_jmp, (int)bmgerr );
 
-	/* dimensions */
+    /* dimensions */
     DIBScanWidth = ( img->width * img->bits_per_pixel + 7 )/8;
     if ( DIBScanWidth % 4 )
         DIBScanWidth += 4 - DIBScanWidth % 4;
@@ -599,7 +599,7 @@ BMGError GetDataFromBitmap( HBITMAP hBitmap,
         blue  = color[0];
 
         for ( p = img->bits; p < img->bits + img->scan_width * img->height;
-		      p += 4 )
+              p += 4 )
         {
             alpha = p[3];
             p[2] = InverseAlphaComp( p[2], alpha, blue);
@@ -608,18 +608,18 @@ BMGError GetDataFromBitmap( HBITMAP hBitmap,
         }
     }
 
-	/* 32-bit DDBs must have the alpha channel set to 0xFF before they are
+    /* 32-bit DDBs must have the alpha channel set to 0xFF before they are
     // saved to a file. This may not be true for all devices that generate
     // 32-bit DDBs.  I have only created 32-bit DDBs using an Intense3D Wildcat
     // 4110 card.  The alpha channel was always 0. */
-	if (img->bits_per_pixel == 32 && numBytes == soBITMAP )
-	{
-		for ( p = img->bits + 3; p < img->bits + img->scan_width * img->height;
+    if (img->bits_per_pixel == 32 && numBytes == soBITMAP )
+    {
+        for ( p = img->bits + 3; p < img->bits + img->scan_width * img->height;
                                  p += 4 )
         {
-			*p = 0xFF;
+            *p = 0xFF;
         }
-	}
+    }
 
     /* create palette if necessary */
     if ( img->bits_per_pixel <= 8 )
@@ -636,8 +636,8 @@ BMGError GetDataFromBitmap( HBITMAP hBitmap,
         ReleaseDC( hWnd, hDC );
     }
 
-	if ( FreelpBits )
-		free( lpBits );
+    if ( FreelpBits )
+        free( lpBits );
 
     return BMG_OK;
 }
@@ -674,7 +674,7 @@ HBITMAP CreateBitmapFromData( struct BMGImageStruct img,
             ReleaseDC( hWnd, hDC );
         if ( pColor != NULL && img.bytes_per_palette_entry == 3U )
             free( pColor );
-		SetLastBMGError( (BMGError)error );
+        SetLastBMGError( (BMGError)error );
         return 0;
     }
 
@@ -855,7 +855,7 @@ BMGError ConvertPaletteToRGB( struct BMGImageStruct img_in,
     if ( error != 0 )
     {
         FreeBMGImage( img_out );
-		SetLastBMGError( (BMGError)error );
+        SetLastBMGError( (BMGError)error );
         return (BMGError)error;
     }
 

@@ -65,11 +65,11 @@ void free_all_registers()
 #if defined(PROFILE_R4300)
     if (last_access[i] && dirty[i]) flushed = 1;
 #endif
-	if (last_access[i])
+    if (last_access[i])
     {
       free_register(i);
     }
-	else
+    else
     {
       while (free_since[i] <= dst)
       {
@@ -224,11 +224,11 @@ int lru_register()
    int i, reg = 0;
    for (i=0; i<8; i++)
      {
-	if (i != ESP && (unsigned long) last_access[i] < oldest_access)
-	  {
-	     oldest_access = (unsigned long) last_access[i];
-	     reg = i;
-	  }
+    if (i != ESP && (unsigned long) last_access[i] < oldest_access)
+      {
+         oldest_access = (unsigned long) last_access[i];
+         reg = i;
+      }
      }
    return reg;
 }
@@ -239,11 +239,11 @@ int lru_base_register() /* EBP cannot be used as a base register for SIB address
    int i, reg = 0;
    for (i=0; i<8; i++)
      {
-	if (i != ESP && i != EBP && (unsigned long) last_access[i] < oldest_access)
-	  {
-	     oldest_access = (unsigned long) last_access[i];
-	     reg = i;
-	  }
+    if (i != ESP && i != EBP && (unsigned long) last_access[i] < oldest_access)
+      {
+         oldest_access = (unsigned long) last_access[i];
+         reg = i;
+      }
      }
    return reg;
 }
@@ -419,7 +419,7 @@ int allocate_register_32_w(unsigned int *addr)
     if (last_access[i] != NULL && reg_content[i] == (unsigned long long *) addr)
     {
       precomp_instr *last = last_access[i] + 1;
-	     
+         
       while (last <= dst)
       {
         last->reg_cache_infos.needed_registers[i] = NULL;
@@ -707,16 +707,16 @@ void build_wrappers(precomp_instr *instr, int start, int end, precomp_block* blo
    int i, reg;
    for (i=start; i<end; i++)
      {
-	instr[i].reg_cache_infos.need_map = 0;
-	for (reg=0; reg<8; reg++)
-	  {
-	     if (instr[i].reg_cache_infos.needed_registers[reg] != NULL)
-	       {
-		  instr[i].reg_cache_infos.need_map = 1;
-		  build_wrapper(&instr[i], instr[i].reg_cache_infos.jump_wrapper, block);
-		  break;
-	       }
-	  }
+    instr[i].reg_cache_infos.need_map = 0;
+    for (reg=0; reg<8; reg++)
+      {
+         if (instr[i].reg_cache_infos.needed_registers[reg] != NULL)
+           {
+          instr[i].reg_cache_infos.need_map = 1;
+          build_wrapper(&instr[i], instr[i].reg_cache_infos.jump_wrapper, block);
+          break;
+           }
+      }
      }
 }
 

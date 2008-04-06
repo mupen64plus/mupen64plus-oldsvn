@@ -8,14 +8,14 @@
 
 #include <SDL/SDL.h>
 
-#define EXPORT				__declspec(dllexport)
+#define EXPORT              __declspec(dllexport)
 
 #include <stdio.h>
 #include "winlnxdefs.h"
 #include "math.h"
 #include "COLOR.h"
 
-#include <math.h>			// For sqrt()
+#include <math.h>           // For sqrt()
 #include <iostream>
 #include <fstream>
 #include <istream>
@@ -32,7 +32,7 @@
 #endif
 
 #ifndef SAFE_CHECK
-# define SAFE_CHECK(a)	if( (a) == NULL ) {ErrorMsg("Creater out of memory"); throw new std::exception();}
+# define SAFE_CHECK(a)  if( (a) == NULL ) {ErrorMsg("Creater out of memory"); throw new std::exception();}
 #endif
 
 #include "typedefs.h"

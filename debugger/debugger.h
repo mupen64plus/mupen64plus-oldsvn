@@ -50,7 +50,7 @@
 
 
 
-int debugger_mode;	// Debugger option enabled.
+int debugger_mode;  // Debugger option enabled.
 
 // State of the Emulation Thread:
 //  0 -> pause, 1 -> step, 2 -> run.
@@ -62,12 +62,12 @@ void init_debugger();
 void update_debugger();
 
 
-pthread_cond_t	debugger_done_cond;
+pthread_cond_t  debugger_done_cond;
 pthread_mutex_t mutex;
 
-GdkColor	color_modif,	// Color of modified register.
-		color_ident;	// Unchanged register.
+GdkColor    color_modif,    // Color of modified register.
+        color_ident;    // Unchanged register.
 
-GtkWidget	*winRegisters;
+GtkWidget   *winRegisters;
 
 #endif //DEBUGGER_H

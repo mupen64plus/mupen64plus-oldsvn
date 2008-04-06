@@ -24,23 +24,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class COGLDecodedMux : public DecodedMux
 {
 protected:
-	virtual void Simplify(void);
-	virtual void Reformat(void);
-	
+    virtual void Simplify(void);
+    virtual void Reformat(void);
+    
 };
 
 class COGLExtDecodedMux : public COGLDecodedMux
 {
 protected:
-	virtual void FurtherFormatForOGL2(void);
-	virtual void Simplify(void);
+    virtual void FurtherFormatForOGL2(void);
+    virtual void Simplify(void);
 };
 
 class COGLExtDecodedMuxTNT2 : public COGLExtDecodedMux
 {
 protected:
-	virtual void FurtherFormatForOGL2(void);
-	
+    virtual void FurtherFormatForOGL2(void);
+    
 };
 
 #endif

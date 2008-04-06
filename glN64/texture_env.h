@@ -3,14 +3,14 @@
 
 struct TexEnv
 {
-	GLint mode;
+    GLint mode;
 
-	struct
-	{
-		WORD color, alpha;
-	} fragment;
+    struct
+    {
+        WORD color, alpha;
+    } fragment;
 
-	BOOL usesT0, usesT1;
+    BOOL usesT0, usesT1;
 };
 
 void Init_texture_env();

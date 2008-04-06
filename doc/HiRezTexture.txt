@@ -20,9 +20,9 @@ How to use high resolution textures in Rice Video 6.1.0 and after
 
    c. Textures are dumpped in either PNG or BMP format
       - RGBA, IA (intensity and alpha) textures are dumpped in 3 (or 2) files
-	[filename part 1 - 4]_all.png
+    [filename part 1 - 4]_all.png
         [filename part 1 - 4]_rgb.png
-	[filename part 1 - 4]_a.png if the alpha channel is not all 0xFF
+    [filename part 1 - 4]_a.png if the alpha channel is not all 0xFF
 
         Please read the later section regarding filenameing.
         *_all.png files are 32bit per pixel PNG files with RGBA channels
@@ -31,7 +31,7 @@ How to use high resolution textures in Rice Video 6.1.0 and after
 
       - I (intensity only) textures are dumpped in 2 files, the alpha channel is not needed
         [filename part 1 - 4]_rgb.png
-	[filename part 1 - 4]_all.png
+    [filename part 1 - 4]_all.png
 
       - Color indexed textures are dumpped in 1 file
         [filename part 1 - 4]_ci.bmp
@@ -66,9 +66,9 @@ How to use high resolution textures in Rice Video 6.1.0 and after
 
       - Color indexed textures must be still in palletted BMP format
       - For RGBA, IA and I textures, you can provide
-	        *_rgb.png, *_a.png   or
-	        *_rgb.bmp, *_a.bmp   or
-	        *_all.png
+            *_rgb.png, *_a.png   or
+            *_rgb.bmp, *_a.bmp   or
+            *_all.png
       - Don't provide duplicate files for the same textures. If you provide the *_rgb, *_a files
         and also *_all.png file, the actually loaded files are not determined.
 
@@ -76,29 +76,29 @@ How to use high resolution textures in Rice Video 6.1.0 and after
 
    Example: THE LEGEND OF ZELDA#0A74F78C#4#1_rgb.png
 
-	[part 1]#[part 2]#[part 3]#[part 4]_[part 5].[extension]
+    [part 1]#[part 2]#[part 3]#[part 4]_[part 5].[extension]
 
-	part 1: The N64 game internal name
-	part 2: CRC32
-	part 3:	Texture format in N64 game
-		0 = RGBA
-		1 = YUV
-		2 = CI
-		3 = IA
-		4 = I
-	part 4: Texture size in N64 game
-		0 = 4 bit
-		1 = 8 bit
-		2 = 16 bit
-		3 = 32 bit
-	part 5: dumpped texture format
-		rgb = 24 bit RGB format
-		a   = 24 bit alpha channel only in 24 bit RGB intensity
-		all = 32 bit RGB format
-		ci  = color indexed (BMP) format
-	extension:
-		PNG
-		BMP
+    part 1: The N64 game internal name
+    part 2: CRC32
+    part 3: Texture format in N64 game
+        0 = RGBA
+        1 = YUV
+        2 = CI
+        3 = IA
+        4 = I
+    part 4: Texture size in N64 game
+        0 = 4 bit
+        1 = 8 bit
+        2 = 16 bit
+        3 = 32 bit
+    part 5: dumpped texture format
+        rgb = 24 bit RGB format
+        a   = 24 bit alpha channel only in 24 bit RGB intensity
+        all = 32 bit RGB format
+        ci  = color indexed (BMP) format
+    extension:
+        PNG
+        BMP
 
 5. How to make your own hi-rez textures
    a. The hi-rez texture size could be 2, 3 or 4 times as the orginal N64 texture size

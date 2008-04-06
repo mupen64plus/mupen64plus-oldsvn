@@ -29,160 +29,160 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class IColor {
 public:
-	uint8 r;
-	uint8 g;
-	uint8 b;
-	uint8 a;
+    uint8 r;
+    uint8 g;
+    uint8 b;
+    uint8 a;
 
-	IColor(COLOR rgba)
-	{
-		*((COLOR*)this) = rgba;
-	}
+    IColor(COLOR rgba)
+    {
+        *((COLOR*)this) = rgba;
+    }
 
-	IColor()
-	{
-		*((COLOR*)this) = 0;
-	}
+    IColor()
+    {
+        *((COLOR*)this) = 0;
+    }
 
-	IColor(XCOLOR &rgba)
-	{
+    IColor(XCOLOR &rgba)
+    {
         *((COLOR*)this) = DWORD(rgba);
-	}
+    }
 
-	inline IColor operator = (const IColor &sec) const
-	{
-		*((COLOR*)this) = *((COLOR*)&sec);
-		return *this;
-	}
+    inline IColor operator = (const IColor &sec) const
+    {
+        *((COLOR*)this) = *((COLOR*)&sec);
+        return *this;
+    }
 
-	inline IColor operator = (COLOR col) const
-	{
-		*((COLOR*)this) = col;
-		return *this;
-	}
+    inline IColor operator = (COLOR col) const
+    {
+        *((COLOR*)this) = col;
+        return *this;
+    }
 
-	inline IColor operator + (const IColor &sec) const
-	{
-		IColor newc;
-		newc.r = (uint8)min(DWORD(r)+DWORD(sec.r),0xFF);
-		newc.g = (uint8)min(DWORD(g)+DWORD(sec.g),0xFF);
-		newc.b = (uint8)min(DWORD(b)+DWORD(sec.b),0xFF);
-		newc.a = (uint8)min(DWORD(a)+DWORD(sec.a),0xFF);
+    inline IColor operator + (const IColor &sec) const
+    {
+        IColor newc;
+        newc.r = (uint8)min(DWORD(r)+DWORD(sec.r),0xFF);
+        newc.g = (uint8)min(DWORD(g)+DWORD(sec.g),0xFF);
+        newc.b = (uint8)min(DWORD(b)+DWORD(sec.b),0xFF);
+        newc.a = (uint8)min(DWORD(a)+DWORD(sec.a),0xFF);
 
-		return newc;
-	}
+        return newc;
+    }
 
-	inline IColor operator - (const IColor &sec) const
-	{
-		IColor newc;
-		newc.r = max(int(r)-int(sec.r),0);
-		newc.g = max(int(g)-int(sec.g),0);
-		newc.b = max(int(b)-int(sec.b),0);
-		newc.a = max(int(a)-int(sec.a),0);
+    inline IColor operator - (const IColor &sec) const
+    {
+        IColor newc;
+        newc.r = max(int(r)-int(sec.r),0);
+        newc.g = max(int(g)-int(sec.g),0);
+        newc.b = max(int(b)-int(sec.b),0);
+        newc.a = max(int(a)-int(sec.a),0);
 
-		return newc;
-	}
-	inline IColor operator * (const IColor &sec) const
-	{
-		IColor newc;
-		newc.r = (uint8)min(DWORD(r)*DWORD(sec.r)/256,255);
-		newc.g = (uint8)min(DWORD(g)*DWORD(sec.g)/256,255);
-		newc.b = (uint8)min(DWORD(b)*DWORD(sec.b)/256,255);
-		newc.a = (uint8)min(DWORD(a)*DWORD(sec.a)/256,255);
-		return newc;
-	}
+        return newc;
+    }
+    inline IColor operator * (const IColor &sec) const
+    {
+        IColor newc;
+        newc.r = (uint8)min(DWORD(r)*DWORD(sec.r)/256,255);
+        newc.g = (uint8)min(DWORD(g)*DWORD(sec.g)/256,255);
+        newc.b = (uint8)min(DWORD(b)*DWORD(sec.b)/256,255);
+        newc.a = (uint8)min(DWORD(a)*DWORD(sec.a)/256,255);
+        return newc;
+    }
 
-	inline IColor& operator += (const IColor &sec)
-	{
-		r = uint8(min(DWORD(r)+DWORD(sec.r),255));
-		g = uint8(min(DWORD(g)+DWORD(sec.g),255));
-		b = uint8(min(DWORD(b)+DWORD(sec.b),255));
-		a = uint8(min(DWORD(a)+DWORD(sec.a),255));
-		return *this;
-	}
+    inline IColor& operator += (const IColor &sec)
+    {
+        r = uint8(min(DWORD(r)+DWORD(sec.r),255));
+        g = uint8(min(DWORD(g)+DWORD(sec.g),255));
+        b = uint8(min(DWORD(b)+DWORD(sec.b),255));
+        a = uint8(min(DWORD(a)+DWORD(sec.a),255));
+        return *this;
+    }
 
-	inline IColor& operator -= (const IColor &sec)
-	{
-		r = uint8(max(int(r)-int(sec.r),0));
-		g = uint8(max(int(g)-int(sec.g),0));
-		b = uint8(max(int(b)-int(sec.b),0));
-		a = uint8(max(int(a)-int(sec.a),0));
-		return *this;
-	}
+    inline IColor& operator -= (const IColor &sec)
+    {
+        r = uint8(max(int(r)-int(sec.r),0));
+        g = uint8(max(int(g)-int(sec.g),0));
+        b = uint8(max(int(b)-int(sec.b),0));
+        a = uint8(max(int(a)-int(sec.a),0));
+        return *this;
+    }
 
-	inline IColor& operator *= (const IColor &sec)
-	{
-		r = uint8(min(DWORD(r)*DWORD(sec.r)/256,255));
-		g = uint8(min(DWORD(g)*DWORD(sec.g)/256,255));
-		b = uint8(min(DWORD(b)*DWORD(sec.b)/256,255));
-		a = uint8(min(DWORD(a)*DWORD(sec.a)/256,255));
-		return *this;
-	}
-	
-	inline IColor& operator += (XCOLOR val)
-	{
-		IColor newc(val);
-		return this->operator += (newc);
-	}
+    inline IColor& operator *= (const IColor &sec)
+    {
+        r = uint8(min(DWORD(r)*DWORD(sec.r)/256,255));
+        g = uint8(min(DWORD(g)*DWORD(sec.g)/256,255));
+        b = uint8(min(DWORD(b)*DWORD(sec.b)/256,255));
+        a = uint8(min(DWORD(a)*DWORD(sec.a)/256,255));
+        return *this;
+    }
+    
+    inline IColor& operator += (XCOLOR val)
+    {
+        IColor newc(val);
+        return this->operator += (newc);
+    }
 
-	inline IColor& operator -= (XCOLOR val)
-	{
-		IColor newc(val);
-		return this->operator-=(newc);
-	}
+    inline IColor& operator -= (XCOLOR val)
+    {
+        IColor newc(val);
+        return this->operator-=(newc);
+    }
 
-	inline IColor& operator *= (XCOLOR val)
-	{
-		IColor newc(val);
-		return this->operator*=(newc);
-	}
+    inline IColor& operator *= (XCOLOR val)
+    {
+        IColor newc(val);
+        return this->operator*=(newc);
+    }
 
-	inline IColor operator + (XCOLOR val) const
-	{
-		IColor newc(val);
-		return this->operator+(newc);
-	}
+    inline IColor operator + (XCOLOR val) const
+    {
+        IColor newc(val);
+        return this->operator+(newc);
+    }
 
-	inline IColor operator - (XCOLOR val) const
-	{
-		IColor newc(val);
-		return this->operator-(newc);
-	}
+    inline IColor operator - (XCOLOR val) const
+    {
+        IColor newc(val);
+        return this->operator-(newc);
+    }
 
-	inline IColor operator * (XCOLOR val) const
-	{
-		IColor newc(val);
-		return this->operator*(newc);
-	}
+    inline IColor operator * (XCOLOR val) const
+    {
+        IColor newc(val);
+        return this->operator*(newc);
+    }
 
-	inline operator COLOR() const
-	{
-		return *((COLOR*)this);
-	}
+    inline operator COLOR() const
+    {
+        return *((COLOR*)this);
+    }
 
-	inline operator XCOLOR() const
-	{
-		XCOLOR rgba;
-		rgba.r = (float)r/256.0f;
-		rgba.g = (float)g/256.0f;
-		rgba.b = (float)b/256.0f;
-		rgba.a = (float)a/256.0f;
+    inline operator XCOLOR() const
+    {
+        XCOLOR rgba;
+        rgba.r = (float)r/256.0f;
+        rgba.g = (float)g/256.0f;
+        rgba.b = (float)b/256.0f;
+        rgba.a = (float)a/256.0f;
 
-		return rgba;
-	}
+        return rgba;
+    }
 
-	inline void Complement()
-	{
-		r = 0xFF-r;
-		g = 0xFF-g;
-		b = 0xFF-b;
-		a = 0xFF-a;
-	}
+    inline void Complement()
+    {
+        r = 0xFF-r;
+        g = 0xFF-g;
+        b = 0xFF-b;
+        a = 0xFF-a;
+    }
 
-	inline void AlphaReplicate()
-	{
-		r=g=b=a;
-	}
+    inline void AlphaReplicate()
+    {
+        r=g=b=a;
+    }
 };
 
 

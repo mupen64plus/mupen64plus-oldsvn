@@ -26,29 +26,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Real render can either implement or not implement these extended render functions
 
 // These extended render functions are in different groups:
-// - Group #1:	Related to frame buffer
+// - Group #1:  Related to frame buffer
 // - Group #2:  Related to 2D sprite
 // - Group #3:  Related BG and ScaledBG
 class CExtendedRender 
 {
 public:
-	virtual void DrawFrameBuffer(bool useVIreg=false, uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0) {};
-	virtual void LoadFrameBuffer(bool useVIreg=false, uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0) {};
-	virtual void LoadTxtrBufFromRDRAM(void) {};
-	virtual void LoadTxtrBufIntoTexture(void) {};
+    virtual void DrawFrameBuffer(bool useVIreg=false, uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0) {};
+    virtual void LoadFrameBuffer(bool useVIreg=false, uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0) {};
+    virtual void LoadTxtrBufFromRDRAM(void) {};
+    virtual void LoadTxtrBufIntoTexture(void) {};
 
-	virtual void DrawSprite2D(Sprite2DInfo &info, uint32 ucode) {};
-	virtual void LoadSprite2D(Sprite2DInfo &info, uint32 ucode) {};
+    virtual void DrawSprite2D(Sprite2DInfo &info, uint32 ucode) {};
+    virtual void LoadSprite2D(Sprite2DInfo &info, uint32 ucode) {};
 
-	
-	virtual void DrawSprite(uObjTxSprite &sprite, bool rectR = true) {};
-	virtual void DrawObjBG1CYC(uObjScaleBg &bg, bool scaled=true) {};
-	virtual void DrawObjBGCopy(uObjBg &info) {};
-	virtual void LoadObjBGCopy(uObjBg &info) {};
-	virtual void LoadObjBG1CYC(uObjScaleBg &info) {};
-	virtual void LoadObjSprite(uObjTxSprite &info, bool useTIAddr=false) {};
+    
+    virtual void DrawSprite(uObjTxSprite &sprite, bool rectR = true) {};
+    virtual void DrawObjBG1CYC(uObjScaleBg &bg, bool scaled=true) {};
+    virtual void DrawObjBGCopy(uObjBg &info) {};
+    virtual void LoadObjBGCopy(uObjBg &info) {};
+    virtual void LoadObjBG1CYC(uObjScaleBg &info) {};
+    virtual void LoadObjSprite(uObjTxSprite &info, bool useTIAddr=false) {};
 
-	virtual void DrawText(const char* str, RECT *rect) {};
+    virtual void DrawText(const char* str, RECT *rect) {};
 };
 
 

@@ -525,92 +525,92 @@ static void (*recomp_special[64])(void) =
 
 static void RBLTZ()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BLTZ;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BLTZ_IDLE;
-	     if (dynacore) genbltz_idle();
-	  }
-	else if (dynacore) genbltz();
+    if (check_nop)
+      {
+         dst->ops = BLTZ_IDLE;
+         if (dynacore) genbltz_idle();
+      }
+    else if (dynacore) genbltz();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BLTZ_OUT;
-	if (dynacore) genbltz_out();
+    dst->ops = BLTZ_OUT;
+    if (dynacore) genbltz_out();
      }
    else if (dynacore) genbltz();
 }
 
 static void RBGEZ()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BGEZ;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BGEZ_IDLE;
-	     if (dynacore) genbgez_idle();
-	  }
-	else if (dynacore) genbgez();
+    if (check_nop)
+      {
+         dst->ops = BGEZ_IDLE;
+         if (dynacore) genbgez_idle();
+      }
+    else if (dynacore) genbgez();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BGEZ_OUT;
-	if (dynacore) genbgez_out();
+    dst->ops = BGEZ_OUT;
+    if (dynacore) genbgez_out();
      }
    else if (dynacore) genbgez();
 }
 
 static void RBLTZL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BLTZL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BLTZL_IDLE;
-	     if (dynacore) genbltzl_idle();
-	  }
-	else if (dynacore) genbltzl();
+    if (check_nop)
+      {
+         dst->ops = BLTZL_IDLE;
+         if (dynacore) genbltzl_idle();
+      }
+    else if (dynacore) genbltzl();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BLTZL_OUT;
-	if (dynacore) genbltzl_out();
+    dst->ops = BLTZL_OUT;
+    if (dynacore) genbltzl_out();
      }
    else if (dynacore) genbltzl();
 }
 
 static void RBGEZL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BGEZL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BGEZL_IDLE;
-	     if (dynacore) genbgezl_idle();
-	  }
-	else if (dynacore) genbgezl();
+    if (check_nop)
+      {
+         dst->ops = BGEZL_IDLE;
+         if (dynacore) genbgezl_idle();
+      }
+    else if (dynacore) genbgezl();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BGEZL_OUT;
-	if (dynacore) genbgezl_out();
+    dst->ops = BGEZL_OUT;
+    if (dynacore) genbgezl_out();
      }
    else if (dynacore) genbgezl();
 }
@@ -653,92 +653,92 @@ static void RTNEI()
 
 static void RBLTZAL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BLTZAL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BLTZAL_IDLE;
-	     if (dynacore) genbltzal_idle();
-	  }
-	else if (dynacore) genbltzal();
+    if (check_nop)
+      {
+         dst->ops = BLTZAL_IDLE;
+         if (dynacore) genbltzal_idle();
+      }
+    else if (dynacore) genbltzal();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BLTZAL_OUT;
-	if (dynacore) genbltzal_out();
+    dst->ops = BLTZAL_OUT;
+    if (dynacore) genbltzal_out();
      }
    else if (dynacore) genbltzal();
 }
 
 static void RBGEZAL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BGEZAL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BGEZAL_IDLE;
-	     if (dynacore) genbgezal_idle();
-	  }
-	else if (dynacore) genbgezal();
+    if (check_nop)
+      {
+         dst->ops = BGEZAL_IDLE;
+         if (dynacore) genbgezal_idle();
+      }
+    else if (dynacore) genbgezal();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BGEZAL_OUT;
-	if (dynacore) genbgezal_out();
+    dst->ops = BGEZAL_OUT;
+    if (dynacore) genbgezal_out();
      }
    else if (dynacore) genbgezal();
 }
 
 static void RBLTZALL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BLTZALL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BLTZALL_IDLE;
-	     if (dynacore) genbltzall_idle();
-	  }
-	else if (dynacore) genbltzall();
+    if (check_nop)
+      {
+         dst->ops = BLTZALL_IDLE;
+         if (dynacore) genbltzall_idle();
+      }
+    else if (dynacore) genbltzall();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BLTZALL_OUT;
-	if (dynacore) genbltzall_out();
+    dst->ops = BLTZALL_OUT;
+    if (dynacore) genbltzall_out();
      }
    else if (dynacore) genbltzall();
 }
 
 static void RBGEZALL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BGEZALL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BGEZALL_IDLE;
-	     if (dynacore) genbgezall_idle();
-	  }
-	else if (dynacore) genbgezall();
+    if (check_nop)
+      {
+         dst->ops = BGEZALL_IDLE;
+         if (dynacore) genbgezall_idle();
+      }
+    else if (dynacore) genbgezall();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BGEZALL_OUT;
-	if (dynacore) genbgezall_out();
+    dst->ops = BGEZALL_OUT;
+    if (dynacore) genbgezall_out();
      }
    else if (dynacore) genbgezall();
 }
@@ -838,92 +838,92 @@ static void (*recomp_cop0[32])(void) =
 
 static void RBC1F()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BC1F;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BC1F_IDLE;
-	     if (dynacore) genbc1f_idle();
-	  }
-	else if (dynacore) genbc1f();
+    if (check_nop)
+      {
+         dst->ops = BC1F_IDLE;
+         if (dynacore) genbc1f_idle();
+      }
+    else if (dynacore) genbc1f();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BC1F_OUT;
-	if (dynacore) genbc1f_out();
+    dst->ops = BC1F_OUT;
+    if (dynacore) genbc1f_out();
      }
    else if (dynacore) genbc1f();
 }
 
 static void RBC1T()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BC1T;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BC1T_IDLE;
-	     if (dynacore) genbc1t_idle();
-	  }
-	else if (dynacore) genbc1t();
+    if (check_nop)
+      {
+         dst->ops = BC1T_IDLE;
+         if (dynacore) genbc1t_idle();
+      }
+    else if (dynacore) genbc1t();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BC1T_OUT;
-	if (dynacore) genbc1t_out();
+    dst->ops = BC1T_OUT;
+    if (dynacore) genbc1t_out();
      }
    else if (dynacore) genbc1t();
 }
 
 static void RBC1FL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BC1FL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BC1FL_IDLE;
-	     if (dynacore) genbc1fl_idle();
-	  }
-	else if (dynacore) genbc1fl();
+    if (check_nop)
+      {
+         dst->ops = BC1FL_IDLE;
+         if (dynacore) genbc1fl_idle();
+      }
+    else if (dynacore) genbc1fl();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BC1FL_OUT;
-	if (dynacore) genbc1fl_out();
+    dst->ops = BC1FL_OUT;
+    if (dynacore) genbc1fl_out();
      }
    else if (dynacore) genbc1fl();
 }
 
 static void RBC1TL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BC1TL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BC1TL_IDLE;
-	     if (dynacore) genbc1tl_idle();
-	  }
-	else if (dynacore) genbc1tl();
+    if (check_nop)
+      {
+         dst->ops = BC1TL_IDLE;
+         if (dynacore) genbc1tl_idle();
+      }
+    else if (dynacore) genbc1tl();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BC1TL_OUT;
-	if (dynacore) genbc1tl_out();
+    dst->ops = BC1TL_OUT;
+    if (dynacore) genbc1tl_out();
      }
    else if (dynacore) genbc1tl();
 }
@@ -1620,138 +1620,138 @@ static void RREGIMM()
 
 static void RJ()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = J_OUT;
    recompile_standard_j_type();
    target = (dst->f.j.inst_index<<2) | (dst->addr & 0xF0000000);
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = J_IDLE;
-	     if (dynacore) genj_idle();
-	  }
-	else if (dynacore) genj();
+    if (check_nop)
+      {
+         dst->ops = J_IDLE;
+         if (dynacore) genj_idle();
+      }
+    else if (dynacore) genj();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = J_OUT;
-	if (dynacore) genj_out();
+    dst->ops = J_OUT;
+    if (dynacore) genj_out();
      }
    else if (dynacore) genj();
 }
 
 static void RJAL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = JAL_OUT;
    recompile_standard_j_type();
    target = (dst->f.j.inst_index<<2) | (dst->addr & 0xF0000000);
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = JAL_IDLE;
-	     if (dynacore) genjal_idle();
-	  }
-	else if (dynacore) genjal();
+    if (check_nop)
+      {
+         dst->ops = JAL_IDLE;
+         if (dynacore) genjal_idle();
+      }
+    else if (dynacore) genjal();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = JAL_OUT;
-	if (dynacore) genjal_out();
+    dst->ops = JAL_OUT;
+    if (dynacore) genjal_out();
      }
    else if (dynacore) genjal();
 }
 
 static void RBEQ()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BEQ;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BEQ_IDLE;
-	     if (dynacore) genbeq_idle();
-	  }
-	else if (dynacore) genbeq();
+    if (check_nop)
+      {
+         dst->ops = BEQ_IDLE;
+         if (dynacore) genbeq_idle();
+      }
+    else if (dynacore) genbeq();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BEQ_OUT;
-	if (dynacore) genbeq_out();
+    dst->ops = BEQ_OUT;
+    if (dynacore) genbeq_out();
      }
    else if (dynacore) genbeq();
 }
 
 static void RBNE()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BNE;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BNE_IDLE;
-	     if (dynacore) genbne_idle();
-	  }
-	else if (dynacore) genbne();
+    if (check_nop)
+      {
+         dst->ops = BNE_IDLE;
+         if (dynacore) genbne_idle();
+      }
+    else if (dynacore) genbne();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BNE_OUT;
-	if (dynacore) genbne_out();
+    dst->ops = BNE_OUT;
+    if (dynacore) genbne_out();
      }
    else if (dynacore) genbne();
 }
 
 static void RBLEZ()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BLEZ;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BLEZ_IDLE;
-	     if (dynacore) genblez_idle();
-	  }
-	else if (dynacore) genblez();
+    if (check_nop)
+      {
+         dst->ops = BLEZ_IDLE;
+         if (dynacore) genblez_idle();
+      }
+    else if (dynacore) genblez();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BLEZ_OUT;
-	if (dynacore) genblez_out();
+    dst->ops = BLEZ_OUT;
+    if (dynacore) genblez_out();
      }
    else if (dynacore) genblez();
 }
 
 static void RBGTZ()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BGTZ;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BGTZ_IDLE;
-	     if (dynacore) genbgtz_idle();
-	  }
-	else if (dynacore) genbgtz();
+    if (check_nop)
+      {
+         dst->ops = BGTZ_IDLE;
+         if (dynacore) genbgtz_idle();
+      }
+    else if (dynacore) genbgtz();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BGTZ_OUT;
-	if (dynacore) genbgtz_out();
+    dst->ops = BGTZ_OUT;
+    if (dynacore) genbgtz_out();
      }
    else if (dynacore) genbgtz();
 }
@@ -1832,92 +1832,92 @@ static void RCOP1()
 
 static void RBEQL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BEQL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BEQL_IDLE;
-	     if (dynacore) genbeql_idle();
-	  }
-	else if (dynacore) genbeql();
+    if (check_nop)
+      {
+         dst->ops = BEQL_IDLE;
+         if (dynacore) genbeql_idle();
+      }
+    else if (dynacore) genbeql();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BEQL_OUT;
-	if (dynacore) genbeql_out();
+    dst->ops = BEQL_OUT;
+    if (dynacore) genbeql_out();
      }
    else if (dynacore) genbeql();
 }
 
 static void RBNEL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BNEL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BNEL_IDLE;
-	     if (dynacore) genbnel_idle();
-	  }
-	else if (dynacore) genbnel();
+    if (check_nop)
+      {
+         dst->ops = BNEL_IDLE;
+         if (dynacore) genbnel_idle();
+      }
+    else if (dynacore) genbnel();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BNEL_OUT;
-	if (dynacore) genbnel_out();
+    dst->ops = BNEL_OUT;
+    if (dynacore) genbnel_out();
      }
    else if (dynacore) genbnel();
 }
 
 static void RBLEZL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BLEZL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BLEZL_IDLE;
-	     if (dynacore) genblezl_idle();
-	  }
-	else if (dynacore) genblezl();
+    if (check_nop)
+      {
+         dst->ops = BLEZL_IDLE;
+         if (dynacore) genblezl_idle();
+      }
+    else if (dynacore) genblezl();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BLEZL_OUT;
-	if (dynacore) genblezl_out();
+    dst->ops = BLEZL_OUT;
+    if (dynacore) genblezl_out();
      }
    else if (dynacore) genblezl();
 }
 
 static void RBGTZL()
 {
-	unsigned int target;
+    unsigned int target;
    dst->ops = BGTZL;
    recompile_standard_i_type();
    target = dst->addr + dst->f.i.immediate*4 + 4;
    if (target == dst->addr)
      {
-	if (check_nop)
-	  {
-	     dst->ops = BGTZL_IDLE;
-	     if (dynacore) genbgtzl_idle();
-	  }
-	else if (dynacore) genbgtzl();
+    if (check_nop)
+      {
+         dst->ops = BGTZL_IDLE;
+         if (dynacore) genbgtzl_idle();
+      }
+    else if (dynacore) genbgtzl();
      }
    else if (!interpcore && (target < dst_block->start || target >= dst_block->end || dst->addr == (dst_block->end-4)))
      {
-	dst->ops = BGTZL_OUT;
-	if (dynacore) genbgtzl_out();
+    dst->ops = BGTZL_OUT;
+    if (dynacore) genbgtzl_out();
      }
    else if (dynacore) genbgtzl();
 }
@@ -2175,42 +2175,42 @@ void init_block(int *source, precomp_block *block)
   if (!block->block)
   {
     long memsize = ((length+1)+(length>>2)) * sizeof(precomp_instr);
-	block->block = malloc(memsize);
+    block->block = malloc(memsize);
     memset(block->block, 0, memsize);
-	already_exist = 0;
+    already_exist = 0;
   }
 
   if (dynacore)
   {
-	if (!block->code)
+    if (!block->code)
     {
 #if defined(PROFILE_R4300)
-	  block->code = malloc(524288); /* allocate so much code space that we'll never have to realloc(), because this may */
+      block->code = malloc(524288); /* allocate so much code space that we'll never have to realloc(), because this may */
       max_code_length = 524288;     /* cause instruction locations to move, and break our profiling data                */
 #else
-	  block->code = malloc(32768);
+      block->code = malloc(32768);
       max_code_length = 32768;
 #endif
     }
-	else
+    else
     {
       max_code_length = block->max_code_length;
     }
-	code_length = 0;
-	inst_pointer = &block->code;
-	
-	if (block->jumps_table)
+    code_length = 0;
+    inst_pointer = &block->code;
+    
+    if (block->jumps_table)
     {
-	  free(block->jumps_table);
-	  block->jumps_table = NULL;
+      free(block->jumps_table);
+      block->jumps_table = NULL;
     }
-	if (block->riprel_table)
+    if (block->riprel_table)
     {
-	  free(block->riprel_table);
-	  block->riprel_table = NULL;
+      free(block->riprel_table);
+      block->riprel_table = NULL;
     }
-	init_assembler(NULL, 0, NULL, 0);
-	init_cache(block->block);
+    init_assembler(NULL, 0, NULL, 0);
+    init_cache(block->block);
   }
    
   if (!already_exist)
@@ -2225,14 +2225,14 @@ void init_block(int *source, precomp_block *block)
 
     for (i=0; i<length; i++)
     {
-	  dst = block->block + i;
-	  dst->addr = block->start + i*4;
-	  dst->reg_cache_infos.need_map = 0;
-	  dst->local_addr = code_length;
+      dst = block->block + i;
+      dst->addr = block->start + i*4;
+      dst->reg_cache_infos.need_map = 0;
+      dst->local_addr = code_length;
 #ifdef COMPARE_CORE
-	  if (dynacore) gendebug();
+      if (dynacore) gendebug();
 #endif
-	  RNOTCOMPILED();
+      RNOTCOMPILED();
     }
 #if defined(PROFILE_R4300)
   fclose(pfProfile);
@@ -2271,9 +2271,9 @@ void init_block(int *source, precomp_block *block)
    */
   invalid_code[block->start>>12] = 0;
   if (block->end < 0x80000000 || block->start >= 0xc0000000)
-  {	
+  { 
     unsigned int paddr;
-	
+    
     paddr = virtual_to_physical_address(block->start, 2);
     invalid_code[paddr>>12] = 0;
     if (!blocks[paddr>>12])
@@ -2287,7 +2287,7 @@ void init_block(int *source, precomp_block *block)
       blocks[paddr>>12]->end = (paddr & ~0xFFF) + 0x1000;
     }
     init_block(NULL, blocks[paddr>>12]);
-	
+    
     paddr += block->end - block->start - 4;
     invalid_code[paddr>>12] = 0;
     if (!blocks[paddr>>12])
@@ -2351,11 +2351,11 @@ void recompile_block(int *source, precomp_block *block, unsigned int func)
    
    if (dynacore)
      {
-	code_length = block->code_length;
-	max_code_length = block->max_code_length;
-	inst_pointer = &block->code;
-	init_assembler(block->jumps_table, block->jumps_number, block->riprel_table, block->riprel_number);
-	init_cache(block->block + (func & 0xFFF) / 4);
+    code_length = block->code_length;
+    max_code_length = block->max_code_length;
+    inst_pointer = &block->code;
+    init_assembler(block->jumps_table, block->jumps_number, block->riprel_table, block->riprel_number);
+    init_cache(block->block + (func & 0xFFF) / 4);
      }
 
 #if defined(PROFILE_R4300)
@@ -2364,54 +2364,54 @@ void recompile_block(int *source, precomp_block *block, unsigned int func)
 
    for (i = (func & 0xFFF) / 4; finished != 2; i++)
      {
-	if(block->start < 0x80000000 || block->start >= 0xc0000000)
-	  {
-		  unsigned int address2 =
-	       virtual_to_physical_address(block->start + i*4, 0);
-	     if(blocks[address2>>12]->block[(address2&0xFFF)/4].ops == NOTCOMPILED)
-	       blocks[address2>>12]->block[(address2&0xFFF)/4].ops = NOTCOMPILED2;
-	  }
-	
-	SRC = source + i;
-	src = source[i];
-	if (!source[i+1]) check_nop = 1; else check_nop = 0;
-	dst = block->block + i;
-	dst->addr = block->start + i*4;
-	dst->reg_cache_infos.need_map = 0;
-	dst->local_addr = code_length;
+    if(block->start < 0x80000000 || block->start >= 0xc0000000)
+      {
+          unsigned int address2 =
+           virtual_to_physical_address(block->start + i*4, 0);
+         if(blocks[address2>>12]->block[(address2&0xFFF)/4].ops == NOTCOMPILED)
+           blocks[address2>>12]->block[(address2&0xFFF)/4].ops = NOTCOMPILED2;
+      }
+    
+    SRC = source + i;
+    src = source[i];
+    if (!source[i+1]) check_nop = 1; else check_nop = 0;
+    dst = block->block + i;
+    dst->addr = block->start + i*4;
+    dst->reg_cache_infos.need_map = 0;
+    dst->local_addr = code_length;
 #ifdef COMPARE_CORE
-	if (dynacore) gendebug();
+    if (dynacore) gendebug();
 #endif
 #if defined(PROFILE_R4300)
     long x86addr = (long) (block->code + block->block[i].local_addr);
     fwrite(source + i, 1, 4, pfProfile); // write 4-byte MIPS opcode
     fwrite(&x86addr, 1, sizeof(char *), pfProfile); // write pointer to dynamically generated x86 code for this MIPS instruction
 #endif
-	recomp_ops[((src >> 26) & 0x3F)]();
-	dst = block->block + i;
+    recomp_ops[((src >> 26) & 0x3F)]();
+    dst = block->block + i;
 
-	/*if ((dst+1)->ops != NOTCOMPILED && !delay_slot_compiled &&
-	    i < length)
-	  {
-	     if (dynacore) genlink_subblock();
-	     finished = 2;
-	  }*/
-	if (delay_slot_compiled) 
-	  {
-	     delay_slot_compiled--;
-	     free_all_registers();
-	  }
-	
-	if (i >= length-2+(length>>2)) finished = 2;
-	if (i >= (length-1) && (block->start == 0xa4000000 ||
-				block->start >= 0xc0000000 ||
-				block->end   <  0x80000000)) finished = 2;
-	if (dst->ops == ERET || finished == 1) finished = 2;
-	if (/*i >= length &&*/ 
-	    (dst->ops == J || dst->ops == J_OUT || dst->ops == JR) &&
-	    !(i >= (length-1) && (block->start >= 0xc0000000 ||
-				  block->end   <  0x80000000)))
-	  finished = 1;
+    /*if ((dst+1)->ops != NOTCOMPILED && !delay_slot_compiled &&
+        i < length)
+      {
+         if (dynacore) genlink_subblock();
+         finished = 2;
+      }*/
+    if (delay_slot_compiled) 
+      {
+         delay_slot_compiled--;
+         free_all_registers();
+      }
+    
+    if (i >= length-2+(length>>2)) finished = 2;
+    if (i >= (length-1) && (block->start == 0xa4000000 ||
+                block->start >= 0xc0000000 ||
+                block->end   <  0x80000000)) finished = 2;
+    if (dst->ops == ERET || finished == 1) finished = 2;
+    if (/*i >= length &&*/ 
+        (dst->ops == J || dst->ops == J_OUT || dst->ops == JR) &&
+        !(i >= (length-1) && (block->start >= 0xc0000000 ||
+                  block->end   <  0x80000000)))
+      finished = 1;
      }
 
 #if defined(PROFILE_R4300)
@@ -2423,37 +2423,37 @@ void recompile_block(int *source, precomp_block *block, unsigned int func)
 
    if (i >= length)
      {
-	dst = block->block + i;
-	dst->addr = block->start + i*4;
-	dst->reg_cache_infos.need_map = 0;
-	dst->local_addr = code_length;
+    dst = block->block + i;
+    dst->addr = block->start + i*4;
+    dst->reg_cache_infos.need_map = 0;
+    dst->local_addr = code_length;
 #ifdef COMPARE_CORE
-	if (dynacore) gendebug();
+    if (dynacore) gendebug();
 #endif
-	RFIN_BLOCK();
-	i++;
-	if (i < length-1+(length>>2)) // useful when last opcode is a jump
-	  {
-	     dst = block->block + i;
-	     dst->addr = block->start + i*4;
-	     dst->reg_cache_infos.need_map = 0;
-	     dst->local_addr = code_length;
+    RFIN_BLOCK();
+    i++;
+    if (i < length-1+(length>>2)) // useful when last opcode is a jump
+      {
+         dst = block->block + i;
+         dst->addr = block->start + i*4;
+         dst->reg_cache_infos.need_map = 0;
+         dst->local_addr = code_length;
 #ifdef COMPARE_CORE
-	     if (dynacore) gendebug();
+         if (dynacore) gendebug();
 #endif
-	     RFIN_BLOCK();
-	     i++;
-	  }
+         RFIN_BLOCK();
+         i++;
+      }
      }
    else if (dynacore) genlink_subblock();
 
    if (dynacore)
      {
-	free_all_registers();
-	passe2(block->block, (func&0xFFF)/4, i, block);
-	block->code_length = code_length;
-	block->max_code_length = max_code_length;
-	free_assembler(&block->jumps_table, &block->jumps_number, &block->riprel_table, &block->riprel_number);
+    free_all_registers();
+    passe2(block->block, (func&0xFFF)/4, i, block);
+    block->code_length = code_length;
+    block->max_code_length = max_code_length;
+    free_assembler(&block->jumps_table, &block->jumps_number, &block->riprel_table, &block->riprel_number);
      }
 #ifdef CORE_DBG
    printf("block recompiled (%x-%x)\n", (int)func, (int)(block->start+i*4));

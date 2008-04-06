@@ -125,19 +125,19 @@ list_t g_PluginList = NULL;
 
 void plugin_delete_list(void)
 {
-	list_node_t *node;
-	plugin *p;
+    list_node_t *node;
+    plugin *p;
 
-	list_foreach(g_PluginList, node)
-	{
-		p = (plugin *)node->data;
-		free(p->file_name);
-		free(p->plugin_name);
-		if (p->handle != NULL)
-			dlclose(p->handle);
-	}
+    list_foreach(g_PluginList, node)
+    {
+        p = (plugin *)node->data;
+        free(p->file_name);
+        free(p->plugin_name);
+        if (p->handle != NULL)
+            dlclose(p->handle);
+    }
 
-	list_delete(&g_PluginList);
+    list_delete(&g_PluginList);
 }
 
 /* plugin_scan_file
@@ -149,68 +149,68 @@ void plugin_delete_list(void)
  */
 int plugin_scan_file(const char *file_name, WORD plugin_type)
 {
-	PLUGIN_INFO pluginInfo;
-	void *handle;
-	plugin *p;
-	char *bname = NULL;
-	char filepath[PATH_MAX];
+    PLUGIN_INFO pluginInfo;
+    void *handle;
+    plugin *p;
+    char *bname = NULL;
+    char filepath[PATH_MAX];
 
-	if(strstr(file_name, "/"))
-		realpath(file_name, filepath);
-	else
-		strncpy(filepath, file_name, PATH_MAX);
+    if(strstr(file_name, "/"))
+        realpath(file_name, filepath);
+    else
+        strncpy(filepath, file_name, PATH_MAX);
 
-	// if this is not an absolute path, assume plugin file is in install dir
-	if(filepath[0] != '/')
-	{
-		bname = strdup(filepath);
-		basename(bname);
-		snprintf(filepath, PATH_MAX, "%splugins/%s", get_installpath(), bname);
-	}
+    // if this is not an absolute path, assume plugin file is in install dir
+    if(filepath[0] != '/')
+    {
+        bname = strdup(filepath);
+        basename(bname);
+        snprintf(filepath, PATH_MAX, "%splugins/%s", get_installpath(), bname);
+    }
 
-	handle = dlopen(filepath, RTLD_NOW);
-	if(handle)
-	{
-		getDllInfo = dlsym(handle, "GetDllInfo");
-		if(getDllInfo)
-		{
-			getDllInfo(&pluginInfo);
+    handle = dlopen(filepath, RTLD_NOW);
+    if(handle)
+    {
+        getDllInfo = dlsym(handle, "GetDllInfo");
+        if(getDllInfo)
+        {
+            getDllInfo(&pluginInfo);
 
-			if(plugin_type != 0 &&
-			   pluginInfo.Type != plugin_type)
-			{
-				printf("Plugin '%s' is the wrong type!\n", file_name);
-				dlclose(handle);
-				return FALSE;
+            if(plugin_type != 0 &&
+               pluginInfo.Type != plugin_type)
+            {
+                printf("Plugin '%s' is the wrong type!\n", file_name);
+                dlclose(handle);
+                return FALSE;
 
-			}
-			else
-				plugin_type = pluginInfo.Type;
-		}
-		else
-		{
-			printf("Plugin '%s' is an invalid plugin\n", file_name);
-			dlclose(handle);
-			return FALSE;
-		}
-	}
-	else
-	{
-		printf("Couldn't load plugin '%s': %s\n", file_name, dlerror());
-		return FALSE;
-	}
+            }
+            else
+                plugin_type = pluginInfo.Type;
+        }
+        else
+        {
+            printf("Plugin '%s' is an invalid plugin\n", file_name);
+            dlclose(handle);
+            return FALSE;
+        }
+    }
+    else
+    {
+        printf("Couldn't load plugin '%s': %s\n", file_name, dlerror());
+        return FALSE;
+    }
 
-	p = malloc(sizeof(plugin));
-	p->type = plugin_type;
-	p->handle = handle;
-	if(bname)
-		p->file_name = bname;
-	else
-		p->file_name = strdup(file_name);
-	p->plugin_name = strdup(pluginInfo.Name);
-	list_append(&g_PluginList, p);
+    p = malloc(sizeof(plugin));
+    p->type = plugin_type;
+    p->handle = handle;
+    if(bname)
+        p->file_name = bname;
+    else
+        p->file_name = strdup(file_name);
+    p->plugin_name = strdup(pluginInfo.Name);
+    list_append(&g_PluginList, p);
 
-	return TRUE;
+    return TRUE;
 }
 
 /* plugin_scan_installdir
@@ -219,29 +219,29 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
  */
 void plugin_scan_installdir(void)
 {
-	DIR *dir;
-	char cwd[PATH_MAX];
-	struct dirent *entry;
+    DIR *dir;
+    char cwd[PATH_MAX];
+    struct dirent *entry;
 
-	strncpy(cwd, get_installpath(), PATH_MAX);
-	strncat(cwd, "plugins", PATH_MAX - strlen(cwd));
-	dir = opendir(cwd);
+    strncpy(cwd, get_installpath(), PATH_MAX);
+    strncat(cwd, "plugins", PATH_MAX - strlen(cwd));
+    dir = opendir(cwd);
 
-	if(dir == NULL)
-	{
-		perror(cwd);
-		return;
-	}
+    if(dir == NULL)
+    {
+        perror(cwd);
+        return;
+    }
 
-	while((entry = readdir(dir)) != NULL)
-	{
-		if (strcmp(entry->d_name + strlen(entry->d_name) - 3, ".so") != 0)
-		  continue;
+    while((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name + strlen(entry->d_name) - 3, ".so") != 0)
+          continue;
         
-		plugin_scan_file(entry->d_name, 0);
-	}
+        plugin_scan_file(entry->d_name, 0);
+    }
 
-	closedir(dir);
+    closedir(dir);
 }
 
 /* plugin_set_configdir
@@ -249,67 +249,67 @@ void plugin_scan_installdir(void)
  */
 void plugin_set_configdir(char *configdir)
 {
-	plugin *p = NULL;
-	list_node_t *node;
+    plugin *p = NULL;
+    list_node_t *node;
 
-	list_foreach(g_PluginList, node)
-	{
-		p = (plugin *)node->data;
+    list_foreach(g_PluginList, node)
+    {
+        p = (plugin *)node->data;
 
-		if(p->handle)
-		{
-			// if plugin provides ability to set a config dir, set it.
-			setConfigDir = dlsym(p->handle, "SetConfigDir");
-			if(setConfigDir)
-				setConfigDir(configdir);
-		}
-	}
+        if(p->handle)
+        {
+            // if plugin provides ability to set a config dir, set it.
+            setConfigDir = dlsym(p->handle, "SetConfigDir");
+            if(setConfigDir)
+                setConfigDir(configdir);
+        }
+    }
 }
 
 plugin *plugin_get_by_name(const char *name)
 {
-	plugin *p = NULL;
-	list_node_t *node;
+    plugin *p = NULL;
+    list_node_t *node;
 
-	list_foreach(g_PluginList, node)
-	{
-		p = (plugin *)node->data;
-   		if (!strcmp(p->plugin_name, name))
-			return p;
-	}
+    list_foreach(g_PluginList, node)
+    {
+        p = (plugin *)node->data;
+        if (!strcmp(p->plugin_name, name))
+            return p;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 char *plugin_filename_by_name(const char *name)
 {
-	plugin *p = plugin_get_by_name(name);
+    plugin *p = plugin_get_by_name(name);
 
-	if(p) return p->file_name;
-	return NULL;
+    if(p) return p->file_name;
+    return NULL;
 }
 
 char *plugin_name_by_filename(const char *filename)
 {
-	plugin *p;
-	list_node_t *node;
-	char real_filename1[PATH_MAX], real_filename2[PATH_MAX];
+    plugin *p;
+    list_node_t *node;
+    char real_filename1[PATH_MAX], real_filename2[PATH_MAX];
 
-	if (!realpath(filename, real_filename1))
-		strcpy(real_filename1, filename);
+    if (!realpath(filename, real_filename1))
+        strcpy(real_filename1, filename);
 
-	list_foreach(g_PluginList, node)
-	{
-		p = (plugin *)node->data;
+    list_foreach(g_PluginList, node)
+    {
+        p = (plugin *)node->data;
 
-		if (!realpath(p->file_name, real_filename2))
-			strcpy(real_filename2, p->file_name);
+        if (!realpath(p->file_name, real_filename2))
+            strcpy(real_filename2, p->file_name);
 
-		if (!strcmp(real_filename1, real_filename2))
-			return p->plugin_name;
-	}
+        if (!strcmp(real_filename1, real_filename2))
+            return p->plugin_name;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 static void sucre()
@@ -318,51 +318,51 @@ static void sucre()
 
 void plugin_exec_config(const char *name)
 {
-	plugin *p = plugin_get_by_name(name);
+    plugin *p = plugin_get_by_name(name);
 
-	if(p && p->handle)
-	{
-		dllConfig = dlsym(p->handle, "DllConfig");
-		if(dllConfig)
-			dllConfig(0);
-	}
+    if(p && p->handle)
+    {
+        dllConfig = dlsym(p->handle, "DllConfig");
+        if(dllConfig)
+            dllConfig(0);
+    }
 }
 
 void plugin_exec_test(const char *name)
 {
-	plugin *p = plugin_get_by_name(name);
+    plugin *p = plugin_get_by_name(name);
 
-	if(p && p->handle)
-	{
-		dllTest = dlsym(p->handle, "DllTest");
-		if(dllTest)
-			dllTest(0);
-	}
+    if(p && p->handle)
+    {
+        dllTest = dlsym(p->handle, "DllTest");
+        if(dllTest)
+            dllTest(0);
+    }
 }
 
 void plugin_exec_about(const char *name)
 {
-	plugin *p = plugin_get_by_name(name);
+    plugin *p = plugin_get_by_name(name);
 
-	if(p && p->handle)
-	{
-		dllAbout = dlsym(p->handle, "DllAbout");
-		if(dllAbout)
-			dllAbout(0);
-	}
+    if(p && p->handle)
+    {
+        dllAbout = dlsym(p->handle, "DllAbout");
+        if(dllAbout)
+            dllAbout(0);
+    }
 }
 
 void plugin_load_plugins(const char *gfx_name,
-			 const char *audio_name,
-			 const char *input_name,
-			 const char *RSP_name)
+             const char *audio_name,
+             const char *input_name,
+             const char *RSP_name)
 {
    int i;
    plugin *p;
    void *handle_gfx = NULL,
-	*handle_audio = NULL,
-	*handle_input = NULL,
-	*handle_RSP = NULL;
+    *handle_audio = NULL,
+    *handle_input = NULL,
+    *handle_RSP = NULL;
 
    p = plugin_get_by_name(gfx_name);
    if(p) handle_gfx = p->handle;
@@ -378,230 +378,230 @@ void plugin_load_plugins(const char *gfx_name,
 
    if (handle_gfx)
      {
-	changeWindow = dlsym(handle_gfx, "ChangeWindow");
-	closeDLL_gfx = dlsym(handle_gfx, "CloseDLL");
-	dllAbout = dlsym(handle_gfx, "DllAbout");
-	dllConfig = dlsym(handle_gfx, "DllConfig");
-	dllTest = dlsym(handle_gfx, "DllTest");
-	initiateGFX = dlsym(handle_gfx, "InitiateGFX");
-	processDList = dlsym(handle_gfx, "ProcessDList");
-	processRDPList = dlsym(handle_gfx, "ProcessRDPList");
-	romClosed_gfx = dlsym(handle_gfx, "RomClosed");
-	romOpen_gfx = dlsym(handle_gfx, "RomOpen");
-	showCFB = dlsym(handle_gfx, "ShowCFB");
-	updateScreen = dlsym(handle_gfx, "UpdateScreen");
-	viStatusChanged = dlsym(handle_gfx, "ViStatusChanged");
-	viWidthChanged = dlsym(handle_gfx, "ViWidthChanged");
-	readScreen = dlsym(handle_gfx, "ReadScreen");
-	captureScreen = dlsym(handle_gfx, "CaptureScreen");
-	
-	fBRead = dlsym(handle_gfx, "FBRead");
-	fBWrite = dlsym(handle_gfx, "FBWrite");
-	fBGetFrameBufferInfo = dlsym(handle_gfx, "FBGetFrameBufferInfo");
+    changeWindow = dlsym(handle_gfx, "ChangeWindow");
+    closeDLL_gfx = dlsym(handle_gfx, "CloseDLL");
+    dllAbout = dlsym(handle_gfx, "DllAbout");
+    dllConfig = dlsym(handle_gfx, "DllConfig");
+    dllTest = dlsym(handle_gfx, "DllTest");
+    initiateGFX = dlsym(handle_gfx, "InitiateGFX");
+    processDList = dlsym(handle_gfx, "ProcessDList");
+    processRDPList = dlsym(handle_gfx, "ProcessRDPList");
+    romClosed_gfx = dlsym(handle_gfx, "RomClosed");
+    romOpen_gfx = dlsym(handle_gfx, "RomOpen");
+    showCFB = dlsym(handle_gfx, "ShowCFB");
+    updateScreen = dlsym(handle_gfx, "UpdateScreen");
+    viStatusChanged = dlsym(handle_gfx, "ViStatusChanged");
+    viWidthChanged = dlsym(handle_gfx, "ViWidthChanged");
+    readScreen = dlsym(handle_gfx, "ReadScreen");
+    captureScreen = dlsym(handle_gfx, "CaptureScreen");
+    
+    fBRead = dlsym(handle_gfx, "FBRead");
+    fBWrite = dlsym(handle_gfx, "FBWrite");
+    fBGetFrameBufferInfo = dlsym(handle_gfx, "FBGetFrameBufferInfo");
 
-	if (changeWindow == NULL) changeWindow = dummy_void;
-	if (closeDLL_gfx == NULL) closeDLL_gfx = dummy_void;
-	if (initiateGFX == NULL) initiateGFX = dummy_initiateGFX;
-	if (processDList == NULL) processDList = dummy_void;
-	if (processRDPList == NULL) processRDPList = dummy_void;
-	if (romClosed_gfx == NULL) romClosed_gfx = dummy_void;
-	if (romOpen_gfx == NULL) romOpen_gfx = dummy_void;
-	if (showCFB == NULL) showCFB = dummy_void;
-	if (updateScreen == NULL) updateScreen = dummy_void;
-	if (viStatusChanged == NULL) viStatusChanged = dummy_void;
-	if (viWidthChanged == NULL) viWidthChanged = dummy_void;
-	if (captureScreen == NULL) captureScreen = dummy_void;
+    if (changeWindow == NULL) changeWindow = dummy_void;
+    if (closeDLL_gfx == NULL) closeDLL_gfx = dummy_void;
+    if (initiateGFX == NULL) initiateGFX = dummy_initiateGFX;
+    if (processDList == NULL) processDList = dummy_void;
+    if (processRDPList == NULL) processRDPList = dummy_void;
+    if (romClosed_gfx == NULL) romClosed_gfx = dummy_void;
+    if (romOpen_gfx == NULL) romOpen_gfx = dummy_void;
+    if (showCFB == NULL) showCFB = dummy_void;
+    if (updateScreen == NULL) updateScreen = dummy_void;
+    if (viStatusChanged == NULL) viStatusChanged = dummy_void;
+    if (viWidthChanged == NULL) viWidthChanged = dummy_void;
+    if (captureScreen == NULL) captureScreen = dummy_void;
 
-	gfx_info.MemoryBswaped = TRUE;
-	gfx_info.HEADER = rom;
-	gfx_info.RDRAM = (BYTE*)rdram;
-	gfx_info.DMEM = (BYTE*)SP_DMEM;
-	gfx_info.IMEM = (BYTE*)SP_IMEM;
-	gfx_info.MI_INTR_REG = &(MI_register.mi_intr_reg);
-	gfx_info.DPC_START_REG = &(dpc_register.dpc_start);
-	gfx_info.DPC_END_REG = &(dpc_register.dpc_end);
-	gfx_info.DPC_CURRENT_REG = &(dpc_register.dpc_current);
-	gfx_info.DPC_STATUS_REG = &(dpc_register.dpc_status);
-	gfx_info.DPC_CLOCK_REG = &(dpc_register.dpc_clock);
-	gfx_info.DPC_BUFBUSY_REG = &(dpc_register.dpc_bufbusy);
-	gfx_info.DPC_PIPEBUSY_REG = &(dpc_register.dpc_pipebusy);
-	gfx_info.DPC_TMEM_REG = &(dpc_register.dpc_tmem);
-	gfx_info.VI_STATUS_REG = &(vi_register.vi_status);
-	gfx_info.VI_ORIGIN_REG = &(vi_register.vi_origin);
-	gfx_info.VI_WIDTH_REG = &(vi_register.vi_width);
-	gfx_info.VI_INTR_REG = &(vi_register.vi_v_intr);
-	gfx_info.VI_V_CURRENT_LINE_REG = &(vi_register.vi_current);
-	gfx_info.VI_TIMING_REG = &(vi_register.vi_burst);
-	gfx_info.VI_V_SYNC_REG = &(vi_register.vi_v_sync);
-	gfx_info.VI_H_SYNC_REG = &(vi_register.vi_h_sync);
-	gfx_info.VI_LEAP_REG = &(vi_register.vi_leap);
-	gfx_info.VI_H_START_REG = &(vi_register.vi_h_start);
-	gfx_info.VI_V_START_REG = &(vi_register.vi_v_start);
-	gfx_info.VI_V_BURST_REG = &(vi_register.vi_v_burst);
-	gfx_info.VI_X_SCALE_REG = &(vi_register.vi_x_scale);
-	gfx_info.VI_Y_SCALE_REG = &(vi_register.vi_y_scale);
-	gfx_info.CheckInterrupts = sucre;
-	initiateGFX(gfx_info);
+    gfx_info.MemoryBswaped = TRUE;
+    gfx_info.HEADER = rom;
+    gfx_info.RDRAM = (BYTE*)rdram;
+    gfx_info.DMEM = (BYTE*)SP_DMEM;
+    gfx_info.IMEM = (BYTE*)SP_IMEM;
+    gfx_info.MI_INTR_REG = &(MI_register.mi_intr_reg);
+    gfx_info.DPC_START_REG = &(dpc_register.dpc_start);
+    gfx_info.DPC_END_REG = &(dpc_register.dpc_end);
+    gfx_info.DPC_CURRENT_REG = &(dpc_register.dpc_current);
+    gfx_info.DPC_STATUS_REG = &(dpc_register.dpc_status);
+    gfx_info.DPC_CLOCK_REG = &(dpc_register.dpc_clock);
+    gfx_info.DPC_BUFBUSY_REG = &(dpc_register.dpc_bufbusy);
+    gfx_info.DPC_PIPEBUSY_REG = &(dpc_register.dpc_pipebusy);
+    gfx_info.DPC_TMEM_REG = &(dpc_register.dpc_tmem);
+    gfx_info.VI_STATUS_REG = &(vi_register.vi_status);
+    gfx_info.VI_ORIGIN_REG = &(vi_register.vi_origin);
+    gfx_info.VI_WIDTH_REG = &(vi_register.vi_width);
+    gfx_info.VI_INTR_REG = &(vi_register.vi_v_intr);
+    gfx_info.VI_V_CURRENT_LINE_REG = &(vi_register.vi_current);
+    gfx_info.VI_TIMING_REG = &(vi_register.vi_burst);
+    gfx_info.VI_V_SYNC_REG = &(vi_register.vi_v_sync);
+    gfx_info.VI_H_SYNC_REG = &(vi_register.vi_h_sync);
+    gfx_info.VI_LEAP_REG = &(vi_register.vi_leap);
+    gfx_info.VI_H_START_REG = &(vi_register.vi_h_start);
+    gfx_info.VI_V_START_REG = &(vi_register.vi_v_start);
+    gfx_info.VI_V_BURST_REG = &(vi_register.vi_v_burst);
+    gfx_info.VI_X_SCALE_REG = &(vi_register.vi_x_scale);
+    gfx_info.VI_Y_SCALE_REG = &(vi_register.vi_y_scale);
+    gfx_info.CheckInterrupts = sucre;
+    initiateGFX(gfx_info);
      }
    else
      {
-	changeWindow = dummy_void;
-	closeDLL_gfx = dummy_void;
-	initiateGFX = dummy_initiateGFX;
-	processDList = dummy_void;
-	processRDPList = dummy_void;
-	romClosed_gfx = dummy_void;
-	romOpen_gfx = dummy_void;
-	showCFB = dummy_void;
-	updateScreen = dummy_void;
-	viStatusChanged = dummy_void;
-	viWidthChanged = dummy_void;
-	readScreen = 0;
-	captureScreen = dummy_void;
+    changeWindow = dummy_void;
+    closeDLL_gfx = dummy_void;
+    initiateGFX = dummy_initiateGFX;
+    processDList = dummy_void;
+    processRDPList = dummy_void;
+    romClosed_gfx = dummy_void;
+    romOpen_gfx = dummy_void;
+    showCFB = dummy_void;
+    updateScreen = dummy_void;
+    viStatusChanged = dummy_void;
+    viWidthChanged = dummy_void;
+    readScreen = 0;
+    captureScreen = dummy_void;
      }
 
    if (handle_audio)
      {
-	closeDLL_audio = dlsym(handle_audio, "CloseDLL");
-	aiDacrateChanged = dlsym(handle_audio, "AiDacrateChanged");
-	aiLenChanged = dlsym(handle_audio, "AiLenChanged");
-	aiReadLength = dlsym(handle_audio, "AiReadLength");
-	//aiUpdate = dlsym(handle_audio, "AiUpdate");
-	initiateAudio = dlsym(handle_audio, "InitiateAudio");
-	processAList = dlsym(handle_audio, "ProcessAList");
-	romClosed_audio = dlsym(handle_audio, "RomClosed");
-	romOpen_audio = dlsym(handle_audio, "RomOpen");
-	
-	if (aiDacrateChanged == NULL) aiDacrateChanged = dummy_aiDacrateChanged;
-	if (aiLenChanged == NULL) aiLenChanged = dummy_void;
-	if (aiReadLength == NULL) aiReadLength = dummy_aiReadLength;
-	//if (aiUpdate == NULL) aiUpdate = dummy_aiUpdate;
-	if (closeDLL_audio == NULL) closeDLL_audio = dummy_void;
-	if (initiateAudio == NULL) initiateAudio = dummy_initiateAudio;
-	if (processAList == NULL) processAList = dummy_void;
-	if (romClosed_audio == NULL) romClosed_audio = dummy_void;
-	if (romOpen_audio == NULL) romOpen_audio = dummy_void;
-	
-	audio_info.MemoryBswaped = TRUE;
-	audio_info.HEADER = rom;
-	audio_info.RDRAM = (BYTE*)rdram;
-	audio_info.DMEM = (BYTE*)SP_DMEM;
-	audio_info.IMEM = (BYTE*)SP_IMEM;
-	audio_info.MI_INTR_REG = &(MI_register.mi_intr_reg);
-	audio_info.AI_DRAM_ADDR_REG = &(ai_register.ai_dram_addr);
-	audio_info.AI_LEN_REG = &(ai_register.ai_len);
-	audio_info.AI_CONTROL_REG = &(ai_register.ai_control);
-	audio_info.AI_STATUS_REG = &dummy;
-	audio_info.AI_DACRATE_REG = &(ai_register.ai_dacrate);
-	audio_info.AI_BITRATE_REG = &(ai_register.ai_bitrate);
-	audio_info.CheckInterrupts = sucre;
-	initiateAudio(audio_info);
+    closeDLL_audio = dlsym(handle_audio, "CloseDLL");
+    aiDacrateChanged = dlsym(handle_audio, "AiDacrateChanged");
+    aiLenChanged = dlsym(handle_audio, "AiLenChanged");
+    aiReadLength = dlsym(handle_audio, "AiReadLength");
+    //aiUpdate = dlsym(handle_audio, "AiUpdate");
+    initiateAudio = dlsym(handle_audio, "InitiateAudio");
+    processAList = dlsym(handle_audio, "ProcessAList");
+    romClosed_audio = dlsym(handle_audio, "RomClosed");
+    romOpen_audio = dlsym(handle_audio, "RomOpen");
+    
+    if (aiDacrateChanged == NULL) aiDacrateChanged = dummy_aiDacrateChanged;
+    if (aiLenChanged == NULL) aiLenChanged = dummy_void;
+    if (aiReadLength == NULL) aiReadLength = dummy_aiReadLength;
+    //if (aiUpdate == NULL) aiUpdate = dummy_aiUpdate;
+    if (closeDLL_audio == NULL) closeDLL_audio = dummy_void;
+    if (initiateAudio == NULL) initiateAudio = dummy_initiateAudio;
+    if (processAList == NULL) processAList = dummy_void;
+    if (romClosed_audio == NULL) romClosed_audio = dummy_void;
+    if (romOpen_audio == NULL) romOpen_audio = dummy_void;
+    
+    audio_info.MemoryBswaped = TRUE;
+    audio_info.HEADER = rom;
+    audio_info.RDRAM = (BYTE*)rdram;
+    audio_info.DMEM = (BYTE*)SP_DMEM;
+    audio_info.IMEM = (BYTE*)SP_IMEM;
+    audio_info.MI_INTR_REG = &(MI_register.mi_intr_reg);
+    audio_info.AI_DRAM_ADDR_REG = &(ai_register.ai_dram_addr);
+    audio_info.AI_LEN_REG = &(ai_register.ai_len);
+    audio_info.AI_CONTROL_REG = &(ai_register.ai_control);
+    audio_info.AI_STATUS_REG = &dummy;
+    audio_info.AI_DACRATE_REG = &(ai_register.ai_dacrate);
+    audio_info.AI_BITRATE_REG = &(ai_register.ai_bitrate);
+    audio_info.CheckInterrupts = sucre;
+    initiateAudio(audio_info);
      }
    else
      {
-	aiDacrateChanged = dummy_aiDacrateChanged;
-	aiLenChanged = dummy_void;
-	aiReadLength = dummy_aiReadLength;
-	//aiUpdate = dummy_aiUpdate;
-	closeDLL_audio = dummy_void;
-	initiateAudio = dummy_initiateAudio;
-	processAList = dummy_void;
-	romClosed_audio = dummy_void;
-	romOpen_audio = dummy_void;
+    aiDacrateChanged = dummy_aiDacrateChanged;
+    aiLenChanged = dummy_void;
+    aiReadLength = dummy_aiReadLength;
+    //aiUpdate = dummy_aiUpdate;
+    closeDLL_audio = dummy_void;
+    initiateAudio = dummy_initiateAudio;
+    processAList = dummy_void;
+    romClosed_audio = dummy_void;
+    romOpen_audio = dummy_void;
      }
    
    if (handle_input)
      {
-	closeDLL_input = dlsym(handle_input, "CloseDLL");
-	controllerCommand = dlsym(handle_input, "ControllerCommand");
-	getKeys = dlsym(handle_input, "GetKeys");
-	initiateControllers = dlsym(handle_input, "InitiateControllers");
-	readController = dlsym(handle_input, "ReadController");
-	romClosed_input = dlsym(handle_input, "RomClosed");
-	romOpen_input = dlsym(handle_input, "RomOpen");
-	keyDown = dlsym(handle_input, "WM_KeyDown");
-	keyUp = dlsym(handle_input, "WM_KeyUp");
-	
-	if (closeDLL_input == NULL) closeDLL_input = dummy_void;
-	if (controllerCommand == NULL) controllerCommand = dummy_controllerCommand;
-	if (getKeys == NULL) getKeys = dummy_getKeys;
-	if (initiateControllers == NULL) initiateControllers = dummy_initiateControllers;
-	if (readController == NULL) readController = dummy_readController;
-	if (romClosed_input == NULL) romClosed_input = dummy_void;
-	if (romOpen_input == NULL) romOpen_input = dummy_void;
-	if (keyDown == NULL) keyDown = dummy_keyDown;
-	if (keyUp == NULL) keyUp = dummy_keyUp;
-	
-	control_info.MemoryBswaped = TRUE;
-	control_info.HEADER = rom;
-	control_info.Controls = Controls;
-	for (i=0; i<4; i++)
-	  {
-	     Controls[i].Present = FALSE;
-	     Controls[i].RawData = FALSE;
-	     Controls[i].Plugin = PLUGIN_NONE;
-	  }
-	initiateControllers(control_info);
+    closeDLL_input = dlsym(handle_input, "CloseDLL");
+    controllerCommand = dlsym(handle_input, "ControllerCommand");
+    getKeys = dlsym(handle_input, "GetKeys");
+    initiateControllers = dlsym(handle_input, "InitiateControllers");
+    readController = dlsym(handle_input, "ReadController");
+    romClosed_input = dlsym(handle_input, "RomClosed");
+    romOpen_input = dlsym(handle_input, "RomOpen");
+    keyDown = dlsym(handle_input, "WM_KeyDown");
+    keyUp = dlsym(handle_input, "WM_KeyUp");
+    
+    if (closeDLL_input == NULL) closeDLL_input = dummy_void;
+    if (controllerCommand == NULL) controllerCommand = dummy_controllerCommand;
+    if (getKeys == NULL) getKeys = dummy_getKeys;
+    if (initiateControllers == NULL) initiateControllers = dummy_initiateControllers;
+    if (readController == NULL) readController = dummy_readController;
+    if (romClosed_input == NULL) romClosed_input = dummy_void;
+    if (romOpen_input == NULL) romOpen_input = dummy_void;
+    if (keyDown == NULL) keyDown = dummy_keyDown;
+    if (keyUp == NULL) keyUp = dummy_keyUp;
+    
+    control_info.MemoryBswaped = TRUE;
+    control_info.HEADER = rom;
+    control_info.Controls = Controls;
+    for (i=0; i<4; i++)
+      {
+         Controls[i].Present = FALSE;
+         Controls[i].RawData = FALSE;
+         Controls[i].Plugin = PLUGIN_NONE;
+      }
+    initiateControllers(control_info);
      }
    else
      {
-	closeDLL_input = dummy_void;
-	controllerCommand = dummy_controllerCommand;
-	getKeys = dummy_getKeys;
-	initiateControllers = dummy_initiateControllers;
-	readController = dummy_readController;
-	romClosed_input = dummy_void;
-	romOpen_input = dummy_void;
-	keyDown = dummy_keyDown;
-	keyUp = dummy_keyUp;
+    closeDLL_input = dummy_void;
+    controllerCommand = dummy_controllerCommand;
+    getKeys = dummy_getKeys;
+    initiateControllers = dummy_initiateControllers;
+    readController = dummy_readController;
+    romClosed_input = dummy_void;
+    romOpen_input = dummy_void;
+    keyDown = dummy_keyDown;
+    keyUp = dummy_keyUp;
      }
    
    if (handle_RSP)
      {
-	closeDLL_RSP = dlsym(handle_RSP, "CloseDLL");
-	doRspCycles = dlsym(handle_RSP, "DoRspCycles");
-	initiateRSP = dlsym(handle_RSP, "InitiateRSP");
-	romClosed_RSP = dlsym(handle_RSP, "RomClosed");
-	
-	if (closeDLL_RSP == NULL) closeDLL_RSP = dummy_void;
-	if (doRspCycles == NULL) doRspCycles = dummy_doRspCycles;
-	if (initiateRSP == NULL) initiateRSP = dummy_initiateRSP;
-	if (romClosed_RSP == NULL) romClosed_RSP = dummy_void;
-	
-	rsp_info.MemoryBswaped = TRUE;
-	rsp_info.RDRAM = (BYTE*)rdram;
-	rsp_info.DMEM = (BYTE*)SP_DMEM;
-	rsp_info.IMEM = (BYTE*)SP_IMEM;
-	rsp_info.MI_INTR_REG = &MI_register.mi_intr_reg;
-	rsp_info.SP_MEM_ADDR_REG = &sp_register.sp_mem_addr_reg;
-	rsp_info.SP_DRAM_ADDR_REG = &sp_register.sp_dram_addr_reg;
-	rsp_info.SP_RD_LEN_REG = &sp_register.sp_rd_len_reg;
-	rsp_info.SP_WR_LEN_REG = &sp_register.sp_wr_len_reg;
-	rsp_info.SP_STATUS_REG = &sp_register.sp_status_reg;
-	rsp_info.SP_DMA_FULL_REG = &sp_register.sp_dma_full_reg;
-	rsp_info.SP_DMA_BUSY_REG = &sp_register.sp_dma_busy_reg;
-	rsp_info.SP_PC_REG = &rsp_register.rsp_pc;
-	rsp_info.SP_SEMAPHORE_REG = &sp_register.sp_semaphore_reg;
-	rsp_info.DPC_START_REG = &dpc_register.dpc_start;
-	rsp_info.DPC_END_REG = &dpc_register.dpc_end;
-	rsp_info.DPC_CURRENT_REG = &dpc_register.dpc_current;
-	rsp_info.DPC_STATUS_REG = &dpc_register.dpc_status;
-	rsp_info.DPC_CLOCK_REG = &dpc_register.dpc_clock;
-	rsp_info.DPC_BUFBUSY_REG = &dpc_register.dpc_bufbusy;
-	rsp_info.DPC_PIPEBUSY_REG = &dpc_register.dpc_pipebusy;
-	rsp_info.DPC_TMEM_REG = &dpc_register.dpc_tmem;
-	rsp_info.CheckInterrupts = sucre;
-	rsp_info.ProcessDlistList = processDList;
-	rsp_info.ProcessAlistList = processAList;
-	rsp_info.ProcessRdpList = processRDPList;
-	rsp_info.ShowCFB = showCFB;
-	initiateRSP(rsp_info,(DWORD*)&i);
+    closeDLL_RSP = dlsym(handle_RSP, "CloseDLL");
+    doRspCycles = dlsym(handle_RSP, "DoRspCycles");
+    initiateRSP = dlsym(handle_RSP, "InitiateRSP");
+    romClosed_RSP = dlsym(handle_RSP, "RomClosed");
+    
+    if (closeDLL_RSP == NULL) closeDLL_RSP = dummy_void;
+    if (doRspCycles == NULL) doRspCycles = dummy_doRspCycles;
+    if (initiateRSP == NULL) initiateRSP = dummy_initiateRSP;
+    if (romClosed_RSP == NULL) romClosed_RSP = dummy_void;
+    
+    rsp_info.MemoryBswaped = TRUE;
+    rsp_info.RDRAM = (BYTE*)rdram;
+    rsp_info.DMEM = (BYTE*)SP_DMEM;
+    rsp_info.IMEM = (BYTE*)SP_IMEM;
+    rsp_info.MI_INTR_REG = &MI_register.mi_intr_reg;
+    rsp_info.SP_MEM_ADDR_REG = &sp_register.sp_mem_addr_reg;
+    rsp_info.SP_DRAM_ADDR_REG = &sp_register.sp_dram_addr_reg;
+    rsp_info.SP_RD_LEN_REG = &sp_register.sp_rd_len_reg;
+    rsp_info.SP_WR_LEN_REG = &sp_register.sp_wr_len_reg;
+    rsp_info.SP_STATUS_REG = &sp_register.sp_status_reg;
+    rsp_info.SP_DMA_FULL_REG = &sp_register.sp_dma_full_reg;
+    rsp_info.SP_DMA_BUSY_REG = &sp_register.sp_dma_busy_reg;
+    rsp_info.SP_PC_REG = &rsp_register.rsp_pc;
+    rsp_info.SP_SEMAPHORE_REG = &sp_register.sp_semaphore_reg;
+    rsp_info.DPC_START_REG = &dpc_register.dpc_start;
+    rsp_info.DPC_END_REG = &dpc_register.dpc_end;
+    rsp_info.DPC_CURRENT_REG = &dpc_register.dpc_current;
+    rsp_info.DPC_STATUS_REG = &dpc_register.dpc_status;
+    rsp_info.DPC_CLOCK_REG = &dpc_register.dpc_clock;
+    rsp_info.DPC_BUFBUSY_REG = &dpc_register.dpc_bufbusy;
+    rsp_info.DPC_PIPEBUSY_REG = &dpc_register.dpc_pipebusy;
+    rsp_info.DPC_TMEM_REG = &dpc_register.dpc_tmem;
+    rsp_info.CheckInterrupts = sucre;
+    rsp_info.ProcessDlistList = processDList;
+    rsp_info.ProcessAlistList = processAList;
+    rsp_info.ProcessRdpList = processRDPList;
+    rsp_info.ShowCFB = showCFB;
+    initiateRSP(rsp_info,(DWORD*)&i);
      }
    else
      {
-	closeDLL_RSP = dummy_void;
-	doRspCycles = dummy_doRspCycles;
-	initiateRSP = dummy_initiateRSP;
-	romClosed_RSP = dummy_void;
+    closeDLL_RSP = dummy_void;
+    doRspCycles = dummy_doRspCycles;
+    initiateRSP = dummy_initiateRSP;
+    romClosed_RSP = dummy_void;
      }
 }

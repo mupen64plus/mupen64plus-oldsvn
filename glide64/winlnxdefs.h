@@ -26,13 +26,13 @@ typedef union _LARGE_INTEGER
 {
    struct
      {
-	DWORD LowPart;
-	INT HighPart;
+    DWORD LowPart;
+    INT HighPart;
      } s;
    struct
      {
-	DWORD LowPart;
-	INT HighPart;
+    DWORD LowPart;
+    INT HighPart;
      } u;
    LONGLONG QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;

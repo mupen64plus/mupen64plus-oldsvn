@@ -49,23 +49,23 @@
  */
 char *trim(char *str)
 {
-	char *p = str;
+    char *p = str;
 
-	while (isspace(*p))
-		p++;
+    while (isspace(*p))
+        p++;
 
-	if(str != p)
-		strcpy(str, p);
+    if(str != p)
+        strcpy(str, p);
 
-	p = str + strlen(str) - 1;
-	if (p > str)
-	{
-		while (isspace(*p))
-			p--;
-		*(++p) = '\0';
-	}
+    p = str + strlen(str) - 1;
+    if (p > str)
+    {
+        while (isspace(*p))
+            p--;
+        *(++p) = '\0';
+    }
 
-	return str;
+    return str;
 }
 
 /** event_to_str
@@ -79,37 +79,37 @@ char *trim(char *str)
  */
 char *event_to_str(const SDL_Event *event)
 {
-	char *event_str = NULL;
+    char *event_str = NULL;
 
-	switch(event->type)
-	{
-		case SDL_JOYAXISMOTION:
-			if(event->jaxis.value >= 15000 || event->jaxis.value <= -15000)
-			{
-				event_str = malloc(10);
-				snprintf(event_str, 10, "J%dA%d%c",
-				         event->jaxis.which,
-					 event->jaxis.axis,
-					 event->jaxis.value > 0? '+' : '-');
-			}
-			break;
+    switch(event->type)
+    {
+        case SDL_JOYAXISMOTION:
+            if(event->jaxis.value >= 15000 || event->jaxis.value <= -15000)
+            {
+                event_str = malloc(10);
+                snprintf(event_str, 10, "J%dA%d%c",
+                         event->jaxis.which,
+                     event->jaxis.axis,
+                     event->jaxis.value > 0? '+' : '-');
+            }
+            break;
 
-		case SDL_JOYBUTTONDOWN:
-			event_str = malloc(10);
-			snprintf(event_str, 10, "J%dB%d",
-			         event->jbutton.which,
-			         event->jbutton.button);
-			break;
+        case SDL_JOYBUTTONDOWN:
+            event_str = malloc(10);
+            snprintf(event_str, 10, "J%dB%d",
+                     event->jbutton.which,
+                     event->jbutton.button);
+            break;
 
-		case SDL_JOYHATMOTION:
-			event_str = malloc(10);
-			snprintf(event_str, 10, "J%dH%d",
-			         event->jhat.which,
-			         event->jhat.value);
-			break;
-	}
+        case SDL_JOYHATMOTION:
+            event_str = malloc(10);
+            snprintf(event_str, 10, "J%dH%d",
+                     event->jhat.which,
+                     event->jhat.value);
+            break;
+    }
 
-	return event_str;
+    return event_str;
 }
 
 /** file utilities **/
@@ -119,9 +119,9 @@ char *event_to_str(const SDL_Event *event)
  */
 int isfile(char *path)
 {
-	struct stat sbuf;
+    struct stat sbuf;
 
-	return (stat(path, &sbuf) == 0) && S_ISREG(sbuf.st_mode);
+    return (stat(path, &sbuf) == 0) && S_ISREG(sbuf.st_mode);
 }
 
 /** isdir
@@ -129,9 +129,9 @@ int isfile(char *path)
  */
 int isdir(char *path)
 {
-	struct stat sbuf;
+    struct stat sbuf;
 
-	return (stat(path, &sbuf) == 0) && S_ISDIR(sbuf.st_mode);
+    return (stat(path, &sbuf) == 0) && S_ISDIR(sbuf.st_mode);
 }
 
 /** copyfile
@@ -139,44 +139,44 @@ int isdir(char *path)
  */
 int copyfile(char *src, char *dest)
 {
-	FILE *to, *from;
-	char c;
+    FILE *to, *from;
+    char c;
 
-	if((from = fopen(src, "r")) == NULL)
-		return -1;
+    if((from = fopen(src, "r")) == NULL)
+        return -1;
 
-	if((to = fopen(dest, "w")) == NULL)
-	{
-		fclose(from);
-		return -2;
-	}
+    if((to = fopen(dest, "w")) == NULL)
+    {
+        fclose(from);
+        return -2;
+    }
 
-	while(!feof(from))
-	{
-		c = fgetc(from);
-		if(ferror(from))
-		{
-			fclose(from);
-			fclose(to);
-			unlink(dest);
-			return -3;
-		}
-		if(!feof(from))
-			fputc(c, to);
+    while(!feof(from))
+    {
+        c = fgetc(from);
+        if(ferror(from))
+        {
+            fclose(from);
+            fclose(to);
+            unlink(dest);
+            return -3;
+        }
+        if(!feof(from))
+            fputc(c, to);
 
-		if(ferror(to))
-		{
-			fclose(from);
-			fclose(to);
-			unlink(dest);
-			return -4;
-		}
-	}
+        if(ferror(to))
+        {
+            fclose(from);
+            fclose(to);
+            unlink(dest);
+            return -4;
+        }
+    }
 
-	fclose(from);
-	fclose(to);
+    fclose(from);
+    fclose(to);
 
-	return 0;
+    return 0;
 }
 
 /** linked list functions **/
@@ -188,30 +188,30 @@ int copyfile(char *src, char *dest)
  */
 list_node_t *list_append(list_t *list, void *data)
 {
-	list_node_t *new_node,
-		    *last_node;
+    list_node_t *new_node,
+            *last_node;
 
-	if(list_empty(*list))
-	{
-		(*list) = malloc(sizeof(list_node_t));
-		(*list)->data = data;
-		(*list)->prev = NULL;
-		(*list)->next = NULL;
-		return *list;
-	}
+    if(list_empty(*list))
+    {
+        (*list) = malloc(sizeof(list_node_t));
+        (*list)->data = data;
+        (*list)->prev = NULL;
+        (*list)->next = NULL;
+        return *list;
+    }
 
-	// find end of list
-	last_node = *list;
-	while(last_node->next != NULL)
-		last_node = last_node->next;
+    // find end of list
+    last_node = *list;
+    while(last_node->next != NULL)
+        last_node = last_node->next;
 
-	// create new node and return it
-	last_node->next = new_node = malloc(sizeof(list_node_t));
-	new_node->data = data;
-	new_node->prev = last_node;
-	new_node->next = NULL;
+    // create new node and return it
+    last_node->next = new_node = malloc(sizeof(list_node_t));
+    new_node->data = data;
+    new_node->prev = last_node;
+    new_node->next = NULL;
 
-	return new_node;
+    return new_node;
 }
 
 /** list_node_delete
@@ -221,17 +221,17 @@ list_node_t *list_append(list_t *list, void *data)
  */
 void list_node_delete(list_t *list, list_node_t *node)
 {
-	if(node == NULL || *list == NULL) return;
+    if(node == NULL || *list == NULL) return;
 
-	if(node->prev != NULL)
-		node->prev->next = node->next;
-	else
-		*list = node->next; // node is first node, update list pointer
+    if(node->prev != NULL)
+        node->prev->next = node->next;
+    else
+        *list = node->next; // node is first node, update list pointer
 
-	if(node->next != NULL)
-		node->next->prev = node->prev;
+    if(node->next != NULL)
+        node->next->prev = node->prev;
 
-	free(node);
+    free(node);
 }
 
 /** list_delete
@@ -241,23 +241,23 @@ void list_node_delete(list_t *list, list_node_t *node)
  */
 void list_delete(list_t *list)
 {
-	list_node_t *prev = NULL,
-		    *curr = NULL;
+    list_node_t *prev = NULL,
+            *curr = NULL;
 
-	// delete all list nodes in the list
-	list_foreach(*list, curr)
-	{
-		if(prev != NULL)
-			free(prev);
+    // delete all list nodes in the list
+    list_foreach(*list, curr)
+    {
+        if(prev != NULL)
+            free(prev);
 
-		// if we're on the last node, delete it
-		if(curr->next == NULL)
-			free(curr);
-		else
-			prev = curr;
-	}
+        // if we're on the last node, delete it
+        if(curr->next == NULL)
+            free(curr);
+        else
+            prev = curr;
+    }
 
-	*list = NULL;
+    *list = NULL;
 }
 
 /** list_node_move_front
@@ -266,21 +266,21 @@ void list_delete(list_t *list)
  */
 void list_node_move_front(list_t *list, list_node_t *node)
 {
-	list_node_t *tmp;
+    list_node_t *tmp;
 
-	if(node == NULL ||
-	   *list == NULL ||
-	   node == *list)
-		return;
+    if(node == NULL ||
+       *list == NULL ||
+       node == *list)
+        return;
 
-	tmp = *list;
-	node->prev->next = node->next;
-	if(node->next != NULL)
-		node->next->prev = node->prev;
-	node->prev = NULL;
-	node->next = *list;
-	(*list)->prev = node;
-	*list = node;
+    tmp = *list;
+    node->prev->next = node->next;
+    if(node->next != NULL)
+        node->next->prev = node->prev;
+    node->prev = NULL;
+    node->next = *list;
+    (*list)->prev = node;
+    *list = node;
 }
 
 /** list_node_move_back
@@ -289,23 +289,23 @@ void list_node_move_front(list_t *list, list_node_t *node)
  */
 void list_node_move_back(list_t *list, list_node_t *node)
 {
-	list_node_t *tmp;
+    list_node_t *tmp;
 
-	tmp = list_last_node(*list);
+    tmp = list_last_node(*list);
 
-	if(node == NULL ||
-	   *list == NULL ||
-	   node == tmp)
-		return;
+    if(node == NULL ||
+       *list == NULL ||
+       node == tmp)
+        return;
 
-	node->next->prev = node->prev;
-	if(node->prev != NULL)
-		node->prev->next = node->next;
-	else
-		*list = node->next; // first node is being moved, update list pointer
-	tmp->next = node;
-	node->prev = tmp;
-	node->next = NULL;
+    node->next->prev = node->prev;
+    if(node->prev != NULL)
+        node->prev->next = node->next;
+    else
+        *list = node->next; // first node is being moved, update list pointer
+    tmp->next = node;
+    node->prev = tmp;
+    node->next = NULL;
 }
 
 /** list_nth_node
@@ -313,15 +313,15 @@ void list_node_move_back(list_t *list, list_node_t *node)
  */
 list_node_t *list_nth_node(list_t list, int n)
 {
-	list_node_t *curr = NULL;
+    list_node_t *curr = NULL;
 
-	list_foreach(list, curr)
-	{
-		if(n-- == 0)
-			break;
-	}
+    list_foreach(list, curr)
+    {
+        if(n-- == 0)
+            break;
+    }
 
-	return curr;
+    return curr;
 }
 
 /** list_last_node
@@ -329,13 +329,13 @@ list_node_t *list_nth_node(list_t list, int n)
  */
 list_node_t *list_last_node(list_t list)
 {
-	if(list != NULL)
-	{
-		while(list->next != NULL)
-			list = list->next;
-	}
+    if(list != NULL)
+    {
+        while(list->next != NULL)
+            list = list->next;
+    }
 
-	return list;
+    return list;
 }
 
 /** list_empty
@@ -343,7 +343,7 @@ list_node_t *list_last_node(list_t list)
  */
 int inline list_empty(list_t list)
 {
-	return list == NULL;
+    return list == NULL;
 }
 
 /** list_length
@@ -351,13 +351,13 @@ int inline list_empty(list_t list)
  */
 int list_length(list_t list)
 {
-	int len = 0;
-	list_node_t *curr;
+    int len = 0;
+    list_node_t *curr;
 
-	list_foreach(list, curr)
-	{
-		len++;
-	}
+    list_foreach(list, curr)
+    {
+        len++;
+    }
 
-	return len;
+    return len;
 }

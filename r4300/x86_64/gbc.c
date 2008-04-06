@@ -48,8 +48,8 @@ void genbc1f()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1F, 1);
-	return;
+    gencallinterp((unsigned long long)BC1F, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -70,8 +70,8 @@ void genbc1f_out()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1F_OUT, 1);
-	return;
+    gencallinterp((unsigned long long)BC1F_OUT, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -89,8 +89,8 @@ void genbc1f_idle()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1F_IDLE, 1);
-	return;
+    gencallinterp((unsigned long long)BC1F_IDLE, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -117,8 +117,8 @@ void genbc1t()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1T, 1);
-	return;
+    gencallinterp((unsigned long long)BC1T, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -139,8 +139,8 @@ void genbc1t_out()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1T_OUT, 1);
-	return;
+    gencallinterp((unsigned long long)BC1T_OUT, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -158,8 +158,8 @@ void genbc1t_idle()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1T_IDLE, 1);
-	return;
+    gencallinterp((unsigned long long)BC1T_IDLE, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -180,8 +180,8 @@ void genbc1fl()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1FL, 1);
-	return;
+    gencallinterp((unsigned long long)BC1FL, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -202,8 +202,8 @@ void genbc1fl_out()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1FL_OUT, 1);
-	return;
+    gencallinterp((unsigned long long)BC1FL_OUT, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -221,8 +221,8 @@ void genbc1fl_idle()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1FL_IDLE, 1);
-	return;
+    gencallinterp((unsigned long long)BC1FL_IDLE, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -243,8 +243,8 @@ void genbc1tl()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1TL, 1);
-	return;
+    gencallinterp((unsigned long long)BC1TL, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -265,8 +265,8 @@ void genbc1tl_out()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1TL_OUT, 1);
-	return;
+    gencallinterp((unsigned long long)BC1TL_OUT, 1);
+    return;
      }
    
    gencheck_cop1_unusable();
@@ -284,8 +284,8 @@ void genbc1tl_idle()
    if (((dst->addr & 0xFFF) == 0xFFC &&
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)BC1TL_IDLE, 1);
-	return;
+    gencallinterp((unsigned long long)BC1TL_IDLE, 1);
+    return;
      }
    
    gencheck_cop1_unusable();

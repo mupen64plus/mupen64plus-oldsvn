@@ -50,51 +50,51 @@ void gui_main_loop(void) { }
 // print info message to console
 void info_message(const char *fmt, ...)
 {
-	va_list ap = {0};
+    va_list ap = {0};
 
-	va_start(ap, fmt);
-	printf(tr("Info"));
-	printf(": ");
-	vprintf(fmt, ap);
-	printf("\n");
-	va_end(ap);
+    va_start(ap, fmt);
+    printf(tr("Info"));
+    printf(": ");
+    vprintf(fmt, ap);
+    printf("\n");
+    va_end(ap);
 }
 
 // print alert message to console
 void alert_message(const char *fmt, ...)
 {
-	va_list ap = {0};
+    va_list ap = {0};
 
-	va_start(ap, fmt);
-	printf(tr("Error"));
-	printf(": ");
-	vprintf(fmt, ap);
-	printf("\n");
-	va_end(ap);
+    va_start(ap, fmt);
+    printf(tr("Error"));
+    printf(": ");
+    vprintf(fmt, ap);
+    printf("\n");
+    va_end(ap);
 }
 
 // print message and ask for user confirmation (yes/no)
 int confirm_message(const char *fmt, ...)
 {
-	va_list ap = {0};
-	char c;
+    va_list ap = {0};
+    char c;
 
-	while(1)
-	{
-		va_start(ap, fmt);
-		printf(tr("Confirm"));
-		printf(": ");
-		vprintf(fmt, ap);
-		printf("(y/n) ");
-		va_end(ap);
+    while(1)
+    {
+        va_start(ap, fmt);
+        printf(tr("Confirm"));
+        printf(": ");
+        vprintf(fmt, ap);
+        printf("(y/n) ");
+        va_end(ap);
         
-		c = fgetc(stdin);
+        c = fgetc(stdin);
         
-		if(tolower(c) == 'y') return 1;
-		else if(tolower(c) == 'n') return 0;
+        if(tolower(c) == 'y') return 1;
+        else if(tolower(c) == 'n') return 0;
 
-		printf(tr("Please answer 'y' (%s) or 'n' (%s).\n"), tr("Yes"), tr("No"));
-	}
+        printf(tr("Please answer 'y' (%s) or 'n' (%s).\n"), tr("Yes"), tr("No"));
+    }
 }
 
 #endif // NOGUI_ONLY

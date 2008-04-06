@@ -29,14 +29,14 @@ AiDacrateChanged( int SystemType )
    switch (SystemType)
      {
       case SYSTEM_NTSC:
-	f = 48681812 / (*AudioInfo.AI_DACRATE_REG + 1);
-	break;
+    f = 48681812 / (*AudioInfo.AI_DACRATE_REG + 1);
+    break;
       case SYSTEM_PAL:
-	f = 49656530 / (*AudioInfo.AI_DACRATE_REG + 1);
-	break;
+    f = 49656530 / (*AudioInfo.AI_DACRATE_REG + 1);
+    break;
       case SYSTEM_MPAL:
-	f = 48628316 / (*AudioInfo.AI_DACRATE_REG + 1);
-	break;
+    f = 48628316 / (*AudioInfo.AI_DACRATE_REG + 1);
+    break;
      }
    if (ioctl(dsp, SNDCTL_DSP_SPEED, &f) == -1)
      printf("error initializing frequency:%x\n", f);
@@ -52,7 +52,7 @@ void sync()
    //printf("new tv = %d\n", tv.tv_usec);
    if (limit && (tv.tv_sec*1000000+tv.tv_usec) < limit)
      {
-	usleep(limit-(tv.tv_sec*1000000+tv.tv_usec));
+    usleep(limit-(tv.tv_sec*1000000+tv.tv_usec));
      }
    //else printf("not sleep\n");
    gettimeofday(&tv, NULL);
@@ -72,9 +72,9 @@ static void *sound_thread(void *emp)
 {
    while (!closed)
      {
-	sem_wait(&sem);
-	write(dsp, buf[cur_buf], *AudioInfo.AI_LEN_REG);
-	sem_post(&sem2);
+    sem_wait(&sem);
+    write(dsp, buf[cur_buf], *AudioInfo.AI_LEN_REG);
+    sem_post(&sem2);
      }
    return 0;
 }
@@ -84,11 +84,11 @@ static void *sound_thread(void *emp)
    //double secPerByte;
    while (!closed)
      {
-	sem_wait(&semt);
-	//secPerByte = (1/(double)frequency)/4.0;
-	//usleep((int)(*AudioInfo.AI_LEN_REG*secPerByte*1000000));
-	usleep((long long)((long long)*AudioInfo.AI_LEN_REG*1000000LL/((long long)frequency*4LL)));
-	sem_post(&semt2);
+    sem_wait(&semt);
+    //secPerByte = (1/(double)frequency)/4.0;
+    //usleep((int)(*AudioInfo.AI_LEN_REG*secPerByte*1000000));
+    usleep((long long)((long long)*AudioInfo.AI_LEN_REG*1000000LL/((long long)frequency*4LL)));
+    sem_post(&semt2);
      }
    return 0;
 }*/
@@ -98,17 +98,17 @@ AiLenChanged( void )
 {
    int i;
    short *p = (short*)(AudioInfo.RDRAM + 
-		       (*AudioInfo.AI_DRAM_ADDR_REG & 0xFFFFFF));
+               (*AudioInfo.AI_DRAM_ADDR_REG & 0xFFFFFF));
    if (buf_size[1-cur_buf] < *AudioInfo.AI_LEN_REG)
      {
-	buf_size[1-cur_buf] = *AudioInfo.AI_LEN_REG;
-	if (buf[1-cur_buf] != NULL) free(buf[1-cur_buf]);
-	buf[1-cur_buf] = (short*)malloc(buf_size[1-cur_buf]*sizeof(char));
+    buf_size[1-cur_buf] = *AudioInfo.AI_LEN_REG;
+    if (buf[1-cur_buf] != NULL) free(buf[1-cur_buf]);
+    buf[1-cur_buf] = (short*)malloc(buf_size[1-cur_buf]*sizeof(char));
      }
    for (i=0; i<(buf_size[1-cur_buf]/4); i++)
      {
-	buf[1-cur_buf][i*2+0] = p[i*2+1];
-	buf[1-cur_buf][i*2+1] = p[i*2+0];
+    buf[1-cur_buf][i*2+0] = p[i*2+1];
+    buf[1-cur_buf][i*2+1] = p[i*2+0];
      }
    //pthread_join(my_thread, NULL);
    cur_buf = 1 - cur_buf;
@@ -119,15 +119,15 @@ AiLenChanged( void )
    //sem_wait(&semt2);
    //sync();
      /*{
-	static int sample_count = 0;
-	count_info info;
-	while (info.bytes<sample_count)
-	  {
-	     if (ioctl(dsp, SNDCTL_DSP_GETOPTR, &info) == -1)
-	       printf("error getting sample count\n");
-//	     printf("i:%d<%d\n", info.bytes, sample_count);
-	  }
-	sample_count += *AudioInfo.AI_LEN_REG;
+    static int sample_count = 0;
+    count_info info;
+    while (info.bytes<sample_count)
+      {
+         if (ioctl(dsp, SNDCTL_DSP_GETOPTR, &info) == -1)
+           printf("error getting sample count\n");
+//       printf("i:%d<%d\n", info.bytes, sample_count);
+      }
+    sample_count += *AudioInfo.AI_LEN_REG;
      }*/
 }
 
@@ -155,13 +155,13 @@ DllAbout( HWND hParent )
    okay_button = gtk_button_new_with_label("OK");
    
    gtk_signal_connect_object(GTK_OBJECT(okay_button), "clicked",
-			     GTK_SIGNAL_FUNC(gtk_widget_destroy),
-			     GTK_OBJECT(dialog));
+                 GTK_SIGNAL_FUNC(gtk_widget_destroy),
+                 GTK_OBJECT(dialog));
    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->action_area),
-		     okay_button);
+             okay_button);
    
    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),
-		     label);
+             label);
    gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
    gtk_widget_show_all(dialog);
 #else
@@ -173,26 +173,26 @@ DllAbout( HWND hParent )
 
 static void GetPluginDir(char *Directory)
 {
-	if(strlen(configdir) > 0)
-	{
-		strncpy(Directory, configdir, PATH_MAX);
-		// make sure there's a trailing '/'
-		if(Directory[strlen(Directory)-1] != '/')
-			strncat(Directory, "/", PATH_MAX - strlen(Directory));
-	}
-	else
-	{
-		int n = readlink("/proc/self/exe", Directory, PATH_MAX);
-		if (n == -1)
-			strcpy(Directory, "./");
-		else
-		{
-			Directory[n] = '\0';
-			while(Directory[strlen(Directory)-1] != '/')
-				Directory[strlen(Directory)-1] = '\0';
-		}
-		strcat(Directory, "plugins/");
-	}
+    if(strlen(configdir) > 0)
+    {
+        strncpy(Directory, configdir, PATH_MAX);
+        // make sure there's a trailing '/'
+        if(Directory[strlen(Directory)-1] != '/')
+            strncat(Directory, "/", PATH_MAX - strlen(Directory));
+    }
+    else
+    {
+        int n = readlink("/proc/self/exe", Directory, PATH_MAX);
+        if (n == -1)
+            strcpy(Directory, "./");
+        else
+        {
+            Directory[n] = '\0';
+            while(Directory[strlen(Directory)-1] != '/')
+                Directory[strlen(Directory)-1] = '\0';
+        }
+        strcat(Directory, "plugins/");
+    }
 }
 
 #ifdef USE_GTK
@@ -248,14 +248,14 @@ static ConfigDialog *CreateConfigDialog()
    gtk_container_add(GTK_CONTAINER(frame), hScale);
    
    gtk_signal_connect_object(GTK_OBJECT(dialog), "delete-event",
-			     GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete),
-			     GTK_OBJECT(dialog));
+                 GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete),
+                 GTK_OBJECT(dialog));
    gtk_signal_connect(GTK_OBJECT(okButton), "clicked",
-		      GTK_SIGNAL_FUNC(okButtonCallback),
-		      (void*)configDialog);
+              GTK_SIGNAL_FUNC(okButtonCallback),
+              (void*)configDialog);
    gtk_signal_connect_object(GTK_OBJECT(cancelButton), "clicked",
-			     GTK_SIGNAL_FUNC(gtk_widget_hide),
-			     GTK_OBJECT(dialog));
+                 GTK_SIGNAL_FUNC(gtk_widget_hide),
+                 GTK_OBJECT(dialog));
    
    configDialog->dialog = dialog;
    configDialog->adj = adj;
@@ -271,19 +271,19 @@ DllConfig ( HWND hParent )
    if (configDialog == NULL) configDialog = CreateConfigDialog();
    
      {
-	char path[PATH_MAX];
-	FILE *f;
-	int val;
-	
-	GetPluginDir(path);
-	strncat(path, "mupen64_sound.cfg", PATH_MAX - strlen(path));
-	f = fopen(path, "rb");
-	if (f)
-	  {
-	     fscanf(f, "%d", &val);
-	     fclose(f);
-	     gtk_adjustment_set_value(GTK_ADJUSTMENT(configDialog->adj), val);
-	  }
+    char path[PATH_MAX];
+    FILE *f;
+    int val;
+    
+    GetPluginDir(path);
+    strncat(path, "mupen64_sound.cfg", PATH_MAX - strlen(path));
+    f = fopen(path, "rb");
+    if (f)
+      {
+         fscanf(f, "%d", &val);
+         fclose(f);
+         gtk_adjustment_set_value(GTK_ADJUSTMENT(configDialog->adj), val);
+      }
      }
    
    gtk_widget_show_all(configDialog->dialog);
@@ -318,15 +318,15 @@ EXPORT void CALL RomOpen()
    int val = 0x20010;
    char path[PATH_MAX];
    FILE *file;
-	
+    
    GetPluginDir(path);
    strcat(path, "mupen64_sound.cfg");
    file = fopen(path, "rb");
    if (file)
      {
-	fscanf(file, "%d", &val);
-	fclose(file);
-	val = 0x20000 | val;
+    fscanf(file, "%d", &val);
+    fclose(file);
+    val = 0x20000 | val;
      }
    dsp = open("/dev/dsp", O_WRONLY);
    if (dsp == -1) printf("error opening /dev/dsp\n");
@@ -372,7 +372,7 @@ RomClosed( void )
 EXPORT void CALL
 SetConfigDir( char *configDir )
 {
-	strncpy(configdir, configDir, PATH_MAX);
+    strncpy(configdir, configDir, PATH_MAX);
 }
 
 EXPORT void CALL

@@ -27,30 +27,30 @@ class CCritSect
  public:
    CCritSect()
      {
-	cs = SDL_CreateMutex();
-	locked = 0;
+    cs = SDL_CreateMutex();
+    locked = 0;
      }
    
    ~CCritSect()
      {
-	SDL_DestroyMutex(cs);
+    SDL_DestroyMutex(cs);
      }
    
    void Lock()
      {
-	SDL_LockMutex(cs);
-	locked = 1;
+    SDL_LockMutex(cs);
+    locked = 1;
      }
    
    void Unlock()
      {
-	locked = 0;
-	SDL_UnlockMutex(cs);
+    locked = 0;
+    SDL_UnlockMutex(cs);
      }
    
    bool IsLocked()
      {
-	return (locked != 0);
+    return (locked != 0);
      }
    
  protected:

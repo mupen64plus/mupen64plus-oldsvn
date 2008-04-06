@@ -1,21 +1,21 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
-*	Copyright (c) 2008  Günther <guenther.emu@freenet.de>
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
+*   Copyright (c) 2008  Günther <guenther.emu@freenet.de>
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -50,37 +50,37 @@ void ZLUT_init()
     if (zLUT)
       return;
     zLUT = new WORD[0x40000];
-	for(int i=0; i<0x40000; i++)
-	{
-	     DWORD exponent = 0;
-	     DWORD testbit = 1 << 17;
-	     while((i & testbit) && (exponent < 7))
-	       {
-		  exponent++;
-		  testbit = 1 << (17 - exponent);
-	       }
-	     
-	     DWORD mantissa = (i >> (6 - (6 < exponent ? 6 : exponent))) & 0x7ff;
-	     zLUT[i] = (WORD)(((exponent << 11) | mantissa) << 2);
+    for(int i=0; i<0x40000; i++)
+    {
+         DWORD exponent = 0;
+         DWORD testbit = 1 << 17;
+         while((i & testbit) && (exponent < 7))
+           {
+          exponent++;
+          testbit = 1 << (17 - exponent);
+           }
+         
+         DWORD mantissa = (i >> (6 - (6 < exponent ? 6 : exponent))) & 0x7ff;
+         zLUT[i] = (WORD)(((exponent << 11) | mantissa) << 2);
     }
     /*
-	for(i=0; i<0x40000; i++)
-	{
-	   int j = i + 1;
-	   WORD z = zLUT[i];
-	   while (zLUT[i] == zLUT[j])
-	     j++;
-	   int w = (j - i) >> 2;
-	   if (w > 0)
-	   {
+    for(i=0; i<0x40000; i++)
+    {
+       int j = i + 1;
+       WORD z = zLUT[i];
+       while (zLUT[i] == zLUT[j])
+         j++;
+       int w = (j - i) >> 2;
+       if (w > 0)
+       {
          int k;
-	     for (k = 1; k < 4; k++)
-	       for (int t = 0; t < w; t++)
+         for (k = 1; k < 4; k++)
+           for (int t = 0; t < w; t++)
              zLUT[i+k*w+t] = z + k;
          i = j - 1;
-	   }
-	}
-	*/
+       }
+    }
+    */
 }
 
 void ZLUT_release()
@@ -129,7 +129,7 @@ __inline int idiv16(int x, int y)        // (x << 16) / y
   __asm {
         mov   eax, x
         mov   ebx, y
-    	mov   edx,eax   
+        mov   edx,eax   
         sar   edx,16
         shl   eax,16    
         idiv  ebx  
@@ -166,9 +166,9 @@ void inner(void * dst, int width, int i);
 inline void inner(void * dst, int width, int i)
 {
   __asm {
-  		mov   edi, dst
-  		mov   ecx, width
-  		mov   ebx, i
+        mov   edi, dst
+        mov   ecx, width
+        mov   ebx, i
         rol   ebx, 16
         mov   edx, [didx_frac]
         mov   al, bl
@@ -191,14 +191,14 @@ inline void inner(WORD * dst, int shift, int width, int i, int didx)
   WORD encodedZ;
   for (int x = 0; x < width; x++)
   {
-		z = i/8192;
-		if (z < 0) z = 0;
-		else if (z > 0x3FFFF) z = 0x3FFFF;
-		encodedZ = zLUT[z];
-		idx = (shift+x)^1;
+        z = i/8192;
+        if (z < 0) z = 0;
+        else if (z > 0x3FFFF) z = 0x3FFFF;
+        encodedZ = zLUT[z];
+        idx = (shift+x)^1;
         if(encodedZ < dst[idx]) 
           dst[idx] = encodedZ;
-		i += didx;
+        i += didx;
   }
 }
 */
@@ -341,7 +341,7 @@ void Rasterize(vertexi * vtx, int vertices, int dzdx)
     WORD * destptr = (WORD*)(gfx.RDRAM+rdp.zimg);
     int y1 = iceil(min_y);
     int shift;
-	//destptr += iceil(min_y) * rdp.zi_width;
+    //destptr += iceil(min_y) * rdp.zi_width;
 
     for(;;)
     {
@@ -358,7 +358,7 @@ void Rasterize(vertexi * vtx, int vertices, int dzdx)
             int z = left_z + imul16(prestep, dzdx);
 
 //            if (y1 > max_y) return;
-//			FRDP("Depth render. x1: %d, y1: %d, width: %d\n", x1, y1, width);
+//          FRDP("Depth render. x1: %d, y1: %d, width: %d\n", x1, y1, width);
             shift = x1 + y1*rdp.zi_width;
 //            if (shift + width > rdp.zi_nb_pixels)
 //              return;
@@ -368,14 +368,14 @@ void Rasterize(vertexi * vtx, int vertices, int dzdx)
             WORD encodedZ;
             for (int x = 0; x < width; x++)
             {
-          		trueZ = z/8192;
-          		if (trueZ < 0) trueZ = 0;
-          		else if (trueZ > 0x3FFFF) trueZ = 0x3FFFF;
-          		encodedZ = zLUT[trueZ];
-          		idx = (shift+x)^1;
+                trueZ = z/8192;
+                if (trueZ < 0) trueZ = 0;
+                else if (trueZ > 0x3FFFF) trueZ = 0x3FFFF;
+                encodedZ = zLUT[trueZ];
+                idx = (shift+x)^1;
                 if(encodedZ < destptr[idx]) 
                   destptr[idx] = encodedZ;
-          		z += dzdx;
+                z += dzdx;
             }
         }
 

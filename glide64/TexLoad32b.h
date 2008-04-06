@@ -1,21 +1,21 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
-*	Copyright (c) 2008  Günther <guenther.emu@freenet.de>
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
+*   Copyright (c) 2008  Günther <guenther.emu@freenet.de>
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -39,434 +39,434 @@
 
 DWORD Load32bRGBA (unsigned char * dst, unsigned char * src, int wid_64, int height, int line, int real_width, int tile)
 {
-	if (wid_64 < 1) wid_64 = 1;
-	if (height < 1) height = 1;
-	int ext = (real_width - (wid_64 << 1)) << 1;
+    if (wid_64 < 1) wid_64 = 1;
+    if (height < 1) height = 1;
+    int ext = (real_width - (wid_64 << 1)) << 1;
 
-	wid_64 >>= 1;		// re-shift it, load twice as many quadwords
+    wid_64 >>= 1;       // re-shift it, load twice as many quadwords
 #ifndef GCC
-	__asm {
-		mov esi,dword ptr [src]
-		mov edi,dword ptr [dst]
+    __asm {
+        mov esi,dword ptr [src]
+        mov edi,dword ptr [dst]
 
-		mov ecx,dword ptr [height]
+        mov ecx,dword ptr [height]
 y_loop:
-		push ecx
+        push ecx
 
-		mov ecx,dword ptr [wid_64]
+        mov ecx,dword ptr [wid_64]
 x_loop:
-		mov eax,dword ptr [esi]		// read first pixel
-		add esi,4
-		bswap eax
-		mov edx,eax
+        mov eax,dword ptr [esi]     // read first pixel
+        add esi,4
+        bswap eax
+        mov edx,eax
 
-		xor ebx,ebx
-		shl eax,8	// 0x000000F0 -> 0x0000F000 (a)
-		and eax,0x0000F000
-		or ebx,eax
-		shr edx,12	// 0x0000F000 -> 0x0000000F (b)
-		mov eax,edx
-		and eax,0x0000000F
-		or ebx,eax
-		shr edx,4	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		mov eax,edx
-		and eax,0x000000F0
-		or ebx,eax
-		shr edx,4	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		and edx,0x00000F00
-		or ebx,edx
+        xor ebx,ebx
+        shl eax,8   // 0x000000F0 -> 0x0000F000 (a)
+        and eax,0x0000F000
+        or ebx,eax
+        shr edx,12  // 0x0000F000 -> 0x0000000F (b)
+        mov eax,edx
+        and eax,0x0000000F
+        or ebx,eax
+        shr edx,4   // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+        mov eax,edx
+        and eax,0x000000F0
+        or ebx,eax
+        shr edx,4   // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+        and edx,0x00000F00
+        or ebx,edx
 
-		mov eax,dword ptr [esi]		// read second pixel
-		add esi,4
-		bswap eax
-		mov edx,eax
+        mov eax,dword ptr [esi]     // read second pixel
+        add esi,4
+        bswap eax
+        mov edx,eax
 
-		shl eax,24	// 0x000000F0 -> 0xF0000000 (a)
-		and eax,0xF0000000
-		or ebx,eax
-					// 0x00F00000 -> 0x00F00000 (g)
-		mov eax,edx
-		and eax,0x00F00000
-		or ebx,eax
-		rol edx,4	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		mov eax,edx
-		and eax,0x000F0000
-		or ebx,eax
-		shl edx,24	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		and edx,0x0F000000
-		or ebx,edx
+        shl eax,24  // 0x000000F0 -> 0xF0000000 (a)
+        and eax,0xF0000000
+        or ebx,eax
+                    // 0x00F00000 -> 0x00F00000 (g)
+        mov eax,edx
+        and eax,0x00F00000
+        or ebx,eax
+        rol edx,4   // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+        mov eax,edx
+        and eax,0x000F0000
+        or ebx,eax
+        shl edx,24  // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+        and edx,0x0F000000
+        or ebx,edx
 
-		mov dword ptr [edi],ebx
-		add edi,4
+        mov dword ptr [edi],ebx
+        add edi,4
 
-		// * copy
-		mov eax,dword ptr [esi]		// read first pixel
-		add esi,4
-		bswap eax
-		mov edx,eax
+        // * copy
+        mov eax,dword ptr [esi]     // read first pixel
+        add esi,4
+        bswap eax
+        mov edx,eax
 
-		xor ebx,ebx
-		shl eax,8	// 0x000000F0 -> 0x0000F000 (a)
-		and eax,0x0000F000
-		or ebx,eax
-		shr edx,12	// 0x0000F000 -> 0x0000000F (b)
-		mov eax,edx
-		and eax,0x0000000F
-		or ebx,eax
-		shr edx,4	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		mov eax,edx
-		and eax,0x000000F0
-		or ebx,eax
-		shr edx,4	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		and edx,0x00000F00
-		or ebx,edx
+        xor ebx,ebx
+        shl eax,8   // 0x000000F0 -> 0x0000F000 (a)
+        and eax,0x0000F000
+        or ebx,eax
+        shr edx,12  // 0x0000F000 -> 0x0000000F (b)
+        mov eax,edx
+        and eax,0x0000000F
+        or ebx,eax
+        shr edx,4   // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+        mov eax,edx
+        and eax,0x000000F0
+        or ebx,eax
+        shr edx,4   // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+        and edx,0x00000F00
+        or ebx,edx
 
-		mov eax,dword ptr [esi]		// read second pixel
-		add esi,4
-		bswap eax
-		mov edx,eax
+        mov eax,dword ptr [esi]     // read second pixel
+        add esi,4
+        bswap eax
+        mov edx,eax
 
-		shl eax,24	// 0x000000F0 -> 0xF0000000 (a)
-		and eax,0xF0000000
-		or ebx,eax
-					// 0x00F00000 -> 0x00F00000 (g)
-		mov eax,edx
-		and eax,0x00F00000
-		or ebx,eax
-		rol edx,4	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		mov eax,edx
-		and eax,0x000F0000
-		or ebx,eax
-		shl edx,24	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		and edx,0x0F000000
-		or ebx,edx
+        shl eax,24  // 0x000000F0 -> 0xF0000000 (a)
+        and eax,0xF0000000
+        or ebx,eax
+                    // 0x00F00000 -> 0x00F00000 (g)
+        mov eax,edx
+        and eax,0x00F00000
+        or ebx,eax
+        rol edx,4   // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+        mov eax,edx
+        and eax,0x000F0000
+        or ebx,eax
+        shl edx,24  // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+        and edx,0x0F000000
+        or ebx,edx
 
-		mov dword ptr [edi],ebx
-		add edi,4
-		// *
+        mov dword ptr [edi],ebx
+        add edi,4
+        // *
 
-		dec ecx
-		jnz x_loop
+        dec ecx
+        jnz x_loop
 
-		pop ecx
-		dec ecx
-		jz end_y_loop
-		push ecx
+        pop ecx
+        dec ecx
+        jz end_y_loop
+        push ecx
 
-		add esi,dword ptr [line]
-		add edi,dword ptr [ext]
+        add esi,dword ptr [line]
+        add edi,dword ptr [ext]
 
-		mov ecx,dword ptr [wid_64]
+        mov ecx,dword ptr [wid_64]
 x_loop_2:
-		mov eax,dword ptr [esi+8]		// read first pixel
-		bswap eax
-		mov edx,eax
+        mov eax,dword ptr [esi+8]       // read first pixel
+        bswap eax
+        mov edx,eax
 
-		xor ebx,ebx
-		shl eax,8	// 0x000000F0 -> 0x0000F000 (a)
-		and eax,0x0000F000
-		or ebx,eax
-		shr edx,12	// 0x0000F000 -> 0x0000000F (b)
-		mov eax,edx
-		and eax,0x0000000F
-		or ebx,eax
-		shr edx,4	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		mov eax,edx
-		and eax,0x000000F0
-		or ebx,eax
-		shr edx,4	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		and edx,0x00000F00
-		or ebx,edx
+        xor ebx,ebx
+        shl eax,8   // 0x000000F0 -> 0x0000F000 (a)
+        and eax,0x0000F000
+        or ebx,eax
+        shr edx,12  // 0x0000F000 -> 0x0000000F (b)
+        mov eax,edx
+        and eax,0x0000000F
+        or ebx,eax
+        shr edx,4   // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+        mov eax,edx
+        and eax,0x000000F0
+        or ebx,eax
+        shr edx,4   // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+        and edx,0x00000F00
+        or ebx,edx
 
-		mov eax,dword ptr [esi+12]		// read second pixel
-		bswap eax
-		mov edx,eax
+        mov eax,dword ptr [esi+12]      // read second pixel
+        bswap eax
+        mov edx,eax
 
-		shl eax,24	// 0x000000F0 -> 0xF0000000 (a)
-		and eax,0xF0000000
-		or ebx,eax
-					// 0x00F00000 -> 0x00F00000 (g)
-		mov eax,edx
-		and eax,0x00F00000
-		or ebx,eax
-		rol edx,4	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		mov eax,edx
-		and eax,0x000F0000
-		or ebx,eax
-		shl edx,24	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		and edx,0x0F000000
-		or ebx,edx
+        shl eax,24  // 0x000000F0 -> 0xF0000000 (a)
+        and eax,0xF0000000
+        or ebx,eax
+                    // 0x00F00000 -> 0x00F00000 (g)
+        mov eax,edx
+        and eax,0x00F00000
+        or ebx,eax
+        rol edx,4   // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+        mov eax,edx
+        and eax,0x000F0000
+        or ebx,eax
+        shl edx,24  // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+        and edx,0x0F000000
+        or ebx,edx
 
-		mov dword ptr [edi],ebx
-		add edi,4
+        mov dword ptr [edi],ebx
+        add edi,4
 
-		// * copy
-		mov eax,dword ptr [esi+0]		// read first pixel
-		bswap eax
-		mov edx,eax
+        // * copy
+        mov eax,dword ptr [esi+0]       // read first pixel
+        bswap eax
+        mov edx,eax
 
-		xor ebx,ebx
-		shl eax,8	// 0x000000F0 -> 0x0000F000 (a)
-		and eax,0x0000F000
-		or ebx,eax
-		shr edx,12	// 0x0000F000 -> 0x0000000F (b)
-		mov eax,edx
-		and eax,0x0000000F
-		or ebx,eax
-		shr edx,4	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		mov eax,edx
-		and eax,0x000000F0
-		or ebx,eax
-		shr edx,4	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		and edx,0x00000F00
-		or ebx,edx
+        xor ebx,ebx
+        shl eax,8   // 0x000000F0 -> 0x0000F000 (a)
+        and eax,0x0000F000
+        or ebx,eax
+        shr edx,12  // 0x0000F000 -> 0x0000000F (b)
+        mov eax,edx
+        and eax,0x0000000F
+        or ebx,eax
+        shr edx,4   // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+        mov eax,edx
+        and eax,0x000000F0
+        or ebx,eax
+        shr edx,4   // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+        and edx,0x00000F00
+        or ebx,edx
 
-		mov eax,dword ptr [esi+4]		// read second pixel
-		add esi,16
-		bswap eax
-		mov edx,eax
+        mov eax,dword ptr [esi+4]       // read second pixel
+        add esi,16
+        bswap eax
+        mov edx,eax
 
-		shl eax,24	// 0x000000F0 -> 0xF0000000 (a)
-		and eax,0xF0000000
-		or ebx,eax
-					// 0x00F00000 -> 0x00F00000 (g)
-		mov eax,edx
-		and eax,0x00F00000
-		or ebx,eax
-		rol edx,4	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		mov eax,edx
-		and eax,0x000F0000
-		or ebx,eax
-		shl edx,24	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		and edx,0x0F000000
-		or ebx,edx
+        shl eax,24  // 0x000000F0 -> 0xF0000000 (a)
+        and eax,0xF0000000
+        or ebx,eax
+                    // 0x00F00000 -> 0x00F00000 (g)
+        mov eax,edx
+        and eax,0x00F00000
+        or ebx,eax
+        rol edx,4   // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+        mov eax,edx
+        and eax,0x000F0000
+        or ebx,eax
+        shl edx,24  // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+        and edx,0x0F000000
+        or ebx,edx
 
-		mov dword ptr [edi],ebx
-		add edi,4
-		// *
+        mov dword ptr [edi],ebx
+        add edi,4
+        // *
 
-		dec ecx
-		jnz x_loop_2
-		
-		add esi,dword ptr [line]
-		add edi,dword ptr [ext]
+        dec ecx
+        jnz x_loop_2
+        
+        add esi,dword ptr [line]
+        add edi,dword ptr [ext]
 
-		pop ecx
-		dec ecx
-		jnz y_loop
+        pop ecx
+        dec ecx
+        jnz y_loop
 
 end_y_loop:
-	}
+    }
 #else // _WIN32
    //printf("Load32bRGBA\n");
    long lTemp, lHeight = (long) height;
    asm volatile (
-		 "y_loop9:               \n"
+         "y_loop9:               \n"
          "mov %[c], %[temp]      \n"
 
-		 "mov %[wid_64], %%ecx  \n"
-		 "x_loop9:               \n"
-		 "mov (%[src]), %%eax     \n"		// read first pixel
-		 "add $4, %[src]          \n"
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
-		 
-		 "xor %%ebx, %%ebx       \n"
-		 "shl $8, %%eax          \n"	// 0x000000F0 -> 0x0000F000 (a)
-		 "and $0x0000F000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $12, %%edx         \n"	// 0x0000F000 -> 0x0000000F (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x0000000F, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000000F0, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		 "and $0x00000F00, %%edx \n"
-		 "or %%edx, %%ebx        \n"
-		 
-		 "mov (%[src]), %%eax     \n"		// read second pixel
-		 "add $4, %[src]          \n"
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
-		 
-		 "shl $24, %%eax         \n"	// 0x000000F0 -> 0xF0000000 (a)
-		 "and $0xF0000000, %%eax \n"
-		 "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x00F00000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "rol $4, %%edx          \n"	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000F0000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shl $24, %%edx         \n"	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		 "and $0x0F000000, %%edx \n"
-		 "or %%edx, %%ebx        \n"
-		 
-		 "mov %%ebx, (%[dst])     \n"
-		 "add $4, %[dst]          \n"
-		 
-		 // * copy
-		 "mov (%[src]), %%eax     \n"		// read first pixel
-		 "add $4, %[src]          \n"
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
-		 
-		 "xor %%ebx, %%ebx       \n"
-		 "shl $8, %%eax          \n"	// 0x000000F0 -> 0x0000F000 (a)
-		 "and $0x0000F000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $12, %%edx         \n"	// 0x0000F000 -> 0x0000000F (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x0000000F, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000000F0, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		 "and $0x00000F00, %%edx \n"
-		 "or %%edx, %%ebx        \n"
-		 
-		 "mov (%[src]), %%eax     \n"		// read second pixel
-		 "add $4, %[src]          \n"
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
-		 
-		 "shl $24, %%eax         \n"	// 0x000000F0 -> 0xF0000000 (a)
-		 "and $0xF0000000, %%eax \n"
-		 "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x00F00000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "rol $4, %%edx          \n"	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000F0000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shl $24, %%edx         \n"	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		 "and $0x0F000000, %%edx \n"
-		 "or %%edx, %%ebx        \n"
-		 
-		 "mov %%ebx, (%[dst])     \n"
-		 "add $4, %[dst]          \n"
-		 // *
+         "mov %[wid_64], %%ecx  \n"
+         "x_loop9:               \n"
+         "mov (%[src]), %%eax     \n"       // read first pixel
+         "add $4, %[src]          \n"
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
+         
+         "xor %%ebx, %%ebx       \n"
+         "shl $8, %%eax          \n"    // 0x000000F0 -> 0x0000F000 (a)
+         "and $0x0000F000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $12, %%edx         \n"    // 0x0000F000 -> 0x0000000F (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x0000000F, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x000000F0, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+         "and $0x00000F00, %%edx \n"
+         "or %%edx, %%ebx        \n"
+         
+         "mov (%[src]), %%eax     \n"       // read second pixel
+         "add $4, %[src]          \n"
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
+         
+         "shl $24, %%eax         \n"    // 0x000000F0 -> 0xF0000000 (a)
+         "and $0xF0000000, %%eax \n"
+         "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x00F00000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "rol $4, %%edx          \n"    // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x000F0000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shl $24, %%edx         \n"    // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+         "and $0x0F000000, %%edx \n"
+         "or %%edx, %%ebx        \n"
+         
+         "mov %%ebx, (%[dst])     \n"
+         "add $4, %[dst]          \n"
+         
+         // * copy
+         "mov (%[src]), %%eax     \n"       // read first pixel
+         "add $4, %[src]          \n"
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
+         
+         "xor %%ebx, %%ebx       \n"
+         "shl $8, %%eax          \n"    // 0x000000F0 -> 0x0000F000 (a)
+         "and $0x0000F000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $12, %%edx         \n"    // 0x0000F000 -> 0x0000000F (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x0000000F, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x000000F0, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+         "and $0x00000F00, %%edx \n"
+         "or %%edx, %%ebx        \n"
+         
+         "mov (%[src]), %%eax     \n"       // read second pixel
+         "add $4, %[src]          \n"
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
+         
+         "shl $24, %%eax         \n"    // 0x000000F0 -> 0xF0000000 (a)
+         "and $0xF0000000, %%eax \n"
+         "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x00F00000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "rol $4, %%edx          \n"    // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x000F0000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shl $24, %%edx         \n"    // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+         "and $0x0F000000, %%edx \n"
+         "or %%edx, %%ebx        \n"
+         
+         "mov %%ebx, (%[dst])     \n"
+         "add $4, %[dst]          \n"
+         // *
 
-		 "dec %%ecx              \n"
-		 "jnz x_loop9            \n"
-		 
+         "dec %%ecx              \n"
+         "jnz x_loop9            \n"
+         
          "mov %[temp], %[c]      \n"
-		 "dec %%ecx              \n"
-		 "jz end_y_loop9         \n"
+         "dec %%ecx              \n"
+         "jz end_y_loop9         \n"
          "mov %[c], %[temp]      \n"
 
-		 "add %[line], %[src]    \n"
-		 "add %[ext], %[dst]     \n"
-		 
-		 "mov %[wid_64], %%ecx  \n"
-		 "x_loop_29:             \n"
-		 "mov 8(%[src]), %%eax    \n"		// read first pixel
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
-		 
-		 "xor %%ebx, %%ebx       \n"
-		 "shl $8, %%eax          \n"	// 0x000000F0 -> 0x0000F000 (a)
-		 "and $0x0000F000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $12, %%edx         \n"	// 0x0000F000 -> 0x0000000F (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x0000000F, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000000F0, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		 "and $0x00000F00, %%edx \n"
-		 "or %%edx, %%ebx        \n"
+         "add %[line], %[src]    \n"
+         "add %[ext], %[dst]     \n"
+         
+         "mov %[wid_64], %%ecx  \n"
+         "x_loop_29:             \n"
+         "mov 8(%[src]), %%eax    \n"       // read first pixel
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
+         
+         "xor %%ebx, %%ebx       \n"
+         "shl $8, %%eax          \n"    // 0x000000F0 -> 0x0000F000 (a)
+         "and $0x0000F000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $12, %%edx         \n"    // 0x0000F000 -> 0x0000000F (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x0000000F, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x000000F0, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+         "and $0x00000F00, %%edx \n"
+         "or %%edx, %%ebx        \n"
 
-		 "mov 12(%[src]), %%eax   \n"		// read second pixel
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
+         "mov 12(%[src]), %%eax   \n"       // read second pixel
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
 
-		 "shl $24, %%eax         \n"	// 0x000000F0 -> 0xF0000000 (a)
-		 "and $0xF0000000, %%eax \n"
-		 "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x00F00000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "rol $4, %%edx          \n"	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000F0000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shl $24, %%edx         \n"	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		 "and $0x0F000000, %%edx \n"
-		 "or %%edx, %%ebx        \n"
-		 
-		 "mov %%ebx, (%[dst])     \n"
-		 "add $4, %[dst]          \n"
-		 
-		 // * copy
-		 "mov (%[src]), %%eax     \n"		// read first pixel
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
-		 
-		 "xor %%ebx, %%ebx       \n"
-		 "shl $8, %%eax          \n"	// 0x000000F0 -> 0x0000F000 (a)
-		 "and $0x0000F000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $12, %%edx         \n"	// 0x0000F000 -> 0x0000000F (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x0000000F, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000000F0, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shr $4, %%edx          \n"	// 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
-		 "and $0x00000F00, %%edx \n"
-		 "or %%edx, %%ebx        \n"
-		 
-		 "mov 4(%[src]), %%eax    \n"		// read second pixel
-		 "add $16, %[src]         \n"
-		 "bswap %%eax            \n"
-		 "mov %%eax, %%edx       \n"
-		 
-		 "shl $24, %%eax         \n"	// 0x000000F0 -> 0xF0000000 (a)
-		 "and $0xF0000000, %%eax \n"
-		 "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x00F00000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "rol $4, %%edx          \n"	// 0x0000F000 (did not shift) -> 0x000F0000 (b)
-		 "mov %%edx, %%eax       \n"
-		 "and $0x000F0000, %%eax \n"
-		 "or %%eax, %%ebx        \n"
-		 "shl $24, %%edx         \n"	// 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
-		 "and $0x0F000000, %%edx \n"
-		 "or %%edx, %%ebx        \n"
-		 
-		 "mov %%ebx, (%[dst])     \n"
-		 "add $4, %[dst]          \n"
-		 // *
+         "shl $24, %%eax         \n"    // 0x000000F0 -> 0xF0000000 (a)
+         "and $0xF0000000, %%eax \n"
+         "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x00F00000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "rol $4, %%edx          \n"    // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x000F0000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shl $24, %%edx         \n"    // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+         "and $0x0F000000, %%edx \n"
+         "or %%edx, %%ebx        \n"
+         
+         "mov %%ebx, (%[dst])     \n"
+         "add $4, %[dst]          \n"
+         
+         // * copy
+         "mov (%[src]), %%eax     \n"       // read first pixel
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
+         
+         "xor %%ebx, %%ebx       \n"
+         "shl $8, %%eax          \n"    // 0x000000F0 -> 0x0000F000 (a)
+         "and $0x0000F000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $12, %%edx         \n"    // 0x0000F000 -> 0x0000000F (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x0000000F, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0x00F00000 went to 0x00000F00 -> 0x000000F0 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x000000F0, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shr $4, %%edx          \n"    // 0xF0000000 went to 0x000F0000 went to 0x0000F000 -> 0x00000F00 (r)
+         "and $0x00000F00, %%edx \n"
+         "or %%edx, %%ebx        \n"
+         
+         "mov 4(%[src]), %%eax    \n"       // read second pixel
+         "add $16, %[src]         \n"
+         "bswap %%eax            \n"
+         "mov %%eax, %%edx       \n"
+         
+         "shl $24, %%eax         \n"    // 0x000000F0 -> 0xF0000000 (a)
+         "and $0xF0000000, %%eax \n"
+         "or %%eax, %%ebx        \n"    // 0x00F00000 -> 0x00F00000 (g)
+         "mov %%edx, %%eax       \n"
+         "and $0x00F00000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "rol $4, %%edx          \n"    // 0x0000F000 (did not shift) -> 0x000F0000 (b)
+         "mov %%edx, %%eax       \n"
+         "and $0x000F0000, %%eax \n"
+         "or %%eax, %%ebx        \n"
+         "shl $24, %%edx         \n"    // 0xF0000000 went to 0x0000000F -> 0x0F000000 (r)
+         "and $0x0F000000, %%edx \n"
+         "or %%edx, %%ebx        \n"
+         
+         "mov %%ebx, (%[dst])     \n"
+         "add $4, %[dst]          \n"
+         // *
 
-		 "dec %%ecx              \n"
-		 "jnz x_loop_29          \n"
-		 
-		 "add %[line], %[src]    \n"
-		 "add %[ext], %[dst]     \n"
-		 
+         "dec %%ecx              \n"
+         "jnz x_loop_29          \n"
+         
+         "add %[line], %[src]    \n"
+         "add %[ext], %[dst]     \n"
+         
          "mov %[temp], %[c]      \n"
-		 "dec %%ecx              \n"
-		 "jnz y_loop9            \n"
-		 
-		 "end_y_loop9:           \n"
-		 : [temp]"=m"(lTemp), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
-		 : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
-		 : "memory", "cc", "ebx", "eax", "edx"
-		 );
+         "dec %%ecx              \n"
+         "jnz y_loop9            \n"
+         
+         "end_y_loop9:           \n"
+         : [temp]"=m"(lTemp), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
+         : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
+         : "memory", "cc", "ebx", "eax", "edx"
+         );
 #endif // _WIN32
-	return (1 << 16) | GR_TEXFMT_ARGB_4444;
+    return (1 << 16) | GR_TEXFMT_ARGB_4444;
 }

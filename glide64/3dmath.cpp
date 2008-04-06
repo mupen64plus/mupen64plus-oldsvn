@@ -1,21 +1,21 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
-*	Copyright (c) 2008  Günther <guenther.emu@freenet.de>
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
+*   Copyright (c) 2008  Günther <guenther.emu@freenet.de>
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -39,78 +39,78 @@
 
 void calc_light (VERTEX *v)
 {
-	float light_intensity = 0.0f;
-	register float color[3] = {rdp.light[rdp.num_lights].r, rdp.light[rdp.num_lights].g, rdp.light[rdp.num_lights].b};
-	for (DWORD l=0; l<rdp.num_lights; l++)
-	{
-		light_intensity = DotProduct (rdp.light_vector[l], v->vec);
+    float light_intensity = 0.0f;
+    register float color[3] = {rdp.light[rdp.num_lights].r, rdp.light[rdp.num_lights].g, rdp.light[rdp.num_lights].b};
+    for (DWORD l=0; l<rdp.num_lights; l++)
+    {
+        light_intensity = DotProduct (rdp.light_vector[l], v->vec);
 
-		if (light_intensity > 0.0f) 
-		{
-     		color[0] += rdp.light[l].r * light_intensity;
-     		color[1] += rdp.light[l].g * light_intensity;
-     		color[2] += rdp.light[l].b * light_intensity;
-		}
-	}
+        if (light_intensity > 0.0f) 
+        {
+            color[0] += rdp.light[l].r * light_intensity;
+            color[1] += rdp.light[l].g * light_intensity;
+            color[2] += rdp.light[l].b * light_intensity;
+        }
+    }
 
-	if (color[0] > 1.0f) color[0] = 1.0f;
-	if (color[1] > 1.0f) color[1] = 1.0f;
-	if (color[2] > 1.0f) color[2] = 1.0f;
+    if (color[0] > 1.0f) color[0] = 1.0f;
+    if (color[1] > 1.0f) color[1] = 1.0f;
+    if (color[2] > 1.0f) color[2] = 1.0f;
 
-	v->r = (BYTE)(color[0]*255.0f);
-	v->g = (BYTE)(color[1]*255.0f);
-	v->b = (BYTE)(color[2]*255.0f);
+    v->r = (BYTE)(color[0]*255.0f);
+    v->g = (BYTE)(color[1]*255.0f);
+    v->b = (BYTE)(color[2]*255.0f);
 }
 
 __inline void TransformVector (float *src, float *dst, float mat[4][4])
 {
-	dst[0] = mat[0][0]*src[0] + mat[1][0]*src[1] + mat[2][0]*src[2];
-	dst[1] = mat[0][1]*src[0] + mat[1][1]*src[1] + mat[2][1]*src[2];
-	dst[2] = mat[0][2]*src[0] + mat[1][2]*src[1] + mat[2][2]*src[2];
+    dst[0] = mat[0][0]*src[0] + mat[1][0]*src[1] + mat[2][0]*src[2];
+    dst[1] = mat[0][1]*src[0] + mat[1][1]*src[1] + mat[2][1]*src[2];
+    dst[2] = mat[0][2]*src[0] + mat[1][2]*src[1] + mat[2][2]*src[2];
 }
 
 //*
 void calc_linear (VERTEX *v)
 {
-	float vec[3];
-	
-	TransformVector (v->vec, vec, rdp.model);
-//	TransformVector (v->vec, vec, rdp.combined);
-	NormalizeVector (vec);
-	float x, y;
-	if (!rdp.use_lookat)
-	{
-	x = vec[0];
-	y = vec[1];
-	}
-	else
-	{
+    float vec[3];
+    
+    TransformVector (v->vec, vec, rdp.model);
+//  TransformVector (v->vec, vec, rdp.combined);
+    NormalizeVector (vec);
+    float x, y;
+    if (!rdp.use_lookat)
+    {
+    x = vec[0];
+    y = vec[1];
+    }
+    else
+    {
     x = DotProduct (rdp.lookat[0], vec);
     y = DotProduct (rdp.lookat[1], vec);
     }
-	if (rdp.cur_cache[0])
-	{
-		// scale >> 6 is size to map to
-		v->ou = (acosf(x)/3.1415f) * (rdp.tiles[rdp.cur_tile].org_s_scale >> 6);
-		v->ov = (acosf(y)/3.1415f) * (rdp.tiles[rdp.cur_tile].org_t_scale >> 6);
-	}
+    if (rdp.cur_cache[0])
+    {
+        // scale >> 6 is size to map to
+        v->ou = (acosf(x)/3.1415f) * (rdp.tiles[rdp.cur_tile].org_s_scale >> 6);
+        v->ov = (acosf(y)/3.1415f) * (rdp.tiles[rdp.cur_tile].org_t_scale >> 6);
+    }
 }
 //*/
 
 /*
 void calc_linear (VERTEX *v)
 {
-	float vec[3];
+    float vec[3];
 
-	TransformVector (v->vec, vec, rdp.combined);
-	NormalizeVector (vec);
+    TransformVector (v->vec, vec, rdp.combined);
+    NormalizeVector (vec);
 
-	if (rdp.cur_cache[0])
-	{
-		// scale >> 6 is size to map to
-		v->ou = (acosf(vec[0])/3.1415f) * (rdp.tiles[rdp.cur_tile].org_s_scale >> 6);
-		v->ov = (acosf(vec[1])/3.1415f) * (rdp.tiles[rdp.cur_tile].org_t_scale >> 6);
-	}
+    if (rdp.cur_cache[0])
+    {
+        // scale >> 6 is size to map to
+        v->ou = (acosf(vec[0])/3.1415f) * (rdp.tiles[rdp.cur_tile].org_s_scale >> 6);
+        v->ov = (acosf(vec[1])/3.1415f) * (rdp.tiles[rdp.cur_tile].org_t_scale >> 6);
+    }
 }
 //*/
 
@@ -130,7 +130,7 @@ void calc_sphere (VERTEX *v)
     t_scale = rdp.tiles[rdp.cur_tile].org_t_scale >> 6;
   }
   TransformVector (v->vec, vec, rdp.model);
-  //	TransformVector (v->vec, vec, rdp.combined);
+  //    TransformVector (v->vec, vec, rdp.combined);
   NormalizeVector (vec);
   float x = DotProduct (rdp.lookat[0], vec);
   float y = DotProduct (rdp.lookat[1], vec);
@@ -152,25 +152,25 @@ void __stdcall MulMatricesNOSSE(float m1[4][4],float m2[4][4],float r[4][4])
         m1[i][3] * m2[3][j];
     }
   }*/
-	r[0][0]  = m1[0][0]*m2[0][0] + m1[0][1]*m2[1][0] + m1[0][2]*m2[2][0] + m1[0][3]*m2[3][0];
-	r[0][1]  = m1[0][0]*m2[0][1] + m1[0][1]*m2[1][1] + m1[0][2]*m2[2][1] + m1[0][3]*m2[3][1];
-	r[0][2]  = m1[0][0]*m2[0][2] + m1[0][1]*m2[1][2] + m1[0][2]*m2[2][2] + m1[0][3]*m2[3][2];
-	r[0][3]  = m1[0][0]*m2[0][3] + m1[0][1]*m2[1][3] + m1[0][2]*m2[2][3] + m1[0][3]*m2[3][3];
+    r[0][0]  = m1[0][0]*m2[0][0] + m1[0][1]*m2[1][0] + m1[0][2]*m2[2][0] + m1[0][3]*m2[3][0];
+    r[0][1]  = m1[0][0]*m2[0][1] + m1[0][1]*m2[1][1] + m1[0][2]*m2[2][1] + m1[0][3]*m2[3][1];
+    r[0][2]  = m1[0][0]*m2[0][2] + m1[0][1]*m2[1][2] + m1[0][2]*m2[2][2] + m1[0][3]*m2[3][2];
+    r[0][3]  = m1[0][0]*m2[0][3] + m1[0][1]*m2[1][3] + m1[0][2]*m2[2][3] + m1[0][3]*m2[3][3];
 
-	r[1][0]  = m1[1][0]*m2[0][0] + m1[1][1]*m2[1][0] + m1[1][2]*m2[2][0] + m1[1][3]*m2[3][0];
-	r[1][1]  = m1[1][0]*m2[0][1] + m1[1][1]*m2[1][1] + m1[1][2]*m2[2][1] + m1[1][3]*m2[3][1];
-	r[1][2]  = m1[1][0]*m2[0][2] + m1[1][1]*m2[1][2] + m1[1][2]*m2[2][2] + m1[1][3]*m2[3][2];
-	r[1][3]  = m1[1][0]*m2[0][3] + m1[1][1]*m2[1][3] + m1[1][2]*m2[2][3] + m1[1][3]*m2[3][3];
+    r[1][0]  = m1[1][0]*m2[0][0] + m1[1][1]*m2[1][0] + m1[1][2]*m2[2][0] + m1[1][3]*m2[3][0];
+    r[1][1]  = m1[1][0]*m2[0][1] + m1[1][1]*m2[1][1] + m1[1][2]*m2[2][1] + m1[1][3]*m2[3][1];
+    r[1][2]  = m1[1][0]*m2[0][2] + m1[1][1]*m2[1][2] + m1[1][2]*m2[2][2] + m1[1][3]*m2[3][2];
+    r[1][3]  = m1[1][0]*m2[0][3] + m1[1][1]*m2[1][3] + m1[1][2]*m2[2][3] + m1[1][3]*m2[3][3];
 
-	r[2][0]  = m1[2][0]*m2[0][0] + m1[2][1]*m2[1][0] + m1[2][2]*m2[2][0] + m1[2][3]*m2[3][0];
-	r[2][1]  = m1[2][0]*m2[0][1] + m1[2][1]*m2[1][1] + m1[2][2]*m2[2][1] + m1[2][3]*m2[3][1];
-	r[2][2]  = m1[2][0]*m2[0][2] + m1[2][1]*m2[1][2] + m1[2][2]*m2[2][2] + m1[2][3]*m2[3][2];
-	r[2][3]  = m1[2][0]*m2[0][3] + m1[2][1]*m2[1][3] + m1[2][2]*m2[2][3] + m1[2][3]*m2[3][3];
+    r[2][0]  = m1[2][0]*m2[0][0] + m1[2][1]*m2[1][0] + m1[2][2]*m2[2][0] + m1[2][3]*m2[3][0];
+    r[2][1]  = m1[2][0]*m2[0][1] + m1[2][1]*m2[1][1] + m1[2][2]*m2[2][1] + m1[2][3]*m2[3][1];
+    r[2][2]  = m1[2][0]*m2[0][2] + m1[2][1]*m2[1][2] + m1[2][2]*m2[2][2] + m1[2][3]*m2[3][2];
+    r[2][3]  = m1[2][0]*m2[0][3] + m1[2][1]*m2[1][3] + m1[2][2]*m2[2][3] + m1[2][3]*m2[3][3];
 
-	r[3][0]  = m1[3][0]*m2[0][0] + m1[3][1]*m2[1][0] + m1[3][2]*m2[2][0] + m1[3][3]*m2[3][0];
-	r[3][1]  = m1[3][0]*m2[0][1] + m1[3][1]*m2[1][1] + m1[3][2]*m2[2][1] + m1[3][3]*m2[3][1];
-	r[3][2]  = m1[3][0]*m2[0][2] + m1[3][1]*m2[1][2] + m1[3][2]*m2[2][2] + m1[3][3]*m2[3][2];
-	r[3][3]  = m1[3][0]*m2[0][3] + m1[3][1]*m2[1][3] + m1[3][2]*m2[2][3] + m1[3][3]*m2[3][3];
+    r[3][0]  = m1[3][0]*m2[0][0] + m1[3][1]*m2[1][0] + m1[3][2]*m2[2][0] + m1[3][3]*m2[3][0];
+    r[3][1]  = m1[3][0]*m2[0][1] + m1[3][1]*m2[1][1] + m1[3][2]*m2[2][1] + m1[3][3]*m2[3][1];
+    r[3][2]  = m1[3][0]*m2[0][2] + m1[3][1]*m2[1][2] + m1[3][2]*m2[2][2] + m1[3][3]*m2[3][2];
+    r[3][3]  = m1[3][0]*m2[0][3] + m1[3][1]*m2[1][3] + m1[3][2]*m2[2][3] + m1[3][3]*m2[3][3];
 }
 
 void __stdcall MulMatricesSSE(float m1[4][4],float m2[4][4],float r[4][4])
@@ -185,136 +185,136 @@ void __stdcall MulMatricesSSE(float m1[4][4],float m2[4][4],float r[4][4])
 
     for (int i = 0; i < 4; ++i)
     {
-	v4sf leftrow = __builtin_ia32_loadups(m1[i]);
-	
-	// Fill tmp with four copies of leftrow[0]
-	v4sf tmp = leftrow;
-	tmp = __builtin_ia32_shufps (tmp, tmp, 0);
-	// Calculate the four first summands
-	v4sf destrow = tmp * row0;
-	
-	// Fill tmp with four copies of leftrow[1]
-	tmp = leftrow;
-	tmp = __builtin_ia32_shufps (tmp, tmp, 1 + (1 << 2) + (1 << 4) + (1 << 6));
-	destrow += tmp * row1;
-	
-	// Fill tmp with four copies of leftrow[2]
-	tmp = leftrow;
-	tmp = __builtin_ia32_shufps (tmp, tmp, 2 + (2 << 2) + (2 << 4) + (2 << 6));
-	destrow += tmp * row2;
-	
-	// Fill tmp with four copies of leftrow[3]
-	tmp = leftrow;
-	tmp = __builtin_ia32_shufps (tmp, tmp, 3 + (3 << 2) + (3 << 4) + (3 << 6));
-	destrow += tmp * row3;
-	
-	__builtin_ia32_storeups(r[i], destrow);
+    v4sf leftrow = __builtin_ia32_loadups(m1[i]);
+    
+    // Fill tmp with four copies of leftrow[0]
+    v4sf tmp = leftrow;
+    tmp = __builtin_ia32_shufps (tmp, tmp, 0);
+    // Calculate the four first summands
+    v4sf destrow = tmp * row0;
+    
+    // Fill tmp with four copies of leftrow[1]
+    tmp = leftrow;
+    tmp = __builtin_ia32_shufps (tmp, tmp, 1 + (1 << 2) + (1 << 4) + (1 << 6));
+    destrow += tmp * row1;
+    
+    // Fill tmp with four copies of leftrow[2]
+    tmp = leftrow;
+    tmp = __builtin_ia32_shufps (tmp, tmp, 2 + (2 << 2) + (2 << 4) + (2 << 6));
+    destrow += tmp * row2;
+    
+    // Fill tmp with four copies of leftrow[3]
+    tmp = leftrow;
+    tmp = __builtin_ia32_shufps (tmp, tmp, 3 + (3 << 2) + (3 << 4) + (3 << 6));
+    destrow += tmp * row3;
+    
+    __builtin_ia32_storeups(r[i], destrow);
     }
 #else
-	__asm
-	{
-		mov 	eax, dword ptr [r]	
-		mov     ecx, dword ptr [m1]
-		mov     edx, dword ptr [m2]
+    __asm
+    {
+        mov     eax, dword ptr [r]  
+        mov     ecx, dword ptr [m1]
+        mov     edx, dword ptr [m2]
 
-		movaps	xmm0,[edx]
-		movaps	xmm1,[edx+16]
-		movaps	xmm2,[edx+32]
-		movaps	xmm3,[edx+48]
+        movaps  xmm0,[edx]
+        movaps  xmm1,[edx+16]
+        movaps  xmm2,[edx+32]
+        movaps  xmm3,[edx+48]
 
 // r[0][0],r[0][1],r[0][2],r[0][3]
 
-		movaps	xmm4,xmmword ptr[ecx]
-		movaps	xmm5,xmm4
-		movaps	xmm6,xmm4
-		movaps	xmm7,xmm4
+        movaps  xmm4,xmmword ptr[ecx]
+        movaps  xmm5,xmm4
+        movaps  xmm6,xmm4
+        movaps  xmm7,xmm4
 
-		shufps	xmm4,xmm4,00000000b
-		shufps	xmm5,xmm5,01010101b
-		shufps	xmm6,xmm6,10101010b
-		shufps	xmm7,xmm7,11111111b
+        shufps  xmm4,xmm4,00000000b
+        shufps  xmm5,xmm5,01010101b
+        shufps  xmm6,xmm6,10101010b
+        shufps  xmm7,xmm7,11111111b
 
-		mulps	xmm4,xmm0
-		mulps	xmm5,xmm1
-		mulps	xmm6,xmm2
-		mulps	xmm7,xmm3
+        mulps   xmm4,xmm0
+        mulps   xmm5,xmm1
+        mulps   xmm6,xmm2
+        mulps   xmm7,xmm3
 
-		addps	xmm4,xmm5
-		addps	xmm4,xmm6
-		addps	xmm4,xmm7
+        addps   xmm4,xmm5
+        addps   xmm4,xmm6
+        addps   xmm4,xmm7
 
-		movaps	xmmword ptr[eax],xmm4
+        movaps  xmmword ptr[eax],xmm4
 
 // r[1][0],r[1][1],r[1][2],r[1][3]
 
-		movaps	xmm4,xmmword ptr[ecx+16]
-		movaps	xmm5,xmm4
-		movaps	xmm6,xmm4
-		movaps	xmm7,xmm4
+        movaps  xmm4,xmmword ptr[ecx+16]
+        movaps  xmm5,xmm4
+        movaps  xmm6,xmm4
+        movaps  xmm7,xmm4
 
-		shufps	xmm4,xmm4,00000000b
-		shufps	xmm5,xmm5,01010101b
-		shufps	xmm6,xmm6,10101010b
-		shufps	xmm7,xmm7,11111111b
+        shufps  xmm4,xmm4,00000000b
+        shufps  xmm5,xmm5,01010101b
+        shufps  xmm6,xmm6,10101010b
+        shufps  xmm7,xmm7,11111111b
 
-		mulps	xmm4,xmm0
-		mulps	xmm5,xmm1
-		mulps	xmm6,xmm2
-		mulps	xmm7,xmm3
+        mulps   xmm4,xmm0
+        mulps   xmm5,xmm1
+        mulps   xmm6,xmm2
+        mulps   xmm7,xmm3
 
-		addps	xmm4,xmm5
-		addps	xmm4,xmm6
-		addps	xmm4,xmm7
+        addps   xmm4,xmm5
+        addps   xmm4,xmm6
+        addps   xmm4,xmm7
 
-		movaps	xmmword ptr[eax+16],xmm4
+        movaps  xmmword ptr[eax+16],xmm4
 
 
 // r[2][0],r[2][1],r[2][2],r[2][3]
 
-		movaps	xmm4,xmmword ptr[ecx+32]
-		movaps	xmm5,xmm4
-		movaps	xmm6,xmm4
-		movaps	xmm7,xmm4
+        movaps  xmm4,xmmword ptr[ecx+32]
+        movaps  xmm5,xmm4
+        movaps  xmm6,xmm4
+        movaps  xmm7,xmm4
 
-		shufps	xmm4,xmm4,00000000b
-		shufps	xmm5,xmm5,01010101b
-		shufps	xmm6,xmm6,10101010b
-		shufps	xmm7,xmm7,11111111b
+        shufps  xmm4,xmm4,00000000b
+        shufps  xmm5,xmm5,01010101b
+        shufps  xmm6,xmm6,10101010b
+        shufps  xmm7,xmm7,11111111b
 
-		mulps	xmm4,xmm0
-		mulps	xmm5,xmm1
-		mulps	xmm6,xmm2
-		mulps	xmm7,xmm3
+        mulps   xmm4,xmm0
+        mulps   xmm5,xmm1
+        mulps   xmm6,xmm2
+        mulps   xmm7,xmm3
 
-		addps	xmm4,xmm5
-		addps	xmm4,xmm6
-		addps	xmm4,xmm7
+        addps   xmm4,xmm5
+        addps   xmm4,xmm6
+        addps   xmm4,xmm7
 
-		movaps	xmmword ptr[eax+32],xmm4
+        movaps  xmmword ptr[eax+32],xmm4
 
 // r[3][0],r[3][1],r[3][2],r[3][3]
 
-		movaps	xmm4,xmmword ptr[ecx+48]
-		movaps	xmm5,xmm4
-		movaps	xmm6,xmm4
-		movaps	xmm7,xmm4
+        movaps  xmm4,xmmword ptr[ecx+48]
+        movaps  xmm5,xmm4
+        movaps  xmm6,xmm4
+        movaps  xmm7,xmm4
 
-		shufps	xmm4,xmm4,00000000b
-		shufps	xmm5,xmm5,01010101b
-		shufps	xmm6,xmm6,10101010b
-		shufps	xmm7,xmm7,11111111b
+        shufps  xmm4,xmm4,00000000b
+        shufps  xmm5,xmm5,01010101b
+        shufps  xmm6,xmm6,10101010b
+        shufps  xmm7,xmm7,11111111b
 
-		mulps	xmm4,xmm0
-		mulps	xmm5,xmm1
-		mulps	xmm6,xmm2
-		mulps	xmm7,xmm3
+        mulps   xmm4,xmm0
+        mulps   xmm5,xmm1
+        mulps   xmm6,xmm2
+        mulps   xmm7,xmm3
 
-		addps	xmm4,xmm5
-		addps	xmm4,xmm6
-		addps	xmm4,xmm7
+        addps   xmm4,xmm5
+        addps   xmm4,xmm6
+        addps   xmm4,xmm7
 
-		movaps	xmmword ptr[eax+48],xmm4
-	}
+        movaps  xmmword ptr[eax+48],xmm4
+    }
 #endif // _WIN32
 }
 
@@ -328,7 +328,7 @@ void math_init()
     asm volatile("cpuid":"=a"(eax),"=d"(edx):"0"(1):"ecx","ebx");
     // Check for SSE
     if (edx & (1 << 25))
-	IsSSE = TRUE;
+    IsSSE = TRUE;
 #else
   DWORD dwEdx;
   __try

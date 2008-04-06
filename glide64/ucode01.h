@@ -95,8 +95,8 @@ static void uc1_vertex()
 
     v->uv_calculated = 0xFFFFFFFF;
     v->screen_translated = 0;
-	v->shade_mods_allowed = 1;
-	v->uv_fixed = 0;
+    v->shade_mods_allowed = 1;
+    v->uv_fixed = 0;
 
     v->scr_off = 0;
     if (v->x < -v->w) v->scr_off |= 1;
@@ -292,6 +292,6 @@ static void uc1_branch_z()
   DWORD vtx = (rdp.cmd0 & 0xFFF) >> 1;
   if( fabs(rdp.vtx[vtx].z) <= (rdp.cmd1/*&0xFFFF*/) )
   {
-	rdp.pc[rdp.pc_i] = addr;
+    rdp.pc[rdp.pc_i] = addr;
   }
 }

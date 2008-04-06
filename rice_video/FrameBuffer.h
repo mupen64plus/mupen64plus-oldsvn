@@ -25,88 +25,88 @@ extern void TexRectToFrameBuffer_8b(uint32 dwXL, uint32 dwYL, uint32 dwXH, uint3
 
 class FrameBufferManager
 {
-	friend class CGraphicsContext;
-	friend class CDXGraphicsContext;
+    friend class CGraphicsContext;
+    friend class CDXGraphicsContext;
 public:
-	FrameBufferManager();
-	~FrameBufferManager();
+    FrameBufferManager();
+    ~FrameBufferManager();
 
-	void Initialize();
-	void CloseUp();
-	void Set_CI_addr(SetImgInfo &newCI);
-	void UpdateRecentCIAddr(SetImgInfo &ciinfo);
-	void SetAddrBeDisplayed(uint32 addr);
-	bool HasAddrBeenDisplayed(uint32 addr, uint32 width);
-	int FindRecentCIInfoIndex(uint32 addr);
-	bool IsDIaRenderTexture();
+    void Initialize();
+    void CloseUp();
+    void Set_CI_addr(SetImgInfo &newCI);
+    void UpdateRecentCIAddr(SetImgInfo &ciinfo);
+    void SetAddrBeDisplayed(uint32 addr);
+    bool HasAddrBeenDisplayed(uint32 addr, uint32 width);
+    int FindRecentCIInfoIndex(uint32 addr);
+    bool IsDIaRenderTexture();
 
-	int			CheckAddrInRenderTextures(uint32 addr, bool checkcrc = true);
-	uint32		ComputeRenderTextureCRCInRDRAM(int infoIdx);
-	void		CheckRenderTextureCRCInRDRAM(void);
-	int			CheckRenderTexturesWithNewCI(SetImgInfo &CIinfo, uint32 height, bool byNewTxtrBuf);
-	virtual void ClearN64FrameBufferToBlack(uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0);
-	virtual int SetBackBufferAsRenderTexture(SetImgInfo &CIinfo, int ciInfoIdx);
-	void		LoadTextureFromRenderTexture(TxtrCacheEntry* pEntry, int infoIdx);
-	void		UpdateFrameBufferBeforeUpdateFrame();
-	virtual void RestoreNormalBackBuffer();					// restore the normal back buffer
-	virtual void CopyBackToFrameBufferIfReadByCPU(uint32 addr);
-	virtual void SetRenderTexture(void);
-	virtual void CloseRenderTexture(bool toSave);
-	virtual void ActiveTextureBuffer(void);
+    int         CheckAddrInRenderTextures(uint32 addr, bool checkcrc = true);
+    uint32      ComputeRenderTextureCRCInRDRAM(int infoIdx);
+    void        CheckRenderTextureCRCInRDRAM(void);
+    int         CheckRenderTexturesWithNewCI(SetImgInfo &CIinfo, uint32 height, bool byNewTxtrBuf);
+    virtual void ClearN64FrameBufferToBlack(uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0);
+    virtual int SetBackBufferAsRenderTexture(SetImgInfo &CIinfo, int ciInfoIdx);
+    void        LoadTextureFromRenderTexture(TxtrCacheEntry* pEntry, int infoIdx);
+    void        UpdateFrameBufferBeforeUpdateFrame();
+    virtual void RestoreNormalBackBuffer();                 // restore the normal back buffer
+    virtual void CopyBackToFrameBufferIfReadByCPU(uint32 addr);
+    virtual void SetRenderTexture(void);
+    virtual void CloseRenderTexture(bool toSave);
+    virtual void ActiveTextureBuffer(void);
 
-	int IsAddrInRecentFrameBuffers(uint32 addr);
-	int CheckAddrInBackBuffers(uint32 addr, uint32 memsize, bool copyToRDRAM = false);
+    int IsAddrInRecentFrameBuffers(uint32 addr);
+    int CheckAddrInBackBuffers(uint32 addr, uint32 memsize, bool copyToRDRAM = false);
 
-	uint8 CIFindIndex(uint16 val);
-	uint32 ComputeCImgHeight(SetImgInfo &info, uint32 &height);
+    uint8 CIFindIndex(uint16 val);
+    uint32 ComputeCImgHeight(SetImgInfo &info, uint32 &height);
 
-	int FindASlot(void);
+    int FindASlot(void);
 
-	bool ProcessFrameWriteRecord();
-	void FrameBufferWriteByCPU(uint32 addr, uint32 size);
-	void FrameBufferReadByCPU( uint32 addr );
-	bool FrameBufferInRDRAMCheckCRC();
-	void StoreRenderTextureToRDRAM(int infoIdx = -1);
+    bool ProcessFrameWriteRecord();
+    void FrameBufferWriteByCPU(uint32 addr, uint32 size);
+    void FrameBufferReadByCPU( uint32 addr );
+    bool FrameBufferInRDRAMCheckCRC();
+    void StoreRenderTextureToRDRAM(int infoIdx = -1);
 
-	virtual bool IsRenderingToTexture() {return m_isRenderingToTexture;}
+    virtual bool IsRenderingToTexture() {return m_isRenderingToTexture;}
 
-	// Device dependent functions
-	virtual void SaveBackBuffer(int ciInfoIdx, RECT* pRect=NULL, bool forceToSaveToRDRAM = false);			// Copy the current back buffer to temp buffer
-	virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL) {}			// Copy the current back buffer to temp buffer
-	virtual void CopyBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
-		uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr, 
-		uint32 memsize, uint32 pitch, TextureFmt bufFmt, void *surf, uint32 bufPitch);
-	virtual void StoreBackBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
-		uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr=0xFFFFFFFF, 
-		uint32 memsize=0xFFFFFFFF, uint32 pitch=0, SURFFORMAT surf_fmt=SURFFMT_A8R8G8B8) {}
+    // Device dependent functions
+    virtual void SaveBackBuffer(int ciInfoIdx, RECT* pRect=NULL, bool forceToSaveToRDRAM = false);          // Copy the current back buffer to temp buffer
+    virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL) {}          // Copy the current back buffer to temp buffer
+    virtual void CopyBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
+        uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr, 
+        uint32 memsize, uint32 pitch, TextureFmt bufFmt, void *surf, uint32 bufPitch);
+    virtual void StoreBackBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
+        uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr=0xFFFFFFFF, 
+        uint32 memsize=0xFFFFFFFF, uint32 pitch=0, SURFFORMAT surf_fmt=SURFFMT_A8R8G8B8) {}
 #ifdef _DEBUG
-	virtual void DisplayRenderTexture(int infoIdx = -1);
+    virtual void DisplayRenderTexture(int infoIdx = -1);
 #endif
 
 protected:
-	bool	m_isRenderingToTexture;
-	int		m_curRenderTextureIndex;
-	int		m_lastTextureBufferIndex;
+    bool    m_isRenderingToTexture;
+    int     m_curRenderTextureIndex;
+    int     m_lastTextureBufferIndex;
 };
 
 class DXFrameBufferManager : public FrameBufferManager
 {
 public:
-	// Device dependent functions
-	virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL);			// Copy the current back buffer to temp buffer
-	virtual void StoreBackBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
-		uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr=0xFFFFFFFF, 
-		uint32 memsize=0xFFFFFFFF, uint32 pitch=0, SURFFORMAT surf_fmt=SURFFMT_A8R8G8B8);
+    // Device dependent functions
+    virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL);            // Copy the current back buffer to temp buffer
+    virtual void StoreBackBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
+        uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr=0xFFFFFFFF, 
+        uint32 memsize=0xFFFFFFFF, uint32 pitch=0, SURFFORMAT surf_fmt=SURFFMT_A8R8G8B8);
 };
 
 class OGLFrameBufferManager : public FrameBufferManager
 {
 public:
-	// Device dependent functions
-	virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL);			// Copy the current back buffer to temp buffer
-	virtual void StoreBackBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
-		uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr=0xFFFFFFFF, 
-		uint32 memsize=0xFFFFFFFF, uint32 pitch=0, SURFFORMAT surf_fmt=SURFFMT_A8R8G8B8);
+    // Device dependent functions
+    virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL);            // Copy the current back buffer to temp buffer
+    virtual void StoreBackBufferToRDRAM(uint32 addr, uint32 fmt, uint32 siz, uint32 width, 
+        uint32 height, uint32 bufWidth, uint32 bufHeight, uint32 startaddr=0xFFFFFFFF, 
+        uint32 memsize=0xFFFFFFFF, uint32 pitch=0, SURFFORMAT surf_fmt=SURFFMT_A8R8G8B8);
 };
 
 extern RenderTextureInfo gRenderTextureInfos[];
