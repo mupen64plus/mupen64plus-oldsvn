@@ -59,7 +59,7 @@ GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 # test for presence of libsamplerate
 ifeq ($(strip $(shell pkg-config samplerate --modversion 2> /dev/null)),)
   # warn user
-  $(warning No libsamplerate development libraries found!)
+  $(warning No libsamplerate development libraries found.  jttl_audio will be built without Best Quality SINC resampler.)
   # set libsamplerate flags and libraries
   SRC_FLAGS	= 
   SRC_LIBS	= 

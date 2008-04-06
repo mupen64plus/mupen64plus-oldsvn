@@ -222,6 +222,7 @@ uninstall:
 clean:
 	$(MAKE) -C blight_input clean
 	$(MAKE) -C dummy_audio clean
+	$(MAKE) -C dummy_video clean
 	$(MAKE) -C glN64 clean
 	$(MAKE) -C rice_video clean
 	$(MAKE) -C glide64 clean
