@@ -3,6 +3,25 @@
 # include pre-make file with a bunch of definitions
 include ../pre.mk
 
+# test for presence of libsamplerate
+ifneq ($(strip $(shell pkg-config samplerate --modversion 2> /dev/null)),)
+  ifneq ($(NO_RESAMP), 1)
+    # set libsamplerate flags and libraries
+    SRC_FLAGS	= `pkg-config samplerate --cflags` -DUSE_SRC
+    SRC_LIBS	= `pkg-config samplerate --libs`
+  else
+    # clear libsamplerate flags and libraries
+    SRC_FLAGS	= 
+    SRC_LIBS	= 
+  endif
+else
+  # warn user
+  $(warning No libsamplerate development libraries found.  jttl_audio will be built without Best Quality SINC resampler.)
+  # clear libsamplerate flags and libraries
+  SRC_FLAGS	= 
+  SRC_LIBS	= 
+endif
+
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC -g
 

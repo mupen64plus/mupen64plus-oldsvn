@@ -193,6 +193,7 @@ targets:
 	@echo "    BITS=32       == build 32-bit binaries on 64-bit machine"
 	@echo "    VCR=1         == enable video recording"
 	@echo "    LIRC=1        == enable LIRC support"
+	@echo "    NO_RESAMP=1   == disable libsamplerate support in jttl_audio"
 	@echo "    NOGUI_ONLY=1  == build without GUI support"
 	@echo "    PREFIX=path   == specify install/uninstall prefix (default: /usr/local)"
 	@echo "  Debugging Options:"
