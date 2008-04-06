@@ -1918,11 +1918,11 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
                     }
                     else if( entry.ti.Format == TXT_FMT_I )
                     {
-                        *pdst++ = *(pdst-1);
+                        *pdst++ = pRGB[-1];
                     }
                     else
                     {
-                        *pdst++ = 0xFF;;
+                        *pdst++ = 0xFF;
                     }
                 }
             }

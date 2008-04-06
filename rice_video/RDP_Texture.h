@@ -87,8 +87,10 @@ inline uint32 ReverseDXT(uint32 val, uint32 lrs, uint32 width, uint32 size)
 // rewrite these routine by myself.
 // Rice, 02/24/2004
 
+#if !defined(__INTEL_COMPILER) && !defined(__x86_64__)
 static uint32 g_value;
 static uint16 g_value16;
+#endif
 
 inline void UnswapCopy( void *src, void *dest, uint32 numBytes )
 {

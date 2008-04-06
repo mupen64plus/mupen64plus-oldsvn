@@ -270,7 +270,7 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
      {
     char s[1024];
     FILE *f;
-    sprintf(s, "unknown task:\n\ttype:%d\n\tsum:%x\n\tPC:%x", (int)task->type, sum, (int)rsp.SP_PC_REG);
+    sprintf(s, "unknown task:\n\ttype:%d\n\tsum:%x\n\tPC:%lx", (int)task->type, sum, (long) rsp.SP_PC_REG);
 #ifdef __WIN32__
     MessageBox(NULL, s, "unknown task", MB_OK);
 #else

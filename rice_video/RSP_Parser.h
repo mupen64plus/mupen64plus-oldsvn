@@ -206,7 +206,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // G_SETIMG fmt: set image formats
 //
 #define TXT_FMT_RGBA    0
-#define TXT_FMT_YUV 1
+#define TXT_FMT_YUV     1
 #define TXT_FMT_CI      2
 #define TXT_FMT_IA      3
 #define TXT_FMT_I       4

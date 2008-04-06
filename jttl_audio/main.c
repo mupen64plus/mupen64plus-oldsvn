@@ -575,7 +575,7 @@ static void resample(Uint8 *src, int src_len, Uint8 *dest, int dest_len)
                 return;
             }
         }
-        src_short_to_float_array (src, _src, src_len/2);
+        src_short_to_float_array ((short *) src, _src, src_len/2);
         src_data.end_of_input = 0;
         src_data.data_in = _src;
         src_data.input_frames = src_len/4;
@@ -587,7 +587,7 @@ static void resample(Uint8 *src, int src_len, Uint8 *dest, int dest_len)
             memset(dest, 0, dest_len);
             return;
         }
-        src_float_to_short_array (_dest, dest, dest_len/2);
+        src_float_to_short_array (_dest, (short *) dest, dest_len/2);
     }
     else
 #endif

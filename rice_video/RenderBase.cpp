@@ -1206,55 +1206,56 @@ uint32 SSELightVert(void)
            : "m"(gRSP), "m"(g_normal), "m"(gRSPnumLights), "r"(gRSPlights), "m"(f255), "m"(fZero)
            : "%rcx", "memory", "cc", "%xmm0", "%xmm1", "%xmm3", "%xmm4", "%xmm5"
            );
+  return rval;
 }
 #else // 32-bit GCC assumed
 uint32 SSELightVert(void)
 {
-uint32 rval;
-float f255 = 255.0, fZero = 0.0;
+  uint32 rval;
+  float f255 = 255.0, fZero = 0.0;
 
-asm volatile(" movaps            %1,  %%xmm3    \n"
-             " movaps            %2,  %%xmm4    \n"
-             " xor            %%ecx,   %%ecx    \n"
-             "0:                                \n"
-             " cmpl              %3,   %%ecx    \n"
-             " jae               2f             \n"
-             " mov            %%ecx,   %%eax    \n"
-             " imul    $0x44, %%eax,   %%eax    \n"
-             " movups   (%4,%%eax,),  %%xmm5    \n"
-             " movups 20(%4,%%eax,),  %%xmm1    \n"
-             " mulps         %%xmm4,  %%xmm5    \n"
-             " movhlps       %%xmm5,  %%xmm0    \n"
-             " addps         %%xmm5,  %%xmm0    \n"
-             " shufps $0x01, %%xmm0,  %%xmm5    \n"
-             " addps         %%xmm5,  %%xmm0    \n"
-             " comiss            %6,  %%xmm0    \n"
-             " jc                1f             \n"
-             " shufps $0x00, %%xmm0,  %%xmm0    \n"
-             " mulps         %%xmm0,  %%xmm1    \n"
-             " addps         %%xmm1,  %%xmm3    \n"
-             "1:                                \n"
-             " inc            %%ecx             \n"
-             " jmp               0b             \n"
-             "2:                                \n"
-             " movss             %5,  %%xmm0    \n"
-             " shufps $0x00, %%xmm0,  %%xmm0    \n"
-             " minps         %%xmm3,  %%xmm0    \n"
-             " cvtss2si      %%xmm0,   %%eax    \n"
-             " shll           $0x10,   %%eax    \n"
-             " orl      $0xff000000,   %%eax    \n"
-             " shufps $0xe5, %%xmm0,  %%xmm0    \n"
-             " cvtss2si      %%xmm0,   %%ecx    \n"
-             " shll              $8,   %%ecx    \n"
-             " orl            %%ecx,   %%eax    \n"
-             " shufps $0xe6, %%xmm0,  %%xmm0    \n"
-             " cvtss2si      %%xmm0,   %%ecx    \n"
-             " orl            %%ecx,   %%eax    \n"
+  asm volatile(" movaps            %1,  %%xmm3    \n"
+               " movaps            %2,  %%xmm4    \n"
+               " xor            %%ecx,   %%ecx    \n"
+               "0:                                \n"
+               " cmpl              %3,   %%ecx    \n"
+               " jae               2f             \n"
+               " mov            %%ecx,   %%eax    \n"
+               " imul    $0x44, %%eax,   %%eax    \n"
+               " movups   (%4,%%eax,),  %%xmm5    \n"
+               " movups 20(%4,%%eax,),  %%xmm1    \n"
+               " mulps         %%xmm4,  %%xmm5    \n"
+               " movhlps       %%xmm5,  %%xmm0    \n"
+               " addps         %%xmm5,  %%xmm0    \n"
+               " shufps $0x01, %%xmm0,  %%xmm5    \n"
+               " addps         %%xmm5,  %%xmm0    \n"
+               " comiss            %6,  %%xmm0    \n"
+               " jc                1f             \n"
+               " shufps $0x00, %%xmm0,  %%xmm0    \n"
+               " mulps         %%xmm0,  %%xmm1    \n"
+               " addps         %%xmm1,  %%xmm3    \n"
+               "1:                                \n"
+               " inc            %%ecx             \n"
+               " jmp               0b             \n"
+               "2:                                \n"
+               " movss             %5,  %%xmm0    \n"
+               " shufps $0x00, %%xmm0,  %%xmm0    \n"
+               " minps         %%xmm3,  %%xmm0    \n"
+               " cvtss2si      %%xmm0,   %%eax    \n"
+               " shll           $0x10,   %%eax    \n"
+               " orl      $0xff000000,   %%eax    \n"
+               " shufps $0xe5, %%xmm0,  %%xmm0    \n"
+               " cvtss2si      %%xmm0,   %%ecx    \n"
+               " shll              $8,   %%ecx    \n"
+               " orl            %%ecx,   %%eax    \n"
+               " shufps $0xe6, %%xmm0,  %%xmm0    \n"
+               " cvtss2si      %%xmm0,   %%ecx    \n"
+               " orl            %%ecx,   %%eax    \n"
                : "=&a"(rval)
                : "m"(gRSP), "m"(g_normal), "m"(gRSPnumLights), "r"(gRSPlights), "m"(f255), "m"(fZero)
                : "%rcx", "memory", "cc", "%xmm0", "%xmm1", "%xmm3", "%xmm4", "%xmm5"
-             );
-return rval;
+               );
+  return rval;
 }
 #endif
 

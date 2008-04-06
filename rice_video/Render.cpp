@@ -310,33 +310,26 @@ void CRender::RenderReset()
 
 bool CRender::FillRect(LONG nX0, LONG nY0, LONG nX1, LONG nY1, uint32 dwColor)
 {
-LOG_UCODE("FillRect: X0=%d, Y0=%d, X1=%d, Y1=%d, Color=0x%8X", nX0, nY0, nX1, nY1, dwColor);
+  LOG_UCODE("FillRect: X0=%d, Y0=%d, X1=%d, Y1=%d, Color=0x%8X", nX0, nY0, nX1, nY1, dwColor);
 
-if(g_CI.dwSize != TXT_SIZE_16b && frameBufferOptions.bIgnore)
-   { return true; }
+  if (g_CI.dwSize != TXT_SIZE_16b && frameBufferOptions.bIgnore) 
+    return true;
 
-if(status.bHandleN64RenderTexture && !status.bDirectWriteIntoRDRAM)
-   { status.bFrameBufferIsDrawn = true; }
+  if (status.bHandleN64RenderTexture && !status.bDirectWriteIntoRDRAM)
+     status.bFrameBufferIsDrawn = true;
 
-if(status.bVIOriginIsUpdated == true &&
-  currentRomOptions.screenUpdateSetting==SCREEN_UPDATE_AT_1ST_PRIMITIVE)
-    {
+  if(status.bVIOriginIsUpdated == true && currentRomOptions.screenUpdateSetting==SCREEN_UPDATE_AT_1ST_PRIMITIVE)
+  {
     status.bVIOriginIsUpdated=false;
     CGraphicsContext::Get()->UpdateFrame();
-    DEBUGGER_PAUSE_AND_DUMP_NO_UPDATE(NEXT_SET_CIMG,
-    {DebuggerAppendMsg("Screen Update at 1st FillRectangle");});
-    }
+    DEBUGGER_PAUSE_AND_DUMP_NO_UPDATE(NEXT_SET_CIMG, {DebuggerAppendMsg("Screen Update at 1st FillRectangle");});
+  }
 
-if( status.bCIBufferIsRendered && status.bVIOriginIsUpdated == true && currentRomOptions.screenUpdateSetting==SCREEN_UPDATE_BEFORE_SCREEN_CLEAR )
+  if (status.bCIBufferIsRendered && status.bVIOriginIsUpdated == true && currentRomOptions.screenUpdateSetting==SCREEN_UPDATE_BEFORE_SCREEN_CLEAR )
     {
-    if( (nX0==0 && nY0 == 0 && ((int)nX1 == g_CI.dwWidth || 
-    nX1 == g_CI.dwWidth-1) ) || (nX0==gRDP.scissor.left && nY0 ==  gRDP.scissor.top 
-    && (nX1 == gRDP.scissor.right || nX1 == gRDP.scissor.right-1)) ||
-    ((nX0+nX1 == (int)g_CI.dwWidth || nX0+nX1 == (int)g_CI.dwWidth-1 || nX0+nX1 ==
-    gRDP.scissor.left+gRDP.scissor.right || nX0+nX1 ==
-    gRDP.scissor.left+gRDP.scissor.right-1) && (nY0 == gRDP.scissor.top || nY0 == 0 ||
-    nY0+nY1 == gRDP.scissor.top+gRDP.scissor.bottom || nY0+nY1 ==
-    gRDP.scissor.top+gRDP.scissor.bottom-1 ) ))
+    if ((nX0==0 && nY0 == 0 && (nX1 == (int) g_CI.dwWidth || nX1 == (int) g_CI.dwWidth-1)) ||
+        (nX0==gRDP.scissor.left && nY0 == gRDP.scissor.top  && (nX1 == gRDP.scissor.right || nX1 == gRDP.scissor.right-1)) ||
+        ((nX0+nX1 == (int)g_CI.dwWidth || nX0+nX1 == (int)g_CI.dwWidth-1 || nX0+nX1 == gRDP.scissor.left+gRDP.scissor.right || nX0+nX1 == gRDP.scissor.left+gRDP.scissor.right-1) && (nY0 == gRDP.scissor.top || nY0 == 0 || nY0+nY1 == gRDP.scissor.top+gRDP.scissor.bottom || nY0+nY1 == gRDP.scissor.top+gRDP.scissor.bottom-1)))
         {
             status.bVIOriginIsUpdated=false;
             CGraphicsContext::Get()->UpdateFrame();
