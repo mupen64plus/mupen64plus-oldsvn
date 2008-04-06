@@ -752,10 +752,10 @@ int create_romBrowser( void )
 	// Create a scrolled window to contain the rom list, make scrollbar visibility automatic.
 	g_MainWindow.romScrolledWindow = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(g_MainWindow.romScrolledWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.romScrolledWindow, TRUE, TRUE, 0 );
 	
 	// Add the romDirectoryList tree view into our scrolled window.
-	gtk_scrolled_window_add_with_viewport ( GTK_SCROLLED_WINDOW (g_MainWindow.romScrolledWindow), g_MainWindow.romTreeView);
+	gtk_container_add (GTK_CONTAINER (g_MainWindow.romScrolledWindow), g_MainWindow.romTreeView);
+	gtk_container_add (GTK_CONTAINER (g_MainWindow.toplevelVBox), g_MainWindow.romScrolledWindow);
 	
 	// Instruct the widget to become visible.
 	gtk_widget_show(g_MainWindow.romScrolledWindow);
