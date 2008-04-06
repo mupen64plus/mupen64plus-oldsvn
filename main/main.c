@@ -41,7 +41,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <pthread.h>    // POSIX Thread library
+#include <pthread.h> // POSIX Thread library
 #include <signal.h> // signals
 #include <getopt.h> // getopt_long
 #include <libgen.h> // basename, dirname
@@ -84,22 +84,22 @@ static void sighandler( int signal, siginfo_t *info, void *context ); // signal 
 // TODO: Improve the auto-incrementing savestate system.
 int         autoinc_slot = 0;
 int         *autoinc_save_slot = &autoinc_slot;
-int     g_Noask = 0;            // don't ask to force load on bad dumps
-int     g_NoaskParam = 0;       // was --noask passed at the commandline?
-int     g_LimitFPS = 1;
-
+int         g_Noask = 0;                // don't ask to force load on bad dumps
+int         g_NoaskParam = 0;           // was --noask passed at the commandline?
+int         g_LimitFPS = 1;
+            
 pthread_t   g_EmulationThread = 0;      // core thread handle
-int     g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
-
+int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
+            
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)
 char        *g_RspPlugin = NULL;        // pointer to rsp plugin specified at commandline (if any)
 
 #ifdef NOGUI_ONLY
-static int  g_GuiEnabled = 0;       // GUI enabled?
+static int  g_GuiEnabled = 0;           // GUI enabled?
 #else
-static int  g_GuiEnabled = 1;       // GUI enabled?
+static int  g_GuiEnabled = 1;           // GUI enabled?
 #endif
 
 static char g_ConfigDir[PATH_MAX] = {0};
@@ -107,10 +107,10 @@ static char g_InstallDir[PATH_MAX] = {0};
 #ifdef DBG
 static int  g_DebuggerEnabled = 0;      // wether the debugger is enabled or not
 #endif
-static int  g_Fullscreen = 0;       // fullscreen enabled?
-static int  g_EmuMode = 0;          // emumode specified at commandline?
+static int  g_Fullscreen = 0;           // fullscreen enabled?
+static int  g_EmuMode = 0;              // emumode specified at commandline?
 static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
-static char *g_Filename = NULL;     // filename to load & run at startup (if given at command line)
+static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
 static int  g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 
 /*********************************************************************************************************

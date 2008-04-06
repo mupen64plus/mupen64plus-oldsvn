@@ -767,11 +767,11 @@ static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct inp
     gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(dialog)->vbox), label);
     gtk_widget_show_all(dialog);
 
-        // capture joystick input from user
+    // capture joystick input from user
     sdl_loop = 1;
     while(sdl_loop)
     {
-        // let gtk work if it needs to. Need this so user can click cancel on the dialog.
+        // let gtk work if it needs to. Need this so user can click buttons on the dialog.
         while(g_main_iteration(FALSE));
 
         if(SDL_PollEvent(&sdl_event))
