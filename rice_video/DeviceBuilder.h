@@ -44,7 +44,7 @@ public:
     static SupportedDeviceType m_deviceGeneralType;
 protected:
     CDeviceBuilder();
-    ~CDeviceBuilder();
+    virtual ~CDeviceBuilder();
 
     static CDeviceBuilder* CreateBuilder(SupportedDeviceType type);
     static SupportedDeviceType m_deviceType;
@@ -68,7 +68,7 @@ public:
 
 protected:
     OGLDeviceBuilder() {};
-    ~OGLDeviceBuilder() {};
+    virtual  ~OGLDeviceBuilder() {};
 
 };
 

@@ -29,9 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // - Group #1:  Related to frame buffer
 // - Group #2:  Related to 2D sprite
 // - Group #3:  Related BG and ScaledBG
-class CExtendedRender 
+class CExtendedRender
 {
 public:
+    virtual ~CExtendedRender() {}
+
     virtual void DrawFrameBuffer(bool useVIreg=false, uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0) {};
     virtual void LoadFrameBuffer(bool useVIreg=false, uint32 left=0, uint32 top=0, uint32 width=0, uint32 height=0) {};
     virtual void LoadTxtrBufFromRDRAM(void) {};

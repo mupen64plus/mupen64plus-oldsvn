@@ -29,7 +29,7 @@ class FrameBufferManager
     friend class CDXGraphicsContext;
 public:
     FrameBufferManager();
-    ~FrameBufferManager();
+    virtual ~FrameBufferManager();
 
     void Initialize();
     void CloseUp();
@@ -91,6 +91,8 @@ protected:
 
 class DXFrameBufferManager : public FrameBufferManager
 {
+    virtual ~DXFrameBufferManager() {}
+
 public:
     // Device dependent functions
     virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL);            // Copy the current back buffer to temp buffer
@@ -101,6 +103,8 @@ public:
 
 class OGLFrameBufferManager : public FrameBufferManager
 {
+    virtual ~OGLFrameBufferManager() {}
+
 public:
     // Device dependent functions
     virtual void CopyBackBufferToRenderTexture(int idx, RecentCIInfo &ciInfo, RECT* pRect=NULL);            // Copy the current back buffer to temp buffer
