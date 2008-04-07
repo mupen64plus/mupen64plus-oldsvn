@@ -699,7 +699,7 @@ static int sdl_loop = 0;
 
 static void callback_cancelSetInput(GtkWidget *widget, gint response, GtkWidget *textbox)
 {
-    // If user clicked the clear button, clear current input mapping
+    // If user clicked the delete button, delete current input mapping
     if(response == GTK_RESPONSE_NO)
         gtk_editable_delete_text(GTK_EDITABLE(textbox), 0, -1);
 
@@ -748,10 +748,10 @@ static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct inp
     dialog = gtk_dialog_new_with_buttons(tr("Map Special Function"),
                                      GTK_WINDOW(g_ConfigDialog.dialog),
                          GTK_DIALOG_MODAL,
-                         GTK_STOCK_CLEAR,
-                         GTK_RESPONSE_NO, // response ID for clear
                          GTK_STOCK_CANCEL,
                          GTK_RESPONSE_NONE,
+                         GTK_STOCK_DELETE,
+                         GTK_RESPONSE_NO, // response ID for delete
                          NULL);
     gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
     g_signal_connect(dialog,
