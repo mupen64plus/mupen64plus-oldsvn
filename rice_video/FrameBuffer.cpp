@@ -582,12 +582,12 @@ uint32 CalculateRDRAMCRC(void *pPhysicalAddress, uint32 left, uint32 top, uint32
         register uint32 *pStart = (uint32*)(pPhysicalAddress);
         pStart += (top * pitch) + (((left<<size)+1)>>3);
 
-                // The original assembly code had a bug in it (it incremented pStart by 'pitch' in bytes, not in dwords)
-                // This C code implements the same algorithm as the ASM but without the bug
+        // The original assembly code had a bug in it (it incremented pStart by 'pitch' in bytes, not in dwords)
+        // This C code implements the same algorithm as the ASM but without the bug
         uint32 y = 0;
         while (y < height)
-                {
-                  uint32 x = 0;
+        {
+          uint32 x = 0;
           while (x < realWidthInDWORD)
           {
             dwAsmCRC = (dwAsmCRC << 4) + ((dwAsmCRC >> 28) & 15);
@@ -598,7 +598,7 @@ uint32 CalculateRDRAMCRC(void *pPhysicalAddress, uint32 left, uint32 top, uint32
           dwAsmCRC ^= y;
           y += yinc;
           pStart += pitch;
-                }
+        }
 
     }
     else
@@ -612,7 +612,7 @@ uint32 CalculateRDRAMCRC(void *pPhysicalAddress, uint32 left, uint32 top, uint32
             dwAsmHeight = height - 1;
             dwAsmPitch = pitchInBytes;
 
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
             __asm 
             {
                 push eax
@@ -646,7 +646,7 @@ l1:             mov esi, [ecx+ebx]
                 pop ebx
                 pop eax
             }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
         asm volatile(" xorl          %k2,      %k2           \n"
                      " movsxl        %k4,      %q4           \n"
                      "0:                                     \n"
@@ -668,7 +668,7 @@ l1:             mov esi, [ecx+ebx]
                      : "m"(dwAsmdwBytesPerLine), "r"(dwAsmPitch)
                      : "%rbx", "%rax", "memory", "cc"
                      );
-#else // GCC assumed
+#elif !defined(NO_ASM)
 # ifndef PIC
            asm volatile("pusha                             \n"
                 "mov    pAsmStart, %%ecx           \n"  // = pStart
@@ -881,48 +881,6 @@ bool FrameBufferManager::ProcessFrameWriteRecord()
                     if( y > rect.bottom ) rect.bottom = y;
                 }
 #else
-
-                /*
-                int index = -1;
-                int rectsize = frameWriteByCPURects.size();
-
-                if( rectsize == 0 )
-                {
-                RECT rect;
-                rect.left=rect.right=x;
-                rect.top=rect.bottom=y;
-                frameWriteByCPURects.push_back(rect);
-                continue;
-                }
-
-                for( int j=0; j<rectsize; j++ )
-                {
-                if( ( (x >= frameWriteByCPURects[j].left && (x<=frameWriteByCPURects[j].right || x-frameWriteByCPURects[j].left<=30)) ||
-                (x < frameWriteByCPURects[j].left && frameWriteByCPURects[j].right-x <= 30) ) &&
-                ( (y >= frameWriteByCPURects[j].top && (x<=frameWriteByCPURects[j].bottom || x-frameWriteByCPURects[j].top<=30)) ||
-                (y < frameWriteByCPURects[j].top && frameWriteByCPURects[j].bottom-y <= 30) ) )
-                {
-                index = j;
-                break;
-                }
-                }
-
-                if( index < 0 )
-                {
-                RECT rect;
-                rect.left=rect.right=x;
-                rect.top=rect.bottom=y;
-                frameWriteByCPURects.push_back(rect);
-                continue;
-                }
-
-                RECT &rect = frameWriteByCPURects[index];
-                if( x < rect.left ) rect.left = x;
-                if( x > rect.right ) rect.right = x;
-                if( y < rect.top )  rect.top = y;
-                if( y > rect.bottom ) rect.bottom = y;
-                */
-
                 if( x < frameWriteByCPURect.left )  frameWriteByCPURect.left = x;
                 if( x > frameWriteByCPURect.right ) frameWriteByCPURect.right = x;
                 if( y < frameWriteByCPURect.top )   frameWriteByCPURect.top = y;

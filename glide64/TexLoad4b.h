@@ -45,7 +45,7 @@ DWORD Load4bCI (unsigned char * dst, unsigned char * src, int wid_64, int height
     unsigned short * pal = (rdp.pal_8 + (rdp.tiles[tile].palette << 4));
     if (rdp.tlut_mode == 2)
     {
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov ebx,dword ptr [pal]
 
@@ -394,7 +394,7 @@ x_loop_2:
 
 end_y_loop:
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
        //printf("Load4bCI1\n");
         // This way, gcc generates either a 32 bit or a 64 bit register
         long lTempX, lTempY, lHeight = (long) height;
@@ -745,11 +745,11 @@ end_y_loop:
              : [pal] "r" (pal), [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
              : "memory", "cc"
              );
-#endif // _WIN32
+#endif
     }
     else
     {
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov ebx,dword ptr [pal]
 
@@ -1098,7 +1098,7 @@ ia_x_loop_2:
 
 ia_end_y_loop:
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
        //printf("Load4bCI2\n");
        long lTempX, lTempY, lHeight = (long) height;
        intptr_t fake_eax, fake_edx;
@@ -1448,7 +1448,7 @@ ia_end_y_loop:
              : [pal] "r" (pal), [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
              : "memory", "cc"
              );
-#endif // _WIN32
+#endif
         return (1 << 16) | GR_TEXFMT_ALPHA_INTENSITY_88;
     }
 
@@ -1468,7 +1468,7 @@ DWORD Load4bIA (unsigned char * dst, unsigned char * src, int wid_64, int height
     if (wid_64 < 1) wid_64 = 1;
     if (height < 1) height = 1;
     int ext = (real_width - (wid_64 << 4));
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [src]
         mov edi,dword ptr [dst]
@@ -2262,7 +2262,7 @@ x_loop_2:
 
 end_y_loop:
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("Load4bIA\n");
    long lTempX, lTempY, lHeight = (long) height;
    asm volatile (
@@ -3057,7 +3057,7 @@ end_y_loop:
     : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
     : "memory", "cc", "eax", "edx", "ebx"
     );
-#endif // _WIN32
+#endif
 
     return /*(0 << 16) | */GR_TEXFMT_ALPHA_INTENSITY_44;
 }
@@ -3073,7 +3073,7 @@ DWORD Load4bI (unsigned char * dst, unsigned char * src, int wid_64, int height,
     if (wid_64 < 1) wid_64 = 1;
     if (height < 1) height = 1;
     int ext = (real_width - (wid_64 << 4));
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [src]
         mov edi,dword ptr [dst]
@@ -3394,7 +3394,7 @@ x_loop_2:
 
 end_y_loop:
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("Load4bI\n");
    long lTempX, lTempY, lHeight = (long) height;
    asm volatile (
@@ -3716,7 +3716,7 @@ end_y_loop:
          : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
          : "memory", "cc", "eax", "edx", "ebx"
          );
-#endif // _WIN
+#endif
 
     return /*(0 << 16) | */GR_TEXFMT_ALPHA_INTENSITY_44;
 }

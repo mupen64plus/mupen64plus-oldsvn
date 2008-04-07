@@ -87,14 +87,14 @@ inline uint32 ReverseDXT(uint32 val, uint32 lrs, uint32 width, uint32 size)
 // rewrite these routine by myself.
 // Rice, 02/24/2004
 
-#if !defined(__INTEL_COMPILER) && !defined(__x86_64__)
+#if !defined(__INTEL_COMPILER) && !defined(__x86_64__) && !defined(NO_ASM)
 static uint32 g_value;
 static uint16 g_value16;
 #endif
 
 inline void UnswapCopy( void *src, void *dest, uint32 numBytes )
 {
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     __asm
     {
         mov     ecx, 0
@@ -157,7 +157,7 @@ TrailingLoop:
         loop    TrailingLoop
 Done:
     }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   asm volatile(" movl       %k1,   %%ebx      \n"
                " andl        $3,   %%ebx      \n"
                " cmpl        $0,   %%ebx      \n"
@@ -211,7 +211,7 @@ Done:
                : "memory", "cc", "%rax", "%rbx", "%rcx"
                );
 
-#else // GCC assumed
+#elif !defined(NO_ASM)
 # ifndef PIC
    g_src = src;
    g_dest = dest;
@@ -355,7 +355,7 @@ Done:
 
 inline void DWordInterleave( void *mem, uint32 numDWords )
 {
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     __asm {
         mov     esi, dword ptr [mem]
         mov     edi, dword ptr [mem]
@@ -370,7 +370,7 @@ DWordInterleaveLoop:
         add     edi, 8
         loop    DWordInterleaveLoop
     }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   asm volatile("0:                                 \n"
                " movl     (%0),     %%eax          \n"
                " movl    8(%0),     %%ebx          \n"
@@ -383,7 +383,7 @@ DWordInterleaveLoop:
            :
            : "memory", "cc", "%rax", "%rbx"
            );
-#else // GCC assumed
+#elif !defined(NO_ASM)
 # ifndef PIC
    g_mem = mem;
    g_numDWords = numDWords;
@@ -432,7 +432,7 @@ DWordInterleaveLoop:
 
 inline void QWordInterleave( void *mem, uint32 numDWords )
 {
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     __asm
     {
         // Interleave the line on the qword
@@ -456,7 +456,7 @@ QWordInterleaveLoop:
         add     edi, 12
         loop    QWordInterleaveLoop
     }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   asm volatile(" shr        $1,       %k1          \n"
                "0:                                 \n"
                " mov      (%0),     %%rax          \n"
@@ -470,7 +470,7 @@ QWordInterleaveLoop:
            :
            : "memory", "cc", "%rax", "%rbx"
            );
-#else // GCC assumed
+#elif !defined(NO_ASM) // GCC assumed
 # ifndef PIC
    g_mem = mem;
    g_numDWords = numDWords;
@@ -534,20 +534,20 @@ QWordInterleaveLoop:
 
 inline uint32 swapdword( uint32 value )
 {
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     __asm
     {
         mov     eax, dword ptr [value]
         bswap   eax
     }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   asm volatile(" bswapl %k0                    \n"
                : "+r"(value)
                :
                :
                );
   return value;
-#else // GCC assumed
+#elif !defined(NO_ASM) // GCC assumed
    g_value = value;
    asm volatile("pusha \n"
         "mov        g_value, %%eax \n"
@@ -564,20 +564,20 @@ inline uint32 swapdword( uint32 value )
 
 inline uint16 swapword( uint16 value )
 {
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     __asm
     {
         mov     ax, word ptr [value]
         xchg    ah, al
     }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   asm volatile("xchg  %%al, %%ah    \n"
                : "+a"(value)
                :
                :
                );
   return value;
-#else // GCC assumed
+#elif !defined(NO_ASM) // GCC assumed
    g_value16 = value;
    asm volatile("pusha \n"
         "mov        g_value16, %%ax \n"

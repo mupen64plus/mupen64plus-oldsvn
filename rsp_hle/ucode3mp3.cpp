@@ -276,9 +276,6 @@ static void InnerLoop () {
                 RSP_Vect[0].DW[1] = 0xB504A57E00016A09;
                 RSP_Vect[0].DW[0] = 0x0002D4130005A827;
 */
-                if ((t1 | t2 | t3 | t5 | t6) & 0x1)
-//                  __asm int 3;
-                    do {} while (0);
 
                 // 0x13A8
                 v[1] = 0;
@@ -561,11 +558,7 @@ static void InnerLoop () {
                 s32 hi0 = mult6;
                 s32 hi1 = mult4;
                 s32 v;
-                /*
-                if (hi0 & 0xffff)
-                    __asm int 3; 
-                if (hi1 & 0xffff)
-                    __asm int 3;*/
+
                 hi0 = (int)hi0 >> 0x10;
                 hi1 = (int)hi1 >> 0x10;
                 for (i = 0; i < 8; i++) {

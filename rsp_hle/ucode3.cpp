@@ -131,7 +131,6 @@ static void ENVMIXER3 () {
         RSig   = *(s16 *)(hleMixerWorkArea + 22); // 22-23
         //u32 test  = *(s32 *)(hleMixerWorkArea + 24); // 22-23
         //if (test != 0x13371337)
-        //  __asm int 3;
     }
 
 
@@ -848,9 +847,6 @@ static void RESAMPLE3 () {
             src[(srcPtr+x)^1] = 0;//*(u16 *)(rsp.RDRAM+((addy+x)^2));
     }
 
-    //if ((Flags & 0x2))
-    //  __asm int 3;
-
     for(int i=0;i < 0x170/2;i++)    {
         location = (((Accum * 0x40) >> 0x10) * 8);
         //location = (Accum >> 0xa) << 0x3;
@@ -979,8 +975,6 @@ static void WHATISTHIS () {
 u32 setaddr;
 static void MP3ADDY () {
     setaddr = (inst2 & 0xffffff);
-    //__asm int 3;
-    //fprintf (fp, "mp3addy: inst1: %08X, inst2: %08X, loopval: %08X\n", inst1, inst2, loopval);
 }
 
 extern "C" {
@@ -1006,7 +1000,7 @@ void MP3 ();
     ((u32*)BufferSpace)[0x008/4] += base;
     ((u32*)BufferSpace)[0xFFC/4] = loopval;
     ((u32*)BufferSpace)[0xFF8/4] = dmembase;
-    //__asm int 3;
+
     memcpy (imem+0x238, rsp.RDRAM+((u32*)BufferSpace)[0x008/4], 0x9C0);
     ((u32*)BufferSpace)[0xFF4/4] = setaddr;
     pDMEM = (char *)BufferSpace;

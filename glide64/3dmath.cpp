@@ -175,7 +175,7 @@ void __stdcall MulMatricesNOSSE(float m1[4][4],float m2[4][4],float r[4][4])
 
 void __stdcall MulMatricesSSE(float m1[4][4],float m2[4][4],float r[4][4])
 {
-#ifdef GCC
+#if defined(__GNUC__) || defined(NO_ASM)
     /* [row][col]*/
     typedef float v4sf __attribute__ ((vector_size (16)));
     v4sf row0 = __builtin_ia32_loadups(m2[0]);
@@ -323,13 +323,13 @@ MULMATRIX MulMatrices = MulMatricesNOSSE;
 void math_init()
 {
   BOOL IsSSE = FALSE;
-#ifdef GCC
+#if defined(__GNUC__) && !defined(NO_ASM)
     int edx, eax;
     asm volatile("cpuid":"=a"(eax),"=d"(edx):"0"(1):"ecx","ebx");
     // Check for SSE
     if (edx & (1 << 25))
     IsSSE = TRUE;
-#else
+#elif !defined(NO_ASM)
   DWORD dwEdx;
   __try
   {

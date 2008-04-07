@@ -2084,7 +2084,7 @@ static void rdp_loadblock()
     
   //    if (lr_s > 0)
     rdp.timg.addr += cnt << 3;
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         // copy the data
         mov edi,dword ptr [dst]
@@ -2123,7 +2123,7 @@ end_dxt_test:
         // swap any remaining data
         call dword ptr [SwapMethod]
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
     uintptr_t dst_arg = dst;
     DWORD cnt_arg = cnt;
     asm volatile(
@@ -2168,7 +2168,7 @@ end_dxt_test:
         : [_dxt] "r" (_dxt), [SwapMethod] "g" (SwapMethod)
         : "memory", "cc", "ecx", "edx"
         );
-#endif // _WIN32
+#endif
     
     rdp.update |= UPDATE_TEXTURE;
     
@@ -2264,7 +2264,7 @@ static void rdp_loadtile()
     
     uintptr_t dst = (uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3);
     uintptr_t end = (uintptr_t)rdp.tmem+4096 - (wid_64<<3);
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         // set initial values
         mov edi,dword ptr [dst]
@@ -2305,7 +2305,7 @@ loadtile_swap_end:
             
 loadtile_end:
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
     DWORD save_wid_64;
     uintptr_t save_dst;
    asm volatile (
@@ -2350,7 +2350,7 @@ loadtile_end:
          [end] "g" (end), [SwapMethod] "g" (SwapMethod), [line_n] "g" (line_n)
          : "memory", "cc", "ebx"
          );
-#endif // _WIN32
+#endif
     
     FRDP("loadtile: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, lr_t: %d\n", tile,
         ul_s, ul_t, lr_s, lr_t);

@@ -507,9 +507,9 @@ uint32 ReadRegistryDwordVal(const char *Field)
 
 bool isMMXSupported() 
 { 
-    int IsMMXSupported; 
+    int IsMMXSupported = 0; 
    
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     __asm 
     { 
         mov eax,1   // CPUID level 1 
@@ -517,9 +517,9 @@ bool isMMXSupported()
         and edx,0x800000        // test bit 23 of feature flag 
         mov IsMMXSupported,edx  // != 0 if MMX is supported 
     } 
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   return true;
-#else // GCC assumed
+#elif !defined(NO_ASM) // GCC assumed
    asm volatile (
          "push %%ebx           \n"
          "mov $1, %%eax        \n"  // CPUID level 1 
@@ -539,19 +539,19 @@ bool isMMXSupported()
 
 bool isSSESupported() 
 {
-    int SSESupport;
+    int SSESupport = 0;
 
     // And finally, check the CPUID for Streaming SIMD Extensions support.
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     _asm{
        mov      eax, 1          // Put a "1" in eax to tell CPUID to get the feature bits
          cpuid                  // Perform CPUID (puts processor feature info into EDX)
          and        edx, 02000000h  // Test bit 25, for Streaming SIMD Extensions existence.
          mov        SSESupport, edx // SIMD Extensions).  Set return value to 1 to indicate,
     }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   return true;
-#else // GCC assumed
+#elif !defined(NO_ASM) // GCC assumed
    asm volatile (
          "push %%ebx                       \n"
          "mov $1, %%eax                    \n"          // Put a "1" in eax to tell CPUID to get the feature bits
@@ -1979,7 +1979,7 @@ GameSetting g_curRomInfo;
 // to              40 12 37 80
 void ROM_ByteSwap_3210(void *v, uint32 dwLen)
 {
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
     __asm
     {
         mov     esi, v
@@ -2002,7 +2002,7 @@ top:
         cmp     esi, edi
         jne     top
     }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   asm volatile("0:                               "
                " movl       (%0), %%eax;         "
                " bswap     %%eax;                "
@@ -2014,7 +2014,7 @@ top:
                :
                : "memory", "cc", "%eax"
                );
-#else // GCC assumed
+#elif !defined(NO_ASM) // GCC assumed
    asm volatile(
         "push           %%ebx          \n"
         "add        %%ecx, %%edi   \n"

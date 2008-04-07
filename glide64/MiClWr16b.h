@@ -120,7 +120,7 @@ void Wrap16bS (unsigned char * tex, DWORD mask, DWORD max_width, DWORD real_widt
     int line = line_full - (count << 2);
     if (line < 0) return;
     unsigned char * start = tex + (mask_width << 1);
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov edi,dword ptr [start]
 
@@ -151,7 +151,7 @@ loop_x:
         dec ecx
         jnz loop_y
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("wrap16bS\n");
     intptr_t fake_esi, fake_eax;
    asm volatile (
@@ -276,7 +276,7 @@ x_loop:
          : [count] "g" (count), [line] "g" ((intptr_t)line), [line_full] "g" ((intptr_t)line_full)
          : "memory", "cc", "eax", "edx"
          );
-#endif // _WIN32
+#endif
 }
 
 //****************************************************************

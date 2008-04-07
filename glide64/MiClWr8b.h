@@ -50,7 +50,7 @@ void Mirror8bS (unsigned char * tex, DWORD mask, DWORD max_width, DWORD real_wid
     int line = line_full - (count);
     if (line < 0) return;
     unsigned char * start = tex + (mask_width);
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov edi,dword ptr [start]
 
@@ -94,7 +94,7 @@ end_mirror_check:
         dec ecx
         jnz loop_y
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("Mirror8bS\n");
     intptr_t fake_esi,fake_eax;
    asm volatile (
@@ -188,7 +188,7 @@ void Wrap8bS (unsigned char * tex, DWORD mask, DWORD max_width, DWORD real_width
     int line = line_full - (count << 2);
     if (line < 0) return;
     unsigned char * start = tex + (mask_width);
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov edi,dword ptr [start]
 
@@ -219,7 +219,7 @@ loop_x:
         dec ecx
         jnz loop_y
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("wrap8bS\n");
     intptr_t fake_esi,fake_eax;
    asm volatile (
@@ -250,7 +250,7 @@ loop_x:
          : [mask_mask] "g" (mask_mask), [count] "g" (count), [line] "g" ((intptr_t)line), [line_full] "g" ((intptr_t)line_full)
          : "memory", "cc", "edx"
          );
-#endif // _WIN32
+#endif
 }
 
 //****************************************************************
@@ -289,7 +289,7 @@ void Clamp8bS (unsigned char * tex, DWORD width, DWORD clamp_to, DWORD real_widt
 
     int line_full = real_width;
     int line = width;
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [constant]
         mov edi,dword ptr [dest]
@@ -314,7 +314,7 @@ x_loop:
         dec ecx
         jnz y_loop
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("clamp8bs\n");
    asm volatile (
          "0: \n"
@@ -339,7 +339,7 @@ x_loop:
          : [count] "g" (count), [line] "g" ((uintptr_t)line), [line_full] "g" ((intptr_t)line_full)
          : "memory", "cc", "eax", "edx"
          );
-#endif // _WIN32
+#endif
 }
 
 //****************************************************************

@@ -286,7 +286,7 @@ void GetTexInfo (int id, int tile)
         {
 
         // Check the CRC
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
         __asm {
             xor eax,eax                         // eax is final result
             mov ebx,dword ptr [line]
@@ -321,7 +321,7 @@ void GetTexInfo (int id, int tile)
 
             mov dword ptr [crc],eax     // store the result
             }
-#else // _WIN32
+#elif !defined(NO_ASM)
         int i;
        asm volatile (
              "xor %[crc], %[crc]      \n"                           // eax is final result
@@ -352,7 +352,7 @@ void GetTexInfo (int id, int tile)
              : [line] "g" ((intptr_t)line), [wid_64] "g" (wid_64)
              : "memory", "cc", "edx"
              );
-#endif // _WIN32
+#endif
         // ** END CRC CHECK
     }
     }

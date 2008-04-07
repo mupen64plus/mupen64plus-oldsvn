@@ -15,30 +15,20 @@ endif
 ifeq ("$(UNAME)","ppc")
   CPU = PPC
   ARCH = 32BITS
+  NO_ASM = 1
 endif
 ifeq ("$(UNAME)","ppc64")
   CPU = PPC
   ARCH = 64BITS
+  NO_ASM = 1
 endif
 
-# find installed assembler: yasm or nasm
-ifneq ("$(shell which yasm 2>&1 | head -c 9)", "which: no")
-  ASM=yasm
-else
-  ifneq ("$(shell which nasm 2>&1 | head -c 9)", "which: no")
-    ASM=nasm
-  else
-    # throw error
-    $(error No yasm or nasm found!)
-  endif
-endif
 
 # test for presence of SDL
 ifeq ("$(shell which sdl-config 2>&1 | head -c 9)", "which: no")
   # throw error
   $(error No SDL development libraries found!)
 endif
-
 
 # test for presence of GTK 2.0
 ifeq ("$(shell which pkg-config 2>&1 | head -c 9)", "which: no")
@@ -91,6 +81,22 @@ ifeq ($(CPU), X86)
 endif
 ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
+endif
+
+# find installed assembler: yasm or nasm
+ifeq ($(NO_ASM), 1)
+  CFLAGS += -DNO_ASM
+else
+  ifneq ("$(shell which yasm 2>&1 | head -c 9)", "which: no")
+    ASM=yasm
+  else
+    ifneq ("$(shell which nasm 2>&1 | head -c 9)", "which: no")
+      ASM=nasm
+    else
+      # throw error
+      $(error No yasm or nasm found!)
+    endif
+  endif
 endif
 
 # set variables for profiling

@@ -83,30 +83,33 @@ OBJ_CORE = \
 	r4300/regimm.o \
 	r4300/tlb.o
 
-ifeq ($(CPU), X86)
-  ifeq ($(ARCH), 64BITS)
-    DYNAREC = x86_64
-  else
-    DYNAREC = x86
+# handle dynamic recompiler objects
+ifneq ($(NO_ASM), 1)
+  ifeq ($(CPU), X86)
+    ifeq ($(ARCH), 64BITS)
+      DYNAREC = x86_64
+    else
+      DYNAREC = x86
+    endif
   endif
-  OBJ_X86 = \
-	r4300/$(DYNAREC)/assemble.o \
-	r4300/$(DYNAREC)/debug.o \
-	r4300/$(DYNAREC)/gbc.o \
-	r4300/$(DYNAREC)/gcop0.o \
-	r4300/$(DYNAREC)/gcop1.o \
-	r4300/$(DYNAREC)/gcop1_d.o \
-	r4300/$(DYNAREC)/gcop1_l.o \
-	r4300/$(DYNAREC)/gcop1_s.o \
-	r4300/$(DYNAREC)/gcop1_w.o \
-	r4300/$(DYNAREC)/gr4300.o \
-	r4300/$(DYNAREC)/gregimm.o \
-	r4300/$(DYNAREC)/gspecial.o \
-	r4300/$(DYNAREC)/gtlb.o \
-	r4300/$(DYNAREC)/regcache.o \
-	r4300/$(DYNAREC)/rjump.o
+  OBJ_DYNAREC = \
+      r4300/$(DYNAREC)/assemble.o \
+      r4300/$(DYNAREC)/debug.o \
+      r4300/$(DYNAREC)/gbc.o \
+      r4300/$(DYNAREC)/gcop0.o \
+      r4300/$(DYNAREC)/gcop1.o \
+      r4300/$(DYNAREC)/gcop1_d.o \
+      r4300/$(DYNAREC)/gcop1_l.o \
+      r4300/$(DYNAREC)/gcop1_s.o \
+      r4300/$(DYNAREC)/gcop1_w.o \
+      r4300/$(DYNAREC)/gr4300.o \
+      r4300/$(DYNAREC)/gregimm.o \
+      r4300/$(DYNAREC)/gspecial.o \
+      r4300/$(DYNAREC)/gtlb.o \
+      r4300/$(DYNAREC)/regcache.o \
+      r4300/$(DYNAREC)/rjump.o
 else
-  OBJ_X86 =
+  OBJ_DYNAREC = r4300/empty_dynarec.o
 endif
 
 OBJ_VCR	= \
@@ -159,7 +162,7 @@ SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
 ALL = mupen64plus $(PLUGINS)
-OBJECTS = $(OBJ_CORE) $(OBJ_X86)
+OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
@@ -194,6 +197,7 @@ targets:
 	@echo "    VCR=1         == enable video recording"
 	@echo "    LIRC=1        == enable LIRC support"
 	@echo "    NO_RESAMP=1   == disable libsamplerate support in jttl_audio"
+	@echo "    NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)"
 	@echo "    NO_GUI=1      == build without GUI support"
 	@echo "    PREFIX=path   == specify install/uninstall prefix (default: /usr/local)"
 	@echo "  Debugging Options:"

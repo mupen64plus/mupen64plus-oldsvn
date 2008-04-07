@@ -37,7 +37,7 @@
 void TexConv_ARGB1555_ARGB4444 (unsigned char * _src, unsigned char * _dst, int width, int height)
 {
     int _size = (width * height) << 1;
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [_src]
         mov edi,dword ptr [_dst]
@@ -79,7 +79,7 @@ tc1_loop:
         dec ecx
         jnz tc1_loop
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("TexConv_ARGB1555_ARGB4444\n");
    asm volatile (
          //"tc1_loop2:             \n"
@@ -123,13 +123,13 @@ tc1_loop:
          :
          : "memory", "cc", "eax", "edx", "ebx"
          );
-#endif // _WIN32
+#endif
 }
 
 void TexConv_AI88_ARGB4444 (unsigned char * _src, unsigned char * _dst, int width, int height)
 {
     int _size = (width * height) << 1;
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [_src]
         mov edi,dword ptr [_dst]
@@ -159,7 +159,7 @@ tc1_loop:
         dec ecx
         jnz tc1_loop
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("TexConv_AI88_ARGB4444\n");
    asm volatile (
          //"tc1_loop3:              \n"
@@ -191,13 +191,13 @@ tc1_loop:
          :
          : "memory", "cc", "eax", "edx", "ebx"
          );
-#endif // _WIN32
+#endif
 }
 
 void TexConv_AI44_ARGB4444 (unsigned char * _src, unsigned char * _dst, int width, int height)
 {
     int _size = width * height;
-#ifndef GCC
+#if !defined(__GNUC__) &&  !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [_src]
         mov edi,dword ptr [_dst]
@@ -258,7 +258,7 @@ tc1_loop:
         dec ecx
         jnz tc1_loop
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("TexConv_AI44_ARGB4444\n");
    asm volatile (
          //"tc1_loop4:             \n"
@@ -321,13 +321,13 @@ tc1_loop:
          :
          : "memory", "cc", "eax", "edx", "ebx"
          );
-#endif // _WIN32
+#endif
 }
 
 void TexConv_A8_ARGB4444 (unsigned char * _src, unsigned char * _dst, int width, int height)
 {
     int _size = (width * height) << 1;
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [_src]
         mov edi,dword ptr [_dst]
@@ -391,7 +391,7 @@ tc1_loop:
         dec ecx
         jnz tc1_loop
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("TexConv_A8_ARGB4444\n");
    asm volatile (
          //"tc1_loop:              \n"
@@ -457,5 +457,5 @@ tc1_loop:
          :
          : "memory", "cc", "eax", "ebx", "edx"
          );
-#endif // _WIN32
+#endif
 }

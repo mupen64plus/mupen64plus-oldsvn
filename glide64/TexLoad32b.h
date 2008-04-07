@@ -44,7 +44,7 @@ DWORD Load32bRGBA (unsigned char * dst, unsigned char * src, int wid_64, int hei
     int ext = (real_width - (wid_64 << 1)) << 1;
 
     wid_64 >>= 1;       // re-shift it, load twice as many quadwords
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [src]
         mov edi,dword ptr [dst]
@@ -257,7 +257,7 @@ x_loop_2:
 
 end_y_loop:
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("Load32bRGBA\n");
    long lTemp, lHeight = (long) height;
    asm volatile (
@@ -467,6 +467,6 @@ end_y_loop:
          : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
          : "memory", "cc", "ebx", "eax", "edx"
          );
-#endif // _WIN32
+#endif
     return (1 << 16) | GR_TEXFMT_ARGB_4444;
 }

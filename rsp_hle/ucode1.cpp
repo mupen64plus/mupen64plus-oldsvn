@@ -136,29 +136,7 @@ static void CLEARBUFF () {
     u32 addr = (u32)(inst1 & 0xffff);
     u32 count = (u32)(inst2 & 0xffff);
     addr &= 0xFFFC;
-//#ifndef SAFE_MEMORY
-#if 1
     memset(BufferSpace+addr, 0, (count+3)&0xFFFC);
-#else
-    __asm {
-        mov ecx, dword ptr [count];
-        add edx, dword ptr [addr];
-        mov eax, dword ptr [BufferSpace];
-        //add edx, 05c0h;
-        push edi
-moretodo:
-        test ecx, ecx;
-        jz isDoneNow;
-        mov edi, edx;
-        xor edi, 3
-        mov byte ptr [eax+edi], 0;
-        dec ecx;
-        inc edi;
-        jmp moretodo
-isDoneNow:
-        pop edi;
-    }
-#endif
 }
 
 //FILE *dfile = fopen ("d:\\envmix.txt", "wt");
@@ -238,22 +216,6 @@ static void ENVMIXER () {
     for (int y = 0; y < AudioCount; y += 0x10) {
 
         if (LAdderStart != LTrg) {
-/*          __asm{
-                mov ecx, dword ptr [LAdderEnd];
-                mov eax, dword ptr [LRamp];
-                imul ecx;
-                shrd eax, edx, 16;
-                //shl edx, 16;
-                //shr eax, 16;
-                //add eax, edx;
-                mov dword ptr [LAdderEnd], eax;
-                mov eax, dword ptr [LAdderStart];
-                mov dword ptr [LAcc], eax;
-                mov dword ptr [LAdderStart], ecx;
-                sub ecx, eax;
-                sar ecx, 3;
-                mov dword ptr [LVol], ecx;
-            }*/
             LAcc = LAdderStart;
             LVol = (LAdderEnd - LAdderStart) >> 3;
             LAdderEnd   = ((s64)LAdderEnd * (s64)LRamp) >> 16;
@@ -264,21 +226,6 @@ static void ENVMIXER () {
         }
 
         if (RAdderStart != RTrg) {
-/*          __asm {
-                mov ecx, dword ptr [RAdderEnd];
-                mov eax, dword ptr [RRamp];
-                imul ecx;
-                shl edx, 16;
-                shr eax, 16;
-                add eax, edx;
-                mov dword ptr [RAdderEnd], eax;
-                mov eax, dword ptr [RAdderStart];
-                mov dword ptr [RAcc], eax;
-                mov dword ptr [RAdderStart], ecx;
-                sub ecx, eax;
-                sar ecx, 3;
-                mov dword ptr [RVol], ecx;
-            }*/
             RAcc = RAdderStart;
             RVol = (RAdderEnd - RAdderStart) >> 3;
             RAdderEnd   = ((s64)RAdderEnd * (s64)RRamp) >> 16;
@@ -526,10 +473,6 @@ static void RESAMPLE () {
             src[(srcPtr+x)^1] = 0;//*(u16 *)(rsp.RDRAM+((addy+x)^2));
     }
 
-    if ((Flags & 0x2))
-//      __asm int 3;
-        do {} while (0);
-
     for(int i=0;i < ((AudioCount+0xf)&0xFFF0)/2;i++)    {
         //location = (((Accum * 0x40) >> 0x10) * 8);
         location = (Accum >> 0xa) << 0x3;
@@ -626,17 +569,6 @@ static void SETLOOP () {
     //VolTrg_Left  = (s16)(loopval>>16);        // m_LeftVol
     //VolRamp_Left = (s16)(loopval);    // m_LeftVolTarget
 }
-/*
-void assert(bool _a_)   {
-    if (!(_a_)) {
-        char szError [512];
-        sprintf(szError,"PC = %08X\n\nError localized at...\n\n  Line:\t %d\n  File:\t %s\n  Time:\t %s\n\nIgnore and continue?",sp_reg_pc, __LINE__,__FILE__,__TIMESTAMP__);
-        MessageBox (NULL, szError, "Assert", MB_OK);
-        __asm int 3;
-        rsp_reg.halt = 1;
-    }
-}
-*/
 
 static void ADPCM () { // Work in progress! :)
     BYTE Flags=(u8)(inst1>>16)&0xff;

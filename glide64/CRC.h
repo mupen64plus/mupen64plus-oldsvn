@@ -51,7 +51,7 @@ void CRC_BuildTable();
 
 inline unsigned int CRC_Calculate( unsigned int crc, const void *buffer, unsigned int count )
 {
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
   unsigned int Crc32=crc;
   __asm {
             mov esi, buffer
@@ -74,7 +74,7 @@ loop1:
             xor Crc32, ecx
    }
    return Crc32;
-#else // _WIN32
+#else
     unsigned int result = crc;
     for (const char * p = (const char*)buffer; p != (const char*)buffer + count; ++p)
     {
@@ -85,6 +85,6 @@ loop1:
     }
     result ^= crc;
     return result;
-#endif // _WIN32
+#endif
 }
 

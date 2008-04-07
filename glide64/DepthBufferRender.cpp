@@ -125,7 +125,7 @@ int idiv16(int x, int y);        // (x << 16) / y
 __inline int idiv16(int x, int y)        // (x << 16) / y
 {
     //x = (((long long)x) << 16) / ((long long)y);
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
   __asm {
         mov   eax, x
         mov   ebx, y
@@ -135,73 +135,15 @@ __inline int idiv16(int x, int y)        // (x << 16) / y
         idiv  ebx  
         mov   x, eax
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
     int reminder;
     asm ("idivl %[divisor]"
           : "=a" (x), "=d" (reminder)
           : [divisor] "g" (y), "d" (x >> 16), "a" (x << 16));
-#endif // _WIN32
+#endif
     return x;
 }
 
-
-/*
-void inner(void * dst, int width, int i);
-#pragma aux inner = \
-    "    rol   ebx, 16                                  "\
-    "    mov   edx, [didx_frac]                         "\
-    "    mov   al, bl                                   "\
-    "    mov   ah, byte ptr [didx_whole]                "\
-    " next:                                             "\
-    "    mov   [edi], al                                "\
-    "    add   ebx, edx                                 "\
-    "    adc   al, ah                                   "\
-    "    inc   edi                                      "\
-    "    dec   ecx                                      "\
-    "    jnz   next                                     "\
-    parm [edi] [ecx] [ebx] modify [eax ebx ecx edx edi]
-
-*/
-/*
-inline void inner(void * dst, int width, int i)
-{
-  __asm {
-        mov   edi, dst
-        mov   ecx, width
-        mov   ebx, i
-        rol   ebx, 16
-        mov   edx, [didx_frac]
-        mov   al, bl
-        mov   ah, byte ptr [didx_whole]
-     next:                                             
-        mov   [edi], al
-        add   ebx, edx
-        adc   al, ah
-        inc   edi
-        dec   ecx
-        jnz   next
-    }
-}
-*/
-/*
-inline void inner(WORD * dst, int shift, int width, int i, int didx)
-{
-  int z;
-  int idx;
-  WORD encodedZ;
-  for (int x = 0; x < width; x++)
-  {
-        z = i/8192;
-        if (z < 0) z = 0;
-        else if (z > 0x3FFFF) z = 0x3FFFF;
-        encodedZ = zLUT[z];
-        idx = (shift+x)^1;
-        if(encodedZ < dst[idx]) 
-          dst[idx] = encodedZ;
-        i += didx;
-  }
-}
-*/
 
 static void RightSection(void)
 {

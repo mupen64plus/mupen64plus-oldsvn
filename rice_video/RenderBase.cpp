@@ -161,7 +161,7 @@ n.y = (g_normal.x * matWorld.m01) + (g_normal.y * matWorld.m11) + (g_normal.z * 
 n.z = (g_normal.x * matWorld.m02) + (g_normal.y * matWorld.m12) + (g_normal.z * matWorld.m22);*/
 
 // Multiply (x,y,z,0) by matrix m, then normalize
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
 #define Vec3TransformNormal(vec, m) __asm                   \
 {                                                       \
     __asm fld       dword ptr [vec + 0]                         \
@@ -246,7 +246,7 @@ __asm l3:   \
 #endif
 
 
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
 __declspec( naked ) void  __fastcall SSEVec3Transform(int i)
 {
     __asm
@@ -373,7 +373,7 @@ __declspec( naked ) void  __fastcall SSEVec3TransformDKR(XVECTOR4 &pOut, const X
         ret;
     }
 }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
 void SSEVec3Transform(int i)
 {
   asm volatile(" shl               $4,      %0   \n"
@@ -422,7 +422,7 @@ void SSEVec3Transform(int i)
                : "memory", "%xmm0", "%xmm1", "%xmm4", "%xmm5", "%xmm6", "%xmm7"
                );
 }
-#else // 32-bit GCC assumed
+#elif !defined(NO_ASM) // 32-bit GCC assumed
 void SSEVec3Transform(int i)
 {
   asm volatile(" shl               $4,      %0   \n"
@@ -474,7 +474,7 @@ void SSEVec3Transform(int i)
 float real255 = 255.0f;
 float real128 = 128.0f;
 
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
 __declspec( naked ) void  __fastcall SSEVec3TransformNormal()
 {
     __asm
@@ -550,7 +550,7 @@ l2:
         ret;
     }
 }
-#elif defined(__GNUC__)  // this code should compile for both 64-bit and 32-bit architectures
+#elif defined(__GNUC__) && !defined(NO_ASM)  // this code should compile for both 64-bit and 32-bit architectures
 void SSEVec3TransformNormal(void)
 {
   asm volatile(" movl              $0,  12(%0)    \n"
@@ -622,13 +622,15 @@ void NormalizeNormalVec()
 
 void InitRenderBase()
 {
-    if( !status.isSSEEnabled || g_curRomInfo.bPrimaryDepthHack || options.enableHackForGames == HACK_FOR_NASCAR)
-    {
-        ProcessVertexData = ProcessVertexDataNoSSE;
-    }
-    else
+#if !defined(NO_ASM)
+    if( status.isSSEEnabled && !g_curRomInfo.bPrimaryDepthHack && options.enableHackForGames != HACK_FOR_NASCAR)
     {
         ProcessVertexData = ProcessVertexDataSSE;
+    }
+    else
+#endif
+    {
+        ProcessVertexData = ProcessVertexDataNoSSE;
     }
 
     gRSPfFogMin = gRSPfFogMax = 0.0f;
@@ -1106,7 +1108,7 @@ float zero = 0.0f;
 float onef = 1.0f;
 float fcosT;
 
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
 __declspec( naked ) uint32  __fastcall SSELightVert()
 {
     __asm
@@ -1159,7 +1161,7 @@ breakout:
         ret;
     }
 }
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
 uint32 SSELightVert(void)
 {
   uint32 rval;
@@ -1208,7 +1210,7 @@ uint32 SSELightVert(void)
            );
   return rval;
 }
-#else // 32-bit GCC assumed
+#elif !defined(NO_ASM) // 32-bit GCC assumed
 uint32 SSELightVert(void)
 {
   uint32 rval;
@@ -1287,6 +1289,7 @@ inline void ReplaceAlphaWithFogFactor(int i)
 // Assumes dwAddr has already been checked! 
 // Don't inline - it's too big with the transform macros
 
+#if !defined(NO_ASM)
 void ProcessVertexDataSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
 {
     UpdateCombinedMatrix();
@@ -1394,6 +1397,7 @@ void ProcessVertexDataSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
     VTX_DUMP(TRACE2("Setting Vertexes: %d - %d\n", dwV0, dwV0+dwNum-1));
     DEBUGGER_PAUSE_AND_DUMP(NEXT_VERTEX_CMD,{TRACE0("Paused at Vertex Cmd");});
 }
+#endif
 
 void ProcessVertexDataNoSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
 {
@@ -1820,9 +1824,11 @@ void ProcessVertexDataDKR(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
             g_normal.z = (char)b; //norma.nz;
 
             Vec3TransformNormal(g_normal, matWorldProject)
+#if !defined(NO_ASM)
             if( status.isSSEEnabled )
                 g_dwVtxDifColor[i] = SSELightVert();
             else
+#endif
                 g_dwVtxDifColor[i] = LightVert(g_normal, i);
         }
         else
@@ -1865,9 +1871,11 @@ void ProcessVertexDataPD(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         g_vtxNonTransformed[i].y = (float)vert.y;
         g_vtxNonTransformed[i].z = (float)vert.z;
 
+#if !defined(NO_ASM)
         if( status.isSSEEnabled )
             SSEVec3Transform(i);
         else
+#endif
         {
             Vec3Transform(&g_vtxTransformed[i], (XVECTOR3*)&g_vtxNonTransformed[i], &gRSPworldProject); // Convert to w=1
             g_vecProjected[i].w = 1.0f / g_vtxTransformed[i].w;
@@ -1893,13 +1901,14 @@ void ProcessVertexDataPD(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
             g_normal.x = (char)r;
             g_normal.y = (char)g;
             g_normal.z = (char)b;
-
+#if !defined(NO_ASM)
             if( status.isSSEEnabled )
             {
                 SSEVec3TransformNormal();
                 g_dwVtxDifColor[i] = SSELightVert();
             }
             else
+#endif
             {
                 Vec3TransformNormal(g_normal, gRSPmodelViewTop);
                 g_dwVtxDifColor[i] = LightVert(g_normal, i);
@@ -1975,9 +1984,11 @@ void ProcessVertexDataConker(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         g_vtxNonTransformed[i].y = (float)vert.y;
         g_vtxNonTransformed[i].z = (float)vert.z;
 
+#if !defined(NO_ASM)
         if( status.isSSEEnabled )
             SSEVec3Transform(i);
         else
+#endif
         {
             Vec3Transform(&g_vtxTransformed[i], (XVECTOR3*)&g_vtxNonTransformed[i], &gRSPworldProject); // Convert to w=1
             g_vecProjected[i].w = 1.0f / g_vtxTransformed[i].w;
@@ -2119,9 +2130,11 @@ void ProcessVertexData_Rogue_Squadron(uint32 dwXYZAddr, uint32 dwColorAddr, uint
         g_vtxNonTransformed[i].y = (float)vertxyz.y;
         g_vtxNonTransformed[i].z = (float)vertxyz.z;
 
+#if !defined(NO_ASM)
         if( status.isSSEEnabled )
             SSEVec3Transform(i);
         else
+#endif
         {
             Vec3Transform(&g_vtxTransformed[i], (XVECTOR3*)&g_vtxNonTransformed[i], &gRSPworldProject); // Convert to w=1
             g_vecProjected[i].w = 1.0f / g_vtxTransformed[i].w;
@@ -2150,12 +2163,14 @@ void ProcessVertexData_Rogue_Squadron(uint32 dwXYZAddr, uint32 dwColorAddr, uint
             g_normal.y = (float)vertcolors.ny;
             g_normal.z = (float)vertcolors.nz;
 
+#if !defined(NO_ASM)
             if( status.isSSEEnabled )
             {
                 SSEVec3TransformNormal();
                 g_dwVtxDifColor[i] = SSELightVert();
             }
             else
+#endif
             {
                 Vec3TransformNormal(g_normal, gRSPmodelViewTop);
                 g_dwVtxDifColor[i] = LightVert(g_normal, i);
@@ -2363,12 +2378,12 @@ void UpdateCombinedMatrix()
         {
             gRSPworldProject = gRSPworldProject * reverseY;
         }
-
+#if !defined(NO_ASM)
         if( status.isSSEEnabled )
         {
             MatrixTranspose(&gRSPworldProjectTransported, &gRSPworldProject);
         }
-
+#endif
         gRSP.bCombinedMatrixIsUpdated = false;
     }
 

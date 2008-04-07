@@ -1784,7 +1784,7 @@ void go()
 #endif
       }
      }
-#if defined(__i386__) || defined(__x86_64__)
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
    else if (dynacore == 1)
      {
      dynacore = 1;
