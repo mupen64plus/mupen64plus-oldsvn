@@ -22,6 +22,7 @@
 #define MUPEN_KDE4_MAINWIDGET_H
 
 #include <QWidget>
+#include <QTimer>
 
 class QVBoxLayout;
 class QTreeView;
@@ -36,11 +37,17 @@ class MainWidget : public QWidget
 
     private slots:
         void resizeHeaderSections();
+        void lineEditTextChanged();
+        void filter();
+
+    signals:
+        void itemCountChanged(int count);
     
     private:
         QTreeView* m_treeView;
         KLineEdit* m_lineEdit;
         QSortFilterProxyModel* m_proxyModel;
+        QTimer m_timer;
 };
 
 #endif // MUPEN_KDE4_MAINWIDGET_H

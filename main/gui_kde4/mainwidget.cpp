@@ -55,14 +55,17 @@ MainWidget::MainWidget(QWidget* parent)
     m_treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
     m_treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     
+    m_timer.setSingleShot(true);
     
     connect(m_lineEdit, SIGNAL(textChanged(QString)),
-             m_proxyModel, SLOT(setFilterFixedString(QString)));
-    connect(RomModel::self(), SIGNAL(modelReset()),
+             this, SLOT(lineEditTextChanged()));
+    connect(&m_timer, SIGNAL(timeout()),
+             this, SLOT(filter()));
+    connect(m_proxyModel, SIGNAL(modelReset()),
              this, SLOT(resizeHeaderSections()));
-    connect(RomModel::self(), SIGNAL(dataChanged(QModelIndex, QModelIndex)),
+    connect(m_proxyModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
              this, SLOT(resizeHeaderSections()));
-    connect(RomModel::self(), SIGNAL(rowsInserted(QModelIndex, int, int)),
+    connect(m_proxyModel, SIGNAL(layoutChanged()),
              this, SLOT(resizeHeaderSections()));
 
     QLabel* filterLabel = new QLabel(i18n("Filter:"), this);
@@ -83,6 +86,20 @@ MainWidget::MainWidget(QWidget* parent)
 void MainWidget::resizeHeaderSections()
 {
     m_treeView->header()->resizeSections(QHeaderView::ResizeToContents);
+}
+
+void MainWidget::lineEditTextChanged()
+{
+    if (m_timer.isActive()) {
+        m_timer.stop();
+    }
+    m_timer.start(50);
+}
+
+void MainWidget::filter()
+{
+    m_proxyModel->setFilterFixedString(m_lineEdit->text());
+    emit itemCountChanged(m_proxyModel->rowCount());
 }
 
 #include "mainwidget.moc"

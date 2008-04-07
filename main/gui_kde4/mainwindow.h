@@ -49,6 +49,7 @@ class MainWindow : public KXmlGuiWindow
         void saveStateRestore();
         void saveStateLoad();
         void configDialogShow();
+        void updateItemCount(int count);
 
     private:
         void createActions();

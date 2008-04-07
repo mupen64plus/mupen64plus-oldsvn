@@ -46,6 +46,8 @@ namespace core {
     }
 }
 
+enum StatusBarFields { ItemCountField };
+
 MainWindow::MainWindow()
     : KXmlGuiWindow()
     , m_mainWidget(0)
@@ -55,6 +57,11 @@ MainWindow::MainWindow()
     setCentralWidget(m_mainWidget);
     createActions();
     setMinimumSize(640, 480); // hack, we should set proper size hints
+    statusBar()->insertPermanentItem("", ItemCountField);
+
+    connect(m_mainWidget, SIGNAL(itemCountChanged(int)),
+             this, SLOT(updateItemCount(int)));
+
     setupGUI();
 }
 
@@ -169,6 +176,11 @@ void MainWindow::configDialogShow()
              RomModel::self(), SLOT(settingsChanged()));
 
     dialog->show();
+}
+
+void MainWindow::updateItemCount(int count)
+{
+    statusBar()->changeItem(i18n("%0 roms").arg(count), ItemCountField);
 }
 
 void MainWindow::createActions()
