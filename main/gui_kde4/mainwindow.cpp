@@ -61,6 +61,8 @@ MainWindow::MainWindow()
 
     connect(m_mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(updateItemCount(int)));
+    connect(m_mainWidget, SIGNAL(romDoubleClicked(QString)),
+             this, SLOT(romOpen(QString)));
 
     setupGUI();
 }
@@ -107,6 +109,11 @@ void MainWindow::romOpen(const KUrl& url)
     }
 }
 
+void MainWindow::romOpen(const QString& filename)
+{
+    romOpen(KUrl(filename));
+}
+
 void MainWindow::romClose()
 {
     core::close_rom();
@@ -146,25 +153,29 @@ void MainWindow::configDialogShow()
     QWidget* mainSettingsWidget = new QWidget(dialog);
     Ui::MainSettings().setupUi(mainSettingsWidget);
     dialog->addPage(mainSettingsWidget, i18n("Main Settings"),
-                    "preferences-system");
+                     "preferences-system");
 
     QWidget* pluginsSettingsWidget = new QWidget(dialog);
     QSize labelIconSize(32, 32);
     Ui::PluginsSettings pluginsSettingsUi;
     pluginsSettingsUi.setupUi(pluginsSettingsWidget);
+    pluginsSettingsUi.kcfg_GraphicsPlugin->addItems(Plugins::graphicsPlugins());
     pluginsSettingsUi.graphicsPluginIconLabel->setPixmap(
         KIcon("applications-graphics").pixmap(labelIconSize)
     );
+    pluginsSettingsUi.kcfg_AudioPlugin->addItems(Plugins::audioPlugins());
     pluginsSettingsUi.audioPluginIconLabel->setPixmap(
         KIcon("audio-headset").pixmap(labelIconSize)
     );
+    pluginsSettingsUi.kcfg_InputPlugin->addItems(Plugins::inputPlugins());
     pluginsSettingsUi.inputPluginIconLabel->setPixmap(
         KIcon("input-gaming").pixmap(labelIconSize)
     );
+    pluginsSettingsUi.kcfg_RspPlugin->addItems(Plugins::rspPlugins());
     pluginsSettingsUi.rspPluginIconLabel->setPixmap(
         KIcon("cpu").pixmap(labelIconSize)
     );
-    dialog->addPage(pluginsSettingsWidget, i18n("Plugins"),
+    dialog->addPage(pluginsSettingsWidget, Plugins::config(), i18n("Plugins"),
                      "applications-engineering");
 
     QWidget* romBrowserSettingsWidget = new QWidget(dialog);

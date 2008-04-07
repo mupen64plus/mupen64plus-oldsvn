@@ -42,7 +42,7 @@ class RomModel : public QAbstractItemModel
     Q_OBJECT
     public:
         enum Columns { Flag = 0, GoodName, Country, Size, Comments, FileName };
-        enum Role { Sort = Qt::UserRole };
+        enum Role { Sort = Qt::UserRole, FullPath };
 
         RomModel(QObject* parent = 0);
         

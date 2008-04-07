@@ -21,15 +21,23 @@
 #ifndef MUPEN64_KDE4_PLUGINS_H
 #define MUPEN64_KDE4_PLUGINS_H
 
-#include <QString>
+#include <QStringList>
+class KConfigSkeleton;
 
-class Plugins
+namespace Plugins
 {
-    public:
-        static QString graphicsPluginName() { return "FOO"; }
-        static QString audioPluginName() { return "BAR"; }
-        static QString inputPluginName() { return "BAZ"; }
-        static QString rspPluginName() { return "BAX"; }
+    QStringList graphicsPlugins();
+    QStringList audioPlugins();
+    QStringList inputPlugins();
+    QStringList rspPlugins();
+
+    int graphicsPluginIndex();
+    int audioPluginIndex();
+    int inputPluginIndex();
+    int rspPluginIndex();
+    
+    KConfigSkeleton* config();
+    void init();
 };
 
 #endif // MUPEN64_KDE4_PLUGINS_H

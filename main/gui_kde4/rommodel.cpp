@@ -251,6 +251,8 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     }
                     break;
             }
+        } else if (role == FullPath) {
+            data = entry.fileName;
         }
     }
     return data;

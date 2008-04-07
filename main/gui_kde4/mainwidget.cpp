@@ -69,6 +69,8 @@ MainWidget::MainWidget(QWidget* parent)
              this, SLOT(resizeHeaderSections()));
     connect(m_proxyModel, SIGNAL(layoutChanged()),
              this, SLOT(resizeHeaderSections()));
+    connect(m_treeView, SIGNAL(doubleClicked(QModelIndex)),
+             this, SLOT(treeViewDoubleClick(QModelIndex)));
 
     QLabel* filterLabel = new QLabel(i18n("Filter:"), this);
     filterLabel->setBuddy(m_lineEdit);
@@ -103,6 +105,14 @@ void MainWidget::filter()
 {
     m_proxyModel->setFilterFixedString(m_lineEdit->text());
     emit itemCountChanged(m_proxyModel->rowCount());
+}
+
+void MainWidget::treeViewDoubleClick(const QModelIndex& index)
+{
+    QString filename = index.data(RomModel::FullPath).toString();
+    if (!filename.isEmpty()) {
+        emit romDoubleClicked(filename);
+    }
 }
 
 #include "mainwidget.moc"

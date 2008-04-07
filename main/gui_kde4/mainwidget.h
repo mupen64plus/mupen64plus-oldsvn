@@ -39,9 +39,11 @@ class MainWidget : public QWidget
         void resizeHeaderSections();
         void lineEditTextChanged();
         void filter();
+        void treeViewDoubleClick(const QModelIndex& index);
 
     signals:
         void itemCountChanged(int count);
+        void romDoubleClicked(const QString& filename);
     
     private:
         QTreeView* m_treeView;

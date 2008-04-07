@@ -39,6 +39,7 @@ class MainWindow : public KXmlGuiWindow
     private slots:
         void romOpen();
         void romOpen(const KUrl& url);
+        void romOpen(const QString& filename);
         void romClose();
         void emulationStart();
         void emulationPauseContinue();

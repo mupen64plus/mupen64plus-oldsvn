@@ -47,7 +47,7 @@ typedef int WPARAM;
 typedef int LPARAM;
 typedef void* LPVOID;
 
-#define __declspec(dllexport)
+#define __declspec(dllexport) __attribute__((visibility("default")))
 #define _cdecl
 #define __stdcall
 #define WINAPI

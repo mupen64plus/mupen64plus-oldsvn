@@ -33,6 +33,7 @@ extern "C" {
 
 #include "mainwindow.h"
 #include "globals.h"
+#include "plugins.h"
 
 static char buf[BUF_MAX];
 
@@ -81,6 +82,7 @@ void gui_build(void)
         get_iconpath("logo.png")
     ));
     application = new KApplication;
+    Plugins::init();
     mainWindow = new MainWindow;
 }
 
