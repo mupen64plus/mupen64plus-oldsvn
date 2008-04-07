@@ -260,7 +260,6 @@ void MainWindow::createActions()
     act = actionCollection()->addAction("emulation_pause_continue");
     act->setText(i18n("Pause"));
     act->setIcon(KIcon("media-playback-pause"));
-    act->setCheckable(true);
     connect(act, SIGNAL(triggered()), this, SLOT(emulationPauseContinue()));
     
     act = actionCollection()->addAction("emulation_stop");
