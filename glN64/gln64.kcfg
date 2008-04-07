@@ -24,7 +24,7 @@
     </group>
     <group name="Textures">
         <entry name="BitDepth" type="Int">
-            <default>2</default>
+            <default>1</default>
         </entry>
         <entry name="CacheSize" type="Int">
             <default>32</default>
