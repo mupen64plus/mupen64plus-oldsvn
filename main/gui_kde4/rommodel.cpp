@@ -60,12 +60,12 @@ RomModel::RomModel(QObject* parent)
     QPixmap pjapan((core::get_iconpath("japan.png")));
     QPixmap pspain((core::get_iconpath("spain.png")));
     QPixmap pusa((core::get_iconpath("usa.png")));
-    QPixmap pusajapan((core::get_iconpath("usajapan.png")));
+    QPixmap pjapanusa((core::get_iconpath("japanusa.png")));
     QPixmap pn64cart((core::get_iconpath("n64cart.xpm")));
     
     QPair<QString, QPixmap> demo(i18n("Demo"), pn64cart);
     QPair<QString, QPixmap> beta(i18n("Beta"), pn64cart);
-    QPair<QString, QPixmap> usajapan(i18n("USA/Japan"), pusajapan);
+    QPair<QString, QPixmap> japanusa(i18n("Japan/USA"), pjapanusa);
     QPair<QString, QPixmap> usa(i18n("USA"), pusa);
     QPair<QString, QPixmap> germany(i18n("Germany"), pgermany);
     QPair<QString, QPixmap> france(i18n("France"), pfrance);
@@ -78,7 +78,7 @@ RomModel::RomModel(QObject* parent)
     
     m_countryInfo[0] = demo;
     m_countryInfo['7'] = beta;
-    m_countryInfo[0x41] = usajapan;
+    m_countryInfo[0x41] = japanusa;
     m_countryInfo[0x44] = germany;
     m_countryInfo[0x45] = usa;
     m_countryInfo[0x46] = france;
