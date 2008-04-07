@@ -181,15 +181,15 @@ create_romPropDialog( void )
     gtk_container_add( GTK_CONTAINER(frame), g_RomPropDialog.commentsEntry );
 
     // ok/cancel button
-    button_ok = gtk_button_new_with_label( tr("Ok") );
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), button_ok, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button_ok), "clicked",
-                GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
-
-    button_cancel = gtk_button_new_with_label( tr("Cancel") );
+    button_cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), button_cancel, TRUE, TRUE, 0 );
     gtk_signal_connect( GTK_OBJECT(button_cancel), "clicked",
                 GTK_SIGNAL_FUNC(callback_cancelClicked), (gpointer)NULL );
+
+    button_ok = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), button_ok, TRUE, TRUE, 0 );
+    gtk_signal_connect( GTK_OBJECT(button_ok), "clicked",
+                GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
 
     return 0;
 }

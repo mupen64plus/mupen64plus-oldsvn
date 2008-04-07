@@ -80,7 +80,7 @@ create_aboutDialog( void )
     mupenImage = gtk_image_new_from_file( get_iconpath("logo.png") );
     gtk_box_pack_start( GTK_BOX(hbox), mupenImage, FALSE, FALSE, 0 );
 
-    button = gtk_button_new_with_label( tr("Ok") );
+    button = gtk_button_new_from_stock(GTK_STOCK_OK);
     gtk_box_pack_start( GTK_BOX(GTK_BOX(GTK_DIALOG(g_AboutDialog.dialog)->action_area)), button, TRUE, TRUE, 0 );
     gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
 

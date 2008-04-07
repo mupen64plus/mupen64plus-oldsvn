@@ -233,9 +233,9 @@ int confirm_message(const char *fmt, ...)
     char buf[2049];
     gint response;
     GtkWidget *dialog = NULL,
-          *hbox = NULL,
-          *label = NULL,
-          *icon = NULL;
+              *hbox = NULL,
+              *label = NULL,
+              *icon = NULL;
     pthread_t self = pthread_self();
 
     va_start(ap, fmt);
@@ -247,12 +247,10 @@ int confirm_message(const char *fmt, ...)
     {
         dialog = gtk_dialog_new_with_buttons(tr("Confirm"),
                                              GTK_WINDOW(g_MainWindow.window),
-                             GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                             tr("Yes"),
-                             GTK_RESPONSE_ACCEPT,
-                             tr("No"),
-                             GTK_RESPONSE_REJECT,
-                             NULL);
+                                             GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                             GTK_STOCK_YES, GTK_RESPONSE_ACCEPT,
+                                             GTK_STOCK_NO, GTK_RESPONSE_REJECT,
+                                             NULL);
         
         hbox = gtk_hbox_new(FALSE, 5);
         
@@ -338,12 +336,12 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
     }
 
     /* get rom file from user */
-    file_chooser = gtk_file_chooser_dialog_new( tr("Open Rom..."),
-                                                GTK_WINDOW(g_MainWindow.window),
-                            GTK_FILE_CHOOSER_ACTION_OPEN,
-                                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                                    NULL);
+    file_chooser = gtk_file_chooser_dialog_new(tr("Open Rom..."),
+                                               GTK_WINDOW(g_MainWindow.window),
+                                               GTK_FILE_CHOOSER_ACTION_OPEN,
+                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                               GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                                               NULL);
 
     // add filter for rom file types
     file_filter = gtk_file_filter_new();

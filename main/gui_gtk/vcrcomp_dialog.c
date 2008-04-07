@@ -228,15 +228,15 @@ create_changeDialogs()
     m_IntegerDialog.entry = gtk_entry_new();
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_IntegerDialog.dialog)->vbox), m_IntegerDialog.entry, TRUE, TRUE, 0 );
 
-    button = gtk_button_new_with_label( tr("Ok") );
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_IntegerDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked",
-                GTK_SIGNAL_FUNC(callback_integerChangeOkClicked), (gpointer)NULL );
-
-    button = gtk_button_new_with_label( tr("Cancel") );
+    button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_IntegerDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
     gtk_signal_connect_object( GTK_OBJECT(button), "clicked",
                     GTK_SIGNAL_FUNC(gtk_widget_hide), GTK_OBJECT(m_IntegerDialog.dialog) );
+
+    button = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_IntegerDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
+    gtk_signal_connect( GTK_OBJECT(button), "clicked",
+                GTK_SIGNAL_FUNC(callback_integerChangeOkClicked), (gpointer)NULL );
 
 
     // string dialog
@@ -251,15 +251,15 @@ create_changeDialogs()
     m_StringDialog.entry = gtk_entry_new();
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_StringDialog.dialog)->vbox), m_StringDialog.entry, TRUE, TRUE, 0 );
 
-    button = gtk_button_new_with_label( tr("Ok") );
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_StringDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked",
-                GTK_SIGNAL_FUNC(callback_stringChangeOkClicked), (gpointer)NULL );
-
-    button = gtk_button_new_with_label( tr("Cancel") );
+    button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_StringDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
     gtk_signal_connect_object( GTK_OBJECT(button), "clicked",
                     GTK_SIGNAL_FUNC(gtk_widget_hide), GTK_OBJECT(m_StringDialog.dialog) );
+
+    button = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_StringDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
+    gtk_signal_connect( GTK_OBJECT(button), "clicked",
+                GTK_SIGNAL_FUNC(callback_stringChangeOkClicked), (gpointer)NULL );
 
 
     // select dialog
@@ -275,15 +275,15 @@ create_changeDialogs()
     gtk_combo_set_value_in_list( GTK_COMBO(m_SelectDialog.combo), TRUE, FALSE );
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_SelectDialog.dialog)->vbox), m_SelectDialog.combo, TRUE, TRUE, 0 );
 
-    button = gtk_button_new_with_label( tr("Ok") );
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_SelectDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked",
-                GTK_SIGNAL_FUNC(callback_selectChangeOkClicked), (gpointer)NULL );
-
-    button = gtk_button_new_with_label( tr("Cancel") );
+    button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_SelectDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
     gtk_signal_connect_object( GTK_OBJECT(button), "clicked",
                     GTK_SIGNAL_FUNC(gtk_widget_hide), GTK_OBJECT(m_SelectDialog.dialog) );
+
+    button = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(m_SelectDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
+    gtk_signal_connect( GTK_OBJECT(button), "clicked",
+                GTK_SIGNAL_FUNC(callback_selectChangeOkClicked), (gpointer)NULL );
 }
 
 
@@ -548,15 +548,15 @@ create_vcrCompDialog( void )
                 GTK_SIGNAL_FUNC(delete_question_event), (gpointer)NULL );
 
     // create ok/cancel button
-    button = gtk_button_new_with_label( tr("Ok") );
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_VcrCompDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked",
-                GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
-
-    button = gtk_button_new_with_label( tr("Cancel") );
+    button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_VcrCompDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
     gtk_signal_connect( GTK_OBJECT(button), "clicked",
                 GTK_SIGNAL_FUNC(callback_cancelClicked), (gpointer)NULL );
+
+    button = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_VcrCompDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
+    gtk_signal_connect( GTK_OBJECT(button), "clicked",
+                GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
 
     // create notebook
     g_VcrCompDialog.notebook = gtk_notebook_new();

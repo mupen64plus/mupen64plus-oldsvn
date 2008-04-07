@@ -311,19 +311,19 @@ GtkWidget *create_dir_browser(gchar * title, gchar * current_path, GtkSelectionM
     gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
     gtk_button_box_set_spacing(GTK_BUTTON_BOX(bbox), 5);
 
-    ok = gtk_button_new_with_label(tr("Ok"));
+    cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+    GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
+    gtk_box_pack_start(GTK_BOX(bbox), cancel, TRUE, TRUE, 0);
+    gtk_signal_connect_object(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), GTK_OBJECT(window));
+    gtk_widget_show(cancel);
+
+    ok = gtk_button_new_from_stock(GTK_STOCK_OK);
     gtk_object_set_user_data(GTK_OBJECT(ok), window);
     GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
     gtk_window_set_default(GTK_WINDOW(window), ok);
     gtk_box_pack_start(GTK_BOX(bbox), ok, TRUE, TRUE, 0);
     gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(ok_clicked), tree);
     gtk_widget_show(ok);
-
-    cancel = gtk_button_new_with_label(tr("Cancel"));
-    GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
-    gtk_box_pack_start(GTK_BOX(bbox), cancel, TRUE, TRUE, 0);
-    gtk_signal_connect_object(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), GTK_OBJECT(window));
-    gtk_widget_show(cancel);
 
     gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 0);
     gtk_widget_show(bbox);

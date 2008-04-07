@@ -39,13 +39,13 @@ Email                : blight@Ashitaka
 
 /** globals **/
 SConfigDialog g_ConfigDialog;
-static int g_RefreshRomBrowser; // refresh the rombrowser when ok is clicked?
-                                // (true if rom directories were changed)
+static int g_RefreshRomBrowser;     // refresh the rombrowser when ok is clicked?
+                                    // (true if rom directories were changed)
 
 struct input_mapping {
-    char *name;         // human-readable name of emulation special function
-    char *key_mapping;      // keyboard mapping of function
-    char *joy_config_name;      // name of joystick mapping in config file
+    char *name;                     // human-readable name of emulation special function
+    char *key_mapping;              // keyboard mapping of function
+    char *joy_config_name;          // name of joystick mapping in config file
     GtkWidget *joy_mapping_textbox; // textbox displaying string representation of joystick mapping
 };
 
@@ -746,18 +746,16 @@ static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct inp
 
     // pop up dialog window telling user what to do
     dialog = gtk_dialog_new_with_buttons(tr("Map Special Function"),
-                                     GTK_WINDOW(g_ConfigDialog.dialog),
-                         GTK_DIALOG_MODAL,
-                         GTK_STOCK_CANCEL,
-                         GTK_RESPONSE_NONE,
-                         GTK_STOCK_DELETE,
-                         GTK_RESPONSE_NO, // response ID for delete
-                         NULL);
+                                         GTK_WINDOW(g_ConfigDialog.dialog),
+                                         GTK_DIALOG_MODAL,
+                                         GTK_STOCK_CANCEL, GTK_RESPONSE_NONE,
+                                         GTK_STOCK_DELETE, GTK_RESPONSE_NO,
+                                         NULL);
     gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
     g_signal_connect(dialog,
                      "response",
-             G_CALLBACK(callback_cancelSetInput),
-             widget);
+                     G_CALLBACK(callback_cancelSetInput),
+                     widget);
 
     snprintf(buf, 512, tr("Press a controller button for:\n\"%s\""), mapping->name);
     label = gtk_label_new(buf);
@@ -896,17 +894,17 @@ int create_configDialog( void )
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->vbox), g_ConfigDialog.notebook, TRUE, TRUE, 0 );
 
     // Create OK/Cancel button
-    button = gtk_button_new_with_label( tr("Ok") );
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
-
-    button = gtk_button_new_with_label( tr("Cancel") );
+    button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
     gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_cancelClicked), (gpointer)NULL );
 
+    button = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
+    gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
+
     // Create Mupen64 configuration page
     {
-        label = gtk_label_new( "Mupen64Plus Configuration" );
+        label = gtk_label_new( tr("General") );
         g_ConfigDialog.configMupen = gtk_vbox_new( FALSE, 6 );
         gtk_container_set_border_width( GTK_CONTAINER(g_ConfigDialog.configMupen), 10 );
         gtk_notebook_append_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configMupen, label );
@@ -1216,11 +1214,11 @@ int create_configDialog( void )
         gtk_box_pack_start( GTK_BOX(hbox1), vbox, FALSE, FALSE, 0 );
     
         // Create the buttons and add it to the buttonbox.
-        button = gtk_button_new_with_label( tr("Add") );
+        button = gtk_button_new_from_stock(GTK_STOCK_ADD);
         gtk_box_pack_start( GTK_BOX(vbox), button, FALSE, FALSE, 0 );
         gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_romDirectoryAdd), (gpointer) NULL );
     
-        button = gtk_button_new_with_label( tr("Remove") );
+        button = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
         gtk_box_pack_start( GTK_BOX(vbox), button, FALSE, FALSE, 0 );
         gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_romDirectoryRemove), (gpointer) NULL );
     
