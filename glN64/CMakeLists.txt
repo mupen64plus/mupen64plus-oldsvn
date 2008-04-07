@@ -3,7 +3,6 @@ project(glN64)
 set(GLN64_VIDEO_SRCS
     2xSAI.cpp
     Combiner.cpp
-    Config_linux.cpp
     CRC.cpp
     DepthBuffer.cpp
     F3D.cpp
@@ -33,6 +32,18 @@ set(GLN64_VIDEO_SRCS
     VI.cpp
 )
 
+if(GTK2GUI)
+    set(GLN64_VIDEO_SRCS ${GLN64_VIDEO_SRCS} Config_gtk2.cpp)
+    include_directories(${GTHREAD2_INCLUDE_DIRS})
+    set(GLN64_VIDEO_LIBS ${GTHREAD2_LIBRARIES} ${GTK2_LIBRARIES} ${PNG_LIBRARY})
+endif(GTK2GUI)
+if(KDE4GUI)
+    set(GLN64_VIDEO_SRCS ${GLN64_VIDEO_SRCS} Config_kde4.cpp)
+    set(GLN64_VIDEO_LIBS ${KDE4_KDEUI_LIBS} ${PNG_LIBRARY})
+    kde4_add_kcfg_files(GLN64_VIDEO_SRCS gln64settings.kcfgc)
+    kde4_add_ui_files(GLN64_VIDEO_SRCS gln64config.ui)
+endif(KDE4GUI)
+
 set_source_files_properties(glN64.cpp PROPERTIES COMPILE_FLAGS -DMAINDEF)
 
 # TODO: enable ASM as needed
@@ -43,17 +54,14 @@ endif(UNIX)
 
 include_directories(
     ${SDL_INCLUDE_DIR}
-    ${GTK2_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
-    ${GTHREAD2_INCLUDE_DIRS}
 )
 
 add_library(gln64_video MODULE ${GLN64_VIDEO_SRCS})
 set_target_properties(gln64_video PROPERTIES PREFIX "") # make sure we get no lib prefix
 target_link_libraries(gln64_video
     ${SDL_LIBRARY}
-    ${GTK2_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${GTHREAD2_LIBRARIES}
+    ${GLN64_VIDEO_LIBS}
 )
 install(TARGETS gln64_video DESTINATION ${PLUGIN_INSTALL_DIR})
