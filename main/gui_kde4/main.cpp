@@ -30,6 +30,7 @@ extern "C" {
 
 #include <cstdio>
 #include <cstdarg>
+#include <pthread.h>
 
 #include "mainwindow.h"
 #include "globals.h"
@@ -90,30 +91,42 @@ void gui_display(void)
 {
     mainWindow->show();
     KApplication::instance()->processEvents();
+    KApplication::instance()->sendPostedEvents();
 }
 
 // Give control of thread to the gui
 void gui_main_loop(void)
 {
-    application->exec();
+    pthread_t self = pthread_self();
+    if (!pthread_equal(self, g_EmulationThread)) {
+        application->exec();
+    }
     KGlobal::config()->sync(); // Make sure we sync settings to disk on exit
 }
 
 // prints informational message to user
 void info_message(const char *fmt, ...)
 {
+    pthread_t self = pthread_self();
     PRINT_TO_BUFFER(fmt);
-    mainWindow->showInfoMessage(buf);
-    KApplication::instance()->processEvents();
+    if (!pthread_equal(self, g_EmulationThread)) {
+        mainWindow->showInfoMessage(buf);
+    } else {
+        puts(buf);
+    }
 }
 
 // prints alert message to user (used for error messages that don't require
 // feedback from user)
 void alert_message(const char *fmt, ...)
 {
+    pthread_t self = pthread_self();
     PRINT_TO_BUFFER(fmt);
-    mainWindow->showAlertMessage(buf);
-    KApplication::instance()->processEvents();
+    if (!pthread_equal(self, g_EmulationThread)) {
+        mainWindow->showAlertMessage(buf);
+    } else {
+        puts(buf);
+    }
 }
 
 // prints message to user that requires confirmation (yes/no)
@@ -122,6 +135,21 @@ void alert_message(const char *fmt, ...)
 //    1 - indicates user selected yes
 int confirm_message(const char *fmt, ...)
 {
+    pthread_t self = pthread_self();
     PRINT_TO_BUFFER(fmt);
-    return mainWindow->confirmMessage(buf);
+    if (!pthread_equal(self, g_EmulationThread)) {
+        return mainWindow->confirmMessage(buf);
+    } else {
+        puts(buf);
+        int c;
+        while (true) {
+            printf(" y/n: ");
+            c = getchar();
+            if (c == 'y') {
+                return 1;
+            } else if (c == 'n') {
+                return 0;
+            }
+        }
+    }
 }
