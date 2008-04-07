@@ -67,7 +67,7 @@ void Config_DoConfig()
     KConfigDialog* dialog = new KConfigDialog(0, "glN64 settings",
                                               glN64Settings::self());
     dialog->setFaceType(KPageDialog::Plain);
-    dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+    dialog->setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Default);
 
     QWidget* settingsWidget = new QWidget(dialog);
     Ui::glN64ConfigWidget().setupUi(settingsWidget);
