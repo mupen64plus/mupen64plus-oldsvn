@@ -28,6 +28,7 @@
 #include <KMessageBox>
 #include <KRecentFilesAction>
 #include <KConfigDialog>
+#include <KDebug>
 
 #include "mainwindow.h"
 #include "mainwidget.h"
@@ -101,11 +102,12 @@ void MainWindow::romOpen()
 
 void MainWindow::romOpen(const KUrl& url)
 {
+    QString path = url.path();
     if (url.isLocalFile()) {
         m_actionRecentFiles->addUrl(url);
         m_actionRecentFiles->saveEntries(KGlobal::config()->group("Recent Roms"));
         KGlobal::config()->sync();
-        core::open_rom(url.path().toLocal8Bit());
+        core::open_rom(path.toLocal8Bit());
         core::startEmulation();
     }
 }
