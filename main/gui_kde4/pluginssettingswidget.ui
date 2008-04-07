@@ -43,21 +43,21 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" >
         <item>
-         <widget class="QPushButton" name="pushButton" >
+         <widget class="QPushButton" name="configureGraphicsPluginButton" >
           <property name="text" >
            <string>Configure</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2" >
+         <widget class="QPushButton" name="testGraphicsPluginButton" >
           <property name="text" >
            <string>Test</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3" >
+         <widget class="QPushButton" name="aboutGraphicsPluginButton" >
           <property name="text" >
            <string>About</string>
           </property>
@@ -98,21 +98,21 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4" >
         <item>
-         <widget class="QPushButton" name="pushButton_4" >
+         <widget class="QPushButton" name="configureAudioPluginButton" >
           <property name="text" >
            <string>Configure</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_5" >
+         <widget class="QPushButton" name="testAudioPluginButton" >
           <property name="text" >
            <string>Test</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_6" >
+         <widget class="QPushButton" name="aboutAudioPluginButton" >
           <property name="text" >
            <string>About</string>
           </property>
@@ -153,21 +153,21 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6" >
         <item>
-         <widget class="QPushButton" name="pushButton_7" >
+         <widget class="QPushButton" name="configureInputPluginButton" >
           <property name="text" >
            <string>Configure</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_8" >
+         <widget class="QPushButton" name="testInputPluginButton" >
           <property name="text" >
            <string>Test</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_9" >
+         <widget class="QPushButton" name="aboutInputPluginButton" >
           <property name="text" >
            <string>About</string>
           </property>
@@ -208,21 +208,21 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_8" >
         <item>
-         <widget class="QPushButton" name="pushButton_10" >
+         <widget class="QPushButton" name="configureRspPluginButton" >
           <property name="text" >
            <string>Configure</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_11" >
+         <widget class="QPushButton" name="testRspPluginButton" >
           <property name="text" >
            <string>Test</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_12" >
+         <widget class="QPushButton" name="aboutRspPluginButton" >
           <property name="text" >
            <string>About</string>
           </property>

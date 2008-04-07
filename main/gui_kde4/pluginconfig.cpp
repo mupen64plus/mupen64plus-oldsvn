@@ -18,31 +18,9 @@
 *
 */
 
-#include <KGlobal>
-#include <QList>
-#include <KConfigSkeleton>
-#include <KDebug>
+#include "pluginconfig.h"
 
-#include "plugins.h"
-
-namespace core {
-    extern "C" {
-        #include "../plugin.h"
-        #include "../main.h"
-        #include "../config.h"
-    }
-}
-
-QStringList PluginList::names() const
-{
-    QStringList result;
-    foreach(core::plugin* p, *this) {
-        result << p->plugin_name;
-    }
-    return result;       
-}
-
-Plugins::Plugins() : KConfigSkeleton()
+PluginConfig::PluginConfig()
 {
     core::list_node_t* node = 0;
     list_foreach(core::g_PluginList, node) {
@@ -73,99 +51,7 @@ Plugins::Plugins() : KConfigSkeleton()
     writeConfig();
 }
 
-K_GLOBAL_STATIC(Plugins, instance);
-Plugins* Plugins::self()
-{
-    return instance;
-}
-
-QStringList Plugins::plugins(PluginType type)
-{
-    QStringList result;
-    
-    switch(type) {
-        case Graphics:
-            result = graphicsPlugins.names();
-            break;
-        case Audio:
-            result = audioPlugins.names();
-            break;
-        case Input:
-            result = inputPlugins.names();
-            break;
-        case Rsp:
-            result = rspPlugins.names();
-            break;
-    }
-    
-    return result;
-}
-
-// COMMENCE SUCKAGE
-
-void Plugins::aboutGraphicsPlugin()
-{
-    core::plugin_exec_about(graphicsPlugins[graphicsPluginIndex]->plugin_name);
-}
-
-void Plugins::configureGraphicsPlugin()
-{
-    core::plugin_exec_config(graphicsPlugins[graphicsPluginIndex]->plugin_name);
-}
-
-void Plugins::testGraphicsPlugin()
-{
-    core::plugin_exec_test(graphicsPlugins[graphicsPluginIndex]->plugin_name);
-}
-
-void Plugins::aboutAudioPlugin()
-{
-    core::plugin_exec_about(audioPlugins[audioPluginIndex]->plugin_name);
-}
-
-void Plugins::configureAudioPlugin()
-{
-    core::plugin_exec_config(audioPlugins[audioPluginIndex]->plugin_name);
-}
-
-void Plugins::testAudioPlugin()
-{
-    core::plugin_exec_test(audioPlugins[audioPluginIndex]->plugin_name);
-}
-
-void Plugins::aboutInputPlugin()
-{
-    core::plugin_exec_about(inputPlugins[inputPluginIndex]->plugin_name);
-}
-
-void Plugins::configureInputPlugin()
-{
-    core::plugin_exec_config(inputPlugins[inputPluginIndex]->plugin_name);
-}
-
-void Plugins::testInputPlugin()
-{
-    core::plugin_exec_test(inputPlugins[inputPluginIndex]->plugin_name);
-}
-
-void Plugins::aboutRspPlugin()
-{
-    core::plugin_exec_about(rspPlugins[rspPluginIndex]->plugin_name);
-}
-
-void Plugins::configureRspPlugin()
-{
-    core::plugin_exec_config(rspPlugins[rspPluginIndex]->plugin_name);
-}
-
-void Plugins::testRspPlugin()
-{
-    core::plugin_exec_test(rspPlugins[rspPluginIndex]->plugin_name);
-}
-
-// END SUCKAGE (mostly)
-
-int Plugins::pluginIndex(char* mupenName, char* mupenConfigString,
+int PluginConfig::pluginIndex(char* mupenName, char* mupenConfigString,
                     PluginList plugins)
 {
     QString name;
@@ -187,7 +73,7 @@ int Plugins::pluginIndex(char* mupenName, char* mupenConfigString,
     return index;
 }
 
-void Plugins::writePlugin(char* mupenConfigString, char* filename,
+void PluginConfig::writePlugin(char* mupenConfigString, char* filename,
                     char* mupenName)
 {
     if (!mupenName) {
@@ -195,7 +81,7 @@ void Plugins::writePlugin(char* mupenConfigString, char* filename,
     }
 }
 
-void Plugins::usrReadConfig()
+void PluginConfig::usrReadConfig()
 {
     graphicsPluginIndex = pluginIndex(core::g_GfxPlugin, "Gfx Plugin",
                                         graphicsPlugins);
@@ -207,7 +93,7 @@ void Plugins::usrReadConfig()
                                     rspPlugins);
 }
 
-void Plugins::usrWriteConfig()
+void PluginConfig::usrWriteConfig()
 {
     writePlugin("Gfx Plugin",
                     graphicsPlugins[graphicsPluginIndex]->file_name,
@@ -224,4 +110,4 @@ void Plugins::usrWriteConfig()
     core::config_write();
 }
 
-#include "plugins.moc"
+#include "pluginconfig.moc"

@@ -151,42 +151,80 @@ void MainWindow::configDialogShow()
     KConfigDialog* dialog = new KConfigDialog(this, "settings",
                                               Settings::self());
 
+    // Main settings
     QWidget* mainSettingsWidget = new QWidget(dialog);
     Ui::MainSettings().setupUi(mainSettingsWidget);
     dialog->addPage(mainSettingsWidget, i18n("Main Settings"),
                      "preferences-system");
 
+    // Plugin Settings
     QWidget* pluginsSettingsWidget = new QWidget(dialog);
+    Plugins* plugins = Plugins::self();
     QSize labelIconSize(32, 32);
     Ui::PluginsSettings pluginsSettingsUi;
+
     pluginsSettingsUi.setupUi(pluginsSettingsWidget);
+
+    // gfx plugin
     pluginsSettingsUi.kcfg_GraphicsPlugin->addItems(
-        Plugins::plugins(Plugins::Graphics)
+        plugins->plugins(Plugins::Graphics)
     );
     pluginsSettingsUi.graphicsPluginIconLabel->setPixmap(
         KIcon("applications-graphics").pixmap(labelIconSize)
     );
+    connect(pluginsSettingsUi.aboutGraphicsPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(aboutGraphicsPlugin()));
+    connect(pluginsSettingsUi.configureGraphicsPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(configureGraphicsPlugin()));
+    connect(pluginsSettingsUi.testGraphicsPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(testGraphicsPlugin()));
+
+    // audio plugin
     pluginsSettingsUi.kcfg_AudioPlugin->addItems(
-        Plugins::plugins(Plugins::Audio)
+        plugins->plugins(Plugins::Audio)
     );
     pluginsSettingsUi.audioPluginIconLabel->setPixmap(
         KIcon("audio-headset").pixmap(labelIconSize)
     );
+    connect(pluginsSettingsUi.aboutAudioPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(aboutAudioPlugin()));
+    connect(pluginsSettingsUi.configureAudioPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(configureAudioPlugin()));
+    connect(pluginsSettingsUi.testAudioPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(testAudioPlugin()));
+
+    // input plugin
     pluginsSettingsUi.kcfg_InputPlugin->addItems(
-        Plugins::plugins(Plugins::Input)
+        plugins->plugins(Plugins::Input)
     );
     pluginsSettingsUi.inputPluginIconLabel->setPixmap(
         KIcon("input-gaming").pixmap(labelIconSize)
     );
+    connect(pluginsSettingsUi.aboutInputPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(aboutInputPlugin()));
+    connect(pluginsSettingsUi.configureInputPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(configureInputPlugin()));
+    connect(pluginsSettingsUi.testInputPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(testInputPlugin()));
+
+    // rsp plugin
     pluginsSettingsUi.kcfg_RspPlugin->addItems(
-        Plugins::plugins(Plugins::Rsp)
+        plugins->plugins(Plugins::Rsp)
     );
     pluginsSettingsUi.rspPluginIconLabel->setPixmap(
         KIcon("cpu").pixmap(labelIconSize)
     );
-    dialog->addPage(pluginsSettingsWidget, Plugins::config(), i18n("Plugins"),
+    connect(pluginsSettingsUi.aboutRspPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(aboutRspPlugin()));
+    connect(pluginsSettingsUi.configureRspPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(configureRspPlugin()));
+    connect(pluginsSettingsUi.testRspPluginButton, SIGNAL(clicked()),
+             plugins, SLOT(testRspPlugin()));
+
+    dialog->addPage(pluginsSettingsWidget, plugins, i18n("Plugins"),
                      "applications-engineering");
 
+    // Rom browser settings
     QWidget* romBrowserSettingsWidget = new QWidget(dialog);
     Ui::RomBrowserSettings().setupUi(romBrowserSettingsWidget);
     dialog->addPage(romBrowserSettingsWidget, i18n("Rom Browser"),

@@ -22,14 +22,66 @@
 #define MUPEN64_KDE4_PLUGINS_H
 
 #include <QStringList>
-class KConfigSkeleton;
+#include <KConfigSkeleton>
 
-namespace Plugins
+namespace core {
+    struct _plugin;
+    typedef _plugin plugin;
+}
+
+class PluginList : public QList<core::plugin*>
 {
-    enum PluginType { Graphics, Audio, Input, Rsp };
-    
-    QStringList plugins(PluginType);
-    KConfigSkeleton* config();
+    public:
+        QStringList names() const;
+};
+
+class Plugins : public KConfigSkeleton
+{
+    Q_OBJECT
+    public:
+        Plugins();
+        static Plugins* self();
+
+        enum PluginType { Graphics, Audio, Input, Rsp };
+        QStringList plugins(PluginType);
+
+    // this sucks!
+    public slots:
+        void aboutGraphicsPlugin();
+        void configureGraphicsPlugin();
+        void testGraphicsPlugin();
+
+        void aboutInputPlugin();
+        void configureInputPlugin();
+        void testInputPlugin();
+
+        void aboutAudioPlugin();
+        void configureAudioPlugin();
+        void testAudioPlugin();
+
+        void aboutRspPlugin();
+        void configureRspPlugin();
+        void testRspPlugin();
+
+    protected:
+        virtual void usrReadConfig();
+        virtual void usrWriteConfig();
+
+    private:
+        int pluginIndex(char* mupenName, char* mupenConfigString,
+                         PluginList plugins);
+        void writePlugin(char* mupenConfigString, char* filename,
+                          char* mupenName);
+
+        int graphicsPluginIndex;
+        int audioPluginIndex;
+        int inputPluginIndex;
+        int rspPluginIndex;
+        
+        PluginList graphicsPlugins;
+        PluginList audioPlugins;
+        PluginList inputPlugins;
+        PluginList rspPlugins;
 };
 
 #endif // MUPEN64_KDE4_PLUGINS_H
