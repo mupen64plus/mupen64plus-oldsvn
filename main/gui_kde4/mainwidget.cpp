@@ -81,6 +81,7 @@ MainWidget::MainWidget(QWidget* parent)
     setLayout(layout);
     
     m_lineEdit->setFocus();
+    QTimer::singleShot(0, this, SLOT(filter())); // so we emit the base item count
 }
 
 void MainWidget::resizeHeaderSections()
