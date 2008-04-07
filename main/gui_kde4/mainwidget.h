@@ -44,6 +44,9 @@ class MainWidget : public QWidget
     signals:
         void itemCountChanged(int count);
         void romActivated(const KUrl& filename);
+
+    protected:
+        virtual bool eventFilter(QObject* obj, QEvent* event);
     
     private:
         QTreeView* m_treeView;

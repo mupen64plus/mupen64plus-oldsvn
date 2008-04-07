@@ -23,6 +23,9 @@
 #include <QSortFilterProxyModel>
 #include <QLabel>
 #include <QHeaderView>
+#include <QKeyEvent>
+#include <QApplication>
+#include <Qt>
 
 #include <KLineEdit>
 #include <KLocale>
@@ -42,6 +45,7 @@ MainWidget::MainWidget(QWidget* parent)
     m_proxyModel = new QSortFilterProxyModel(this);
     
     m_lineEdit->setClearButtonShown(true);
+    m_lineEdit->installEventFilter(this);
     
     m_proxyModel->setSourceModel(RomModel::self());
     m_proxyModel->setFilterKeyColumn(-1); // search all columns
@@ -55,6 +59,7 @@ MainWidget::MainWidget(QWidget* parent)
     m_treeView->setModel(m_proxyModel);
     m_treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
     m_treeView->header()->resizeSections(QHeaderView::ResizeToContents);
+    m_treeView->setFocusProxy(m_lineEdit);
     
     m_timer.setSingleShot(true);
     
@@ -114,6 +119,28 @@ void MainWidget::treeViewActivated(const QModelIndex& index)
     if (!filename.isEmpty()) {
         emit romActivated(filename);
     }
+}
+
+bool MainWidget::eventFilter(QObject* obj, QEvent* event)
+{
+    bool filtered = false;
+
+    if (obj == m_lineEdit) {
+        if (event->type() == QEvent::KeyPress) {
+            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            switch(keyEvent->key()) {
+                case Qt::Key_Enter:
+                case Qt::Key_Return:
+                case Qt::Key_Up:
+                case Qt::Key_Down:
+                    QApplication::sendEvent(m_treeView, keyEvent);
+                    filtered = true;
+                    break;
+            }
+        }
+    }
+
+    return filtered;
 }
 
 #include "mainwidget.moc"
