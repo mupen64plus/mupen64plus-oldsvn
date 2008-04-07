@@ -29,11 +29,13 @@ if(KDE4GUI)
     # KDE is a lot stricter about C standards compliance than mupen so reset
     # the cflags
     set(CMAKE_C_FLAGS "")
+    add_definitions(-DKDE4)
 else(KDE4GUI)
     find_package(PkgConfig REQUIRED)
     pkg_search_module(GTK2 REQUIRED gtk+-2.0)
     pkg_search_module(GTHREAD2 REQUIRED gthread-2.0)
     set(GTK2GUI ON)
+    add_definitions(-DUSE_GTKs)
 endif(KDE4GUI)
 
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
@@ -47,20 +49,20 @@ endif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
 set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/mupen64plus)
 set(PLUGIN_INSTALL_DIR ${INSTALL_DIR}/plugins)
 
+add_subdirectory(dummy_video)
+add_subdirectory(dummy_audio)
+add_subdirectory(rsp_hle)
+add_subdirectory(mupen64_input)
+
 if(GTK2GUI)
     add_subdirectory(mupen64_audio)
     add_subdirectory(jttl_audio)
-    add_subdirectory(dummy_audio)
 
-    add_subdirectory(mupen64_input)
     # add_subdirectory(blight_input) FIXME
 
     add_subdirectory(rice_video)
-    add_subdirectory(dummy_video)
     #add_subdirectory(glide64) FIXME
     add_subdirectory(glN64)
-    
-    add_subdirectory(rsp_hle)
 endif(GTK2GUI)
 
 set(CORE_SRCS
@@ -154,6 +156,7 @@ if(KDE4GUI)
         main/gui_kde4/mainwidget.cpp
         main/gui_kde4/romdirectorieslistwidget.cpp
         main/gui_kde4/rommodel.cpp
+        main/gui_kde4/plugins.cpp
     )
     kde4_add_kcfg_files(KDE4_GUI_SRCS main/gui_kde4/settings.kcfgc)
     kde4_add_ui_files(KDE4_GUI_SRCS
