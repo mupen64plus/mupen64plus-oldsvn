@@ -1,5 +1,0 @@
- - add menu shortcuts (tip: Gtk+ FAQ)
- - add help
- - debugger support (untested cuz debugger doesn't support gui)
- - catch signals from the core thread
- - log window
