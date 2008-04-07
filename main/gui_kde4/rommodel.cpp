@@ -54,14 +54,14 @@ RomModel::RomModel(QObject* parent)
 
     QPixmap paustralia(core::get_iconpath("australia.png"));
     QPixmap peurope(core::get_iconpath("europe.png"));
-    QPixmap pfrance((core::get_iconpath("france.png")));
-    QPixmap pgermany((core::get_iconpath("germany.png")));
-    QPixmap pitaly((core::get_iconpath("italy.png")));
-    QPixmap pjapan((core::get_iconpath("japan.png")));
-    QPixmap pspain((core::get_iconpath("spain.png")));
-    QPixmap pusa((core::get_iconpath("usa.png")));
-    QPixmap pjapanusa((core::get_iconpath("japanusa.png")));
-    QPixmap pn64cart((core::get_iconpath("n64cart.xpm")));
+    QPixmap pfrance(core::get_iconpath("france.png"));
+    QPixmap pgermany(core::get_iconpath("germany.png"));
+    QPixmap pitaly(core::get_iconpath("italy.png"));
+    QPixmap pjapan(core::get_iconpath("japan.png"));
+    QPixmap pspain(core::get_iconpath("spain.png"));
+    QPixmap pusa(core::get_iconpath("usa.png"));
+    QPixmap pjapanusa(core::get_iconpath("japanusa.png"));
+    QPixmap pn64cart(core::get_iconpath("n64cart.xpm"));
     
     QPair<QString, QPixmap> demo(i18n("Demo"), pn64cart);
     QPair<QString, QPixmap> beta(i18n("Beta"), pn64cart);
