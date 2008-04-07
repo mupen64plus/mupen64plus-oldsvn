@@ -1,0 +1,188 @@
+project(rice_video)
+
+set(RICE_VIDEO_SRCS
+    blender.cpp
+    CNvTNTCombiner.cpp
+    Combiner.cpp
+    CombinerTable.cpp
+    Config.cpp
+    ConvertImage16.cpp
+    ConvertImage.cpp
+    Debugger.cpp
+    DecodedMux.cpp
+    DeviceBuilder.cpp
+    DirectXDecodedMux.cpp
+    FrameBuffer.cpp
+    GeneralCombiner.cpp
+    GraphicsContext.cpp
+    messagebox.c
+    math.cpp
+    OGLCombiner.cpp
+    OGLCombinerNV.cpp
+    OGLCombinerTNT2.cpp
+    OGLDecodedMux.cpp
+    OGLExtCombiner.cpp
+    OGLExtRender.cpp
+    OGLFragmentShaders.cpp
+    OGLGraphicsContext.cpp
+    OGLRender.cpp
+    OGLRenderExt.cpp
+    OGLTexture.cpp
+    RenderBase.cpp
+    Render.cpp
+    RenderExt.cpp
+    RenderTexture.cpp
+    RSP_Parser.cpp
+    RSP_S2DEX.cpp
+    support.c
+    Texture.cpp
+    TextureFilters_2xsai.cpp
+    TextureFilters.cpp
+    TextureFilters_hq2x.cpp
+    TextureFilters_hq4x.cpp
+    TextureManager.cpp
+    Video.cpp
+    liblinux/adler32.c
+    liblinux/BMGImage.c
+    liblinux/BMGUtils.c
+    liblinux/bmp.c
+    liblinux/crc32.c
+    liblinux/deflate.c
+    liblinux/infblock.c
+    liblinux/infcodes.c
+    liblinux/inffast.c
+    liblinux/inflate.c
+    liblinux/inftrees.c
+    liblinux/infutil.c
+    liblinux/png.c
+    liblinux/pngerror.c
+    liblinux/pngget.c
+    liblinux/pngmem.c
+    liblinux/pngread.c
+    liblinux/pngrio.c
+    liblinux/pngrtran.c
+    liblinux/pngrutil.c
+    liblinux/pngrw.c
+    liblinux/pngset.c
+    liblinux/pngtrans.c
+    liblinux/pngwio.c
+    liblinux/pngwrite.c
+    liblinux/pngwtran.c
+    liblinux/pngwutil.c
+    liblinux/trees.c
+    liblinux/zutil.c
+)
+
+include_directories(
+    ${SDL_INCLUDE_DIR}
+    ${GTK2_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
+    ${PNG_INCLUDE_DIR}
+)
+
+add_library(rice_video MODULE ${RICE_VIDEO_SRCS})
+set_target_properties(rice_video PROPERTIES PREFIX "") # make sure we get no lib prefix
+target_link_libraries(rice_video
+    ${SDL_LIBRARY}
+    ${GTK2_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${PNG_LIBRARIES}
+)
+install(TARGETS rice_video DESTINATION ${PLUGIN_INSTALL_DIR})
+project(rice_video)
+
+set(RICE_VIDEO_SRCS
+    blender.cpp
+    CNvTNTCombiner.cpp
+    Combiner.cpp
+    CombinerTable.cpp
+    Config.cpp
+    ConvertImage16.cpp
+    ConvertImage.cpp
+    Debugger.cpp
+    DecodedMux.cpp
+    DeviceBuilder.cpp
+    DirectXDecodedMux.cpp
+    FrameBuffer.cpp
+    GeneralCombiner.cpp
+    GraphicsContext.cpp
+    messagebox.c
+    math.cpp
+    OGLCombiner.cpp
+    OGLCombinerNV.cpp
+    OGLCombinerTNT2.cpp
+    OGLDecodedMux.cpp
+    OGLExtCombiner.cpp
+    OGLExtRender.cpp
+    OGLFragmentShaders.cpp
+    OGLGraphicsContext.cpp
+    OGLRender.cpp
+    OGLRenderExt.cpp
+    OGLTexture.cpp
+    RenderBase.cpp
+    Render.cpp
+    RenderExt.cpp
+    RenderTexture.cpp
+    RSP_Parser.cpp
+    RSP_S2DEX.cpp
+    support.c
+    Texture.cpp
+    TextureFilters_2xsai.cpp
+    TextureFilters.cpp
+    TextureFilters_hq2x.cpp
+    TextureFilters_hq4x.cpp
+    TextureManager.cpp
+    Video.cpp
+    liblinux/adler32.c
+    liblinux/BMGImage.c
+    liblinux/BMGUtils.c
+    liblinux/bmp.c
+    liblinux/crc32.c
+    liblinux/deflate.c
+    liblinux/infblock.c
+    liblinux/infcodes.c
+    liblinux/inffast.c
+    liblinux/inflate.c
+    liblinux/inftrees.c
+    liblinux/infutil.c
+    liblinux/png.c
+    liblinux/pngerror.c
+    liblinux/pngget.c
+    liblinux/pngmem.c
+    liblinux/pngread.c
+    liblinux/pngrio.c
+    liblinux/pngrtran.c
+    liblinux/pngrutil.c
+    liblinux/pngrw.c
+    liblinux/pngset.c
+    liblinux/pngtrans.c
+    liblinux/pngwio.c
+    liblinux/pngwrite.c
+    liblinux/pngwtran.c
+    liblinux/pngwutil.c
+    liblinux/trees.c
+    liblinux/zutil.c
+)
+
+if(CMAKE_COMPILER_IS_GNUCC)
+    if(MARCH STREQUAL x86)
+        add_definitions(-msse -mmmx -DPIC)
+    endif(MARCH STREQUAL x86)
+endif(CMAKE_COMPILER_IS_GNUCC)
+
+include_directories(
+    ${SDL_INCLUDE_DIR}
+    ${GTK2_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
+    ${PNG_INCLUDE_DIR}
+)
+
+add_library(rice_video MODULE ${RICE_VIDEO_SRCS})
+set_target_properties(rice_video PROPERTIES PREFIX "") # make sure we get no lib prefix
+target_link_libraries(rice_video
+    ${SDL_LIBRARY}
+    ${GTK2_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${PNG_LIBRARIES}
+)
+install(TARGETS rice_video DESTINATION ${PLUGIN_INSTALL_DIR})
