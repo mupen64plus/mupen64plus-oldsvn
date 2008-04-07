@@ -133,6 +133,8 @@ bool MainWidget::eventFilter(QObject* obj, QEvent* event)
                 case Qt::Key_Return:
                 case Qt::Key_Up:
                 case Qt::Key_Down:
+                case Qt::Key_PageUp:
+                case Qt::Key_PageDown:
                     QApplication::sendEvent(m_treeView, keyEvent);
                     filtered = true;
                     break;
