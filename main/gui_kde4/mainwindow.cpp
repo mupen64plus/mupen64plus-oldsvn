@@ -62,8 +62,8 @@ MainWindow::MainWindow()
 
     connect(m_mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(updateItemCount(int)));
-    connect(m_mainWidget, SIGNAL(romDoubleClicked(QString)),
-             this, SLOT(romOpen(QString)));
+    connect(m_mainWidget, SIGNAL(romActivated(KUrl)),
+             this, SLOT(romOpen(KUrl)));
 
     setupGUI();
 }
@@ -108,11 +108,6 @@ void MainWindow::romOpen(const KUrl& url)
         core::open_rom(url.path().toLocal8Bit());
         core::startEmulation();
     }
-}
-
-void MainWindow::romOpen(const QString& filename)
-{
-    romOpen(KUrl(filename));
 }
 
 void MainWindow::romClose()

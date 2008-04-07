@@ -26,6 +26,7 @@
 
 #include <KLineEdit>
 #include <KLocale>
+#include <KUrl>
 
 #include "mainwidget.h"
 #include "rommodel.h"
@@ -69,8 +70,8 @@ MainWidget::MainWidget(QWidget* parent)
              this, SLOT(resizeHeaderSections()));
     connect(m_proxyModel, SIGNAL(layoutChanged()),
              this, SLOT(resizeHeaderSections()));
-    connect(m_treeView, SIGNAL(doubleClicked(QModelIndex)),
-             this, SLOT(treeViewDoubleClick(QModelIndex)));
+    connect(m_treeView, SIGNAL(activated(QModelIndex)),
+             this, SLOT(treeViewActivated(QModelIndex)));
 
     QLabel* filterLabel = new QLabel(i18n("Filter:"), this);
     filterLabel->setBuddy(m_lineEdit);
@@ -107,11 +108,11 @@ void MainWidget::filter()
     emit itemCountChanged(m_proxyModel->rowCount());
 }
 
-void MainWidget::treeViewDoubleClick(const QModelIndex& index)
+void MainWidget::treeViewActivated(const QModelIndex& index)
 {
     QString filename = index.data(RomModel::FullPath).toString();
     if (!filename.isEmpty()) {
-        emit romDoubleClicked(filename);
+        emit romActivated(filename);
     }
 }
 
