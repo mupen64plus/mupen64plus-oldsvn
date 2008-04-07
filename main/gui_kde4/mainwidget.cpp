@@ -63,6 +63,8 @@ MainWidget::MainWidget(QWidget* parent)
              this, SLOT(filter()));
     connect(m_proxyModel, SIGNAL(modelReset()),
              this, SLOT(resizeHeaderSections()));
+    connect(m_proxyModel, SIGNAL(modelReset()),
+             this, SLOT(filter()));
     connect(m_proxyModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
              this, SLOT(resizeHeaderSections()));
     connect(m_proxyModel, SIGNAL(layoutChanged()),
