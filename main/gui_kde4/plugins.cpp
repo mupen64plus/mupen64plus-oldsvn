@@ -21,6 +21,7 @@
 #include <KGlobal>
 #include <QList>
 #include <KConfigSkeleton>
+#include <KDebug>
 
 #include "plugins.h"
 
@@ -80,15 +81,13 @@ class PluginsConfig : public KConfigSkeleton
                         break;
                 }
             }
+
             setCurrentGroup("Plugins");
             addItemInt("GraphicsPlugin", graphicsPluginIndex, 0);
             addItemInt("AudioPlugin", audioPluginIndex, 0);
             addItemInt("InputPlugin", inputPluginIndex, 0);
             addItemInt("RspPlugin", rspPluginIndex, 0);
-        }
 
-        void init()
-        {
             readConfig();
             writeConfig();
         }
@@ -158,65 +157,43 @@ class PluginsConfig : public KConfigSkeleton
                          inputPlugins[inputPluginIndex]->file_name,
                          core::g_InputPlugin);
             writePlugin("RSP Plugin",
-                         inputPlugins[inputPluginIndex]->file_name,
+                         rspPlugins[rspPluginIndex]->file_name,
                          core::g_RspPlugin);
             core::config_write();
         }
 };
 
-K_GLOBAL_STATIC(PluginsConfig, plugins);
+K_GLOBAL_STATIC(PluginsConfig, pluginsConfigInstance);
 
 namespace Plugins {
     
-    QStringList graphicsPlugins()
+    QStringList plugins(PluginType type)
     {
-        return plugins->graphicsPlugins.names();
-    }
-    
-    QStringList audioPlugins()
-    {
-        return plugins->audioPlugins.names();
-    }
-    
-    QStringList inputPlugins()
-    {
-        return plugins->inputPlugins.names();
-    }
-    
-    QStringList rspPlugins()
-    {
-        return plugins->rspPlugins.names();
-    }
+        QStringList result;
 
-    int graphicsPluginIndex()
-    {
-        return plugins->graphicsPluginIndex;
-    }
-    
-    int audioPluginIndex()
-    {
-        return plugins->audioPluginIndex;
-    }
-    
-    int inputPluginIndex()
-    {
-        return plugins->inputPluginIndex;
-    }
-    
-    int rspPluginIndex()
-    {
-        return plugins->rspPluginIndex;
-    }
+        switch(type) {
+            case Graphics:
+                result = pluginsConfigInstance->graphicsPlugins.names();
+                break;
+            case Audio:
+                result = pluginsConfigInstance->audioPlugins.names();
+                break;
+            case Input:
+                result = pluginsConfigInstance->inputPlugins.names();
+                break;
+            case Rsp:
+                result = pluginsConfigInstance->rspPlugins.names();
+                break;
+        }
 
+        return result;
+    }
+    
     KConfigSkeleton* config()
     {
-        return plugins;
+        return pluginsConfigInstance;
     }
 
-    void init()
-    {
-        plugins->init();
-    }
 }
 
 #include "plugins.moc"

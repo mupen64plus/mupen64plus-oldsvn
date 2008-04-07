@@ -26,18 +26,10 @@ class KConfigSkeleton;
 
 namespace Plugins
 {
-    QStringList graphicsPlugins();
-    QStringList audioPlugins();
-    QStringList inputPlugins();
-    QStringList rspPlugins();
-
-    int graphicsPluginIndex();
-    int audioPluginIndex();
-    int inputPluginIndex();
-    int rspPluginIndex();
+    enum PluginType { Graphics, Audio, Input, Rsp };
     
+    QStringList plugins(PluginType);
     KConfigSkeleton* config();
-    void init();
 };
 
 #endif // MUPEN64_KDE4_PLUGINS_H

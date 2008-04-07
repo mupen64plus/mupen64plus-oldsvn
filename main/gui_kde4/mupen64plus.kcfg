@@ -2,7 +2,6 @@
 <!DOCTYPE kcfg SYSTEM "http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
 <kcfg>
     <kcfgfile/>
-    <include>plugins.h</include>
     <group name="CPU Core">
         <entry name="DynamicRecompiler" type="Bool">
             <default>false</default>
