@@ -36,7 +36,7 @@
 #endif
 #include <stdio.h>
 
-#include "Rsp_#1.1.h"
+#include "Rsp_1.1.h"
 #include "hle.h"
 
 static struct 

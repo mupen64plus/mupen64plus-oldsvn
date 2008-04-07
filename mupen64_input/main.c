@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "../main/winlnxdefs.h"
-#include "Controller_#1.1.h"
+#include "Controller_1.1.h"
 
 #ifdef USE_GTK
 #include <gtk/gtk.h>
