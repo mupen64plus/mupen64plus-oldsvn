@@ -50,6 +50,7 @@ OBJ_CORE = \
 	main/util.o \
 	main/translate.o \
 	main/guifuncs.o \
+	main/cheat.o \
 	main/config.o \
 	main/adler32.o \
 	main/ioapi.o \

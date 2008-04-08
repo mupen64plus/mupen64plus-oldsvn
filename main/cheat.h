@@ -34,12 +34,16 @@
 typedef struct {
     unsigned int address;
     unsigned short value;
-    bool enabled;
-    cheatcode next_cheat;
+    int enabled;
+    struct cheatcode *next_cheat;
+    unsigned int crc;
 } cheatcode;
 
 #define ENTRY_BOOT 0
 #define ENTRY_VI 1
+
+extern struct cheatcode *cheats;
+extern int numcheats;
 
 // creation/list handeling functions
 cheatcode parse_cheat_string(char* sz_cheat);
@@ -50,7 +54,9 @@ void update_address_16bit(unsigned int address, unsigned short new_value);
 
 // loop functions (used for going through the list)
 void apply_boot_cheats();
-void apply_cheats(int entry);
+void apply_cheats(int crc);
+
+void load_cheats();
 
 // individual application - returns 0 if we are supposed to skip the next cheat
 // (only happens on conditional codes)

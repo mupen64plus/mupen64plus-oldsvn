@@ -34,22 +34,26 @@
 #include "../memory/memory.h"
 #include "cheat.h"
 
+struct cheatcode *cheats;
+int numcheats;
 extern char *rdramb;
-void apply_cheats(int entry)
+
+void apply_cheats(int crc)
 {
-    if (entry == ENTRY_BOOT)
+    /*if (entry == ENTRY_BOOT)
     {
 
     }
     if (entry == ENTRY_VI)
     {
         
-    }
+    }*/
 }
 
-//cheatcode parse_cheat_string(char* sz_cheat)
-//{
-//}
+void load_cheats()
+{
+
+}
     
 int execute_cheat(unsigned int address, unsigned short value)
 {
