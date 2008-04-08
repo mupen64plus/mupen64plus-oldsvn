@@ -79,5 +79,5 @@ void set_store_location(unsigned int address);
  * to enable them on demand. The code to be repeated is not limited to constant writes.
  * Any 80/81/88/89 code type appearing below a '50' code should work.
  */
- 
- 
+
+
