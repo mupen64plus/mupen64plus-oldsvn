@@ -21,7 +21,6 @@ Email                : blight@Ashitaka
 #include "main_gtk.h"
 #include "rombrowser.h"
 #include "../config.h"
-#include "dirbrowser.h"
 #include "../guifuncs.h"
 #include "../translate.h"
 #include "../util.h"
@@ -214,15 +213,16 @@ gboolean callback_checkForEach (GtkTreeModel *model, GtkTreePath *path, GtkTreeI
 }
 
 // rombrowser
-static void callback_romDirectorySelected( const gchar *dirname )
+static void addRomDirectory(const gchar *dirname)
 {
     // Local variables
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW ( g_ConfigDialog.romDirectoryList ));
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
 
     gtk_tree_model_foreach(model, callback_checkForEach, (gpointer) dirname);
     if(Match)
     {
         alert_message(tr("The directory you selected is already in the list."));
+        Match = 0;
         return;
     }
 
@@ -237,13 +237,34 @@ static void callback_romDirectorySelected( const gchar *dirname )
 
 static void callback_romDirectoryAdd( GtkWidget *widget, gpointer data )
 {
-    GtkWidget *dirbrowser;
+    GtkWidget *file_chooser;
 
-        typedef void (*callback)(gchar*);
-    dirbrowser = create_dir_browser( (gchar*)tr("Select Rom Directory"), get_configpath(), GTK_SELECTION_SINGLE, (callback)callback_romDirectorySelected );
+    // get a directory path from the user
+    file_chooser = gtk_file_chooser_dialog_new(tr("Select Rom Directory"),
+                                               GTK_WINDOW(g_ConfigDialog.dialog),
+                                               GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                               GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+                                               NULL);
 
-    /* Display that dialog */
-    gtk_widget_show( dirbrowser );
+    if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
+    {
+        char *buf;
+        gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+        buf = malloc(strlen(path)+2);
+        strcpy(buf, path);
+
+        // add trailing '/'
+        if(buf[strlen(buf)-1] != '/')
+            strcat(buf, "/");
+
+        addRomDirectory(buf);
+    
+        free(buf);
+        g_free(path);
+    }
+
+    gtk_widget_destroy(file_chooser);
 }
 
 static void callback_romDirectoryRemove( GtkWidget *widget, gpointer data )
@@ -486,7 +507,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
     {
         char buf[30];
         sprintf( buf, "RomDirectory[%d]", i );
-        callback_romDirectorySelected( config_get_string( buf, "" ) );
+        addRomDirectory(config_get_string(buf, ""));
     }
 
     if(g_GfxPlugin)
@@ -1221,10 +1242,6 @@ int create_configDialog( void )
         button = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
         gtk_box_pack_start( GTK_BOX(vbox), button, FALSE, FALSE, 0 );
         gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_romDirectoryRemove), (gpointer) NULL );
-    
-        button = gtk_button_new_with_label( tr("Remove All") );
-        gtk_box_pack_start( GTK_BOX(vbox), button, FALSE, FALSE, 0 );
-        gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_romDirectoryRemoveAll), (gpointer) NULL );
     
         // Create the "recursive" checkbox.
         g_ConfigDialog.romDirsScanRecCheckButton = gtk_check_button_new_with_label( tr("Recursively scan rom directories") );

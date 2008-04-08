@@ -127,8 +127,7 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/aboutdialog.o \
 	main/gui_gtk/configdialog.o \
 	main/gui_gtk/rombrowser.o \
-	main/gui_gtk/romproperties.o \
-	main/gui_gtk/dirbrowser.o
+	main/gui_gtk/romproperties.o
 
 OBJ_DBG = \
         debugger/debugger.o \

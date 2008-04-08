@@ -27,21 +27,6 @@ Email                : blight@Ashitaka
 /** globals **/
 SAboutDialog g_AboutDialog;
 
-/** callbacks **/
-static void
-callback_okClicked( GtkWidget *widget, gpointer data )
-{
-    gtk_widget_hide( g_AboutDialog.dialog );
-}
-
-// hide on delete
-static gint delete_question_event(GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-    gtk_widget_hide( widget );
-
-    return TRUE; // undeleteable
-}
-
 /** function to create the about dialog **/
 int
 create_aboutDialog( void )
@@ -53,12 +38,15 @@ create_aboutDialog( void )
     GtkWidget *button;
 
     g_AboutDialog.dialog = gtk_dialog_new();
-    gtk_container_set_border_width( GTK_CONTAINER(g_AboutDialog.dialog), 10 );
     gtk_window_set_title( GTK_WINDOW(g_AboutDialog.dialog), tr("About " MUPEN_NAME) );
+    gtk_window_set_resizable(GTK_WINDOW(g_AboutDialog.dialog), FALSE);
+    gtk_container_set_border_width( GTK_CONTAINER(g_AboutDialog.dialog), 10 );
+
     // set main window as parent of about window
     gtk_window_set_transient_for(GTK_WINDOW(g_AboutDialog.dialog), GTK_WINDOW(g_MainWindow.window));
-    gtk_signal_connect(GTK_OBJECT(g_AboutDialog.dialog), "delete_event",
-                GTK_SIGNAL_FUNC(delete_question_event), (gpointer)NULL );
+
+    // closing the about window should hide it, not destroy it
+    g_signal_connect(GTK_OBJECT(g_AboutDialog.dialog), "delete-event", GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), (gpointer)NULL);
 
     hbox = gtk_hbox_new( FALSE, 5 );
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_AboutDialog.dialog)->vbox), hbox, FALSE, FALSE, 0 );
@@ -82,7 +70,7 @@ create_aboutDialog( void )
 
     button = gtk_button_new_from_stock(GTK_STOCK_OK);
     gtk_box_pack_start( GTK_BOX(GTK_BOX(GTK_DIALOG(g_AboutDialog.dialog)->action_area)), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
+    g_signal_connect_swapped(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide), (gpointer)g_AboutDialog.dialog);
 
     return 0;
 }

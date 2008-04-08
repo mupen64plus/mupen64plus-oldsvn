@@ -471,12 +471,12 @@ static void callback_SaveAs( GtkWidget *widget, gpointer data )
     {
         GtkWidget *file_chooser;
 
-        file_chooser = gtk_file_chooser_dialog_new( tr("Save as..."),
-                                                    GTK_WINDOW(g_MainWindow.window),
-                                GTK_FILE_CHOOSER_ACTION_SAVE,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                                        NULL);
+        file_chooser = gtk_file_chooser_dialog_new(tr("Save as..."),
+                                                   GTK_WINDOW(g_MainWindow.window),
+                                                   GTK_FILE_CHOOSER_ACTION_SAVE,
+                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                   GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                                                   NULL);
 
         if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
         {
