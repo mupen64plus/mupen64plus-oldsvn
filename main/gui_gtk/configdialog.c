@@ -657,8 +657,8 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
             gtk_editable_delete_text(GTK_EDITABLE(mapping->joy_mapping_textbox), 0, -1);
             gtk_editable_insert_text(GTK_EDITABLE(mapping->joy_mapping_textbox),
                                      config_get_string(mapping->joy_config_name, ""),
-                         strlen(config_get_string(mapping->joy_config_name, "")),
-                         &i);
+                                     strlen(config_get_string(mapping->joy_config_name, "")),
+                                     &i);
         }
     }
 }
@@ -837,7 +837,7 @@ int create_configDialog( void )
     g_ConfigDialog.gfxPluginGList = NULL;
     g_ConfigDialog.audioPluginGList = NULL;
     g_ConfigDialog.inputPluginGList = NULL;
-        g_ConfigDialog.RSPPluginGList = NULL;
+    g_ConfigDialog.RSPPluginGList = NULL;
 
     // Iterate through all of the plugins
     list_foreach(g_PluginList, node)
@@ -1233,9 +1233,6 @@ int create_configDialog( void )
         // Create the "full filename" checkbox.
         g_ConfigDialog.romShowFullPathsCheckButton = gtk_check_button_new_with_label( tr("Show full paths in filenames") );
         gtk_box_pack_start( GTK_BOX(g_ConfigDialog.configRomBrowser), g_ConfigDialog.romShowFullPathsCheckButton, FALSE, FALSE, 0 );
-
-        // Initalize the widgets.
-        callback_dialogShow( NULL, NULL );
     }
 
     // Create Hotkey Configuration page
@@ -1308,5 +1305,9 @@ int create_configDialog( void )
             gtk_box_pack_start( GTK_BOX(hbox1), vbox, FALSE, FALSE, 0 );
         }
     }
+
+    // Initalize the widgets.
+    callback_dialogShow( NULL, NULL );
+
     return 0;
 }

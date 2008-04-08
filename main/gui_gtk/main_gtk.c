@@ -402,14 +402,7 @@ static void callback_languageSelected(GtkWidget *widget, gpointer data)
     tr_set_language( name );
     config_put_string( "Language", name );
 
-    // recreate gui
-    gtk_widget_destroy( g_MainWindow.window );
-    gtk_widget_destroy( g_AboutDialog.dialog );
-    gtk_widget_destroy( g_ConfigDialog.dialog );
-    create_mainWindow();
-    create_aboutDialog();
-    create_configDialog();
-    gtk_widget_show_all( g_MainWindow.window );
+    reload();
 }
 
 // reload windows
