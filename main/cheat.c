@@ -110,7 +110,7 @@ void load_cheats(char crcmatch[22])
     {
 nextcheat:
         //gzgets(f, buf, 255);
-        fgets(f, buf, 255);
+        fgets(buf, 255, f);
         if (buf[0] == ':')
         {
             strncpy(crc, buf+1, 21);
@@ -119,24 +119,24 @@ nextcheat:
             if(strncmp(crc,crcmatch,21)==0) goto nextcheat;
             
             //gzgets(f, buf, 255);
-            fgets(f, buf, 255);
+            fgets(buf, 255, f);
             cheatname = (char *)malloc(255);
             strncpy(cheatname, buf, strlen(buf));
             printf ("Name: %s\n",buf);
             
             //gzgets(f, buf, 255);
-            fgets(f, buf, 255);
+            fgets(buf, 255, f);
             enabled = strtol(buf, buf+1, 10);
-            printf ("Enabled: %s\n",buf);
+            printf ("Enabled: %c\n",buf);
             
             //gzgets(f, buf, 255);
-            fgets(f, buf, 255);
+            fgets(buf, 255, f);
             if(buf[0] == '<')
             {
                 do
                 {
                     //gzgets(f, buf, 255);
-                    fgets(f, buf, 255);
+                    fgets(buf, 255, f);
                     cheats[i].address = strtol(buf, buf+8, 16);
                     cheats[i].value = strtol(buf+8, buf+12, 16);
                     cheats[i].cheatname = cheatname;
@@ -151,7 +151,8 @@ nextcheat:
     //while (!gzeof(f));
     while (!feof(f));
    
-    gzclose(f);
+    //gzclose(f);
+    fclose(f);
 }
     
 int execute_cheat(unsigned int address, unsigned short value)
