@@ -36,7 +36,6 @@ typedef struct {
     unsigned short value;
     int enabled;
     struct cheatcode *next_cheat;
-    unsigned int crc;
 } cheatcode;
 
 #define ENTRY_BOOT 0
@@ -54,7 +53,7 @@ void update_address_16bit(unsigned int address, unsigned short new_value);
 
 // loop functions (used for going through the list)
 void apply_boot_cheats();
-void apply_cheats(int crc);
+void apply_cheats(int entry);
 
 void load_cheats();
 

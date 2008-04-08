@@ -38,16 +38,50 @@ struct cheatcode *cheats;
 int numcheats;
 extern char *rdramb;
 
-void apply_cheats(int crc)
+void apply_cheats(int entry)
 {
-    /*if (entry == ENTRY_BOOT)
+    int x;
+    int do_next = 0;
+    struct next_cheat;
+    for (x = 0;x < numcheats;x++)
     {
-
-    }
-    if (entry == ENTRY_VI)
-    {
+        next_cheat = null;
+        do_next = 1;
         
-    }*/
+        if (entry == ENTRY_BOOT)
+        {
+            if ((cheats[x]->address & 0xF0000000) == 0xF0000000) 
+            {
+                if(cheats[x]->enabled == 1)
+                {
+                    do
+                    { 
+                        execute_cheat(cheats[x]->address,cheats[x]->value);
+                        next_cheat = cheats[x]->next_cheat;
+                    } while (next_cheat != null);
+                }
+            }
+        }
+        
+        if (entry == ENTRY_VI)
+        {
+            if(cheats[x]->enabled == 1)
+            {
+                do
+                { 
+                    if (do_next != 0)
+                    {
+                        do_next = execute_cheat(cheats[x]->address,cheats[x]->value);
+                    }
+                    else
+                    {
+                        do_next = 1;
+                    }
+                    next_cheat = cheats[x]->next_cheat;
+                } while (next_cheat != null);
+            }
+        }
+    }
 }
 
 void load_cheats()
