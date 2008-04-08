@@ -101,7 +101,11 @@ void load_cheats(char crcmatch[22])
     cheats = (cheatcode *)malloc(strtol(buf, NULL, 10)*sizeof(cheatcode));
     memset(cheats,0,strtol(buf, NULL, 10)*sizeof(cheatcode));
     
-    if (f==NULL) return;
+    if (f==NULL)
+    {
+        fprintf(stderr,"File Error\n");
+        return;
+    }
     do
     {
 nextcheat:

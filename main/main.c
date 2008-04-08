@@ -63,6 +63,7 @@
 #include "util.h"
 #include "translate.h"
 #include "volume.h"
+#include "cheat.h"
 
 #ifdef DBG
 #include <glib.h>
@@ -715,6 +716,10 @@ static void * emulationThread( void *_arg )
     if( g_DebuggerEnabled )
         init_debugger();
 #endif
+    char crcmatch[22];
+    sprintf(crcmatch,"%x %x",ROM_HEADER->CRC1, ROM_HEADER->CRC2);
+    load_cheats(crcmatch);
+
     go();   /* core func */
 
 #ifdef WITH_LIRC
