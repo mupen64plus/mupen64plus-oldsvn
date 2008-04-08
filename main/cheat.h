@@ -31,18 +31,18 @@
 
 // this struct might come in handy, who knows...
 
-typedef struct {
+typedef struct 
+{
     unsigned int address;
     unsigned short value;
     int enabled;
-    struct cheatcode *next_cheat;
+    char crc[22];
+    char *cheatname;
+    void *next_cheat;
 } cheatcode;
 
 #define ENTRY_BOOT 0
 #define ENTRY_VI 1
-
-extern struct cheatcode *cheats;
-extern int numcheats;
 
 // creation/list handeling functions
 cheatcode parse_cheat_string(char* sz_cheat);

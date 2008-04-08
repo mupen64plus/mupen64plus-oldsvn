@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <zlib.h>
 #ifndef __WIN32__
 #include "../main/winlnxdefs.h"
 #else
@@ -34,59 +35,119 @@
 #include "../memory/memory.h"
 #include "cheat.h"
 
-struct cheatcode *cheats;
-int numcheats;
 extern char *rdramb;
+cheatcode *cheats;
+int numcheats;
 
 void apply_cheats(int entry)
 {
     int x;
     int do_next = 0;
-    struct next_cheat;
+    cheatcode *next_cheat;
     for (x = 0;x < numcheats;x++)
     {
-        next_cheat = null;
-        do_next = 1;
-        
-        if (entry == ENTRY_BOOT)
-        {
-            if ((cheats[x]->address & 0xF0000000) == 0xF0000000) 
-            {
-                if(cheats[x]->enabled == 1)
-                {
-                    do
-                    { 
-                        execute_cheat(cheats[x]->address,cheats[x]->value);
-                        next_cheat = cheats[x]->next_cheat;
-                    } while (next_cheat != null);
-                }
-            }
-        }
-        
-        if (entry == ENTRY_VI)
-        {
-            if(cheats[x]->enabled == 1)
-            {
-                do
-                { 
-                    if (do_next != 0)
-                    {
-                        do_next = execute_cheat(cheats[x]->address,cheats[x]->value);
-                    }
-                    else
-                    {
-                        do_next = 1;
-                    }
-                    next_cheat = cheats[x]->next_cheat;
-                } while (next_cheat != null);
-            }
-        }
+       next_cheat = NULL;
+       do_next = 1;
+       if (entry == ENTRY_BOOT)
+       {
+           if ((cheats[x].address & 0xF0000000) == 0xF0000000)
+           {
+               if(cheats[x].enabled == 1)
+               {
+                   do
+                   {
+                       execute_cheat(cheats[x].address,cheats[x].value);
+                       next_cheat = (cheatcode *)cheats[x].next_cheat;
+                   } while (next_cheat != NULL);
+               }
+           }
+       }
+       if (entry == ENTRY_VI)
+       {
+           if(cheats[x].enabled == 1)
+           {
+               do
+               {
+                   if (do_next != 0)
+                   {
+                       do_next = execute_cheat(cheats[x].address,cheats[x].value);
+                   }
+                   else
+                   {
+                       do_next = 1;
+                   }
+                   next_cheat = (cheatcode *)cheats[x].next_cheat;
+               } while (next_cheat != NULL);
+           }
+       }
     }
 }
 
-void load_cheats()
+void load_cheats(char crcmatch[22])
 {
-
+    char buf[256];
+    char crc[22];
+    char *cheatname;
+    int i=0;
+    int enabled;
+    char *path = malloc(strlen(get_configpath())+1+strlen("cheats.gs"));
+    strcpy(path, get_configpath());
+    strcat(path, "cheats.gs");
+    //gzFile f = gzopen(path, "rb");
+    FILE *f = fopen(path, "rb");
+    free(path);
+    
+    gzgets(f, buf, 255);
+    cheats = (cheatcode *)malloc(strtol(buf, NULL, 10)*sizeof(cheatcode));
+    memset(cheats,0,strtol(buf, NULL, 10)*sizeof(cheatcode));
+    
+    if (f==NULL) return;
+    do
+    {
+nextcheat:
+        //gzgets(f, buf, 255);
+        fgets(f, buf, 255);
+        if (buf[0] == ':')
+        {
+            strncpy(crc, buf+1, 21);
+            printf ("CRC: %s\n",buf);
+            
+            if(strncmp(crc,crcmatch,21)==0) goto nextcheat;
+            
+            //gzgets(f, buf, 255);
+            fgets(f, buf, 255);
+            cheatname = (char *)malloc(255);
+            strncpy(cheatname, buf, strlen(buf));
+            printf ("Name: %s\n",buf);
+            
+            //gzgets(f, buf, 255);
+            fgets(f, buf, 255);
+            enabled = strtol(buf, buf+1, 10);
+            printf ("Enabled: %s\n",buf);
+            
+            //gzgets(f, buf, 255);
+            fgets(f, buf, 255);
+            if(buf[0] == '<')
+            {
+                do
+                {
+                    //gzgets(f, buf, 255);
+                    fgets(f, buf, 255);
+                    cheats[i].address = strtol(buf, buf+8, 16);
+                    cheats[i].value = strtol(buf+8, buf+12, 16);
+                    cheats[i].cheatname = cheatname;
+                    cheats[i].enabled = enabled;
+                    memcpy(cheats[i].crc,crc,21);
+                    i++;
+                }
+                while(buf[0] != '>');
+            }
+        }
+    }
+    //while (!gzeof(f));
+    while (!feof(f));
+   
+    gzclose(f);
 }
     
 int execute_cheat(unsigned int address, unsigned short value)
@@ -102,12 +163,12 @@ int execute_cheat(unsigned int address, unsigned short value)
             address = 0x81000000 | (address & 0xFFFFFF);
             update_address_16bit(address,value);
             return 1;
-            break;      
+            break;
         case 0xA0000000:
             address = 0xA0000000 | (address & 0xFFFFFF);
             update_address_8bit(address,value);
             return 1;
-            break;          
+            break;
         case 0xA1000000:
             address = 0xA1000000 | (address & 0xFFFFFF);
             update_address_16bit(address,value);
@@ -124,7 +185,7 @@ int execute_cheat(unsigned int address, unsigned short value)
         case 0xD2000000:
             address = 0xD2000000 | (address & 0xFFFFFF);
             return !(address_equal_to_8bit(address,value));
-            break; 
+            break;
         case 0xD3000000:
             address = 0xD3000000 | (address & 0xFFFFFF);
             return !(address_equal_to_16bit(address,value));
@@ -133,7 +194,7 @@ int execute_cheat(unsigned int address, unsigned short value)
             address = 0xF0000000 | (address & 0xFFFFFF);
             update_address_8bit(address,value);
             return 1;
-            break;          
+            break;
         case 0xF1000000:
             address = 0xF1000000 | (address & 0xFFFFFF);
             update_address_16bit(address,value);
@@ -142,8 +203,8 @@ int execute_cheat(unsigned int address, unsigned short value)
         case 0xEE000000:
             disable_expansion_pack();
             return 1;
-            break;                                              
-    } 
+            break;
+    }
 }  
 
 int address_equal_to_8bit(unsigned int address, unsigned char value)
