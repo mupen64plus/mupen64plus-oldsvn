@@ -34,7 +34,7 @@
 typedef struct {
     unsigned int address;
     unsigned short value;
-    char command;
+    bool enabled;
     cheatcode next_cheat;
 } cheatcode;
 
