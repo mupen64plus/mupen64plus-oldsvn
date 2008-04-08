@@ -1,6 +1,6 @@
 /**
  * Mupen64 - cheat.c
- * Copyright (C) 2008 NMN
+ * Copyright (C) 2008 okaygo
  *
  * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
  * 
@@ -98,17 +98,18 @@ void load_cheats(char crcmatch[22])
     FILE *f = fopen(path, "rb");
     free(path);
     
+    if (f==NULL)
+    {
+        fprintf(stderr,"File Error\n");
+        return;
+    }
+
     //gzgets(f, buf, 255);
     fgets(buf, 255, f);
     numcheats = strtol(buf, NULL, 16);
     cheats = (cheatcode *)malloc(strtol(buf, NULL, 10)*sizeof(cheatcode));
     memset(cheats,0,strtol(buf, NULL, 10)*sizeof(cheatcode));
     
-    if (f==NULL)
-    {
-        fprintf(stderr,"File Error\n");
-        return;
-    }
     do
     {
 nextcheat:

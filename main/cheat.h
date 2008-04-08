@@ -1,9 +1,8 @@
 /**
- * Mupen64 - rom.h
- * Copyright (C) 2002 Hacktarux
+ * Mupen64 - cheat.h
+ * Copyright (C) 2008 okaygo
  *
  * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
  * 
  * If you want to contribute to the project please contact
  * me first (maybe someone is already making what you are
