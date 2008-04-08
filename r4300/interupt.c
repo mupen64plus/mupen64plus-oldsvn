@@ -47,15 +47,13 @@
 #include "../main/plugin.h"
 #include "../main/savestates.h"
 #include "../main/vcr.h"
-
+#include "../main/cheat.h"
 #ifdef WITH_LIRC
 #include "../main/lirc.h"
 #endif //WITH_LIRC
-
-
 unsigned int next_vi;
 int vi_field=0;
-
+int vi_counter=0;
 typedef struct _interupt_queue
 {
    int type;
@@ -350,7 +348,10 @@ void gen_interupt()
 #endif //WITH_LIRC
    }
 
-   if (stop == 1) dyna_stop();
+   if (stop == 1) {
+     vi_counter = 0; // debug
+   	 dyna_stop();
+   }
    if (savestates_job & LOADSTATE) 
      {
     savestates_load();
@@ -396,6 +397,16 @@ void gen_interupt()
     break;
     
       case VI_INT:
+       if(vi_counter < 60) {	
+       	 if (vi_counter == 0)
+         {
+             apply_cheats(ENTRY_BOOT);
+         }
+         vi_counter++;
+       }
+       else {
+            apply_cheats(ENTRY_VI);
+       }
 #ifdef VCR_SUPPORT
     VCR_updateScreen();
 #else
