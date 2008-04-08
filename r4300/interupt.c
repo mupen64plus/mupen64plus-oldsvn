@@ -51,6 +51,7 @@
 #ifdef WITH_LIRC
 #include "../main/lirc.h"
 #endif //WITH_LIRC
+
 unsigned int next_vi;
 int vi_field=0;
 int vi_counter=0;
@@ -350,7 +351,7 @@ void gen_interupt()
 
    if (stop == 1) {
      vi_counter = 0; // debug
-   	 dyna_stop();
+     dyna_stop();
    }
    if (savestates_job & LOADSTATE) 
      {
@@ -397,8 +398,8 @@ void gen_interupt()
     break;
     
       case VI_INT:
-       if(vi_counter < 60) {	
-       	 if (vi_counter == 0)
+       if(vi_counter < 60) {    
+         if (vi_counter == 0)
          {
              apply_cheats(ENTRY_BOOT);
          }
