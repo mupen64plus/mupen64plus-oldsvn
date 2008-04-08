@@ -97,9 +97,12 @@ void load_cheats(char crcmatch[22])
     FILE *f = fopen(path, "rb");
     free(path);
     
-    gzgets(f, buf, 255);
-    cheats = (cheatcode *)malloc(strtol(buf, NULL, 10)*sizeof(cheatcode));
-    memset(cheats,0,strtol(buf, NULL, 10)*sizeof(cheatcode));
+    //gzgets(f, buf, 255);
+    fgets(buf, 255, f);
+    numcheats = strtol(buf, buf+strlen(buf), 0)*sizeof(cheatcode);
+    cheats = (cheatcode *)malloc(numcheats*sizeof(cheatcode));
+    memset(cheats,0,numcheats*sizeof(cheatcode));
+    fprintf(stderr,"Loading %i cheats.\n",numcheats);
     
     if (f==NULL)
     {
