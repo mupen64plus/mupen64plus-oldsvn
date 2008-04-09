@@ -88,6 +88,7 @@ int         *autoinc_save_slot = &autoinc_slot;
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_LimitFPS = 1;
+int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
             
 pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
@@ -112,7 +113,6 @@ static int  g_Fullscreen = 0;           // fullscreen enabled?
 static int  g_EmuMode = 0;              // emumode specified at commandline?
 static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
 static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
-static int  g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -716,9 +716,8 @@ static void * emulationThread( void *_arg )
     if( g_DebuggerEnabled )
         init_debugger();
 #endif
-    char crcmatch[22];
-    sprintf(crcmatch,"%x %x",ROM_HEADER->CRC1, ROM_HEADER->CRC2);
-    load_cheats(crcmatch);
+    // load cheats for the current rom
+    cheat_load_current_rom();
 
     go();   /* core func */
 
@@ -1215,6 +1214,8 @@ int main(int argc, char *argv[])
     /* TODO: nogui version does not use ini file */
     ini_openFile();
 
+    cheat_read_config();
+
     // build gui, but do not display
     if(g_GuiEnabled)
         gui_build();
@@ -1233,6 +1234,7 @@ int main(int argc, char *argv[])
            !g_GuiEnabled)
         {
             // cleanup and exit
+            cheat_delete_all();
             ini_closeFile();
             plugin_delete_list();
             tr_delete_languages();
@@ -1249,6 +1251,7 @@ int main(int argc, char *argv[])
         printUsage(argv[0]);
 
         // cleanup and exit
+        cheat_delete_all();
         ini_closeFile();
         plugin_delete_list();
         tr_delete_languages();
@@ -1264,6 +1267,8 @@ int main(int argc, char *argv[])
     stopEmulation();
     config_write();
     ini_updateFile(1);
+    cheat_write_config();
+    cheat_delete_all();
     ini_closeFile();
     plugin_delete_list();
     tr_delete_languages();

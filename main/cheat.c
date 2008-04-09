@@ -25,144 +25,51 @@
 // gameshark and xploder64 reference: http://doc.kodewerx.net/hacking_n64.html 
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <zlib.h>
-#ifndef __WIN32__
-#include "../main/winlnxdefs.h"
-#else
-#include <windows.h>
-#endif
+#include <errno.h>
+#include <zlib.h> // TODO: compress cfg file
+
 #include "../memory/memory.h"
-#include "main.h"
 #include "cheat.h"
+#include "main.h"
+#include "rom.h"
+#include "util.h" // list utilities
 
-extern char *rdramb;
-cheatcode *cheats;
-int numcheats;
+#define CHEAT_FILENAME "cheats.cfg"
 
-void apply_cheats(int entry)
+// public globals
+list_t g_Cheats = NULL; // list of all supported cheats
+
+// static globals
+static rom_cheats_t *g_Current = NULL; // current loaded rom
+
+// private functions
+static void update_address_16bit(unsigned int address, unsigned short new_value)
 {
-    int x;
-    int do_next = 0;
-    for (x = 0;x < numcheats;x++)
-    {
-       do_next = 1;
-       if (entry == ENTRY_BOOT)
-       {
-           if ((cheats[x].address & 0xF0000000) == 0xF0000000)
-           {
-               if(cheats[x].enabled == 1)
-               {
-                   execute_cheat(cheats[x].address,cheats[x].value);
-               }
-           }
-       }
-       if (entry == ENTRY_VI)
-       {
-           if(cheats[x].enabled == 1)
-           {
-               if ((cheats[x].address & 0xF0000000) == 0xD0000000)
-               {
-                   do_next = execute_cheat(cheats[x].address,cheats[x].value);
-                   x++;
-                   if(do_next)
-                   {
-                       execute_cheat(cheats[x].address,cheats[x].value);
-                   }
-               }
-               else
-               {
-                   execute_cheat(cheats[x].address,cheats[x].value);
-               }
-           }
-       }
-    }
+    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16))) = new_value;
 }
 
-void load_cheats(char crcmatch[22])
+static void update_address_8bit(unsigned int address, unsigned char new_value)
 {
-    char buf[256];
-    char buf2[256];
-    char crc[22];
-    char *cheatname;
-    int i=0;
-    int enabled;
-    char *path = malloc(strlen(get_configpath())+1+strlen("cheats.gs"));
-    strcpy(path, get_configpath());
-    strcat(path, "cheats.gs");
-    //gzFile f = gzopen(path, "rb");
-    FILE *f = fopen(path, "rb");
-    free(path);
-    
-    if (f==NULL)
-    {
-        fprintf(stderr,"File Error\n");
-        return;
-    }
-
-    //gzgets(f, buf, 255);
-    fgets(buf, 255, f);
-    numcheats = strtol(buf, NULL, 16);
-    cheats = (cheatcode *)malloc(strtol(buf, NULL, 10)*sizeof(cheatcode));
-    memset(cheats,0,strtol(buf, NULL, 10)*sizeof(cheatcode));
-    
-    do
-    {
-nextcheat:
-        //gzgets(f, buf, 255);
-        fgets(buf, 255, f);
-        if (feof(f)) { break; }
-        if (buf[0] == ':')
-        {
-            strncpy(crc, buf+1, 21);
-            printf ("CRC: %s\n",buf);
-            
-            if(strncmp(crc,crcmatch,21)==0) goto nextcheat;
-            
-            //gzgets(f, buf, 255);
-            fgets(buf, 255, f);
-            cheatname = (char *)malloc(255);
-            strncpy(cheatname, buf, strlen(buf));
-            printf ("Name: %s\n",buf);
-            
-            //gzgets(f, buf, 255);
-            fgets(buf, 255, f);
-            enabled = strtol(buf, NULL, 10);
-            printf ("Enabled: %i\n",enabled);
-            
-            //gzgets(f, buf, 255);
-            fgets(buf, 255, f);
-            if(buf[0] == '<')
-            {
-                fgets(buf, 255, f);
-                do
-                {
-                    //gzgets(f, buf, 255);
-                    strncpy(buf2, buf, 8);
-                    cheats[i].address = strtoul(buf2, NULL, 16);
-                    //printf("address: %x vs. %s", cheats[i].address, buf2);
-                    cheats[i].value = strtol(buf+8, NULL, 16);
-                    //printf("address: %x vs. %s", cheats[i].value, buf);
-                    cheats[i].cheatname = cheatname;
-                    cheats[i].enabled = enabled;
-                    //memcpy(cheats[i].crc,crc,21);
-                    i++;
-                    fgets(buf, 255, f);
-                }
-                while(buf[0] != '>');
-                
-            }
-        }
-    }
-    //while (!gzeof(f));
-    while (!feof(f));
-    printf("Done loading cheats.\n");
-    //gzclose(f);
-    fclose(f);
+    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8))) = new_value;
 }
-    
-int execute_cheat(unsigned int address, unsigned short value)
+
+static int address_equal_to_8bit(unsigned int address, unsigned char value)
+{
+    unsigned char value_read;
+    value_read = *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8)));
+    return value_read == value;
+}
+
+static int address_equal_to_16bit(unsigned int address, unsigned short value)
+{
+    unsigned short value_read;
+    value_read = *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16)));
+    return value_read == value;
+}
+
+// individual application - returns 0 if we are supposed to skip the next cheat
+// (only happens on conditional codes)
+static int execute_cheat(unsigned int address, unsigned short value)
 {
     switch (address & 0xFF000000)
     {
@@ -213,45 +120,282 @@ int execute_cheat(unsigned int address, unsigned short value)
             return 1;
             break;
         case 0xEE000000:
-            disable_expansion_pack();
+            // most likely, this doesnt do anything.
+            execute_cheat(0xF1000318, 0x0040);
+            execute_cheat(0xF100031A, 0x0000);
             return 1;
             break;
     }
 }  
 
-int address_equal_to_8bit(unsigned int address, unsigned char value)
+// public functions
+void cheat_apply_cheats(int entry)
 {
-    unsigned char value_read;
-    value_read = *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8)));
-    if (value_read == value)
+    int do_next, check_next = 0;
+    list_node_t *node1, *node2;
+    cheat_t *cheat;
+    cheat_code_t *code;
+
+    // if no cheats for current rom, return
+    if(!g_Current) return;
+
+    list_foreach(g_Current->cheats, node1)
     {
-        return 1;
-    }
-    else
-    {
-        return 0;
+        cheat = (cheat_t *)node1->data;
+        if(cheat->always_enabled || cheat->enabled)
+        {
+            switch(entry)
+            {
+                case ENTRY_BOOT:
+                    list_foreach(cheat->cheat_codes, node2)
+                    {
+                        code = (cheat_code_t *)node2->data;
+                        execute_cheat(code->address, code->value);
+                    }
+                    break;
+                case ENTRY_VI:
+                    list_foreach(cheat->cheat_codes, node2)
+                    {
+                        code = (cheat_code_t *)node2->data;
+
+                        if(check_next)
+                        {
+                            if(do_next)
+                                execute_cheat(code->address, code->value);
+
+                            check_next = 0;
+                        }
+                        else if((code->address & 0xF0000000) == 0xD0000000)
+                        {
+                            do_next = execute_cheat(code->address, code->value);
+                            check_next = 1;
+                        }
+                        else
+                            execute_cheat(code->address, code->value);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
 
-int address_equal_to_16bit(unsigned int address, unsigned short value)
+/** cheat_read_config
+ *   Read config file and populate list of supported cheats. Format of cheat file is:
+ *
+ *   {Some Game's CRC}
+ *   name=Some Game
+ *
+ *   [Cheat Name 1]
+ *   enabled=1
+ *   XXXXXXXX YYYY <-- cheat code (address, new value)
+ *   XXXXXXXX YYYY
+ *   XXXXXXXX YYYY
+ *
+ *   [Cheat Name 2]
+ *   enabled=0
+ *   XXXXXXXX YYYY
+ *   XXXXXXXX YYYY
+ *   XXXXXXXX YYYY
+ *
+ *   {Another Game's CRC}
+ *   name=Another Game
+ *   ...
+ */
+void cheat_read_config(void)
 {
-    unsigned short value_read;
-    value_read = *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16)));
-    if (value_read == value)
+    char path[PATH_MAX];
+    FILE *f = NULL;
+    char line[2048];
+
+    rom_cheats_t *romcheat = NULL;
+    cheat_t *cheat = NULL;
+    cheat_code_t *cheatcode = NULL;
+
+    snprintf(path, PATH_MAX, "%s%s", get_configpath(), CHEAT_FILENAME);
+    f = fopen(path, "r");
+
+    // if no cheat config file installed, exit quietly
+    if(!f) return;
+
+    // parse file lines
+    while(!feof(f))
     {
-        return 1;
+        if( !fgets( line, 2048, f ) )
+            break;
+
+        trim(line);
+
+        if(strlen(line) == 0 ||
+           line[0] == '#')     // comment
+            continue;
+
+        // beginning of new rom section
+        if (line[0] == '{' && line[strlen(line)-1] == '}')
+        {
+            romcheat = malloc(sizeof(rom_cheats_t));
+            list_append(&g_Cheats, romcheat);
+            memset(romcheat, 0, sizeof(rom_cheats_t));
+            sscanf(line, "{%x %x}", &romcheat->crc1, &romcheat->crc2);
+            continue;
+        }
+
+        // rom name (just informational)
+        if(strncasecmp(line, "name=", 5) == 0)
+        {
+            romcheat->rom_name = strdup(strstr(line, "=")+1);
+            continue;
+        }
+
+        // name of cheat
+        if(line[0] == '[' && line[strlen(line)-1] == ']')
+        {
+            cheat = malloc(sizeof(cheat_t));
+            memset(cheat, 0, sizeof(cheat_t));
+            list_append(&romcheat->cheats, cheat);
+            line[strlen(line)-1] = '\0'; // get rid of trailing ']'
+            cheat->name = strdup(line+1);
+            continue;
+        }
+
+        // cheat always enabled?
+        if(strncasecmp(line, "enabled=", 8) == 0)
+        {
+            sscanf(line, "enabled=%d", &cheat->always_enabled);
+            continue;
+        }
+
+        // else, line must be a cheat code
+        cheatcode = malloc(sizeof(cheat_code_t));
+        memset(cheatcode, 0, sizeof(cheat_code_t));
+        list_append(&cheat->cheat_codes, cheatcode);
+        sscanf(line, "%x %hx", &cheatcode->address, &cheatcode->value);
     }
-    else
-    {
-        return 0;
-    }
+    fclose(f);
 }
 
-// most likely, this doesnt do anything.
-void disable_expansion_pack()
+/** cheat_write_config
+ *   Write out all cheats to file
+ */
+void cheat_write_config(void)
 {
-    execute_cheat(0xF1000318, 0x0040);
-    execute_cheat(0xF100031A, 0x0000);
+    char path[PATH_MAX];
+    FILE *f = NULL;
+
+    list_node_t *node1, *node2, *node3;
+    rom_cheats_t *romcheat = NULL;
+    cheat_t *cheat = NULL;
+    cheat_code_t *cheatcode = NULL;
+
+    // if no cheats, don't bother writing out file
+    if(list_empty(g_Cheats)) return;
+
+    snprintf(path, PATH_MAX, "%s%s", get_configpath(), CHEAT_FILENAME);
+    f = fopen(path, "w");
+    if(!f)
+        return;
+
+    list_foreach(g_Cheats, node1)
+    {
+        romcheat = (rom_cheats_t *)node1->data;
+
+        fprintf(f, "{%.8x %.8x}\n"
+                "name=%s\n",
+                romcheat->crc1,
+                romcheat->crc2,
+                romcheat->rom_name);
+
+        list_foreach(romcheat->cheats, node2)
+        {
+            cheat = (cheat_t *)node2->data;
+
+            fprintf(f, "\n[%s]\n", cheat->name);
+            fprintf(f, "enabled=%d\n", cheat->always_enabled? 1 : 0);
+
+            list_foreach(cheat->cheat_codes, node3)
+            {
+                cheatcode = (cheat_code_t *)node3->data;
+
+                fprintf(f, "%.8x %.4hx\n", cheatcode->address, cheatcode->value);
+            }
+        }
+        fprintf(f, "\n");
+    }
+
+    fclose(f);
+}
+
+/** cheat_delete_all
+ *   Delete all cheat-related structures
+ */
+void cheat_delete_all(void)
+{
+    list_node_t *node1, *node2, *node3;
+    rom_cheats_t *romcheat = NULL;
+    cheat_t *cheat = NULL;
+    cheat_code_t *cheatcode = NULL;
+
+    list_foreach(g_Cheats, node1)
+    {
+        romcheat = (rom_cheats_t *)node1->data;
+
+        free(romcheat->rom_name);
+        list_foreach(romcheat->cheats, node2)
+        {
+            cheat = (cheat_t *)node2->data;
+
+            free(cheat->name);
+            list_foreach(cheat->cheat_codes, node3)
+            {
+                cheatcode = (cheat_code_t *)node3->data;
+                free(cheatcode);
+            }
+            list_delete(&cheat->cheat_codes);
+            free(cheat);
+        }
+        list_delete(&romcheat->cheats);
+        free(romcheat);
+    }
+    list_delete(&g_Cheats);
+    g_Current = NULL;
+}
+
+/** cheat_load_current_rom
+ *   sets pointer to cheats for currently loaded rom.
+ */
+void cheat_load_current_rom(void)
+{
+    list_node_t *node;
+    rom_cheats_t *rom_cheat = NULL;
+    unsigned int crc1, crc2;
+
+    if(!ROM_HEADER) return;
+
+    list_foreach(g_Cheats, node)
+    {
+        rom_cheat = (rom_cheats_t *)node->data;
+
+        if(g_MemHasBeenBSwapped)
+        {
+            crc1 = sl(rom_cheat->crc1);
+            crc2 = sl(rom_cheat->crc2);
+        }
+        else
+        {
+            crc1 = rom_cheat->crc1;
+            crc2 = rom_cheat->crc2;
+        }
+
+        if(crc1 == ROM_HEADER->CRC1 &&
+           crc2 == ROM_HEADER->CRC2)
+        {
+            g_Current = rom_cheat;
+            return;
+        }
+    }
+    // not found
+    g_Current = NULL;
 }
 
 void additional_enable_code()
@@ -277,15 +421,5 @@ void enabler(unsigned int address)
     */
      
     return;
-}
-
-void update_address_16bit(unsigned int address, unsigned short new_value)
-{
-    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16))) = new_value;
-}
-
-void update_address_8bit(unsigned int address, unsigned char new_value)
-{
-    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8))) = new_value;
 }
 

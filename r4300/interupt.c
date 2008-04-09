@@ -401,12 +401,12 @@ void gen_interupt()
        if(vi_counter < 60) {    
          if (vi_counter == 0)
          {
-             apply_cheats(ENTRY_BOOT);
+             cheat_apply_cheats(ENTRY_BOOT);
          }
          vi_counter++;
        }
        else {
-            apply_cheats(ENTRY_VI);
+            cheat_apply_cheats(ENTRY_VI);
        }
 #ifdef VCR_SUPPORT
     VCR_updateScreen();
