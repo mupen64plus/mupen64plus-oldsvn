@@ -45,6 +45,7 @@
 namespace core {
     extern "C" {
         #include "../main.h"
+        #include "../plugin.h"
     }
 }
 
@@ -132,8 +133,12 @@ void MainWindow::emulationStop()
     core::stopEmulation();
 }
 
+void MainWindow::viewFullScreen()
+{
+    core::changeWindow();
+}
+
 // FIXME these need implementing...
-void MainWindow::viewFullScreen() {}
 void MainWindow::saveStateSave() {}
 void MainWindow::saveStateSaveAs() {}
 void MainWindow::saveStateRestore() {}

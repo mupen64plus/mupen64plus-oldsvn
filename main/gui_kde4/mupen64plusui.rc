@@ -13,8 +13,6 @@
         <Action name="emulation_pause_continue"/>
         <Action name="emulation_stop"/>
         <Separator/>
-        <Action name="fullscreen"/>
-        <Separator/>
         <Action name="save_state_save"/>
         <Action name="save_state_save_as"/>
         <Action name="save_state_restore"/>
