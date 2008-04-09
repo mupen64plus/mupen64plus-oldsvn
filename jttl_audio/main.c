@@ -246,34 +246,27 @@ EXPORT void CALL AiLenChanged( void )
 
     // And then syncronization */
 
-    // If buffer is running slow we speed up the game a bit. Actually we skip the syncronization.
-    if(buffer_pos < LowBufferLoadLevel)
-    {
-        if(TimeCompensation == 2)
-        {
-            //wait_time -= (LOW_BUFFER_LOAD_LEVEL - buffer_pos);
-            wait_time = -1;
-            if(buffer_pos < SecondaryBufferSize*4)
-                SDL_PauseAudio(1);
-        }
-    }
-    else SDL_PauseAudio(0);
-    
-    if(wait_time != -1) 
-    {
-        // This will slow down the game incase it is going too fast to keep up with.
-        // The temporary speed burst is believed to be a side effect of CPU timer inaccuracies.
-        if(buffer_pos > HighBufferLoadLevel && TimeCompensation == 2)
-        {
-            wait_time += (float)(buffer_pos - HIGH_BUFFER_LOAD_LEVEL) / (float)(frequency / 250);
-        }
+       /* If buffer is running slow we speed up the game a bit. Actually we skip the syncronization. */
+       if(buffer_pos < LowBufferLoadLevel)
+       {
+               //wait_time -= (LOW_BUFFER_LOAD_LEVEL - buffer_pos);
+               wait_time = -1;
+           if(buffer_pos < SecondaryBufferSize*4)
+             SDL_PauseAudio(1);
+       }
+       else SDL_PauseAudio(0);
+       if(wait_time != -1) {
+               /* If for some reason game is runnin extremely fast and there is risk buffer is going to
+                 overflow, we slow down the game a bit to keep sound smooth. The overspeed is caused
+                 by inaccuracy in machines clock. */
+               if(buffer_pos > HighBufferLoadLevel)
+               {
+                       wait_time += (float)(buffer_pos - HIGH_BUFFER_LOAD_LEVEL) / (float)(frequency / 250);
+               }
         expected_ticks = ((float)(prev_len_reg) / (float)(frequency / 250));
 
-        if(TimeCompensation >= 1)
-        {
-            if(last_ticks + expected_ticks > SDL_GetTicks())
-            {
-                wait_time += (last_ticks + expected_ticks) - SDL_GetTicks();
+               if(last_ticks + expected_ticks > SDL_GetTicks()) {
+                       wait_time += (last_ticks + expected_ticks) - SDL_GetTicks();
 #ifdef DEBUG
                 printf("[JttL's SDL Audio plugin] Debug: wait_time: %i, Buffer: %i/%i\n", wait_time, buffer_pos, PrimaryBufferSize);
 #endif
@@ -281,7 +274,6 @@ EXPORT void CALL AiLenChanged( void )
             }
         }
 
-    }
     last_ticks = SDL_GetTicks();
     prev_len_reg = LenReg;
 
