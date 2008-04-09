@@ -56,11 +56,7 @@ void apply_cheats(int entry)
            {
                if(cheats[x].enabled == 1)
                {
-                   do
-                   {
-                       execute_cheat(cheats[x].address,cheats[x].value);
-                       next_cheat = (cheatcode *)cheats[x].next_cheat;
-                   } while (next_cheat != NULL);
+                   execute_cheat(cheats[x].address,cheats[x].value);
                }
            }
        }
@@ -68,18 +64,19 @@ void apply_cheats(int entry)
        {
            if(cheats[x].enabled == 1)
            {
-               do
+               if ((cheats[x].address & 0xF0000000) == 0xD0000000)
                {
-                   if (do_next != 0)
+                   do_next = execute_cheat(cheats[x].address,cheats[x].value);
+                   x++;
+                   if(do_next)
                    {
-                       do_next = execute_cheat(cheats[x].address,cheats[x].value);
+                       execute_cheat(cheats[x].address,cheats[x].value);
                    }
-                   else
-                   {
-                       do_next = 1;
-                   }
-                   next_cheat = (cheatcode *)cheats[x].next_cheat;
-               } while (next_cheat != NULL);
+               }
+               else
+               {
+                   execute_cheat(cheats[x].address,cheats[x].value);
+               }
            }
        }
     }
