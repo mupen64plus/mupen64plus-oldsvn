@@ -45,10 +45,8 @@ void apply_cheats(int entry)
 {
     int x;
     int do_next = 0;
-    cheatcode *next_cheat;
     for (x = 0;x < numcheats;x++)
     {
-       next_cheat = NULL;
        do_next = 1;
        if (entry == ENTRY_BOOT)
        {

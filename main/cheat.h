@@ -36,7 +36,6 @@ typedef struct {
     int enabled;
     char command;
     char *cheatname;
-    struct cheatcode *next_cheat;
 } cheatcode;
 
 #define ENTRY_BOOT 0
