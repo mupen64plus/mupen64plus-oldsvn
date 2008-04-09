@@ -132,7 +132,7 @@ static int execute_cheat(unsigned int address, unsigned short value)
 static int gs_button_pressed(void)
 {
     return key_pressed('g') ||
-           key_pressed('G');
+           key_pressed('G') ||
            event_active(config_get_string("Joy Mapping GS Button", ""));
 }
 
