@@ -33,12 +33,12 @@
 #include "main.h"
 #include "rom.h"
 #include "util.h" // list utilities
+#include "config.h"
 
 #define CHEAT_FILENAME "cheats.cfg"
 
 // public globals
 list_t g_Cheats = NULL; // list of all supported cheats
-int g_GSButtonPressed = 0; // Gameshark button pressed?
 
 // static globals
 static rom_cheats_t *g_Current = NULL; // current loaded rom
@@ -128,6 +128,13 @@ static int execute_cheat(unsigned int address, unsigned short value)
             break;
     }
 }  
+
+static int gs_button_pressed(void)
+{
+    return key_pressed('g') ||
+           key_pressed('G');
+           event_active(config_get_string("Joy Mapping GS Button", ""));
+}
 
 // public functions
 void cheat_apply_cheats(int entry)

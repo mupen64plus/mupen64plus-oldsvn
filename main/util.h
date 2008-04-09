@@ -39,6 +39,8 @@
 /** string utilities **/
 char *trim(char *str);
 char *event_to_str(const SDL_Event *event);
+int event_active(const char *event_str);
+int key_pressed(SDLKey k);
 
 /** file utilities **/
 int isfile(char *path);

@@ -32,7 +32,6 @@
 #define ENTRY_VI 1
 
 extern list_t g_Cheats;
-extern int g_GSButtonPressed;
 
 // represents all cheats for a given rom
 typedef struct {

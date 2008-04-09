@@ -104,13 +104,97 @@ char *event_to_str(const SDL_Event *event)
 
         case SDL_JOYHATMOTION:
             event_str = malloc(10);
-            snprintf(event_str, 10, "J%dH%d",
+            snprintf(event_str, 10, "J%dH%dV%d",
                      event->jhat.which,
+                     event->jhat.hat,
                      event->jhat.value);
             break;
     }
 
     return event_str;
+}
+
+/** event_active
+ *    Returns 1 if the specified joystick event is currently active. This
+ *    function expects an input string of the same form output by event_to_str.
+ */
+int event_active(const char *event_str)
+{
+    char device, joy_input_type, axis_direction;
+    int dev_number, input_number, input_value;
+    SDL_Joystick *joystick = NULL;
+
+    // empty string
+    if(!event_str || strlen(event_str) == 0) return 0;
+
+    // joystick event
+    if(event_str[0] == 'J')
+    {
+        // parse string depending on type of joystick input
+        switch(event_str[2])
+        {
+            // axis
+            case 'A':
+                sscanf(event_str, "%c%d%c%d%c", &device, &dev_number,
+                       &joy_input_type, &input_number, &axis_direction);
+                break;
+            // hat
+            case 'H':
+                sscanf(event_str, "%c%d%c%dV%d", &device, &dev_number,
+                       &joy_input_type, &input_number, &input_value);
+                break;
+            // button
+            case 'B':
+                sscanf(event_str, "%c%d%c%d", &device, &dev_number,
+                       &joy_input_type, &input_number);
+                break;
+        }
+
+        joystick = SDL_JoystickOpen(dev_number);
+        SDL_JoystickUpdate();
+        switch(joy_input_type)
+        {
+            case 'A':
+                if(axis_direction == '-')
+                    return SDL_JoystickGetAxis(joystick, input_number) < -15000;
+                else
+                    return SDL_JoystickGetAxis(joystick, input_number) > 15000;
+                return (int)SDL_JoystickGetButton(joystick, input_number);
+                break;
+            case 'B':
+                return (int)SDL_JoystickGetButton(joystick, input_number);
+                break;
+            case 'H':
+                return SDL_JoystickGetHat(joystick, input_number) == input_value;
+                break;
+            default:
+                return 0;
+                break;
+        }
+    }
+
+    // keyboard event
+    if(event_str[0] == 'K')
+    {
+        // TODO
+    }
+}
+
+/** key_pressed
+ *   Returns 1 if the given key is currently pressed.
+ */
+int key_pressed(SDLKey k)
+{
+    Uint8 *key_states;
+    int num_keys;
+
+    SDL_PumpEvents(); // update input state array
+    key_states = SDL_GetKeyState(&num_keys);
+
+    if(k >= num_keys)
+        return 0;
+
+    return key_states[k];
 }
 
 /** file utilities **/
