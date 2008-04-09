@@ -30,9 +30,19 @@
 
 #include "SDL.h"
 
-
 #define DEVICE_KEYBOARD     (-1)
 #define DEVICE_NONE         (-2)
+
+// Some stuff from n-rage plugin
+#define RD_GETSTATUS        0x00        // get status
+#define RD_READKEYS         0x01        // read button values
+#define RD_READPAK          0x02        // read from controllerpack
+#define RD_WRITEPAK         0x03        // write to controllerpack
+#define RD_RESETCONTROLLER  0xff        // reset controller
+#define RD_READEEPROM       0x04        // read eeprom
+#define RD_WRITEEPROM       0x05        // write eeprom
+
+#define PAK_IO_RUMBLE       0xC000      // the address where rumble-commands are sent to
 
 enum EButton
 {
@@ -50,6 +60,8 @@ enum EButton
     U_CBUTTON,
     R_TRIG,
     L_TRIG,
+    MEMPAK,
+    RUMBLEPAK,
     Y_AXIS,
     X_AXIS,
     NUM_BUTTONS
@@ -78,11 +90,13 @@ typedef struct
     BUTTONS buttons;
 
     // mappings
-    SButtonMap    button[14];   // 14 buttons; in the order of EButton
+    SButtonMap    button[16];   // 14 buttons; in the order of EButton
     SAxisMap      axis[2];      //  2 axis
     int           device;       // joystick device; -1 = keyboard; -2 = none
     int           mouse;        // mouse enabled: 0 = no; 1 = yes
     SDL_Joystick *joystick;     // SDL joystick device
+    int           event_joystick;   // the /dev/input/eventX device for force feeback
+    
 } SController;
 
 #endif // __PLUGIN_H__

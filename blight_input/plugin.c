@@ -15,6 +15,13 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <linux/input.h>
+
 #include "plugin.h"
 
 #include "../main/winlnxdefs.h"
@@ -35,6 +42,13 @@
 #include <stdio.h>
 #include <string.h>
 
+/* defines for the force feedback rumble support */
+#define BITS_PER_LONG (sizeof(long) * 8)
+#define OFF(x)  ((x)%BITS_PER_LONG)
+#define BIT(x)  (1UL<<OFF(x))
+#define LONG(x) ((x)/BITS_PER_LONG)
+#define test_bit(bit, array)    ((array[LONG(bit)] >> OFF(bit)) & 1)
+
 static unsigned short button_bits[] = {
     0x0001,  // R_DPAD
     0x0002,  // L_DPAD
@@ -49,7 +63,9 @@ static unsigned short button_bits[] = {
     0x0400,  // D_CBUTTON
     0x0800,  // U_CBUTTON
     0x1000,  // R_TRIG
-    0x2000   // L_TRIG
+    0x2000,  // L_TRIG
+    0x4000,  // Mempak switch
+    0x8000   // Rumblepak switch
 };
 
 static SController controller[4];   // 4 controllers
@@ -71,6 +87,8 @@ static const char *button_names[] = {
     "C Button U",   // U_CBUTTON
     "R Trig",       // R_TRIG
     "L Trig",       // L_TRIG
+    "Mempak switch",
+    "Rumblepak switch",
     "Y Axis",       // Y_AXIS
     "X Axis"        // X_AXIS
 };
@@ -129,41 +147,14 @@ get_hat_pos_by_name( const char *name )
     return -1;
 }
 
-/*
-static void
-strip_whitespace( char *buf )
-{
-    char *p = buf, *dest = buf;
-
-    while( *p )
-    {
-        if( *p == ' ' || *p == '\t' )
-        {
-            while( *++p == ' ' || *p == '\t' );
-            p--;
-            memcpy( dest, p, p - dest );
-            dest += p - dest;
-        }
-
-        ++p;
-        dest = p;
-    }
-#ifdef _DEBUG
-    printf( "%s, %d: whitespace stripped: %s\n", __FILE__, __LINE__, buf );
-#endif
-}
-*/
-void
-read_configuration( void )
+void read_configuration( void )
 {
     FILE *f;
-    int cont, plugged, mempak, mouse, i, b, dev;
+    int cont, plugged, plugin, mouse, i, b, dev;
     char line[200], device[200], key_a[200], key_b[200], button_a[200], button_b[200],
              axis[200], button[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
     const char *p;
     char path[PATH_MAX];
-//  const char *p1, *p2;
-
 
     for( i = 0; i < 4; i++ )
     {
@@ -171,7 +162,7 @@ read_configuration( void )
         controller[i].control.Present = FALSE;
         controller[i].control.RawData = FALSE;
         controller[i].control.Plugin = PLUGIN_NONE;
-        for( b = 0; b < 14; b++ )
+        for( b = 0; b < 16; b++ )
         {
             controller[i].button[b].button = -1;
             controller[i].button[b].key = SDLK_UNKNOWN;
@@ -205,7 +196,6 @@ read_configuration( void )
     {
         if( fgets( line, 200, f ) == NULL )
             break;
-//      strip_whitespace( line );
         if( line[0] == '\n' || line[0] == '\0' )
             continue;
         if( sscanf( line, "[controller %d]", &cont ) == 1 )
@@ -215,10 +205,9 @@ read_configuration( void )
             controller[cont].control.Present = plugged;
             continue;
         }
-        if( sscanf( line, "mempak=%d", &mempak ) == 1 )
+        if( sscanf( line, "plugin=%d", &plugin ) == 1 )
         {
-            if( mempak )
-                controller[cont].control.Plugin = PLUGIN_MEMPAK;
+            controller[cont].control.Plugin = plugin;
             continue;
         }
         if( sscanf( line, "mouse=%d", &mouse ) == 1 )
@@ -251,25 +240,11 @@ read_configuration( void )
             {
                 num = sscanf( p, "key( %s , %s ); button( %s , %s ); axis( %s ); hat( %s , %s , %s )",
                     key_a, key_b, button_a, button_b, axis, hat, hat_pos_a, hat_pos_b );
-/*              p1 = strstr( p, "key(" );
-                if( p1 )
-                {
-                    p2 = strchr( p1, ',' );
-                    if( p2 )
-                    {
-                        strcpy( key_a, p1, p2 - p1 );
-                        key_a[p2 - p1] = '\0';
-                        p2 = strchr(
-                        strcpy( key_b, p1, p2 - p1 );
-                    }
-                }
-*/
+
 #ifdef _DEBUG
                 printf( "%s, %d: num = %d, key_a = %s, key_b = %s, button_a = %s, button_b = %s, axis = %s, hat = %s, hat_pos_a = %s, hat_pos_b = %s\n", __FILE__, __LINE__, num,
                         key_a, key_b, button_a, button_b, axis, hat, hat_pos_a, hat_pos_b );
 #endif
-//              controller[cont].axis[b - Y_AXIS].key_a = get_key_by_name( key_a );
-//              controller[cont].axis[b - Y_AXIS].key_b = get_key_by_name( key_b );
                 if( sscanf( key_a, "%d", (int *)&controller[cont].axis[b - Y_AXIS].key_a ) != 1 )
                     controller[cont].axis[b - Y_AXIS].key_a = -1;
                 if( sscanf( key_b, "%d", (int *)&controller[cont].axis[b - Y_AXIS].key_b ) != 1 )
@@ -310,7 +285,6 @@ read_configuration( void )
                     else if( controller[cont].button[b].axis_dir == '-' )
                         controller[cont].button[b].axis_dir = -1;
                 }
-//              controller[cont].button[b].key = get_key_by_name( key_a );
                 if( sscanf( key_a, "%d", (int *)&controller[cont].button[b].key ) != 1 )
                     controller[cont].button[b].key = -1;
                 if( sscanf( button_a, "%d", &controller[cont].button[b].button ) != 1 )
@@ -340,7 +314,6 @@ write_configuration( void )
 {
     FILE *f;
     int i, b;
-//  const char *cKey_a, *cKey_b;
     char cKey_a[100], cKey_b[100];
     char cButton_a[100], cButton_b[100], cAxis[100];
     char cHat[100];
@@ -362,7 +335,7 @@ write_configuration( void )
     {
         fprintf( f, "[controller %d]\n", i );
         fprintf( f, "plugged=%d\n", controller[i].control.Present );
-        fprintf( f, "mempak=%d\n", (controller[i].control.Plugin == PLUGIN_MEMPAK) ? 1 : 0 ); // ???
+        fprintf( f, "plugin=%d\n", controller[i].control.Plugin );
         fprintf( f, "mouse=%d\n", controller[i].mouse );
         if( controller[i].device == DEVICE_KEYBOARD )
             fprintf( f, "device=Keyboard\n" );
@@ -371,7 +344,7 @@ write_configuration( void )
         else
             fprintf( f, "device=None\n" );
 
-        for( b = 0; b < 14; b++ )
+        for( b = 0; b < 16; b++ )
         {
 //          cKey_a = (controller[i].button[b].key == SDLK_UNKNOWN) ? "None" : SDL_GetKeyName( controller[i].button[b].key );
             if( controller[i].button[b].key >= 0 )
@@ -435,7 +408,7 @@ write_configuration( void )
             else
                 strcpy( cHat, "None" );
 
-            fprintf( f, "%s=key( %s , %s ); button( %s , %s ); axis( %s ); hat( %s , %s , %s )\n", button_names[b+14],
+            fprintf( f, "%s=key( %s , %s ); button( %s , %s ); axis( %s ); hat( %s , %s , %s )\n", button_names[b+16],
                         cKey_a, cKey_b, cButton_a, cButton_b, cAxis, cHat, HAT_POS_NAME(controller[i].axis[b].hat_pos_a), HAT_POS_NAME(controller[i].axis[b].hat_pos_b) );
         }
         fprintf( f, "\n" );
@@ -443,6 +416,36 @@ write_configuration( void )
 
     fclose( f );
     return 0;
+}
+
+BYTE lastCommand[6];
+
+struct ff_effect ffeffect[3];
+struct ff_effect ffstrong[3];
+struct ff_effect ffweak[3];
+
+BYTE DataCRC( BYTE *Data, int iLenght )
+{
+    register BYTE Remainder = Data[0];
+
+    int iByte = 1;
+    BYTE bBit = 0;
+
+    while( iByte <= iLenght )
+    {
+        BOOL HighBit = ((Remainder & 0x80) != 0);
+        Remainder = Remainder << 1;
+
+        Remainder += ( iByte < iLenght && Data[iByte] & (0x80 >> bBit )) ? 1 : 0;
+
+        Remainder ^= (HighBit) ? 0x85 : 0;
+
+        bBit++;
+        iByte += bBit/8;
+        bBit %= 8;
+    }
+
+    return Remainder;
 }
 
 /******************************************************************
@@ -476,13 +479,75 @@ CloseDLL( void )
             read controller:      01 04 01 FF FF FF FF
 *******************************************************************/
 void
-ControllerCommand( int Control, BYTE *Command )
+ControllerCommand(int Control, BYTE *Command)
 {
-#if 0//def _DEBUG
-    printf( "\nRaw Command (cont=%d):\n", Control );
-    printf( "\t%02X %02X %02X %02X %02X %02X\n", Command[0], Command[1],
-            Command[2], Command[3], Command[4], Command[5]);//, Command[6], Command[7] );
-#endif
+    BYTE *Data = &Command[5];
+    struct input_event play;
+
+    if (Control == -1)
+        return;
+
+    switch (Command[2])
+    {
+        case RD_GETSTATUS:
+            /*printf( "Get status\n" );*/
+            break;
+        case RD_READKEYS:
+            /*printf( "Read keys\n" );*/
+            break;
+        case RD_READPAK:
+            /*printf( "Read pak\n" );*/
+            if (controller[Control].control.Plugin == PLUGIN_RAW)
+            {
+                DWORD dwAddress = (Command[3] << 8) + (Command[4] & 0xE0);
+    
+                if(( dwAddress >= 0x8000 ) && ( dwAddress < 0x9000 ) )
+                    memset( Data, 0x80, 32 );
+                else
+                    memset( Data, 0x00, 32 );
+    
+                Data[32] = DataCRC( Data, 32 );
+                break;
+                }
+        case RD_WRITEPAK:
+            /*printf( "Write pak\n" );*/
+            if (controller[Control].control.Plugin == PLUGIN_RAW)
+            {
+                DWORD dwAddress = (Command[3] << 8) + (Command[4] & 0xE0);
+                if( dwAddress == PAK_IO_RUMBLE && controller[Control].event_joystick != 0)
+                {
+                    if( *Data )
+                    {
+                        play.type = EV_FF;
+                        play.code = ffeffect[Control].id;
+                        play.value = 1;
+    
+                        if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
+                            perror("Error starting rumble effect");
+                    }
+                    else
+                    {
+                        play.type = EV_FF;
+                        play.code = ffeffect[Control].id;
+                        play.value = 0;
+
+                        if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
+                            perror("Error stopping rumble effect");
+                    }
+                }
+                Data[32] = DataCRC( Data, 32 );
+            }
+            break;
+        case RD_RESETCONTROLLER:
+            /*printf( "Reset controller\n" );*/
+            break;
+        case RD_READEEPROM:
+            /*printf( "Read eeprom\n" );*/
+            break;
+        case RD_WRITEEPROM:
+            /*printf( "Write eeprom\n" );*/
+            break;
+        }
 }
 
 /******************************************************************
@@ -762,6 +827,7 @@ GetDllInfo( PLUGIN_INFO *PluginInfo )
 void
 GetKeys( int Control, BUTTONS *Keys )
 {
+    struct input_event play;
     int b, axis_val, axis_max_val;
     SDL_Event event;
     Uint8 *keystate = SDL_GetKeyState( NULL );
@@ -775,7 +841,7 @@ GetKeys( int Control, BUTTONS *Keys )
 
     if( controller[Control].device >= 0 )
     {
-        for( b = 0; b < 14; b++ )
+        for( b = 0; b < 16; b++ )
         {
             if( controller[Control].button[b].button >= 0 )
                 if( SDL_JoystickGetButton( controller[Control].joystick, controller[Control].button[b].button ) )
@@ -838,7 +904,7 @@ GetKeys( int Control, BUTTONS *Keys )
             axis_max_val -= 40;
         if (keystate[SDLK_LSHIFT])
             axis_max_val -= 20;
-        for( b = 0; b < 14; b++ )
+        for( b = 0; b < 16; b++ )
         {
             if( controller[Control].button[b].key == SDLK_UNKNOWN || ((int) controller[Control].button[b].key) < 0)
                 continue;
@@ -872,7 +938,7 @@ GetKeys( int Control, BUTTONS *Keys )
     {
         Uint8 mstate = SDL_GetMouseState( NULL, NULL );
 
-        for( b = 0; b < 14; b++ )
+        for( b = 0; b < 16; b++ )
         {
             if( controller[Control].button[b].mouse < 1 )
                 continue;
@@ -931,6 +997,110 @@ GetKeys( int Control, BUTTONS *Keys )
     printf( "Controller #%d value: 0x%8.8X\n", Control, *(int *)&controller[Control].buttons );
 #endif
     *(int *)Keys = *(int *)&controller[Control].buttons;
+
+    /* handle mempack / rumblepak switching */
+    if (controller[Control].buttons.button & button_bits[14])
+    {
+        controller[Control].control.Plugin = PLUGIN_MEMPAK;
+        play.type = EV_FF;
+        play.code = ffweak[Control].id;
+        play.value = 1;
+        if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
+            perror("Error starting rumble effect");
+    }
+    if (controller[Control].buttons.button & button_bits[15])
+    {
+        controller[Control].control.Plugin = PLUGIN_RAW;
+        play.type = EV_FF;
+        play.code = ffstrong[Control].id;
+        play.value = 1;
+
+        if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
+            perror("Error starting rumble effect");
+    }
+}
+
+int InitiateRumble(int cntrl)
+{
+    DIR *dp;
+    struct dirent *ep;
+    unsigned long features[4];
+    char temp[128];
+    char temp2[128];
+    int iFound = 0;
+
+    sprintf(temp,"/sys/class/input/js%d/device", controller[cntrl].device);
+    dp = opendir(temp);
+
+    if (dp == NULL) return 0;
+
+    while ((ep = readdir (dp)))
+    {
+        if (!strncmp(ep->d_name,"input:event",11))
+        {
+            sscanf(ep->d_name,"input:%s",temp2);
+            sprintf(temp,"/dev/input/%s",temp2);
+            iFound = 1;
+            break;
+        }
+        else if (!strncmp(ep->d_name,"input:input",11))
+        {
+            strcat(temp, "/");
+            strcat(temp, ep->d_name);
+            closedir (dp);
+            dp = opendir(temp);
+            if (dp == NULL) return 0;
+        }
+    }
+    closedir(dp);
+    if (!iFound) return 0;
+
+    controller[cntrl].event_joystick = open(temp, O_RDWR);
+    if (controller[cntrl].event_joystick == -1)
+    {
+        printf("["PLUGIN_NAME"]: Couldn't open device file '%s' for rumble support.\n", temp);
+        controller[cntrl].event_joystick = 0;
+        return 0;
+    }
+
+    if (ioctl(controller[cntrl].event_joystick, EVIOCGBIT(EV_FF, sizeof(unsigned long) * 4), features) == -1)
+    {
+        controller[cntrl].event_joystick = 0;
+        return 0;
+    }
+
+    if (!test_bit(FF_RUMBLE, features))
+    {
+        printf("["PLUGIN_NAME"]: No rumble supported on N64 joystick #i\n", cntrl + 1);
+        return 0;
+    }
+
+    ffeffect[cntrl].type = FF_RUMBLE;
+    ffeffect[cntrl].id = -1;
+    ffeffect[cntrl].u.rumble.strong_magnitude = 0xFFFF;
+    ffeffect[cntrl].u.rumble.weak_magnitude = 0xFFFF;
+
+    ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffeffect[cntrl]);
+
+    ffstrong[cntrl].type = FF_RUMBLE;
+    ffstrong[cntrl].id = -1;
+    ffstrong[cntrl].u.rumble.strong_magnitude = 0xFFFF;
+    ffstrong[cntrl].u.rumble.weak_magnitude = 0x0000;
+    ffstrong[cntrl].replay.length = 500;
+    ffstrong[cntrl].replay.delay = 0;
+
+    ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffstrong[cntrl]);
+
+    ffweak[cntrl].type = FF_RUMBLE;
+    ffweak[cntrl].id = -1;
+    ffweak[cntrl].u.rumble.strong_magnitude = 0x0000;
+    ffweak[cntrl].u.rumble.weak_magnitude = 0xFFFF;
+    ffweak[cntrl].replay.length = 500;
+    ffweak[cntrl].replay.delay = 0;
+
+    ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffweak[cntrl]);
+
+    printf("["PLUGIN_NAME"]: Rumble activated on N64 joystick #i\n", cntrl + 1);
 }
 
 /******************************************************************
@@ -954,7 +1124,10 @@ InitiateControllers( CONTROL_INFO ControlInfo )
     read_configuration();
 
     for( i = 0; i < 4; i++ )
+    {
         memcpy( ControlInfo.Controls + i, &controller[i].control, sizeof( CONTROL ) );
+        InitiateRumble(i);
+    }
 
     printf( "["PLUGIN_NAME"]: version "PLUGIN_VERSION" initialized.\n" );
 }

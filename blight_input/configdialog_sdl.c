@@ -55,6 +55,8 @@ static const char *button_names[] = {
     "C Button U",   // U_CBUTTON
     "R Trig",   // R_TRIG
     "L Trig",   // L_TRIG
+    "Mempak switch",
+    "Rumblepak switch",
     "Y Axis",   // Y_AXIS
     "X Axis"    // X_AXIS
 };
@@ -97,7 +99,7 @@ static SCallback callback[] = {
     { button_clicked, 1, 380, 445, 90, 25 },            // cancel
 
     { checkbutton_clicked, 0,  20, 45, 90, 25 },        // plugged
-    { checkbutton_clicked, 1, 120, 45, 90, 25 },        // mempak
+    { checkbutton_clicked, 1, 120, 45, 100, 25 },       // plugin
 
     { device_clicked, 0, 360, 45, 260, 25 },            // device
 
@@ -115,9 +117,10 @@ static SCallback callback[] = {
     { pad_button_clicked, D_CBUTTON,    475, 205, 80, 20 },
     { pad_button_clicked, R_TRIG,       395, 105, 50, 20 },
     { pad_button_clicked, L_TRIG,       155, 105, 50, 20 },
+    { pad_button_clicked, MEMPAK,       110, 350, 150, 20 },
+    { pad_button_clicked, RUMBLEPAK,    110, 375, 150, 20 },
     { pad_button_clicked, Y_AXIS,       220, 398, 50, 20 },
     { pad_button_clicked, X_AXIS,       280, 398, 50, 20 },
-
     { checkbutton_clicked, 2,       340, 398, 110, 25 },        // enable mouse
 
     { NULL, 0, 0, 0, 0, 0 }
@@ -219,7 +222,7 @@ button_released()
             orig_cont[i].device = config[i].device;
             orig_cont[i].mouse = config[i].mouse;
             memcpy( orig_cont[i].axis, config[i].axis, sizeof( SAxisMap ) * 2 );
-            memcpy( orig_cont[i].button, config[i].button, sizeof( SButtonMap ) * 14 );
+            memcpy( orig_cont[i].button, config[i].button, sizeof( SButtonMap ) * 16 );
             memcpy( &orig_cont[i].control, &config[i].control, sizeof( CONTROL ) );
         }
         write_configuration();
@@ -246,10 +249,12 @@ checkbutton_clicked( int _arg )
     }
     else if( _arg == 1 )
     {
-        if( config[cont].control.Plugin == PLUGIN_MEMPAK )
+        if( config[cont].control.Plugin == PLUGIN_RAW )
             config[cont].control.Plugin = PLUGIN_NONE;
-        else
+        else if( config[cont].control.Plugin == PLUGIN_NONE )
             config[cont].control.Plugin = PLUGIN_MEMPAK;
+        else
+            config[cont].control.Plugin = PLUGIN_RAW;
     }
     else if( _arg == 2 )
     {
@@ -739,6 +744,8 @@ configure_thread( void *_arg )
         write_text( screen, 475, 205, black, gray, button_names[D_CBUTTON] );
         write_text( screen, 395, 105, black, gray, button_names[R_TRIG] );
         write_text( screen, 155, 105, black, gray, button_names[L_TRIG] );
+        write_text( screen, 110, 350, black, gray, button_names[MEMPAK] );
+        write_text( screen, 110, 375, black, gray, button_names[RUMBLEPAK] );
         write_text( screen, 220, 398, black, gray, button_names[Y_AXIS] );
         write_text( screen, 280, 398, black, gray, button_names[X_AXIS] );
 
@@ -752,14 +759,18 @@ configure_thread( void *_arg )
         write_text( screen, dstrect.x + 13, dstrect.y+1, black, (config[cont].control.Present) ? gray : dark_gray, "Plugged" );
 
         // draw mempak checkbutton
-        dstrect.x = 120; dstrect.y = 45; dstrect.w = 90; dstrect.h = 25;
+        dstrect.x = 120; dstrect.y = 45; dstrect.w = 100; dstrect.h = 25;
         SDL_FillRect( screen, &dstrect, u32black );
         dstrect.x++; dstrect.y++; dstrect.w -= 2; dstrect.h -= 2;
         SDL_FillRect( screen, &dstrect, (config[cont].control.Plugin == PLUGIN_MEMPAK) ? u32gray_border : u32white );
         dstrect.x++; dstrect.y++; dstrect.w--; dstrect.h--;
-        SDL_FillRect( screen, &dstrect, (config[cont].control.Plugin == PLUGIN_MEMPAK) ? u32gray : u32dark_gray );
-        write_text( screen, dstrect.x + 12, dstrect.y+1, black, (config[cont].control.Plugin == PLUGIN_MEMPAK) ? gray : dark_gray, "Mem Pak" );
-
+        SDL_FillRect( screen, &dstrect, (config[cont].control.Plugin != PLUGIN_NONE) ? u32gray : u32dark_gray );
+        if (config[cont].control.Plugin == PLUGIN_NONE)
+            write_text( screen, dstrect.x + 12, dstrect.y, black, dark_gray, "None" );
+        if (config[cont].control.Plugin == PLUGIN_MEMPAK)
+            write_text( screen, dstrect.x + 12, dstrect.y, black, gray, "Mem Pak" );
+        if (config[cont].control.Plugin == PLUGIN_RAW)
+            write_text( screen, dstrect.x + 12, dstrect.y, black, gray, "Rumble Pak" );
         // draw mouse checkbutton
         dstrect.x = 340; dstrect.y = 398; dstrect.w = 110; dstrect.h = 25;
         SDL_FillRect( screen, &dstrect, u32black );
@@ -1014,7 +1025,7 @@ init_and_run( void *_arg )
             config[i].device = DEVICE_NONE;
         config[i].mouse = orig_cont[i].mouse;
         memcpy( config[i].axis, orig_cont[i].axis, sizeof( SAxisMap ) * 2 );
-        memcpy( config[i].button, orig_cont[i].button, sizeof( SButtonMap ) * 14 );
+        memcpy( config[i].button, orig_cont[i].button, sizeof( SButtonMap ) * 16 );
         memcpy( &config[i].control, &orig_cont[i].control, sizeof( CONTROL ) );
     }
 
