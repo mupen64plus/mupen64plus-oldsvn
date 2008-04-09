@@ -94,6 +94,26 @@ static int execute_cheat(unsigned int address, unsigned short value)
             update_address_16bit(address,value);
             return 1;
             break;
+        case 0x88000000:
+            address = 0x80000000 | (address & 0xFFFFFF);
+            update_address_8bit(address,value);
+            return 1;
+            break;
+        case 0x89000000:
+            address = 0x81000000 | (address & 0xFFFFFF);
+            update_address_16bit(address,value);
+            return 1;
+            break;
+        case 0xA8000000:
+            address = 0xA0000000 | (address & 0xFFFFFF);
+            update_address_8bit(address,value);
+            return 1;
+            break;
+        case 0xA9000000:
+            address = 0xA1000000 | (address & 0xFFFFFF);
+            update_address_16bit(address,value);
+            return 1;
+            break;
         case 0xD0000000:
             address = 0xD0000000 | (address & 0xFFFFFF);
             return address_equal_to_8bit(address,value);
@@ -109,6 +129,22 @@ static int execute_cheat(unsigned int address, unsigned short value)
         case 0xD3000000:
             address = 0xD3000000 | (address & 0xFFFFFF);
             return !(address_equal_to_16bit(address,value));
+            break;
+        case 0xD8000000:
+            address = 0xD8000000 | (address & 0xFFFFFF);
+            return address_equal_to_8bit(address,value);
+            break;
+        case 0xD9000000:
+            address = 0xD9000000 | (address & 0xFFFFFF);
+            return address_equal_to_16bit(address,value);
+            break;
+        case 0xDA000000:
+            address = 0xDA000000 | (address & 0xFFFFFF);
+            return !(address_equal_to_16bit(address,value));
+            break;
+        case 0xDB000000:
+            address = 0xDB000000 | (address & 0xFFFFFF);
+            return !(address_equal_to_8bit(address,value));
             break;
         case 0xF0000000:
             address = 0xF0000000 | (address & 0xFFFFFF);
@@ -201,7 +237,9 @@ void cheat_apply_cheats(int entry)
                         }
                         // GS button triggers cheat code
                         else if((code->address & 0xFF000000) == 0x88000000 ||
-                                (code->address & 0xFF000000) == 0x89000000)
+                                (code->address & 0xFF000000) == 0x89000000 ||
+                                (code->address & 0xFF000000) == 0xA8000000 ||
+                                (code->address & 0xFF000000) == 0xA9000000)
                         {
                             if(gs_button_pressed())
                                 execute_cheat(code->address, code->value);
@@ -229,6 +267,7 @@ void cheat_apply_cheats(int entry)
  *   XXXXXXXX YYYY <-- cheat code (address, new value)
  *   XXXXXXXX YYYY
  *   XXXXXXXX YYYY
+ * 
  *
  *   [Cheat Name 2]
  *   enabled=0
