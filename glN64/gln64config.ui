@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>347</width>
-    <height>343</height>
+    <width>263</width>
+    <height>335</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -104,6 +104,21 @@
           <string>1440 x 1080</string>
          </property>
         </item>
+        <item>
+         <property name="text" >
+          <string>1600 x 1200</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1680 x 1050</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1920 x 1200</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="1" column="1" >
@@ -150,6 +165,9 @@
       <string>Textures</string>
      </property>
      <layout class="QFormLayout" name="formLayout" >
+      <property name="fieldGrowthPolicy" >
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
       <property name="labelAlignment" >
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
@@ -199,7 +217,7 @@
       <item row="2" column="1" >
        <widget class="QCheckBox" name="kcfg_HwFramebufferTextures" >
         <property name="text" >
-         <string>HW Framebuffer Textures (experimental)</string>
+         <string>HW Framebuffer Textures</string>
         </property>
        </widget>
       </item>
