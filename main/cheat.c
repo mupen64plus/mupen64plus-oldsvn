@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <zlib.h>
 #ifndef __WIN32__
 #include "../main/winlnxdefs.h"
@@ -33,6 +34,7 @@
 #include <windows.h>
 #endif
 #include "../memory/memory.h"
+#include "main.h"
 #include "cheat.h"
 
 extern char *rdramb;
