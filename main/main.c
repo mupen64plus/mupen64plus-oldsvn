@@ -567,6 +567,12 @@ static int sdl_event_filter( const SDL_Event *event )
                             volChange(-2);
                             break;
 
+                        // Gameshark button pressed
+                        case 'g':
+                        case 'G':
+                            g_GSButtonPressed = 1;
+                            break;
+
                         default:
                             keyDown( 0, event->key.keysym.sym );
                     }
@@ -581,7 +587,16 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 default:
-                    keyUp( 0, event->key.keysym.sym );
+                    switch (event->key.keysym.unicode)
+                    {
+                        // Gameshark button released
+                        case 'g':
+                        case 'G':
+                            g_GSButtonPressed = 0;
+                            break;
+                        default:
+                            keyUp( 0, event->key.keysym.sym );
+                    }
             }
             return 0;
             break;
@@ -617,6 +632,20 @@ static int sdl_event_filter( const SDL_Event *event )
                 volChange(-2);
             else if(strcmp(event_str, config_get_string("Joy Mapping Increase Volume", "")) == 0)
                 volChange(2);
+            // Gameshark button should only be mapped to a button
+            else if(strcmp(event_str, config_get_string("Joy Mapping GS Button", "")) == 0)
+                g_GSButtonPressed = (event->type == SDL_JOYBUTTONDOWN);
+
+            free(event_str);
+            return 0;
+            break;
+        case SDL_JOYBUTTONUP:
+            event_str = event_to_str(event);
+
+            if(!event_str) return 0;
+
+            if(strcmp(event_str, config_get_string("Joy Mapping GS Button", "")) == 0)
+                g_GSButtonPressed = 0;
 
             free(event_str);
             return 0;

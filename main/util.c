@@ -95,6 +95,7 @@ char *event_to_str(const SDL_Event *event)
             break;
 
         case SDL_JOYBUTTONDOWN:
+        case SDL_JOYBUTTONUP:
             event_str = malloc(10);
             snprintf(event_str, 10, "J%dB%d",
                      event->jbutton.which,

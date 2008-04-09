@@ -113,6 +113,12 @@ static struct input_mapping mappings[] =
             "Joy Mapping Increase Volume",
             NULL
         },
+        {
+            "Gameshark Button",
+            "G",
+            "Joy Mapping GS Button",
+            NULL
+        },
         { 0, 0, 0, 0 } // last entry
     };
 

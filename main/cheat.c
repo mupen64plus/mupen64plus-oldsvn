@@ -38,6 +38,7 @@
 
 // public globals
 list_t g_Cheats = NULL; // list of all supported cheats
+int g_GSButtonPressed = 0; // Gameshark button pressed?
 
 // static globals
 static rom_cheats_t *g_Current = NULL; // current loaded rom
@@ -372,23 +373,23 @@ void cheat_load_current_rom(void)
 
     if(!ROM_HEADER) return;
 
+    if(g_MemHasBeenBSwapped)
+    {
+        crc1 = sl(ROM_HEADER->CRC1);
+        crc2 = sl(ROM_HEADER->CRC2);
+    }
+    else
+    {
+        crc1 = ROM_HEADER->CRC1;
+        crc2 = ROM_HEADER->CRC2;
+    }
+
     list_foreach(g_Cheats, node)
     {
         rom_cheat = (rom_cheats_t *)node->data;
 
-        if(g_MemHasBeenBSwapped)
-        {
-            crc1 = sl(rom_cheat->crc1);
-            crc2 = sl(rom_cheat->crc2);
-        }
-        else
-        {
-            crc1 = rom_cheat->crc1;
-            crc2 = rom_cheat->crc2;
-        }
-
-        if(crc1 == ROM_HEADER->CRC1 &&
-           crc2 == ROM_HEADER->CRC2)
+        if(crc1 == rom_cheat->crc1 &&
+           crc2 == rom_cheat->crc2)
         {
             g_Current = rom_cheat;
             return;
