@@ -18,6 +18,9 @@
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
 
+#define PACKAGE "blight's SDL input plugin"
+#define VERSION "0.0.10"
+
 #define PLUGIN_NAME		PACKAGE
 #define PLUGIN_VERSION	VERSION
 

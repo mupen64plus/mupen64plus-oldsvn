@@ -57,6 +57,7 @@ add_subdirectory(dummy_audio)
 add_subdirectory(rsp_hle)
 add_subdirectory(mupen64_input)
 add_subdirectory(glN64)
+add_subdirectory(blight_input)
 
 if(GTK2GUI)
     add_subdirectory(mupen64_audio)
