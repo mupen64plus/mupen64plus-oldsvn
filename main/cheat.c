@@ -139,7 +139,6 @@ static int gs_button_pressed(void)
 // public functions
 void cheat_apply_cheats(int entry)
 {
-    int do_next, check_next = 0;
     list_node_t *node1, *node2;
     cheat_t *cheat;
     cheat_code_t *code;
@@ -158,7 +157,10 @@ void cheat_apply_cheats(int entry)
                     list_foreach(cheat->cheat_codes, node2)
                     {
                         code = (cheat_code_t *)node2->data;
-                        execute_cheat(code->address, code->value);
+
+                        // code should only be written once at boot time
+                        if((code->address & 0xF0000000) == 0xF0000000)
+                            execute_cheat(code->address, code->value);
                     }
                     break;
                 case ENTRY_VI:
@@ -166,18 +168,45 @@ void cheat_apply_cheats(int entry)
                     {
                         code = (cheat_code_t *)node2->data;
 
-                        if(check_next)
+                        // conditional cheat codes
+                        if((code->address & 0xF0000000) == 0xD0000000)
                         {
-                            if(do_next)
-                                execute_cheat(code->address, code->value);
+                            // if code needs GS button pressed and it's not, skip it
+                            if(((code->address & 0xFF000000) == 0xD8000000 ||
+                                (code->address & 0xFF000000) == 0xD9000000 ||
+                                (code->address & 0xFF000000) == 0xDA000000 ||
+                                (code->address & 0xFF000000) == 0xDB000000) &&
+                               !gs_button_pressed())
+                            {
+                                // skip next code
+                                if(node2->next != NULL)
+                                    node2 = node2->next;
+                                continue;
+                            }
 
-                            check_next = 0;
+                            // if condition true, execute next cheat code
+                            if(execute_cheat(code->address, code->value))
+                            {
+                                node2 = node2->next;
+                                code = (cheat_code_t *)node2->data;
+                                execute_cheat(code->address, code->value);
+                            }
+                            // if condition false, skip next code
+                            else
+                            {
+                                if(node2->next != NULL)
+                                    node2 = node2->next;
+                                continue;
+                            }
                         }
-                        else if((code->address & 0xF0000000) == 0xD0000000)
+                        // GS button triggers cheat code
+                        else if((code->address & 0xFF000000) == 0x88000000 ||
+                                (code->address & 0xFF000000) == 0x89000000)
                         {
-                            do_next = execute_cheat(code->address, code->value);
-                            check_next = 1;
+                            if(gs_button_pressed())
+                                execute_cheat(code->address, code->value);
                         }
+                        // normal cheat code
                         else
                             execute_cheat(code->address, code->value);
                     }
