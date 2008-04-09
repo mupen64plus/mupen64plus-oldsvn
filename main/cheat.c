@@ -112,6 +112,7 @@ void load_cheats(char crcmatch[22])
 nextcheat:
         //gzgets(f, buf, 255);
         fgets(buf, 255, f);
+        if (feof(f)) { break; }
         if (buf[0] == ':')
         {
             strncpy(crc, buf+1, 21);
