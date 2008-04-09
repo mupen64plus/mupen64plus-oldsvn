@@ -222,7 +222,7 @@ void Clamp16bS (unsigned char * tex, DWORD width, DWORD clamp_to, DWORD real_wid
     int line_full = real_width << 1;
     int line = width << 1;
 
-#ifndef GCC
+#if !defined(__GNUC__) && !defined(NO_ASM)
     __asm {
         mov esi,dword ptr [constant]
         mov edi,dword ptr [dest]
@@ -247,7 +247,7 @@ x_loop:
         dec ecx
         jnz y_loop
     }
-#else // _WIN32
+#elif !defined(NO_ASM)
    //printf("clamp16bS\n");
    asm volatile (
          //"y_loop10:                \n"

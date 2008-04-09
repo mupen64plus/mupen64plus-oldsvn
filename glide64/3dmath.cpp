@@ -175,7 +175,7 @@ void __stdcall MulMatricesNOSSE(float m1[4][4],float m2[4][4],float r[4][4])
 
 void __stdcall MulMatricesSSE(float m1[4][4],float m2[4][4],float r[4][4])
 {
-#if defined(__GNUC__) || defined(NO_ASM)
+#if defined(__GNUC__) && !defined(NO_ASM)
     /* [row][col]*/
     typedef float v4sf __attribute__ ((vector_size (16)));
     v4sf row0 = __builtin_ia32_loadups(m2[0]);
@@ -210,7 +210,7 @@ void __stdcall MulMatricesSSE(float m1[4][4],float m2[4][4],float r[4][4])
     
     __builtin_ia32_storeups(r[i], destrow);
     }
-#else
+#elif !defined(NO_ASM)
     __asm
     {
         mov     eax, dword ptr [r]  
