@@ -69,92 +69,42 @@ static int address_equal_to_16bit(unsigned int address, unsigned short value)
 }
 
 // individual application - returns 0 if we are supposed to skip the next cheat
-// (only happens on conditional codes)
+// (only really used on conditional codes)
 static int execute_cheat(unsigned int address, unsigned short value)
 {
     switch (address & 0xFF000000)
     {
         case 0x80000000:
-            address = 0x80000000 | (address & 0xFFFFFF);
+        case 0x88000000:
+        case 0xA0000000:
+        case 0xA8000000:
+        case 0xF0000000:
             update_address_8bit(address,value);
             return 1;
             break;
         case 0x81000000:
-            address = 0x81000000 | (address & 0xFFFFFF);
-            update_address_16bit(address,value);
-            return 1;
-            break;
-        case 0xA0000000:
-            address = 0xA0000000 | (address & 0xFFFFFF);
-            update_address_8bit(address,value);
-            return 1;
-            break;
-        case 0xA1000000:
-            address = 0xA1000000 | (address & 0xFFFFFF);
-            update_address_16bit(address,value);
-            return 1;
-            break;
-        case 0x88000000:
-            address = 0x80000000 | (address & 0xFFFFFF);
-            update_address_8bit(address,value);
-            return 1;
-            break;
         case 0x89000000:
-            address = 0x81000000 | (address & 0xFFFFFF);
-            update_address_16bit(address,value);
-            return 1;
-            break;
-        case 0xA8000000:
-            address = 0xA0000000 | (address & 0xFFFFFF);
-            update_address_8bit(address,value);
-            return 1;
-            break;
+        case 0xA1000000:
         case 0xA9000000:
-            address = 0xA1000000 | (address & 0xFFFFFF);
+        case 0xF1000000:
             update_address_16bit(address,value);
             return 1;
             break;
         case 0xD0000000:
-            address = 0xD0000000 | (address & 0xFFFFFF);
+        case 0xD8000000:
             return address_equal_to_8bit(address,value);
             break;
         case 0xD1000000:
-            address = 0xD1000000 | (address & 0xFFFFFF);
+        case 0xD9000000:
             return address_equal_to_16bit(address,value);
             break;
         case 0xD2000000:
-            address = 0xD2000000 | (address & 0xFFFFFF);
+        case 0xDB000000:
             return !(address_equal_to_8bit(address,value));
             break;
         case 0xD3000000:
-            address = 0xD3000000 | (address & 0xFFFFFF);
-            return !(address_equal_to_16bit(address,value));
-            break;
-        case 0xD8000000:
-            address = 0xD8000000 | (address & 0xFFFFFF);
-            return address_equal_to_8bit(address,value);
-            break;
-        case 0xD9000000:
-            address = 0xD9000000 | (address & 0xFFFFFF);
-            return address_equal_to_16bit(address,value);
-            break;
         case 0xDA000000:
-            address = 0xDA000000 | (address & 0xFFFFFF);
             return !(address_equal_to_16bit(address,value));
-            break;
-        case 0xDB000000:
-            address = 0xDB000000 | (address & 0xFFFFFF);
-            return !(address_equal_to_8bit(address,value));
-            break;
-        case 0xF0000000:
-            address = 0xF0000000 | (address & 0xFFFFFF);
-            update_address_8bit(address,value);
-            return 1;
-            break;
-        case 0xF1000000:
-            address = 0xF1000000 | (address & 0xFFFFFF);
-            update_address_16bit(address,value);
-            return 1;
             break;
         case 0xEE000000:
             // most likely, this doesnt do anything.
@@ -162,8 +112,11 @@ static int execute_cheat(unsigned int address, unsigned short value)
             execute_cheat(0xF100031A, 0x0000);
             return 1;
             break;
+        default:
+            return 1;
+            break;
     }
-}  
+}
 
 static int gs_button_pressed(void)
 {
