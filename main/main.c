@@ -89,7 +89,7 @@ int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_LimitFPS = 1;
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
-            
+int         g_FPSModifier = 100;
 pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
             
@@ -194,6 +194,7 @@ static int GetVILimit(void)
 
 static void InitTimer(void)
 {
+    g_FPSModifier = 100;
     VILimit = GetVILimit();
     VILimitMilliseconds = (double) 1000.0/VILimit; 
     printf("init timer!\n");
@@ -240,6 +241,21 @@ void new_frame(void)
     LastFPSTime = CurrentFPSTime ;*/
 }
 
+void modify_framerate(int percent)
+{
+    g_FPSModifier += percent;
+    if (g_FPSModifier > 300)
+    {
+        g_FPSModifier = 500;
+    }
+    if (g_FPSModifier < 5)
+    {
+        g_FPSModifier = 5;
+    }
+    VILimitMilliseconds = (double) 1000.0/(VILimit * g_FPSModifier / 100);
+    printf("Speed Modifier: %i \n",g_FPSModifier);
+}
+
 void new_vi(void)
 {
     int Dif;
@@ -249,8 +265,6 @@ void new_vi(void)
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
     int time;
-    
-    if(!g_LimitFPS) return;
 
     start_section(IDLE_SECTION);
     VI_Counter++;
@@ -265,11 +279,11 @@ void new_vi(void)
     
     Dif = CurrentFPSTime - LastFPSTime;
     
-    if (Dif <  VILimitMilliseconds ) 
+    if (Dif <  VILimitMilliseconds) 
     {
         CalculatedTime = CounterTime + (double)VILimitMilliseconds * (double)VI_Counter;
         time = (int)(CalculatedTime - CurrentFPSTime);
-        if (time>0) 
+        if (time>0 && time<1000 && g_LimitFPS) 
         {
             usleep(time * 1000);
         }
@@ -520,7 +534,12 @@ static int sdl_event_filter( const SDL_Event *event )
                     if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
                         changeWindow();
                     break;
-
+                case SDLK_F10:
+                    modify_framerate(-5);
+                    break;
+                case SDLK_F11:
+                    modify_framerate(5);
+                    break;
                 case SDLK_F12:
                     screenshot();
                     break;
