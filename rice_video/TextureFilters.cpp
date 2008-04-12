@@ -1778,40 +1778,12 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
     char filename_rgb[PATH_MAX];
     char filename_a[PATH_MAX];
 
-
-    //GetPluginDir(filename_rgb);
-    //strcat(filename_rgb,"hires_texture\\");
-    //strcat(filename_rgb,g_curRomInfo.szGameName);
-    //strcat(filename_rgb,"\\");
-
     strcpy(filename_rgb, gHiresTxtrInfos[idx].foldername);
 
     sprintf(filename_rgb+strlen(filename_rgb), "%s#%08X#%d#%d", g_curRomInfo.szGameName, entry.dwCRC, entry.ti.Format, entry.ti.Size);
     strcpy(filename_a,filename_rgb);
     strcat(filename_rgb,gHiresTxtrInfos[idx].RGBNameTail);
     strcat(filename_a,gHiresTxtrInfos[idx].AlphaNameTail);
-
-    //{
-    //  extern uint32 dwAsmCRC2;
-    //  char filename_rgb_new[PATH_MAX];
-    //  char filename_a_new[PATH_MAX];
-    //  GetPluginDir(filename_rgb_new);
-    //  strcat(filename_rgb_new,"hires_texture\\");
-    //  strcat(filename_rgb_new,g_curRomInfo.szGameName);
-    //  strcat(filename_rgb_new,"\\new\\");
-    //  sprintf(filename_rgb_new+strlen(filename_rgb_new), "%s#%08X#%d#%d", g_curRomInfo.szGameName, dwAsmCRC2, entry.ti.Format, entry.ti.Size);
-    //  strcpy(filename_a_new,filename_rgb_new);
-    //  strcat(filename_rgb_new,gHiresTxtrInfos[idx].RGBNameTail);
-    //  strcat(filename_a_new,gHiresTxtrInfos[idx].AlphaNameTail);
-    //  if( PathFileExists(filename_rgb) )
-    //  {
-    //      CopyFile(filename_rgb,filename_rgb_new,TRUE);
-    //  }
-    //  if( PathFileExists(filename_a) )
-    //  {
-    //      CopyFile(filename_a,filename_a_new,TRUE);
-    //  }
-    //}
 
     // Load BMP image to buffer_rbg
     unsigned char *buf_rgba = NULL;
@@ -1870,8 +1842,8 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
         return;
     }
 
-// calculate the texture size magnification by comparing the N64 texture size and the hi-res texture size
-    int scale = 1;
+    // calculate the texture size magnification by comparing the N64 texture size and the hi-res texture size
+    int scale = 0;
     if (width == 1 * (int)entry.ti.WidthToCreate && height == 1 * (int)entry.ti.HeightToCreate)
         scale = 1;
     else if (width == 2 * (int)entry.ti.WidthToCreate && height == 2 * (int)entry.ti.HeightToCreate)
@@ -1882,8 +1854,15 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
         scale = 8;
     else if (width == 16 * (int)entry.ti.WidthToCreate && height == 16 * (int)entry.ti.HeightToCreate)
         scale =16;
-    else printf("Non-integral hi-res texture scale.  Orig = (%i,%i)  Hi-res = (%i,%i)\n", 
-            entry.ti.WidthToCreate, entry.ti.HeightToCreate, width, height);
+    else
+    {
+        int scalex = width / (int)entry.ti.WidthToCreate;
+        int scaley = height / (int)entry.ti.HeightToCreate;
+        scale = scalex > scaley ? scalex : scaley; // set scale to maximum(scalex,scaley)
+        printf("Warning: Non-integral hi-res texture scale.  Orig = (%i,%i)  Hi-res = (%i,%i)\nTextures may look incorrect\n", 
+               entry.ti.WidthToCreate, entry.ti.HeightToCreate, width, height);
+    }
+
     // Create new texture
     entry.pEnhancedTexture = CDeviceBuilder::GetBuilder()->CreateTexture(entry.ti.WidthToCreate*scale, entry.ti.HeightToCreate*scale);
     DrawInfo info;
