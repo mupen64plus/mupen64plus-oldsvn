@@ -129,5 +129,3 @@ Alt-Enter == Toggle between windowed and fullscreen (may not be supported by all
 -----------------------
 As of March 2008, the RiceVideoLinux plugin may be unstable with users of the open source drivers for an ATI Radeon graphics adapter when fog is enabled.  If you have are using the open source Radeon driver, you should set the "EnableFog" value in RiceVideo.cfg to 0.
 
-
-
