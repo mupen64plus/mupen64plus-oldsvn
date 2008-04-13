@@ -1820,23 +1820,7 @@ void go()
      pure_interpreter();
      }
    debug_count+= Count;
-   printf ("PC=%x:%x\n", (unsigned int)(PC->addr), 
-       (unsigned int)(rdram[(PC->addr&0xFFFFFF)/4]));
-   for (j=0; j<16; j++)
-     printf ("reg[%2d]:%8x%8x        reg[%d]:%8x%8x\n",   
-         j,
-         (unsigned int)(reg[j] >> 32),
-         (unsigned int)reg[j],
-         j+16,
-         (unsigned int)(reg[j+16] >> 32),
-         (unsigned int)reg[j+16]);
-   printf("hi:%8x%8x        lo:%8x%8x\n",
-      (unsigned int)(hi >> 32),
-      (unsigned int)hi,
-      (unsigned int)(lo >> 32),
-      (unsigned int)lo);
-   printf("après %d instructions soit %x\n",(unsigned int)debug_count
-      ,(unsigned int)debug_count);
+   printf("R4300 core finished.\n",(unsigned int)debug_count);
    for (i=0; i<0x100000; i++)
    {
      if (blocks[i])
