@@ -6,11 +6,6 @@ include ./pre.mk
 # local CFLAGS, LIBS, and LDFLAGS
 LDFLAGS += -lz -lm -lpng
 
-# set executable stack as a linker option for X86 architecture, for dynamic recompiler
-ifeq ($(CPU), X86)
-  LDFLAGS += -z execstack
-endif
-
 # set options
 ifeq ($(DBG), 1)
   CFLAGS += -DDBG
@@ -33,8 +28,8 @@ endif
 ifeq ($(LIRC), 1)
   CFLAGS += -DWITH_LIRC
 endif
-ifeq ($(NOGUI_ONLY), 1)
-  CFLAGS += -DNOGUI_ONLY
+ifeq ($(NO_GUI), 1)
+  CFLAGS += -DNO_GUI
 else
   CFLAGS += $(GTK_FLAGS)
 endif
@@ -47,19 +42,20 @@ CFLAGS += -DPREFIX=\"$(PREFIX)\"
 # list of object files to generate
 OBJ_CORE = \
 	main/main.o \
+	main/$(PLATFORM)/plugin.o \
+	main/$(PLATFORM)/volume.o \
 	main/util.o \
 	main/translate.o \
 	main/guifuncs.o \
+	main/cheat.o \
 	main/config.o \
 	main/adler32.o \
 	main/ioapi.o \
 	main/md5.o \
 	main/mupenIniApi.o \
-	main/plugin.o \
 	main/rom.o \
 	main/savestates.o \
 	main/unzip.o \
-	main/volume.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
@@ -83,30 +79,33 @@ OBJ_CORE = \
 	r4300/regimm.o \
 	r4300/tlb.o
 
-ifeq ($(CPU), X86)
-  ifeq ($(ARCH), 64BITS)
-    DYNAREC = x86_64
-  else
-    DYNAREC = x86
+# handle dynamic recompiler objects
+ifneq ($(NO_ASM), 1)
+  ifeq ($(CPU), X86)
+    ifeq ($(ARCH), 64BITS)
+      DYNAREC = x86_64
+    else
+      DYNAREC = x86
+    endif
   endif
-  OBJ_X86 = \
-	r4300/$(DYNAREC)/assemble.o \
-	r4300/$(DYNAREC)/debug.o \
-	r4300/$(DYNAREC)/gbc.o \
-	r4300/$(DYNAREC)/gcop0.o \
-	r4300/$(DYNAREC)/gcop1.o \
-	r4300/$(DYNAREC)/gcop1_d.o \
-	r4300/$(DYNAREC)/gcop1_l.o \
-	r4300/$(DYNAREC)/gcop1_s.o \
-	r4300/$(DYNAREC)/gcop1_w.o \
-	r4300/$(DYNAREC)/gr4300.o \
-	r4300/$(DYNAREC)/gregimm.o \
-	r4300/$(DYNAREC)/gspecial.o \
-	r4300/$(DYNAREC)/gtlb.o \
-	r4300/$(DYNAREC)/regcache.o \
-	r4300/$(DYNAREC)/rjump.o
+  OBJ_DYNAREC = \
+      r4300/$(DYNAREC)/assemble.o \
+      r4300/$(DYNAREC)/debug.o \
+      r4300/$(DYNAREC)/gbc.o \
+      r4300/$(DYNAREC)/gcop0.o \
+      r4300/$(DYNAREC)/gcop1.o \
+      r4300/$(DYNAREC)/gcop1_d.o \
+      r4300/$(DYNAREC)/gcop1_l.o \
+      r4300/$(DYNAREC)/gcop1_s.o \
+      r4300/$(DYNAREC)/gcop1_w.o \
+      r4300/$(DYNAREC)/gr4300.o \
+      r4300/$(DYNAREC)/gregimm.o \
+      r4300/$(DYNAREC)/gspecial.o \
+      r4300/$(DYNAREC)/gtlb.o \
+      r4300/$(DYNAREC)/regcache.o \
+      r4300/$(DYNAREC)/rjump.o
 else
-  OBJ_X86 =
+  OBJ_DYNAREC = r4300/empty_dynarec.o
 endif
 
 OBJ_VCR	= \
@@ -123,8 +122,7 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/aboutdialog.o \
 	main/gui_gtk/configdialog.o \
 	main/gui_gtk/rombrowser.o \
-	main/gui_gtk/romproperties.o \
-	main/gui_gtk/dirbrowser.o
+	main/gui_gtk/romproperties.o
 
 OBJ_DBG = \
         debugger/debugger.o \
@@ -145,7 +143,7 @@ OBJ_DBG = \
 		debugger/ui_clist_edit.o
 
 PLUGINS	= plugins/blight_input.so \
-          plugins/dummyaudio.so \
+		  plugins/dummyaudio.so \
           plugins/dummyvideo.so \
           plugins/glN64.so \
           plugins/ricevideo.so \
@@ -159,7 +157,7 @@ SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
 ALL = mupen64plus $(PLUGINS)
-OBJECTS = $(OBJ_CORE) $(OBJ_X86)
+OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
@@ -175,7 +173,7 @@ ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
 endif
-ifneq ($(NOGUI_ONLY), 1)
+ifneq ($(NO_GUI), 1)
   OBJECTS += $(OBJ_GTK_GUI)
   LIBS += $(GTK_LIBS)
 endif
@@ -190,10 +188,16 @@ targets:
 	@echo "    install       == Install Mupen64Plus and all plugins"
 	@echo "    uninstall     == Uninstall Mupen64Plus and all plugins"
 	@echo "  Options:"
+	@echo "    PLAT=generic  == use GCC in a generic way."
+	@echo "    PLAT=mingw    == use MinGW specifically."
+	@echo "    PLAT=cygwin   == use Cygwin specifically."
+	@echo "    PLAT=msvc     == use Microsoft C Compiler."
 	@echo "    BITS=32       == build 32-bit binaries on 64-bit machine"
 	@echo "    VCR=1         == enable video recording"
 	@echo "    LIRC=1        == enable LIRC support"
-	@echo "    NOGUI_ONLY=1  == build without GUI support"
+	@echo "    NO_RESAMP=1   == disable libsamplerate support in jttl_audio"
+	@echo "    NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)"
+	@echo "    NO_GUI=1      == build without GUI support"
 	@echo "    PREFIX=path   == specify install/uninstall prefix (default: /usr/local)"
 	@echo "  Debugging Options:"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
@@ -207,11 +211,11 @@ targets:
 all: $(ALL)
 
 mupen64plus: $(OBJECTS)
-	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
+	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic $(PLATFORMSPECLIB) -o $@
 	$(STRIP) $@
 
 mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
-	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
+	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic $(PLATFORMSPECLIB) -o $@
 
 install:
 	./install.sh $(PREFIX)
@@ -222,6 +226,7 @@ uninstall:
 clean:
 	$(MAKE) -C blight_input clean
 	$(MAKE) -C dummy_audio clean
+	$(MAKE) -C dummy_video clean
 	$(MAKE) -C glN64 clean
 	$(MAKE) -C rice_video clean
 	$(MAKE) -C glide64 clean
@@ -247,8 +252,8 @@ main/vcr_compress.o: main/vcr_compress.cpp
 	$(CXX) -o $@ $(CFLAGS) $(AVIFILE_FLAGS) -c $<
 
 plugins/blight_input.so: FORCE
-	$(MAKE) -C blight_input all
-	@$(CP) ./blight_input/blight_input.so ./plugins/blight_input.so
+	#$(MAKE) -C blight_input all
+	#@$(CP) ./blight_input/blight_input.so ./plugins/blight_input.so
 
 plugins/dummyaudio.so: FORCE
 	$(MAKE) -C dummy_audio all
@@ -259,24 +264,24 @@ plugins/dummyvideo.so: FORCE
 	@$(CP) ./dummy_video/dummyvideo.so ./plugins/dummyvideo.so
 
 plugins/glN64.so: FORCE
-	$(MAKE) -C glN64 all
-	@$(CP) ./glN64/glN64.so ./plugins/glN64.so
+	#$(MAKE) -C glN64 all
+	#@$(CP) ./glN64/glN64.so ./plugins/glN64.so
 
 plugins/ricevideo.so: FORCE
-	$(MAKE) -C rice_video all
-	@$(CP) ./rice_video/ricevideo.so ./plugins/ricevideo.so
+	#$(MAKE) -C rice_video all
+	#@$(CP) ./rice_video/ricevideo.so ./plugins/ricevideo.so
 
 plugins/glide64.so: FORCE
-	$(MAKE) -C glide64 all
-	@$(CP) ./glide64/glide64.so ./plugins/glide64.so
+	#$(MAKE) -C glide64 all
+	#@$(CP) ./glide64/glide64.so ./plugins/glide64.so
 
 plugins/jttl_audio.so: FORCE
 	$(MAKE) -C jttl_audio all
 	@$(CP) ./jttl_audio/jttl_audio.so ./plugins/jttl_audio.so
 
 plugins/mupen64_audio.so: FORCE
-	$(MAKE) -C mupen64_audio all
-	@$(CP) ./mupen64_audio/mupen64_audio.so ./plugins/mupen64_audio.so
+	#$(MAKE) -C mupen64_audio all
+	#@$(CP) ./mupen64_audio/mupen64_audio.so ./plugins/mupen64_audio.so
 
 plugins/mupen64_hle_rsp_azimer.so: FORCE
 	$(MAKE) -C rsp_hle all
