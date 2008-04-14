@@ -207,10 +207,6 @@ void read_configuration( void )
         }
         if( sscanf( line, "plugin=%d", &plugin ) == 1 )
         {
-            // switch to mempak if this controller doesn't support rumble
-//            if (plugin == PLUGIN_RAW && controller[cont].event_joystick == 0)
-//                plugin = PLUGIN_MEMPAK;
-
             controller[cont].control.Plugin = plugin;
             continue;
         }
