@@ -22,6 +22,11 @@ else(NOT ASM)
     message(STATUS "Found assembler ${ASM}")
 endif(NOT ASM)
 
+find_package(PkgConfig REQUIRED)
+pkg_search_module(GTK2 REQUIRED gtk+-2.0)
+pkg_search_module(GTHREAD2 REQUIRED gthread-2.0)
+include_directories(${GTK2_INCLUDE_DIRS})
+
 if(KDE4GUI)
     find_package(Qt4 REQUIRED)
     find_package(KDE4 REQUIRED)
@@ -33,12 +38,8 @@ if(KDE4GUI)
     set(CMAKE_C_FLAGS "")
     add_definitions(-DKDE4)
 else(KDE4GUI)
-    find_package(PkgConfig REQUIRED)
-    pkg_search_module(GTK2 REQUIRED gtk+-2.0)
-    pkg_search_module(GTHREAD2 REQUIRED gthread-2.0)
     set(GTK2GUI ON)
     add_definitions(-DUSE_GTK)
-    include_directories(${GTK2_INCLUDE_DIRS})
 endif(KDE4GUI)
 
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
@@ -62,8 +63,6 @@ add_subdirectory(blight_input)
 if(GTK2GUI)
     add_subdirectory(mupen64_audio)
     add_subdirectory(jttl_audio)
-
-    # add_subdirectory(blight_input) FIXME
 
     add_subdirectory(rice_video)
     #add_subdirectory(glide64) FIXME
@@ -195,7 +194,7 @@ include_directories(${SDL_INCLUDE_DIR})
 
 if(KDE4GUI)
     kde4_add_executable(mupen64plus ${CORE_SRCS} ${X86_DYNAREC_SRCS} ${KDE4_GUI_SRCS})
-    target_link_libraries(mupen64plus ${SDL_LIBRARY} ${KDE4_KDEUI_LIBS} kio pthread z)
+    target_link_libraries(mupen64plus ${SDL_LIBRARY} ${GTK2_LIBRARIES} ${KDE4_KDEUI_LIBS} kio pthread z)
     install(FILES main/gui_kde4/mupen64plusui.rc DESTINATION  ${DATA_INSTALL_DIR}/mupen64plus)
 #     install(FILES mupen64plus.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
 else(KDE4GUI)

@@ -23,6 +23,8 @@ extern "C" {
     #include "../main.h"
 }
 
+#include <gtk/gtk.h>
+
 #include <KApplication>
 #include <KAboutData>
 #include <KLocale>
@@ -72,6 +74,8 @@ void gui_parseArgs(int *argc, char ***argv)
 
     KCmdLineArgs::addStdCmdLineOptions();
     KCmdLineArgs::init(*argc, *argv, aboutData);
+
+    gtk_init(argc, argv);
 }
 
 // Build GUI components, but do not display
