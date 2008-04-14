@@ -55,11 +55,11 @@ void savestates_select_slot(unsigned int s)
    slot = s;
 }
 
-void savestates_select_filename(unsigned char *fn)
+void savestates_select_filename(const char *fn)
 {
    slot += 10;
    if (strlen((char *) fn) >= 1024) return;
-   strcpy(fname, (char *) fn);
+   strcpy(fname, fn);
 }
 
 void savestates_save()
