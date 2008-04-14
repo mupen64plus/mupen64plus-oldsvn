@@ -125,6 +125,7 @@ OBJ_LIRC = \
 OBJ_GTK_GUI = \
 	main/gui_gtk/main_gtk.o \
 	main/gui_gtk/aboutdialog.o \
+	main/gui_gtk/cheatdialog.o \
 	main/gui_gtk/configdialog.o \
 	main/gui_gtk/rombrowser.o \
 	main/gui_gtk/romproperties.o

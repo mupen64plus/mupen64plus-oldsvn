@@ -23,6 +23,7 @@ Email                : blight@Ashitaka
 #include "../config.h"
 #include "../util.h"
 #include "aboutdialog.h"
+#include "cheatdialog.h"
 #include "configdialog.h"
 #include "rombrowser.h"
 #include "romproperties.h"
@@ -956,12 +957,15 @@ static GtkWidget       *slotItem[9];
 // menuBar
 static int create_menuBar( void )
 {
+    GtkWidget   *menuItem;
     GtkWidget   *fileMenu;
     GtkWidget   *fileMenuItem;
     GtkWidget   *emulationMenu;
     GtkWidget   *emulationMenuItem;
     GtkWidget   *optionsMenu;
     GtkWidget   *optionsMenuItem;
+    GtkWidget   *cheatMenu;
+    GtkWidget   *cheatMenuItem;
 #ifdef VCR_SUPPORT
     GtkWidget   *vcrMenu;
     GtkWidget   *vcrMenuItem;
@@ -1029,6 +1033,7 @@ static int create_menuBar( void )
     GtkAccelGroup *fileAccelGroup;
     GtkAccelGroup *emulationAccelGroup;
     GtkAccelGroup *optionsAccelGroup = NULL;
+    GtkAccelGroup *cheatAccelGroup = NULL;
 #ifdef VCR_SUPPORT
     GtkAccelGroup *vcrAccelGroup;
 #endif
@@ -1210,6 +1215,20 @@ static int create_menuBar( void )
     gtk_signal_connect_object( GTK_OBJECT(optionsRSPItem), "activate", GTK_SIGNAL_FUNC(callback_configureRSP), (gpointer)NULL );
     gtk_signal_connect_object( GTK_OBJECT(optionsFullScreenItem), "activate",GTK_SIGNAL_FUNC(callback_fullScreen), (gpointer)NULL );
 
+    // cheat menu
+    cheatAccelGroup = gtk_accel_group_new();
+    cheatMenu = gtk_menu_new();
+    cheatMenuItem = menu_item_new_with_accelerator(menuAccelGroup, tr("_Cheats"));
+    gtk_menu_item_set_submenu( GTK_MENU_ITEM(cheatMenuItem), cheatMenu );
+
+    menuItem = menu_item_new_with_accelerator(menuAccelGroup, tr("Enable _Cheats..."));
+    g_signal_connect(GTK_OBJECT(menuItem), "activate", G_CALLBACK(cb_enableCheatDialog), NULL);
+    gtk_menu_append(GTK_MENU(cheatMenu), menuItem);
+
+    menuItem = menu_item_new_with_accelerator(menuAccelGroup, tr("_Edit Cheats..."));
+    g_signal_connect_swapped(GTK_OBJECT(menuItem), "activate", G_CALLBACK(cb_editCheatDialog), NULL);
+    gtk_menu_append(GTK_MENU(cheatMenu), menuItem);
+
     // vcr menu
 #ifdef VCR_SUPPORT
     vcrAccelGroup = gtk_accel_group_new();
@@ -1273,6 +1292,7 @@ static int create_menuBar( void )
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), fileMenuItem );
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), emulationMenuItem );
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), optionsMenuItem );
+    gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), cheatMenuItem );
 #ifdef VCR_SUPPORT
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), vcrMenuItem );
 #endif

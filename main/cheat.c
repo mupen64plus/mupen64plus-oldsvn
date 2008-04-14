@@ -138,7 +138,7 @@ void cheat_apply_cheats(int entry)
     list_foreach(g_Current->cheats, node1)
     {
         cheat = (cheat_t *)node1->data;
-        if(cheat->enabled)
+        if(cheat->always_enabled || cheat->enabled)
         {
             switch(entry)
             {
@@ -291,7 +291,7 @@ void cheat_read_config(void)
         // cheat always enabled?
         if(strncasecmp(line, "enabled=", 8) == 0)
         {
-            sscanf(line, "enabled=%d", &cheat->enabled);
+            sscanf(line, "enabled=%d", &cheat->always_enabled);
             continue;
         }
 
@@ -340,7 +340,7 @@ void cheat_write_config(void)
             cheat = (cheat_t *)node2->data;
 
             fprintf(f, "\n[%s]\n", cheat->name);
-            fprintf(f, "enabled=%d\n", cheat->enabled? 1 : 0);
+            fprintf(f, "enabled=%d\n", cheat->always_enabled? 1 : 0);
 
             list_foreach(cheat->cheat_codes, node3)
             {

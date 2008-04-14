@@ -70,7 +70,7 @@ create_aboutDialog( void )
 
     button = gtk_button_new_from_stock(GTK_STOCK_OK);
     gtk_box_pack_start( GTK_BOX(GTK_BOX(GTK_DIALOG(g_AboutDialog.dialog)->action_area)), button, TRUE, TRUE, 0 );
-    g_signal_connect_swapped(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide), (gpointer)g_AboutDialog.dialog);
+    g_signal_connect_swapped(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide), g_AboutDialog.dialog);
 
     return 0;
 }

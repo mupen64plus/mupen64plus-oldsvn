@@ -393,10 +393,10 @@ void list_node_move_back(list_t *list, list_node_t *node)
     node->next = NULL;
 }
 
-/** list_nth_node
+/** list_nth_node_data
  *    Returns the nth node in list. If n is out of range, NULL is returned.
  */
-list_node_t *list_nth_node(list_t list, int n)
+void *list_nth_node_data(list_t list, int n)
 {
     list_node_t *curr = NULL;
 
@@ -406,7 +406,7 @@ list_node_t *list_nth_node(list_t list, int n)
             break;
     }
 
-    return curr;
+    return curr != NULL ? curr->data : curr;
 }
 
 /** list_last_node

@@ -44,7 +44,8 @@ typedef struct {
 // represents a cheat for a game
 typedef struct {
     char *name;
-    int enabled; // persists past config file
+    int enabled; // cheat enabled until mupen64plus is closed
+    int always_enabled; // always enabled (written to config)
     list_t cheat_codes; // list of cheat_code_t's
 } cheat_t;
 

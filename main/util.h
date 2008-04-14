@@ -61,7 +61,7 @@ void list_node_delete(list_t *list, list_node_t *node);
 void list_delete(list_t *list);
 void list_node_move_front(list_t *list, list_node_t *node);
 void list_node_move_back(list_t *list, list_node_t *node);
-list_node_t *list_nth_node(list_t list, int n);
+void *list_nth_node_data(list_t list, int n);
 list_node_t *list_last_node(list_t list);
 int inline list_empty(list_t list);
 int list_length(list_t list);
