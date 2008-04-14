@@ -207,6 +207,10 @@ void read_configuration( void )
         }
         if( sscanf( line, "plugin=%d", &plugin ) == 1 )
         {
+            // switch to mempak if this controller doesn't support rumble
+//            if (plugin == PLUGIN_RAW && controller[cont].event_joystick == 0)
+//                plugin = PLUGIN_MEMPAK;
+
             controller[cont].control.Plugin = plugin;
             continue;
         }
@@ -1002,21 +1006,26 @@ GetKeys( int Control, BUTTONS *Keys )
     if (controller[Control].buttons.button & button_bits[14])
     {
         controller[Control].control.Plugin = PLUGIN_MEMPAK;
-        play.type = EV_FF;
-        play.code = ffweak[Control].id;
-        play.value = 1;
-        if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
-            perror("Error starting rumble effect");
+        if (controller[Control].event_joystick != 0)
+        {
+            play.type = EV_FF;
+            play.code = ffweak[Control].id;
+            play.value = 1;
+            if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
+                perror("Error starting rumble effect");
+        }
     }
     if (controller[Control].buttons.button & button_bits[15])
     {
         controller[Control].control.Plugin = PLUGIN_RAW;
-        play.type = EV_FF;
-        play.code = ffstrong[Control].id;
-        play.value = 1;
-
-        if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
-            perror("Error starting rumble effect");
+        if (controller[Control].event_joystick != 0)
+        {
+            play.type = EV_FF;
+            play.code = ffstrong[Control].id;
+            play.value = 1;
+            if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
+                perror("Error starting rumble effect");
+        }
     }
 }
 
@@ -1028,6 +1037,8 @@ int InitiateRumble(int cntrl)
     char temp[128];
     char temp2[128];
     int iFound = 0;
+
+    controller[cntrl].event_joystick = 0;
 
     sprintf(temp,"/sys/class/input/js%d/device", controller[cntrl].device);
     dp = opendir(temp);
@@ -1053,7 +1064,11 @@ int InitiateRumble(int cntrl)
         }
     }
     closedir(dp);
-    if (!iFound) return 0;
+    if (!iFound)
+    {
+        printf("["PLUGIN_NAME"]: Couldn't find input event for rumble support.\n", temp);
+        return 0;
+    }
 
     controller[cntrl].event_joystick = open(temp, O_RDWR);
     if (controller[cntrl].event_joystick == -1)
@@ -1065,13 +1080,15 @@ int InitiateRumble(int cntrl)
 
     if (ioctl(controller[cntrl].event_joystick, EVIOCGBIT(EV_FF, sizeof(unsigned long) * 4), features) == -1)
     {
+        printf("["PLUGIN_NAME"]: Linux kernel communication failed for force feedback (rumble).\n", temp);
         controller[cntrl].event_joystick = 0;
         return 0;
     }
 
     if (!test_bit(FF_RUMBLE, features))
     {
-        printf("["PLUGIN_NAME"]: No rumble supported on N64 joystick #i\n", cntrl + 1);
+        printf("["PLUGIN_NAME"]: No rumble supported on N64 joystick #%i\n", cntrl + 1);
+        controller[cntrl].event_joystick = 0;
         return 0;
     }
 
@@ -1100,7 +1117,7 @@ int InitiateRumble(int cntrl)
 
     ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffweak[cntrl]);
 
-    printf("["PLUGIN_NAME"]: Rumble activated on N64 joystick #i\n", cntrl + 1);
+    printf("["PLUGIN_NAME"]: Rumble activated on N64 joystick #%i\n", cntrl + 1);
 }
 
 /******************************************************************
