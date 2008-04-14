@@ -79,6 +79,7 @@ set(CORE_SRCS
     main/savestates.c
     main/unzip.c
     main/volume.c
+    main/cheat.c
     memory/dma.c
     memory/flashram.c
     memory/memory.c
@@ -110,7 +111,8 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL i686)
 endif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
 
 if(DYNAREC)
-    set(X86_DYNAREC_SRCS
+    message("Dynamic recompiler enabled")
+    set(DYNAREC_SRCS
         r4300/${DYNAREC}/assemble.c
         r4300/${DYNAREC}/debug.c
         r4300/${DYNAREC}/gbc.c
@@ -127,6 +129,9 @@ if(DYNAREC)
         r4300/${DYNAREC}/regcache.c
         r4300/${DYNAREC}/rjump.c
     )
+else(DYNAREC)
+    message("Dynamic recompiler disabled")
+    set(DYNAREC_SRCS r4300/empty_dynarec.c)
 endif(DYNAREC)
 
 set(VCR_SRCS
@@ -189,12 +194,11 @@ add_definitions(-DPREFIX='"${CMAKE_INSTALL_PREFIX}"')
 include_directories(${SDL_INCLUDE_DIR})
 
 if(KDE4GUI)
-    kde4_add_executable(mupen64plus ${CORE_SRCS} ${X86_DYNAREC_SRCS} ${KDE4_GUI_SRCS})
+    kde4_add_executable(mupen64plus ${CORE_SRCS} ${DYNAREC_SRCS} ${KDE4_GUI_SRCS})
     target_link_libraries(mupen64plus ${SDL_LIBRARY} ${GTK2_LIBRARIES} ${KDE4_KDEUI_LIBS} kio pthread z)
     install(FILES main/gui_kde4/mupen64plusui.rc DESTINATION  ${DATA_INSTALL_DIR}/mupen64plus)
-#     install(FILES mupen64plus.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
 else(KDE4GUI)
-    add_executable(mupen64plus ${CORE_SRCS} ${X86_DYNAREC_SRCS} ${GTK_GUI_SRCS})
+    add_executable(mupen64plus ${CORE_SRCS} ${DYNAREC_SRCS} ${GTK_GUI_SRCS})
     target_link_libraries(mupen64plus ${SDL_LIBRARY} ${GTK2_LIBRARIES} pthread z)
 endif(KDE4GUI)
 
