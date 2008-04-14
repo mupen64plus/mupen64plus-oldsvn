@@ -29,6 +29,7 @@
 #include <KRecentFilesAction>
 #include <KConfigDialog>
 #include <KDebug>
+#include <KMenu>
 
 #include "mainwindow.h"
 #include "mainwidget.h"
@@ -46,6 +47,7 @@ namespace core {
     extern "C" {
         #include "../main.h"
         #include "../plugin.h"
+        #include "../savestates.h"
     }
 }
 
@@ -138,11 +140,55 @@ void MainWindow::viewFullScreen()
     core::changeWindow();
 }
 
-// FIXME these need implementing...
-void MainWindow::saveStateSave() {}
-void MainWindow::saveStateSaveAs() {}
-void MainWindow::saveStateRestore() {}
-void MainWindow::saveStateLoad() {}
+void MainWindow::saveStateSave()
+{
+    if (core::g_EmulationThread) {
+        core::savestates_job |= SAVESTATE;
+    }
+}
+
+void MainWindow::saveStateSaveAs()
+{
+    if (core::g_EmulationThread) {
+        QString filename = KFileDialog::getSaveFileName();
+        if (!filename.isEmpty()) {
+            core::savestates_select_filename(filename.toLocal8Bit());
+            core::savestates_job |= SAVESTATE;
+        }
+    } else {
+        showAlertMessage(i18n("Emulation not running!"));
+    }
+}
+
+void MainWindow::saveStateRestore()
+{
+    if (core::g_EmulationThread) {
+        core::savestates_job |= LOADSTATE;
+    }
+}
+
+void MainWindow::saveStateLoad()
+{
+    if (core::g_EmulationThread) {
+        QString filename = KFileDialog::getOpenFileName();
+        if (!filename.isEmpty()) {
+            core::savestates_select_filename(filename.toLocal8Bit());
+            core::savestates_job |= LOADSTATE;
+        }
+    } else {
+        showAlertMessage(i18n("Emulation not running!"));
+    }
+}
+
+void MainWindow::saveStateSetCurrent(QAction* a)
+{
+    bool ok = false;
+    int slot = a->data().toInt(&ok);
+    if (ok) {
+        core::savestates_select_slot(slot);
+    }
+    kDebug() << "Selected slot" << slot;
+}
 
 void MainWindow::configDialogShow()
 {
@@ -296,6 +342,29 @@ void MainWindow::createActions()
     act->setText(i18n("Load State"));
     act->setIcon(KIcon("document-open"));
     connect(act, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
+
+    act = actionCollection()->addAction("save_state_current");
+    act->setText(i18n("Current Save State"));
+    KMenu* m = new KMenu(this);
+    QActionGroup* ag = new QActionGroup(act);
+    for (int i = 0; i < 10; i++) {
+        QAction* a = 0;
+        if (i == 0) {
+            a = m->addAction(i18n("Default slot"));
+        } else {
+            a = m->addAction(i18n("Slot &%1", i));
+        }
+        a->setCheckable(true);
+        a->setData(i);
+        ag->addAction(a);
+        if (i == 0) {
+            m->addSeparator();
+            a->setChecked(true);
+        }
+    }
+    act->setMenu(m);
+    connect(ag, SIGNAL(triggered(QAction*)),
+            this, SLOT(saveStateSetCurrent(QAction*)));
     
     // Other stuff
     KStandardAction::preferences(this, SLOT(configDialogShow()),

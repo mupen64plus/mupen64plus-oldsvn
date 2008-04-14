@@ -48,6 +48,7 @@ class MainWindow : public KXmlGuiWindow
         void saveStateSaveAs();
         void saveStateRestore();
         void saveStateLoad();
+        void saveStateSetCurrent(QAction* a);
         void configDialogShow();
         void updateItemCount(int count);
 
