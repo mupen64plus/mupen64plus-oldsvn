@@ -141,10 +141,10 @@ set(LIRC_SRCS main/lirc.c)
 set(GTK_GUI_SRCS
     main/gui_gtk/main_gtk.c
     main/gui_gtk/aboutdialog.c
+    main/gui_gtk/cheatdialog.c
     main/gui_gtk/configdialog.c
     main/gui_gtk/rombrowser.c
     main/gui_gtk/romproperties.c
-    main/gui_gtk/dirbrowser.c
 )
 
 if(KDE4GUI)
