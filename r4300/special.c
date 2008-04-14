@@ -105,10 +105,10 @@ void JALR()
    delay_slot=0;
    if (!skip_jump)
      {
-	*dest = PC->addr;
-	sign_extended(*dest);
-	
-	jump_to(local_rs32);
+    *dest = PC->addr;
+    sign_extended(*dest);
+    
+    jump_to(local_rs32);
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -191,10 +191,10 @@ void DIV()
 {
    if (rrt32)
      {
-	lo = rrs32 / rrt32;
-	hi = rrs32 % rrt32;
-	sign_extended(lo);
-	sign_extended(hi);
+    lo = rrs32 / rrt32;
+    hi = rrs32 % rrt32;
+    sign_extended(lo);
+    sign_extended(hi);
      }
    else printf("div\n");
    PC++;
@@ -204,10 +204,10 @@ void DIVU()
 {
    if (rrt32)
      {
-	lo = (unsigned int)rrs32 / (unsigned int)rrt32;
-	hi = (unsigned int)rrs32 % (unsigned int)rrt32;
-	sign_extended(lo);
-	sign_extended(hi);
+    lo = (unsigned int)rrs32 / (unsigned int)rrt32;
+    hi = (unsigned int)rrs32 % (unsigned int)rrt32;
+    sign_extended(lo);
+    sign_extended(hi);
      }
    else printf("divu\n");
    PC++;
@@ -222,14 +222,14 @@ void DMULT()
    
    if (rrs < 0)
      {
-	op2 = -rrs;
-	sign = 1 - sign;
+    op2 = -rrs;
+    sign = 1 - sign;
      }
    else op2 = rrs;
    if (rrt < 0)
      {
-	op4 = -rrt;
-	sign = 1 - sign;
+    op4 = -rrt;
+    sign = 1 - sign;
      }
    else op4 = rrt;
    
@@ -252,9 +252,9 @@ void DMULT()
    hi = (result3 & 0xFFFFFFFF) | (result4 << 32);
    if (sign)
      {
-	hi = ~hi;
-	if (!lo) hi++;
-	else lo = ~lo + 1;
+    hi = ~hi;
+    if (!lo) hi++;
+    else lo = ~lo + 1;
      }
    PC++;
 }
@@ -290,8 +290,8 @@ void DDIV()
 {
    if (rrt)
      {
-	lo = (long long int)rrs / (long long int)rrt;
-	hi = (long long int)rrs % (long long int)rrt;
+    lo = (long long int)rrs / (long long int)rrt;
+    hi = (long long int)rrs % (long long int)rrt;
      }
 //   else printf("ddiv\n");
    PC++;
@@ -301,8 +301,8 @@ void DDIVU()
 {
    if (rrt)
      {
-	lo = (unsigned long long int)rrs / (unsigned long long int)rrt;
-	hi = (unsigned long long int)rrs % (unsigned long long int)rrt;
+    lo = (unsigned long long int)rrs / (unsigned long long int)rrt;
+    hi = (unsigned long long int)rrs % (unsigned long long int)rrt;
      }
 //   else printf("ddivu\n");
    PC++;
@@ -403,8 +403,8 @@ void TEQ()
 {
    if (rrs == rrt)
      {
-	printf("trap exception in teq\n");
-	stop=1;
+    printf("trap exception in teq\n");
+    stop=1;
      }
    PC++;
 }

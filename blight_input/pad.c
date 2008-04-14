@@ -3,10 +3,10 @@
 #ifdef GUI_SDL
 
 const struct {
-  unsigned int 	 width;
-  unsigned int 	 height;
-  unsigned int 	 bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
-  unsigned char	 pixel_data[304 * 310 * 4 + 1];
+  unsigned int   width;
+  unsigned int   height;
+  unsigned int   bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
+  unsigned char  pixel_data[304 * 310 * 4 + 1];
 } pad_image = {
   304, 310, 4,
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"

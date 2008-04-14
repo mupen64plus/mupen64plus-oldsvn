@@ -1975,7 +1975,7 @@ typedef void (APIENTRY * PFNGLVERTEXPOINTEREXTPROC) (GLint size, GLenum type, GL
 **   Radeon 9500/9700 based : Supported
 */
 #ifndef GL_EXT_multi_draw_arrays
-#define GL_EXT_multi_draw_arrays				1
+#define GL_EXT_multi_draw_arrays                1
 
 typedef void (APIENTRY * PFNGLMULTIDRAWARRAYSEXTPROC) (GLenum mode, GLint *first, GLsizei *count, GLsizei primcount);
 typedef void (APIENTRY * PFNGLMULTIDRAWELEMENTSEXTPROC) (GLenum mode, GLsizei *count, GLenum type, const void **indices, GLsizei primcount);
@@ -2465,7 +2465,7 @@ typedef void (APIENTRY * PFNGLADDSWAPHINTRECTWINPROC) (GLint x, GLint y, GLsizei
 **   Radeon 9500/9700 based : Supported
 */
 #ifndef GL_SUN_multi_draw_arrays
-#define GL_SUN_multi_draw_arrays			  1
+#define GL_SUN_multi_draw_arrays              1
 
 typedef void (APIENTRY * PFNGLMULTIDRAWARRAYSSUNPROC) (GLenum mode, GLint *first, GLsizei *count, GLsizei primcount);
 typedef void (APIENTRY * PFNGLMULTIDRAWELEMENTSSUNPROC) (GLenum mode, GLsizei *count, GLenum type, const void **indices, GLsizei primcount);

@@ -37,7 +37,7 @@
 void genadd_d()
 {
 #ifdef INTERPRET_ADD_D
-	gencallinterp((unsigned int)ADD_D, 0);
+    gencallinterp((unsigned int)ADD_D, 0);
 #else
    gencheck_cop1_unusable();
    mov_eax_memoffs32((unsigned int *)(&reg_cop1_double[dst->f.cf.fs]));

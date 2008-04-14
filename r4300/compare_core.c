@@ -48,39 +48,39 @@ void display_error(char *txt)
    printf("err: %6s  ", txt);
    if (interpcore)
      {
-	printf("addr:%x\t ", (int)interp_addr);
-	if (!strcmp(txt, "PC")) printf("My PC: %x  Ref PC: %x\t ", (int)interp_addr, *(int*)&comp_reg[0]);
+    printf("addr:%x\t ", (int)interp_addr);
+    if (!strcmp(txt, "PC")) printf("My PC: %x  Ref PC: %x\t ", (int)interp_addr, *(int*)&comp_reg[0]);
      }
    else
      {
-	printf("addr:%x\t ", (int)PC->addr);
-	if (!strcmp(txt, "PC")) printf("My PC: %x  Ref PC: %x\t ", (int)PC->addr, *(int*)&comp_reg[0]);
+    printf("addr:%x\t ", (int)PC->addr);
+    if (!strcmp(txt, "PC")) printf("My PC: %x  Ref PC: %x\t ", (int)PC->addr, *(int*)&comp_reg[0]);
      }
    
    if (!strcmp(txt, "gpr"))
        {
-	  for (i=0; i<32; i++)
-	    {
-	       if (reg[i] != comp_reg[i])
-		 printf("My: reg[%d]=%llx\t Ref: reg[%d]=%llx\t ",
-			i, reg[i], i, comp_reg[i]);
-	    }
+      for (i=0; i<32; i++)
+        {
+           if (reg[i] != comp_reg[i])
+         printf("My: reg[%d]=%llx\t Ref: reg[%d]=%llx\t ",
+            i, reg[i], i, comp_reg[i]);
+        }
        }
    if (!strcmp(txt, "cop0"))
        {
-	  for (i=0; i<32; i++)
-	    {
-	       if (reg_cop0[i] != comp_reg2[i])
-		 printf("My: reg_cop0[%d]=%x\t Ref: reg_cop0[%d]=%x\t ",
-			i, (unsigned int)reg_cop0[i], i, (unsigned int)comp_reg2[i]);
-	    }
+      for (i=0; i<32; i++)
+        {
+           if (reg_cop0[i] != comp_reg2[i])
+         printf("My: reg_cop0[%d]=%x\t Ref: reg_cop0[%d]=%x\t ",
+            i, (unsigned int)reg_cop0[i], i, (unsigned int)comp_reg2[i]);
+        }
        }
    printf("\n");
    /*for (i=0; i<32; i++)
      {
-	if (reg_cop0[i] != comp_reg[i])
-	  printf("reg_cop0[%d]=%llx != reg[%d]=%llx\n",
-		 i, reg_cop0[i], i, comp_reg[i]);
+    if (reg_cop0[i] != comp_reg[i])
+      printf("reg_cop0[%d]=%llx != reg[%d]=%llx\n",
+         i, reg_cop0[i], i, comp_reg[i]);
      }*/
    
    stop_it();
@@ -90,12 +90,12 @@ void check_input_sync(unsigned char *value)
 {
    if (dynacore || interpcore)
      {
-	fread(value, 4, 1, f);
+    fread(value, 4, 1, f);
      }
    else
      {
-	
-	fwrite(value, 4, 1, f);
+    
+    fwrite(value, 4, 1, f);
      }
 }
 
@@ -108,71 +108,71 @@ void compare_core()
 
    if (dynacore || interpcore)
      {
-	if (!pipe_opened)
-	  {
-	     mkfifo("compare_pipe", 0600);
+    if (!pipe_opened)
+      {
+         mkfifo("compare_pipe", 0600);
          printf("Waiting to read pipe.\n");
-	     f = fopen("compare_pipe", "r");
-	     pipe_opened = 1;
-	  }
-	
-	fread (comp_reg, 4, sizeof(int), f);
-	if (interpcore)
-	  {
-	     if (memcmp(&interp_addr, comp_reg, 4))
-         {
-           if (iFirst) { printf(errHead); iFirst = 0; }
-	       display_error("PC");
-         }
-	  }
-	else
-	  {
-	     if (memcmp(&PC->addr, comp_reg, 4))
+         f = fopen("compare_pipe", "r");
+         pipe_opened = 1;
+      }
+    
+    fread (comp_reg, 4, sizeof(int), f);
+    if (interpcore)
+      {
+         if (memcmp(&interp_addr, comp_reg, 4))
          {
            if (iFirst) { printf(errHead); iFirst = 0; }
            display_error("PC");
          }
-	  }
-	fread (comp_reg, 32, sizeof(long long int), f);
-	if (memcmp(reg, comp_reg, 32*sizeof(long long int)))
-    {
-      if (iFirst) { printf(errHead); iFirst = 0; }
-	  display_error("gpr");
-    }
-	fread (comp_reg, 32, sizeof(int), f);
-	if (memcmp(reg_cop0, comp_reg, 32*sizeof(int)))
-    {
-      if (iFirst) { printf(errHead); iFirst = 0; }
-	  display_error("cop0");
       }
-	fread (comp_reg, 32, sizeof(long long int), f);
-	if (memcmp(reg_cop1_fgr_64, comp_reg, 32*sizeof(long long int)))
+    else
+      {
+         if (memcmp(&PC->addr, comp_reg, 4))
+         {
+           if (iFirst) { printf(errHead); iFirst = 0; }
+           display_error("PC");
+         }
+      }
+    fread (comp_reg, 32, sizeof(long long int), f);
+    if (memcmp(reg, comp_reg, 32*sizeof(long long int)))
     {
       if (iFirst) { printf(errHead); iFirst = 0; }
-	  display_error("cop1");
+      display_error("gpr");
     }
-	/*fread(comp_reg, 1, sizeof(int), f);
-	if (memcmp(&rdram[0x31280/4], comp_reg, sizeof(int)))
-	  display_error("mem");*/
-	/*fread (comp_reg, 4, 1, f);
-	if (memcmp(&FCR31, comp_reg, 4))
-	  display_error();*/
-	old_op = op;
+    fread (comp_reg, 32, sizeof(int), f);
+    if (memcmp(reg_cop0, comp_reg, 32*sizeof(int)))
+    {
+      if (iFirst) { printf(errHead); iFirst = 0; }
+      display_error("cop0");
+      }
+    fread (comp_reg, 32, sizeof(long long int), f);
+    if (memcmp(reg_cop1_fgr_64, comp_reg, 32*sizeof(long long int)))
+    {
+      if (iFirst) { printf(errHead); iFirst = 0; }
+      display_error("cop1");
+    }
+    /*fread(comp_reg, 1, sizeof(int), f);
+    if (memcmp(&rdram[0x31280/4], comp_reg, sizeof(int)))
+      display_error("mem");*/
+    /*fread (comp_reg, 4, 1, f);
+    if (memcmp(&FCR31, comp_reg, 4))
+      display_error();*/
+    old_op = op;
      }
    else
      {
-	if (!pipe_opened)
-	  {
+    if (!pipe_opened)
+      {
          printf("Waiting to write pipe.\n");
-	     f = fopen("compare_pipe", "w");
-	     pipe_opened = 1;
-	  }
-	
-	fwrite(&PC->addr, 4, sizeof(int), f);
-	fwrite(reg, 32, sizeof(long long int), f);
-	fwrite(reg_cop0, 32, sizeof(int), f);
-	fwrite(reg_cop1_fgr_64, 32, sizeof(long long int), f);
-	//fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
-	/*fwrite(&FCR31, 4, 1, f);*/
+         f = fopen("compare_pipe", "w");
+         pipe_opened = 1;
+      }
+    
+    fwrite(&PC->addr, 4, sizeof(int), f);
+    fwrite(reg, 32, sizeof(long long int), f);
+    fwrite(reg_cop0, 32, sizeof(int), f);
+    fwrite(reg_cop1_fgr_64, 32, sizeof(long long int), f);
+    //fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
+    /*fwrite(&FCR31, 4, 1, f);*/
      }
 }

@@ -385,9 +385,9 @@ typedef FxU32 GrCoordinateSpaceMode_t;
 typedef FxU32 GrStipplePattern_t;
 typedef FxI32 GrStippleMode_t;
 
-#define GR_STIPPLE_DISABLE	0x0
-#define GR_STIPPLE_PATTERN	0x1
-#define GR_STIPPLE_ROTATE	0x2
+#define GR_STIPPLE_DISABLE  0x0
+#define GR_STIPPLE_PATTERN  0x1
+#define GR_STIPPLE_ROTATE   0x2
 
 /* Types of data in strips */
 #define GR_FLOAT        0

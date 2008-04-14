@@ -24,24 +24,24 @@ Email                : blight@Ashitaka
 
 typedef struct
 {
-	GtkWidget	*dialog;
-	GtkWidget	*notebook;
+    GtkWidget   *dialog;
+    GtkWidget   *notebook;
 
-	GtkWidget	*videoPage;
-	GtkWidget	*videoCodecCombo;
-	GList		*videoCodecGList;
-	GtkWidget	*videoAttribCombo;
-	GList		*videoAttribGList;
-	GtkWidget	*videoAttribEntry;
-	GtkWidget	*videoAttribChangeButton;
+    GtkWidget   *videoPage;
+    GtkWidget   *videoCodecCombo;
+    GList       *videoCodecGList;
+    GtkWidget   *videoAttribCombo;
+    GList       *videoAttribGList;
+    GtkWidget   *videoAttribEntry;
+    GtkWidget   *videoAttribChangeButton;
 
-	GtkWidget	*audioPage;
-	GtkWidget	*audioCodecCombo;
-	GList		*audioCodecGList;
-	GtkWidget	*audioAttribCombo;
-	GList		*audioAttribGList;
-	GtkWidget	*audioAttribEntry;
-	GtkWidget	*audioAttribChangeButton;
+    GtkWidget   *audioPage;
+    GtkWidget   *audioCodecCombo;
+    GList       *audioCodecGList;
+    GtkWidget   *audioAttribCombo;
+    GList       *audioAttribGList;
+    GtkWidget   *audioAttribEntry;
+    GtkWidget   *audioAttribChangeButton;
 } SVcrCompDialog;
 
 extern SVcrCompDialog g_VcrCompDialog;

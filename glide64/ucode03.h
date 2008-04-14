@@ -78,7 +78,7 @@ static void uc3_vertex()
     // Calculate light vectors
     for (DWORD l=0; l<rdp.num_lights; l++)
     {
-	  InverseTransformVector(&rdp.light[l].dir_x, rdp.light_vector[l], rdp.model);
+      InverseTransformVector(&rdp.light[l].dir_x, rdp.light_vector[l], rdp.model);
       NormalizeVector (rdp.light_vector[l]);
     }
   }
@@ -103,11 +103,11 @@ static void uc3_vertex()
     v->x_w = v->x * v->oow;
     v->y_w = v->y * v->oow;
     v->z_w = v->z * v->oow;
-	CalculateFog (v);
+    CalculateFog (v);
 
     v->uv_calculated = 0xFFFFFFFF;
     v->screen_translated = 0;
-	v->shade_mods_allowed = 1;
+    v->shade_mods_allowed = 1;
 
     v->scr_off = 0;
     if (v->x < -v->w) v->scr_off |= 1;

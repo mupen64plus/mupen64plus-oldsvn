@@ -1,20 +1,20 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -36,27 +36,27 @@
 #define COMBINE_H
 
 // texture MOD types
-#define TMOD_TEX_INTER_COLOR_USING_FACTOR			1
-#define TMOD_TEX_INTER_COL_USING_COL1				2
-#define TMOD_FULL_COLOR_SUB_TEX						3
-#define TMOD_COL_INTER_COL1_USING_TEX				4
-#define TMOD_COL_INTER_COL1_USING_TEXA				5
-#define TMOD_COL_INTER_COL1_USING_TEXA__MUL_TEX		6
-#define TMOD_COL_INTER_TEX_USING_TEXA				7
-#define TMOD_COL2_INTER__COL_INTER_COL1_USING_TEX__USING_TEXA	8
-#define TMOD_TEX_SCALE_FAC_ADD_FAC					9
-#define TMOD_TEX_SUB_COL_MUL_FAC_ADD_TEX			10
-#define TMOD_TEX_SCALE_COL_ADD_COL					11
-#define TMOD_TEX_ADD_COL							12
-#define TMOD_TEX_SUB_COL							13
-#define TMOD_TEX_SUB_COL_MUL_FAC					14
-#define TMOD_COL_INTER_TEX_USING_COL1				15
-#define TMOD_COL_MUL_TEXA_ADD_TEX					16
-#define TMOD_COL_INTER_TEX_USING_TEX				17
-#define TMOD_TEX_INTER_NOISE_USING_COL				18
-#define TMOD_TEX_INTER_COL_USING_TEXA				19
-#define TMOD_TEX_MUL_COL				            20
-#define TMOD_TEX_SCALE_FAC_ADD_COL					21
+#define TMOD_TEX_INTER_COLOR_USING_FACTOR           1
+#define TMOD_TEX_INTER_COL_USING_COL1               2
+#define TMOD_FULL_COLOR_SUB_TEX                     3
+#define TMOD_COL_INTER_COL1_USING_TEX               4
+#define TMOD_COL_INTER_COL1_USING_TEXA              5
+#define TMOD_COL_INTER_COL1_USING_TEXA__MUL_TEX     6
+#define TMOD_COL_INTER_TEX_USING_TEXA               7
+#define TMOD_COL2_INTER__COL_INTER_COL1_USING_TEX__USING_TEXA   8
+#define TMOD_TEX_SCALE_FAC_ADD_FAC                  9
+#define TMOD_TEX_SUB_COL_MUL_FAC_ADD_TEX            10
+#define TMOD_TEX_SCALE_COL_ADD_COL                  11
+#define TMOD_TEX_ADD_COL                            12
+#define TMOD_TEX_SUB_COL                            13
+#define TMOD_TEX_SUB_COL_MUL_FAC                    14
+#define TMOD_COL_INTER_TEX_USING_COL1               15
+#define TMOD_COL_MUL_TEXA_ADD_TEX                   16
+#define TMOD_COL_INTER_TEX_USING_TEX                17
+#define TMOD_TEX_INTER_NOISE_USING_COL              18
+#define TMOD_TEX_INTER_COL_USING_TEXA               19
+#define TMOD_TEX_MUL_COL                            20
+#define TMOD_TEX_SCALE_FAC_ADD_COL                  21
 
 #define COMBINE_EXT_COLOR     1
 #define COMBINE_EXT_ALPHA     2

@@ -24,16 +24,16 @@ Email                : blight@Ashitaka
 
 typedef struct
 {
-	GtkWidget *dialog;
+    GtkWidget *dialog;
 
-	// entries
-	GtkWidget *romNameEntry;
-	GtkWidget *fileNameEntry;
-	GtkWidget *sizeEntry;
-	GtkWidget *countryEntry;
-	GtkWidget *iniCodeEntry;
-	GtkWidget *md5Entry;
-	GtkWidget *commentsEntry;
+    // entries
+    GtkWidget *romNameEntry;
+    GtkWidget *fileNameEntry;
+    GtkWidget *sizeEntry;
+    GtkWidget *countryEntry;
+    GtkWidget *iniCodeEntry;
+    GtkWidget *md5Entry;
+    GtkWidget *commentsEntry;
 } SRomPropertiesDialog;
 extern SRomPropertiesDialog g_RomPropDialog;
 

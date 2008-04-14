@@ -28,47 +28,47 @@ extern const char* cycleTypeStrs[];
 
 class CColorCombiner
 {
-	friend class CRender;
+    friend class CRender;
 public:
-	virtual ~CColorCombiner() {};
-	COLOR GetConstFactor(uint32 colorFlag, uint32 alphaFlag, uint32 defaultColor = 0);
-	virtual void InitCombinerMode(void);
+    virtual ~CColorCombiner() {};
+    COLOR GetConstFactor(uint32 colorFlag, uint32 alphaFlag, uint32 defaultColor = 0);
+    virtual void InitCombinerMode(void);
 
-	virtual bool Initialize(void)=0;
-	virtual void CleanUp(void) {};
-	virtual void UpdateCombiner(uint32 dwMux0, uint32 dwMux1);
-	virtual void InitCombinerBlenderForSimpleTextureDraw(uint32 tile=0)=0;
-	virtual void DisableCombiner(void)=0;
+    virtual bool Initialize(void)=0;
+    virtual void CleanUp(void) {};
+    virtual void UpdateCombiner(uint32 dwMux0, uint32 dwMux1);
+    virtual void InitCombinerBlenderForSimpleTextureDraw(uint32 tile=0)=0;
+    virtual void DisableCombiner(void)=0;
 
 #ifdef _DEBUG
-	virtual void DisplaySimpleMuxString(void);
-	virtual void DisplayMuxString(void);
+    virtual void DisplaySimpleMuxString(void);
+    virtual void DisplayMuxString(void);
 #endif
 
-	DecodedMux *m_pDecodedMux;
+    DecodedMux *m_pDecodedMux;
 protected:
-	CColorCombiner(CRender *pRender) : 
-		m_pDecodedMux(NULL), m_bTex0Enabled(false),m_bTex1Enabled(false),m_bTexelsEnable(false),
-		m_bCycleChanged(false), m_supportedStages(1),m_bSupportMultiTexture(true),m_pRender(pRender)
-	{
-	}
+    CColorCombiner(CRender *pRender) : 
+        m_pDecodedMux(NULL), m_bTex0Enabled(false),m_bTex1Enabled(false),m_bTexelsEnable(false),
+        m_bCycleChanged(false), m_supportedStages(1),m_bSupportMultiTexture(true),m_pRender(pRender)
+    {
+    }
 
-	virtual void InitCombinerCycleCopy(void)=0;
-	virtual void InitCombinerCycleFill(void)=0;
-	virtual void InitCombinerCycle12(void)=0;
+    virtual void InitCombinerCycleCopy(void)=0;
+    virtual void InitCombinerCycleFill(void)=0;
+    virtual void InitCombinerCycle12(void)=0;
 
-	bool	m_bTex0Enabled;
-	bool	m_bTex1Enabled;
-	bool	m_bTexelsEnable;
+    bool    m_bTex0Enabled;
+    bool    m_bTex1Enabled;
+    bool    m_bTexelsEnable;
 
-	bool	m_bCycleChanged;	// A flag will be set if cycle is changed to FILL or COPY
+    bool    m_bCycleChanged;    // A flag will be set if cycle is changed to FILL or COPY
 
-	int		m_supportedStages;
-	bool	m_bSupportMultiTexture;
+    int     m_supportedStages;
+    bool    m_bSupportMultiTexture;
 
-	CRender *m_pRender;
+    CRender *m_pRender;
 
-	CSortedList<uint64, DecodedMux> m_DecodedMuxList;
+    CSortedList<uint64, DecodedMux> m_DecodedMuxList;
 };
 
 uint32 GetTexelNumber(N64CombinerType &m);
@@ -80,18 +80,18 @@ void swap(uint8 &a, uint8 &b);
 
 inline bool isEqual(uint8 val1, uint8 val2)
 {
-	if( (val1&MUX_MASK) == (val2&MUX_MASK) )
-		return true;
-	else
-		return false;
+    if( (val1&MUX_MASK) == (val2&MUX_MASK) )
+        return true;
+    else
+        return false;
 }
 
 inline bool isTexel(uint8 val)
 {
-	if( (val&MUX_MASK) == MUX_TEXEL0 || (val&MUX_MASK) == MUX_TEXEL1 )
-		return true;
-	else
-		return false;
+    if( (val&MUX_MASK) == MUX_TEXEL0 || (val&MUX_MASK) == MUX_TEXEL1 )
+        return true;
+    else
+        return false;
 }
 
 

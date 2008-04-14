@@ -26,135 +26,135 @@ SupportedDeviceType CDeviceBuilder::m_deviceGeneralType = DIRECTX_DEVICE;
 
 CDeviceBuilder* CDeviceBuilder::GetBuilder(void)
 {
-	if( m_pInstance == NULL )
-		CreateBuilder(m_deviceType);
-	
-	return m_pInstance;
+    if( m_pInstance == NULL )
+        CreateBuilder(m_deviceType);
+    
+    return m_pInstance;
 }
 
 void CDeviceBuilder::SelectDeviceType(SupportedDeviceType type)
 {
-	if( type != m_deviceType && m_pInstance != NULL )
-	{
-		DeleteBuilder();
-	}
+    if( type != m_deviceType && m_pInstance != NULL )
+    {
+        DeleteBuilder();
+    }
 
-	CDeviceBuilder::m_deviceType = type;
-	switch(type)
-	{
-	case OGL_DEVICE:
-	case OGL_1_1_DEVICE:
-	case OGL_1_2_DEVICE:
-	case OGL_1_3_DEVICE:
-	case OGL_1_4_DEVICE:
-	case OGL_1_4_V2_DEVICE:
-	case OGL_TNT2_DEVICE:
-	case NVIDIA_OGL_DEVICE:
-	case OGL_FRAGMENT_PROGRAM:
-		CDeviceBuilder::m_deviceGeneralType = OGL_DEVICE;
-		break;
-	 default:
-	   break;
-	}
+    CDeviceBuilder::m_deviceType = type;
+    switch(type)
+    {
+    case OGL_DEVICE:
+    case OGL_1_1_DEVICE:
+    case OGL_1_2_DEVICE:
+    case OGL_1_3_DEVICE:
+    case OGL_1_4_DEVICE:
+    case OGL_1_4_V2_DEVICE:
+    case OGL_TNT2_DEVICE:
+    case NVIDIA_OGL_DEVICE:
+    case OGL_FRAGMENT_PROGRAM:
+        CDeviceBuilder::m_deviceGeneralType = OGL_DEVICE;
+        break;
+     default:
+       break;
+    }
 }
 
 SupportedDeviceType CDeviceBuilder::GetDeviceType(void)
 {
-	return CDeviceBuilder::m_deviceType;
+    return CDeviceBuilder::m_deviceType;
 }
 
 SupportedDeviceType CDeviceBuilder::GetGeneralDeviceType(void)
 {
-	return CDeviceBuilder::m_deviceGeneralType;
+    return CDeviceBuilder::m_deviceGeneralType;
 }
 
 CDeviceBuilder* CDeviceBuilder::CreateBuilder(SupportedDeviceType type)
 {
-	if( m_pInstance == NULL )
-	{
-		switch( type )
-		{
-		case 	OGL_DEVICE:
-		case 	OGL_1_1_DEVICE:
-		case 	OGL_1_2_DEVICE:
-		case 	OGL_1_3_DEVICE:
-		case 	OGL_1_4_DEVICE:
-		case 	OGL_1_4_V2_DEVICE:
-		case 	OGL_TNT2_DEVICE:
-		case 	NVIDIA_OGL_DEVICE:
-		case OGL_FRAGMENT_PROGRAM:
-			m_pInstance = new OGLDeviceBuilder();
-			break;
-		default:
-			ErrorMsg("Error builder type");
-			exit(1);
-		}
+    if( m_pInstance == NULL )
+    {
+        switch( type )
+        {
+        case    OGL_DEVICE:
+        case    OGL_1_1_DEVICE:
+        case    OGL_1_2_DEVICE:
+        case    OGL_1_3_DEVICE:
+        case    OGL_1_4_DEVICE:
+        case    OGL_1_4_V2_DEVICE:
+        case    OGL_TNT2_DEVICE:
+        case    NVIDIA_OGL_DEVICE:
+        case OGL_FRAGMENT_PROGRAM:
+            m_pInstance = new OGLDeviceBuilder();
+            break;
+        default:
+            ErrorMsg("Error builder type");
+            exit(1);
+        }
 
-		SAFE_CHECK(m_pInstance);
-	}
+        SAFE_CHECK(m_pInstance);
+    }
 
-	return m_pInstance;
+    return m_pInstance;
 }
 
 void CDeviceBuilder::DeleteBuilder(void)
 {
-	delete m_pInstance;
-	m_pInstance = NULL;
+    delete m_pInstance;
+    m_pInstance = NULL;
 }
 
 CDeviceBuilder::CDeviceBuilder() :
-	m_pRender(NULL),
-	m_pGraphicsContext(NULL),
-	m_pColorCombiner(NULL),
-	m_pAlphaBlender(NULL)
+    m_pRender(NULL),
+    m_pGraphicsContext(NULL),
+    m_pColorCombiner(NULL),
+    m_pAlphaBlender(NULL)
 {
 }
 
 CDeviceBuilder::~CDeviceBuilder()
 {
-	DeleteGraphicsContext();
-	DeleteRender();
-	DeleteColorCombiner();
-	DeleteAlphaBlender();
+    DeleteGraphicsContext();
+    DeleteRender();
+    DeleteColorCombiner();
+    DeleteAlphaBlender();
 }
 
 void CDeviceBuilder::DeleteGraphicsContext(void)
 {
-	if( m_pGraphicsContext != NULL )
-	{
-		delete m_pGraphicsContext;
-		CGraphicsContext::g_pGraphicsContext = m_pGraphicsContext = NULL;
-	}
+    if( m_pGraphicsContext != NULL )
+    {
+        delete m_pGraphicsContext;
+        CGraphicsContext::g_pGraphicsContext = m_pGraphicsContext = NULL;
+    }
 
-	SAFE_DELETE(g_pFrameBufferManager);
+    SAFE_DELETE(g_pFrameBufferManager);
 }
 
 void CDeviceBuilder::DeleteRender(void)
 {
-	if( m_pRender != NULL )
-	{
-		delete m_pRender;
-		CRender::g_pRender = m_pRender = NULL;
-		CRender::gRenderReferenceCount = 0;
-	}
+    if( m_pRender != NULL )
+    {
+        delete m_pRender;
+        CRender::g_pRender = m_pRender = NULL;
+        CRender::gRenderReferenceCount = 0;
+    }
 }
 
 void CDeviceBuilder::DeleteColorCombiner(void)
 {
-	if( m_pColorCombiner != NULL )
-	{
-		delete m_pColorCombiner;
-		m_pColorCombiner = NULL;
-	}
+    if( m_pColorCombiner != NULL )
+    {
+        delete m_pColorCombiner;
+        m_pColorCombiner = NULL;
+    }
 }
 
 void CDeviceBuilder::DeleteAlphaBlender(void)
 {
-	if( m_pAlphaBlender != NULL )
-	{
-		delete m_pAlphaBlender;
-		m_pAlphaBlender = NULL;
-	}
+    if( m_pAlphaBlender != NULL )
+    {
+        delete m_pAlphaBlender;
+        m_pAlphaBlender = NULL;
+    }
 }
 
 
@@ -162,186 +162,186 @@ void CDeviceBuilder::DeleteAlphaBlender(void)
 
 CGraphicsContext * OGLDeviceBuilder::CreateGraphicsContext(void)
 {
-	if( g_GraphicsInfo.hStatusBar )
-	{
+    if( g_GraphicsInfo.hStatusBar )
+    {
         printf("[RiceVideo] Creating OpenGL Device Context\n");
-	}
-	if( m_pGraphicsContext == NULL )
-	{
-		m_pGraphicsContext = new COGLGraphicsContext();
-		SAFE_CHECK(m_pGraphicsContext);
-		CGraphicsContext::g_pGraphicsContext = m_pGraphicsContext;
-	}
+    }
+    if( m_pGraphicsContext == NULL )
+    {
+        m_pGraphicsContext = new COGLGraphicsContext();
+        SAFE_CHECK(m_pGraphicsContext);
+        CGraphicsContext::g_pGraphicsContext = m_pGraphicsContext;
+    }
 
-	g_pFrameBufferManager = new FrameBufferManager;
-	return m_pGraphicsContext;
+    g_pFrameBufferManager = new FrameBufferManager;
+    return m_pGraphicsContext;
 }
 
 CRender * OGLDeviceBuilder::CreateRender(void)
 {
-	if( m_pRender == NULL )
-	{
-		if( CGraphicsContext::g_pGraphicsContext == NULL && CGraphicsContext::g_pGraphicsContext->Ready() )
-		{
-			ErrorMsg("Can not create ColorCombiner before creating and initializing GraphicsContext");
-			m_pRender = NULL;
-			SAFE_CHECK(m_pRender);
-		}
+    if( m_pRender == NULL )
+    {
+        if( CGraphicsContext::g_pGraphicsContext == NULL && CGraphicsContext::g_pGraphicsContext->Ready() )
+        {
+            ErrorMsg("Can not create ColorCombiner before creating and initializing GraphicsContext");
+            m_pRender = NULL;
+            SAFE_CHECK(m_pRender);
+        }
 
-		COGLGraphicsContext &context = *((COGLGraphicsContext*)CGraphicsContext::g_pGraphicsContext);
+        COGLGraphicsContext &context = *((COGLGraphicsContext*)CGraphicsContext::g_pGraphicsContext);
 
-		if( context.m_bSupportMultiTexture )
-		{
-			// OGL extension render
-			m_pRender = new COGLExtRender();
-		}
-		else
-		{
-			// Basic OGL Render
-			m_pRender = new OGLRender();
-		}
-		SAFE_CHECK(m_pRender);
-		CRender::g_pRender = m_pRender;
-	}
+        if( context.m_bSupportMultiTexture )
+        {
+            // OGL extension render
+            m_pRender = new COGLExtRender();
+        }
+        else
+        {
+            // Basic OGL Render
+            m_pRender = new OGLRender();
+        }
+        SAFE_CHECK(m_pRender);
+        CRender::g_pRender = m_pRender;
+    }
 
-	return m_pRender;
+    return m_pRender;
 }
 
 CTexture * OGLDeviceBuilder::CreateTexture(uint32 dwWidth, uint32 dwHeight, TextureUsage usage)
 {
-	COGLTexture *txtr = new COGLTexture(dwWidth, dwHeight, usage);
-	if( txtr->m_pTexture == NULL )
-	{
-		delete txtr;
-		TRACE0("Cannot create new texture, out of video memory");
-		return NULL;
-	}
-	else
-		return txtr;
+    COGLTexture *txtr = new COGLTexture(dwWidth, dwHeight, usage);
+    if( txtr->m_pTexture == NULL )
+    {
+        delete txtr;
+        TRACE0("Cannot create new texture, out of video memory");
+        return NULL;
+    }
+    else
+        return txtr;
 }
 
 CColorCombiner * OGLDeviceBuilder::CreateColorCombiner(CRender *pRender)
 {
-	if( m_pColorCombiner == NULL )
-	{
-		if( CGraphicsContext::g_pGraphicsContext == NULL && CGraphicsContext::g_pGraphicsContext->Ready() )
-		{
-			ErrorMsg("Can not create ColorCombiner before creating and initializing GraphicsContext");
-		}
-		else
-		{
-			m_deviceType = (SupportedDeviceType)options.OpenglRenderSetting;
-			if( m_deviceType == OGL_DEVICE )	// Best fit
-			{
-				int maxUnit = 2;
-				COGLGraphicsContext *pcontext = (COGLGraphicsContext *)(CGraphicsContext::g_pGraphicsContext);
-				glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB,&maxUnit);
+    if( m_pColorCombiner == NULL )
+    {
+        if( CGraphicsContext::g_pGraphicsContext == NULL && CGraphicsContext::g_pGraphicsContext->Ready() )
+        {
+            ErrorMsg("Can not create ColorCombiner before creating and initializing GraphicsContext");
+        }
+        else
+        {
+            m_deviceType = (SupportedDeviceType)options.OpenglRenderSetting;
+            if( m_deviceType == OGL_DEVICE )    // Best fit
+            {
+                int maxUnit = 2;
+                COGLGraphicsContext *pcontext = (COGLGraphicsContext *)(CGraphicsContext::g_pGraphicsContext);
+                glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB,&maxUnit);
 
-				if( pcontext->IsExtensionSupported("GL_ARB_fragment_program") )
-				{
-					m_pColorCombiner = new COGL_FragmentProgramCombiner(pRender);
-					printf("[RiceVideo] OpenGL Combiner: Fragment Program\n");
-				}
-				else if( pcontext->IsExtensionSupported("GL_NV_texture_env_combine4") || 
-					pcontext->IsExtensionSupported("GL_NV_register_combiners") )
-				{
-					m_pColorCombiner = new COGLColorCombinerNvidia(pRender);
-					printf("[RiceVideo] OpenGL Combiner: NVidia\n");
-				}
-				else if( pcontext->IsExtensionSupported("GL_NV_texture_env_combine4") )
-				{
-					m_pColorCombiner = new COGLColorCombinerTNT2(pRender);
-					printf("[RiceVideo] OpenGL Combiner: TNT2\n");
-				}
-				else if( pcontext->IsExtensionSupported("GL_EXT_texture_env_combine") ||
-						 pcontext->IsExtensionSupported("GL_ARB_texture_env_combine") )
-				{
-					if( pcontext->IsExtensionSupported("GL_ARB_texture_env_crossbar") )
-					{
-						if( maxUnit > 2 )
+                if( pcontext->IsExtensionSupported("GL_ARB_fragment_program") )
+                {
+                    m_pColorCombiner = new COGL_FragmentProgramCombiner(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: Fragment Program\n");
+                }
+                else if( pcontext->IsExtensionSupported("GL_NV_texture_env_combine4") || 
+                    pcontext->IsExtensionSupported("GL_NV_register_combiners") )
+                {
+                    m_pColorCombiner = new COGLColorCombinerNvidia(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: NVidia\n");
+                }
+                else if( pcontext->IsExtensionSupported("GL_NV_texture_env_combine4") )
+                {
+                    m_pColorCombiner = new COGLColorCombinerTNT2(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: TNT2\n");
+                }
+                else if( pcontext->IsExtensionSupported("GL_EXT_texture_env_combine") ||
+                         pcontext->IsExtensionSupported("GL_ARB_texture_env_combine") )
+                {
+                    if( pcontext->IsExtensionSupported("GL_ARB_texture_env_crossbar") )
+                    {
+                        if( maxUnit > 2 )
                         {
-							m_pColorCombiner = new COGLColorCombiner4v2(pRender);
-    						printf("[RiceVideo] OpenGL Combiner: OGL 1.4 version 2\n");
+                            m_pColorCombiner = new COGLColorCombiner4v2(pRender);
+                            printf("[RiceVideo] OpenGL Combiner: OGL 1.4 version 2\n");
                         }
-						else
+                        else
                         {
-							m_pColorCombiner = new COGLColorCombiner4(pRender);
-    						printf("[RiceVideo] OpenGL Combiner: OGL 1.4\n");
+                            m_pColorCombiner = new COGLColorCombiner4(pRender);
+                            printf("[RiceVideo] OpenGL Combiner: OGL 1.4\n");
                         }
-					}
-					else
-					{
-						if( maxUnit > 2 )
+                    }
+                    else
+                    {
+                        if( maxUnit > 2 )
                         {
-							m_pColorCombiner = new COGLColorCombiner4v2(pRender);
-    						printf("[RiceVideo] OpenGL Combiner: OGL 1.4 version 2 (w/o env crossbar)\n");
+                            m_pColorCombiner = new COGLColorCombiner4v2(pRender);
+                            printf("[RiceVideo] OpenGL Combiner: OGL 1.4 version 2 (w/o env crossbar)\n");
                         }
-						else
+                        else
                         {
-    						m_pColorCombiner = new COGLColorCombiner2(pRender);
-	    					printf("[RiceVideo] OpenGL Combiner: OGL 1.2/1.3\n");
+                            m_pColorCombiner = new COGLColorCombiner2(pRender);
+                            printf("[RiceVideo] OpenGL Combiner: OGL 1.2/1.3\n");
                         }
-					}
-				}
-				else
-				{
-					m_pColorCombiner = new COGLColorCombiner(pRender);
-					printf("[RiceVideo] OpenGL Combiner: Basic OGL");
-				}
-			}
-			else
-			{
-				switch(m_deviceType)
-				{
-				case OGL_1_1_DEVICE:
-					m_pColorCombiner = new COGLColorCombiner(pRender);
-					printf("[RiceVideo] OpenGL Combiner: Basic OGL\n");
-					break;
-				case OGL_1_2_DEVICE:
-				case OGL_1_3_DEVICE:
-					m_pColorCombiner = new COGLColorCombiner2(pRender);
-					printf("[RiceVideo] OpenGL Combiner: OGL 1.2/1.3\n");
-					break;
-				case OGL_1_4_DEVICE:
-					m_pColorCombiner = new COGLColorCombiner4(pRender);
-					printf("[RiceVideo] OpenGL Combiner: OGL 1.4\n");
-					break;
-				case OGL_1_4_V2_DEVICE:
-					m_pColorCombiner = new COGLColorCombiner4v2(pRender);
-					printf("[RiceVideo] OpenGL Combiner: OGL 1.4 Version 2\n");
-					break;
-				case OGL_TNT2_DEVICE:
-					m_pColorCombiner = new COGLColorCombinerTNT2(pRender);
-					printf("[RiceVideo] OpenGL Combiner: TNT2\n");
-					break;
-				case NVIDIA_OGL_DEVICE:
-					m_pColorCombiner = new COGLColorCombinerNvidia(pRender);
-					printf("[RiceVideo] OpenGL Combiner: Nvidia\n");
-					break;
-				case OGL_FRAGMENT_PROGRAM:
-					m_pColorCombiner = new COGL_FragmentProgramCombiner(pRender);
-					printf("[RiceVideo] OpenGL Combiner: Fragment Program\n");
-					break;
-				 default:
-				        break;
-				}
-			}
-		}
+                    }
+                }
+                else
+                {
+                    m_pColorCombiner = new COGLColorCombiner(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: Basic OGL");
+                }
+            }
+            else
+            {
+                switch(m_deviceType)
+                {
+                case OGL_1_1_DEVICE:
+                    m_pColorCombiner = new COGLColorCombiner(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: Basic OGL\n");
+                    break;
+                case OGL_1_2_DEVICE:
+                case OGL_1_3_DEVICE:
+                    m_pColorCombiner = new COGLColorCombiner2(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: OGL 1.2/1.3\n");
+                    break;
+                case OGL_1_4_DEVICE:
+                    m_pColorCombiner = new COGLColorCombiner4(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: OGL 1.4\n");
+                    break;
+                case OGL_1_4_V2_DEVICE:
+                    m_pColorCombiner = new COGLColorCombiner4v2(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: OGL 1.4 Version 2\n");
+                    break;
+                case OGL_TNT2_DEVICE:
+                    m_pColorCombiner = new COGLColorCombinerTNT2(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: TNT2\n");
+                    break;
+                case NVIDIA_OGL_DEVICE:
+                    m_pColorCombiner = new COGLColorCombinerNvidia(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: Nvidia\n");
+                    break;
+                case OGL_FRAGMENT_PROGRAM:
+                    m_pColorCombiner = new COGL_FragmentProgramCombiner(pRender);
+                    printf("[RiceVideo] OpenGL Combiner: Fragment Program\n");
+                    break;
+                 default:
+                        break;
+                }
+            }
+        }
 
-		SAFE_CHECK(m_pColorCombiner);
-	}
+        SAFE_CHECK(m_pColorCombiner);
+    }
 
-	return m_pColorCombiner;
+    return m_pColorCombiner;
 }
 
 CBlender * OGLDeviceBuilder::CreateAlphaBlender(CRender *pRender)
 {
-	if( m_pAlphaBlender == NULL )
-	{
-		m_pAlphaBlender = new COGLBlender(pRender);
-		SAFE_CHECK(m_pAlphaBlender);
-	}
+    if( m_pAlphaBlender == NULL )
+    {
+        m_pAlphaBlender = new COGLBlender(pRender);
+        SAFE_CHECK(m_pAlphaBlender);
+    }
 
-	return m_pAlphaBlender;
+    return m_pAlphaBlender;
 }
 

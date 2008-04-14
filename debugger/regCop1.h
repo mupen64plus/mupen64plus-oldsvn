@@ -45,7 +45,7 @@
 
 int FGR_opened;
 
-GtkWidget	*frFGR;
+GtkWidget   *frFGR;
 
 void init_FGR();
 void update_FGR();

@@ -17,18 +17,18 @@
 typedef struct _ClistEditData ClistEditData;
 struct _ClistEditData
 {
-	GtkWidget *window;
-	GtkWidget *entry;
+    GtkWidget *window;
+    GtkWidget *entry;
 
-	gchar *old_name;
-	gchar *new_name;
+    gchar *old_name;
+    gchar *new_name;
 
-	gint (*edit_func)(ClistEditData *ced, const gchar *oldname, const gchar *newname, gpointer data);
-	gpointer edit_data;
+    gint (*edit_func)(ClistEditData *ced, const gchar *oldname, const gchar *newname, gpointer data);
+    gpointer edit_data;
 
-	GtkCList *clist;
-	gint row;
-	gint column;
+    GtkCList *clist;
+    gint row;
+    gint column;
 };
 
 
@@ -36,7 +36,7 @@ struct _ClistEditData
  * edit_func: return TRUE is rename successful, FALSE on failure.
  */
 gint clist_edit_by_row(GtkCList *clist, gint row, gint column,
-		       gint (*edit_func)(ClistEditData *, const gchar *, const gchar *, gpointer), gpointer data);
+               gint (*edit_func)(ClistEditData *, const gchar *, const gchar *, gpointer), gpointer data);
 
 /*
  * use this when highlighting a right-click menued or dnd clist row.

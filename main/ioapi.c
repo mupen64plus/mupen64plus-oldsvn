@@ -114,7 +114,7 @@ int ZCALLBACK ftell_file_func (opaque, stream)
    voidpf opaque;
    voidpf stream;
 {
-	int ret;
+    int ret;
     ret = ftell((FILE *)stream);
     return ret;
 }
@@ -126,7 +126,7 @@ int ZCALLBACK fseek_file_func (opaque, stream, offset, origin)
    int origin;
 {
     int fseek_origin=0;
-	int ret;
+    int ret;
     switch (origin)
     {
     case ZLIB_FILEFUNC_SEEK_CUR :
@@ -149,7 +149,7 @@ int ZCALLBACK fclose_file_func (opaque, stream)
    voidpf opaque;
    voidpf stream;
 {
-	int ret;
+    int ret;
     ret = fclose((FILE *)stream);
     return ret;
 }

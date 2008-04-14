@@ -39,6 +39,8 @@
 /** string utilities **/
 char *trim(char *str);
 char *event_to_str(const SDL_Event *event);
+int event_active(const char *event_str);
+int key_pressed(SDLKey k);
 
 /** file utilities **/
 int isfile(char *path);
@@ -47,9 +49,9 @@ int copyfile(char *src, char *dest);
 
 /** linked list utilities **/
 typedef struct _list_node {
-	void *data;
-	struct _list_node *prev;
-	struct _list_node *next;
+    void *data;
+    struct _list_node *prev;
+    struct _list_node *next;
 } list_node_t;
 
 typedef list_node_t * list_t;
@@ -59,13 +61,13 @@ void list_node_delete(list_t *list, list_node_t *node);
 void list_delete(list_t *list);
 void list_node_move_front(list_t *list, list_node_t *node);
 void list_node_move_back(list_t *list, list_node_t *node);
-list_node_t *list_nth_node(list_t list, int n);
+void *list_nth_node_data(list_t list, int n);
 list_node_t *list_last_node(list_t list);
 int inline list_empty(list_t list);
 int list_length(list_t list);
 
 // cycles through each listnode in list setting curr_node to current node.
 #define list_foreach(list, curr_node) \
-	for((curr_node) = (list); (curr_node) != NULL; (curr_node) = (curr_node)->next)
+    for((curr_node) = (list); (curr_node) != NULL; (curr_node) = (curr_node)->next)
 
 #endif // __UTIL_H__

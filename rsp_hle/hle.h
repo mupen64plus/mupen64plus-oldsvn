@@ -41,33 +41,33 @@
 #endif
 
 // types
-typedef unsigned char		u8;
-typedef unsigned short		u16;
-typedef unsigned int		u32;
-typedef unsigned long long	u64;
+typedef unsigned char       u8;
+typedef unsigned short      u16;
+typedef unsigned int        u32;
+typedef unsigned long long  u64;
 
-typedef signed char			s8;
-typedef signed short		s16;
-typedef signed int			s32;
-typedef signed long long	s64;
+typedef signed char         s8;
+typedef signed short        s16;
+typedef signed int          s32;
+typedef signed long long    s64;
 
 //#define ACMD_SIZE               32
 /*
  * Audio flags
  */
 
-#define A_INIT			0x01
-#define A_CONTINUE		0x00
+#define A_INIT          0x01
+#define A_CONTINUE      0x00
 #define A_LOOP          0x02
 #define A_OUT           0x02
-#define A_LEFT			0x02
-#define	A_RIGHT			0x00
-#define A_VOL			0x04
-#define A_RATE			0x00
-#define A_AUX			0x08
-#define A_NOAUX			0x00
-#define A_MAIN			0x00
-#define A_MIX			0x10
+#define A_LEFT          0x02
+#define A_RIGHT         0x00
+#define A_VOL           0x04
+#define A_RATE          0x00
+#define A_AUX           0x08
+#define A_NOAUX         0x00
+#define A_MAIN          0x00
+#define A_MIX           0x10
 
 extern RSP_INFO rsp;
 

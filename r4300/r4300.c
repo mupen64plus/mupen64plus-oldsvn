@@ -76,7 +76,7 @@ void (*code)();
 #define check_memory() \
    if (!invalid_code[address>>12]) \
        if (blocks[address>>12]->block[(address&0xFFF)/4].ops != NOTCOMPILED) \
-	 invalid_code[address>>12] = 1;
+     invalid_code[address>>12] = 1;
 
 void NI()
 {
@@ -103,26 +103,26 @@ void FIN_BLOCK()
 {
    if (!delay_slot)
      {
-	jump_to((PC-1)->addr+4);
-	PC->ops();
-	if (dynacore) dyna_jump();
+    jump_to((PC-1)->addr+4);
+    PC->ops();
+    if (dynacore) dyna_jump();
      }
    else
      {
-	precomp_block *blk = actual;
-	precomp_instr *inst = PC;
-	jump_to((PC-1)->addr+4);
-	
-	if (!skip_jump)
-	  {
-	     PC->ops();
-	     actual = blk;
-	     PC = inst+1;
-	  }
-	else
-	  PC->ops();
-	
-	if (dynacore) dyna_jump();
+    precomp_block *blk = actual;
+    precomp_instr *inst = PC;
+    jump_to((PC-1)->addr+4);
+    
+    if (!skip_jump)
+      {
+         PC->ops();
+         actual = blk;
+         PC = inst+1;
+      }
+    else
+      PC->ops();
+    
+    if (dynacore) dyna_jump();
      }
 }
 
@@ -172,11 +172,11 @@ void JAL()
    delay_slot=0;
    if (!skip_jump)
      {
-	reg[31]=PC->addr;
-	sign_extended(reg[31]);
-	
-	PC=actual->block+
-	  (((((PC-2)->f.j.inst_index<<2) | ((PC-1)->addr & 0xF0000000))-actual->start)>>2);
+    reg[31]=PC->addr;
+    sign_extended(reg[31]);
+    
+    PC=actual->block+
+      (((((PC-2)->f.j.inst_index<<2) | ((PC-1)->addr & 0xF0000000))-actual->start)>>2);
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -192,10 +192,10 @@ void JAL_OUT()
    delay_slot=0;
    if (!skip_jump)
      {
-	reg[31]=PC->addr;
-	sign_extended(reg[31]);
-	
-	jump_to(jump_target);
+    reg[31]=PC->addr;
+    sign_extended(reg[31]);
+    
+    jump_to(jump_target);
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -246,10 +246,10 @@ void BEQ_IDLE()
    int skip;
    if (irs == irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BEQ();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BEQ();
      }
    else BEQ();
 }
@@ -290,10 +290,10 @@ void BNE_IDLE()
    int skip;
    if (irs != irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BNE();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BNE();
      }
    else BNE();
 }
@@ -332,10 +332,10 @@ void BLEZ_IDLE()
    int skip;
    if (irs <= irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BLEZ();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BLEZ();
      }
    else BLEZ();
 }
@@ -374,10 +374,10 @@ void BGTZ_IDLE()
    int skip;
    if (irs > irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BGTZ();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BGTZ();
      }
    else BGTZ();
 }
@@ -440,18 +440,18 @@ void BEQL()
 {
    if (irs == irt)
      {
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if(!skip_jump)
-	  PC += (PC-2)->f.i.immediate-1;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if(!skip_jump)
+      PC += (PC-2)->f.i.immediate-1;
      }
    else 
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -461,19 +461,19 @@ void BEQL_OUT()
 {
    if (irs == irt)
      {
-	jump_target = (int)PC->f.i.immediate;
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if (!skip_jump)
-	  jump_to(PC->addr + ((jump_target-1)<<2));
+    jump_target = (int)PC->f.i.immediate;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if (!skip_jump)
+      jump_to(PC->addr + ((jump_target-1)<<2));
      }
    else
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -484,10 +484,10 @@ void BEQL_IDLE()
    int skip;
    if (irs == irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BEQL();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BEQL();
      }
    else BEQL();
 }
@@ -496,18 +496,18 @@ void BNEL()
 {
    if (irs != irt)
      {
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if(!skip_jump)
-	  PC += (PC-2)->f.i.immediate-1;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if(!skip_jump)
+      PC += (PC-2)->f.i.immediate-1;
      }
    else
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -517,19 +517,19 @@ void BNEL_OUT()
 {
    if (irs != irt)
      {
-	jump_target = (int)PC->f.i.immediate;
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if (!skip_jump)
-	  jump_to(PC->addr + ((jump_target-1)<<2));
+    jump_target = (int)PC->f.i.immediate;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if (!skip_jump)
+      jump_to(PC->addr + ((jump_target-1)<<2));
      }
    else
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -540,10 +540,10 @@ void BNEL_IDLE()
    int skip;
    if (irs != irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BNEL();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BNEL();
      }
    else BNEL();
 }
@@ -552,18 +552,18 @@ void BLEZL()
 {
    if (irs <= 0)
      {
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if(!skip_jump)
-	  PC += (PC-2)->f.i.immediate-1;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if(!skip_jump)
+      PC += (PC-2)->f.i.immediate-1;
      }
    else
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -573,19 +573,19 @@ void BLEZL_OUT()
 {
    if (irs <= 0)
      {
-	jump_target = (int)PC->f.i.immediate;
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if (!skip_jump)
-	  jump_to(PC->addr + ((jump_target-1)<<2));
+    jump_target = (int)PC->f.i.immediate;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if (!skip_jump)
+      jump_to(PC->addr + ((jump_target-1)<<2));
      }
    else
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -596,10 +596,10 @@ void BLEZL_IDLE()
    int skip;
    if (irs <= irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BLEZL();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BLEZL();
      }
    else BLEZL();
 }
@@ -608,18 +608,18 @@ void BGTZL()
 {
    if (irs > 0)
      {
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if(!skip_jump)
-	  PC += (PC-2)->f.i.immediate-1;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if(!skip_jump)
+      PC += (PC-2)->f.i.immediate-1;
      }
    else
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -629,19 +629,19 @@ void BGTZL_OUT()
 {
    if (irs > 0)
      {
-	jump_target = (int)PC->f.i.immediate;
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if (!skip_jump)
-	  jump_to(PC->addr + ((jump_target-1)<<2));
+    jump_target = (int)PC->f.i.immediate;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if (!skip_jump)
+      jump_to(PC->addr + ((jump_target-1)<<2));
      }
    else
      {
-	PC+=2;
-	update_count();
+    PC+=2;
+    update_count();
      }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
@@ -652,10 +652,10 @@ void BGTZL_IDLE()
    int skip;
    if (irs > irt)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BGTZL();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BGTZL();
      }
    else BGTZL();
 }
@@ -679,59 +679,59 @@ void LDL()
    switch ((lsaddr) & 7)
      {
       case 0:
-	address = lsaddr;
-	rdword = (unsigned long long *) &lsrt;
-	read_dword_in_memory();
-	break;
+    address = lsaddr;
+    rdword = (unsigned long long *) &lsrt;
+    read_dword_in_memory();
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFF) | (word << 8);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFF) | (word << 8);
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFF) | (word << 16);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFF) | (word << 16);
+    break;
       case 3:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFF) | (word << 24);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFF) | (word << 24);
+    break;
       case 4:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFF) | (word << 32);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFF) | (word << 32);
+    break;
       case 5:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFFLL) | (word << 40);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFFLL) | (word << 40);
+    break;
       case 6:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFFFFLL) | (word << 48);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFFFFLL) | (word << 48);
+    break;
       case 7:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFFFFFFLL) | (word << 56);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFFFFFFLL) | (word << 56);
+    break;
      }
 }
 
@@ -742,59 +742,59 @@ void LDR()
    switch ((lsaddr) & 7)
      {
       case 0:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFFFFFF00LL) | (word >> 56);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFFFFFF00LL) | (word >> 56);
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFFFF0000LL) | (word >> 48);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFFFF0000LL) | (word >> 48);
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFF000000LL) | (word >> 40);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFF000000LL) | (word >> 40);
+    break;
       case 3:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFF00000000LL) | (word >> 32);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFF00000000LL) | (word >> 32);
+    break;
       case 4:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFF0000000000LL) | (word >> 24);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFF0000000000LL) | (word >> 24);
+    break;
       case 5:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFF000000000000LL) | (word >> 16);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFF000000000000LL) | (word >> 16);
+    break;
       case 6:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFF00000000000000LL) | (word >> 8);
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFF00000000000000LL) | (word >> 8);
+    break;
       case 7:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = (unsigned long long *) &lsrt;
-	read_dword_in_memory();
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = (unsigned long long *) &lsrt;
+    read_dword_in_memory();
+    break;
      }
 }
 
@@ -825,31 +825,31 @@ void LWL()
    switch ((lsaddr) & 3)
      {
       case 0:
-	address = lsaddr;
-	rdword = (unsigned long long *) &lsrt;
-	read_word_in_memory();
-	break;
+    address = lsaddr;
+    rdword = (unsigned long long *) &lsrt;
+    read_word_in_memory();
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFF) | (word << 8);
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFF) | (word << 8);
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFF) | (word << 16);
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFF) | (word << 16);
+    break;
       case 3:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFF) | (word << 24);
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFF) | (word << 24);
+    break;
      }
    if(address)
      sign_extended(lsrt);
@@ -888,32 +888,32 @@ void LWR()
    switch ((lsaddr) & 3)
      {
       case 0:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFFFFFF00LL) | ((word >> 24) & 0xFF);
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFFFFFF00LL) | ((word >> 24) & 0xFF);
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFFFF0000LL) | ((word >> 16) & 0xFFFF);
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFFFF0000LL) | ((word >> 16) & 0xFFFF);
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	if(address)
-	  lsrt = (lsrt & 0xFFFFFFFFFF000000LL) | ((word >> 8) & 0XFFFFFF);
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    if(address)
+      lsrt = (lsrt & 0xFFFFFFFFFF000000LL) | ((word >> 8) & 0XFFFFFF);
+    break;
       case 3:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = (unsigned long long *) &lsrt;
-	read_word_in_memory();
-	if(address)
-	  sign_extended(lsrt);
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = (unsigned long long *) &lsrt;
+    read_word_in_memory();
+    if(address)
+      sign_extended(lsrt);
      }
 }
 
@@ -950,39 +950,39 @@ void SWL()
    switch ((lsaddr) & 3)
      {
       case 0:
-	address = (lsaddr) & 0xFFFFFFFC;
-	word = (unsigned int)lsrt;
-	write_word_in_memory();
-	check_memory();
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    word = (unsigned int)lsrt;
+    write_word_in_memory();
+    check_memory();
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	if(address)
-	  {
-	     word = ((unsigned int)lsrt >> 8) | (old_word & 0xFF000000);
-	     write_word_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    if(address)
+      {
+         word = ((unsigned int)lsrt >> 8) | (old_word & 0xFF000000);
+         write_word_in_memory();
+         check_memory();
+      }
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	if(address)
-	  {
-	     word = ((unsigned int)lsrt >> 16) | (old_word & 0xFFFF0000);
-	     write_word_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    if(address)
+      {
+         word = ((unsigned int)lsrt >> 16) | (old_word & 0xFFFF0000);
+         write_word_in_memory();
+         check_memory();
+      }
+    break;
       case 3:
-	address = lsaddr;
-	byte = (unsigned char)(lsrt >> 24);
-	write_byte_in_memory();
-	check_memory();
-	break;
+    address = lsaddr;
+    byte = (unsigned char)(lsrt >> 24);
+    write_byte_in_memory();
+    check_memory();
+    break;
      }
 }
 
@@ -1002,88 +1002,88 @@ void SDL()
    switch ((lsaddr) & 7)
      {
       case 0:
-	address = (lsaddr) & 0xFFFFFFF8;
-	dword = lsrt;
-	write_dword_in_memory();
-	check_memory();
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    dword = lsrt;
+    write_dword_in_memory();
+    check_memory();
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = ((unsigned long long)lsrt >> 8)|(old_word & 0xFF00000000000000LL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = ((unsigned long long)lsrt >> 8)|(old_word & 0xFF00000000000000LL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = ((unsigned long long)lsrt >> 16)|(old_word & 0xFFFF000000000000LL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = ((unsigned long long)lsrt >> 16)|(old_word & 0xFFFF000000000000LL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 3:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = ((unsigned long long)lsrt >> 24)|(old_word & 0xFFFFFF0000000000LL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = ((unsigned long long)lsrt >> 24)|(old_word & 0xFFFFFF0000000000LL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 4:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = ((unsigned long long)lsrt >> 32)|(old_word & 0xFFFFFFFF00000000LL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = ((unsigned long long)lsrt >> 32)|(old_word & 0xFFFFFFFF00000000LL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 5:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = ((unsigned long long)lsrt >> 40)|(old_word & 0xFFFFFFFFFF000000LL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = ((unsigned long long)lsrt >> 40)|(old_word & 0xFFFFFFFFFF000000LL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 6:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = ((unsigned long long)lsrt >> 48)|(old_word & 0xFFFFFFFFFFFF0000LL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = ((unsigned long long)lsrt >> 48)|(old_word & 0xFFFFFFFFFFFF0000LL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 7:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = ((unsigned long long)lsrt >> 56)|(old_word & 0xFFFFFFFFFFFFFF00LL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = ((unsigned long long)lsrt >> 56)|(old_word & 0xFFFFFFFFFFFFFF00LL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
      }
 }
 
@@ -1094,88 +1094,88 @@ void SDR()
    switch ((lsaddr) & 7)
      {
       case 0:
-	address = lsaddr;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = (lsrt << 56) | (old_word & 0x00FFFFFFFFFFFFFFLL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = lsaddr;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = (lsrt << 56) | (old_word & 0x00FFFFFFFFFFFFFFLL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = (lsrt << 48) | (old_word & 0x0000FFFFFFFFFFFFLL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = (lsrt << 48) | (old_word & 0x0000FFFFFFFFFFFFLL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = (lsrt << 40) | (old_word & 0x000000FFFFFFFFFFLL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = (lsrt << 40) | (old_word & 0x000000FFFFFFFFFFLL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 3:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = (lsrt << 32) | (old_word & 0x00000000FFFFFFFFLL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = (lsrt << 32) | (old_word & 0x00000000FFFFFFFFLL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 4:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = (lsrt << 24) | (old_word & 0x0000000000FFFFFFLL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = (lsrt << 24) | (old_word & 0x0000000000FFFFFFLL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 5:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = (lsrt << 16) | (old_word & 0x000000000000FFFFLL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = (lsrt << 16) | (old_word & 0x000000000000FFFFLL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 6:
-	address = (lsaddr) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	if(address)
-	  {
-	     dword = (lsrt << 8) | (old_word & 0x00000000000000FFLL);
-	     write_dword_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    if(address)
+      {
+         dword = (lsrt << 8) | (old_word & 0x00000000000000FFLL);
+         write_dword_in_memory();
+         check_memory();
+      }
+    break;
       case 7:
-	address = (lsaddr) & 0xFFFFFFF8;
-	dword = lsrt;
-	write_dword_in_memory();
-	check_memory();
-	break;
+    address = (lsaddr) & 0xFFFFFFF8;
+    dword = lsrt;
+    write_dword_in_memory();
+    check_memory();
+    break;
      }
 }
 
@@ -1186,44 +1186,44 @@ void SWR()
    switch ((lsaddr) & 3)
      {
       case 0:
-	address = lsaddr;
-	rdword = &old_word;
-	read_word_in_memory();
-	if(address)
-	  {
-	     word = ((unsigned int)lsrt << 24) | (old_word & 0x00FFFFFF);
-	     write_word_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = lsaddr;
+    rdword = &old_word;
+    read_word_in_memory();
+    if(address)
+      {
+         word = ((unsigned int)lsrt << 24) | (old_word & 0x00FFFFFF);
+         write_word_in_memory();
+         check_memory();
+      }
+    break;
       case 1:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	if(address)
-	  {
-	     word = ((unsigned int)lsrt << 16) | (old_word & 0x0000FFFF);
-	     write_word_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    if(address)
+      {
+         word = ((unsigned int)lsrt << 16) | (old_word & 0x0000FFFF);
+         write_word_in_memory();
+         check_memory();
+      }
+    break;
       case 2:
-	address = (lsaddr) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	if(address)
-	  {
-	     word = ((unsigned int)lsrt << 8) | (old_word & 0x000000FF);
-	     write_word_in_memory();
-	     check_memory();
-	  }
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    if(address)
+      {
+         word = ((unsigned int)lsrt << 8) | (old_word & 0x000000FF);
+         write_word_in_memory();
+         check_memory();
+      }
+    break;
       case 3:
-	address = (lsaddr) & 0xFFFFFFFC;
-	word = (unsigned int)lsrt;
-	write_word_in_memory();
-	check_memory();
-	break;
+    address = (lsaddr) & 0xFFFFFFFC;
+    word = (unsigned int)lsrt;
+    write_word_in_memory();
+    check_memory();
+    break;
      }
 }
 
@@ -1240,8 +1240,8 @@ void LL()
    read_word_in_memory();
    if (address)
      {
-	sign_extended(lsrt);
-	llbit = 1;
+    sign_extended(lsrt);
+    llbit = 1;
      }
 }
 
@@ -1288,16 +1288,16 @@ void SC()
    PC++;
    if(llbit)
      {
-	address = lsaddr;
-	word = (unsigned int)(lsrt & 0xFFFFFFFF);
-	write_word_in_memory();
-	check_memory();
-	llbit = 0;
-	lsrt = 1;
+    address = lsaddr;
+    word = (unsigned int)(lsrt & 0xFFFFFFFF);
+    write_word_in_memory();
+    check_memory();
+    llbit = 0;
+    lsrt = 1;
      }
    else
      {
-	lsrt = 0;
+    lsrt = 0;
      }
 }
 
@@ -1340,23 +1340,23 @@ void NOTCOMPILED()
      recompile_block((int *) SP_DMEM, blocks[0xa4000000>>12], PC->addr);
    else
      {
-	unsigned int paddr = 0;
-	if (PC->addr >= 0x80000000 && PC->addr < 0xc0000000)
+    unsigned int paddr = 0;
+    if (PC->addr >= 0x80000000 && PC->addr < 0xc0000000)
       paddr = PC->addr;
-	else
+    else
       paddr = virtual_to_physical_address(PC->addr, 2);
-	if (paddr)
-	  {
-	     if ((paddr & 0x1FFFFFFF) >= 0x10000000)
-	       {
-		  recompile_block((int *) rom+((((paddr-(PC->addr-blocks[PC->addr>>12]->start)) & 0x1FFFFFFF) - 0x10000000)>>2),
-				  blocks[PC->addr>>12], PC->addr);
-	       }
-	     else
-	       recompile_block((int *) rdram+(((paddr-(PC->addr-blocks[PC->addr>>12]->start)) & 0x1FFFFFFF)>>2),
-			       blocks[PC->addr>>12], PC->addr);
-	  }
-	else printf("not compiled exception\n");
+    if (paddr)
+      {
+         if ((paddr & 0x1FFFFFFF) >= 0x10000000)
+           {
+          recompile_block((int *) rom+((((paddr-(PC->addr-blocks[PC->addr>>12]->start)) & 0x1FFFFFFF) - 0x10000000)>>2),
+                  blocks[PC->addr>>12], PC->addr);
+           }
+         else
+           recompile_block((int *) rdram+(((paddr-(PC->addr-blocks[PC->addr>>12]->start)) & 0x1FFFFFFF)>>2),
+                   blocks[PC->addr>>12], PC->addr);
+      }
+    else printf("not compiled exception\n");
      }
    PC->ops();
    if (dynacore)
@@ -1372,29 +1372,29 @@ static inline unsigned int update_invalid_addr(unsigned int addr)
 {
    if (addr >= 0x80000000 && addr < 0xa0000000)
      {
-	if (invalid_code[addr>>12]) invalid_code[(addr+0x20000000)>>12] = 1;
-	if (invalid_code[(addr+0x20000000)>>12]) invalid_code[addr>>12] = 1;
-	return addr;
+    if (invalid_code[addr>>12]) invalid_code[(addr+0x20000000)>>12] = 1;
+    if (invalid_code[(addr+0x20000000)>>12]) invalid_code[addr>>12] = 1;
+    return addr;
      }
    else if (addr >= 0xa0000000 && addr < 0xc0000000)
      {
-	if (invalid_code[addr>>12]) invalid_code[(addr-0x20000000)>>12] = 1;
-	if (invalid_code[(addr-0x20000000)>>12]) invalid_code[addr>>12] = 1;
-	return addr;
+    if (invalid_code[addr>>12]) invalid_code[(addr-0x20000000)>>12] = 1;
+    if (invalid_code[(addr-0x20000000)>>12]) invalid_code[addr>>12] = 1;
+    return addr;
      }
    else
      {
-	unsigned int paddr = virtual_to_physical_address(addr, 2);
-	if (paddr)
-	  {
-	     unsigned int beg_paddr = paddr - (addr - (addr&~0xFFF));
-	     update_invalid_addr(paddr);
-	     if (invalid_code[(beg_paddr+0x000)>>12]) invalid_code[addr>>12] = 1;
-	     if (invalid_code[(beg_paddr+0xFFC)>>12]) invalid_code[addr>>12] = 1;
-	     if (invalid_code[addr>>12]) invalid_code[(beg_paddr+0x000)>>12] = 1;
-	     if (invalid_code[addr>>12]) invalid_code[(beg_paddr+0xFFC)>>12] = 1;
-	  }
-	return paddr;
+    unsigned int paddr = virtual_to_physical_address(addr, 2);
+    if (paddr)
+      {
+         unsigned int beg_paddr = paddr - (addr - (addr&~0xFFF));
+         update_invalid_addr(paddr);
+         if (invalid_code[(beg_paddr+0x000)>>12]) invalid_code[addr>>12] = 1;
+         if (invalid_code[(beg_paddr+0xFFC)>>12]) invalid_code[addr>>12] = 1;
+         if (invalid_code[addr>>12]) invalid_code[(beg_paddr+0x000)>>12] = 1;
+         if (invalid_code[addr>>12]) invalid_code[(beg_paddr+0xFFC)>>12] = 1;
+      }
+    return paddr;
      }
 }
 
@@ -1409,19 +1409,19 @@ void jump_to_func()
    actual = blocks[addr>>12];
    if (invalid_code[addr>>12])
      {
-	if (!blocks[addr>>12])
-	  {
-	     blocks[addr>>12] = malloc(sizeof(precomp_block));
-	     actual = blocks[addr>>12];
-	     blocks[addr>>12]->code = NULL;
-	     blocks[addr>>12]->block = NULL;
-	     blocks[addr>>12]->jumps_table = NULL;
-	     blocks[addr>>12]->riprel_table = NULL;
-	  }
-	blocks[addr>>12]->start = addr & ~0xFFF;
-	blocks[addr>>12]->end = (addr & ~0xFFF) + 0x1000;
-	init_block((int *) rdram+(((paddr-(addr-blocks[addr>>12]->start)) & 0x1FFFFFFF)>>2),
-		   blocks[addr>>12]);
+    if (!blocks[addr>>12])
+      {
+         blocks[addr>>12] = malloc(sizeof(precomp_block));
+         actual = blocks[addr>>12];
+         blocks[addr>>12]->code = NULL;
+         blocks[addr>>12]->block = NULL;
+         blocks[addr>>12]->jumps_table = NULL;
+         blocks[addr>>12]->riprel_table = NULL;
+      }
+    blocks[addr>>12]->start = addr & ~0xFFF;
+    blocks[addr>>12]->end = (addr & ~0xFFF) + 0x1000;
+    init_block((int *) rdram+(((paddr-(addr-blocks[addr>>12]->start)) & 0x1FFFFFFF)>>2),
+           blocks[addr>>12]);
      }
    PC=actual->block+((addr-actual->start)>>2);
    
@@ -1433,9 +1433,9 @@ int check_cop1_unusable()
 {
    if (!(Status & 0x20000000))
      {
-	Cause = (11 << 2) | 0x10000000;
-	exception_general();
-	return 1;
+    Cause = (11 << 2) | 0x10000000;
+    exception_general();
+    return 1;
      }
    return 0;
 }
@@ -1444,17 +1444,17 @@ void update_count()
 {
    if (interpcore)
      {
-	Count = Count + (interp_addr - last_addr)/2;
-	last_addr = interp_addr;
+    Count = Count + (interp_addr - last_addr)/2;
+    last_addr = interp_addr;
      }
    else
      {
-	if (PC->addr < last_addr)
-	  {
-	     printf("PC->addr < last_addr\n");
-	  }
-	Count = Count + (PC->addr - last_addr)/2;
-	last_addr = PC->addr;
+    if (PC->addr < last_addr)
+      {
+         printf("PC->addr < last_addr\n");
+      }
+    Count = Count + (PC->addr - last_addr)/2;
+    last_addr = PC->addr;
      }
 #ifdef COMPARE_CORE
    if (delay_slot)
@@ -1470,8 +1470,8 @@ void init_blocks()
    int i;
    for (i=0; i<0x100000; i++)
      {
-	invalid_code[i] = 1;
-	blocks[i] = NULL;
+    invalid_code[i] = 1;
+    blocks[i] = NULL;
      }
    blocks[0xa4000000>>12] = malloc(sizeof(precomp_block));
    invalid_code[0xa4000000>>12] = 1;
@@ -1505,41 +1505,41 @@ void go()
    rompause = 0;
    for (i=0;i<32;i++)
      {
-	reg[i]=0;
-	reg_cop0[i]=0;
-	reg_cop1_fgr_32[i]=0;
-	reg_cop1_fgr_64[i]=0;
-	
-	reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
-	reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
-	
-	// --------------tlb------------------------
-	tlb_e[i].mask=0;
-	tlb_e[i].vpn2=0;
-	tlb_e[i].g=0;
-	tlb_e[i].asid=0;
-	tlb_e[i].pfn_even=0;
-	tlb_e[i].c_even=0;
-	tlb_e[i].d_even=0;
-	tlb_e[i].v_even=0;
-	tlb_e[i].pfn_odd=0;
-	tlb_e[i].c_odd=0;
-	tlb_e[i].d_odd=0;
-	tlb_e[i].v_odd=0;
-	tlb_e[i].r=0;
-	//tlb_e[i].check_parity_mask=0x1000;
-	
-	tlb_e[i].start_even=0;
-	tlb_e[i].end_even=0;
-	tlb_e[i].phys_even=0;
-	tlb_e[i].start_odd=0;
-	tlb_e[i].end_odd=0;
-	tlb_e[i].phys_odd=0;
+    reg[i]=0;
+    reg_cop0[i]=0;
+    reg_cop1_fgr_32[i]=0;
+    reg_cop1_fgr_64[i]=0;
+    
+    reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
+    reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
+    
+    // --------------tlb------------------------
+    tlb_e[i].mask=0;
+    tlb_e[i].vpn2=0;
+    tlb_e[i].g=0;
+    tlb_e[i].asid=0;
+    tlb_e[i].pfn_even=0;
+    tlb_e[i].c_even=0;
+    tlb_e[i].d_even=0;
+    tlb_e[i].v_even=0;
+    tlb_e[i].pfn_odd=0;
+    tlb_e[i].c_odd=0;
+    tlb_e[i].d_odd=0;
+    tlb_e[i].v_odd=0;
+    tlb_e[i].r=0;
+    //tlb_e[i].check_parity_mask=0x1000;
+    
+    tlb_e[i].start_even=0;
+    tlb_e[i].end_even=0;
+    tlb_e[i].phys_even=0;
+    tlb_e[i].start_odd=0;
+    tlb_e[i].end_odd=0;
+    tlb_e[i].phys_odd=0;
      }
    for (i=0; i<0x100000; i++)
      {
-	tlb_LUT_r[i] = 0;
-	tlb_LUT_w[i] = 0;
+    tlb_LUT_r[i] = 0;
+    tlb_LUT_w[i] = 0;
      }
    llbit=0;
    hi=0;
@@ -1617,57 +1617,57 @@ void go()
       case 0x55:
       case 0x58:
       case 0x59:
-	switch (CIC_Chip) {
-	 case 2:
-	   reg[5] = 0xFFFFFFFFC0F1D859LL;
-	   reg[14]= 0x000000002DE108EALL;
-	   break;
-	 case 3:
-	   reg[5] = 0xFFFFFFFFD4646273LL;
-	   reg[14]= 0x000000001AF99984LL;
-	   break;
-	 case 5:
-	   SP_IMEM[1] = 0xBDA807FC;
-	   reg[5] = 0xFFFFFFFFDECAAAD1LL;
-	   reg[14]= 0x000000000CF85C13LL;
-	   reg[24]= 0x0000000000000002LL;
-	   break;
-	 case 6:
-	   reg[5] = 0xFFFFFFFFB04DC903LL;
-	   reg[14]= 0x000000001AF99984LL;
-	   reg[24]= 0x0000000000000002LL;
-	   break;
-	}
-	reg[23]= 0x0000000000000006LL;
-	reg[31]= 0xFFFFFFFFA4001554LL;
-	break;
+    switch (CIC_Chip) {
+     case 2:
+       reg[5] = 0xFFFFFFFFC0F1D859LL;
+       reg[14]= 0x000000002DE108EALL;
+       break;
+     case 3:
+       reg[5] = 0xFFFFFFFFD4646273LL;
+       reg[14]= 0x000000001AF99984LL;
+       break;
+     case 5:
+       SP_IMEM[1] = 0xBDA807FC;
+       reg[5] = 0xFFFFFFFFDECAAAD1LL;
+       reg[14]= 0x000000000CF85C13LL;
+       reg[24]= 0x0000000000000002LL;
+       break;
+     case 6:
+       reg[5] = 0xFFFFFFFFB04DC903LL;
+       reg[14]= 0x000000001AF99984LL;
+       reg[24]= 0x0000000000000002LL;
+       break;
+    }
+    reg[23]= 0x0000000000000006LL;
+    reg[31]= 0xFFFFFFFFA4001554LL;
+    break;
       case 0x37:
       case 0x41:
       case 0x45:
       case 0x4A:
       default:
-	switch (CIC_Chip) {
-	 case 2:
-	   reg[5] = 0xFFFFFFFFC95973D5LL;
-	   reg[14]= 0x000000002449A366LL;
-	   break;
-	 case 3:
-	   reg[5] = 0xFFFFFFFF95315A28LL;
-	   reg[14]= 0x000000005BACA1DFLL;
-	   break;
-	 case 5:
-	   SP_IMEM[1] = 0x8DA807FC;
-	   reg[5] = 0x000000005493FB9ALL;
-	   reg[14]= 0xFFFFFFFFC2C20384LL;
-	   break;
-	 case 6:
-	   reg[5] = 0xFFFFFFFFE067221FLL;
-	   reg[14]= 0x000000005CD2B70FLL;
-	   break;
-	}
-	reg[20]= 0x0000000000000001LL;
-	reg[24]= 0x0000000000000003LL;
-	reg[31]= 0xFFFFFFFFA4001550LL;
+    switch (CIC_Chip) {
+     case 2:
+       reg[5] = 0xFFFFFFFFC95973D5LL;
+       reg[14]= 0x000000002449A366LL;
+       break;
+     case 3:
+       reg[5] = 0xFFFFFFFF95315A28LL;
+       reg[14]= 0x000000005BACA1DFLL;
+       break;
+     case 5:
+       SP_IMEM[1] = 0x8DA807FC;
+       reg[5] = 0x000000005493FB9ALL;
+       reg[14]= 0xFFFFFFFFC2C20384LL;
+       break;
+     case 6:
+       reg[5] = 0xFFFFFFFFE067221FLL;
+       reg[14]= 0x000000005CD2B70FLL;
+       break;
+    }
+    reg[20]= 0x0000000000000001LL;
+    reg[24]= 0x0000000000000003LL;
+    reg[31]= 0xFFFFFFFFA4001550LL;
      }
    switch (CIC_Chip) {
     case 1:
@@ -1733,66 +1733,66 @@ void go()
 
    if (dynacore == 0)
      {
-	 printf ("R4300 Core mode: Interpreter\n");
+     printf ("R4300 Core mode: Interpreter\n");
      init_blocks();
      last_addr = PC->addr;
      while (!stop)
-	  {
-	     //if ((debug_count+Count) >= 0x78a8091) break; // obj 0x16aeb8a
-	     //if ((debug_count+Count) >= 0x16b1360)
-	     /*if ((debug_count+Count) >= 0xf203ae0)
-	       {
-		  printf ("PC=%x:%x\n", (unsigned int)(PC->addr), 
-			  (unsigned int)(rdram[(PC->addr&0xFFFFFF)/4]));
-		  for (j=0; j<16; j++)
-		    printf ("reg[%2d]:%8x%8x        reg[%d]:%8x%8x\n",   
-			    j,
-			    (unsigned int)(reg[j] >> 32),
-			    (unsigned int)reg[j],
-			    j+16,
-			    (unsigned int)(reg[j+16] >> 32),
-			    (unsigned int)reg[j+16]);
-		  printf("hi:%8x%8x        lo:%8x%8x\n",
-			 (unsigned int)(hi >> 32),
-			 (unsigned int)hi,
-			 (unsigned int)(lo >> 32),
-			 (unsigned int)lo);
-		  printf("après %d instructions soit %x\n",(unsigned int)(debug_count+Count)
-			 ,(unsigned int)(debug_count+Count));
-		  getchar();
-	       }*/
-	     /*if ((debug_count+Count) >= 0x80000000) 
-	       printf("%x:%x, %x\n", (int)PC->addr, 
-		      (int)rdram[(PC->addr & 0xFFFFFF)/4],
-		      (int)(debug_count+Count));*/
+      {
+         //if ((debug_count+Count) >= 0x78a8091) break; // obj 0x16aeb8a
+         //if ((debug_count+Count) >= 0x16b1360)
+         /*if ((debug_count+Count) >= 0xf203ae0)
+           {
+          printf ("PC=%x:%x\n", (unsigned int)(PC->addr), 
+              (unsigned int)(rdram[(PC->addr&0xFFFFFF)/4]));
+          for (j=0; j<16; j++)
+            printf ("reg[%2d]:%8x%8x        reg[%d]:%8x%8x\n",   
+                j,
+                (unsigned int)(reg[j] >> 32),
+                (unsigned int)reg[j],
+                j+16,
+                (unsigned int)(reg[j+16] >> 32),
+                (unsigned int)reg[j+16]);
+          printf("hi:%8x%8x        lo:%8x%8x\n",
+             (unsigned int)(hi >> 32),
+             (unsigned int)hi,
+             (unsigned int)(lo >> 32),
+             (unsigned int)lo);
+          printf("après %d instructions soit %x\n",(unsigned int)(debug_count+Count)
+             ,(unsigned int)(debug_count+Count));
+          getchar();
+           }*/
+         /*if ((debug_count+Count) >= 0x80000000) 
+           printf("%x:%x, %x\n", (int)PC->addr, 
+              (int)rdram[(PC->addr & 0xFFFFFF)/4],
+              (int)(debug_count+Count));*/
 #ifdef COMPARE_CORE
-	     if (PC->ops == FIN_BLOCK && 
-		 (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
-		 virtual_to_physical_address(PC->addr, 2);
-	     compare_core();
+         if (PC->ops == FIN_BLOCK && 
+         (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
+         virtual_to_physical_address(PC->addr, 2);
+         compare_core();
 #endif
-	     PC->ops();
-	     /*if (j!= (Count & 0xFFF00000))
-	       {
-		  j = (Count & 0xFFF00000);
-		  printf("%x\n", j);
-	       }*/
-	     //check_PC;
+         PC->ops();
+         /*if (j!= (Count & 0xFFF00000))
+           {
+          j = (Count & 0xFFF00000);
+          printf("%x\n", j);
+           }*/
+         //check_PC;
 #ifdef DBG
-	     if (debugger_mode)
-	       update_debugger();
+         if (debugger_mode)
+           update_debugger();
 #endif
-	  }
+      }
      }
-#if defined(__i386__) || defined(__x86_64__)
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
    else if (dynacore == 1)
      {
-	 dynacore = 1;
-	 printf ("R4300 Core mode: Dynamic Recompiler\n");
-	 init_blocks();
-	 code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
-	 dyna_start(code);
-	 PC++;
+     dynacore = 1;
+     printf ("R4300 Core mode: Dynamic Recompiler\n");
+     init_blocks();
+     code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
+     dyna_start(code);
+     PC++;
 
 #if defined(PROFILE_R4300)
      pfProfile = fopen("instructionaddrs.dat", "ab");
@@ -1814,33 +1814,17 @@ void go()
 #endif
    else
      {
-	 printf ("R4300 Core mode: Pure Interpreter\n");
-	 dynacore = 0;
-	 interpcore = 1;
-	 pure_interpreter();
+     printf ("R4300 Core mode: Pure Interpreter\n");
+     dynacore = 0;
+     interpcore = 1;
+     pure_interpreter();
      }
    debug_count+= Count;
-   printf ("PC=%x:%x\n", (unsigned int)(PC->addr), 
-	   (unsigned int)(rdram[(PC->addr&0xFFFFFF)/4]));
-   for (j=0; j<16; j++)
-     printf ("reg[%2d]:%8x%8x        reg[%d]:%8x%8x\n",   
-	     j,
-	     (unsigned int)(reg[j] >> 32),
-	     (unsigned int)reg[j],
-	     j+16,
-	     (unsigned int)(reg[j+16] >> 32),
-	     (unsigned int)reg[j+16]);
-   printf("hi:%8x%8x        lo:%8x%8x\n",
-	  (unsigned int)(hi >> 32),
-	  (unsigned int)hi,
-	  (unsigned int)(lo >> 32),
-	  (unsigned int)lo);
-   printf("après %d instructions soit %x\n",(unsigned int)debug_count
-	  ,(unsigned int)debug_count);
+   printf("R4300 core finished.\n",(unsigned int)debug_count);
    for (i=0; i<0x100000; i++)
    {
      if (blocks[i])
-	 {
+     {
        if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
        if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
        if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }

@@ -38,25 +38,25 @@ extern int run;
 
 void init_debugger()
 {
-	debugger_mode = 1;
-	run = 0;
+    debugger_mode = 1;
+    run = 0;
 
 //]=-=-=[ Initialisation des Couleurs ]=-=-=[
-	color_modif.red = 0x0000;
-	color_modif.green = 0xA000;
-	color_modif.blue = 0xFFFF;
+    color_modif.red = 0x0000;
+    color_modif.green = 0xA000;
+    color_modif.blue = 0xFFFF;
 
-	color_ident.red = 0xFFFF;
-	color_ident.green = 0xFFFF;
-	color_ident.blue = 0xFFFF;
+    color_ident.red = 0xFFFF;
+    color_ident.green = 0xFFFF;
+    color_ident.blue = 0xFFFF;
 
-	init_registers();
-	init_desasm();
-	init_breakpoints();
-	//init_TLBwindow();
+    init_registers();
+    init_desasm();
+    init_breakpoints();
+    //init_TLBwindow();
 
-	pthread_mutex_init( &mutex, NULL);
-	pthread_cond_init( &debugger_done_cond, NULL);
+    pthread_mutex_init( &mutex, NULL);
+    pthread_cond_init( &debugger_done_cond, NULL);
 }
 
 
@@ -66,35 +66,35 @@ void update_debugger()
 // Update debugger state and display.
 // Should be called after each R4300 instruction.
 {
-	if(run==2) {
-		if( check_breakpoints(PC->addr)==-1 ) {
-			previousPC = PC->addr;
-			return;
-		}
-		else {
-			run = 0;
-			switch_button_to_run();
-			gdk_beep();
-		}
-	}
+    if(run==2) {
+        if( check_breakpoints(PC->addr)==-1 ) {
+            previousPC = PC->addr;
+            return;
+        }
+        else {
+            run = 0;
+            switch_button_to_run();
+            gdk_beep();
+        }
+    }
 
-	if(registers_opened) {
-		gdk_threads_enter();
-		update_registers();
-		gdk_threads_leave();
-	}	
-	if(desasm_opened) {
-		gdk_threads_enter();
-		update_desasm( PC->addr );
-		gdk_threads_leave();
-	}
-	/*if(regTLB_opened) {
-		gdk_threads_enter();
-		update_TLBwindow();
-		gdk_threads_leave();
-	}*/
-	previousPC = PC->addr;
+    if(registers_opened) {
+        gdk_threads_enter();
+        update_registers();
+        gdk_threads_leave();
+    }   
+    if(desasm_opened) {
+        gdk_threads_enter();
+        update_desasm( PC->addr );
+        gdk_threads_leave();
+    }
+    /*if(regTLB_opened) {
+        gdk_threads_enter();
+        update_TLBwindow();
+        gdk_threads_leave();
+    }*/
+    previousPC = PC->addr;
 
-	// Emulation thread is blocked until a button is clicked.
-	pthread_cond_wait(&debugger_done_cond, &mutex);
+    // Emulation thread is blocked until a button is clicked.
+    pthread_cond_wait(&debugger_done_cond, &mutex);
 }

@@ -79,7 +79,7 @@ void modelview_pop (int num = 1)
 {
   if (rdp.model_i > num - 1)
   {
-  	 rdp.model_i -= num;
+     rdp.model_i -= num;
   }
   else
   {
@@ -303,20 +303,20 @@ static void uc0_movemem()
       rdp.update &= ~UPDATE_MULT_MAT;
 
       int x,y;
-	  DWORD addr = segoffset(rdp.cmd1) & 0x00FFFFFF;
+      DWORD addr = segoffset(rdp.cmd1) & 0x00FFFFFF;
       FRDP ("matrix addr: %08lx\n", addr);
       addr >>= 1;
 
-	  DWORD a = rdp.pc[rdp.pc_i] & BMASK;
-	  rdp.pc[rdp.pc_i] = (a+24) & BMASK; //skip next 3 command, b/c they all are part of gSPForceMatrix
+      DWORD a = rdp.pc[rdp.pc_i] & BMASK;
+      rdp.pc[rdp.pc_i] = (a+24) & BMASK; //skip next 3 command, b/c they all are part of gSPForceMatrix
 
       for (x=0; x<16; x+=4) { // Adding 4 instead of one, just to remove mult. later
 
         for (y=0; y<4; y++) {
           rdp.combined[x>>2][y] = (float)(
-        	(((__int32)((WORD*)gfx.RDRAM)[(addr+x+y)^1]) << 16) |
-        	((WORD*)gfx.RDRAM)[(addr+x+y+16)^1]
-        	) / 65536.0f;
+            (((__int32)((WORD*)gfx.RDRAM)[(addr+x+y)^1]) << 16) |
+            ((WORD*)gfx.RDRAM)[(addr+x+y+16)^1]
+            ) / 65536.0f;
         }
       }
 
@@ -329,7 +329,7 @@ static void uc0_movemem()
     }
     break;
 
-	//next 3 command should never appear since they will be skipped in previous command
+    //next 3 command should never appear since they will be skipped in previous command
   case 0x98:
     RDP_E ("uc0:movemem matrix 0 - ERROR!\n");
     RDP ("matrix 0 - IGNORED\n");
@@ -416,7 +416,7 @@ static void uc0_vertex()
 
     v->uv_calculated = 0xFFFFFFFF;
     v->screen_translated = 0;
-	v->shade_mods_allowed = 1;
+    v->shade_mods_allowed = 1;
 
     v->scr_off = 0;
     if (v->x < -v->w) v->scr_off |= 1;
@@ -580,7 +580,7 @@ static void uc0_modifyvtx(BYTE where, WORD vtx, DWORD val)
     v->g = (BYTE)((val >> 16) & 0xFF);
     v->b = (BYTE)((val >> 8) & 0xFF);
     v->a = (BYTE)(val & 0xFF);
-	v->shade_mods_allowed = 1;
+    v->shade_mods_allowed = 1;
 
     FRDP ("RGBA: %d, %d, %d, %d\n", v->r, v->g, v->b, v->a);
     break;
@@ -589,7 +589,7 @@ static void uc0_modifyvtx(BYTE where, WORD vtx, DWORD val)
     v->ou = (float)((short)(val>>16)) / 32.0f;
     v->ov = (float)((short)(val&0xFFFF)) / 32.0f;
     v->uv_calculated = 0xFFFFFFFF;
-	v->uv_fixed = 0;
+    v->uv_fixed = 0;
 
     FRDP ("u/v: (%04lx, %04lx), (%f, %f)\n", (short)(val>>16), (short)(val&0xFFFF),
       v->ou, v->ov);
@@ -622,12 +622,12 @@ static void uc0_modifyvtx(BYTE where, WORD vtx, DWORD val)
     break;
 
   case 0x1C:    // Z screen
-	{
+    {
       float scr_z = (float)((short)(val>>16));
     v->z_w = (scr_z - rdp.view_trans[2]) / rdp.view_scale[2];
     v->z = v->z_w * v->w;
     FRDP ("z: %f\n", scr_z);
-	}
+    }
     break;
 
   default:
@@ -730,7 +730,7 @@ static void uc0_texture()
     tmp_tile->s_scale = (float)(s+1)/65536.0f;
     tmp_tile->t_scale = (float)(t+1)/65536.0f;
     tmp_tile->s_scale /= 32.0f;
-   	tmp_tile->t_scale /= 32.0f;
+    tmp_tile->t_scale /= 32.0f;
    
     rdp.update |= UPDATE_TEXTURE;
 

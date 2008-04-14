@@ -7,7 +7,7 @@
 # include "../main/winlnxdefs.h"
 #endif
 
-extern char			pluginName[];
+extern char         pluginName[];
 
 extern void (*CheckInterrupts)( void );
 extern char *screenDirectory;

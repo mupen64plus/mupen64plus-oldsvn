@@ -19,7 +19,7 @@ AiLenChanged( void )
 EXPORT DWORD CALL
 AiReadLength( void )
 {
-	return 0;
+    return 0;
 }
 
 EXPORT void CALL
@@ -35,7 +35,7 @@ CloseDLL( void )
 EXPORT void CALL
 DllAbout( HWND hParent )
 {
-	printf ("No Audio Plugin\n" );
+    printf ("No Audio Plugin\n" );
 }
 
 EXPORT void CALL
@@ -51,18 +51,18 @@ DllTest ( HWND hParent )
 EXPORT void CALL
 GetDllInfo( PLUGIN_INFO * PluginInfo )
 {
-	PluginInfo->Version = 0x0101;
-	PluginInfo->Type    = PLUGIN_TYPE_AUDIO;
-	sprintf(PluginInfo->Name,"No Audio");
-	PluginInfo->NormalMemory  = TRUE;
-	PluginInfo->MemoryBswaped = TRUE;
+    PluginInfo->Version = 0x0101;
+    PluginInfo->Type    = PLUGIN_TYPE_AUDIO;
+    sprintf(PluginInfo->Name,"No Audio");
+    PluginInfo->NormalMemory  = TRUE;
+    PluginInfo->MemoryBswaped = TRUE;
 }
 
 EXPORT BOOL CALL
 InitiateAudio( AUDIO_INFO Audio_Info )
 {
-	AudioInfo = Audio_Info;
-	return TRUE;
+    AudioInfo = Audio_Info;
+    return TRUE;
 }
 
 EXPORT void CALL RomOpen()

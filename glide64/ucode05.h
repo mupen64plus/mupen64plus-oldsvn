@@ -136,11 +136,11 @@ static void uc5_vertex ()
 
   if (rdp.cmd0 & 0x00010000)
   {
-  	if (billboarding)
-  		vtx_last = 1;
+    if (billboarding)
+        vtx_last = 1;
   }
   else
-  	vtx_last = 0;
+    vtx_last = 0;
 
   int first = ((rdp.cmd0 >> 9) & 0x1F) + vtx_last;
   FRDP ("uc5:vertex - addr: %08lx, first: %d, count: %d, matrix: %08lx\n", addr, first, n, cur_mtx);
@@ -181,7 +181,7 @@ static void uc5_vertex ()
 
     v->uv_calculated = 0xFFFFFFFF;
     v->screen_translated = 0;
-	v->shade_mods_allowed = 1;
+    v->shade_mods_allowed = 1;
 
     v->scr_off = 0;
     if (v->x < -v->w) v->scr_off |= 1;
@@ -321,7 +321,7 @@ static void uc5_moveword()
       rdp.fog_multiplier = (short)(rdp.cmd1 >> 16);
       rdp.fog_offset = (short)(rdp.cmd1 & 0x0000FFFF);
       FRDP ("fog: multiplier: %f, offset: %f\n", rdp.fog_multiplier, rdp.fog_offset);
-      //	  rdp.update |= UPDATE_FOG_ENABLED;
+      //      rdp.update |= UPDATE_FOG_ENABLED;
     }
     break;
     

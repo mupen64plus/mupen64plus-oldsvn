@@ -38,7 +38,7 @@ Type 'make' by itself to view all available build options:
      BITS=32       == build 32-bit binaries on 64-bit machine
      VCR=1         == enable video recording
      LIRC=1        == enable LIRC support
-     NOGUI_ONLY=1  == build without GUI support
+     NO_GUI=1      == build without GUI support
      PREFIX=path   == specify install/uninstall prefix (default: /usr/local)
    Debugging Options:
      PROFILE=1     == build gprof instrumentation into binaries for profiling
@@ -51,9 +51,9 @@ Type 'make' by itself to view all available build options:
 
 Previous to version 1.3, building mupen64 built two programs: mupen64 and mupen64_nogui. mupen64 had a gtk graphical frontend including a rom browser. mupen64_nogui contained no graphical frontend and all options were specified via the commandline. As of version 1.3, the mupen64 and mupen64_nogui codebases have been combined. Now, building mupen64plus results in one executable called mupen64plus that can either be run with a gui (default) or without a gui, by specifying --nogui at the commandline. For backwards compatability, if a symbolic link to the mupen64plus executable called mupen64plus_nogui (or mupen64_nogui) is created, running the mupen64plus_nogui symlink is equivalent to running mupen64plus with the --nogui flag.
 
-NOTE: If you want to build a nogui-only version of mupen64plus, i.e. without gtk+ dependencies, pass the NOGUI_ONLY=1 option to make, like this:
+NOTE: If you want to build a nogui-only version of mupen64plus, i.e. without gtk+ dependencies, pass the NO_GUI=1 option to make, like this:
 
- $ make NOGUI_ONLY=1 all
+ $ make NO_GUI=1 all
 
 2. Installation
 ---------------
@@ -128,6 +128,4 @@ Alt-Enter == Toggle between windowed and fullscreen (may not be supported by all
 5. Known Issues
 -----------------------
 As of March 2008, the RiceVideoLinux plugin may be unstable with users of the open source drivers for an ATI Radeon graphics adapter when fog is enabled.  If you have are using the open source Radeon driver, you should set the "EnableFog" value in RiceVideo.cfg to 0.
-
-
 

@@ -269,8 +269,8 @@ void C_SF_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    PC++;
@@ -280,8 +280,8 @@ void C_NGLE_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    PC++;
@@ -291,8 +291,8 @@ void C_SEQ_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] == *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -304,8 +304,8 @@ void C_NGL_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] == *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -318,8 +318,8 @@ void C_LT_D()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] < *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -332,8 +332,8 @@ void C_NGE_D()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] < *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -346,8 +346,8 @@ void C_LE_D()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] <= *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -360,8 +360,8 @@ void C_NGT_D()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] <= *reg_cop1_double[cfft])
      FCR31 |= 0x800000;

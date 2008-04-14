@@ -21,10 +21,10 @@
 #define __PAD_IMAGE_H__
 
 extern const struct {
-  unsigned int 	 width;
-  unsigned int 	 height;
-  unsigned int 	 bytes_per_pixel; /* 3:RGB, 4:RGBA */
-  unsigned char	 pixel_data[304 * 310 * 4 + 1];
+  unsigned int   width;
+  unsigned int   height;
+  unsigned int   bytes_per_pixel; /* 3:RGB, 4:RGBA */
+  unsigned char  pixel_data[304 * 310 * 4 + 1];
 } pad_image;
 
 #endif // __PAD_IMAGE_H__

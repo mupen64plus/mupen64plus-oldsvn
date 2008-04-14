@@ -24,19 +24,19 @@ class CRender;
 class CBlender
 {
 public:
-	virtual ~CBlender() {}
-	
-	virtual void InitBlenderMode(void);
-	virtual void NormalAlphaBlender(void)=0;
-	virtual void DisableAlphaBlender(void)=0;
-	
-	virtual void BlendFunc(uint32 srcFunc, uint32 desFunc)=0;
+    virtual ~CBlender() {}
+    
+    virtual void InitBlenderMode(void);
+    virtual void NormalAlphaBlender(void)=0;
+    virtual void DisableAlphaBlender(void)=0;
+    
+    virtual void BlendFunc(uint32 srcFunc, uint32 desFunc)=0;
 
-	virtual void Enable()=0;
-	virtual void Disable()=0;
+    virtual void Enable()=0;
+    virtual void Disable()=0;
 protected:
-	CBlender(CRender *pRender) : m_pRender(pRender) {}
-	CRender *m_pRender;
+    CBlender(CRender *pRender) : m_pRender(pRender) {}
+    CRender *m_pRender;
 };
 
 #endif

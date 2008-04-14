@@ -89,16 +89,16 @@ void gensllv()
    
    if (rd != ECX)
      {
-	mov_reg32_reg32(rd, rt);
-	shl_reg32_cl(rd);
+    mov_reg32_reg32(rd, rt);
+    shl_reg32_cl(rd);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rt);
-	shl_reg32_cl(temp);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rt);
+    shl_reg32_cl(temp);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -116,16 +116,16 @@ void gensrlv()
    
    if (rd != ECX)
      {
-	mov_reg32_reg32(rd, rt);
-	shr_reg32_cl(rd);
+    mov_reg32_reg32(rd, rt);
+    shr_reg32_cl(rd);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rt);
-	shr_reg32_cl(temp);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rt);
+    shr_reg32_cl(temp);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -143,16 +143,16 @@ void gensrav()
    
    if (rd != ECX)
      {
-	mov_reg32_reg32(rd, rt);
-	sar_reg32_cl(rd);
+    mov_reg32_reg32(rd, rt);
+    sar_reg32_cl(rd);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rt);
-	sar_reg32_cl(temp);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rt);
+    sar_reg32_cl(temp);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -174,8 +174,8 @@ void genjr()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)JR, 1);
-	return;
+    gencallinterp((unsigned int)JR, 1);
+    return;
      }
    
    free_all_registers();
@@ -243,8 +243,8 @@ void genjalr()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)JALR, 1);
-	return;
+    gencallinterp((unsigned int)JALR, 1);
+    return;
      }
    
    free_all_registers();
@@ -392,35 +392,35 @@ void gendsllv()
    
    if (rd1 != ECX && rd2 != ECX)
      {
-	mov_reg32_reg32(rd1, rt1);
-	mov_reg32_reg32(rd2, rt2);
-	shld_reg32_reg32_cl(rd2,rd1);
-	shl_reg32_cl(rd1);
-	test_reg32_imm32(ECX, 0x20);
-	je_rj(4);
-	mov_reg32_reg32(rd2, rd1); // 2
-	xor_reg32_reg32(rd1, rd1); // 2
+    mov_reg32_reg32(rd1, rt1);
+    mov_reg32_reg32(rd2, rt2);
+    shld_reg32_reg32_cl(rd2,rd1);
+    shl_reg32_cl(rd1);
+    test_reg32_imm32(ECX, 0x20);
+    je_rj(4);
+    mov_reg32_reg32(rd2, rd1); // 2
+    xor_reg32_reg32(rd1, rd1); // 2
      }
    else
      {
-	int temp1, temp2;
-	force_32(ECX);
-	temp1 = lru_register();
-	temp2 = lru_register_exc1(temp1);
-	free_register(temp1);
-	free_register(temp2);
-	
-	mov_reg32_reg32(temp1, rt1);
-	mov_reg32_reg32(temp2, rt2);
-	shld_reg32_reg32_cl(temp2, temp1);
-	shl_reg32_cl(temp1);
-	test_reg32_imm32(ECX, 0x20);
-	je_rj(4);
-	mov_reg32_reg32(temp2, temp1); // 2
-	xor_reg32_reg32(temp1, temp1); // 2
-	
-	mov_reg32_reg32(rd1, temp1);
-	mov_reg32_reg32(rd2, temp2);
+    int temp1, temp2;
+    force_32(ECX);
+    temp1 = lru_register();
+    temp2 = lru_register_exc1(temp1);
+    free_register(temp1);
+    free_register(temp2);
+    
+    mov_reg32_reg32(temp1, rt1);
+    mov_reg32_reg32(temp2, rt2);
+    shld_reg32_reg32_cl(temp2, temp1);
+    shl_reg32_cl(temp1);
+    test_reg32_imm32(ECX, 0x20);
+    je_rj(4);
+    mov_reg32_reg32(temp2, temp1); // 2
+    xor_reg32_reg32(temp1, temp1); // 2
+    
+    mov_reg32_reg32(rd1, temp1);
+    mov_reg32_reg32(rd2, temp2);
      }
 #endif
 }
@@ -440,35 +440,35 @@ void gendsrlv()
    
    if (rd1 != ECX && rd2 != ECX)
      {
-	mov_reg32_reg32(rd1, rt1);
-	mov_reg32_reg32(rd2, rt2);
-	shrd_reg32_reg32_cl(rd1,rd2);
-	shr_reg32_cl(rd2);
-	test_reg32_imm32(ECX, 0x20);
-	je_rj(4);
-	mov_reg32_reg32(rd1, rd2); // 2
-	xor_reg32_reg32(rd2, rd2); // 2
+    mov_reg32_reg32(rd1, rt1);
+    mov_reg32_reg32(rd2, rt2);
+    shrd_reg32_reg32_cl(rd1,rd2);
+    shr_reg32_cl(rd2);
+    test_reg32_imm32(ECX, 0x20);
+    je_rj(4);
+    mov_reg32_reg32(rd1, rd2); // 2
+    xor_reg32_reg32(rd2, rd2); // 2
      }
    else
      {
-	int temp1, temp2;
-	force_32(ECX);
-	temp1 = lru_register();
-	temp2 = lru_register_exc1(temp1);
-	free_register(temp1);
-	free_register(temp2);
-	
-	mov_reg32_reg32(temp1, rt1);
-	mov_reg32_reg32(temp2, rt2);
-	shrd_reg32_reg32_cl(temp1, temp2);
-	shr_reg32_cl(temp2);
-	test_reg32_imm32(ECX, 0x20);
-	je_rj(4);
-	mov_reg32_reg32(temp1, temp2); // 2
-	xor_reg32_reg32(temp2, temp2); // 2
-	
-	mov_reg32_reg32(rd1, temp1);
-	mov_reg32_reg32(rd2, temp2);
+    int temp1, temp2;
+    force_32(ECX);
+    temp1 = lru_register();
+    temp2 = lru_register_exc1(temp1);
+    free_register(temp1);
+    free_register(temp2);
+    
+    mov_reg32_reg32(temp1, rt1);
+    mov_reg32_reg32(temp2, rt2);
+    shrd_reg32_reg32_cl(temp1, temp2);
+    shr_reg32_cl(temp2);
+    test_reg32_imm32(ECX, 0x20);
+    je_rj(4);
+    mov_reg32_reg32(temp1, temp2); // 2
+    xor_reg32_reg32(temp2, temp2); // 2
+    
+    mov_reg32_reg32(rd1, temp1);
+    mov_reg32_reg32(rd2, temp2);
      }
 #endif
 }
@@ -488,35 +488,35 @@ void gendsrav()
    
    if (rd1 != ECX && rd2 != ECX)
      {
-	mov_reg32_reg32(rd1, rt1);
-	mov_reg32_reg32(rd2, rt2);
-	shrd_reg32_reg32_cl(rd1,rd2);
-	sar_reg32_cl(rd2);
-	test_reg32_imm32(ECX, 0x20);
-	je_rj(5);
-	mov_reg32_reg32(rd1, rd2); // 2
-	sar_reg32_imm8(rd2, 31); // 3
+    mov_reg32_reg32(rd1, rt1);
+    mov_reg32_reg32(rd2, rt2);
+    shrd_reg32_reg32_cl(rd1,rd2);
+    sar_reg32_cl(rd2);
+    test_reg32_imm32(ECX, 0x20);
+    je_rj(5);
+    mov_reg32_reg32(rd1, rd2); // 2
+    sar_reg32_imm8(rd2, 31); // 3
      }
    else
      {
-	int temp1, temp2;
-	force_32(ECX);
-	temp1 = lru_register();
-	temp2 = lru_register_exc1(temp1);
-	free_register(temp1);
-	free_register(temp2);
-	
-	mov_reg32_reg32(temp1, rt1);
-	mov_reg32_reg32(temp2, rt2);
-	shrd_reg32_reg32_cl(temp1, temp2);
-	sar_reg32_cl(temp2);
-	test_reg32_imm32(ECX, 0x20);
-	je_rj(5);
-	mov_reg32_reg32(temp1, temp2); // 2
-	sar_reg32_imm8(temp2, 31); // 3
-	
-	mov_reg32_reg32(rd1, temp1);
-	mov_reg32_reg32(rd2, temp2);
+    int temp1, temp2;
+    force_32(ECX);
+    temp1 = lru_register();
+    temp2 = lru_register_exc1(temp1);
+    free_register(temp1);
+    free_register(temp2);
+    
+    mov_reg32_reg32(temp1, rt1);
+    mov_reg32_reg32(temp2, rt2);
+    shrd_reg32_reg32_cl(temp1, temp2);
+    sar_reg32_cl(temp2);
+    test_reg32_imm32(ECX, 0x20);
+    je_rj(5);
+    mov_reg32_reg32(temp1, temp2); // 2
+    sar_reg32_imm8(temp2, 31); // 3
+    
+    mov_reg32_reg32(rd1, temp1);
+    mov_reg32_reg32(rd2, temp2);
      }
 #endif
 }
@@ -652,16 +652,16 @@ void genadd()
    
    if (rt != rd && rs != rd)
      {
-	mov_reg32_reg32(rd, rs);
-	add_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    add_reg32_reg32(rd, rt);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs);
-	add_reg32_reg32(temp, rt);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs);
+    add_reg32_reg32(temp, rt);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -677,16 +677,16 @@ void genaddu()
    
    if (rt != rd && rs != rd)
      {
-	mov_reg32_reg32(rd, rs);
-	add_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    add_reg32_reg32(rd, rt);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs);
-	add_reg32_reg32(temp, rt);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs);
+    add_reg32_reg32(temp, rt);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -702,16 +702,16 @@ void gensub()
    
    if (rt != rd && rs != rd)
      {
-	mov_reg32_reg32(rd, rs);
-	sub_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    sub_reg32_reg32(rd, rt);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs);
-	sub_reg32_reg32(temp, rt);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs);
+    sub_reg32_reg32(temp, rt);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -727,16 +727,16 @@ void gensubu()
    
    if (rt != rd && rs != rd)
      {
-	mov_reg32_reg32(rd, rs);
-	sub_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    sub_reg32_reg32(rd, rt);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs);
-	sub_reg32_reg32(temp, rt);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs);
+    sub_reg32_reg32(temp, rt);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -755,21 +755,21 @@ void genand()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	and_reg32_reg32(rd1, rt1);
-	and_reg32_reg32(rd2, rt2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    and_reg32_reg32(rd1, rt1);
+    and_reg32_reg32(rd2, rt2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	and_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	and_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    and_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    and_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
      }
 #endif
 }
@@ -788,21 +788,21 @@ void genor()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	or_reg32_reg32(rd1, rt1);
-	or_reg32_reg32(rd2, rt2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    or_reg32_reg32(rd1, rt1);
+    or_reg32_reg32(rd2, rt2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	or_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	or_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    or_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    or_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
      }
 #endif
 }
@@ -821,21 +821,21 @@ void genxor()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	xor_reg32_reg32(rd1, rt1);
-	xor_reg32_reg32(rd2, rt2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    xor_reg32_reg32(rd1, rt1);
+    xor_reg32_reg32(rd2, rt2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	xor_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	xor_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    xor_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    xor_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
      }
 #endif
 }
@@ -854,25 +854,25 @@ void gennor()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	or_reg32_reg32(rd1, rt1);
-	or_reg32_reg32(rd2, rt2);
-	not_reg32(rd1);
-	not_reg32(rd2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    or_reg32_reg32(rd1, rt1);
+    or_reg32_reg32(rd2, rt2);
+    not_reg32(rd1);
+    not_reg32(rd2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	or_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	or_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
-	not_reg32(rd1);
-	not_reg32(rd2);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    or_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    or_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
+    not_reg32(rd1);
+    not_reg32(rd2);
      }
 #endif
 }
@@ -935,21 +935,21 @@ void gendadd()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	add_reg32_reg32(rd1, rt1);
-	adc_reg32_reg32(rd2, rt2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    add_reg32_reg32(rd1, rt1);
+    adc_reg32_reg32(rd2, rt2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	add_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	adc_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    add_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    adc_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
      }
 #endif
 }
@@ -968,21 +968,21 @@ void gendaddu()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	add_reg32_reg32(rd1, rt1);
-	adc_reg32_reg32(rd2, rt2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    add_reg32_reg32(rd1, rt1);
+    adc_reg32_reg32(rd2, rt2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	add_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	adc_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    add_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    adc_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
      }
 #endif
 }
@@ -1001,21 +1001,21 @@ void gendsub()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	sub_reg32_reg32(rd1, rt1);
-	sbb_reg32_reg32(rd2, rt2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    sub_reg32_reg32(rd1, rt1);
+    sbb_reg32_reg32(rd2, rt2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	sub_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	sbb_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    sub_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    sbb_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
      }
 #endif
 }
@@ -1034,21 +1034,21 @@ void gendsubu()
    
    if (rt1 != rd1 && rs1 != rd1)
      {
-	mov_reg32_reg32(rd1, rs1);
-	mov_reg32_reg32(rd2, rs2);
-	sub_reg32_reg32(rd1, rt1);
-	sbb_reg32_reg32(rd2, rt2);
+    mov_reg32_reg32(rd1, rs1);
+    mov_reg32_reg32(rd2, rs2);
+    sub_reg32_reg32(rd1, rt1);
+    sbb_reg32_reg32(rd2, rt2);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rs1);
-	sub_reg32_reg32(temp, rt1);
-	mov_reg32_reg32(rd1, temp);
-	mov_reg32_reg32(temp, rs2);
-	sbb_reg32_reg32(temp, rt2);
-	mov_reg32_reg32(rd2, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rs1);
+    sub_reg32_reg32(temp, rt1);
+    mov_reg32_reg32(rd1, temp);
+    mov_reg32_reg32(temp, rs2);
+    sbb_reg32_reg32(temp, rt2);
+    mov_reg32_reg32(rd2, temp);
      }
 #endif
 }
@@ -1074,8 +1074,8 @@ void gendsll()
    shl_reg32_imm8(rd1, dst->f.r.sa);
    if (dst->f.r.sa & 0x20)
      {
-	mov_reg32_reg32(rd2, rd1);
-	xor_reg32_reg32(rd1, rd1);
+    mov_reg32_reg32(rd2, rd1);
+    xor_reg32_reg32(rd1, rd1);
      }
 #endif
 }
@@ -1096,8 +1096,8 @@ void gendsrl()
    shr_reg32_imm8(rd2, dst->f.r.sa);
    if (dst->f.r.sa & 0x20)
      {
-	mov_reg32_reg32(rd1, rd2);
-	xor_reg32_reg32(rd2, rd2);
+    mov_reg32_reg32(rd1, rd2);
+    xor_reg32_reg32(rd2, rd2);
      }
 #endif
 }
@@ -1118,8 +1118,8 @@ void gendsra()
    sar_reg32_imm8(rd2, dst->f.r.sa);
    if (dst->f.r.sa & 0x20)
      {
-	mov_reg32_reg32(rd1, rd2);
-	sar_reg32_imm8(rd2, 31);
+    mov_reg32_reg32(rd1, rd2);
+    sar_reg32_imm8(rd2, 31);
      }
 #endif
 }

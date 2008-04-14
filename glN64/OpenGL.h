@@ -23,79 +23,79 @@
 
 struct GLVertex
 {
-	float x, y, z, w;
-	struct
-	{
-		float r, g, b, a;
-	} color, secondaryColor;
-	float s0, t0, s1, t1;
-	float fog;
+    float x, y, z, w;
+    struct
+    {
+        float r, g, b, a;
+    } color, secondaryColor;
+    float s0, t0, s1, t1;
+    float fog;
 };
 
 struct GLInfo
 {
 #ifndef __LINUX__
-	HGLRC	hRC, hPbufferRC;
-	HDC		hDC, hPbufferDC;
-	HWND	hWnd;
-	HPBUFFERARB	hPbuffer;
+    HGLRC   hRC, hPbufferRC;
+    HDC     hDC, hPbufferDC;
+    HWND    hWnd;
+    HPBUFFERARB hPbuffer;
 #else
-	SDL_Surface *hScreen;
+    SDL_Surface *hScreen;
 #endif // __LINUX__
 
-	DWORD	fullscreenWidth, fullscreenHeight, fullscreenBits, fullscreenRefresh;
-	DWORD	width, height, windowedWidth, windowedHeight, heightOffset;
+    DWORD   fullscreenWidth, fullscreenHeight, fullscreenBits, fullscreenRefresh;
+    DWORD   width, height, windowedWidth, windowedHeight, heightOffset;
 
-	BOOL	fullscreen, forceBilinear, fog;
+    BOOL    fullscreen, forceBilinear, fog;
 
-	float	scaleX, scaleY;
+    float   scaleX, scaleY;
 
-	BOOL	ATI_texture_env_combine3;	// Radeon
-	BOOL	ATIX_texture_env_route;		// Radeon
+    BOOL    ATI_texture_env_combine3;   // Radeon
+    BOOL    ATIX_texture_env_route;     // Radeon
 
-	BOOL	ARB_multitexture;			// TNT, GeForce, Rage 128, Radeon
-	BOOL	ARB_texture_env_combine;	// GeForce, Rage 128, Radeon
-	BOOL	ARB_texture_env_crossbar;	// Radeon (GeForce supports it, but doesn't report it)
+    BOOL    ARB_multitexture;           // TNT, GeForce, Rage 128, Radeon
+    BOOL    ARB_texture_env_combine;    // GeForce, Rage 128, Radeon
+    BOOL    ARB_texture_env_crossbar;   // Radeon (GeForce supports it, but doesn't report it)
 
-	BOOL	EXT_fog_coord;				// TNT, GeForce, Rage 128, Radeon
-	BOOL	EXT_texture_env_combine;	// TNT, GeForce, Rage 128, Radeon
-	BOOL	EXT_secondary_color;		// GeForce, Radeon
+    BOOL    EXT_fog_coord;              // TNT, GeForce, Rage 128, Radeon
+    BOOL    EXT_texture_env_combine;    // TNT, GeForce, Rage 128, Radeon
+    BOOL    EXT_secondary_color;        // GeForce, Radeon
 
-	BOOL	NV_texture_env_combine4;	// TNT, GeForce
-	BOOL	NV_register_combiners;		// GeForce
-	BOOL	ARB_buffer_region;
-	BOOL	ARB_pbuffer;
-	BOOL	ARB_render_texture;
-	BOOL	ARB_pixel_format;
+    BOOL    NV_texture_env_combine4;    // TNT, GeForce
+    BOOL    NV_register_combiners;      // GeForce
+    BOOL    ARB_buffer_region;
+    BOOL    ARB_pbuffer;
+    BOOL    ARB_render_texture;
+    BOOL    ARB_pixel_format;
 
-	int		maxTextureUnits;			// TNT = 2, GeForce = 2-4, Rage 128 = 2, Radeon = 3-6
-	int		maxGeneralCombiners;
+    int     maxTextureUnits;            // TNT = 2, GeForce = 2-4, Rage 128 = 2, Radeon = 3-6
+    int     maxGeneralCombiners;
 
-	BOOL	enable2xSaI;
-	BOOL	enableAnisotropicFiltering;
-	BOOL	frameBufferTextures;
-	int		textureBitDepth;
-	float	originAdjust;
+    BOOL    enable2xSaI;
+    BOOL    enableAnisotropicFiltering;
+    BOOL    frameBufferTextures;
+    int     textureBitDepth;
+    float   originAdjust;
 
-	GLVertex vertices[256];
-	BYTE	triangles[80][3];
-	BYTE	numTriangles;
-	BYTE	numVertices;
+    GLVertex vertices[256];
+    BYTE    triangles[80][3];
+    BYTE    numTriangles;
+    BYTE    numVertices;
 #ifndef __LINUX__
-	HWND	hFullscreenWnd;
+    HWND    hFullscreenWnd;
 #endif
-	BOOL	usePolygonStipple;
-	GLubyte	stipplePattern[32][8][128];
-	BYTE	lastStipple;
+    BOOL    usePolygonStipple;
+    GLubyte stipplePattern[32][8][128];
+    BYTE    lastStipple;
 
-	BYTE	combiner;
+    BYTE    combiner;
 };
 
 extern GLInfo OGL;
 
 struct GLcolor
 {
-	float r, g, b, a;
+    float r, g, b, a;
 };
 
 #ifndef __LINUX__
@@ -127,7 +127,7 @@ extern PFNGLSECONDARYCOLOR3FEXTPROC glSecondaryColor3fEXT;
 extern PFNGLSECONDARYCOLOR3FVEXTPROC glSecondaryColor3fvEXT;
 extern PFNGLSECONDARYCOLOR3IEXTPROC glSecondaryColor3iEXT;
 extern PFNGLSECONDARYCOLOR3IVEXTPROC glSecondaryColor3ivEXT;
-extern PFNGLSECONDARYCOLOR3SEXTPROC	glSecondaryColor3sEXT;
+extern PFNGLSECONDARYCOLOR3SEXTPROC glSecondaryColor3sEXT;
 extern PFNGLSECONDARYCOLOR3SVEXTPROC glSecondaryColor3svEXT;
 extern PFNGLSECONDARYCOLOR3UBEXTPROC glSecondaryColor3ubEXT;
 extern PFNGLSECONDARYCOLOR3UBVEXTPROC glSecondaryColor3ubvEXT;

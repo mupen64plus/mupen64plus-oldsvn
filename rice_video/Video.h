@@ -24,133 +24,133 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <limits.h> // PATH_MAX
 
 typedef struct {
-	float	fViWidth, fViHeight;
-	unsigned __int16		uViWidth, uViHeight;
-	unsigned __int16		uDisplayWidth, uDisplayHeight;
-	unsigned __int16		uFullScreenDisplayWidth, uFullScreenDisplayHeight;
-	unsigned __int16		uWindowDisplayWidth, uWindowDisplayHeight;
-	
-	BOOL	bDisplayFullscreen;
-	int		uFullScreenRefreshRate;
+    float   fViWidth, fViHeight;
+    unsigned __int16        uViWidth, uViHeight;
+    unsigned __int16        uDisplayWidth, uDisplayHeight;
+    unsigned __int16        uFullScreenDisplayWidth, uFullScreenDisplayHeight;
+    unsigned __int16        uWindowDisplayWidth, uWindowDisplayHeight;
+    
+    BOOL    bDisplayFullscreen;
+    int     uFullScreenRefreshRate;
 
-	float	fMultX, fMultY;
-	int		vpLeftW, vpTopW, vpRightW, vpBottomW, vpWidthW, vpHeightW;
+    float   fMultX, fMultY;
+    int     vpLeftW, vpTopW, vpRightW, vpBottomW, vpWidthW, vpHeightW;
 
-	int		statusBarHeight, statusBarHeightToUse, toolbarHeight, toolbarHeightToUse;
-	BOOL	screenSaverStatus;
+    int     statusBarHeight, statusBarHeightToUse, toolbarHeight, toolbarHeightToUse;
+    BOOL    screenSaverStatus;
 
-	struct {
-		uint32		left;
-		uint32		top;
-		uint32		right;
-		uint32		bottom;
-		uint32		width;
-		uint32		height;
-		bool		needToClip;
-	} clipping;
+    struct {
+        uint32      left;
+        uint32      top;
+        uint32      right;
+        uint32      bottom;
+        uint32      width;
+        uint32      height;
+        bool        needToClip;
+    } clipping;
 
-	int		timer;
-	float	fps;	// frame per second
-	float	dps;	// dlist per second
-	uint32	lastSecFrameCount;
-	uint32	lastSecDlistCount;
+    int     timer;
+    float   fps;    // frame per second
+    float   dps;    // dlist per second
+    uint32  lastSecFrameCount;
+    uint32  lastSecDlistCount;
 }WindowSettingStruct;
 
 extern WindowSettingStruct windowSetting;
 
 typedef enum 
 {
-	PRIM_TRI1,
-	PRIM_TRI2,
-	PRIM_TRI3,
-	PRIM_DMA_TRI,
-	PRIM_LINE3D,
-	PRIM_TEXTRECT,
-	PRIM_TEXTRECTFLIP,
-	PRIM_FILLRECT,
+    PRIM_TRI1,
+    PRIM_TRI2,
+    PRIM_TRI3,
+    PRIM_DMA_TRI,
+    PRIM_LINE3D,
+    PRIM_TEXTRECT,
+    PRIM_TEXTRECTFLIP,
+    PRIM_FILLRECT,
 } PrimitiveType;
 
 typedef enum 
 {
-	RSP_SCISSOR,
-	RDP_SCISSOR,
-	UNKNOWN_SCISSOR,
+    RSP_SCISSOR,
+    RDP_SCISSOR,
+    UNKNOWN_SCISSOR,
 } CurScissorType;
 
 typedef struct {
-	bool	bGameIsRunning;
-	uint32	dwTvSystem;
-	float	fRatio;
+    bool    bGameIsRunning;
+    uint32  dwTvSystem;
+    float   fRatio;
 
-	BOOL	frameReadByCPU;
-	BOOL	frameWriteByCPU;
+    BOOL    frameReadByCPU;
+    BOOL    frameWriteByCPU;
 
-	uint32	SPCycleCount;		// Count how many CPU cycles SP used in this DLIST
-	uint32	DPCycleCount;		// Count how many CPU cycles DP used in this DLIST
+    uint32  SPCycleCount;       // Count how many CPU cycles SP used in this DLIST
+    uint32  DPCycleCount;       // Count how many CPU cycles DP used in this DLIST
 
-	uint32	dwNumTrisRendered;
-	uint32	dwNumDListsCulled;
-	uint32	dwNumTrisClipped;
-	uint32	dwNumVertices;
-	uint32  dwBiggestVertexIndex;
+    uint32  dwNumTrisRendered;
+    uint32  dwNumDListsCulled;
+    uint32  dwNumTrisClipped;
+    uint32  dwNumVertices;
+    uint32  dwBiggestVertexIndex;
 
-	uint32	gDlistCount;
-	uint32	gFrameCount;
-	uint32	gUcodeCount;
-	uint32	gRDPTime;
-	BOOL	ToToggleFullScreen;
-	bool	bDisableFPS;
+    uint32  gDlistCount;
+    uint32  gFrameCount;
+    uint32  gUcodeCount;
+    uint32  gRDPTime;
+    BOOL    ToToggleFullScreen;
+    bool    bDisableFPS;
 
-	bool	bUseModifiedUcodeMap;
-	bool	ucodeHasBeenSet;
-	bool	bUcodeIsKnown;
+    bool    bUseModifiedUcodeMap;
+    bool    ucodeHasBeenSet;
+    bool    bUcodeIsKnown;
 
-	uint32	curRenderBuffer;
-	uint32	curDisplayBuffer;
-	uint32	curVIOriginReg;
-	CurScissorType  curScissor;
+    uint32  curRenderBuffer;
+    uint32  curDisplayBuffer;
+    uint32  curVIOriginReg;
+    CurScissorType  curScissor;
 
-	PrimitiveType primitiveType;
+    PrimitiveType primitiveType;
 
-	uint32	lastPurgeTimeTime;		// Time textures were last purged
+    uint32  lastPurgeTimeTime;      // Time textures were last purged
 
-	bool	UseLargerTile[2];		// This is a speed up for large tile loading,
-	uint32	LargerTileRealLeft[2];	// works only for TexRect, LoadTile, large width, large pitch
+    bool    UseLargerTile[2];       // This is a speed up for large tile loading,
+    uint32  LargerTileRealLeft[2];  // works only for TexRect, LoadTile, large width, large pitch
 
-	bool	bVIOriginIsUpdated;
-	bool	bCIBufferIsRendered;
-	int		leftRendered,topRendered,rightRendered,bottomRendered;
+    bool    bVIOriginIsUpdated;
+    bool    bCIBufferIsRendered;
+    int     leftRendered,topRendered,rightRendered,bottomRendered;
 
-	bool	isMMXSupported;
-	bool	isSSESupported;
-	bool	isVertexShaderSupported;
+    bool    isMMXSupported;
+    bool    isSSESupported;
+    bool    isVertexShaderSupported;
 
-	bool	isMMXEnabled;
-	bool	isSSEEnabled;
-	bool	isVertexShaderEnabled;
-	bool	bUseHW_T_L;					// Use hardware T&L, for debug purpose only
+    bool    isMMXEnabled;
+    bool    isSSEEnabled;
+    bool    isVertexShaderEnabled;
+    bool    bUseHW_T_L;                 // Use hardware T&L, for debug purpose only
 
-	bool	toShowCFB;
-	bool	toCaptureScreen;
-	char	screenCaptureFilename[MAX_PATH];
+    bool    toShowCFB;
+    bool    toCaptureScreen;
+    char    screenCaptureFilename[MAX_PATH];
 
-	char	CPUCoreMsgToDisplay[256];
-	bool	CPUCoreMsgIsSet;
+    char    CPUCoreMsgToDisplay[256];
+    bool    CPUCoreMsgIsSet;
 
-	bool	bAllowLoadFromTMEM;
+    bool    bAllowLoadFromTMEM;
 
-	// Frame buffer simulation related status variables
-	bool	bN64FrameBufferIsUsed;		// Frame buffer is used in the frame
-	bool	bN64IsDrawingTextureBuffer;	// The current N64 game is rendering into render_texture, to create self-rendering texture
-	bool	bHandleN64RenderTexture;	// Do we need to handle of the N64 render_texture stuff?
-	bool	bDirectWriteIntoRDRAM;		// When drawing into render_texture, this value =
-										// = true	don't render, but write real N64 graphic value into RDRAM
-										// = false  rendering into render_texture of DX or OGL, the render_texture
-										//			will be copied into RDRAM at the end
-	bool	bFrameBufferIsDrawn;		// flag to mark if the frame buffer is ever drawn
-	bool	bFrameBufferDrawnByTriangles;	// flag to tell if the buffer is even drawn by Triangle cmds
+    // Frame buffer simulation related status variables
+    bool    bN64FrameBufferIsUsed;      // Frame buffer is used in the frame
+    bool    bN64IsDrawingTextureBuffer; // The current N64 game is rendering into render_texture, to create self-rendering texture
+    bool    bHandleN64RenderTexture;    // Do we need to handle of the N64 render_texture stuff?
+    bool    bDirectWriteIntoRDRAM;      // When drawing into render_texture, this value =
+                                        // = true   don't render, but write real N64 graphic value into RDRAM
+                                        // = false  rendering into render_texture of DX or OGL, the render_texture
+                                        //          will be copied into RDRAM at the end
+    bool    bFrameBufferIsDrawn;        // flag to mark if the frame buffer is ever drawn
+    bool    bFrameBufferDrawnByTriangles;   // flag to tell if the buffer is even drawn by Triangle cmds
 
-	bool    bScreenIsDrawn;
+    bool    bScreenIsDrawn;
 
 } PluginStatus;
 
