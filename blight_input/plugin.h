@@ -22,10 +22,16 @@
 #define PLUGIN_VERSION  VERSION
 
 #ifndef PATH_MAX
-#  define PATH_MAX 1024
+#include <limits.h>
 #endif
 
-#include "../main/winlnxdefs.h"
+
+#ifdef USEPOSIX
+#include "../main/wintypes.h"
+#endif
+#ifdef USEWIN32
+#include <windows.h>
+#endif
 #include "Controller_1.1.h"
 
 #include "SDL.h"

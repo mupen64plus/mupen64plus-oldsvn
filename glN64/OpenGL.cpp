@@ -1,17 +1,20 @@
-#ifndef __LINUX__
-# include <windows.h>
-# include <GL/gl.h>
+#ifdef USEWIN32
+#include <windows.h>
+# include "gl.h"
 # include "glext.h"
-#else // !__LINUX__
-# include "../main/winlnxdefs.h"
-#define GL_GLEXT_PROTOTYPES
-#define __WIN32__
-#include "gl.h" 
 #include "glext.h"
-#undef __WIN32__
-#include <png.h>
-//# include <GL/gl.h>
-//# include <GL/glext.h>
+# include <png.h>
+# include "SDL.h"
+# include <string.h>
+# include <time.h>
+# include <stdlib.h>
+#endif
+#ifdef USEPOSIX
+# include "../main/wintypes.h"
+# define GL_GLEXT_PROTOTYPES
+# include "gl.h"
+# include "glext.h"
+# include <png.h>
 # include "SDL.h"
 # include <string.h>
 # include <time.h>
@@ -25,7 +28,7 @@
 # endif
 # define timeGetTime() time(NULL)
 
-#endif // __LINUX__
+#endif
 #include <math.h>
 #include <stdio.h>
 #include "glN64.h"
@@ -233,6 +236,7 @@ void OGL_InitStates()
         glEnableClientState( GL_TEXTURE_COORD_ARRAY );
     }
 
+    #ifdef USEPOSIX
     if (OGL.EXT_fog_coord)
     {
         glFogi( GL_FOG_COORDINATE_SOURCE_EXT, GL_FOG_COORDINATE_EXT );
@@ -244,6 +248,7 @@ void OGL_InitStates()
         glFogCoordPointerEXT( GL_FLOAT, sizeof( GLVertex ), &OGL.vertices[0].fog );
         glEnableClientState( GL_FOG_COORDINATE_ARRAY_EXT );
     }
+    #endif
 
     glPolygonOffset( -3.0f, -3.0f );
 
@@ -266,9 +271,10 @@ void OGL_InitStates()
                                             ((i > (rand() >> 10)) << 0);
     }
 
-#ifndef __LINUX__
+#ifdef USEWIN32
     SwapBuffers( wglGetCurrentDC() );
-#else
+#endif
+#ifdef USEPOSIX
     OGL_SwapBuffers();
 #endif
 }
@@ -977,20 +983,20 @@ void OGL_DrawTexturedRect( float ulx, float uly, float lrx, float lry, float uls
 
         if (OGL.ARB_multitexture)
         {
-            glMultiTexCoord2fARB( GL_TEXTURE0_ARB, rect[0].s0, rect[0].t0 );
-            glMultiTexCoord2fARB( GL_TEXTURE1_ARB, rect[0].s1, rect[0].t1 );
+            glMultiTexCoord2fARB( GL_TEXTURE0, rect[0].s0, rect[0].t0 );
+            glMultiTexCoord2fARB( GL_TEXTURE1, rect[0].s1, rect[0].t1 );
             glVertex4f( rect[0].x, rect[0].y, rect[0].z, 1.0f );
 
-            glMultiTexCoord2fARB( GL_TEXTURE0_ARB, rect[1].s0, rect[0].t0 );
-            glMultiTexCoord2fARB( GL_TEXTURE1_ARB, rect[1].s1, rect[0].t1 );
+            glMultiTexCoord2fARB( GL_TEXTURE0, rect[1].s0, rect[0].t0 );
+            glMultiTexCoord2fARB( GL_TEXTURE1, rect[1].s1, rect[0].t1 );
             glVertex4f( rect[1].x, rect[0].y, rect[0].z, 1.0f );
 
-            glMultiTexCoord2fARB( GL_TEXTURE0_ARB, rect[1].s0, rect[1].t0 );
-            glMultiTexCoord2fARB( GL_TEXTURE1_ARB, rect[1].s1, rect[1].t1 );
+            glMultiTexCoord2fARB( GL_TEXTURE0, rect[1].s0, rect[1].t0 );
+            glMultiTexCoord2fARB( GL_TEXTURE1, rect[1].s1, rect[1].t1 );
             glVertex4f( rect[1].x, rect[1].y, rect[0].z, 1.0f );
 
-            glMultiTexCoord2fARB( GL_TEXTURE0_ARB, rect[0].s0, rect[1].t0 );
-            glMultiTexCoord2fARB( GL_TEXTURE1_ARB, rect[0].s1, rect[1].t1 );
+            glMultiTexCoord2fARB( GL_TEXTURE0, rect[0].s0, rect[1].t0 );
+            glMultiTexCoord2fARB( GL_TEXTURE1, rect[0].s1, rect[1].t1 );
             glVertex4f( rect[0].x, rect[1].y, rect[0].z, 1.0f );
         }
         else

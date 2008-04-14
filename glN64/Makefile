@@ -1,6 +1,7 @@
 # Makefile for Mupen64
 
 # include pre-make file with a bunch of definitions
+FROMPLUGIN=1
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
@@ -9,7 +10,7 @@ CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -Wall
 # list of object files to generate
 OBJECTS = \
 	glN64.o \
-	Config_linux.o \
+	Config_$(PLATFORM).o \
 	OpenGL.o \
 	N64.o \
 	RSP.o \

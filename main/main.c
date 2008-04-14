@@ -35,20 +35,15 @@
 
 #include <unistd.h>
 #include <dirent.h>
-#include <sys/stat.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <pthread.h> // POSIX Thread library
-#include <signal.h> // signals
-#include <getopt.h> // getopt_long
-#include <libgen.h> // basename, dirname
+#include <signal.h>
+#include <getopt.h>
+#include <libgen.h>
 
 #include "main.h"
 #include "version.h"
-#include "winlnxdefs.h"
 #include "config.h"
 #include "plugin.h"
 #include "rom.h"
@@ -59,7 +54,7 @@
 #include "savestates.h"
 #include "vcr.h"
 #include "vcr_compress.h"
-#include "guifuncs.h" // gui-specific functions
+#include "guifuncs.h"
 #include "util.h"
 #include "translate.h"
 #include "volume.h"
@@ -78,8 +73,7 @@
 
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
-static void *emulationThread( void *_arg );
-static void sighandler( int signal, siginfo_t *info, void *context ); // signal handler
+static int sdl_event_filter( const SDL_Event *event );
 
 /** globals **/
 // TODO: Improve the auto-incrementing savestate system.
@@ -90,7 +84,6 @@ int         g_NoaskParam = 0;           // was --noask passed at the commandline
 int         g_LimitFPS = 1;
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
             
-pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
             
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
@@ -113,6 +106,14 @@ static int  g_Fullscreen = 0;           // fullscreen enabled?
 static int  g_EmuMode = 0;              // emumode specified at commandline?
 static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
 static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
+
+#ifdef USEPOSIX
+#include "posix/main.c"
+#endif
+
+#ifdef USEWIN32
+#include "win32/main.c"
+#endif
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -366,107 +367,6 @@ int close_rom(void)
     return 0;
 }
 
-/** emulation **/
-/* startEmulation
- *  Begins emulation thread
- */
-void startEmulation(void)
-{
-    const char *gfx_plugin = NULL,
-               *audio_plugin = NULL,
-           *input_plugin = NULL,
-           *RSP_plugin = NULL;
-
-    // make sure rom is loaded before running
-    if(!rom)
-    {
-        alert_message(tr("There is no Rom loaded."));
-        return;
-    }
-
-    // make sure all plugins are specified before running
-    if(g_GfxPlugin)
-        gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
-    else
-        gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
-
-    if(!gfx_plugin)
-    {
-        alert_message(tr("No graphics plugin specified."));
-        return;
-    }
-
-    if(g_AudioPlugin)
-        audio_plugin = plugin_name_by_filename(g_AudioPlugin);
-    else
-        audio_plugin = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
-
-    if(!audio_plugin)
-    {
-        alert_message(tr("No audio plugin specified."));
-        return;
-    }
-
-    if(g_InputPlugin)
-        input_plugin = plugin_name_by_filename(g_InputPlugin);
-    else
-        input_plugin = plugin_name_by_filename(config_get_string("Input Plugin", ""));
-
-    if(!input_plugin)
-    {
-        alert_message(tr("No input plugin specified."));
-        return;
-    }
-
-    if(g_RspPlugin)
-        RSP_plugin = plugin_name_by_filename(g_RspPlugin);
-    else
-        RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
-
-    if(!RSP_plugin)
-    {
-        alert_message(tr("No RSP plugin specified."));
-        return;
-    }
-
-    // in nogui mode, just start the emulator in the main thread
-    if(!g_GuiEnabled)
-    {
-        emulationThread(NULL);
-    }
-    else if(!g_EmulationThread)
-    {
-        // spawn emulation thread
-        if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
-        {
-            g_EmulationThread = 0;
-            alert_message(tr("Couldn't spawn core thread!"));
-            return;
-        }
-        pthread_detach(g_EmulationThread);
-        info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
-    }
-
-}
-
-void stopEmulation(void)
-{
-    if(g_EmulationThread || g_EmulatorRunning)
-    {
-        info_message(tr("Stopping emulation."));
-        rompause = 0;
-        stop_it();
-
-        // wait until emulation thread is done before continuing
-        if(g_EmulationThread)
-            pthread_join(g_EmulationThread, NULL);
-
-        g_EmulatorRunning = 0;
-
-        info_message(tr("Emulation stopped."));
-    }
-}
-
 int pauseContinueEmulation(void)
 {
     if (!g_EmulatorRunning)
@@ -624,206 +524,6 @@ static int sdl_event_filter( const SDL_Event *event )
     }
 
     return 1;
-}
-
-/*********************************************************************************************************
-* emulation thread - runs the core
-*/
-static void * emulationThread( void *_arg )
-{
-    const char *gfx_plugin = NULL,
-               *audio_plugin = NULL,
-           *input_plugin = NULL,
-           *RSP_plugin = NULL;
-    struct sigaction sa;
-
-    // install signal handler
-    memset( &sa, 0, sizeof( struct sigaction ) );
-    sa.sa_sigaction = sighandler;
-    sa.sa_flags = SA_SIGINFO;
-    sigaction( SIGSEGV, &sa, NULL );
-    sigaction( SIGILL, &sa, NULL );
-    sigaction( SIGFPE, &sa, NULL );
-    sigaction( SIGCHLD, &sa, NULL );
-
-    g_EmulatorRunning = 1;
-    g_LimitFPS = config_get_bool("LimitFPS", TRUE);
-
-    // if emu mode wasn't specified at the commandline, set from config file
-    if(!g_EmuMode)
-        dynacore = config_get_number( "Core", CORE_DYNAREC );
-
-    no_audio_delay = config_get_bool("NoAudioDelay", FALSE);
-    no_compiled_jump = config_get_bool("NoCompiledJump", FALSE);
-
-    // init sdl
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_ShowCursor(0);
-    SDL_EnableKeyRepeat(0, 0);
-
-    SDL_SetEventFilter(sdl_event_filter);
-    SDL_EnableUNICODE(1);
-
-    /* Determine which plugins to use:
-     *  -If valid plugin was specified at the commandline, use it
-     *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
-     */
-    if(g_GfxPlugin)
-        gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
-    else
-        gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
-
-    if(g_AudioPlugin)
-        audio_plugin = plugin_name_by_filename(g_AudioPlugin);
-    else
-        audio_plugin = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
-
-    if(g_InputPlugin)
-        input_plugin = plugin_name_by_filename(g_InputPlugin);
-    else
-        input_plugin = plugin_name_by_filename(config_get_string("Input Plugin", ""));
-
-    if(g_RspPlugin)
-        RSP_plugin = plugin_name_by_filename(g_RspPlugin);
-    else
-        RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
-
-    // initialize memory, and do byte-swapping if it's not been done yet
-    if (g_MemHasBeenBSwapped == 0)
-    {
-        init_memory(1);
-        g_MemHasBeenBSwapped = 1;
-    }
-    else
-    {
-        init_memory(0);
-    }
-
-    // load the plugins and attach the ROM to them
-    plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
-    romOpen_gfx();
-    romOpen_audio();
-    romOpen_input();
-
-    if (g_Fullscreen)
-        changeWindow();
-
-#ifdef WITH_LIRC
-    lircStart();
-#endif // WITH_LIRC
-
-#ifdef DBG
-    if( g_DebuggerEnabled )
-        init_debugger();
-#endif
-    // load cheats for the current rom
-    cheat_load_current_rom();
-
-    go();   /* core func */
-
-#ifdef WITH_LIRC
-    lircStop();
-#endif // WITH_LIRC
-
-    romClosed_RSP();
-    romClosed_input();
-    romClosed_audio();
-    romClosed_gfx();
-    closeDLL_RSP();
-    closeDLL_input();
-    closeDLL_audio();
-    closeDLL_gfx();
-    free_memory();
-
-    // clean up
-    g_EmulationThread = 0;
-
-    SDL_Quit();
-
-    if (g_Filename != 0)
-    {
-        // the following doesn't work - it wouldn't exit immediately but when the next event is
-        // recieved (i.e. mouse movement)
-/*      gdk_threads_enter();
-        gtk_main_quit();
-        gdk_threads_leave();*/
-    }
-
-    return NULL;
-}
-
-/*********************************************************************************************************
-* signal handler
-*/
-static void sighandler(int signal, siginfo_t *info, void *context)
-{
-    if( info->si_pid == g_EmulationThread )
-    {
-        switch( signal )
-        {
-            case SIGSEGV:
-                alert_message(tr("The core thread recieved a SIGSEGV signal.\n"
-                                "This means it tried to access protected memory.\n"
-                                "Maybe you have set a wrong ucode for one of the plugins!"));
-                printf( "SIGSEGV in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-#ifdef SEGV_MAPERR
-                switch( info->si_code )
-                {
-                    case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
-                    case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
-                }
-#endif
-                break;
-            case SIGILL:
-                printf( "SIGILL in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-#ifdef ILL_ILLOPC
-                switch( info->si_code )
-                {
-                    case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
-                    case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
-                    case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
-                    case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
-                    case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
-                    case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
-                    case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
-                    case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
-                }
-#endif
-                break;
-            case SIGFPE:
-                printf( "SIGFPE in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-                switch( info->si_code )
-                {
-                    case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
-                    case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
-                    case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
-                    case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
-                    case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
-                    case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
-                    case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
-                    case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
-                }
-                break;
-            default:
-                printf( "Signal number %d in core thread caught:\n", signal );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        }
-        pthread_cancel(g_EmulationThread);
-        g_EmulationThread = 0;
-        g_EmulatorRunning = 0;
-    }
-    else
-    {
-        printf( "Signal number %d caught:\n", signal );
-        printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        exit( EXIT_FAILURE );
-    }
 }
 
 static void printUsage(const char *progname)
@@ -1015,14 +715,13 @@ static void setPaths(void)
     // if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
     if (strlen(g_ConfigDir) == 0)
     {
-        strncpy(g_ConfigDir, getenv("HOME"), PATH_MAX);
-        strncat(g_ConfigDir, "/.mupen64plus", PATH_MAX - strlen(g_ConfigDir));
+        strncpy(g_ConfigDir, gethomedir(), PATH_MAX);
 
-        // if ~/.mupen64plus dir is not found, create it
+        // if the home dir is not found, create it
         if(!isdir(g_ConfigDir))
         {
             printf("Creating %s to store user data\n", g_ConfigDir);
-            if(mkdir(g_ConfigDir, (mode_t)0755) != 0)
+            if(mkdirwp(g_ConfigDir, 0755) != 0)
             {
                 printf("Error: Could not create %s: ", g_ConfigDir);
                 perror(NULL);
@@ -1032,7 +731,7 @@ static void setPaths(void)
             // create save subdir
             strncpy(buf, g_ConfigDir, PATH_MAX);
             strncat(buf, "/save", PATH_MAX - strlen(buf));
-            if(mkdir(buf, (mode_t)0755) != 0)
+            if(mkdirwp(buf, 0755) != 0)
             {
                 // report error, but don't exit
                 printf("Warning: Could not create %s: %s", buf, strerror(errno));
@@ -1041,7 +740,7 @@ static void setPaths(void)
             // create screenshots subdir
             strncpy(buf, g_ConfigDir, PATH_MAX);
             strncat(buf, "/screenshots", PATH_MAX - strlen(buf));
-            if(mkdir(buf, (mode_t)0755) != 0)
+            if(mkdirwp(buf, 0755) != 0)
             {
                 // report error, but don't exit
                 printf("Warning: Could not create %s: %s", buf, strerror(errno));
@@ -1062,7 +761,7 @@ static void setPaths(void)
         // if install dir is not in the default location, try the same dir as the binary
         if(!isdir(g_InstallDir))
         {
-            int n = readlink("/proc/self/exe", buf, PATH_MAX);
+            int n = getexedir(buf, PATH_MAX);
 
             if(n > 0)
             {

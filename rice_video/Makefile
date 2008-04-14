@@ -1,6 +1,7 @@
 # Makefile for RiceVideoLinux, in Mupen64Plus
 
 # include pre-make file with a bunch of definitions
+FROMPLUGIN=1
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS

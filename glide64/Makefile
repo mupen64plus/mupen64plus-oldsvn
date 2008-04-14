@@ -1,6 +1,7 @@
 # Makefile for Glide64, in Mupen64Plus
 
 # include pre-make file with a bunch of definitions
+FROMPLUGIN=1
 include ../pre.mk
 
 # set BITS

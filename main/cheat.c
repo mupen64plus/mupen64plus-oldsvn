@@ -28,12 +28,12 @@
 #include <errno.h>
 #include <zlib.h> // TODO: compress cfg file
 
-#include "../memory/memory.h"
 #include "cheat.h"
 #include "main.h"
 #include "rom.h"
 #include "util.h" // list utilities
 #include "config.h"
+#include "../memory/memory.h"
 
 #define CHEAT_FILENAME "cheats.cfg"
 

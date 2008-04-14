@@ -1,6 +1,7 @@
-#ifndef __LINUX__
+#ifdef USEWIN32
 # include <windows.h>
-#else
+#endif
+#ifdef USEPOSIX
 # include "../main/winlnxdefs.h"
 # include <stdlib.h> // malloc()
 

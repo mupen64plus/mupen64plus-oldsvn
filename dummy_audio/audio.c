@@ -1,4 +1,9 @@
-#include "../main/winlnxdefs.h"
+#ifdef USEPOSIX
+#include "../main/wintypes.h"
+#endif
+#ifdef USEWIN32
+#include <windows.h>
+#endif
 #include <stdio.h>
 
 #include "audio.h"

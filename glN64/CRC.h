@@ -1,7 +1,8 @@
-#ifndef __LINUX__
+#ifdef USEWIN32
 # include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
+#endif
+#ifdef USEPOSIX
+# include "../main/wintypes.h"
 #endif // __LINUX__
 
 void CRC_BuildTable();

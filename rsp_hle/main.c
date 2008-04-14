@@ -1,14 +1,13 @@
-#ifdef __WIN32__
+#ifdef USEWIN32
 #include <windows.h>
-#include "./winproject/resource.h"
-#include "./win/win.h"
-#else
+#endif
+#ifdef USEPOSIX
+#include "wintypes.h"
+#endif
 #ifdef USE_GTK
 #include <gtk/gtk.h>
 #endif
-#include "wintypes.h"
 #include <string.h>
-#endif
 #include <stdio.h>
 
 #include "Rsp_#1.1.h"
@@ -20,7 +19,7 @@ RSP_INFO rsp;
 
 BOOL AudioHle = FALSE, GraphicsHle = TRUE, SpecificHle = FALSE;
 
-#ifdef __WIN32__
+#ifdef USEWIN32
 extern void (*processAList)();
 static BOOL firstTime = TRUE;
 void loadPlugin();
@@ -34,9 +33,9 @@ __declspec(dllexport) void CloseDLL (void)
 
 __declspec(dllexport) void DllAbout ( HWND hParent )
 {
-#ifdef __WIN32__
+#ifdef USEWIN32
    MessageBox(NULL, "Mupen64 HLE RSP plugin v0.2 with Azimers code by Hacktarux", "RSP HLE", MB_OK);
-#else
+#endif
 #ifdef USE_GTK
    char tMsg[256];
    GtkWidget *dialog, *label, *okay_button;
@@ -61,22 +60,20 @@ __declspec(dllexport) void DllAbout ( HWND hParent )
    sprintf(tMsg,"Mupen64 HLE RSP plugin v0.2 with Azimers code by Hacktarux");
    fprintf(stderr, "About\n%s\n", tMsg);
 #endif
-#endif
 }
 
 __declspec(dllexport) void DllConfig ( HWND hParent )
 {
-#ifdef __WIN32__
-    if (firstTime)
-    DialogBox(dll_hInstance,
-                     MAKEINTRESOURCE(IDD_RSPCONFIG), hParent, ConfigDlgProc);
-   //MessageBox(NULL, "no config", "noconfig", MB_OK);
+#ifdef USEWIN32
+    //if (firstTime)
+    //DialogBox(dll_hInstance, MAKEINTRESOURCE(IDD_RSPCONFIG), hParent, ConfigDlgProc);
+    MessageBox(NULL, "no config", "noconfig", MB_OK);
 #endif
 }
 
 __declspec(dllexport) void DllTest ( HWND hParent )
 {
-#ifdef __WIN32__
+#ifdef USEWIN32
    MessageBox(NULL, "no test", "no test", MB_OK);
 #endif
 }
@@ -152,12 +149,12 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
 {
    OSTask_t *task = (OSTask_t*)(rsp.DMEM + 0xFC0);
    unsigned int i, sum=0;
-#ifdef __WIN32__
+#ifdef USEWIN32
    if(firstTime)
    {
       firstTime=FALSE;
-      if (SpecificHle)
-            loadPlugin();
+      //if (SpecificHle)
+            //loadPlugin();
    }
 #endif
 
@@ -174,10 +171,10 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
       *rsp.DPC_STATUS_REG &= ~0x0002;
       return Cycles;
    } else if (task->type == 2 && AudioHle) {
-#ifdef __WIN32__
-      if (SpecificHle)
-            processAList();
-      else
+#ifdef USEWIN32
+      //if (SpecificHle)
+            //processAList();
+      //else
 #endif
       if (rsp.ProcessAlistList != NULL) {
      rsp.ProcessAlistList();

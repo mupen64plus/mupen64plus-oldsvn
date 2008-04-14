@@ -1,7 +1,12 @@
 #include <SDL.h>
 #include <string.h>
 
-#include "../main/winlnxdefs.h"
+#ifdef USEWIN32
+#include <windows.h>
+#endif
+#ifdef USEPOSIX
+#include "../main/wintypes.h"
+#endif
 #include "Controller_#1.1.h"
 
 #ifdef USE_GTK

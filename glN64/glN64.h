@@ -1,11 +1,11 @@
 #ifndef GLN64_H
 #define GLN64_H
 
-#ifndef __LINUX__
+#ifdef USEPOSIX
+#include "../main/wintypes.h"
+#endif
+#ifdef USEWIN32
 #include <windows.h>
-//#include <commctrl.h>
-#else
-# include "../main/winlnxdefs.h"
 #endif
 
 #ifndef PATH_MAX
@@ -15,9 +15,9 @@
 //#define DEBUG
 //#define RSPTHREAD
 
-#ifndef __LINUX__
+#ifdef USEWIN32
 extern HWND         hWnd;
-//extern HWND           hFullscreen;
+extern HWND         hFullscreen;
 extern HWND         hStatusBar;
 extern HWND         hToolBar;
 extern HINSTANCE    hInstance;

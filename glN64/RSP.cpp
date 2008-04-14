@@ -1,7 +1,8 @@
-#ifndef __LINUX__
+#ifdef USEWIN32
 # include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
+#endif
+#ifdef USEPOSIX
+# include "../main/wintypes.h"
 
 # ifndef min
 #  define min(a,b) ((a) < (b) ? (a) : (b))

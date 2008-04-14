@@ -1,8 +1,9 @@
-#ifndef __LINUX__
+#ifdef USEWIN32
 # include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
-#endif // __LINUX__
+#endif
+#ifdef USEPOSIX
+# include "../main/wintypes.h"
+#endif
 #include "N64.h"
 #include "Types.h"
 

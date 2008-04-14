@@ -93,7 +93,12 @@ KNOWN BUGS:
 #include <samplerate.h>
 #endif
 
-#include "../main/winlnxdefs.h"
+#ifdef USEWIN32
+#include "windows.h"
+#endif
+#ifdef USEPOSIX
+#include "../main/wintypes.h"
+#endif
 #include "Audio_#1.2.h"
 
 /* Current version number */

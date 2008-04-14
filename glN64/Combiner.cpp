@@ -1,7 +1,9 @@
-#ifndef __LINUX__
+
+#ifdef USEWIN32
 # include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
+#endif
+#ifdef USEPOSIX
+# include "../main/wintypes.h"
 # include <stdlib.h>
 #endif // __LINUX__
 #include "OpenGL.h"
