@@ -28,6 +28,7 @@
 **/
 
 #include "dma.h"
+#include "memory.h"
 #include "../main/main.h"
 #include "../main/rom.h"
 #include <stdio.h>
@@ -39,7 +40,6 @@
 #include "flashram.h"
 #include "../main/guifuncs.h"
 #include "../r4300/ops.h"
-#include "memory.h"
 
 static unsigned char sram[0x8000];
 

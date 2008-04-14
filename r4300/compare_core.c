@@ -29,15 +29,10 @@
 
 #include <sys/stat.h>
 #include "r4300.h"
-#ifdef USEPOSIX
-#include "../main/wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include "../memory/memory.h"
+#include "../main/winlnxdefs.h"
 #include "../main/plugin.h"
 #include "../r4300/recomph.h"
-#include "../memory/memory.h"
 
 static FILE *f;
 static int pipe_opened = 0;
@@ -106,7 +101,6 @@ void check_input_sync(unsigned char *value)
 
 void compare_core()
 {   
-#ifdef USEPOSIX
    static int comparecnt = 0;
    int iFirst = 1;
    char errHead[128];
@@ -181,5 +175,4 @@ void compare_core()
     //fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
     /*fwrite(&FCR31, 4, 1, f);*/
      }
-#endif
 }

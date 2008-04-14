@@ -1,7 +1,6 @@
 # Makefile for Mupen64
 
 # include pre-make file with a bunch of definitions
-FROMPLUGIN=1
 include ../pre.mk
 
 # test for presence of libsamplerate

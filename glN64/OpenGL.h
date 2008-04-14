@@ -1,20 +1,22 @@
 #ifndef OPENGL_H
 #define OPENGL_H
 
-#ifdef USEWIN32
+#ifndef __LINUX__
 # include <windows.h>
-# include "gl.h"
-# include "glext.h"
 # include "wglext.h"
-# include "SDL.h"
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# define GL_GLEXT_PROTOTYPES
-# include "gl.h"
+# include <GL/gl.h>
 # include "glext.h"
+#else
+# include "../main/winlnxdefs.h"
+#define GL_GLEXT_PROTOTYPES
+#define __WIN32__
+#include "gl.h" 
+#include "glext.h"
+#undef __WIN32__
+//# include <GL/gl.h>
+//# include <GL/glext.h>
 # include "SDL.h"
-#endif
+#endif // __LINUX__
 
 #include "glATI.h"
 #include "gSP.h"
@@ -32,14 +34,14 @@ struct GLVertex
 
 struct GLInfo
 {
-#ifdef USEWIN32
+#ifndef __LINUX__
     HGLRC   hRC, hPbufferRC;
     HDC     hDC, hPbufferDC;
     HWND    hWnd;
     HPBUFFERARB hPbuffer;
-#endif
-
+#else
     SDL_Surface *hScreen;
+#endif // __LINUX__
 
     DWORD   fullscreenWidth, fullscreenHeight, fullscreenBits, fullscreenRefresh;
     DWORD   width, height, windowedWidth, windowedHeight, heightOffset;
@@ -79,7 +81,7 @@ struct GLInfo
     BYTE    triangles[80][3];
     BYTE    numTriangles;
     BYTE    numVertices;
-#ifdef USEWIN32
+#ifndef __LINUX__
     HWND    hFullscreenWnd;
 #endif
     BOOL    usePolygonStipple;
@@ -96,7 +98,7 @@ struct GLcolor
     float r, g, b, a;
 };
 
-#ifdef USEWIN32
+#ifndef __LINUX__
 extern PFNGLCOMBINERPARAMETERFVNVPROC glCombinerParameterfvNV;
 extern PFNGLCOMBINERPARAMETERFNVPROC glCombinerParameterfNV;
 extern PFNGLCOMBINERPARAMETERIVNVPROC glCombinerParameterivNV;
@@ -111,9 +113,9 @@ extern PFNGLGETCOMBINEROUTPUTPARAMETERIVNVPROC glGetCombinerOutputParameterivNV;
 extern PFNGLGETFINALCOMBINERINPUTPARAMETERFVNVPROC glGetFinalCombinerInputParameterfvNV;
 extern PFNGLGETFINALCOMBINERINPUTPARAMETERIVNVPROC glGetFinalCombinerInputParameterivNV;
 
-extern PFNGLACTIVETEXTUREPROC glActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREPROC glClientActiveTextureARB;
-extern PFNGLMULTITEXCOORD2FPROC glMultiTexCoord2fARB;
+extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
+extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 
 extern PFNGLSECONDARYCOLOR3FVEXTPROC glSecondaryColor3fvEXT;
 
@@ -149,7 +151,7 @@ extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 extern PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
 extern PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
 extern PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
-#endif
+#endif // !__LINUX__
 
 bool OGL_Start();
 void OGL_Stop();
@@ -163,9 +165,9 @@ void OGL_ClearDepthBuffer();
 void OGL_ClearColorBuffer( float *color );
 void OGL_ResizeWindow();
 void OGL_SaveScreenshot();
-#ifdef USEPOSIX
+#ifdef __LINUX__
 void OGL_SwapBuffers();
-#endif
+#endif // __LINUX__
 void OGL_ReadScreen( void **dest, int *width, int *height );
 
 #endif

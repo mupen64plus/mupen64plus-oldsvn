@@ -63,10 +63,9 @@ void VI_UpdateScreen()
     {
         if (gSP.changed & CHANGED_COLORBUFFER)
         {
-#ifdef USEWIN32
+#ifndef __LINUX__
             SwapBuffers( OGL.hDC );
-#endif
-#ifdef USEPOSIX
+#else
             OGL_SwapBuffers();
 #endif
             gSP.changed &= ~CHANGED_COLORBUFFER;

@@ -1,9 +1,7 @@
-
-#ifdef USEWIN32
+#ifndef __LINUX__
 # include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
+#else
+# include "../main/winlnxdefs.h"
 # include <time.h>
 # include <stdlib.h>
 # ifndef min

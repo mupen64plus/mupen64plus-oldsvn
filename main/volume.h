@@ -30,11 +30,13 @@
 /* Sound volume functions.
  */
 
-#ifdef USEPOSIX
-#include "posix/volume.h"
-#endif
+#ifndef __VOLUME_H__
+#define __VOLUME_H__
 
-#ifdef USEWIN32
-#include "win32/volume.h"
-#endif
+void volSet(int);
+int volGet(void);
+void volMute(void);
+int volIsMuted(void);
+void volChange(int);
 
+#endif // __VOLUME_H__

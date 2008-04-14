@@ -1,11 +1,10 @@
 #ifndef RSP_H
 #define RSP_H
 
-#ifdef USEWIN32
+#ifndef __LINUX__
 # include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
+#else
+# include "../main/winlnxdefs.h"
 # include "SDL.h"
 # include "SDL_thread.h"
 #endif

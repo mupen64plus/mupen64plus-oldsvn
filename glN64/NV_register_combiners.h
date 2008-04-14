@@ -1,6 +1,4 @@
-
-# include "gl.h"
-# include "glext.h"
+#include <GL/gl.h>
 
 struct CombinerInput
 {

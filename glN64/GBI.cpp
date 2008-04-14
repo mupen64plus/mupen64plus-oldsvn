@@ -15,10 +15,9 @@
 #include "F3DWRUS.h"
 #include "F3DPD.h"
 #include "Types.h"
-#ifdef USEWIN32
-# include "resource.h"
-#endif
-#ifdef USEPOSIX
+#ifndef __LINUX__
+# include "Resource.h"
+#else // !__LINUX__
 # include <glib.h>
 # include <gtk/gtk.h>
 # include <string.h>
@@ -106,7 +105,7 @@ void GBI_Unknown( u32 w0, u32 w1 )
 #endif
 }
 
-#ifdef USEWIN32
+#ifndef __LINUX__
 INT_PTR CALLBACK MicrocodeDlgProc( HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
     switch (uMsg)
@@ -139,8 +138,7 @@ INT_PTR CALLBACK MicrocodeDlgProc( HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARA
 
     return FALSE;
 }
-#endif
-#ifdef USEPOSIX
+#else // !__LINUX__
 static int selectedMicrocode = -1;
 static GtkWidget *microcodeWindow = 0;
 static GtkWidget *microcodeList = 0;
@@ -276,7 +274,7 @@ static int MicrocodeDialog()
 
     return selectedMicrocode;
 }
-#endif
+#endif // __LINUX__
 
 MicrocodeInfo *GBI_AddMicrocode()
 {
@@ -436,17 +434,13 @@ MicrocodeInfo *GBI_DetectMicrocode( u32 uc_start, u32 uc_dstart, u16 uc_dsize )
     }
 
     // Let the user choose the microcode
-#ifdef USEWIN32
+#ifndef __LINUX__
     current->type = DialogBox( hInstance, MAKEINTRESOURCE( IDD_MICROCODEDLG ), hWnd, MicrocodeDlgProc );
-#endif
-#ifdef USEPOSIX
+#else // !__LINUX__
     printf( "glN64: Warning - unknown ucode!!!\n" );
-    if(last_good_ucode != (u32)-1) 
-    {
+    if(last_good_ucode != (u32)-1) {
         current->type=last_good_ucode;
-    }
-    else 
-    {
+    } else {
         current->type = MicrocodeDialog();
     }
 #endif // __LINUX__

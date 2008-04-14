@@ -1,8 +1,7 @@
 #ifndef TEXTURES_H
 #define TEXTURES_H
 
-# include "gl.h"
-# include "glext.h"
+#include <GL/gl.h>
 #include "convert.h"
 
 struct CachedTexture

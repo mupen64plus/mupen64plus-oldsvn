@@ -29,13 +29,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef USEPOSIX
-#include "../main/wintypes.h"
-#endif
-#ifdef USEWIN32
+#ifndef __WIN32__
+#include "../main/winlnxdefs.h"
+#else
 #include <windows.h>
 #endif
 
+#include "memory.h"
 #include "dma.h"
 #include "../r4300/r4300.h"
 #include "../r4300/macros.h"
@@ -47,7 +47,6 @@
 #include "../main/main.h"
 #include "../main/plugin.h"
 #include "../main/vcr.h"
-#include "memory.h"
 
 /* definitions of the rcp's structures and memory area */
 RDRAM_register rdram_register;

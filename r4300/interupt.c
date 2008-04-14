@@ -339,7 +339,10 @@ void gen_interupt()
    // if paused, poll for input events
    while(rompause)
    {
-        SDL_Delay(10);
+        struct timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 10000000;
+        nanosleep(&ts, NULL); // sleep for 10 milliseconds
         SDL_PumpEvents();
 #ifdef WITH_LIRC
     lircCheckInput();

@@ -16,12 +16,7 @@ Email                : blight@Ashitaka
 ***************************************************************************/
 
 #include "../version.h"
-#ifdef USEPOSIX
-#include "../wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include "../winlnxdefs.h"
 #include "../guifuncs.h"
 #include "main_gtk.h"
 #include "../main.h"

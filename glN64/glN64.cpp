@@ -1,14 +1,13 @@
-#ifdef USEWIN32
+#ifndef __LINUX__
 # include <windows.h>
 # include <commctrl.h>
 # include <process.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
+#else
+# include "../main/winlnxdefs.h"
 # include <string.h>
 #endif
-# include "gl.h"
-# include "glext.h"
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include "glN64.h"
 #include "Debug.h"
 #include "Zilmar GFX 1.3.h"
@@ -21,13 +20,13 @@
 #include "Textures.h"
 #include "Combiner.h"
 
-#ifdef USEWIN32
+#ifndef __LINUX__
 HWND        hWnd;
 HWND        hStatusBar;
-HWND      hFullscreen;
+//HWND      hFullscreen;
 HWND        hToolBar;
 HINSTANCE   hInstance;
-#endif
+#endif // !__LINUX__
 
 char        pluginName[] = "glN64 v0.4.1";
 char        *screenDirectory;
@@ -35,7 +34,7 @@ u32 last_good_ucode = -1;
 void (*CheckInterrupts)( void );
 char        configdir[PATH_MAX] = {0};
 
-#ifdef USEWIN32
+#ifndef __LINUX__
 LONG        windowedStyle;
 LONG        windowedExStyle;
 RECT        windowedRect;
@@ -48,9 +47,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
     if (dwReason == DLL_PROCESS_ATTACH)
     {
         Config_LoadConfig();
-# ifdef RSPTHREAD
         RSP.thread = NULL;
-# endif
         OGL.hRC = NULL;
         OGL.hDC = NULL;
 /*      OGL.hPbufferRC = NULL;
@@ -154,7 +151,7 @@ EXPORT void CALL ChangeWindow (void)
     SetEvent( RSP.threadMsg[RSPMSG_INITTEXTURES] );
     WaitForSingleObject( RSP.threadFinished, INFINITE );
 #else // RSPTHREAD
-# ifdef USEPOSIX
+# ifdef __LINUX__
     SDL_WM_ToggleFullScreen( OGL.hScreen );
 # endif // __LINUX__
 #endif // !RSPTHREAD
@@ -166,10 +163,9 @@ EXPORT void CALL CloseDLL (void)
 
 EXPORT void CALL DllAbout ( HWND hParent )
 {
-#ifdef USEWIN32
+#ifndef __LINUX__
     MessageBox( hParent, "glN64 v0.4 by Orkin\n\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn", pluginName, MB_OK | MB_ICONINFORMATION );
-#endif
-#ifdef USEPOSIX
+#else
     puts( "glN64 v0.4 by Orkin\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn\nported by blight" );
 #endif
 }
@@ -196,7 +192,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
     PluginInfo->MemoryBswaped = TRUE;
 }
 
-#ifdef USEWIN32
+#ifndef __LINUX__
 BOOL CALLBACK FindToolBarProc( HWND hWnd, LPARAM lParam )
 {
     if (GetWindowLong( hWnd, GWL_STYLE ) & RBS_VARHEIGHT)
@@ -206,18 +202,17 @@ BOOL CALLBACK FindToolBarProc( HWND hWnd, LPARAM lParam )
     }
     return TRUE;
 }
-#endif
+#endif // !__LINUX__
 
 EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info)
 {
-#ifdef USEWIN32
+#ifndef __LINUX__
     hWnd = Gfx_Info.hWnd;
     hStatusBar = Gfx_Info.hStatusBar;
     hToolBar = NULL;
 
     EnumChildWindows( hWnd, FindToolBarProc,0 );
-#endif
-#ifdef USEPOSIX
+#else // !__LINUX__
     Config_LoadConfig();
     OGL.hScreen = NULL;
 # ifdef RSPTHREAD
@@ -228,30 +223,30 @@ EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info)
     IMEM = Gfx_Info.IMEM;
     RDRAM = Gfx_Info.RDRAM;
 
-    REG.MI_INTR = (u32*)Gfx_Info.MI_INTR_REG;
-    REG.DPC_START = (u32*)Gfx_Info.DPC_START_REG;
-    REG.DPC_END = (u32*)Gfx_Info.DPC_END_REG;
-    REG.DPC_CURRENT = (u32*)Gfx_Info.DPC_CURRENT_REG;
-    REG.DPC_STATUS = (u32*)Gfx_Info.DPC_STATUS_REG;
-    REG.DPC_CLOCK = (u32*)Gfx_Info.DPC_CLOCK_REG;
-    REG.DPC_BUFBUSY = (u32*)Gfx_Info.DPC_BUFBUSY_REG;
-    REG.DPC_PIPEBUSY = (u32*)Gfx_Info.DPC_PIPEBUSY_REG;
-    REG.DPC_TMEM = (u32*)Gfx_Info.DPC_TMEM_REG;
+    REG.MI_INTR = Gfx_Info.MI_INTR_REG;
+    REG.DPC_START = Gfx_Info.DPC_START_REG;
+    REG.DPC_END = Gfx_Info.DPC_END_REG;
+    REG.DPC_CURRENT = Gfx_Info.DPC_CURRENT_REG;
+    REG.DPC_STATUS = Gfx_Info.DPC_STATUS_REG;
+    REG.DPC_CLOCK = Gfx_Info.DPC_CLOCK_REG;
+    REG.DPC_BUFBUSY = Gfx_Info.DPC_BUFBUSY_REG;
+    REG.DPC_PIPEBUSY = Gfx_Info.DPC_PIPEBUSY_REG;
+    REG.DPC_TMEM = Gfx_Info.DPC_TMEM_REG;
 
-    REG.VI_STATUS = (u32*)Gfx_Info.VI_STATUS_REG;
-    REG.VI_ORIGIN = (u32*)Gfx_Info.VI_ORIGIN_REG;
-    REG.VI_WIDTH = (u32*)Gfx_Info.VI_WIDTH_REG;
-    REG.VI_INTR = (u32*)Gfx_Info.VI_INTR_REG;
-    REG.VI_V_CURRENT_LINE = (u32*)Gfx_Info.VI_V_CURRENT_LINE_REG;
-    REG.VI_TIMING = (u32*)Gfx_Info.VI_TIMING_REG;
-    REG.VI_V_SYNC = (u32*)Gfx_Info.VI_V_SYNC_REG;
-    REG.VI_H_SYNC = (u32*)Gfx_Info.VI_H_SYNC_REG;
-    REG.VI_LEAP = (u32*)Gfx_Info.VI_LEAP_REG;
-    REG.VI_H_START = (u32*)Gfx_Info.VI_H_START_REG;
-    REG.VI_V_START = (u32*)Gfx_Info.VI_V_START_REG;
-    REG.VI_V_BURST = (u32*)Gfx_Info.VI_V_BURST_REG;
-    REG.VI_X_SCALE = (u32*)Gfx_Info.VI_X_SCALE_REG;
-    REG.VI_Y_SCALE = (u32*)Gfx_Info.VI_Y_SCALE_REG;
+    REG.VI_STATUS = Gfx_Info.VI_STATUS_REG;
+    REG.VI_ORIGIN = Gfx_Info.VI_ORIGIN_REG;
+    REG.VI_WIDTH = Gfx_Info.VI_WIDTH_REG;
+    REG.VI_INTR = Gfx_Info.VI_INTR_REG;
+    REG.VI_V_CURRENT_LINE = Gfx_Info.VI_V_CURRENT_LINE_REG;
+    REG.VI_TIMING = Gfx_Info.VI_TIMING_REG;
+    REG.VI_V_SYNC = Gfx_Info.VI_V_SYNC_REG;
+    REG.VI_H_SYNC = Gfx_Info.VI_H_SYNC_REG;
+    REG.VI_LEAP = Gfx_Info.VI_LEAP_REG;
+    REG.VI_H_START = Gfx_Info.VI_H_START_REG;
+    REG.VI_V_START = Gfx_Info.VI_V_START_REG;
+    REG.VI_V_BURST = Gfx_Info.VI_V_BURST_REG;
+    REG.VI_X_SCALE = Gfx_Info.VI_X_SCALE_REG;
+    REG.VI_Y_SCALE = Gfx_Info.VI_Y_SCALE_REG;
 
     CheckInterrupts = Gfx_Info.CheckInterrupts;
 

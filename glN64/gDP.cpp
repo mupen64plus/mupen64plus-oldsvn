@@ -13,7 +13,7 @@
 #include "DepthBuffer.h"
 #include "VI.h"
 
-#ifdef USEPOSIX
+#ifdef __LINUX__
 # ifndef min
 #  define min(a,b) ((a) < (b) ? (a) : (b))
 # endif

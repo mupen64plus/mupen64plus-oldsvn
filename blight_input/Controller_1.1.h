@@ -80,7 +80,7 @@ typedef struct {
     unsigned short button;
     char  stick_y;
     char  stick_x;
-    unsigned char _errno;
+    unsigned char  errno;
 } BUTTONS;
 
 typedef struct {

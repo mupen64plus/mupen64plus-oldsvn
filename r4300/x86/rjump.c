@@ -54,7 +54,7 @@ void dyna_start(void (*code)())
   /* then call the code(), which should theoretically never return.  */
   /* When dyna_stop() sets the *return_address to the saved EIP, the emulator thread will come back here. */
   /* It will jump to label 2, restore the base and stack pointers, and exit this function */
-#ifdef _MSVC_VER
+#ifdef _WIN32
    __asm
    {
      mov _save_ebp, ebp
@@ -71,24 +71,6 @@ void dyna_start(void (*code)())
      mov esp, _save_esp
    }
 #elif defined(__GNUC__) && defined(__i386__)
-#ifdef __WIN32__
-   asm volatile 
-      (" movl %%ebp, _save_ebp \n"
-       " movl %%esp, _save_esp \n"
-       " call 1f              \n"
-       " jmp 2f               \n"
-       "1:                    \n"
-       " popl %%eax           \n"
-       " movl %%eax, _save_eip \n"
-       " call *%%ebx          \n"
-       "2:                    \n"
-       " movl _save_ebp, %%ebp \n"
-       " movl _save_esp, %%esp \n"
-       :
-       : "b" (code)
-       : "%eax", "memory"
-       );
-#else
    asm volatile 
       (" movl %%ebp, save_ebp \n"
        " movl %%esp, save_esp \n"
@@ -105,7 +87,6 @@ void dyna_start(void (*code)())
        : "b" (code)
        : "%eax", "memory"
        );
-#endif
 #endif
 
    /* clear the registers so we don't return here a second time; that would be a bug */
