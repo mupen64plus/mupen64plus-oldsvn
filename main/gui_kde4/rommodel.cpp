@@ -111,15 +111,25 @@ void RomModel::update()
     char crc[BUF_MAX];
     
     m_romList.clear();
+    KConfig romcache("mupen64plus_romcache");
 
     foreach(QString directory, m_romDirectories) {
         foreach(QString romFile, QDir(directory).entryList(RomExtensions)) {
+            RomEntry entry;
+            int size = 0;
+
             url = directory;
             url.addPath(romFile);
             abspath = url.path();
-            int size = core::fill_header(abspath.toLocal8Bit());
-            if (size > 0) {
-                RomEntry entry;
+
+            if (romcache.hasGroup(abspath)) {
+                KConfigGroup group = romcache.group(abspath);
+                entry.size = group.readEntry("size").toInt();
+                entry.crc = group.readEntry("crc");
+                entry.fileName = abspath;
+                QString country = group.readEntry("country");
+                entry.cCountry = static_cast<unsigned char>(country.toInt());
+            } else if ((size = core::fill_header(abspath.toLocal8Bit())) > 0 ) {
                 entry.size = size;
                 entry.fileName = abspath;
                 std::snprintf(crc, BUF_MAX, "%08X-%08X-C%02X",
@@ -127,19 +137,28 @@ void RomModel::update()
                                 sl(core::ROM_HEADER->CRC2),
                                 core::ROM_HEADER->Country_code);
                 entry.cCountry = core::ROM_HEADER->Country_code;
-                core::mupenEntry* iniEntry = core::ini_search_by_CRC(crc);
-                if (iniEntry) {
-                    entry.comments = iniEntry->comments;
-                    entry.goodName = iniEntry->goodname;
-                    // do we need to free inEntry? the gtk code seems to but
-                    // we crash if we attempt it...
-                    // free(iniEntry);
-                } else {
-                    entry.goodName = romFile;
-                    entry.comments = i18n("No INI Entry");
-                }
-                m_romList << entry;
+                entry.crc = crc;
+                KConfigGroup group = romcache.group(abspath);
+                group.writeEntry("size", entry.size);
+                group.writeEntry("country", static_cast<int>(entry.cCountry));
+                group.writeEntry("crc", entry.crc);
+            } else {
+                // Invalid rom, bail
+                continue;
             }
+
+            core::mupenEntry* iniEntry = core::ini_search_by_CRC(
+                entry.crc.toLatin1()
+            );
+            if (iniEntry) {
+                entry.comments = iniEntry->comments;
+                entry.goodName = iniEntry->goodname;
+            } else {
+                entry.comments = i18n("No INI Entry");
+                entry.goodName = romFile;
+            }
+
+            m_romList << entry;
         }
     }
     

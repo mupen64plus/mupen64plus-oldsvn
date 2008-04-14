@@ -35,6 +35,7 @@ struct RomEntry
     unsigned char cCountry;
     QString fileName;
     QString comments;
+    QString crc;
 };
 
 class RomModel : public QAbstractItemModel
