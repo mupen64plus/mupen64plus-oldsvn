@@ -3,11 +3,9 @@ project(jttl_audio)
 set(JTTL_LIBS ${SDL_LIBRARY})
 include_directories(${SDL_INCLUDE_DIR})
 
-if (GTK_FOUND)
-    add_definitions(-DUSE_GTK)
-    set(JTTL_LIBS ${JTTL_LIBS} ${GTK_LIBRARIES})
-    include_directories(${GTK_INCLUDE_DIR})
-endif (GTK_FOUND)
+add_definitions(-DUSE_GTK)
+set(JTTL_LIBS ${JTTL_LIBS} ${GTK_LIBRARIES})
+include_directories(${GTK_INCLUDE_DIR})
 
 set(JTTL_AUDIO_SRCS main.c)
 

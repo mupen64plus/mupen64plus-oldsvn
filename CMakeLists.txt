@@ -27,6 +27,26 @@ pkg_search_module(GTK2 REQUIRED gtk+-2.0)
 pkg_search_module(GTHREAD2 REQUIRED gthread-2.0)
 include_directories(${GTK2_INCLUDE_DIRS})
 
+set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/mupen64plus)
+set(PLUGIN_INSTALL_DIR ${INSTALL_DIR}/plugins)
+
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
+    set(BITS 64)
+    set(MARCH amd64)
+else(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
+    set(BITS 32)
+    set(MARCH x86)
+endif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
+
+add_subdirectory(mupen64_audio)
+add_subdirectory(jttl_audio)
+add_subdirectory(rice_video)
+add_subdirectory(dummy_video)
+add_subdirectory(dummy_audio)
+add_subdirectory(rsp_hle)
+add_subdirectory(mupen64_input)
+add_subdirectory(blight_input)
+
 if(KDE4GUI)
     find_package(Qt4 REQUIRED)
     find_package(KDE4 REQUIRED)
@@ -42,31 +62,7 @@ else(KDE4GUI)
     add_definitions(-DUSE_GTK)
 endif(KDE4GUI)
 
-if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
-    set(BITS 64)
-    set(MARCH amd64)
-else(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
-    set(BITS 32)
-    set(MARCH x86)
-endif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
-
-set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/mupen64plus)
-set(PLUGIN_INSTALL_DIR ${INSTALL_DIR}/plugins)
-
-add_subdirectory(dummy_video)
-add_subdirectory(dummy_audio)
-add_subdirectory(rsp_hle)
-add_subdirectory(mupen64_input)
 add_subdirectory(glN64)
-add_subdirectory(blight_input)
-
-if(GTK2GUI)
-    add_subdirectory(mupen64_audio)
-    add_subdirectory(jttl_audio)
-
-    add_subdirectory(rice_video)
-    #add_subdirectory(glide64) FIXME
-endif(GTK2GUI)
 
 set(CORE_SRCS
     main/main.c
