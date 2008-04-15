@@ -68,10 +68,6 @@ class RomModel : public QAbstractItemModel
     public slots:
         void settingsChanged();
 
-    private slots:
-        void jobDone(ThreadWeaver::Job* job);
-        void allJobsDone();
-
     private:
         QPixmap countryFlag(unsigned char c) const;
         QString countryName(unsigned char c) const;
