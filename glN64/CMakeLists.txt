@@ -32,17 +32,16 @@ set(GLN64_VIDEO_SRCS
     VI.cpp
 )
 
-if(GTK2GUI)
+if(GTK2_UI)
     set(GLN64_VIDEO_SRCS ${GLN64_VIDEO_SRCS} Config_gtk2.cpp)
     include_directories(${GTHREAD2_INCLUDE_DIRS})
     set(GLN64_VIDEO_LIBS ${GTHREAD2_LIBRARIES} ${GTK2_LIBRARIES} ${PNG_LIBRARY})
-endif(GTK2GUI)
-if(KDE4_UI)
+elseif(KDE4_UI)
     set(GLN64_VIDEO_SRCS ${GLN64_VIDEO_SRCS} Config_kde4.cpp)
     set(GLN64_VIDEO_LIBS ${KDE4_KDEUI_LIBS} ${PNG_LIBRARY})
     kde4_add_kcfg_files(GLN64_VIDEO_SRCS gln64settings.kcfgc)
     kde4_add_ui_files(GLN64_VIDEO_SRCS gln64config.ui)
-endif(KDE4_UI)
+endif(GTK2_UI)
 
 set_source_files_properties(glN64.cpp PROPERTIES COMPILE_FLAGS -DMAINDEF)
 

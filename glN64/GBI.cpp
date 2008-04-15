@@ -23,7 +23,7 @@
 # include <string.h>
 # include <unistd.h>
 # include <stdlib.h>
-#elifdef KDE4
+#elifdef USE_KDE4
 # warning NO KDE GUI YET!
 #endif
 #include "CRC.h"
@@ -140,7 +140,7 @@ INT_PTR CALLBACK MicrocodeDlgProc( HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARA
 
     return FALSE;
 }
-#elifdef GTK2GUI
+#elif defined USE_GTK
 static int selectedMicrocode = -1;
 static GtkWidget *microcodeWindow = 0;
 static GtkWidget *microcodeList = 0;
@@ -276,14 +276,16 @@ static int MicrocodeDialog()
 
     return selectedMicrocode;
 }
-#else // KDE4
-
+#elif defined USE_KDE4
+# warning "The KDE4 microcode dialog needs to be implemented!!"
 static int MicrocodeDialog()
 {
     // FIXME
     return 0;
 }
 
+#else
+# error "No microcode dialog implementation!"
 #endif
 
 MicrocodeInfo *GBI_AddMicrocode()

@@ -32,7 +32,6 @@ extern "C" {
 
 #include <cstdio>
 #include <cstdarg>
-#include <pthread.h>
 
 #include "mainwindow.h"
 #include "globals.h"

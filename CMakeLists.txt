@@ -57,9 +57,9 @@ if(KDE4_UI)
     # KDE is a lot stricter about C standards compliance than mupen so reset
     # the cflags
     set(CMAKE_C_FLAGS "")
-    add_definitions(-DKDE4)
+    add_definitions(-DUSE_KDE4)
 else(KDE4_UI)
-    set(GTK2GUI ON)
+    set(GTK2_UI ON)
     add_definitions(-DUSE_GTK)
 endif(KDE4_UI)
 
@@ -113,7 +113,7 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL i686)
 endif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL x86_64)
 
 if(DYNAREC)
-    message("Dynamic recompiler enabled")
+    message(STATUS "Dynamic recompiler enabled")
     set(DYNAREC_SRCS
         r4300/${DYNAREC}/assemble.c
         r4300/${DYNAREC}/debug.c
@@ -132,7 +132,7 @@ if(DYNAREC)
         r4300/${DYNAREC}/rjump.c
     )
 else(DYNAREC)
-    message("Dynamic recompiler disabled")
+    message(STATUS "Dynamic recompiler disabled")
     set(DYNAREC_SRCS r4300/empty_dynarec.c)
 endif(DYNAREC)
 
