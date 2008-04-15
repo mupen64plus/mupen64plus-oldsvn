@@ -25,14 +25,15 @@
 #include <QStringList>
 #include <QPixmap>
 #include <QPair>
+#include <QChar>
 
 struct RomEntry
 {
-    RomEntry() : size(-1), cCountry('?') {}
+    RomEntry() : size(-1), country('?') {}
 
     int size;
     QString goodName;
-    unsigned char cCountry;
+    QChar country;
     QString fileName;
     QString comments;
     QString crc;
@@ -69,15 +70,15 @@ class RomModel : public QAbstractItemModel
         void settingsChanged();
 
     private:
-        QPixmap countryFlag(unsigned char c) const;
-        QString countryName(unsigned char c) const;
+        QPixmap countryFlag(QChar c) const;
+        QString countryName(QChar c) const;
 
         QStringList m_columnHeaders;
         QList<RomEntry> m_romList;
 
         bool m_showFullPath;
         QStringList m_romDirectories;
-        QMap<unsigned char, QPair<QString, QPixmap> > m_countryInfo;
+        QMap<QChar, QPair<QString, QPixmap> > m_countryInfo;
 };
 
 #endif // MUPEN_KDE4_ROMMODEL_H

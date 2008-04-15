@@ -76,23 +76,23 @@ RomModel::RomModel(QObject* parent)
     QPair<QString, QPixmap> europe(i18n("Europe"), peurope);
     QPair<QString, QPixmap> unknown(i18n("Unknown"), pn64cart);
     
-    m_countryInfo[0] = demo;
+    m_countryInfo[char(0)] = demo;
     m_countryInfo['7'] = beta;
-    m_countryInfo[0x41] = japanusa;
-    m_countryInfo[0x44] = germany;
-    m_countryInfo[0x45] = usa;
-    m_countryInfo[0x46] = france;
+    m_countryInfo[char(0x41)] = japanusa;
+    m_countryInfo[char(0x44)] = germany;
+    m_countryInfo[char(0x45)] = usa;
+    m_countryInfo[char(0x46)] = france;
     m_countryInfo['I'] = italy;
-    m_countryInfo[0x4A] = japan;
+    m_countryInfo[char(0x4A)] = japan;
     m_countryInfo['S'] = spain;
-    m_countryInfo[0x55] = australia;
-    m_countryInfo[0x59] = australia;
-    m_countryInfo[0x50] = europe;
-    m_countryInfo[0x58] = europe;
-    m_countryInfo[0x20] = europe;
-    m_countryInfo[0x21] = europe;
-    m_countryInfo[0x38] = europe;
-    m_countryInfo[0x70] = europe;
+    m_countryInfo[char(0x55)] = australia;
+    m_countryInfo[char(0x59)] = australia;
+    m_countryInfo[char(0x50)] = europe;
+    m_countryInfo[char(0x58)] = europe;
+    m_countryInfo[char(0x20)] = europe;
+    m_countryInfo[char(0x21)] = europe;
+    m_countryInfo[char(0x38)] = europe;
+    m_countryInfo[char(0x70)] = europe;
     m_countryInfo['?'] = unknown;
 
     update();
@@ -126,7 +126,7 @@ void RomModel::update()
                                 sl(core::ROM_HEADER->CRC1),
                                 sl(core::ROM_HEADER->CRC2),
                                 core::ROM_HEADER->Country_code);
-                entry.cCountry = core::ROM_HEADER->Country_code;
+                entry.country = char(core::ROM_HEADER->Country_code);
                 core::mupenEntry* iniEntry = core::ini_search_by_CRC(crc);
                 if (iniEntry) {
                     entry.comments = iniEntry->comments;
@@ -189,7 +189,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = entry.goodName;
                     break;
                 case Country:
-                    data = countryName(entry.cCountry);
+                    data = countryName(entry.country);
                     break;
                 case Size:
                     data = i18n("%0 Mbit").arg((entry.size * 8) / 1024 / 1024);
@@ -224,7 +224,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
         } else if (role == Qt::DecorationRole) {
             switch(index.column()) {
                 case Flag:
-                    data = countryFlag(entry.cCountry);
+                    data = countryFlag(entry.country);
                     break;
             }
         } else if (role == Sort) {
@@ -234,7 +234,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     break;
                 case Flag:
                 case Country:
-                    data = countryName(entry.cCountry);
+                    data = countryName(entry.country);
                     break;
                 case Size:
                     data = entry.size;
@@ -286,7 +286,7 @@ void RomModel::settingsChanged()
     }
 }
 
-QPixmap RomModel::countryFlag(unsigned char c) const
+QPixmap RomModel::countryFlag(QChar c) const
 {
     if (!m_countryInfo.contains(c)) {
         c = '?';
@@ -294,7 +294,7 @@ QPixmap RomModel::countryFlag(unsigned char c) const
     return m_countryInfo[c].second;
 }
 
-QString RomModel::countryName(unsigned char c) const
+QString RomModel::countryName(QChar c) const
 {
     if (!m_countryInfo.contains(c)) {
         c = '?';
