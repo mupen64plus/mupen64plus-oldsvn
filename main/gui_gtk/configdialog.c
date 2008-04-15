@@ -797,7 +797,7 @@ static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct inp
     while(sdl_loop)
     {
         // let gtk work if it needs to. Need this so user can click buttons on the dialog.
-        while(g_main_iteration(FALSE));
+        GUI_PROCESS_QUEUED_EVENTS();
 
         if(SDL_PollEvent(&sdl_event))
         {

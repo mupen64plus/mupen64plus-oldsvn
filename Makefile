@@ -181,7 +181,7 @@ ifeq ($(LIRC), 1)
 endif
 ifneq ($(NO_GUI), 1)
   OBJECTS += $(OBJ_GTK_GUI)
-  LIBS += $(GTK_LIBS)
+  LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
 endif
 
 # build targets

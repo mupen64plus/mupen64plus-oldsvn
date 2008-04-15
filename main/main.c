@@ -1165,11 +1165,9 @@ int main(int argc, char *argv[])
     const char *p;
 #endif
 
-    // parse gui-specific commandline args first
+    // allow gui subsystem to init and parse gui-specific commandline args first
     if(g_GuiEnabled)
-    {
-        gui_parseArgs(&argc, &argv);
-    }
+        gui_init(&argc, &argv);
 
     parseCommandLine(argc, argv);
     setPaths();

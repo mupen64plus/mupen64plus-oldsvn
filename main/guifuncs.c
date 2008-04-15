@@ -42,7 +42,7 @@
 #include "translate.h"
 #include "../r4300/r4300.h"
 
-void gui_parseArgs(int *argc, char ***argv) { }
+void gui_init(int *argc, char ***argv) { }
 void gui_build(void) { }
 void gui_display(void) { }
 void gui_main_loop(void) { }

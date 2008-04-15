@@ -34,4 +34,13 @@ extern SMainWindow g_MainWindow;
 
 void reload();
 void statusbar_message( const char *section, const char *fmt, ... );
+
+// helper macro
+#define GUI_PROCESS_QUEUED_EVENTS() \
+{ \
+    gdk_threads_leave(); \
+    while(g_main_context_iteration(NULL, FALSE)); \
+    gdk_threads_enter(); \
+}
+
 #endif // __MAIN_GTK_H__

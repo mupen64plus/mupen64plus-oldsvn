@@ -40,10 +40,10 @@ Email                : blight@Ashitaka
 #include "../vcr_compress.h"
 
 #ifdef DBG
-#include <glib.h>
 #include "../../debugger/debugger.h"
 #endif
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include <SDL.h>
@@ -83,6 +83,8 @@ typedef struct
     GtkWidget  *bar;
 } statusBarSection;
 
+static pthread_t g_GuiThread = 0; // main gui thread
+
 static statusBarSection statusBarSections[] = {
     { "status", -1, NULL },
     { "num_roms", -1, NULL },
@@ -93,11 +95,18 @@ static statusBarSection statusBarSections[] = {
 * GUI interfaces (declared in ../guifuncs.h)
 */
 
-/** gui_parseArgs
+/** gui_init
  *    Parse gui-specific arguments and remove them from argument list.
  */
-void gui_parseArgs(int *argc, char ***argv)
+void gui_init(int *argc, char ***argv)
 {
+    // init multi-threading support
+    g_thread_init(NULL);
+    gdk_threads_init();
+
+    // save main gui thread handle
+    g_GuiThread = pthread_self();
+
     // call gtk to parse arguments
     gtk_init(argc, argv);
 }
@@ -107,6 +116,9 @@ void gui_parseArgs(int *argc, char ***argv)
  */
 void gui_build(void)
 {
+    // info_message function can safely be used after we get the gdk lock
+    gdk_threads_enter();
+
     rombrowser_readCache();
 
     create_mainWindow();
@@ -122,10 +134,7 @@ void gui_build(void)
  */
 void gui_display(void)
 {
-    gtk_widget_show_all( g_MainWindow.window );
-
-    // perform any queued gui actions
-    while( g_main_iteration( FALSE ) );
+    gtk_widget_show_all(g_MainWindow.window);
 }
 
 /** gui_main_loop
@@ -134,6 +143,7 @@ void gui_display(void)
 void gui_main_loop(void)
 {
     gtk_main();
+    gdk_threads_leave();
 }
 
 // prints informational message to status bar
@@ -148,9 +158,12 @@ void info_message(const char *fmt, ...)
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() &&
-       !pthread_equal(self, g_EmulationThread))
+    if(gui_enabled())
     {
+        // if we're calling from a thread other than the main gtk thread, take gdk lock
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_enter();
+
         for(i = 0; statusBarSections[i].name; i++)
         {
             if(!strcasecmp("status", statusBarSections[i].name))
@@ -159,11 +172,17 @@ void info_message(const char *fmt, ...)
                 gtk_statusbar_push(GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id, buf);
         
                 // update status bar
-                while( g_main_iteration( FALSE ) );
+                GUI_PROCESS_QUEUED_EVENTS();
         
+                if(!pthread_equal(self, g_GuiThread))
+                    gdk_threads_leave();
+
                 return;
             }
         }
+
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_leave();
     }
     // if gui not enabled, just print to console
     else
@@ -171,10 +190,6 @@ void info_message(const char *fmt, ...)
         printf(tr("Info"));
         printf(": %s\n", buf);
     }
-
-#ifdef _DEBUG
-    printf("statusbar_message(): unknown section '%s'!\n", section);
-#endif
 }
 
 // pops up dialog box with error message and ok button
@@ -183,29 +198,29 @@ void alert_message(const char *fmt, ...)
     va_list ap;
     char buf[2049];
     GtkWidget *dialog = NULL,
-          *hbox = NULL,
-          *label = NULL,
-          *icon = NULL;
+              *hbox = NULL,
+              *label = NULL,
+              *icon = NULL;
     pthread_t self = pthread_self();
 
     va_start(ap, fmt);
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() &&
-       !pthread_equal(self, g_EmulationThread))
+    if(gui_enabled())
     {
+        // if we're calling from a thread other than the main gtk thread, take gdk lock
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_enter();
+
         dialog = gtk_dialog_new_with_buttons(tr("Error"),
                                              GTK_WINDOW(g_MainWindow.window),
-                             GTK_DIALOG_DESTROY_WITH_PARENT,
-                             GTK_STOCK_OK,
-                             GTK_RESPONSE_NONE,
-                             NULL);
+                                             GTK_DIALOG_DESTROY_WITH_PARENT,
+                                             GTK_STOCK_OK, GTK_RESPONSE_NONE,
+                                             NULL);
         
-        g_signal_connect_swapped(dialog,
-                                 "response",
-                     G_CALLBACK(gtk_widget_destroy),
-                     dialog);
+        g_signal_connect_swapped(dialog, "response",
+                                 G_CALLBACK(gtk_widget_destroy), dialog);
         
         hbox = gtk_hbox_new(FALSE, 5);
         
@@ -218,6 +233,9 @@ void alert_message(const char *fmt, ...)
         gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
         
         gtk_widget_show_all(dialog);
+
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_leave();
     }
     // if gui not enabled, just print to console
     else
@@ -243,9 +261,12 @@ int confirm_message(const char *fmt, ...)
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() &&
-       !pthread_equal(self, g_EmulationThread))
+    if(gui_enabled())
     {
+        // if we're calling from a thread other than the main gtk thread, take gdk lock
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_enter();
+
         dialog = gtk_dialog_new_with_buttons(tr("Confirm"),
                                              GTK_WINDOW(g_MainWindow.window),
                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -269,6 +290,9 @@ int confirm_message(const char *fmt, ...)
         
         gtk_widget_destroy(dialog);
         
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_leave();
+
         return response == GTK_RESPONSE_ACCEPT;
     }
     // if gui not enabled, get input from the console
@@ -511,12 +535,12 @@ static void callback_Load( GtkWidget *widget, gpointer data )
     {
         GtkWidget *file_chooser;
 
-        file_chooser = gtk_file_chooser_dialog_new( tr("Load..."),
-                                                    GTK_WINDOW(g_MainWindow.window),
-                                GTK_FILE_CHOOSER_ACTION_SAVE,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                                        NULL);
+        file_chooser = gtk_file_chooser_dialog_new(tr("Load..."),
+                                                   GTK_WINDOW(g_MainWindow.window),
+                                                   GTK_FILE_CHOOSER_ACTION_SAVE,
+                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                                                   NULL);
         
         if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
         {
@@ -661,12 +685,12 @@ static void callback_vcrStartRecord( GtkWidget *widget, gpointer data )
         GtkWidget *file_chooser;
 
         // get save file from user
-        file_chooser = gtk_file_chooser_dialog_new( tr("Save Recording"),
-                                                    GTK_WINDOW(g_MainWindow.window),
-                                GTK_FILE_CHOOSER_ACTION_SAVE,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                                        NULL);
+        file_chooser = gtk_file_chooser_dialog_new(tr("Save Recording"),
+                                                   GTK_WINDOW(g_MainWindow.window),
+                                                   GTK_FILE_CHOOSER_ACTION_SAVE,
+                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                   GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                                                   NULL);
         
         if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
         {
@@ -716,12 +740,12 @@ static void callback_vcrStartPlayback( GtkWidget *widget, gpointer data )
         GtkFileFilter *file_filter;
 
         // get recording file from user to playback
-        file_chooser = gtk_file_chooser_dialog_new( tr("Load Recording"),
-                                                    GTK_WINDOW(g_MainWindow.window),
-                                GTK_FILE_CHOOSER_ACTION_OPEN,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                                        NULL);
+        file_chooser = gtk_file_chooser_dialog_new(tr("Load Recording"),
+                                                   GTK_WINDOW(g_MainWindow.window),
+                                                   GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                                                   NULL);
         
         // add filter for recording file types
         file_filter = gtk_file_filter_new();
@@ -780,12 +804,12 @@ static void callback_vcrStartCapture( GtkWidget *widget, gpointer data )
         GtkFileFilter *file_filter;
 
         // load recording file to capture
-        file_chooser = gtk_file_chooser_dialog_new( tr("Load Recording"),
-                                                    GTK_WINDOW(g_MainWindow.window),
-                                GTK_FILE_CHOOSER_ACTION_OPEN,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                                        NULL);
+        file_chooser = gtk_file_chooser_dialog_new(tr("Load Recording"),
+                                                   GTK_WINDOW(g_MainWindow.window),
+                                                   GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                                                   NULL);
         
         // add filter for recording file types
         file_filter = gtk_file_filter_new();
@@ -810,12 +834,12 @@ static void callback_vcrStartCapture( GtkWidget *widget, gpointer data )
             gtk_widget_destroy(file_chooser);
 
             // get avi filename from user to save recording to.
-            file_chooser = gtk_file_chooser_dialog_new( tr("Save as..."),
-                                                            GTK_WINDOW(g_MainWindow.window),
-                                        GTK_FILE_CHOOSER_ACTION_SAVE,
-                                                GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                                GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                                                NULL);
+            file_chooser = gtk_file_chooser_dialog_new(tr("Save as..."),
+                                                       GTK_WINDOW(g_MainWindow.window),
+                                                       GTK_FILE_CHOOSER_ACTION_SAVE,
+                                                       GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                       GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                                                       NULL);
 
             if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
             {
