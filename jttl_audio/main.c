@@ -165,8 +165,6 @@ static Uint32 LowBufferLoadLevel = LOW_BUFFER_LOAD_LEVEL;
 static Uint32 HighBufferLoadLevel = HIGH_BUFFER_LOAD_LEVEL;
 // Resample or not
 static Uint8 Resample = 1;
-// This actually handles all delaying
-static Uint8 TimeCompensation = 1;
 
 static int realFreq;
 static char configdir[PATH_MAX] = {0};
@@ -246,33 +244,36 @@ EXPORT void CALL AiLenChanged( void )
 
     // And then syncronization */
 
-       /* If buffer is running slow we speed up the game a bit. Actually we skip the syncronization. */
-       if(buffer_pos < LowBufferLoadLevel)
-       {
-               //wait_time -= (LOW_BUFFER_LOAD_LEVEL - buffer_pos);
-               wait_time = -1;
-           if(buffer_pos < SecondaryBufferSize*4)
-             SDL_PauseAudio(1);
-       }
-       else SDL_PauseAudio(0);
-       if(wait_time != -1) {
-               /* If for some reason game is runnin extremely fast and there is risk buffer is going to
-                 overflow, we slow down the game a bit to keep sound smooth. The overspeed is caused
-                 by inaccuracy in machines clock. */
-               if(buffer_pos > HighBufferLoadLevel)
-               {
-                       wait_time += (float)(buffer_pos - HIGH_BUFFER_LOAD_LEVEL) / (float)(frequency / 250);
-               }
+    /* If buffer is running slow we speed up the game a bit. Actually we skip the syncronization. */
+    if (buffer_pos < LowBufferLoadLevel)
+    {
+        wait_time = -1;
+        if(buffer_pos < SecondaryBufferSize*4)
+          SDL_PauseAudio(1);
+    }
+    else
+        SDL_PauseAudio(0);
+
+    if (wait_time != -1)
+    {
+        /* If for some reason game is runnin extremely fast and there is risk buffer is going to
+           overflow, we slow down the game a bit to keep sound smooth. The overspeed is caused
+           by inaccuracy in machines clock. */
+        if(buffer_pos > HighBufferLoadLevel)
+        {
+            wait_time += (float)(buffer_pos - HIGH_BUFFER_LOAD_LEVEL) / (float)(frequency / 250);
+        }
         expected_ticks = ((float)(prev_len_reg) / (float)(frequency / 250));
 
-               if(last_ticks + expected_ticks > SDL_GetTicks()) {
-                       wait_time += (last_ticks + expected_ticks) - SDL_GetTicks();
+        if (last_ticks + expected_ticks > SDL_GetTicks())
+        {
+            wait_time += (last_ticks + expected_ticks) - SDL_GetTicks();
 #ifdef DEBUG
-                printf("[JttL's SDL Audio plugin] Debug: wait_time: %i, Buffer: %i/%i\n", wait_time, buffer_pos, PrimaryBufferSize);
+            printf("[JttL's SDL Audio plugin] Debug: wait_time: %i, Buffer: %i/%i\n", wait_time, buffer_pos, PrimaryBufferSize);
 #endif
-                SDL_Delay(wait_time);
-            }
+            SDL_Delay(wait_time);
         }
+    }
 
     last_ticks = SDL_GetTicks();
     prev_len_reg = LenReg;
@@ -622,7 +623,6 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 #endif
         int rlen = ((len/4 * frequency) / realFreq)*4;
         resample(buffer, rlen, stream, len);
-        //memcpy(stream, buffer, rlen);
         memmove(buffer, &buffer[ rlen ], buffer_pos  - rlen);
 
         buffer_pos = buffer_pos - rlen ;
@@ -633,16 +633,13 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
         underrun_count++;
         fprintf(stderr, "[JttL's SDL Audio plugin] Debug: Audio buffer underrun (%i).\n",underrun_count);
 #endif
-        //resample(buffer, buffer_pos, stream, ((buffer_pos/4 * realFreq) / frequency)*8);
         memset(stream + ((buffer_pos/4 * realFreq) / frequency)*4, 0, len - ((buffer_pos/4 * realFreq) / frequency)*4);
-        //memcpy(stream, buffer, buffer_pos );
         buffer_pos = 0;
     }
 }
 EXPORT void CALL RomOpen()
 {
     /* This function is for compatibility with Mupen64. */
-    //semaphore = SDL_CreateSemaphore(0);
     ReadConfig();
     InitializeAudio( frequency );
 }
@@ -836,7 +833,6 @@ void ReadConfig()
             if(strcasecmp(param,"LOW_BUFFER_LOAD_LEVEL") == 0) LowBufferLoadLevel = atoi(value);
             if(strcasecmp(param,"HIGH_BUFFER_LOAD_LEVEL") == 0) HighBufferLoadLevel = atoi(value);
             if(strcasecmp(param,"RESAMPLE") == 0) Resample = atoi(value);
-            if(strcasecmp(param,"TIME_COMPENSATION") == 0) TimeCompensation = atoi(value);
         }
     }
     fclose(config_file);
