@@ -31,7 +31,6 @@ extern int g_Noask;
 extern int g_NoaskParam;
 extern int g_LimitFPS;
 extern int g_MemHasBeenBSwapped;
-extern int g_FPSModifier;
 extern pthread_t g_EmulationThread;
 extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;
@@ -45,7 +44,6 @@ char *get_iconspath(void);
 char *get_iconpath(char *iconfile);
 int   gui_enabled(void);
 
-void modify_framerate(int percent);
 void new_frame();
 void new_vi();
 

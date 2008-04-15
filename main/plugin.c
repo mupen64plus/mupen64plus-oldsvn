@@ -63,6 +63,7 @@ static BOOL dummy_initiateAudio(AUDIO_INFO Audio_Info) { return TRUE; }
 static void dummy_initiateControllers(CONTROL_INFO Control_Info) {}
 static void dummy_aiDacrateChanged(int SystemType) {}
 static DWORD dummy_aiReadLength() { return 0; }
+static void dummy_setSpeedFactor(int percent) {}
 //static void dummy_aiUpdate(BOOL Wait) {}
 static void dummy_controllerCommand(int Control, BYTE * Command) {}
 static void dummy_getKeys(int Control, BUTTONS *Keys) {}
@@ -100,6 +101,7 @@ BOOL (*initiateAudio)(AUDIO_INFO Audio_Info) = dummy_initiateAudio;
 void (*processAList)() = dummy_void;
 void (*romClosed_audio)() = dummy_void;
 void (*romOpen_audio)() = dummy_void;
+void (*setSpeedFactor)(int percent) = dummy_setSpeedFactor;
 
 void (*closeDLL_input)() = dummy_void;
 void (*controllerCommand)(int Control, BYTE * Command) = dummy_controllerCommand;
@@ -471,6 +473,7 @@ void plugin_load_plugins(const char *gfx_name,
     processAList = dlsym(handle_audio, "ProcessAList");
     romClosed_audio = dlsym(handle_audio, "RomClosed");
     romOpen_audio = dlsym(handle_audio, "RomOpen");
+    setSpeedFactor = dlsym(handle_audio, "SetSpeedFactor");
     
     if (aiDacrateChanged == NULL) aiDacrateChanged = dummy_aiDacrateChanged;
     if (aiLenChanged == NULL) aiLenChanged = dummy_void;
@@ -481,6 +484,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (processAList == NULL) processAList = dummy_void;
     if (romClosed_audio == NULL) romClosed_audio = dummy_void;
     if (romOpen_audio == NULL) romOpen_audio = dummy_void;
+    if (setSpeedFactor == NULL) setSpeedFactor = dummy_setSpeedFactor;
     
     audio_info.MemoryBswaped = TRUE;
     audio_info.HEADER = rom;
@@ -508,6 +512,7 @@ void plugin_load_plugins(const char *gfx_name,
     processAList = dummy_void;
     romClosed_audio = dummy_void;
     romOpen_audio = dummy_void;
+    setSpeedFactor = dummy_setSpeedFactor;
      }
    
    if (handle_input)
