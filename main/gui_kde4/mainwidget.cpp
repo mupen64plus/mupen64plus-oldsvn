@@ -96,7 +96,11 @@ MainWidget::MainWidget(QWidget* parent)
 
 void MainWidget::resizeHeaderSections()
 {
+    QString filter = m_lineEdit->text();
+    m_proxyModel->setFilterFixedString("");
     m_treeView->header()->resizeSections(QHeaderView::ResizeToContents);
+    m_proxyModel->setFilterFixedString(filter);
+    emit itemCountChanged(m_proxyModel->rowCount());
 }
 
 void MainWidget::lineEditTextChanged()

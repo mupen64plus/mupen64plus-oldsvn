@@ -38,6 +38,10 @@ struct RomEntry
     QString crc;
 };
 
+namespace ThreadWeaver {
+    class Job;
+}
+
 class RomModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -63,6 +67,10 @@ class RomModel : public QAbstractItemModel
 
     public slots:
         void settingsChanged();
+
+    private slots:
+        void jobDone(ThreadWeaver::Job* job);
+        void allJobsDone();
 
     private:
         QPixmap countryFlag(unsigned char c) const;

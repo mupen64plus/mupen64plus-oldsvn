@@ -195,7 +195,7 @@ include_directories(${SDL_INCLUDE_DIR})
 
 if(KDE4GUI)
     kde4_add_executable(mupen64plus ${CORE_SRCS} ${DYNAREC_SRCS} ${KDE4_GUI_SRCS})
-    target_link_libraries(mupen64plus ${SDL_LIBRARY} ${GTK2_LIBRARIES} ${KDE4_KDEUI_LIBS} kio pthread z)
+    target_link_libraries(mupen64plus ${SDL_LIBRARY} ${GTK2_LIBRARIES} ${KDE4_KDEUI_LIBS} kio threadweaver pthread z)
     install(FILES main/gui_kde4/mupen64plusui.rc DESTINATION  ${DATA_INSTALL_DIR}/mupen64plus)
 else(KDE4GUI)
     add_executable(mupen64plus ${CORE_SRCS} ${DYNAREC_SRCS} ${GTK_GUI_SRCS})

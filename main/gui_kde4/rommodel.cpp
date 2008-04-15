@@ -24,6 +24,8 @@
 #include <KGlobal>
 #include <KLocale>
 #include <KGlobalSettings>
+#include <ThreadWeaver/Weaver>
+#include <ThreadWeaver/Job>
 
 #include <cstdio>
 
@@ -39,6 +41,43 @@ namespace core {
         #include "../main.h"
     }
 }
+
+class RomJob : public ThreadWeaver::Job
+{
+    public:
+        RomJob(const QString& filename)
+            : ThreadWeaver::Job()
+            , m_filename(filename)
+            {}
+        RomEntry entry;
+
+    protected:
+        void run() {
+            char crc[BUF_MAX];
+            int size = core::fill_header(m_filename.toLocal8Bit());
+            if (size > 0 ) {
+                entry.size = size;
+                entry.fileName = m_filename;
+                std::snprintf(crc, BUF_MAX, "%08X-%08X-C%02X",
+                                sl(core::ROM_HEADER->CRC1),
+                                sl(core::ROM_HEADER->CRC2),
+                                core::ROM_HEADER->Country_code);
+                entry.cCountry = core::ROM_HEADER->Country_code;
+                entry.crc = crc;
+                core::mupenEntry* iniEntry = core::ini_search_by_CRC(crc);
+                if (iniEntry) {
+                    entry.comments = iniEntry->comments;
+                    entry.goodName = iniEntry->goodname;
+                } else {
+                    entry.comments = i18n("No INI Entry");
+                    entry.goodName = KUrl(m_filename).fileName();
+                }
+            }
+        }
+
+    private:
+        QString m_filename;
+};
 
 RomModel::RomModel(QObject* parent)
     : QAbstractItemModel(parent)
@@ -94,7 +133,17 @@ RomModel::RomModel(QObject* parent)
     m_countryInfo[0x38] = europe;
     m_countryInfo[0x70] = europe;
     m_countryInfo['?'] = unknown;
+    
+    connect(ThreadWeaver::Weaver::instance(),
+             SIGNAL(jobDone(ThreadWeaver::Job*)),
+             this,
+             SLOT(jobDone(ThreadWeaver::Job*)));
+    connect(ThreadWeaver::Weaver::instance(),
+             SIGNAL(finished()),
+             this,
+             SLOT(allJobsDone()));
 
+    settingsChanged();
     update();
 }
 
@@ -105,64 +154,31 @@ RomModel* RomModel::self()
 }
 
 void RomModel::update()
-{
-    KUrl url;
-    QString abspath;
-    char crc[BUF_MAX];
+{   
+    // only ever have one thread running, the core isn't thread-safe
+    ThreadWeaver::Weaver::instance()->setMaximumNumberOfThreads(1);
+
+    ThreadWeaver::Weaver::instance()->dequeue();
+    ThreadWeaver::Weaver::instance()->finish();
+    ThreadWeaver::Weaver::instance()->suspend();
     
     m_romList.clear();
-    KConfig romcache("mupen64plus_romcache");
-
+    reset();
+    
+    KUrl url;
+    QString abspath;
     foreach(QString directory, m_romDirectories) {
         foreach(QString romFile, QDir(directory).entryList(RomExtensions)) {
-            RomEntry entry;
-            int size = 0;
-
             url = directory;
             url.addPath(romFile);
             abspath = url.path();
-
-            if (romcache.hasGroup(abspath)) {
-                KConfigGroup group = romcache.group(abspath);
-                entry.size = group.readEntry("size").toInt();
-                entry.crc = group.readEntry("crc");
-                entry.fileName = abspath;
-                QString country = group.readEntry("country");
-                entry.cCountry = static_cast<unsigned char>(country.toInt());
-            } else if ((size = core::fill_header(abspath.toLocal8Bit())) > 0 ) {
-                entry.size = size;
-                entry.fileName = abspath;
-                std::snprintf(crc, BUF_MAX, "%08X-%08X-C%02X",
-                                sl(core::ROM_HEADER->CRC1),
-                                sl(core::ROM_HEADER->CRC2),
-                                core::ROM_HEADER->Country_code);
-                entry.cCountry = core::ROM_HEADER->Country_code;
-                entry.crc = crc;
-                KConfigGroup group = romcache.group(abspath);
-                group.writeEntry("size", entry.size);
-                group.writeEntry("country", static_cast<int>(entry.cCountry));
-                group.writeEntry("crc", entry.crc);
-            } else {
-                // Invalid rom, bail
-                continue;
-            }
-
-            core::mupenEntry* iniEntry = core::ini_search_by_CRC(
-                entry.crc.toLatin1()
-            );
-            if (iniEntry) {
-                entry.comments = iniEntry->comments;
-                entry.goodName = iniEntry->goodname;
-            } else {
-                entry.comments = i18n("No INI Entry");
-                entry.goodName = romFile;
-            }
-
-            m_romList << entry;
+            
+            RomJob* j = new RomJob(abspath);
+            ThreadWeaver::Weaver::instance()->enqueue(j);
         }
     }
     
-    reset();
+    ThreadWeaver::Weaver::instance()->resume();
 }
 
 QModelIndex RomModel::index(int row, int column,
@@ -182,8 +198,9 @@ int RomModel::rowCount(const QModelIndex& parent) const
 {
     int retval = 0;
 
-    if (!parent.isValid())
-        return m_romList.count();
+    if (!parent.isValid()) {
+        retval = m_romList.count();
+    }
 
     return retval;
 }
@@ -303,6 +320,21 @@ void RomModel::settingsChanged()
             createIndex(columnCount() - 1, FileName)
         );
     }
+}
+
+void RomModel::jobDone(ThreadWeaver::Job* job)
+{
+    RomJob* rj = static_cast<RomJob*>(job);
+    if (rj->entry.size > 0) {
+        beginInsertRows(QModelIndex(), m_romList.count(), m_romList.count());
+        m_romList << rj->entry;
+        endInsertRows();
+    }
+}
+
+void RomModel::allJobsDone()
+{
+    emit layoutChanged();
 }
 
 QPixmap RomModel::countryFlag(unsigned char c) const
