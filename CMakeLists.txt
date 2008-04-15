@@ -10,6 +10,10 @@ find_package(SDL_ttf REQUIRED)
 find_program(YASM_EXECUTABLE yasm)
 find_program(NASM_EXECUTABLE nasm)
 
+find_package(PkgConfig REQUIRED)
+pkg_search_module(GTK2 REQUIRED gtk+-2.0)
+pkg_search_module(GTHREAD2 REQUIRED gthread-2.0)
+
 if(YASM_EXECUTABLE )
     set(ASM ${YASM_EXECUTABLE})
 elseif(NASM_EXECUTABLE)
@@ -21,11 +25,6 @@ if(NOT ASM)
 else(NOT ASM)
     message(STATUS "Found assembler ${ASM}")
 endif(NOT ASM)
-
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GTK2 REQUIRED gtk+-2.0)
-pkg_search_module(GTHREAD2 REQUIRED gthread-2.0)
-include_directories(${GTK2_INCLUDE_DIRS})
 
 set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/mupen64plus)
 set(PLUGIN_INSTALL_DIR ${INSTALL_DIR}/plugins)
@@ -47,7 +46,8 @@ add_subdirectory(rsp_hle)
 add_subdirectory(mupen64_input)
 add_subdirectory(blight_input)
 
-if(KDE4GUI)
+option(KDE4_UI "Use the KDE4 interface. Gtk+-2 is the default.")
+if(KDE4_UI)
     find_package(Qt4 REQUIRED)
     find_package(KDE4 REQUIRED)
     include(KDE4Defaults)
@@ -57,11 +57,12 @@ if(KDE4GUI)
     # the cflags
     set(CMAKE_C_FLAGS "")
     add_definitions(-DKDE4)
-else(KDE4GUI)
+else(KDE4_UI)
     set(GTK2GUI ON)
     add_definitions(-DUSE_GTK)
-endif(KDE4GUI)
+endif(KDE4_UI)
 
+#glN64 plugin support KDE4 ui so it needs to come after possible KDE4 setup
 add_subdirectory(glN64)
 
 set(CORE_SRCS
@@ -152,7 +153,7 @@ set(GTK_GUI_SRCS
     main/gui_gtk/romproperties.c
 )
 
-if(KDE4GUI)
+if(KDE4_UI)
     include_directories(main/gui_kde4)
     set(KDE4_GUI_SRCS
         main/gui_kde4/main.cpp
@@ -169,7 +170,7 @@ if(KDE4GUI)
         main/gui_kde4/romdirectorieslistwidget.ui
         main/gui_kde4/rombrowsersettingswidget.ui
     )
-endif(KDE4GUI)
+endif(KDE4_UI)
 
 set(DEBUGGER_SRCS
     debugger/debugger.c
@@ -191,16 +192,16 @@ set(DEBUGGER_SRCS
 )
 
 add_definitions(-DPREFIX='"${CMAKE_INSTALL_PREFIX}"')
-include_directories(${SDL_INCLUDE_DIR})
+include_directories(${SDL_INCLUDE_DIR} ${GTK2_INCLUDE_DIRS})
 
-if(KDE4GUI)
+if(KDE4_UI)
     kde4_add_executable(mupen64plus ${CORE_SRCS} ${DYNAREC_SRCS} ${KDE4_GUI_SRCS})
     target_link_libraries(mupen64plus ${SDL_LIBRARY} ${GTK2_LIBRARIES} ${KDE4_KDEUI_LIBS} kio threadweaver pthread z)
     install(FILES main/gui_kde4/mupen64plusui.rc DESTINATION  ${DATA_INSTALL_DIR}/mupen64plus)
-else(KDE4GUI)
+else(KDE4_UI)
     add_executable(mupen64plus ${CORE_SRCS} ${DYNAREC_SRCS} ${GTK_GUI_SRCS})
     target_link_libraries(mupen64plus ${SDL_LIBRARY} ${GTK2_LIBRARIES} pthread z)
-endif(KDE4GUI)
+endif(KDE4_UI)
 
 install(TARGETS mupen64plus RUNTIME DESTINATION bin)
 install(FILES doc/HiRezTexture.txt doc/readme.pdf DESTINATION ${INSTALL_DIR}/doc)
