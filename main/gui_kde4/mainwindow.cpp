@@ -289,6 +289,25 @@ void MainWindow::updateItemCount(int count)
     statusBar()->changeItem(i18n("%0 roms").arg(count), ItemCountField);
 }
 
+bool MainWindow::event(QEvent* event)
+{
+    bool retval = false;
+    switch (event->type()) {
+        case InfoEventType:
+            showInfoMessage(static_cast<InfoEvent*>(event)->message);
+            retval = true;
+            break;
+        case AlertEventType:
+            showAlertMessage(static_cast<AlertEvent*>(event)->message);
+            retval = true;
+            break;
+        default:
+            retval = KXmlGuiWindow::event(event);
+            break;
+    }
+    return retval;
+}
+
 void MainWindow::createActions()
 {
     KAction *act = 0;

@@ -101,36 +101,27 @@ void gui_display(void)
 // Give control of thread to the gui
 void gui_main_loop(void)
 {
-    pthread_t self = pthread_self();
-    if (!pthread_equal(self, g_EmulationThread)) {
-        application->exec();
-    }
+    application->exec();
     KGlobal::config()->sync(); // Make sure we sync settings to disk on exit
 }
 
 // prints informational message to user
 void info_message(const char *fmt, ...)
 {
-    pthread_t self = pthread_self();
     PRINT_TO_BUFFER(fmt);
-    if (!pthread_equal(self, g_EmulationThread)) {
-        mainWindow->showInfoMessage(buf);
-    } else {
-        puts(buf);
-    }
+    InfoEvent* e = new InfoEvent;
+    e->message = buf;
+    application->postEvent(mainWindow, e);
 }
 
 // prints alert message to user (used for error messages that don't require
 // feedback from user)
 void alert_message(const char *fmt, ...)
 {
-    pthread_t self = pthread_self();
     PRINT_TO_BUFFER(fmt);
-    if (!pthread_equal(self, g_EmulationThread)) {
-        mainWindow->showAlertMessage(buf);
-    } else {
-        puts(buf);
-    }
+    AlertEvent* e = new AlertEvent;
+    e->message = buf;
+    application->postEvent(mainWindow, e);
 }
 
 // prints message to user that requires confirmation (yes/no)
@@ -139,21 +130,6 @@ void alert_message(const char *fmt, ...)
 //    1 - indicates user selected yes
 int confirm_message(const char *fmt, ...)
 {
-    pthread_t self = pthread_self();
     PRINT_TO_BUFFER(fmt);
-    if (!pthread_equal(self, g_EmulationThread)) {
-        return mainWindow->confirmMessage(buf);
-    } else {
-        puts(buf);
-        int c;
-        while (true) {
-            printf(" y/n: ");
-            c = getchar();
-            if (c == 'y') {
-                return 1;
-            } else if (c == 'n') {
-                return 0;
-            }
-        }
-    }
+    return mainWindow->confirmMessage(buf);
 }

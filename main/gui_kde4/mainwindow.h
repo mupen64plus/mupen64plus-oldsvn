@@ -22,9 +22,30 @@
 #define MUPEN_KDE4_MAINWINDOW_H
 
 #include <KXmlGuiWindow>
+#include <QEvent>
 
 class MainWidget;
 class KRecentFilesAction;
+
+enum CustomEventTypes
+{
+    InfoEventType = QEvent::User,
+    AlertEventType
+};
+
+class InfoEvent : public QEvent
+{
+    public:
+        InfoEvent() : QEvent(Type(InfoEventType)) {}
+        QString message;
+};
+
+class AlertEvent : public QEvent
+{
+    public:
+        AlertEvent() : QEvent(Type(AlertEventType)) {}
+        QString message;
+};
 
 class MainWindow : public KXmlGuiWindow
 {
@@ -51,6 +72,9 @@ class MainWindow : public KXmlGuiWindow
         void saveStateSetCurrent(QAction* a);
         void configDialogShow();
         void updateItemCount(int count);
+
+    protected:
+        bool event(QEvent* event);
 
     private:
         void createActions();
