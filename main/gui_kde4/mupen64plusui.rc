@@ -1,5 +1,5 @@
 <!DOCTYPE kpartgui>
-<kpartgui name="mupen64plus" version="1">
+<kpartgui name="mupen64plus" version="2">
 <MenuBar>
     <Menu name="file" noMerge="1"><text>&amp;Rom</text>
         <Action name="file_open"/>
@@ -13,10 +13,11 @@
         <Action name="emulation_pause_continue"/>
         <Action name="emulation_stop"/>
         <Separator/>
-        <Action name="save_state_save"/>
         <Action name="save_state_save_as"/>
-        <Action name="save_state_restore"/>
         <Action name="save_state_load"/>
+        <Separator/>
+        <Action name="save_state_save"/>
+        <Action name="save_state_restore"/>
         <Separator/>
         <Action name="save_state_current"/>
     </Menu>

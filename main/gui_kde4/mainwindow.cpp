@@ -323,28 +323,28 @@ void MainWindow::createActions()
     act->setIcon(KIcon("view-fullscreen"));
     connect(act, SIGNAL(triggered()), this, SLOT(viewFullScreen()));
 
-    act = actionCollection()->addAction("save_state_save");
-    act->setText(i18n("Save State"));
-    act->setIcon(KIcon("document-save"));
-    connect(act, SIGNAL(triggered()), this, SLOT(saveStateSave()));
-    
     act = actionCollection()->addAction("save_state_save_as");
     act->setText(i18n("Save State as..."));
     act->setIcon(KIcon("document-save-as"));
     connect(act, SIGNAL(triggered()), this, SLOT(saveStateSaveAs()));
     
-    act = actionCollection()->addAction("save_state_restore");
-    act->setText(i18n("Restore State"));
-    act->setIcon(KIcon("document-revert"));
-    connect(act, SIGNAL(triggered()), this, SLOT(saveStateRestore()));
-    
     act = actionCollection()->addAction("save_state_load");
-    act->setText(i18n("Load State"));
+    act->setText(i18n("Load State from..."));
     act->setIcon(KIcon("document-open"));
     connect(act, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
 
+    act = actionCollection()->addAction("save_state_save");
+    act->setText(i18n("Save State to current Slot"));
+    act->setIcon(KIcon("document-save"));
+    connect(act, SIGNAL(triggered()), this, SLOT(saveStateSave()));
+
+    act = actionCollection()->addAction("save_state_restore");
+    act->setText(i18n("Restore State from current Slot"));
+    act->setIcon(KIcon("document-revert"));
+    connect(act, SIGNAL(triggered()), this, SLOT(saveStateRestore()));
+
     act = actionCollection()->addAction("save_state_current");
-    act->setText(i18n("Current Save State"));
+    act->setText(i18n("Current Save State Slot"));
     KMenu* m = new KMenu(this);
     QActionGroup* ag = new QActionGroup(act);
     for (int i = 0; i < 10; i++) {
