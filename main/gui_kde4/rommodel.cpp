@@ -24,8 +24,6 @@
 #include <KGlobal>
 #include <KLocale>
 #include <KGlobalSettings>
-#include <ThreadWeaver/Weaver>
-#include <ThreadWeaver/Job>
 
 #include <cstdio>
 
@@ -41,43 +39,6 @@ namespace core {
         #include "../main.h"
     }
 }
-
-class RomJob : public ThreadWeaver::Job
-{
-    public:
-        RomJob(const QString& filename)
-            : ThreadWeaver::Job()
-            , m_filename(filename)
-            {}
-        RomEntry entry;
-
-    protected:
-        void run() {
-            char crc[BUF_MAX];
-            int size = core::fill_header(m_filename.toLocal8Bit());
-            if (size > 0 ) {
-                entry.size = size;
-                entry.fileName = m_filename;
-                std::snprintf(crc, BUF_MAX, "%08X-%08X-C%02X",
-                                sl(core::ROM_HEADER->CRC1),
-                                sl(core::ROM_HEADER->CRC2),
-                                core::ROM_HEADER->Country_code);
-                entry.cCountry = core::ROM_HEADER->Country_code;
-                entry.crc = crc;
-                core::mupenEntry* iniEntry = core::ini_search_by_CRC(crc);
-                if (iniEntry) {
-                    entry.comments = iniEntry->comments;
-                    entry.goodName = iniEntry->goodname;
-                } else {
-                    entry.comments = i18n("No INI Entry");
-                    entry.goodName = KUrl(m_filename).fileName();
-                }
-            }
-        }
-
-    private:
-        QString m_filename;
-};
 
 RomModel::RomModel(QObject* parent)
     : QAbstractItemModel(parent)
@@ -133,17 +94,7 @@ RomModel::RomModel(QObject* parent)
     m_countryInfo[0x38] = europe;
     m_countryInfo[0x70] = europe;
     m_countryInfo['?'] = unknown;
-    
-    connect(ThreadWeaver::Weaver::instance(),
-             SIGNAL(jobDone(ThreadWeaver::Job*)),
-             this,
-             SLOT(jobDone(ThreadWeaver::Job*)));
-    connect(ThreadWeaver::Weaver::instance(),
-             SIGNAL(finished()),
-             this,
-             SLOT(allJobsDone()));
 
-    settingsChanged();
     update();
 }
 
@@ -154,31 +105,45 @@ RomModel* RomModel::self()
 }
 
 void RomModel::update()
-{   
-    // only ever have one thread running, the core isn't thread-safe
-    ThreadWeaver::Weaver::instance()->setMaximumNumberOfThreads(1);
-
-    ThreadWeaver::Weaver::instance()->dequeue();
-    ThreadWeaver::Weaver::instance()->finish();
-    ThreadWeaver::Weaver::instance()->suspend();
-    
-    m_romList.clear();
-    reset();
-    
+{
     KUrl url;
     QString abspath;
+    char crc[BUF_MAX];
+    
+    m_romList.clear();
+
     foreach(QString directory, m_romDirectories) {
         foreach(QString romFile, QDir(directory).entryList(RomExtensions)) {
             url = directory;
             url.addPath(romFile);
             abspath = url.path();
-            
-            RomJob* j = new RomJob(abspath);
-            ThreadWeaver::Weaver::instance()->enqueue(j);
+            int size = core::fill_header(abspath.toLocal8Bit());
+            if (size > 0) {
+                RomEntry entry;
+                entry.size = size;
+                entry.fileName = abspath;
+                std::snprintf(crc, BUF_MAX, "%08X-%08X-C%02X",
+                                sl(core::ROM_HEADER->CRC1),
+                                sl(core::ROM_HEADER->CRC2),
+                                core::ROM_HEADER->Country_code);
+                entry.cCountry = core::ROM_HEADER->Country_code;
+                core::mupenEntry* iniEntry = core::ini_search_by_CRC(crc);
+                if (iniEntry) {
+                    entry.comments = iniEntry->comments;
+                    entry.goodName = iniEntry->goodname;
+                    // do we need to free inEntry? the gtk code seems to but
+                    // we crash if we attempt it...
+                    // free(iniEntry);
+                } else {
+                    entry.goodName = romFile;
+                    entry.comments = i18n("No INI Entry");
+                }
+                m_romList << entry;
+            }
         }
     }
     
-    ThreadWeaver::Weaver::instance()->resume();
+    reset();
 }
 
 QModelIndex RomModel::index(int row, int column,
@@ -198,9 +163,8 @@ int RomModel::rowCount(const QModelIndex& parent) const
 {
     int retval = 0;
 
-    if (!parent.isValid()) {
-        retval = m_romList.count();
-    }
+    if (!parent.isValid())
+        return m_romList.count();
 
     return retval;
 }
@@ -320,21 +284,6 @@ void RomModel::settingsChanged()
             createIndex(columnCount() - 1, FileName)
         );
     }
-}
-
-void RomModel::jobDone(ThreadWeaver::Job* job)
-{
-    RomJob* rj = static_cast<RomJob*>(job);
-    if (rj->entry.size > 0) {
-        beginInsertRows(QModelIndex(), m_romList.count(), m_romList.count());
-        m_romList << rj->entry;
-        endInsertRows();
-    }
-}
-
-void RomModel::allJobsDone()
-{
-    emit layoutChanged();
 }
 
 QPixmap RomModel::countryFlag(unsigned char c) const
