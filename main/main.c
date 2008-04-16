@@ -571,18 +571,12 @@ static int sdl_event_filter( const SDL_Event *event )
             {
                 case SDLK_ESCAPE:
                     break;
-
+                case SDLK_f:
+                    // cancel fast-forward
+                    set_speed_factor(g_SpeedFactor);
+                    break;
                 default:
-                    switch (event->key.keysym.unicode)
-                    {
-                        // cancel fast-forward
-                        case 'f':
-                        case 'F':
-                            set_speed_factor(g_SpeedFactor);
-                            break;
-                        default:
-                            keyDown( 0, event->key.keysym.sym );
-                    }
+                    keyUp( 0, event->key.keysym.sym );
             }
             return 0;
             break;
