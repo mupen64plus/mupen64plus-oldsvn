@@ -209,12 +209,6 @@ static unsigned int gettimeofday_msec(void)
     return foo;
 }
 
-static void set_speed_factor(int percent)
-{
-    printf("Current emulator speed: %i%% \n", percent);
-    setSpeedFactor(percent);  // call to audio plugin
-}
-
 void new_frame(void)
 {
 }
@@ -227,6 +221,8 @@ void new_vi(void)
     static unsigned int CounterTime = 0;
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
+
+    double AdjustedLimit = VILimitMilliseconds * 100.0 / g_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
     start_section(IDLE_SECTION);
@@ -242,9 +238,9 @@ void new_vi(void)
     
     Dif = CurrentFPSTime - LastFPSTime;
     
-    if (Dif <  VILimitMilliseconds) 
+    if (Dif < AdjustedLimit) 
     {
-        CalculatedTime = CounterTime + (double)VILimitMilliseconds * (double)VI_Counter;
+        CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
         time = (int)(CalculatedTime - CurrentFPSTime);
         if (time > 0)
         {
@@ -252,8 +248,7 @@ void new_vi(void)
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }
-    
-    
+
     if (CurrentFPSTime - CounterTime >= 1000.0 ) 
     {
         CounterTime = gettimeofday_msec();
@@ -469,6 +464,7 @@ void screenshot(void)
 */
 static int sdl_event_filter( const SDL_Event *event )
 {
+    static int SavedSpeedFactor = 100;
     char *event_str = NULL;
 
     switch( event->type )
@@ -501,14 +497,16 @@ static int sdl_event_filter( const SDL_Event *event )
                     if (g_SpeedFactor > 10)
                     {
                         g_SpeedFactor -= 5;
-                        set_speed_factor(g_SpeedFactor);
+                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     }
                     break;
                 case SDLK_F11:
                     if (g_SpeedFactor < 300)
                     {
                         g_SpeedFactor += 5;
-                        set_speed_factor(g_SpeedFactor);
+                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     }
                     break;
                 case SDLK_F12:
@@ -556,7 +554,9 @@ static int sdl_event_filter( const SDL_Event *event )
                         // fast-forward
                         case 'f':
                         case 'F':
-                            set_speed_factor(250);
+                            SavedSpeedFactor = g_SpeedFactor;
+                            g_SpeedFactor = 250;
+                            setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                             break;
                         // pass all other keypresses to the input plugin
                         default:
@@ -573,7 +573,8 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
                 case SDLK_f:
                     // cancel fast-forward
-                    set_speed_factor(g_SpeedFactor);
+                    g_SpeedFactor = SavedSpeedFactor;
+                    setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     break;
                 default:
                     keyUp( 0, event->key.keysym.sym );
