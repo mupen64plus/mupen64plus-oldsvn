@@ -548,19 +548,24 @@ SRC_STATE *src_state;
 SRC_DATA src_data;
 #endif
 
-static void resample(Uint8 *src, int src_len, int oldsamplerate, Uint8 *dest, int dest_len, int newsamplerate)
+static int resample(Uint8 *input, int input_avail, int oldsamplerate, Uint8 *output, int output_needed, int newsamplerate)
 {
 #ifdef USE_SRC
     if(Resample == 2)
     {
-        if(((_src_len != src_len*2) || (_dest_len != dest_len*2)) && src_len > 0 && dest_len > 0)
+        // the high quality resampler needs more input than the samplerate ratio would indicate to work properly
+        if (input_avail > output_needed * 3 / 2)
+            input_avail = output_needed * 3 / 2; // just to avoid too much short-float-short conversion time
+        if (_src_len < input_avail*2 && input_avail > 0)
         {
             if(_src) free(_src);
-            _src_len = src_len*2;
+            _src_len = input_avail*2;
             _src = malloc(_src_len);
-            
+        }
+        if (_dest_len < output_needed*2 && output_needed > 0)
+        {
             if(_dest) free(_dest);
-            _dest_len = dest_len*2;
+            _dest_len = output_needed*2;
             _dest = malloc(_dest_len);
         }
         memset(_src,0,_src_len);
@@ -570,38 +575,39 @@ static void resample(Uint8 *src, int src_len, int oldsamplerate, Uint8 *dest, in
             src_state = src_new (SRC_SINC_BEST_QUALITY, 2, &error);
             if(src_state == NULL)
             {
-                memset(dest, 0, dest_len);
+                memset(output, 0, output_needed);
                 return;
             }
         }
-        src_short_to_float_array ((short *) src, _src, src_len/2);
+        src_short_to_float_array ((short *) input, _src, input_avail/2);
         src_data.end_of_input = 0;
         src_data.data_in = _src;
-        src_data.input_frames = src_len/4;
-        src_data.src_ratio = (1.0 * newsamplerate) / oldsamplerate;
+        src_data.input_frames = input_avail/4;
+        src_data.src_ratio = (float) newsamplerate / oldsamplerate;
         src_data.data_out = _dest;
-        src_data.output_frames = dest_len/4;
+        src_data.output_frames = output_needed/4;
         if ((error = src_process (src_state, &src_data)))
         {
-            memset(dest, 0, dest_len);
-            return;
+            memset(output, 0, output_needed);
+            return input_avail;  // number of bytes consumed
         }
-        src_float_to_short_array (_dest, (short *) dest, dest_len/2);
+        src_float_to_short_array (_dest, (short *) output, output_needed/2);
+        return src_data.input_frames_used * 4;
     }
     else
 #endif
     if(Resample == 1)
     {
-        int *psrc = (int*)src;
-        int *pdest = (int*)dest;
+        int *psrc = (int*)input;
+        int *pdest = (int*)output;
         int i;
         int j=0;
-        int sldf = src_len/4;
+        int sldf = oldsamplerate;
         int const2 = 2*sldf;
-        int dldf = dest_len/4;
+        int dldf = newsamplerate;
         int const1 = const2 - 2*dldf;
         int criteria = const2 - dldf;
-        for(i=0; i<dldf; ++i)
+        for(i = 0; i < output_needed/4; i++)
         {
             pdest[i] = psrc[j];
             if(criteria >= 0)
@@ -611,11 +617,13 @@ static void resample(Uint8 *src, int src_len, int oldsamplerate, Uint8 *dest, in
             }
             else criteria += const2;
         }
+        return j * 4; //number of bytes consumed
     }
     else
     {
-        memset(dest, 0, dest_len);
-        memcpy(dest,src,src_len);
+        memset(output, 0, output_needed);
+        memcpy(output,input,input_avail);
+        return input_avail;
     }
 }
 
@@ -626,10 +634,10 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 
     if (buffer_pos > (len * oldsamplerate) / newsamplerate)
     {
-        int rlen = ((len/4 * oldsamplerate) / newsamplerate) * 4;
-        resample(buffer, rlen, oldsamplerate, stream, len, newsamplerate);
-        memmove(buffer, &buffer[ rlen ], buffer_pos  - rlen);
-        buffer_pos = buffer_pos - rlen ;
+        int input_used;
+        input_used = resample(buffer, buffer_pos, oldsamplerate, stream, len, newsamplerate);
+        memmove(buffer, &buffer[input_used], buffer_pos - input_used);
+        buffer_pos -= input_used;
     }
     else
     {
@@ -637,7 +645,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
         underrun_count++;
         fprintf(stderr, "[JttL's SDL Audio plugin] Debug: Audio buffer underrun (%i).\n",underrun_count);
 #endif
-        memset(stream + ((buffer_pos/4 * newsamplerate) / oldsamplerate)*4, 0, len - ((buffer_pos/4 * newsamplerate) / oldsamplerate)*4);
+        memset(stream , 0, len);
         buffer_pos = 0;
     }
 }
