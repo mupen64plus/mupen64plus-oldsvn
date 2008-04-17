@@ -112,7 +112,7 @@ static int  g_EmuMode = 0;              // emumode specified at commandline?
 static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
 static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
 static int  g_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
-
+static int  g_FrameAdvance = 0;         // variable to check if we pause on next frame
 /*********************************************************************************************************
 * exported gui funcs
 */
@@ -256,6 +256,10 @@ void new_vi(void)
     
     LastFPSTime = CurrentFPSTime ;
     end_section(IDLE_SECTION);
+    if (g_FrameAdvance) {
+        rompause = 1;
+        g_FrameAdvance = 0;
+    }
 }
 
 int open_rom( const char *filename )
@@ -536,6 +540,7 @@ static int sdl_event_filter( const SDL_Event *event )
                         case 'p':
                         case 'P':
                             pauseContinueEmulation();
+                            g_FrameAdvance = 0;
                             break;
                         // volume mute/unmute
                         case 'm':
@@ -557,7 +562,16 @@ static int sdl_event_filter( const SDL_Event *event )
                             g_SpeedFactor = 250;
                             setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                             break;
+                        // frame advance
+                        case '/':
+                        case '?':
+                            g_FrameAdvance = 1;
+                            if (g_FrameAdvance)
+                                pauseContinueEmulation();
+                            break;
+                        
                         // pass all other keypresses to the input plugin
+                        
                         default:
                             keyDown( 0, event->key.keysym.sym );
                     }
@@ -1158,6 +1172,12 @@ int main(int argc, char *argv[])
     int i;
     const char *p;
 #endif
+    printf(" __  __                         __   _  _   ____  _             \n");  
+    printf("|  \\/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \\| |_   _ ___ \n");
+    printf("| |\\/| | | | | '_ \\ / _ \\ '_ \\| '_ \\| || |_| |_) | | | | / __|  \n");
+    printf("| |  | | |_| | |_) |  __/ | | | (_) |__   _|  __/| | |_| \\__ \\  \n");
+    printf("|_|  |_|\\__,_| .__/ \\___|_| |_|\\___/   |_| |_|   |_|\\__,_|___/  \n");
+    printf("             |_|         http://code.google.com/p/mupen64plus/  \n\n");                                              
 
     // allow gui subsystem to init and parse gui-specific commandline args first
     if(g_GuiEnabled)
