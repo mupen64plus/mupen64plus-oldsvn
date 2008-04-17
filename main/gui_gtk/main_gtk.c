@@ -45,6 +45,8 @@ Email                : blight@Ashitaka
 
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkkeysyms.h>
 
 #include <SDL.h>
 
@@ -1028,6 +1030,8 @@ static int create_menuBar( void )
 
     GtkWidget   *helpAboutItem;
 
+    GtkAccelGroup *accelGroup;
+
     GSList *group = NULL;
     GSList *slot_group = NULL;
     list_t langList;
@@ -1036,6 +1040,10 @@ static int create_menuBar( void )
     const char *confLang = config_get_string( "Language", "English" );
     char buffer[1000];
     int i, lang_found;
+
+    // accelerator group
+    accelGroup = gtk_accel_group_new();
+    gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), accelGroup);
 
     // menubar
     g_MainWindow.menuBar = gtk_menu_bar_new();
@@ -1046,11 +1054,15 @@ static int create_menuBar( void )
     fileMenuItem = gtk_menu_item_new_with_mnemonic(tr("_File"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(fileMenuItem), fileMenu );
     fileLoadRomItem = gtk_menu_item_new_with_mnemonic(tr("_Open Rom..."));
+    gtk_widget_add_accelerator(fileLoadRomItem, "activate", accelGroup,
+                               GDK_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     fileCloseRomItem = gtk_menu_item_new_with_mnemonic(tr("_Close Rom"));
     fileSeparator1 = gtk_menu_item_new();
     fileLanguageItem = gtk_menu_item_new_with_mnemonic(tr("_Language"));
     fileSeparator2 = gtk_menu_item_new();
     fileExitItem = gtk_menu_item_new_with_mnemonic(tr("_Exit"));
+    gtk_widget_add_accelerator(fileExitItem, "activate", accelGroup,
+                               GDK_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     gtk_menu_append( GTK_MENU(fileMenu), fileLoadRomItem );
     gtk_menu_append( GTK_MENU(fileMenu), fileCloseRomItem );
     gtk_menu_append( GTK_MENU(fileMenu), fileSeparator1 );
@@ -1099,9 +1111,9 @@ static int create_menuBar( void )
             tr_set_language(language);
         }
 
-        gtk_signal_connect_object( GTK_OBJECT(fileLanguageItem), "toggled",
-                       GTK_SIGNAL_FUNC(callback_languageSelected), (gpointer)NULL );
-        gtk_menu_append( GTK_MENU(fileLanguageMenu), fileLanguageItem );
+        gtk_signal_connect_object(GTK_OBJECT(fileLanguageItem), "toggled",
+                                  GTK_SIGNAL_FUNC(callback_languageSelected), NULL);
+        gtk_menu_append(GTK_MENU(fileLanguageMenu), fileLanguageItem );
     }
     // free language name list
     list_delete(&langList);
@@ -1112,13 +1124,21 @@ static int create_menuBar( void )
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(emulationMenuItem), emulationMenu );
     emulationStartItem = gtk_menu_item_new_with_mnemonic(tr("_Start"));
     emulationPauseContinueItem = gtk_menu_item_new_with_mnemonic(tr("Pause/_Continue"));
+    gtk_widget_add_accelerator(emulationPauseContinueItem, "activate", accelGroup,
+                               GDK_p, 0, GTK_ACCEL_VISIBLE);
     emulationStopItem = gtk_menu_item_new_with_mnemonic(tr("Sto_p"));
+    gtk_widget_add_accelerator(emulationStopItem, "activate", accelGroup,
+                               GDK_Escape, 0, GTK_ACCEL_VISIBLE);
     emulationSeparator1 = gtk_menu_item_new();
     emulationLimitFPSItem = gtk_check_menu_item_new_with_mnemonic(tr("Limit _FPS"));
     emulationSeparator2 = gtk_menu_item_new();
     emulationSaveItem = gtk_menu_item_new_with_mnemonic(tr("Save State"));
+    gtk_widget_add_accelerator(emulationSaveItem, "activate", accelGroup,
+                               GDK_F5, 0, GTK_ACCEL_VISIBLE);
     emulationSaveAsItem = gtk_menu_item_new_with_mnemonic(tr("Save State As"));
     emulationRestoreItem = gtk_menu_item_new_with_mnemonic(tr("Restore State"));
+    gtk_widget_add_accelerator(emulationRestoreItem, "activate", accelGroup,
+                               GDK_F7, 0, GTK_ACCEL_VISIBLE);
     emulationLoadItem = gtk_menu_item_new_with_mnemonic(tr("Load State"));
     emulationSeparator3 = gtk_menu_item_new();
     emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("Current save state"));
@@ -1182,6 +1202,8 @@ static int create_menuBar( void )
     optionsRSPItem = gtk_menu_item_new_with_mnemonic(tr("_RSP Settings..."));
     optionsSeparator2 = gtk_menu_item_new();
     optionsFullScreenItem = gtk_menu_item_new_with_mnemonic(tr("_Full Screen"));
+    gtk_widget_add_accelerator(optionsFullScreenItem, "activate", accelGroup,
+                               GDK_Return, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
     gtk_menu_append( GTK_MENU(optionsMenu), optionsConfigureItem );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsSeparator1 );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsVideoItem );
