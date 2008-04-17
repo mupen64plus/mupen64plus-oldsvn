@@ -949,31 +949,6 @@ static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, g
 /*********************************************************************************************************
 * gui creation
 */
-// create a menu item with an accelerator
-static GtkWidget *menu_item_new_with_accelerator( GtkAccelGroup *group, const char *label )
-{
-    GtkWidget *item;
-    gint key;
-
-    item = gtk_menu_item_new_with_label( "" );
-    key = gtk_label_parse_uline( GTK_LABEL(GTK_BIN(item)->child), label );
-//  gtk_widget_add_accelerator( item, "activate_item", group, key, GDK_MOD1_MASK, 0 );
-
-    return item;
-}
-// create a check menu item with an accelerator
-static GtkWidget *check_menu_item_new_with_accelerator( GtkAccelGroup *group, const char *label )
-{
-    GtkWidget *item;
-    gint key;
-
-    item = gtk_check_menu_item_new_with_label( "" );
-    key = gtk_label_parse_uline( GTK_LABEL(GTK_BIN(item)->child), label );
-//  gtk_widget_add_accelerator( item, "activate_item", group, key, GDK_MOD1_MASK, 0 );
-
-    return item;
-}
-
 // static widgets to change their state from emulation thread
 static GtkWidget       *slotDefaultItem;
 static GtkWidget       *slotItem[9];
@@ -1053,19 +1028,6 @@ static int create_menuBar( void )
 
     GtkWidget   *helpAboutItem;
 
-    GtkAccelGroup *menuAccelGroup;
-    GtkAccelGroup *fileAccelGroup;
-    GtkAccelGroup *emulationAccelGroup;
-    GtkAccelGroup *optionsAccelGroup = NULL;
-    GtkAccelGroup *cheatAccelGroup = NULL;
-#ifdef VCR_SUPPORT
-    GtkAccelGroup *vcrAccelGroup;
-#endif
-#ifdef DBG
-    GtkAccelGroup *debuggerAccelGroup;
-#endif
-    GtkAccelGroup *helpAccelGroup;
-
     GSList *group = NULL;
     GSList *slot_group = NULL;
     list_t langList;
@@ -1078,19 +1040,17 @@ static int create_menuBar( void )
     // menubar
     g_MainWindow.menuBar = gtk_menu_bar_new();
     gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.menuBar, FALSE, FALSE, 0 );
-    menuAccelGroup = gtk_accel_group_new();
 
     // file menu
-    fileAccelGroup = gtk_accel_group_new();
     fileMenu = gtk_menu_new();
-    fileMenuItem = menu_item_new_with_accelerator( menuAccelGroup, tr("_File") );
+    fileMenuItem = gtk_menu_item_new_with_mnemonic(tr("_File"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(fileMenuItem), fileMenu );
-    fileLoadRomItem = menu_item_new_with_accelerator( fileAccelGroup, tr("_Open Rom...") );
-    fileCloseRomItem = menu_item_new_with_accelerator( fileAccelGroup, tr("_Close Rom") );
+    fileLoadRomItem = gtk_menu_item_new_with_mnemonic(tr("_Open Rom..."));
+    fileCloseRomItem = gtk_menu_item_new_with_mnemonic(tr("_Close Rom"));
     fileSeparator1 = gtk_menu_item_new();
-    fileLanguageItem = menu_item_new_with_accelerator( fileAccelGroup, tr("_Language") );
+    fileLanguageItem = gtk_menu_item_new_with_mnemonic(tr("_Language"));
     fileSeparator2 = gtk_menu_item_new();
-    fileExitItem = menu_item_new_with_accelerator( fileAccelGroup, tr("_Exit") );
+    fileExitItem = gtk_menu_item_new_with_mnemonic(tr("_Exit"));
     gtk_menu_append( GTK_MENU(fileMenu), fileLoadRomItem );
     gtk_menu_append( GTK_MENU(fileMenu), fileCloseRomItem );
     gtk_menu_append( GTK_MENU(fileMenu), fileSeparator1 );
@@ -1147,22 +1107,21 @@ static int create_menuBar( void )
     list_delete(&langList);
 
     // emulation menu
-    emulationAccelGroup = gtk_accel_group_new();
     emulationMenu = gtk_menu_new();
-    emulationMenuItem = menu_item_new_with_accelerator( menuAccelGroup, tr("_Emulation") );
+    emulationMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Emulation"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(emulationMenuItem), emulationMenu );
-    emulationStartItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("_Start") );
-    emulationPauseContinueItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Pause/_Continue") );
-    emulationStopItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Sto_p") );
+    emulationStartItem = gtk_menu_item_new_with_mnemonic(tr("_Start"));
+    emulationPauseContinueItem = gtk_menu_item_new_with_mnemonic(tr("Pause/_Continue"));
+    emulationStopItem = gtk_menu_item_new_with_mnemonic(tr("Sto_p"));
     emulationSeparator1 = gtk_menu_item_new();
-    emulationLimitFPSItem = check_menu_item_new_with_accelerator( emulationAccelGroup, tr("Limit _FPS") );
+    emulationLimitFPSItem = gtk_check_menu_item_new_with_mnemonic(tr("Limit _FPS"));
     emulationSeparator2 = gtk_menu_item_new();
-    emulationSaveItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Save State") );
-    emulationSaveAsItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Save State As") );
-    emulationRestoreItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Restore State") );
-    emulationLoadItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Load State") );
+    emulationSaveItem = gtk_menu_item_new_with_mnemonic(tr("Save State"));
+    emulationSaveAsItem = gtk_menu_item_new_with_mnemonic(tr("Save State As"));
+    emulationRestoreItem = gtk_menu_item_new_with_mnemonic(tr("Restore State"));
+    emulationLoadItem = gtk_menu_item_new_with_mnemonic(tr("Load State"));
     emulationSeparator3 = gtk_menu_item_new();
-    emulationSlotItem = menu_item_new_with_accelerator( emulationAccelGroup, tr("Current save state") );
+    emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("Current save state"));
 
     gtk_menu_append( GTK_MENU(emulationMenu), emulationStartItem );
     gtk_menu_append( GTK_MENU(emulationMenu), emulationPauseContinueItem );
@@ -1213,16 +1172,16 @@ static int create_menuBar( void )
 
     // options menu
     optionsMenu = gtk_menu_new();
-    optionsMenuItem = menu_item_new_with_accelerator( menuAccelGroup, tr("_Options") );
+    optionsMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Options"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(optionsMenuItem), optionsMenu );
-    optionsConfigureItem = menu_item_new_with_accelerator( optionsAccelGroup, tr("_Configure...") );
+    optionsConfigureItem = gtk_menu_item_new_with_mnemonic(tr("_Configure..."));
     optionsSeparator1 = gtk_menu_item_new();
-    optionsVideoItem = menu_item_new_with_accelerator( optionsAccelGroup, tr("_Video Settings...") );
-    optionsAudioItem = menu_item_new_with_accelerator( optionsAccelGroup, tr("_Audio Settings...") );
-    optionsInputItem = menu_item_new_with_accelerator( optionsAccelGroup, tr("_Input Settings...") );
-    optionsRSPItem = menu_item_new_with_accelerator( optionsAccelGroup, tr("_RSP Settings...") );
+    optionsVideoItem = gtk_menu_item_new_with_mnemonic(tr("_Video Settings..."));
+    optionsAudioItem = gtk_menu_item_new_with_mnemonic(tr("_Audio Settings..."));
+    optionsInputItem = gtk_menu_item_new_with_mnemonic(tr("_Input Settings..."));
+    optionsRSPItem = gtk_menu_item_new_with_mnemonic(tr("_RSP Settings..."));
     optionsSeparator2 = gtk_menu_item_new();
-    optionsFullScreenItem = menu_item_new_with_accelerator( optionsAccelGroup, tr("_Full Screen") );
+    optionsFullScreenItem = gtk_menu_item_new_with_mnemonic(tr("_Full Screen"));
     gtk_menu_append( GTK_MENU(optionsMenu), optionsConfigureItem );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsSeparator1 );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsVideoItem );
@@ -1240,35 +1199,33 @@ static int create_menuBar( void )
     gtk_signal_connect_object( GTK_OBJECT(optionsFullScreenItem), "activate",GTK_SIGNAL_FUNC(callback_fullScreen), (gpointer)NULL );
 
     // cheat menu
-    cheatAccelGroup = gtk_accel_group_new();
     cheatMenu = gtk_menu_new();
-    cheatMenuItem = menu_item_new_with_accelerator(menuAccelGroup, tr("_Cheats"));
+    cheatMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Cheats"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(cheatMenuItem), cheatMenu );
 
-    menuItem = menu_item_new_with_accelerator(menuAccelGroup, tr("Enable _Cheats..."));
+    menuItem = gtk_menu_item_new_with_mnemonic(tr("Enable _Cheats..."));
     g_signal_connect(GTK_OBJECT(menuItem), "activate", G_CALLBACK(cb_enableCheatDialog), NULL);
     gtk_menu_append(GTK_MENU(cheatMenu), menuItem);
 
-    menuItem = menu_item_new_with_accelerator(menuAccelGroup, tr("_Edit Cheats..."));
+    menuItem = gtk_menu_item_new_with_mnemonic(tr("_Edit Cheats..."));
     g_signal_connect_swapped(GTK_OBJECT(menuItem), "activate", G_CALLBACK(cb_editCheatDialog), NULL);
     gtk_menu_append(GTK_MENU(cheatMenu), menuItem);
 
     // vcr menu
 #ifdef VCR_SUPPORT
-    vcrAccelGroup = gtk_accel_group_new();
     vcrMenu = gtk_menu_new();
-    vcrMenuItem = menu_item_new_with_accelerator( menuAccelGroup, tr("_VCR") );
+    vcrMenuItem = gtk_menu_item_new_with_mnemonic(tr("_VCR"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(vcrMenuItem), vcrMenu );
-    vcrStartRecordItem = menu_item_new_with_accelerator( vcrAccelGroup, tr("Start _Record...") );
-    vcrStopRecordItem = menu_item_new_with_accelerator( vcrAccelGroup, tr("Stop Record") );
+    vcrStartRecordItem = gtk_menu_item_new_with_mnemonic(tr("Start _Record..."));
+    vcrStopRecordItem = gtk_menu_item_new_with_mnemonic(tr("Stop Record"));
     vcrSeparator1 = gtk_menu_item_new();
-    vcrStartPlaybackItem = menu_item_new_with_accelerator( vcrAccelGroup, tr("Start _Playback...") );
-    vcrStopPlaybackItem = menu_item_new_with_accelerator( vcrAccelGroup, tr("Stop Playback") );
+    vcrStartPlaybackItem = gtk_menu_item_new_with_mnemonic(tr("Start _Playback..."));
+    vcrStopPlaybackItem = gtk_menu_item_new_with_mnemonic(tr("Stop Playback"));
     vcrSeparator2 = gtk_menu_item_new();
-    vcrStartCaptureItem = menu_item_new_with_accelerator( vcrAccelGroup, tr("Start _Capture...") );
-    vcrStopCaptureItem = menu_item_new_with_accelerator( vcrAccelGroup, tr("Stop Capture") );
+    vcrStartCaptureItem = gtk_menu_item_new_with_mnemonic(tr("Start _Capture..."));
+    vcrStopCaptureItem = gtk_menu_item_new_with_mnemonic(tr("Stop Capture"));
     vcrSeparator3 = gtk_menu_item_new();
-    vcrSetupItem = menu_item_new_with_accelerator( vcrAccelGroup, tr("Configure Codec...") );
+    vcrSetupItem = gtk_menu_item_new_with_mnemonic(tr("Configure Codec..."));
 
     gtk_menu_append( GTK_MENU(vcrMenu), vcrStartRecordItem );
     gtk_menu_append( GTK_MENU(vcrMenu), vcrStopRecordItem );
@@ -1292,22 +1249,20 @@ static int create_menuBar( void )
 
     // debugger menu
 #ifdef DBG
-    debuggerAccelGroup = gtk_accel_group_new();
     debuggerMenu = gtk_menu_new();
-    debuggerMenuItem = menu_item_new_with_accelerator( menuAccelGroup, tr("_Debugger") );
+    debuggerMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Debugger"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(debuggerMenuItem), debuggerMenu );
-    debuggerEnableItem = menu_item_new_with_accelerator( debuggerAccelGroup, tr("_Enable") );
+    debuggerEnableItem = gtk_menu_item_new_with_mnemonic(tr("_Enable"));
     gtk_menu_append( GTK_MENU(debuggerMenu), debuggerEnableItem );
 
     gtk_signal_connect_object( GTK_OBJECT(debuggerEnableItem), "toggled", GTK_SIGNAL_FUNC(callback_debuggerEnableToggled), (gpointer)NULL );
 #endif // DBG
 
     // help menu
-    helpAccelGroup = gtk_accel_group_new();
     helpMenu = gtk_menu_new();
-    helpMenuItem = menu_item_new_with_accelerator( menuAccelGroup, tr("_Help") );
+    helpMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Help"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(helpMenuItem), helpMenu );
-    helpAboutItem = menu_item_new_with_accelerator( helpAccelGroup, tr("_About...") );
+    helpAboutItem = gtk_menu_item_new_with_mnemonic(tr("_About..."));
     gtk_menu_append( GTK_MENU(helpMenu), helpAboutItem );
 
     gtk_signal_connect_object( GTK_OBJECT(helpAboutItem), "activate", GTK_SIGNAL_FUNC(callback_aboutMupen), (gpointer)NULL );
@@ -1325,19 +1280,6 @@ static int create_menuBar( void )
 #endif
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), helpMenuItem );
 
-    // Add accelerators to window
-/*  gtk_menu_set_accel_group( GTK_MENU(fileMenu), menuAccelGroup );
-    gtk_menu_set_accel_group( GTK_MENU(fileMenu), fileAccelGroup );
-    gtk_menu_set_accel_group( GTK_MENU(emulationMenu), emulationAccelGroup );
-    gtk_menu_set_accel_group( GTK_MENU(optionsMenu), optionsAccelGroup );
-#ifdef VCR_SUPPORT
-    gtk_menu_set_accel_group( GTK_MENU(vcrMenu), vcrAccelGroup );
-#endif
-#ifdef DBG
-    gtk_menu_set_accel_group( GTK_MENU(debuggerMenu), debuggerAccelGroup );
-#endif
-    gtk_menu_set_accel_group( GTK_MENU(helpMenu), helpAccelGroup );*/
-    
     GTK_CHECK_MENU_ITEM(emulationLimitFPSItem)->active = config_get_bool( "LimitFPS", TRUE );
     
     return 0;
