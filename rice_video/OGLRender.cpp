@@ -433,7 +433,6 @@ void OGLRender::SetTextureVFlag(TextureUVFlag dwFlag, uint32 dwTile)
 }
 
 // Basic render drawing functions
-
 bool OGLRender::RenderTexRect()
 {
     glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
@@ -873,24 +872,47 @@ void OGLRender::EndRendering(void)
         CRender::gRenderReferenceCount--;
 }
 
-void OGLRender::glViewportWrapper(GLint x, GLint y, GLsizei width, GLsizei height, bool flag)
+void OGLRender::glViewportWrapper(GLint XPosition, GLint YPosition, GLsizei Width, GLsizei Height, bool Flag)
 {
-    static GLint mx=0,my=0;
-    static GLsizei m_width=0, m_height=0;
-    static bool mflag=true;
+    static GLint OldXPosition=0,OldYPosition=0;
+    static GLsizei OldWidth=0, OldHeight=0;
+    static bool OldFlag=true;
+    GLint XOffset, YOffset, CorrectedWidth, CorrectedHeight;
 
-    if( x!=mx || y!=my || width!=m_width || height!=m_height || mflag!=flag)
-    {
-        mx=x;
-        my=y;
-        m_width=width;
-        m_height=height;
-        mflag=flag;
+    if(XPosition!=OldXPosition||YPosition!=OldYPosition||Width!=OldWidth||Height!=OldHeight||Flag!=OldFlag)
+        {
+        OldXPosition=XPosition;
+        OldYPosition=YPosition;
+        OldWidth=Width;
+        OldHeight=Height;
+        OldFlag=Flag;
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        if( flag )  glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
-        glViewport(x,y,width,height);
-    }
+        if((GLfloat)windowSetting.uDisplayWidth/(GLfloat)windowSetting.uDisplayHeight==4.0/3.0)
+            {
+            CorrectedWidth = Width;
+            CorrectedHeight = Height;
+            XOffset = YOffset = 0;
+            }
+        if((GLfloat)windowSetting.uDisplayWidth/(GLfloat)windowSetting.uDisplayHeight>4.0/3.0)
+            {
+            CorrectedWidth = (GLint)(4.0/3.0*(GLfloat)windowSetting.uDisplayHeight);
+            CorrectedHeight = Height;
+            XOffset = (windowSetting.uDisplayWidth-CorrectedWidth)/2;
+            YOffset = 0;
+            }
+        if((GLfloat)windowSetting.uDisplayWidth/(GLfloat)windowSetting.uDisplayHeight<4.0/3.0)
+            {
+            CorrectedWidth = Width;
+            CorrectedHeight = (GLint)(3.0/4.0*(GLfloat)windowSetting.uDisplayWidth);
+            XOffset = 0; 
+            YOffset = (windowSetting.uDisplayHeight-CorrectedHeight)/2;
+            }
+        glViewport(XPosition+XOffset,YPosition+YOffset,CorrectedWidth,CorrectedHeight);
+
+        if(Flag)
+            { glOrtho(0, CorrectedWidth, CorrectedHeight, 0, -1, 1); }
+        }
 }
 
 void OGLRender::CaptureScreen(char *filename)
