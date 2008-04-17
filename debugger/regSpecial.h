@@ -45,7 +45,7 @@
 
 int regSpecial_opened;
 
-GtkWidget	*frRegSpecial;
+GtkWidget   *frRegSpecial;
 
 void init_regSpecial();
 void update_regSpecial();

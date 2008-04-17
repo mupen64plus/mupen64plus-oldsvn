@@ -22,7 +22,7 @@ Email                : blight@Ashitaka
 
 typedef struct
 {
-	GtkWidget *dialog;
+    GtkWidget *dialog;
 } SAboutDialog;
 extern SAboutDialog g_AboutDialog;
 

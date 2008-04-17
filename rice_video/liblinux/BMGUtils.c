@@ -59,45 +59,45 @@ BMGError LastBMGError;
 /* sets the last BMG error */
 void SetLastBMGError( BMGError err )
 {
-	LastBMGError = err;
+    LastBMGError = err;
 }
 
 /* returns the last error state */
 BMGError GetLastBMGError()
 {
-	return LastBMGError;
+    return LastBMGError;
 }
 /* gets the error message */
 void GetLastBMGErrorMessage( const char **msg )
 {
-	if ( LastBMGError == errWindowsAPI )
-	{
+    if ( LastBMGError == errWindowsAPI )
+    {
 #ifdef _WIN32
-		  LPVOID lpMsgBuf;
+          LPVOID lpMsgBuf;
 
-		  FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-			NULL,
-			GetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf,
-			0,
-			NULL
-		  );
+          FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL,
+            GetLastError(),
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+            (LPTSTR) &lpMsgBuf,
+            0,
+            NULL
+          );
 #else // _WIN32
-	   char* lpMsgBuf = "Erreur BMG\n";
+       char* lpMsgBuf = "Erreur BMG\n";
 #endif // _WIN32
 
-		/* copy the string. */
-		  strcpy( BMGErrorStrings[(int)LastBMGError], (char *)lpMsgBuf );
+        /* copy the string. */
+          strcpy( BMGErrorStrings[(int)LastBMGError], (char *)lpMsgBuf );
 
 #ifdef _WIN32
-		/* Free the buffer. */
-		  LocalFree( lpMsgBuf );
+        /* Free the buffer. */
+          LocalFree( lpMsgBuf );
 #endif // _WIN32
-	}
+    }
 
-	*msg = BMGErrorStrings[(int)LastBMGError];
+    *msg = BMGErrorStrings[(int)LastBMGError];
 }
 
 /* Global background color variables */
@@ -151,31 +151,31 @@ void Convert1to8( struct BMGImageStruct img,
         }
 
         if ( i-- )
-		{
+        {
             *r++ =  (unsigned char)((*p & 0x80) ? 1 : 0);
-			if ( i-- )
-			{
-				*r++ =  (unsigned char)((*p & 0x40) ? 1 : 0);
-				if ( i-- )
-				{
-					*r++ =  (unsigned char)((*p & 0x20) ? 1 : 0);
-					if ( i-- )
-					{
-						*r++ =  (unsigned char)((*p & 0x10) ? 1 : 0);
-						if ( i-- )
-						{
-							*r++ =  (unsigned char)((*p & 0x08) ? 1 : 0);
-							if ( i-- )
-							{
-								*r++ =  (unsigned char)((*p & 0x04) ? 1 : 0);
-						        if ( i )
-									*r   =  (unsigned char)((*p & 0x02) ? 1:0);
-							}
-						}
-					}
-				}
-			}
-		}
+            if ( i-- )
+            {
+                *r++ =  (unsigned char)((*p & 0x40) ? 1 : 0);
+                if ( i-- )
+                {
+                    *r++ =  (unsigned char)((*p & 0x20) ? 1 : 0);
+                    if ( i-- )
+                    {
+                        *r++ =  (unsigned char)((*p & 0x10) ? 1 : 0);
+                        if ( i-- )
+                        {
+                            *r++ =  (unsigned char)((*p & 0x08) ? 1 : 0);
+                            if ( i-- )
+                            {
+                                *r++ =  (unsigned char)((*p & 0x04) ? 1 : 0);
+                                if ( i )
+                                    *r   =  (unsigned char)((*p & 0x02) ? 1:0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -238,45 +238,45 @@ unsigned char AlphaComp( unsigned char fg,
 // returns 1 if successfull, 0 otherwise */
 BMGError Convert16to24( struct BMGImageStruct *img )
 {
-	unsigned int i;
-	unsigned int new_scan_width;
-	unsigned char *new_bits;
+    unsigned int i;
+    unsigned int new_scan_width;
+    unsigned char *new_bits;
 
-	/* this function will only work with 16 BBP images */
-	if ( img->bits_per_pixel != 16 )
-		return errInvalidPixelFormat;
+    /* this function will only work with 16 BBP images */
+    if ( img->bits_per_pixel != 16 )
+        return errInvalidPixelFormat;
 
-	/* calculate the new scan width */
-	new_scan_width = 3 * img->width;
-	if ( new_scan_width % 4 && img->opt_for_bmp )
-		new_scan_width += 4 - new_scan_width % 4;
+    /* calculate the new scan width */
+    new_scan_width = 3 * img->width;
+    if ( new_scan_width % 4 && img->opt_for_bmp )
+        new_scan_width += 4 - new_scan_width % 4;
 
-	/* allocate memory for the new pixel values */
-	new_bits = (unsigned char *)calloc( new_scan_width * img->height, sizeof(unsigned char) );
-	if ( new_bits == 0 )
-		return errMemoryAllocation;
+    /* allocate memory for the new pixel values */
+    new_bits = (unsigned char *)calloc( new_scan_width * img->height, sizeof(unsigned char) );
+    if ( new_bits == 0 )
+        return errMemoryAllocation;
 
-	/* convert the 16 BPP pixel values to the equivalent 24 BPP values  */
-	for ( i = 0; i < img->height; i++ )
-	{
-		unsigned char *p24;
-		unsigned short *p16 = (unsigned short *)(img->bits + i * img->scan_width);
-		unsigned char *start = new_bits + i * new_scan_width;
-		unsigned char *end = start + new_scan_width;
-		for ( p24 = start; p24 < end; p24 += 3, p16++ ) 
-		{
-			p24[0] = (unsigned char)( (*p16 & 0x001F) << 3 );
-			p24[1] = (unsigned char)( (*p16 & 0x03E0) >> 2 );
-			p24[2] = (unsigned char)( (*p16 & 0x7C00) >> 7 );
-		}
-	}
+    /* convert the 16 BPP pixel values to the equivalent 24 BPP values  */
+    for ( i = 0; i < img->height; i++ )
+    {
+        unsigned char *p24;
+        unsigned short *p16 = (unsigned short *)(img->bits + i * img->scan_width);
+        unsigned char *start = new_bits + i * new_scan_width;
+        unsigned char *end = start + new_scan_width;
+        for ( p24 = start; p24 < end; p24 += 3, p16++ ) 
+        {
+            p24[0] = (unsigned char)( (*p16 & 0x001F) << 3 );
+            p24[1] = (unsigned char)( (*p16 & 0x03E0) >> 2 );
+            p24[2] = (unsigned char)( (*p16 & 0x7C00) >> 7 );
+        }
+    }
 
-	free( img->bits );
-	img->bits = new_bits;
-	img->scan_width = new_scan_width;
-	img->bits_per_pixel = 24;
+    free( img->bits );
+    img->bits = new_bits;
+    img->scan_width = new_scan_width;
+    img->bits_per_pixel = 24;
 
-	return BMG_OK;
+    return BMG_OK;
 }
 
 /****************************************************************************/

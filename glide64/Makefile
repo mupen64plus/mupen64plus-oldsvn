@@ -1,6 +1,7 @@
 # Makefile for Glide64, in Mupen64Plus
 
 # include pre-make file with a bunch of definitions
+FROMPLUGIN=1
 include ../pre.mk
 
 # set BITS
@@ -72,10 +73,15 @@ OBJECTS = \
 	CRC.o \
 	Combine.o \
 	TexBuffer.o \
-	Tmem_nasm.o \
 	Config.o \
 	3dmath.o \
 	DepthBufferRender.o
+
+ifeq ($(NO_ASM), 1)
+  CFLAGS += -DNO_ASM
+else
+  OBJECTS += Tmem_nasm.o
+endif
 
 WRAPPEROBJECTS = \
 	wrapper/combiner.o \

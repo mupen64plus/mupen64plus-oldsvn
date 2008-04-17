@@ -60,73 +60,73 @@ void TLBWI()
 
    if (tlb_e[Index&0x3F].v_even)
      {
-	for (i=tlb_e[Index&0x3F].start_even>>12; i<=tlb_e[Index&0x3F].end_even>>12; i++)
-	  {
-	     if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
-				    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
-	       invalid_code[i] = 1;
-	     if (!invalid_code[i])
-	       {
-		  /*int j;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
-		  
-		  blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
-		  
-		  invalid_code[i] = 1;
-	       }
-	     else if (blocks[i])
-	       {
-		  /*int j;
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
-		  blocks[i]->adler32 = 0;
-	       }
-	     tlb_LUT_r[i] = 0;
-	  }
-	if (tlb_e[Index&0x3F].d_even)
-	  for (i=tlb_e[Index&0x3F].start_even>>12; i<=tlb_e[Index&0x3F].end_even>>12; i++)
-	    tlb_LUT_w[i] = 0;
+    for (i=tlb_e[Index&0x3F].start_even>>12; i<=tlb_e[Index&0x3F].end_even>>12; i++)
+      {
+         if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
+                    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
+           invalid_code[i] = 1;
+         if (!invalid_code[i])
+           {
+          /*int j;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
+          
+          blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
+          
+          invalid_code[i] = 1;
+           }
+         else if (blocks[i])
+           {
+          /*int j;
+          for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
+          blocks[i]->adler32 = 0;
+           }
+         tlb_LUT_r[i] = 0;
+      }
+    if (tlb_e[Index&0x3F].d_even)
+      for (i=tlb_e[Index&0x3F].start_even>>12; i<=tlb_e[Index&0x3F].end_even>>12; i++)
+        tlb_LUT_w[i] = 0;
      }
    if (tlb_e[Index&0x3F].v_odd)
      {
-	for (i=tlb_e[Index&0x3F].start_odd>>12; i<=tlb_e[Index&0x3F].end_odd>>12; i++)
-	  {
-	     if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
-				    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
-	       invalid_code[i] = 1;
-	     if (!invalid_code[i])
-	       {
-		  /*int j;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
-		  
-		  blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
-		  
-		  invalid_code[i] = 1;
-	       }
-	     else if (blocks[i])
-	       {
-		  /*int j;
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
-		  blocks[i]->adler32 = 0;
-	       }
-	     tlb_LUT_r[i] = 0;
-	  }
-	if (tlb_e[Index&0x3F].d_odd)
-	  for (i=tlb_e[Index&0x3F].start_odd>>12; i<=tlb_e[Index&0x3F].end_odd>>12; i++)
-	    tlb_LUT_w[i] = 0;
+    for (i=tlb_e[Index&0x3F].start_odd>>12; i<=tlb_e[Index&0x3F].end_odd>>12; i++)
+      {
+         if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
+                    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
+           invalid_code[i] = 1;
+         if (!invalid_code[i])
+           {
+          /*int j;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
+          
+          blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
+          
+          invalid_code[i] = 1;
+           }
+         else if (blocks[i])
+           {
+          /*int j;
+          for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
+          blocks[i]->adler32 = 0;
+           }
+         tlb_LUT_r[i] = 0;
+      }
+    if (tlb_e[Index&0x3F].d_odd)
+      for (i=tlb_e[Index&0x3F].start_odd>>12; i<=tlb_e[Index&0x3F].end_odd>>12; i++)
+        tlb_LUT_w[i] = 0;
      }
    tlb_e[Index&0x3F].g = (EntryLo0 & EntryLo1 & 1);
    tlb_e[Index&0x3F].pfn_even = (EntryLo0 & 0x3FFFFFC0) >> 6;
@@ -149,45 +149,45 @@ void TLBWI()
    
    if (tlb_e[Index&0x3F].v_even)
      {
-	if (tlb_e[Index&0x3F].start_even < tlb_e[Index&0x3F].end_even &&
-	    !(tlb_e[Index&0x3F].start_even >= 0x80000000 &&
-	    tlb_e[Index&0x3F].end_even < 0xC0000000) &&
-	    tlb_e[Index&0x3F].phys_even < 0x20000000)
-	  {
-	     for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
-	     if (tlb_e[Index&0x3F].d_even)
-	       for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
-	  }
-	
-	for (i=tlb_e[Index&0x3F].start_even>>12; i<=tlb_e[Index&0x3F].end_even>>12; i++)
-	  {
-	     /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
-			       blocks[i]->md5[2] || blocks[i]->md5[3]))
-	       {
-		  int j;
-		  int equal = 1;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++)
-		    if (digest[j] != blocks[i]->md5[j])
-		      equal = 0;
-		  if (equal) invalid_code[i] = 0;
-	      }*/
-	     if(blocks[i] && blocks[i]->adler32)
-	       {
-		  if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
-		    invalid_code[i] = 0;
-	       }
-	  }
+    if (tlb_e[Index&0x3F].start_even < tlb_e[Index&0x3F].end_even &&
+        !(tlb_e[Index&0x3F].start_even >= 0x80000000 &&
+        tlb_e[Index&0x3F].end_even < 0xC0000000) &&
+        tlb_e[Index&0x3F].phys_even < 0x20000000)
+      {
+         for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
+         if (tlb_e[Index&0x3F].d_even)
+           for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
+      }
+    
+    for (i=tlb_e[Index&0x3F].start_even>>12; i<=tlb_e[Index&0x3F].end_even>>12; i++)
+      {
+         /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
+                   blocks[i]->md5[2] || blocks[i]->md5[3]))
+           {
+          int j;
+          int equal = 1;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++)
+            if (digest[j] != blocks[i]->md5[j])
+              equal = 0;
+          if (equal) invalid_code[i] = 0;
+          }*/
+         if(blocks[i] && blocks[i]->adler32)
+           {
+          if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
+            invalid_code[i] = 0;
+           }
+      }
      }
    tlb_e[Index&0x3F].start_odd = tlb_e[Index&0x3F].end_even+1;
    tlb_e[Index&0x3F].end_odd = tlb_e[Index&0x3F].start_odd+
@@ -196,45 +196,45 @@ void TLBWI()
    
    if (tlb_e[Index&0x3F].v_odd)
      {
-	if (tlb_e[Index&0x3F].start_odd < tlb_e[Index&0x3F].end_odd &&
-	    !(tlb_e[Index&0x3F].start_odd >= 0x80000000 &&
-	    tlb_e[Index&0x3F].end_odd < 0xC0000000) &&
-	    tlb_e[Index&0x3F].phys_odd < 0x20000000)
-	  {
-	     for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
-	     if (tlb_e[Index&0x3F].d_odd)
-	       for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
-	  }
-	
-	for (i=tlb_e[Index&0x3F].start_odd>>12; i<=tlb_e[Index&0x3F].end_odd>>12; i++)
-	  {
-	     /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
-			       blocks[i]->md5[2] || blocks[i]->md5[3]))
-	       {
-		  int j;
-		  int equal = 1;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++)
-		    if (digest[j] != blocks[i]->md5[j])
-		      equal = 0;
-		  if (equal) invalid_code[i] = 0;
-	       }*/
-	     if(blocks[i] && blocks[i]->adler32)
-	       {
-		  if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
-		    invalid_code[i] = 0;
-	       }
-	  }
+    if (tlb_e[Index&0x3F].start_odd < tlb_e[Index&0x3F].end_odd &&
+        !(tlb_e[Index&0x3F].start_odd >= 0x80000000 &&
+        tlb_e[Index&0x3F].end_odd < 0xC0000000) &&
+        tlb_e[Index&0x3F].phys_odd < 0x20000000)
+      {
+         for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
+         if (tlb_e[Index&0x3F].d_odd)
+           for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
+      }
+    
+    for (i=tlb_e[Index&0x3F].start_odd>>12; i<=tlb_e[Index&0x3F].end_odd>>12; i++)
+      {
+         /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
+                   blocks[i]->md5[2] || blocks[i]->md5[3]))
+           {
+          int j;
+          int equal = 1;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++)
+            if (digest[j] != blocks[i]->md5[j])
+              equal = 0;
+          if (equal) invalid_code[i] = 0;
+           }*/
+         if(blocks[i] && blocks[i]->adler32)
+           {
+          if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
+            invalid_code[i] = 0;
+           }
+      }
      }
    PC++;
 }
@@ -247,73 +247,73 @@ void TLBWR()
 
    if (tlb_e[Random].v_even)
      {
-	for (i=tlb_e[Random].start_even>>12; i<=tlb_e[Random].end_even>>12; i++)
-	  {
-	     if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
-				    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
-	       invalid_code[i] = 1;
-	     if (!invalid_code[i])
-	       {
-		  /*int j;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
-		  
-		  blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
-		  
-		  invalid_code[i] = 1;
-	       }
-	     else if (blocks[i])
-	       {
-		  /*int j;
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
-		  blocks[i]->adler32 = 0;
-	       }
-	     tlb_LUT_r[i] = 0;
-	  }
-	if (tlb_e[Random].d_even)
-	  for (i=tlb_e[Random].start_even>>12; i<=tlb_e[Random].end_even>>12; i++)
-	    tlb_LUT_w[i] = 0;
+    for (i=tlb_e[Random].start_even>>12; i<=tlb_e[Random].end_even>>12; i++)
+      {
+         if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
+                    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
+           invalid_code[i] = 1;
+         if (!invalid_code[i])
+           {
+          /*int j;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
+          
+          blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
+          
+          invalid_code[i] = 1;
+           }
+         else if (blocks[i])
+           {
+          /*int j;
+          for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
+          blocks[i]->adler32 = 0;
+           }
+         tlb_LUT_r[i] = 0;
+      }
+    if (tlb_e[Random].d_even)
+      for (i=tlb_e[Random].start_even>>12; i<=tlb_e[Random].end_even>>12; i++)
+        tlb_LUT_w[i] = 0;
      }
    if (tlb_e[Random].v_odd)
      {
-	for (i=tlb_e[Random].start_odd>>12; i<=tlb_e[Random].end_odd>>12; i++)
-	  {
-	     if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
-				    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
-	       invalid_code[i] = 1;
-	     if (!invalid_code[i])
-	       {
-		  /*int j;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
-		  
-		  blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
-		  
-		  invalid_code[i] = 1;
-	       }
-	     else if (blocks[i])
-	       {
-		  /*int j;
-		  for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
-		  blocks[i]->adler32 = 0;
-	       }
-	     tlb_LUT_r[i] = 0;
-	  }
-	if (tlb_e[Random].d_odd)
-	  for (i=tlb_e[Random].start_odd>>12; i<=tlb_e[Random].end_odd>>12; i++)
-	    tlb_LUT_w[i] = 0;
+    for (i=tlb_e[Random].start_odd>>12; i<=tlb_e[Random].end_odd>>12; i++)
+      {
+         if(!invalid_code[i] &&(invalid_code[tlb_LUT_r[i]>>12] ||
+                    invalid_code[(tlb_LUT_r[i]>>12)+0x20000]))
+           invalid_code[i] = 1;
+         if (!invalid_code[i])
+           {
+          /*int j;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++) blocks[i]->md5[j] = digest[j];*/
+          
+          blocks[i]->adler32 = adler32(0, (const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4], 0x1000);
+          
+          invalid_code[i] = 1;
+           }
+         else if (blocks[i])
+           {
+          /*int j;
+          for (j=0; j<16; j++) blocks[i]->md5[j] = 0;*/
+          blocks[i]->adler32 = 0;
+           }
+         tlb_LUT_r[i] = 0;
+      }
+    if (tlb_e[Random].d_odd)
+      for (i=tlb_e[Random].start_odd>>12; i<=tlb_e[Random].end_odd>>12; i++)
+        tlb_LUT_w[i] = 0;
      }
    tlb_e[Random].g = (EntryLo0 & EntryLo1 & 1);
    tlb_e[Random].pfn_even = (EntryLo0 & 0x3FFFFFC0) >> 6;
@@ -336,45 +336,45 @@ void TLBWR()
    
    if (tlb_e[Random].v_even)
      {
-	if (tlb_e[Random].start_even < tlb_e[Random].end_even &&
-	    !(tlb_e[Random].start_even >= 0x80000000 &&
-	    tlb_e[Random].end_even < 0xC0000000) &&
-	    tlb_e[Random].phys_even < 0x20000000)
-	  {
-	     for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i+=0x1000)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even) + 0xFFF);
-	     if (tlb_e[Random].d_even)
-	       for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i+=0x1000)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even) + 0xFFF);
-	  }
-	
-	for (i=tlb_e[Random].start_even>>12; i<=tlb_e[Random].end_even>>12; i++)
-	  {
-	     /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
-			       blocks[i]->md5[2] || blocks[i]->md5[3]))
-	       {
-		  int j;
-		  int equal = 1;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++)
-		    if (digest[j] != blocks[i]->md5[j])
-		      equal = 0;
-		  if (equal) invalid_code[i] = 0;
-	       }*/
-	     if(blocks[i] && blocks[i]->adler32)
-	       {
-		  if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
-		     invalid_code[i] = 0;
-	       }
-	  }
+    if (tlb_e[Random].start_even < tlb_e[Random].end_even &&
+        !(tlb_e[Random].start_even >= 0x80000000 &&
+        tlb_e[Random].end_even < 0xC0000000) &&
+        tlb_e[Random].phys_even < 0x20000000)
+      {
+         for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i+=0x1000)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even) + 0xFFF);
+         if (tlb_e[Random].d_even)
+           for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i+=0x1000)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even) + 0xFFF);
+      }
+    
+    for (i=tlb_e[Random].start_even>>12; i<=tlb_e[Random].end_even>>12; i++)
+      {
+         /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
+                   blocks[i]->md5[2] || blocks[i]->md5[3]))
+           {
+          int j;
+          int equal = 1;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++)
+            if (digest[j] != blocks[i]->md5[j])
+              equal = 0;
+          if (equal) invalid_code[i] = 0;
+           }*/
+         if(blocks[i] && blocks[i]->adler32)
+           {
+          if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
+             invalid_code[i] = 0;
+           }
+      }
      }
    tlb_e[Random].start_odd = tlb_e[Random].end_even+1;
    tlb_e[Random].end_odd = tlb_e[Random].start_odd+
@@ -383,45 +383,45 @@ void TLBWR()
    
    if (tlb_e[Random].v_odd)
      {
-	if (tlb_e[Random].start_odd < tlb_e[Random].end_odd &&
-	    !(tlb_e[Random].start_odd >= 0x80000000 &&
-	    tlb_e[Random].end_odd < 0xC0000000) &&
-	    tlb_e[Random].phys_odd < 0x20000000)
-	  {
-	     for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i+=0x1000)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd) + 0xFFF);
-	     if (tlb_e[Random].d_odd)
-	       for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i+=0x1000)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd) + 0xFFF);
-	  }
-	
-	for (i=tlb_e[Random].start_odd>>12; i<=tlb_e[Random].end_odd>>12; i++)
-	  {
-	     /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
-	      blocks[i]->md5[2] || blocks[i]->md5[3]))
-	       {
-		  int j;
-		  int equal = 1;
-		  md5_state_t state;
-		  md5_byte_t digest[16];
-		  md5_init(&state);
-		  md5_append(&state, 
-			     (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
-			     0x1000);
-		  md5_finish(&state, digest);
-		  for (j=0; j<16; j++)
-		    if (digest[j] != blocks[i]->md5[j])
-		      equal = 0;
-		  if (equal) invalid_code[i] = 0;
-	      }*/
-	     if(blocks[i] && blocks[i]->adler32)
-	       {
-		  if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
-		    invalid_code[i] = 0;
-	       }
-	  }
+    if (tlb_e[Random].start_odd < tlb_e[Random].end_odd &&
+        !(tlb_e[Random].start_odd >= 0x80000000 &&
+        tlb_e[Random].end_odd < 0xC0000000) &&
+        tlb_e[Random].phys_odd < 0x20000000)
+      {
+         for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i+=0x1000)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd) + 0xFFF);
+         if (tlb_e[Random].d_odd)
+           for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i+=0x1000)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd) + 0xFFF);
+      }
+    
+    for (i=tlb_e[Random].start_odd>>12; i<=tlb_e[Random].end_odd>>12; i++)
+      {
+         /*if (blocks[i] && (blocks[i]->md5[0] || blocks[i]->md5[1] ||
+          blocks[i]->md5[2] || blocks[i]->md5[3]))
+           {
+          int j;
+          int equal = 1;
+          md5_state_t state;
+          md5_byte_t digest[16];
+          md5_init(&state);
+          md5_append(&state, 
+                 (const md5_byte_t*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],
+                 0x1000);
+          md5_finish(&state, digest);
+          for (j=0; j<16; j++)
+            if (digest[j] != blocks[i]->md5[j])
+              equal = 0;
+          if (equal) invalid_code[i] = 0;
+          }*/
+         if(blocks[i] && blocks[i]->adler32)
+           {
+          if(blocks[i]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[i]&0x7FF000)/4],0x1000))
+            invalid_code[i] = 0;
+           }
+      }
      }
    PC++;
 }
@@ -432,14 +432,14 @@ void TLBP()
    Index |= 0x80000000;
    for (i=0; i<32; i++)
      {
-	if (((tlb_e[i].vpn2 & (~tlb_e[i].mask)) ==
-	     (((EntryHi & 0xFFFFE000) >> 13) & (~tlb_e[i].mask))) &&
-	    ((tlb_e[i].g) ||
-	     (tlb_e[i].asid == (EntryHi & 0xFF))))
-	  {
-	     Index = i;
-	     break;
-	  }
+    if (((tlb_e[i].vpn2 & (~tlb_e[i].mask)) ==
+         (((EntryHi & 0xFFFFE000) >> 13) & (~tlb_e[i].mask))) &&
+        ((tlb_e[i].g) ||
+         (tlb_e[i].asid == (EntryHi & 0xFF))))
+      {
+         Index = i;
+         break;
+      }
      }
    PC++;
 }
@@ -451,13 +451,13 @@ void ERET()
    update_count();
    if (Status & 0x4)
      {
-	printf ("erreur dans ERET\n");
-	stop=1;
+    printf ("erreur dans ERET\n");
+    stop=1;
      }
    else
      {
-	Status &= 0xFFFFFFFD;
-	jump_to(EPC);
+    Status &= 0xFFFFFFFD;
+    jump_to(EPC);
      }
    llbit = 0;
    check_interupt();

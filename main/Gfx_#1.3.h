@@ -24,66 +24,66 @@ extern "C" {
 #endif
 
 /* Plugin types */
-#define PLUGIN_TYPE_GFX				2
+#define PLUGIN_TYPE_GFX             2
 
-#define EXPORT						__declspec(dllexport)
-#define CALL						_cdecl
+#define EXPORT                      __declspec(dllexport)
+#define CALL                        _cdecl
 
 /***** Structures *****/
 typedef struct {
-	WORD Version;        /* Set to 0x0103 */
-	WORD Type;           /* Set to PLUGIN_TYPE_GFX */
-	char Name[100];      /* Name of the DLL */
+    WORD Version;        /* Set to 0x0103 */
+    WORD Type;           /* Set to PLUGIN_TYPE_GFX */
+    char Name[100];      /* Name of the DLL */
 
-	/* If DLL supports memory these memory options then set them to TRUE or FALSE
-	   if it does not support it */
-	BOOL NormalMemory;    /* a normal BYTE array */ 
-	BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
-	                          bswap on a dword (32 bits) boundry */
+    /* If DLL supports memory these memory options then set them to TRUE or FALSE
+       if it does not support it */
+    BOOL NormalMemory;    /* a normal BYTE array */ 
+    BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
+                              bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
 
 typedef struct {
-	HWND hWnd;			/* Render window */
-	HWND hStatusBar;    /* if render window does not have a status bar then this is NULL */
+    HWND hWnd;          /* Render window */
+    HWND hStatusBar;    /* if render window does not have a status bar then this is NULL */
 
-	BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
-	                       //   bswap on a dword (32 bits) boundry 
-						   //	eg. the first 8 bytes are stored like this:
-	                       //        4 3 2 1   8 7 6 5
+    BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
+                           //   bswap on a dword (32 bits) boundry 
+                           //   eg. the first 8 bytes are stored like this:
+                           //        4 3 2 1   8 7 6 5
 
-	BYTE * HEADER;	// This is the rom header (first 40h bytes of the rom
-					// This will be in the same memory format as the rest of the memory.
-	BYTE * RDRAM;
-	BYTE * DMEM;
-	BYTE * IMEM;
+    BYTE * HEADER;  // This is the rom header (first 40h bytes of the rom
+                    // This will be in the same memory format as the rest of the memory.
+    BYTE * RDRAM;
+    BYTE * DMEM;
+    BYTE * IMEM;
 
-	DWORD * MI_INTR_REG;
+    DWORD * MI_INTR_REG;
 
-	DWORD * DPC_START_REG;
-	DWORD * DPC_END_REG;
-	DWORD * DPC_CURRENT_REG;
-	DWORD * DPC_STATUS_REG;
-	DWORD * DPC_CLOCK_REG;
-	DWORD * DPC_BUFBUSY_REG;
-	DWORD * DPC_PIPEBUSY_REG;
-	DWORD * DPC_TMEM_REG;
+    DWORD * DPC_START_REG;
+    DWORD * DPC_END_REG;
+    DWORD * DPC_CURRENT_REG;
+    DWORD * DPC_STATUS_REG;
+    DWORD * DPC_CLOCK_REG;
+    DWORD * DPC_BUFBUSY_REG;
+    DWORD * DPC_PIPEBUSY_REG;
+    DWORD * DPC_TMEM_REG;
 
-	DWORD * VI_STATUS_REG;
-	DWORD * VI_ORIGIN_REG;
-	DWORD * VI_WIDTH_REG;
-	DWORD * VI_INTR_REG;
-	DWORD * VI_V_CURRENT_LINE_REG;
-	DWORD * VI_TIMING_REG;
-	DWORD * VI_V_SYNC_REG;
-	DWORD * VI_H_SYNC_REG;
-	DWORD * VI_LEAP_REG;
-	DWORD * VI_H_START_REG;
-	DWORD * VI_V_START_REG;
-	DWORD * VI_V_BURST_REG;
-	DWORD * VI_X_SCALE_REG;
-	DWORD * VI_Y_SCALE_REG;
+    DWORD * VI_STATUS_REG;
+    DWORD * VI_ORIGIN_REG;
+    DWORD * VI_WIDTH_REG;
+    DWORD * VI_INTR_REG;
+    DWORD * VI_V_CURRENT_LINE_REG;
+    DWORD * VI_TIMING_REG;
+    DWORD * VI_V_SYNC_REG;
+    DWORD * VI_H_SYNC_REG;
+    DWORD * VI_LEAP_REG;
+    DWORD * VI_H_START_REG;
+    DWORD * VI_V_START_REG;
+    DWORD * VI_V_BURST_REG;
+    DWORD * VI_X_SCALE_REG;
+    DWORD * VI_Y_SCALE_REG;
 
-	void (*CheckInterrupts)( void );
+    void (*CheckInterrupts)( void );
 } GFX_INFO;
 
 /******************************************************************
@@ -98,7 +98,7 @@ EXPORT void CALL CaptureScreen ( char * Directory );
   Function: ChangeWindow
   Purpose:  to change the window between fullscreen and window 
             mode. If the window was in fullscreen this should 
-			change the screen to window mode and vice vesa.
+            change the screen to window mode and vice vesa.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -144,7 +144,7 @@ EXPORT void CALL DllTest ( HWND hParent );
   Function: DrawScreen
   Purpose:  This function is called when the emulator receives a
             WM_PAINT message. This allows the gfx to fit in when
-			it is being used in the desktop.
+            it is being used in the desktop.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -164,7 +164,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
   Function: InitiateGFX
   Purpose:  This function is called when the DLL is started to give
             information from the emulator that the n64 graphics
-			uses. This is not called from the emulation thread.
+            uses. This is not called from the emulation thread.
   Input:    Gfx_Info is passed to this function which is defined
             above.
   Output:   TRUE on success
@@ -181,11 +181,11 @@ EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info);
   Function: MoveScreen
   Purpose:  This function is called in response to the emulator
             receiving a WM_MOVE passing the xpos and ypos passed
-			from that message.
+            from that message.
   input:    xpos - the x-coordinate of the upper-left corner of the
             client area of the window.
-			ypos - y-coordinate of the upper-left corner of the
-			client area of the window. 
+            ypos - y-coordinate of the upper-left corner of the
+            client area of the window. 
   output:   none
 *******************************************************************/ 
 EXPORT void CALL MoveScreen (int xpos, int ypos);
@@ -229,7 +229,7 @@ EXPORT void CALL RomOpen (void);
   Function: ShowCFB
   Purpose:  Useally once Dlists are started being displayed, cfb is
             ignored. This function tells the dll to start displaying
-			them again.
+            them again.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -239,7 +239,7 @@ EXPORT void CALL ShowCFB (void);
   Function: UpdateScreen
   Purpose:  This function is called in response to a vsync of the
             screen were the VI bit in MI_INTR_REG has already been
-			set
+            set
   input:    none
   output:   none
 *******************************************************************/ 

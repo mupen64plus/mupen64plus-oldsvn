@@ -18,10 +18,16 @@ Email                : blight@Ashitaka
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#include <pthread.h>
-
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
+#endif
+
+#ifdef USEPOSIX
+#include "posix/main.h"
+#endif
+
+#ifdef USEWIN32
+#include "win32/main.h"
 #endif
 
 /* globals */
@@ -29,7 +35,8 @@ extern int autoinc_slot;
 extern int *autoinc_save_slot;
 extern int g_Noask;
 extern int g_NoaskParam;
-extern pthread_t g_EmulationThread;
+extern int g_LimitFPS;
+extern int g_MemHasBeenBSwapped;
 extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;
 extern char *g_InputPlugin;

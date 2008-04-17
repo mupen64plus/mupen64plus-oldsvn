@@ -38,7 +38,7 @@ void genadd_s()
    inc_m32abs(&instr_count[119]);
 #endif
 #ifdef INTERPRET_ADD_S
-	gencallinterp((unsigned long long)ADD_S, 0);
+    gencallinterp((unsigned long long)ADD_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_simple[dst->f.cf.fs]));
@@ -56,7 +56,7 @@ void gensub_s()
    inc_m32abs(&instr_count[120]);
 #endif
 #ifdef INTERPRET_SUB_S
-	gencallinterp((unsigned long long)SUB_S, 0);
+    gencallinterp((unsigned long long)SUB_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_simple[dst->f.cf.fs]));
@@ -74,7 +74,7 @@ void genmul_s()
    inc_m32abs(&instr_count[121]);
 #endif
 #ifdef INTERPRET_MUL_S
-	gencallinterp((unsigned long long)MUL_S, 0);
+    gencallinterp((unsigned long long)MUL_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_simple[dst->f.cf.fs]));
@@ -92,7 +92,7 @@ void gendiv_s()
    inc_m32abs(&instr_count[122]);
 #endif
 #ifdef INTERPRET_DIV_S
-	gencallinterp((unsigned long long)DIV_S, 0);
+    gencallinterp((unsigned long long)DIV_S, 0);
 #else
    gencheck_cop1_unusable();
    mov_reg64_m64abs(RAX, (unsigned long long *)(&reg_cop1_simple[dst->f.cf.fs]));

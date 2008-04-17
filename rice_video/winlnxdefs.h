@@ -16,9 +16,6 @@ typedef float FLOAT;
 
 typedef int HWND;
 typedef void* HBITMAP;
-typedef char* LPCTSTR;
-
-#define LPCSTR char*
 
 typedef struct
 {
@@ -122,8 +119,6 @@ typedef struct tagBITMAPFILEHEADER
 } __attribute__ ((packed)) BITMAPFILEHEADER, *PBITMAPFILEHEADER;
 
 #define BI_RGB 0
-
-void OutputDebugString(LPCTSTR lpOutputString);
 
 typedef enum _BLEND 
 {

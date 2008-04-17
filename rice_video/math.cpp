@@ -20,9 +20,9 @@ XMATRIX::XMATRIX( const MATRIX &pIn )
 }
 
 XMATRIX::XMATRIX( float _11, float _12, float _13, float _14,
-		      float _21, float _22, float _23, float _24,
-		      float _31, float _32, float _33, float _34,
-		      float _41, float _42, float _43, float _44 )
+              float _21, float _22, float _23, float _24,
+              float _31, float _32, float _33, float _34,
+              float _41, float _42, float _43, float _44 )
 {
    this->_11 = _11;
    this->_12 = _12;
@@ -171,31 +171,31 @@ XVECTOR3::XVECTOR3( float _x, float _y, float _z )
 }
 
 /*
-	// casting
-	inline operator float* ();
-	inline operator const float* () const;
+    // casting
+    inline operator float* ();
+    inline operator const float* () const;
 
-	// assignment operators
-	inline XVECTOR3& operator += ( const XVECTOR3 &op );
-	inline XVECTOR3& operator -= ( const XVECTOR3 &op );
-	inline XVECTOR3& operator *= ( float op );
+    // assignment operators
+    inline XVECTOR3& operator += ( const XVECTOR3 &op );
+    inline XVECTOR3& operator -= ( const XVECTOR3 &op );
+    inline XVECTOR3& operator *= ( float op );
         inline XVECTOR3& operator /= ( float op );
 
-	// unary operators
-	inline XVECTOR3 operator + () const;
-	inline XVECTOR3 operator - () const;
+    // unary operators
+    inline XVECTOR3 operator + () const;
+    inline XVECTOR3 operator - () const;
 
-	// binary operators
+    // binary operators
         inline XVECTOR3 operator + ( const XVECTOR3 &op ) const;
-	inline XVECTOR3 operator - ( const XVECTOR3 &op ) const;
-	inline XVECTOR3 operator * ( float op ) const;
-	inline XVECTOR3 operator / ( float op ) const;
+    inline XVECTOR3 operator - ( const XVECTOR3 &op ) const;
+    inline XVECTOR3 operator * ( float op ) const;
+    inline XVECTOR3 operator / ( float op ) const;
 
 
-	friend XVECTOR3 operator * ( float, const XVECTOR3& );
+    friend XVECTOR3 operator * ( float, const XVECTOR3& );
 
-	inline bool operator == ( const XVECTOR3 &op ) const;
-	inline bool operator != ( const XVECTOR3 &op ) const;
+    inline bool operator == ( const XVECTOR3 &op ) const;
+    inline bool operator != ( const XVECTOR3 &op ) const;
 */
 
 //---------- XVECTOR4
@@ -205,42 +205,42 @@ XVECTOR4::XVECTOR4()
 }
 
 /*
-	XVECTOR4( const float *f );
-	XVECTOR4( const VECTOR4 &v );
-	XVECTOR4( float _x, float _y, float _z, float _w );
+    XVECTOR4( const float *f );
+    XVECTOR4( const VECTOR4 &v );
+    XVECTOR4( float _x, float _y, float _z, float _w );
 
-	// casting
+    // casting
         inline operator float* ();
-	inline operator const float* () const;
+    inline operator const float* () const;
 
-	// assignment operators
-	inline XVECTOR4& operator += ( const XVECTOR4 &op );
-	inline XVECTOR4& operator -= ( const XVECTOR4 &op );
-	inline XVECTOR4& operator *= ( float op );
-	inline XVECTOR4& operator /= ( float op );
+    // assignment operators
+    inline XVECTOR4& operator += ( const XVECTOR4 &op );
+    inline XVECTOR4& operator -= ( const XVECTOR4 &op );
+    inline XVECTOR4& operator *= ( float op );
+    inline XVECTOR4& operator /= ( float op );
 
-	// unary operators
-	inline XVECTOR4 operator + () const;
-	inline XVECTOR4 operator - () const;
+    // unary operators
+    inline XVECTOR4 operator + () const;
+    inline XVECTOR4 operator - () const;
 
-	// binary operators
-	inline XVECTOR4 operator + ( const XVECTOR4 &op ) const;
-	inline XVECTOR4 operator - ( const XVECTOR4 &op ) const;
-	inline XVECTOR4 operator * ( float op ) const;
-	inline XVECTOR4 operator / ( float op ) const;
+    // binary operators
+    inline XVECTOR4 operator + ( const XVECTOR4 &op ) const;
+    inline XVECTOR4 operator - ( const XVECTOR4 &op ) const;
+    inline XVECTOR4 operator * ( float op ) const;
+    inline XVECTOR4 operator / ( float op ) const;
 
-	friend XVECTOR4 operator * ( float, const XVECTOR4& );
+    friend XVECTOR4 operator * ( float, const XVECTOR4& );
 
-	inline bool operator == ( const XVECTOR4 &op ) const;
-	inline bool operator != ( const XVECTOR4 &op ) const;
+    inline bool operator == ( const XVECTOR4 &op ) const;
+    inline bool operator != ( const XVECTOR4 &op ) const;
 */
 
 //---------- OTHER
 
 XMATRIX* MatrixTranspose(
-				XMATRIX* pOut,
-				CONST XMATRIX* pM
-				)
+                XMATRIX* pOut,
+                CONST XMATRIX* pM
+                )
 {
    pOut->_11 = pM->_11;
    pOut->_12 = pM->_21;

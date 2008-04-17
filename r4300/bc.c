@@ -66,10 +66,10 @@ void BC1F_IDLE()
    int skip;
    if ((FCR31 & 0x800000)==0)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BC1F();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BC1F();
      }
    else BC1F();
 }
@@ -108,10 +108,10 @@ void BC1T_IDLE()
    int skip;
    if ((FCR31 & 0x800000)!=0)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BC1T();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BC1T();
      }
    else BC1T();
 }
@@ -121,13 +121,13 @@ void BC1FL()
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)==0)
      {
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if(!skip_jump)
-	  PC += (PC-2)->f.i.immediate-1;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if(!skip_jump)
+      PC += (PC-2)->f.i.immediate-1;
      }
    else
      PC+=2;
@@ -140,14 +140,14 @@ void BC1FL_OUT()
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)==0)
      {
-	jump_target = (int)PC->f.i.immediate;
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if (!skip_jump)
-	  jump_to(PC->addr + ((jump_target-1)<<2));
+    jump_target = (int)PC->f.i.immediate;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if (!skip_jump)
+      jump_to(PC->addr + ((jump_target-1)<<2));
      }
    else
      PC+=2;
@@ -160,10 +160,10 @@ void BC1FL_IDLE()
    int skip;
    if ((FCR31 & 0x800000)==0)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BC1FL();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BC1FL();
      }
    else BC1FL();
 }
@@ -173,13 +173,13 @@ void BC1TL()
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)!=0)
      {
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if(!skip_jump)
-	  PC += (PC-2)->f.i.immediate-1;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if(!skip_jump)
+      PC += (PC-2)->f.i.immediate-1;
      }
    else
      PC+=2;
@@ -192,14 +192,14 @@ void BC1TL_OUT()
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)!=0)
      {
-	jump_target = (int)PC->f.i.immediate;
-	PC++;
-	delay_slot=1;
-	PC->ops();
-	update_count();
-	delay_slot=0;
-	if (!skip_jump)
-	  jump_to(PC->addr + ((jump_target-1)<<2));
+    jump_target = (int)PC->f.i.immediate;
+    PC++;
+    delay_slot=1;
+    PC->ops();
+    update_count();
+    delay_slot=0;
+    if (!skip_jump)
+      jump_to(PC->addr + ((jump_target-1)<<2));
      }
    else
      PC+=2;
@@ -212,10 +212,10 @@ void BC1TL_IDLE()
    int skip;
    if ((FCR31 & 0x800000)!=0)
      {
-	update_count();
-	skip = next_interupt - Count;
-	if (skip > 3) Count += (skip & 0xFFFFFFFC);
-	else BC1TL();
+    update_count();
+    skip = next_interupt - Count;
+    if (skip > 3) Count += (skip & 0xFFFFFFFC);
+    else BC1TL();
      }
    else BC1TL();
 }

@@ -36,7 +36,7 @@ void genmfc0()
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[109]);
 #endif
-	gencallinterp((unsigned long long)MFC0, 0);
+    gencallinterp((unsigned long long)MFC0, 0);
 }
 
 void genmtc0()
@@ -44,5 +44,5 @@ void genmtc0()
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[110]);
 #endif
-	gencallinterp((unsigned long long)MTC0, 0);
+    gencallinterp((unsigned long long)MTC0, 0);
 }

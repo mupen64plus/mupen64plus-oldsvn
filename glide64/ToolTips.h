@@ -1,20 +1,20 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -33,12 +33,12 @@
 //
 //****************************************************************
 
-extern HWND			g_hwndDlg;
+extern HWND         g_hwndDlg;
 
 #ifdef USE_TOOLTIPS
-extern HINSTANCE	g_hinst;
-extern HWND			g_hwndTT;
-extern HHOOK		g_hhk;
+extern HINSTANCE    g_hinst;
+extern HWND         g_hwndTT;
+extern HHOOK        g_hhk;
 
 BOOL DoCreateDialogTooltip(void);
 VOID OnWMNotify(LPARAM lParam);

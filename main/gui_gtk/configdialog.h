@@ -22,37 +22,38 @@ Email                : blight@Ashitaka
 
 typedef struct
 {
-	GtkWidget	*dialog;
+    GtkWidget   *dialog;
 
-	GtkWidget	*notebook;
-	GtkWidget	*configMupen;
-	GtkWidget	*configPlugins;
-	GtkWidget	*configRomBrowser;
+    GtkWidget   *notebook;
+    GtkWidget   *configMupen;
+    GtkWidget   *configPlugins;
+    GtkWidget   *configRomBrowser;
+    GtkWidget   *configInputMappings;
 
-	GtkWidget	*coreInterpreterCheckButton;
-	GtkWidget	*coreDynaRecCheckButton;
-	GtkWidget	*corePureInterpCheckButton;
-	GtkWidget       *autoincSaveSlotCheckButton;
-	GtkWidget       *noaskCheckButton;
-	GList		*toolbarStyleGList;
-	GtkWidget	*toolbarStyleCombo;
-	GList		*toolbarSizeGList;
-	GtkWidget	*toolbarSizeCombo;
+    GtkWidget   *coreInterpreterCheckButton;
+    GtkWidget   *coreDynaRecCheckButton;
+    GtkWidget   *corePureInterpCheckButton;
+    GtkWidget       *autoincSaveSlotCheckButton;
+    GtkWidget       *noaskCheckButton;
+    GList       *toolbarStyleGList;
+    GtkWidget   *toolbarStyleCombo;
+    GList       *toolbarSizeGList;
+    GtkWidget   *toolbarSizeCombo;
 
-	GtkWidget	*gfxCombo;
-	GtkWidget	*audioCombo;
-	GtkWidget	*inputCombo;
-	GtkWidget	*RSPCombo;
-	GList		*gfxPluginGList;
-	GList		*audioPluginGList;
-	GList		*inputPluginGList;
-	GList		*RSPPluginGList;
+    GtkWidget   *gfxCombo;
+    GtkWidget   *audioCombo;
+    GtkWidget   *inputCombo;
+    GtkWidget   *RSPCombo;
+    GList       *gfxPluginGList;
+    GList       *audioPluginGList;
+    GList       *inputPluginGList;
+    GList       *RSPPluginGList;
 
-	GtkWidget	*romDirectoryList;
-	GtkWidget	*romDirsScanRecCheckButton;
-	GtkWidget	*romShowFullPathsCheckButton;
-	GtkWidget       *noAudioDelayCheckButton;
-	GtkWidget       *noCompiledJumpCheckButton;
+    GtkWidget   *romDirectoryList;
+    GtkWidget   *romDirsScanRecCheckButton;
+    GtkWidget   *romShowFullPathsCheckButton;
+    GtkWidget       *noAudioDelayCheckButton;
+    GtkWidget       *noCompiledJumpCheckButton;
 } SConfigDialog;
 extern SConfigDialog g_ConfigDialog;
 

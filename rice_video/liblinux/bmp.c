@@ -59,7 +59,7 @@ BMGError ReadBMP( const char *filename,
 {
     FILE *file;
     int error;
-	BMGError tmp;
+    BMGError tmp;
     unsigned char *p, *q; /*, *q_end; */
 /*    unsigned int cnt; */
     int i;
@@ -75,7 +75,7 @@ BMGError ReadBMP( const char *filename,
     unsigned int bit_size, rawbit_size;
     unsigned char *rawbits = NULL;
 
-	SetLastBMGError( BMG_OK );
+    SetLastBMGError( BMG_OK );
 
     if ( img == NULL )
         { error = (int) errInvalidBMGImage; goto err_jmp; }
@@ -110,7 +110,7 @@ BMGError ReadBMP( const char *filename,
         img->bytes_per_palette_entry = 4U;
     }
 
-	tmp = AllocateBMGImage( img );
+    tmp = AllocateBMGImage( img );
     if ( tmp != BMG_OK )
         { error = (int) tmp; goto err_jmp; }
 
@@ -221,7 +221,7 @@ BMGError WriteBMP( const char *filename,
     BITMAPFILEHEADER bmfh;
     BITMAPINFOHEADER bmih;
 
-	SetLastBMGError( BMG_OK );
+    SetLastBMGError( BMG_OK );
 
     /* error handler */
     error = setjmp( err_jmp );
@@ -233,7 +233,7 @@ BMGError WriteBMP( const char *filename,
             free( bits );
         if ( pColor != NULL )
             free( pColor );
-		SetLastBMGError( (BMGError)error );
+        SetLastBMGError( (BMGError)error );
         return (BMGError)error;
     }
 

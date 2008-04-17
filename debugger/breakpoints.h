@@ -54,4 +54,4 @@ int add_breakpoint( uint32 address );
 int remove_breakpoint_by_address( uint32 address );
 int check_breakpoints( uint32 address );
 
-#endif	// BREAKPOINTS_H
+#endif  // BREAKPOINTS_H

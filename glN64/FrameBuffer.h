@@ -6,19 +6,19 @@
 
 struct FrameBuffer
 {
-	FrameBuffer *higher, *lower;
+    FrameBuffer *higher, *lower;
 
-	CachedTexture *texture;
+    CachedTexture *texture;
 
-	u32 startAddress, endAddress;
-	u32 size, width, height, changed;
-	float scaleX, scaleY;
+    u32 startAddress, endAddress;
+    u32 size, width, height, changed;
+    float scaleX, scaleY;
 };
 
 struct FrameBufferInfo
 {
-	FrameBuffer *top, *bottom, *current;
-	int numBuffers;
+    FrameBuffer *top, *bottom, *current;
+    int numBuffers;
 };
 
 extern FrameBufferInfo frameBuffer;

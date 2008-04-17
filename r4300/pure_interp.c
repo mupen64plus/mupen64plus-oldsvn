@@ -125,10 +125,10 @@ static void JALR()
    delay_slot=0;
    if (!skip_jump)
      {
-	*dest = interp_addr;
-	sign_extended(*dest);
-	
-	interp_addr = local_rs32;
+    *dest = interp_addr;
+    sign_extended(*dest);
+    
+    interp_addr = local_rs32;
      }
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
@@ -211,10 +211,10 @@ static void DIV()
 {
    if (rrt32)
      {
-	lo = rrs32 / rrt32;
-	hi = rrs32 % rrt32;
-	sign_extended(lo);
-	sign_extended(hi);
+    lo = rrs32 / rrt32;
+    hi = rrs32 % rrt32;
+    sign_extended(lo);
+    sign_extended(hi);
      }
    else printf("div\n");
    interp_addr+=4;
@@ -224,10 +224,10 @@ static void DIVU()
 {
    if (rrt32)
      {
-	lo = (unsigned int)rrs32 / (unsigned int)rrt32;
-	hi = (unsigned int)rrs32 % (unsigned int)rrt32;
-	sign_extended(lo);
-	sign_extended(hi);
+    lo = (unsigned int)rrs32 / (unsigned int)rrt32;
+    hi = (unsigned int)rrs32 % (unsigned int)rrt32;
+    sign_extended(lo);
+    sign_extended(hi);
      }
    else printf("divu\n");
    interp_addr+=4;
@@ -242,14 +242,14 @@ static void DMULT()
    
    if (rrs < 0)
      {
-	op2 = -rrs;
-	sign = 1 - sign;
+    op2 = -rrs;
+    sign = 1 - sign;
      }
    else op2 = rrs;
    if (rrt < 0)
      {
-	op4 = -rrt;
-	sign = 1 - sign;
+    op4 = -rrt;
+    sign = 1 - sign;
      }
    else op4 = rrt;
    
@@ -272,9 +272,9 @@ static void DMULT()
    hi = (result3 & 0xFFFFFFFF) | (result4 << 32);
    if (sign)
      {
-	hi = ~hi;
-	if (!lo) hi++;
-	else lo = ~lo + 1;
+    hi = ~hi;
+    if (!lo) hi++;
+    else lo = ~lo + 1;
      }
    interp_addr+=4;
 }
@@ -310,8 +310,8 @@ static void DDIV()
 {
    if (rrt)
      {
-	lo = (long long int)rrs / (long long int)rrt;
-	hi = (long long int)rrs % (long long int)rrt;
+    lo = (long long int)rrs / (long long int)rrt;
+    hi = (long long int)rrs % (long long int)rrt;
      }
    else printf("ddiv\n");
    interp_addr+=4;
@@ -321,8 +321,8 @@ static void DDIVU()
 {
    if (rrt)
      {
-	lo = (unsigned long long int)rrs / (unsigned long long int)rrt;
-	hi = (unsigned long long int)rrs % (unsigned long long int)rrt;
+    lo = (unsigned long long int)rrs / (unsigned long long int)rrt;
+    hi = (unsigned long long int)rrs % (unsigned long long int)rrt;
      }
    else printf("ddivu\n");
    interp_addr+=4;
@@ -423,8 +423,8 @@ static void TEQ()
 {
    if (rrs == rrt)
      {
-	printf("trap exception in teq\n");
-	stop=1;
+    printf("trap exception in teq\n");
+    stop=1;
      }
    interp_addr+=4;
 }
@@ -484,16 +484,16 @@ static void BLTZ()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (local_rs < 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -514,16 +514,16 @@ static void BGEZ()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (local_rs >= 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -544,26 +544,26 @@ static void BLTZL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (irs < 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if (irs < 0)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else interp_addr+=8;
    last_addr = interp_addr;
@@ -577,26 +577,26 @@ static void BGEZL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (irs >= 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if (irs >= 0)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else interp_addr+=8;
    last_addr = interp_addr;
@@ -610,28 +610,28 @@ static void BLTZAL()
    reg[31]=interp_addr+8;
    if((&irs)!=(reg+31))
      {
-	if ((interp_addr + (local_immediate+1)*4) == interp_addr)
-	  if (local_rs < 0)
-	    {
-	       if (probe_nop(interp_addr+4))
-		 {
-		    update_count();
-		    skip = next_interupt - Count;
-		    if (skip > 3) 
-		      {
-			 Count += (skip & 0xFFFFFFFC);
-			 return;
-		      }
-		 }
-	    }
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	if(local_rs < 0)
-	  interp_addr += (local_immediate-1)*4;
+    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
+      if (local_rs < 0)
+        {
+           if (probe_nop(interp_addr+4))
+         {
+            update_count();
+            skip = next_interupt - Count;
+            if (skip > 3) 
+              {
+             Count += (skip & 0xFFFFFFFC);
+             return;
+              }
+         }
+        }
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    if(local_rs < 0)
+      interp_addr += (local_immediate-1)*4;
      }
    else printf("erreur dans bltzal\n");
    last_addr = interp_addr;
@@ -645,28 +645,28 @@ static void BGEZAL()
    reg[31]=interp_addr+8;
    if((&irs)!=(reg+31))
      {
-	if ((interp_addr + (local_immediate+1)*4) == interp_addr)
-	  if (local_rs >= 0)
-	    {
-	       if (probe_nop(interp_addr+4))
-		 {
-		    update_count();
-		    skip = next_interupt - Count;
-		    if (skip > 3) 
-		      {
-			 Count += (skip & 0xFFFFFFFC);
-			 return;
-		      }
-		 }
-	    }
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	if(local_rs >= 0)
-	  interp_addr += (local_immediate-1)*4;
+    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
+      if (local_rs >= 0)
+        {
+           if (probe_nop(interp_addr+4))
+         {
+            update_count();
+            skip = next_interupt - Count;
+            if (skip > 3) 
+              {
+             Count += (skip & 0xFFFFFFFC);
+             return;
+              }
+         }
+        }
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    if(local_rs >= 0)
+      interp_addr += (local_immediate-1)*4;
      }
    else printf("erreur dans bgezal\n");
    last_addr = interp_addr;
@@ -680,31 +680,31 @@ static void BLTZALL()
    reg[31]=interp_addr+8;
    if((&irs)!=(reg+31))
      {
-	if ((interp_addr + (local_immediate+1)*4) == interp_addr)
-	  if (local_rs < 0)
-	    {
-	       if (probe_nop(interp_addr+4))
-		 {
-		    update_count();
-		    skip = next_interupt - Count;
-		    if (skip > 3) 
-		      {
-			 Count += (skip & 0xFFFFFFFC);
-			 return;
-		      }
-		 }
-	    }
-	if (local_rs < 0)
-	  {
-	     interp_addr+=4;
-	     delay_slot=1;
-	     prefetch();
-	     interp_ops[((op >> 26) & 0x3F)]();
-	     update_count();
-	     delay_slot=0;
-	     interp_addr += (local_immediate-1)*4;
-	  }
-	else interp_addr+=8;
+    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
+      if (local_rs < 0)
+        {
+           if (probe_nop(interp_addr+4))
+         {
+            update_count();
+            skip = next_interupt - Count;
+            if (skip > 3) 
+              {
+             Count += (skip & 0xFFFFFFFC);
+             return;
+              }
+         }
+        }
+    if (local_rs < 0)
+      {
+         interp_addr+=4;
+         delay_slot=1;
+         prefetch();
+         interp_ops[((op >> 26) & 0x3F)]();
+         update_count();
+         delay_slot=0;
+         interp_addr += (local_immediate-1)*4;
+      }
+    else interp_addr+=8;
      }
    else printf("erreur dans bltzall\n");
    last_addr = interp_addr;
@@ -718,31 +718,31 @@ static void BGEZALL()
    reg[31]=interp_addr+8;
    if((&irs)!=(reg+31))
      {
-	if ((interp_addr + (local_immediate+1)*4) == interp_addr)
-	  if (local_rs >= 0)
-	    {
-	       if (probe_nop(interp_addr+4))
-		 {
-		    update_count();
-		    skip = next_interupt - Count;
-		    if (skip > 3) 
-		      {
-			 Count += (skip & 0xFFFFFFFC);
-			 return;
-		      }
-		 }
-	    }
-	if (local_rs >= 0)
-	  {
-	     interp_addr+=4;
-	     delay_slot=1;
-	     prefetch();
-	     interp_ops[((op >> 26) & 0x3F)]();
-	     update_count();
-	     delay_slot=0;
-	     interp_addr += (local_immediate-1)*4;
-	  }
-	else interp_addr+=8;
+    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
+      if (local_rs >= 0)
+        {
+           if (probe_nop(interp_addr+4))
+         {
+            update_count();
+            skip = next_interupt - Count;
+            if (skip > 3) 
+              {
+             Count += (skip & 0xFFFFFFFC);
+             return;
+              }
+         }
+        }
+    if (local_rs >= 0)
+      {
+         interp_addr+=4;
+         delay_slot=1;
+         prefetch();
+         interp_ops[((op >> 26) & 0x3F)]();
+         update_count();
+         delay_slot=0;
+         interp_addr += (local_immediate-1)*4;
+      }
+    else interp_addr+=8;
      }
    else printf("erreur dans bgezall\n");
    last_addr = interp_addr;
@@ -778,19 +778,19 @@ static void TLBWI()
    
    if (tlb_e[Index&0x3F].v_even)
      {
-	for (i=tlb_e[Index&0x3F].start_even; i<tlb_e[Index&0x3F].end_even; i++)
-	  tlb_LUT_r[i>>12] = 0;
-	if (tlb_e[Index&0x3F].d_even)
-	  for (i=tlb_e[Index&0x3F].start_even; i<tlb_e[Index&0x3F].end_even; i++)
-	    tlb_LUT_w[i>>12] = 0;
+    for (i=tlb_e[Index&0x3F].start_even; i<tlb_e[Index&0x3F].end_even; i++)
+      tlb_LUT_r[i>>12] = 0;
+    if (tlb_e[Index&0x3F].d_even)
+      for (i=tlb_e[Index&0x3F].start_even; i<tlb_e[Index&0x3F].end_even; i++)
+        tlb_LUT_w[i>>12] = 0;
      }
    if (tlb_e[Index&0x3F].v_odd)
      {
-	for (i=tlb_e[Index&0x3F].start_odd; i<tlb_e[Index&0x3F].end_odd; i++)
-	  tlb_LUT_r[i>>12] = 0;
-	if (tlb_e[Index&0x3F].d_odd)
-	  for (i=tlb_e[Index&0x3F].start_odd; i<tlb_e[Index&0x3F].end_odd; i++)
-	    tlb_LUT_w[i>>12] = 0;
+    for (i=tlb_e[Index&0x3F].start_odd; i<tlb_e[Index&0x3F].end_odd; i++)
+      tlb_LUT_r[i>>12] = 0;
+    if (tlb_e[Index&0x3F].d_odd)
+      for (i=tlb_e[Index&0x3F].start_odd; i<tlb_e[Index&0x3F].end_odd; i++)
+        tlb_LUT_w[i>>12] = 0;
      }
    tlb_e[Index&0x3F].g = (EntryLo0 & EntryLo1 & 1);
    tlb_e[Index&0x3F].pfn_even = (EntryLo0 & 0x3FFFFFC0) >> 6;
@@ -813,19 +813,19 @@ static void TLBWI()
    
    if (tlb_e[Index&0x3F].v_even)
      {
-	if (tlb_e[Index&0x3F].start_even < tlb_e[Index&0x3F].end_even &&
-	    !(tlb_e[Index&0x3F].start_even >= 0x80000000 &&
-	    tlb_e[Index&0x3F].end_even < 0xC0000000) &&
-	    tlb_e[Index&0x3F].phys_even < 0x20000000)
-	  {
-	     for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
-	     if (tlb_e[Index&0x3F].d_even)
-	       for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
-	  }
+    if (tlb_e[Index&0x3F].start_even < tlb_e[Index&0x3F].end_even &&
+        !(tlb_e[Index&0x3F].start_even >= 0x80000000 &&
+        tlb_e[Index&0x3F].end_even < 0xC0000000) &&
+        tlb_e[Index&0x3F].phys_even < 0x20000000)
+      {
+         for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
+         if (tlb_e[Index&0x3F].d_even)
+           for (i=tlb_e[Index&0x3F].start_even;i<tlb_e[Index&0x3F].end_even;i++)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_even + (i - tlb_e[Index&0x3F].start_even));
+      }
      }
    
    tlb_e[Index&0x3F].start_odd = tlb_e[Index&0x3F].end_even+1;
@@ -835,19 +835,19 @@ static void TLBWI()
    
    if (tlb_e[Index&0x3F].v_odd)
      {
-	if (tlb_e[Index&0x3F].start_odd < tlb_e[Index&0x3F].end_odd &&
-	    !(tlb_e[Index&0x3F].start_odd >= 0x80000000 &&
-	    tlb_e[Index&0x3F].end_odd < 0xC0000000) &&
-	    tlb_e[Index&0x3F].phys_odd < 0x20000000)
-	  {
-	     for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
-	     if (tlb_e[Index&0x3F].d_odd)
-	       for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
-	  }
+    if (tlb_e[Index&0x3F].start_odd < tlb_e[Index&0x3F].end_odd &&
+        !(tlb_e[Index&0x3F].start_odd >= 0x80000000 &&
+        tlb_e[Index&0x3F].end_odd < 0xC0000000) &&
+        tlb_e[Index&0x3F].phys_odd < 0x20000000)
+      {
+         for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
+         if (tlb_e[Index&0x3F].d_odd)
+           for (i=tlb_e[Index&0x3F].start_odd;i<tlb_e[Index&0x3F].end_odd;i++)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Index&0x3F].phys_odd + (i - tlb_e[Index&0x3F].start_odd));
+      }
      }
    interp_addr+=4;
 }
@@ -859,19 +859,19 @@ static void TLBWR()
    Random = (Count/2 % (32 - Wired)) + Wired;
    if (tlb_e[Random].v_even)
      {
-	for (i=tlb_e[Random].start_even; i<tlb_e[Random].end_even; i++)
-	  tlb_LUT_r[i>>12] = 0;
-	if (tlb_e[Random].d_even)
-	  for (i=tlb_e[Random].start_even; i<tlb_e[Random].end_even; i++)
-	    tlb_LUT_w[i>>12] = 0;
+    for (i=tlb_e[Random].start_even; i<tlb_e[Random].end_even; i++)
+      tlb_LUT_r[i>>12] = 0;
+    if (tlb_e[Random].d_even)
+      for (i=tlb_e[Random].start_even; i<tlb_e[Random].end_even; i++)
+        tlb_LUT_w[i>>12] = 0;
      }
    if (tlb_e[Random].v_odd)
      {
-	for (i=tlb_e[Random].start_odd; i<tlb_e[Random].end_odd; i++)
-	  tlb_LUT_r[i>>12] = 0;
-	if (tlb_e[Random].d_odd)
-	  for (i=tlb_e[Random].start_odd; i<tlb_e[Random].end_odd; i++)
-	    tlb_LUT_w[i>>12] = 0;
+    for (i=tlb_e[Random].start_odd; i<tlb_e[Random].end_odd; i++)
+      tlb_LUT_r[i>>12] = 0;
+    if (tlb_e[Random].d_odd)
+      for (i=tlb_e[Random].start_odd; i<tlb_e[Random].end_odd; i++)
+        tlb_LUT_w[i>>12] = 0;
      }
    tlb_e[Random].g = (EntryLo0 & EntryLo1 & 1);
    tlb_e[Random].pfn_even = (EntryLo0 & 0x3FFFFFC0) >> 6;
@@ -894,19 +894,19 @@ static void TLBWR()
    
    if (tlb_e[Random].v_even)
      {
-	if (tlb_e[Random].start_even < tlb_e[Random].end_even &&
-	    !(tlb_e[Random].start_even >= 0x80000000 &&
-	    tlb_e[Random].end_even < 0xC0000000) &&
-	    tlb_e[Random].phys_even < 0x20000000)
-	  {
-	     for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i++)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even));
-	     if (tlb_e[Random].d_even)
-	       for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i++)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even));
-	  }
+    if (tlb_e[Random].start_even < tlb_e[Random].end_even &&
+        !(tlb_e[Random].start_even >= 0x80000000 &&
+        tlb_e[Random].end_even < 0xC0000000) &&
+        tlb_e[Random].phys_even < 0x20000000)
+      {
+         for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i++)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even));
+         if (tlb_e[Random].d_even)
+           for (i=tlb_e[Random].start_even;i<tlb_e[Random].end_even;i++)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_even + (i - tlb_e[Random].start_even));
+      }
      }
    tlb_e[Random].start_odd = tlb_e[Random].end_even+1;
    tlb_e[Random].end_odd = tlb_e[Random].start_odd+
@@ -915,19 +915,19 @@ static void TLBWR()
    
    if (tlb_e[Random].v_odd)
      {
-	if (tlb_e[Random].start_odd < tlb_e[Random].end_odd &&
-	    !(tlb_e[Random].start_odd >= 0x80000000 &&
-	    tlb_e[Random].end_odd < 0xC0000000) &&
-	    tlb_e[Random].phys_odd < 0x20000000)
-	  {
-	     for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i++)
-	       tlb_LUT_r[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd));
-	     if (tlb_e[Random].d_odd)
-	       for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i++)
-		 tlb_LUT_w[i>>12] = 0x80000000 | 
-	       (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd));
-	  }
+    if (tlb_e[Random].start_odd < tlb_e[Random].end_odd &&
+        !(tlb_e[Random].start_odd >= 0x80000000 &&
+        tlb_e[Random].end_odd < 0xC0000000) &&
+        tlb_e[Random].phys_odd < 0x20000000)
+      {
+         for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i++)
+           tlb_LUT_r[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd));
+         if (tlb_e[Random].d_odd)
+           for (i=tlb_e[Random].start_odd;i<tlb_e[Random].end_odd;i++)
+         tlb_LUT_w[i>>12] = 0x80000000 | 
+           (tlb_e[Random].phys_odd + (i - tlb_e[Random].start_odd));
+      }
      }
    interp_addr+=4;
 }
@@ -938,14 +938,14 @@ static void TLBP()
    Index |= 0x80000000;
    for (i=0; i<32; i++)
      {
-	if (((tlb_e[i].vpn2 & (~tlb_e[i].mask)) ==
-	     (((EntryHi & 0xFFFFE000) >> 13) & (~tlb_e[i].mask))) &&
-	    ((tlb_e[i].g) ||
-	     (tlb_e[i].asid == (EntryHi & 0xFF))))
-	  {
-	     Index = i;
-	     break;
-	  }
+    if (((tlb_e[i].vpn2 & (~tlb_e[i].mask)) ==
+         (((EntryHi & 0xFFFFE000) >> 13) & (~tlb_e[i].mask))) &&
+        ((tlb_e[i].g) ||
+         (tlb_e[i].asid == (EntryHi & 0xFF))))
+      {
+         Index = i;
+         break;
+      }
      }
    interp_addr+=4;
 }
@@ -955,13 +955,13 @@ static void ERET()
    update_count();
    if (Status & 0x4)
      {
-	printf("erreur dans ERET\n");
-	stop=1;
+    printf("erreur dans ERET\n");
+    stop=1;
      }
    else
      {
-	Status &= 0xFFFFFFFD;
-	interp_addr = EPC;
+    Status &= 0xFFFFFFFD;
+    interp_addr = EPC;
      }
    llbit = 0;
    check_interupt();
@@ -986,11 +986,11 @@ static void MFC0()
    switch(PC->f.r.nrd)
      {
       case 1:
-	printf("lecture de Random\n");
-	stop=1;
+    printf("lecture de Random\n");
+    stop=1;
       default:
-	rrt32 = reg_cop0[PC->f.r.nrd];
-	sign_extended(rrt);
+    rrt32 = reg_cop0[PC->f.r.nrd];
+    sign_extended(rrt);
      }
    interp_addr+=4;
 }
@@ -1000,125 +1000,125 @@ static void MTC0()
    switch(PC->f.r.nrd)
      {
       case 0:    // Index
-	Index = rrt & 0x8000003F;
-	if ((Index & 0x3F) > 31) 
-	  {
-	     printf ("il y a plus de 32 TLB\n");
-	     stop=1;
-	  }
-	break;
+    Index = rrt & 0x8000003F;
+    if ((Index & 0x3F) > 31) 
+      {
+         printf ("il y a plus de 32 TLB\n");
+         stop=1;
+      }
+    break;
       case 1:    // Random
-	break;
+    break;
       case 2:    // EntryLo0
-	EntryLo0 = rrt & 0x3FFFFFFF;
-	break;
+    EntryLo0 = rrt & 0x3FFFFFFF;
+    break;
       case 3:    // EntryLo1
- 	EntryLo1 = rrt & 0x3FFFFFFF;
-	break;
+    EntryLo1 = rrt & 0x3FFFFFFF;
+    break;
       case 4:    // Context
-	Context = (rrt & 0xFF800000) | (Context & 0x007FFFF0);
-	break;
+    Context = (rrt & 0xFF800000) | (Context & 0x007FFFF0);
+    break;
       case 5:    // PageMask
-	PageMask = rrt & 0x01FFE000;
-	break;
+    PageMask = rrt & 0x01FFE000;
+    break;
       case 6:    // Wired
-	Wired = rrt;
-	Random = 31;
-	break;
+    Wired = rrt;
+    Random = 31;
+    break;
       case 8:    // BadVAddr
-	break;
+    break;
       case 9:    // Count
-	update_count();
-	if (next_interupt <= Count) gen_interupt();
-	debug_count += Count;
-	translate_event_queue(rrt & 0xFFFFFFFF);
-	Count = rrt & 0xFFFFFFFF;
-	debug_count -= Count;
-	break;
+    update_count();
+    if (next_interupt <= Count) gen_interupt();
+    debug_count += Count;
+    translate_event_queue(rrt & 0xFFFFFFFF);
+    Count = rrt & 0xFFFFFFFF;
+    debug_count -= Count;
+    break;
       case 10:   // EntryHi
-	EntryHi = rrt & 0xFFFFE0FF;
-	break;
+    EntryHi = rrt & 0xFFFFE0FF;
+    break;
       case 11:   // Compare
-	update_count();
-	remove_event(COMPARE_INT);
-	add_interupt_event_count(COMPARE_INT, (unsigned int)rrt);
-	Compare = rrt;
-	Cause = Cause & 0xFFFF7FFF; //Timer interupt is clear
-	break;
+    update_count();
+    remove_event(COMPARE_INT);
+    add_interupt_event_count(COMPARE_INT, (unsigned int)rrt);
+    Compare = rrt;
+    Cause = Cause & 0xFFFF7FFF; //Timer interupt is clear
+    break;
       case 12:   // Status
-	if((rrt & 0x04000000) != (Status & 0x04000000))
-	  {
-	     if (rrt & 0x04000000)
-	       {
-		  int i;
-		  for (i=0; i<32; i++)
-		    {
-		       //reg_cop1_fgr_64[i]=reg_cop1_fgr_32[i];
-		       reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i];
-		       reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i];
-		    }
-	       }
-	     else
-	       {
-		  int i;
-		  for (i=0; i<32; i++)
-		    {
-		       //reg_cop1_fgr_32[i]=reg_cop1_fgr_64[i]&0xFFFFFFFF;
-		       //if (i<16) reg_cop1_double[i*2]=(double*)&reg_cop1_fgr_32[i*2];
-		       //reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i & 0xFFFE];
-		       if(!(i&1))
-			 reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i>>1];
-		       //reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i];
-		       //reg_cop1_simple[i]=(float*)&reg_cop1_fgr_32[i];
-		       //reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i & 0xFFFE]+(i&1);
+    if((rrt & 0x04000000) != (Status & 0x04000000))
+      {
+         if (rrt & 0x04000000)
+           {
+          int i;
+          for (i=0; i<32; i++)
+            {
+               //reg_cop1_fgr_64[i]=reg_cop1_fgr_32[i];
+               reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i];
+               reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i];
+            }
+           }
+         else
+           {
+          int i;
+          for (i=0; i<32; i++)
+            {
+               //reg_cop1_fgr_32[i]=reg_cop1_fgr_64[i]&0xFFFFFFFF;
+               //if (i<16) reg_cop1_double[i*2]=(double*)&reg_cop1_fgr_32[i*2];
+               //reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i & 0xFFFE];
+               if(!(i&1))
+             reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i>>1];
+               //reg_cop1_double[i]=(double*)&reg_cop1_fgr_64[i];
+               //reg_cop1_simple[i]=(float*)&reg_cop1_fgr_32[i];
+               //reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i & 0xFFFE]+(i&1);
 #ifndef _BIG_ENDIAN
-		       reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i>>1]+(i&1);
+               reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i>>1]+(i&1);
 #else
-		       reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i>>1]+(1-(i&1));
+               reg_cop1_simple[i]=(float*)&reg_cop1_fgr_64[i>>1]+(1-(i&1));
 #endif
-		    }
-	       }
-	  }
-	Status = rrt;
-	interp_addr+=4;
-	check_interupt();
-	update_count();
-	if (next_interupt <= Count) gen_interupt();
-	interp_addr-=4;
-	break;
+            }
+           }
+      }
+    Status = rrt;
+    interp_addr+=4;
+    check_interupt();
+    update_count();
+    if (next_interupt <= Count) gen_interupt();
+    interp_addr-=4;
+    break;
       case 13:   // Cause
-	if (rrt!=0)
-	  {
-	     printf("écriture dans Cause\n");
-	     stop = 1;
-	  }
-	else Cause = rrt;
-	break;
+    if (rrt!=0)
+      {
+         printf("écriture dans Cause\n");
+         stop = 1;
+      }
+    else Cause = rrt;
+    break;
       case 14:   // EPC
-	EPC = rrt;
-	break;
+    EPC = rrt;
+    break;
       case 15:  // PRevID
-	break;
+    break;
       case 16:  // Config
-	Config = rrt;
-	break;
+    Config = rrt;
+    break;
       case 18:  // WatchLo
-	WatchLo = rrt & 0xFFFFFFFF;
-	break;
+    WatchLo = rrt & 0xFFFFFFFF;
+    break;
       case 19:  // WatchHi
-	WatchHi = rrt & 0xFFFFFFFF;
-	break;
+    WatchHi = rrt & 0xFFFFFFFF;
+    break;
       case 27: // CacheErr
-	break;
+    break;
       case 28: // TagLo
-	TagLo = rrt & 0x0FFFFFC0;
-	break;
+    TagLo = rrt & 0x0FFFFFC0;
+    break;
       case 29: // TagHi
-	TagHi =0;
-	break;
+    TagHi =0;
+    break;
       default:
-	printf("unknown mtc0 write : %d\n", PC->f.r.nrd);
-	stop=1;
+    printf("unknown mtc0 write : %d\n", PC->f.r.nrd);
+    stop=1;
      }
    interp_addr+=4;
 }
@@ -1142,16 +1142,16 @@ static void BC1F()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if ((FCR31 & 0x800000)==0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -1171,16 +1171,16 @@ static void BC1T()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if ((FCR31 & 0x800000)!=0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -1200,26 +1200,26 @@ static void BC1FL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if ((FCR31 & 0x800000)==0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if ((FCR31 & 0x800000)==0)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else
      interp_addr+=8;
@@ -1233,26 +1233,26 @@ static void BC1TL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if ((FCR31 & 0x800000)!=0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if ((FCR31 & 0x800000)!=0)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else
      interp_addr+=8;
@@ -1294,7 +1294,7 @@ static void DIV_S()
 {
    if((FCR31 & 0x400) && *reg_cop1_simple[cfft] == 0)
      {
-	printf("div_s by 0\n");
+    printf("div_s by 0\n");
      }
    set_rounding();
    *reg_cop1_simple[cffd] = *reg_cop1_simple[cffs] /
@@ -1479,8 +1479,8 @@ static void C_SF_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    interp_addr+=4;
@@ -1490,8 +1490,8 @@ static void C_NGLE_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    interp_addr+=4;
@@ -1501,8 +1501,8 @@ static void C_SEQ_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] == *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -1514,8 +1514,8 @@ static void C_NGL_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] == *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -1527,8 +1527,8 @@ static void C_LT_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] < *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -1540,8 +1540,8 @@ static void C_NGE_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] < *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -1553,8 +1553,8 @@ static void C_LE_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] <= *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -1566,8 +1566,8 @@ static void C_NGT_S()
 {
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] <= *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -1615,12 +1615,12 @@ static void DIV_D()
 {
    if((FCR31 & 0x400) && *reg_cop1_double[cfft] == 0)
      {
-	//FCR31 |= 0x8020;
-	/*FCR31 |= 0x8000;
-	Cause = 15 << 2;
-	exception_general();*/
-	printf("div_d by 0\n");
-	//return;
+    //FCR31 |= 0x8020;
+    /*FCR31 |= 0x8000;
+    Cause = 15 << 2;
+    exception_general();*/
+    printf("div_d by 0\n");
+    //return;
      }
    set_rounding();
    *reg_cop1_double[cffd] = *reg_cop1_double[cffs] /
@@ -1805,8 +1805,8 @@ static void C_SF_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    interp_addr+=4;
@@ -1816,8 +1816,8 @@ static void C_NGLE_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    interp_addr+=4;
@@ -1827,8 +1827,8 @@ static void C_SEQ_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] == *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -1840,8 +1840,8 @@ static void C_NGL_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] == *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -1853,8 +1853,8 @@ static void C_LT_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] < *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -1866,8 +1866,8 @@ static void C_NGE_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] < *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -1879,8 +1879,8 @@ static void C_LE_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] <= *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -1892,8 +1892,8 @@ static void C_NGT_D()
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_double[cffs] <= *reg_cop1_double[cfft])
      FCR31 |= 0x800000;
@@ -1982,13 +1982,13 @@ static void CFC1()
 {
    if (rfs==31)
      {
-	rrt32 = FCR31;
-	sign_extended(rrt);
+    rrt32 = FCR31;
+    sign_extended(rrt);
      }
    if (rfs==0)
      {
-	rrt32 = FCR0;
-	sign_extended(rrt);
+    rrt32 = FCR0;
+    sign_extended(rrt);
      }
    interp_addr+=4;
 }
@@ -2012,20 +2012,20 @@ static void CTC1()
    switch((FCR31 & 3))
      {
       case 0:
-	rounding_mode = 0x33F;
-	break;
+    rounding_mode = 0x33F;
+    break;
       case 1:
-	rounding_mode = 0xF3F;
-	break;
+    rounding_mode = 0xF3F;
+    break;
       case 2:
-	rounding_mode = 0xB3F;
-	break;
+    rounding_mode = 0xB3F;
+    break;
       case 3:
-	rounding_mode = 0x73F;
-	break;
+    rounding_mode = 0x73F;
+    break;
      }
    //if ((FCR31 >> 7) & 0x1F) printf("FPU Exception enabled : %x\n",
-//				   (int)((FCR31 >> 7) & 0x1F));
+//                 (int)((FCR31 >> 7) & 0x1F));
    interp_addr+=4;
 }
 
@@ -2077,16 +2077,16 @@ static void J()
    unsigned int naddr = (PC->f.j.inst_index<<2) | (interp_addr & 0xF0000000);
    if (naddr == interp_addr)
      {
-	if (probe_nop(interp_addr+4))
-	  {
-	     update_count();
-	     skip = next_interupt - Count;
-	     if (skip > 3) 
-	       {
-		  Count += (skip & 0xFFFFFFFC);
-		  return;
-	       }
-	  }
+    if (probe_nop(interp_addr+4))
+      {
+         update_count();
+         skip = next_interupt - Count;
+         if (skip > 3) 
+           {
+          Count += (skip & 0xFFFFFFFC);
+          return;
+           }
+      }
      }
    interp_addr+=4;
    delay_slot=1;
@@ -2104,16 +2104,16 @@ static void JAL()
    unsigned int naddr = (PC->f.j.inst_index<<2) | (interp_addr & 0xF0000000);
    if (naddr == interp_addr)
      {
-	if (probe_nop(interp_addr+4))
-	  {
-	     update_count();
-	     skip = next_interupt - Count;
-	     if (skip > 3) 
-	       {
-		  Count += (skip & 0xFFFFFFFC);
-		  return;
-	       }
-	  }
+    if (probe_nop(interp_addr+4))
+      {
+         update_count();
+         skip = next_interupt - Count;
+         if (skip > 3) 
+           {
+          Count += (skip & 0xFFFFFFFC);
+          return;
+           }
+      }
      }
    interp_addr+=4;
    delay_slot=1;
@@ -2123,10 +2123,10 @@ static void JAL()
    delay_slot=0;
    if (!skip_jump)
      {
-	reg[31]=interp_addr;
-	sign_extended(reg[31]);
-	
-	interp_addr = naddr;
+    reg[31]=interp_addr;
+    sign_extended(reg[31]);
+    
+    interp_addr = naddr;
      }
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
@@ -2140,16 +2140,16 @@ static void BEQ()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (local_rs == local_rt)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -2171,16 +2171,16 @@ static void BNE()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (local_rs != local_rt)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -2201,16 +2201,16 @@ static void BLEZ()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (local_rs <= 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -2231,16 +2231,16 @@ static void BGTZ()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (local_rs > 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    interp_addr+=4;
    delay_slot=1;
@@ -2327,31 +2327,31 @@ static void BEQL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (irs == irt)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if (local_rs == local_rt)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else
      {
-	interp_addr+=8;
-	update_count();
+    interp_addr+=8;
+    update_count();
      }
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
@@ -2365,31 +2365,31 @@ static void BNEL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (irs != irt)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if (local_rs != local_rt)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else
      {
-	interp_addr+=8;
-	update_count();
+    interp_addr+=8;
+    update_count();
      }
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
@@ -2402,31 +2402,31 @@ static void BLEZL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (irs <= 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if (local_rs <= 0)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else
      {
-	interp_addr+=8;
-	update_count();
+    interp_addr+=8;
+    update_count();
      }
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
@@ -2439,31 +2439,31 @@ static void BGTZL()
    if ((interp_addr + (local_immediate+1)*4) == interp_addr)
      if (irs > 0)
        {
-	  if (probe_nop(interp_addr+4))
-	    {
-	       update_count();
-	       skip = next_interupt - Count;
-	       if (skip > 3) 
-		 {
-		    Count += (skip & 0xFFFFFFFC);
-		    return;
-		 }
-	    }
+      if (probe_nop(interp_addr+4))
+        {
+           update_count();
+           skip = next_interupt - Count;
+           if (skip > 3) 
+         {
+            Count += (skip & 0xFFFFFFFC);
+            return;
+         }
+        }
        }
    if (local_rs > 0)
      {
-	interp_addr+=4;
-	delay_slot=1;
-	prefetch();
-	interp_ops[((op >> 26) & 0x3F)]();
-	update_count();
-	delay_slot=0;
-	interp_addr += (local_immediate-1)*4;
+    interp_addr+=4;
+    delay_slot=1;
+    prefetch();
+    interp_ops[((op >> 26) & 0x3F)]();
+    update_count();
+    delay_slot=0;
+    interp_addr += (local_immediate-1)*4;
      }
    else
      {
-	interp_addr+=8;
-	update_count();
+    interp_addr+=8;
+    update_count();
      }
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
@@ -2488,52 +2488,52 @@ static void LDL()
    switch ((iimmediate + irs32) & 7)
      {
       case 0:
-	address = iimmediate + irs32;
-	rdword = (unsigned long long *) &irt;
-	read_dword_in_memory();
-	break;
+    address = iimmediate + irs32;
+    rdword = (unsigned long long *) &irt;
+    read_dword_in_memory();
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFF) | (word << 8);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFF) | (word << 8);
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFF) | (word << 16);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFF) | (word << 16);
+    break;
       case 3:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFF) | (word << 24);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFF) | (word << 24);
+    break;
       case 4:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFF) | (word << 32);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFF) | (word << 32);
+    break;
       case 5:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFFFFLL) | (word << 40);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFFFFLL) | (word << 40);
+    break;
       case 6:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFFFFFFLL) | (word << 48);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFFFFFFLL) | (word << 48);
+    break;
       case 7:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFFFFFFFFLL) | (word << 56);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFFFFFFFFLL) | (word << 56);
+    break;
      }
 }
 
@@ -2544,52 +2544,52 @@ static void LDR()
    switch ((iimmediate + irs32) & 7)
      {
       case 0:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFFFFFFFF00LL) | (word >> 56);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFFFFFFFF00LL) | (word >> 56);
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFFFFFF0000LL) | (word >> 48);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFFFFFF0000LL) | (word >> 48);
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFFFF000000LL) | (word >> 40);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFFFF000000LL) | (word >> 40);
+    break;
       case 3:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFFFF00000000LL) | (word >> 32);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFFFF00000000LL) | (word >> 32);
+    break;
       case 4:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFFFF0000000000LL) | (word >> 24);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFFFF0000000000LL) | (word >> 24);
+    break;
       case 5:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFFFF000000000000LL) | (word >> 16);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFFFF000000000000LL) | (word >> 16);
+    break;
       case 6:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &word;
-	read_dword_in_memory();
-	irt = (irt & 0xFF00000000000000LL) | (word >> 8);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &word;
+    read_dword_in_memory();
+    irt = (irt & 0xFF00000000000000LL) | (word >> 8);
+    break;
       case 7:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = (unsigned long long *) &irt;
-	read_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = (unsigned long long *) &irt;
+    read_dword_in_memory();
+    break;
      }
 }
 
@@ -2618,28 +2618,28 @@ static void LWL()
    switch ((iimmediate + irs32) & 3)
      {
       case 0:
-	address = iimmediate + irs32;
-	rdword = (unsigned long long *) &irt;
-	read_word_in_memory();
-	break;
+    address = iimmediate + irs32;
+    rdword = (unsigned long long *) &irt;
+    read_word_in_memory();
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	irt = (irt & 0xFF) | (word << 8);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    irt = (irt & 0xFF) | (word << 8);
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	irt = (irt & 0xFFFF) | (word << 16);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    irt = (irt & 0xFFFF) | (word << 16);
+    break;
       case 3:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	irt = (irt & 0xFFFFFF) | (word << 24);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    irt = (irt & 0xFFFFFF) | (word << 24);
+    break;
      }
    sign_extended(irt);
 }
@@ -2676,28 +2676,28 @@ static void LWR()
    switch ((iimmediate + irs32) & 3)
      {
       case 0:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	irt = (irt & 0xFFFFFFFFFFFFFF00LL) | ((word >> 24) & 0xFF);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    irt = (irt & 0xFFFFFFFFFFFFFF00LL) | ((word >> 24) & 0xFF);
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	irt = (irt & 0xFFFFFFFFFFFF0000LL) | ((word >> 16) & 0xFFFF);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    irt = (irt & 0xFFFFFFFFFFFF0000LL) | ((word >> 16) & 0xFFFF);
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &word;
-	read_word_in_memory();
-	irt = (irt & 0xFFFFFFFFFF000000LL) | ((word >> 8) & 0xFFFFFF);
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &word;
+    read_word_in_memory();
+    irt = (irt & 0xFFFFFFFFFF000000LL) | ((word >> 8) & 0xFFFFFF);
+    break;
       case 3:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = (unsigned long long *) &irt;
-	read_word_in_memory();
-	sign_extended(irt);
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = (unsigned long long *) &irt;
+    read_word_in_memory();
+    sign_extended(irt);
      }
 }
 
@@ -2732,29 +2732,29 @@ static void SWL()
    switch ((iimmediate + irs32) & 3)
      {
       case 0:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	word = (unsigned int)irt;
-	write_word_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    word = (unsigned int)irt;
+    write_word_in_memory();
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	word = ((unsigned int)irt >> 8) | (old_word & 0xFF000000);
-	write_word_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    word = ((unsigned int)irt >> 8) | (old_word & 0xFF000000);
+    write_word_in_memory();
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	word = ((unsigned int)irt >> 16) | (old_word & 0xFFFF0000);
-	write_word_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    word = ((unsigned int)irt >> 16) | (old_word & 0xFFFF0000);
+    write_word_in_memory();
+    break;
       case 3:
-	address = iimmediate + irs32;
-	byte = (unsigned char)(irt >> 24);
-	write_byte_in_memory();
-	break;
+    address = iimmediate + irs32;
+    byte = (unsigned char)(irt >> 24);
+    write_byte_in_memory();
+    break;
      }
 }
 
@@ -2773,59 +2773,59 @@ static void SDL()
    switch ((iimmediate + irs32) & 7)
      {
       case 0:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	dword = irt;
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    dword = irt;
+    write_dword_in_memory();
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = ((unsigned long long)irt >> 8)|(old_word & 0xFF00000000000000LL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = ((unsigned long long)irt >> 8)|(old_word & 0xFF00000000000000LL);
+    write_dword_in_memory();
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = ((unsigned long long)irt >> 16)|(old_word & 0xFFFF000000000000LL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = ((unsigned long long)irt >> 16)|(old_word & 0xFFFF000000000000LL);
+    write_dword_in_memory();
+    break;
       case 3:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = ((unsigned long long)irt >> 24)|(old_word & 0xFFFFFF0000000000LL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = ((unsigned long long)irt >> 24)|(old_word & 0xFFFFFF0000000000LL);
+    write_dword_in_memory();
+    break;
       case 4:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = ((unsigned long long)irt >> 32)|(old_word & 0xFFFFFFFF00000000LL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = ((unsigned long long)irt >> 32)|(old_word & 0xFFFFFFFF00000000LL);
+    write_dword_in_memory();
+    break;
       case 5:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = ((unsigned long long)irt >> 40)|(old_word & 0xFFFFFFFFFF000000LL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = ((unsigned long long)irt >> 40)|(old_word & 0xFFFFFFFFFF000000LL);
+    write_dword_in_memory();
+    break;
       case 6:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = ((unsigned long long)irt >> 48)|(old_word & 0xFFFFFFFFFFFF0000LL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = ((unsigned long long)irt >> 48)|(old_word & 0xFFFFFFFFFFFF0000LL);
+    write_dword_in_memory();
+    break;
       case 7:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = ((unsigned long long)irt >> 56)|(old_word & 0xFFFFFFFFFFFFFF00LL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = ((unsigned long long)irt >> 56)|(old_word & 0xFFFFFFFFFFFFFF00LL);
+    write_dword_in_memory();
+    break;
      }
 }
 
@@ -2836,59 +2836,59 @@ static void SDR()
    switch ((iimmediate + irs32) & 7)
      {
       case 0:
-	address = iimmediate + irs32;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = (irt << 56) | (old_word & 0x00FFFFFFFFFFFFFFLL);
-	write_dword_in_memory();
-	break;
+    address = iimmediate + irs32;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = (irt << 56) | (old_word & 0x00FFFFFFFFFFFFFFLL);
+    write_dword_in_memory();
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = (irt << 48) | (old_word & 0x0000FFFFFFFFFFFFLL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = (irt << 48) | (old_word & 0x0000FFFFFFFFFFFFLL);
+    write_dword_in_memory();
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = (irt << 40) | (old_word & 0x000000FFFFFFFFFFLL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = (irt << 40) | (old_word & 0x000000FFFFFFFFFFLL);
+    write_dword_in_memory();
+    break;
       case 3:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = (irt << 32) | (old_word & 0x00000000FFFFFFFFLL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = (irt << 32) | (old_word & 0x00000000FFFFFFFFLL);
+    write_dword_in_memory();
+    break;
       case 4:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = (irt << 24) | (old_word & 0x0000000000FFFFFFLL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = (irt << 24) | (old_word & 0x0000000000FFFFFFLL);
+    write_dword_in_memory();
+    break;
       case 5:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = (irt << 16) | (old_word & 0x000000000000FFFFLL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = (irt << 16) | (old_word & 0x000000000000FFFFLL);
+    write_dword_in_memory();
+    break;
       case 6:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	rdword = &old_word;
-	read_dword_in_memory();
-	dword = (irt << 8) | (old_word & 0x00000000000000FFLL);
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    rdword = &old_word;
+    read_dword_in_memory();
+    dword = (irt << 8) | (old_word & 0x00000000000000FFLL);
+    write_dword_in_memory();
+    break;
       case 7:
-	address = (iimmediate + irs32) & 0xFFFFFFF8;
-	dword = irt;
-	write_dword_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFF8;
+    dword = irt;
+    write_dword_in_memory();
+    break;
      }
 }
 
@@ -2899,31 +2899,31 @@ static void SWR()
    switch ((iimmediate + irs32) & 3)
      {
       case 0:
-	address = iimmediate + irs32;
-	rdword = &old_word;
-	read_word_in_memory();
-	word = ((unsigned int)irt << 24) | (old_word & 0x00FFFFFF);
-	write_word_in_memory();
-	break;
+    address = iimmediate + irs32;
+    rdword = &old_word;
+    read_word_in_memory();
+    word = ((unsigned int)irt << 24) | (old_word & 0x00FFFFFF);
+    write_word_in_memory();
+    break;
       case 1:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	word = ((unsigned int)irt << 16) | (old_word & 0x0000FFFF);
-	write_word_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    word = ((unsigned int)irt << 16) | (old_word & 0x0000FFFF);
+    write_word_in_memory();
+    break;
       case 2:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	rdword = &old_word;
-	read_word_in_memory();
-	word = ((unsigned int)irt << 8) | (old_word & 0x000000FF);
-	write_word_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    rdword = &old_word;
+    read_word_in_memory();
+    word = ((unsigned int)irt << 8) | (old_word & 0x000000FF);
+    write_word_in_memory();
+    break;
       case 3:
-	address = (iimmediate + irs32) & 0xFFFFFFFC;
-	word = (unsigned int)irt;
-	write_word_in_memory();
-	break;
+    address = (iimmediate + irs32) & 0xFFFFFFFC;
+    word = (unsigned int)irt;
+    write_word_in_memory();
+    break;
      }
 }
 
@@ -2975,15 +2975,15 @@ static void SC()
    interp_addr+=4;
    if(llbit)
      {
-	address = iimmediate + irs32;
-	word = (unsigned int)(irt & 0xFFFFFFFF);
-	write_word_in_memory();
-	llbit = 0;
-	irt = 1;
+    address = iimmediate + irs32;
+    word = (unsigned int)(irt & 0xFFFFFFFF);
+    write_word_in_memory();
+    llbit = 0;
+    irt = 1;
      }
    else
      {
-	irt = 0;
+    irt = 0;
      }
 }
 
@@ -3033,61 +3033,61 @@ void prefetch()
    //unsigned int comp;
    //if (!tlb_used)
      //{
-	/*if (f==NULL) f = fopen("/mnt/windows/pcdeb.txt", "rb");
-	fscanf(f, "%x", &comp);
-	if (comp != interp_addr)
-	  {
-	     printf("diff@%x, line:%d\n", interp_addr, line);
-	     stop=1;
-	  }*/
-	//line++;
-	//if ((debug_count+Count) > 0x50fe000) printf("line:%d\n", line);
-	/*if ((debug_count+Count) > 0xb70000)
-	  printf("count:%x, add:%x, op:%x, l%d\n", (int)(Count+debug_count),
-		 interp_addr, op, line);*/
+    /*if (f==NULL) f = fopen("/mnt/windows/pcdeb.txt", "rb");
+    fscanf(f, "%x", &comp);
+    if (comp != interp_addr)
+      {
+         printf("diff@%x, line:%d\n", interp_addr, line);
+         stop=1;
+      }*/
+    //line++;
+    //if ((debug_count+Count) > 0x50fe000) printf("line:%d\n", line);
+    /*if ((debug_count+Count) > 0xb70000)
+      printf("count:%x, add:%x, op:%x, l%d\n", (int)(Count+debug_count),
+         interp_addr, op, line);*/
      //}
    //printf("addr:%x\n", interp_addr);
    if ((interp_addr >= 0x80000000) && (interp_addr < 0xc0000000))
      {
-	if ((interp_addr >= 0x80000000) && (interp_addr < 0x80800000))
-	  {
-	     op = rdram[(interp_addr&0xFFFFFF)/4];
-	     /*if ((debug_count+Count) > 0xabaa20)
-	       printf("count:%x, add:%x, op:%x, l%d\n", (int)(Count+debug_count),
-		      interp_addr, op, line);*/
-	     prefetch_opcode(op);
-	  }
-	else if ((interp_addr >= 0xa4000000) && (interp_addr < 0xa4001000))
-	  {
-	     op = SP_DMEM[(interp_addr&0xFFF)/4];
-	     prefetch_opcode(op);
-	  }
-	else if ((interp_addr > 0xb0000000))
-	  {
-	     op = ((unsigned int*)rom)[(interp_addr & 0xFFFFFFF)/4];
-	     prefetch_opcode(op);
-	  }
-	else
-	  {
-	     printf("execution à l'addresse :%x\n", (int)interp_addr);
-	     stop=1;
-	  }
+    if ((interp_addr >= 0x80000000) && (interp_addr < 0x80800000))
+      {
+         op = rdram[(interp_addr&0xFFFFFF)/4];
+         /*if ((debug_count+Count) > 0xabaa20)
+           printf("count:%x, add:%x, op:%x, l%d\n", (int)(Count+debug_count),
+              interp_addr, op, line);*/
+         prefetch_opcode(op);
+      }
+    else if ((interp_addr >= 0xa4000000) && (interp_addr < 0xa4001000))
+      {
+         op = SP_DMEM[(interp_addr&0xFFF)/4];
+         prefetch_opcode(op);
+      }
+    else if ((interp_addr > 0xb0000000))
+      {
+         op = ((unsigned int*)rom)[(interp_addr & 0xFFFFFFF)/4];
+         prefetch_opcode(op);
+      }
+    else
+      {
+         printf("execution à l'addresse :%x\n", (int)interp_addr);
+         stop=1;
+      }
      }
    else
      {
-	unsigned int addr = interp_addr, phys;
-	phys = virtual_to_physical_address(interp_addr, 2);
-	if (phys != 0x00000000) interp_addr = phys;
-	else 
-	  {
-	     prefetch();
-	     //tlb_used = 0;
-	     return;
-	  }
-	//tlb_used = 1;
-	prefetch();
-	//tlb_used = 0;
-	interp_addr = addr;
+    unsigned int addr = interp_addr, phys;
+    phys = virtual_to_physical_address(interp_addr, 2);
+    if (phys != 0x00000000) interp_addr = phys;
+    else 
+      {
+         prefetch();
+         //tlb_used = 0;
+         return;
+      }
+    //tlb_used = 1;
+    prefetch();
+    //tlb_used = 0;
+    interp_addr = addr;
      }
 }
 
@@ -3099,20 +3099,20 @@ void pure_interpreter()
    last_addr = interp_addr;
    while (!stop)
      {
-	//if (interp_addr == 0x10022d08) stop = 1;
-	prefetch();
+    //if (interp_addr == 0x10022d08) stop = 1;
+    prefetch();
 #ifdef COMPARE_CORE
-	compare_core();
+    compare_core();
 #endif
-	//if (Count > 0x2000000) printf("inter:%x,%x\n", interp_addr,op);
-	//if ((Count+debug_count) > 0xabaa2c) stop=1;
-	interp_ops[((op >> 26) & 0x3F)]();
+    //if (Count > 0x2000000) printf("inter:%x,%x\n", interp_addr,op);
+    //if ((Count+debug_count) > 0xabaa2c) stop=1;
+    interp_ops[((op >> 26) & 0x3F)]();
 
-	//Count = (unsigned int)Count + 2;
-	//if (interp_addr == 0x80000180) last_addr = interp_addr;
+    //Count = (unsigned int)Count + 2;
+    //if (interp_addr == 0x80000180) last_addr = interp_addr;
 #ifdef DBG
-	PC->addr = interp_addr;
-	if (debugger_mode) update_debugger();
+    PC->addr = interp_addr;
+    if (debugger_mode) update_debugger();
 #endif
      }
    PC->addr = interp_addr;
@@ -3125,15 +3125,15 @@ void interprete_section(unsigned int addr)
    last_addr = interp_addr;
    while (!stop && (addr >> 12) == (interp_addr >> 12))
      {
-	prefetch();
+    prefetch();
 #ifdef COMPARE_CORE
-	compare_core();
+    compare_core();
 #endif
-	PC->addr = interp_addr;
-	interp_ops[((op >> 26) & 0x3F)]();
+    PC->addr = interp_addr;
+    interp_ops[((op >> 26) & 0x3F)]();
 #ifdef DBG
-	PC->addr = interp_addr;
-	if (debugger_mode) update_debugger();
+    PC->addr = interp_addr;
+    if (debugger_mode) update_debugger();
 #endif
      }
    PC->addr = interp_addr;

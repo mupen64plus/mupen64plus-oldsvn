@@ -41,36 +41,36 @@ typedef struct _precomp_instr
    void (*ops)();
    union
      {
-	struct
-	  {
-	     long long int *rs;
-	     long long int *rt;
-	     short immediate;
-	  } i;
-	struct
-	  {
-	     unsigned int inst_index;
-	  } j;
-	struct
-	  {
-	     long long int *rs;
-	     long long int *rt;
-	     long long int *rd;
-	     unsigned char sa;
-	     unsigned char nrd;
-	  } r;
-	struct
-	  {
-	     unsigned char base;
-	     unsigned char ft;
-	     short offset;
-	  } lf;
-	struct
-	  {
-	     unsigned char ft;
-	     unsigned char fs;
-	     unsigned char fd;
-	  } cf;
+    struct
+      {
+         long long int *rs;
+         long long int *rt;
+         short immediate;
+      } i;
+    struct
+      {
+         unsigned int inst_index;
+      } j;
+    struct
+      {
+         long long int *rs;
+         long long int *rt;
+         long long int *rd;
+         unsigned char sa;
+         unsigned char nrd;
+      } r;
+    struct
+      {
+         unsigned char base;
+         unsigned char ft;
+         short offset;
+      } lf;
+    struct
+      {
+         unsigned char ft;
+         unsigned char fs;
+         unsigned char fd;
+      } cf;
      } f;
    unsigned int addr; /* word-aligned instruction address in r4300 address space */
    unsigned int local_addr; /* byte offset to start of corresponding x86_64 instructions, from start of code block */

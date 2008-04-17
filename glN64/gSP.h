@@ -5,92 +5,92 @@
 #include "GBI.h"
 #include "gDP.h"
 
-#define CHANGED_VIEWPORT		0x01
-#define CHANGED_MATRIX			0x02
-#define CHANGED_COLORBUFFER		0x04
-#define CHANGED_GEOMETRYMODE	0x08
-#define CHANGED_TEXTURE			0x10
-#define CHANGED_FOGPOSITION		0x10
+#define CHANGED_VIEWPORT        0x01
+#define CHANGED_MATRIX          0x02
+#define CHANGED_COLORBUFFER     0x04
+#define CHANGED_GEOMETRYMODE    0x08
+#define CHANGED_TEXTURE         0x10
+#define CHANGED_FOGPOSITION     0x10
 
 struct SPVertex
 {
-	f32		x, y, z, w;
-	f32		nx, ny, nz;
-	f32		r, g, b, a;
-	f32		s, t;
-	f32		xClip, yClip, zClip;
-	s16		flag;
+    f32     x, y, z, w;
+    f32     nx, ny, nz;
+    f32     r, g, b, a;
+    f32     s, t;
+    f32     xClip, yClip, zClip;
+    s16     flag;
 };
 
 typedef SPVertex SPTriangle[3];
 
 struct gSPInfo
 {
-	u32 segment[16];
+    u32 segment[16];
 
-	struct
-	{
-		u32 modelViewi, stackSize, billboard;
-		f32 modelView[32][4][4];
-		f32 projection[4][4];
-		f32 combined[4][4];
-	} matrix;
+    struct
+    {
+        u32 modelViewi, stackSize, billboard;
+        f32 modelView[32][4][4];
+        f32 projection[4][4];
+        f32 combined[4][4];
+    } matrix;
 
-	struct
-	{
-		f32 A, B, C, D;
-		f32 X, Y;
-		f32 baseScaleX, baseScaleY;
-	} objMatrix;
+    struct
+    {
+        f32 A, B, C, D;
+        f32 X, Y;
+        f32 baseScaleX, baseScaleY;
+    } objMatrix;
 
-	SPVertex vertices[80];
+    SPVertex vertices[80];
 
-	u32 vertexColorBase;
-	u32 vertexi;
+    u32 vertexColorBase;
+    u32 vertexi;
 
-	struct
-	{
-		f32	r, g, b;
-		f32	x, y, z;
-	} lights[8];
+    struct
+    {
+        f32 r, g, b;
+        f32 x, y, z;
+    } lights[8];
 
-	struct
-	{
-		f32 scales, scalet;
-		s32 level, on, tile;
+    struct
+    {
+        f32 scales, scalet;
+        s32 level, on, tile;
     } texture;
 
-	gDPTile *textureTile[2];
+    gDPTile *textureTile[2];
 
-	struct
-	{
-		f32 vscale[4];
-		f32 vtrans[4];
-		f32 x, y, width, height;
-		f32 nearz, farz;
-	} viewport;
+    struct
+    {
+        f32 vscale[4];
+        f32 vtrans[4];
+        f32 x, y, width, height;
+        f32 nearz, farz;
+    } viewport;
 
-	struct
-	{
-		s16 multiplier, offset;
-	} fog;
+    struct
+    {
+        s16 multiplier, offset;
+    } fog;
 
-	struct
-	{
-		u32 address, width, height, format, size, palette;
-	} bgImage;
+    struct
+    {
+        u32 address, width, height, format, size, palette;
+    } bgImage;
 
-	u32 geometryMode;
-	s32 numLights;
+    u32 geometryMode;
+    s32 numLights;
 
-	u32 changed;
+    u32 changed;
 
-	u32 status[4];
+    u32 status[4];
 
-	struct
-	{
-		u32 vtx, mtx;
-	} DMAOffsets;
+    struct
+    {
+        u32 vtx, mtx;
+    } DMAOffsets;
 };
 
 extern gSPInfo gSP;
@@ -113,11 +113,11 @@ void gSPBranchLessZ( u32 branchdl, u32 vtx, f32 zval );
 void gSPSprite2DBase( u32 base );
 void gSP1Triangle( s32 v0, s32 v1, s32 v2, s32 flag );
 void gSP2Triangles( s32 v00, s32 v01, s32 v02, s32 flag0, 
-				    s32 v10, s32 v11, s32 v12, s32 flag1 );
+                    s32 v10, s32 v11, s32 v12, s32 flag1 );
 void gSP4Triangles( s32 v00, s32 v01, s32 v02,
-				    s32 v10, s32 v11, s32 v12,
-					s32 v20, s32 v21, s32 v22,
-					s32 v30, s32 v31, s32 v32 );
+                    s32 v10, s32 v11, s32 v12,
+                    s32 v20, s32 v21, s32 v22,
+                    s32 v30, s32 v31, s32 v32 );
 void gSPDMATriangles( u32 tris, u32 n );
 void gSP1Quadrangle( s32 v0, s32 v1, s32 v2, s32 v4 );
 void gSPCullDisplayList( u32 v0, u32 vn );

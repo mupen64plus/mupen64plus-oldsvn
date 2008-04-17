@@ -53,13 +53,13 @@ void CFC1()
    if (check_cop1_unusable()) return;
    if (rfs==31)
      {
-	rrt32 = FCR31;
-	sign_extended(rrt);
+    rrt32 = FCR31;
+    sign_extended(rrt);
      }
    if (rfs==0)
      {
-	rrt32 = FCR0;
-	sign_extended(rrt);
+    rrt32 = FCR0;
+    sign_extended(rrt);
      }
    PC++;
 }
@@ -86,19 +86,19 @@ void CTC1()
    switch((FCR31 & 3))
      {
       case 0:
-	rounding_mode = 0x33F;
-	break;
+    rounding_mode = 0x33F;
+    break;
       case 1:
-	rounding_mode = 0xF3F;
-	break;
+    rounding_mode = 0xF3F;
+    break;
       case 2:
-	rounding_mode = 0xB3F;
-	break;
+    rounding_mode = 0xB3F;
+    break;
       case 3:
-	rounding_mode = 0x73F;
-	break;
+    rounding_mode = 0x73F;
+    break;
      }
    //if ((FCR31 >> 7) & 0x1F) printf("FPU Exception enabled : %x\n", 
-//				   (int)((FCR31 >> 7) & 0x1F));
+//                 (int)((FCR31 >> 7) & 0x1F));
    PC++;
 }

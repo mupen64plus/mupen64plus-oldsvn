@@ -13,11 +13,11 @@ char configdir[PATH_MAX] = {0};
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 {
-	if (dwReason == DLL_PROCESS_ATTACH)
-	{
+    if (dwReason == DLL_PROCESS_ATTACH)
+    {
 
-	}
-	return TRUE;
+    }
+    return TRUE;
 }
 #else
 void _init( void )
@@ -59,17 +59,17 @@ EXPORT void CALL DrawScreen (void)
 
 EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 {
-	PluginInfo->Version = 0x103;
-	PluginInfo->Type = PLUGIN_TYPE_GFX;
-	strcpy( PluginInfo->Name, pluginName );
-	PluginInfo->NormalMemory = FALSE;
-	PluginInfo->MemoryBswaped = TRUE;
+    PluginInfo->Version = 0x103;
+    PluginInfo->Type = PLUGIN_TYPE_GFX;
+    strcpy( PluginInfo->Name, pluginName );
+    PluginInfo->NormalMemory = FALSE;
+    PluginInfo->MemoryBswaped = TRUE;
 }
 
 
 EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info)
 {
-	return TRUE;
+    return TRUE;
 }
 
 EXPORT void CALL MoveScreen (int xpos, int ypos)

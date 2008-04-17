@@ -399,48 +399,48 @@ typedef enum {
 // Frame buffers
 typedef struct
 {
-	DWORD addr;   //color image address
-	DWORD format; 
-	DWORD size;   
-	DWORD width;
-	DWORD height;
-	CI_STATUS status;
-	int   changed;
+    DWORD addr;   //color image address
+    DWORD format; 
+    DWORD size;   
+    DWORD width;
+    DWORD height;
+    CI_STATUS status;
+    int   changed;
 } COLOR_IMAGE;
 
 typedef struct
 {
     GrChipID_t tmu;
-	DWORD addr;  //address of color image
-	DWORD end_addr; 
-	DWORD tex_addr; //address in video memory
-	DWORD width;    //width of color image
-	DWORD height;   //height of color image
-	WORD  format;   //format of color image
-	BOOL  clear;  //flag. texture buffer must be cleared
-	BOOL  drawn;  //flag. if equal to 1, this image was already drawn in current frame
-	float scr_width; //width of rendered image
-	float scr_height; //height of rendered image
-	DWORD tex_width;  //width of texture buffer
-	DWORD tex_height; //height of texture buffer
-	int   tile;     //
-	WORD  tile_uls; //shift from left bound of the texture
-	WORD  tile_ult; //shift from top of the texture
-	DWORD v_shift; //shift from top of the texture
-	DWORD u_shift; //shift from left of the texture
-	float u_scale; //used to map vertex u,v coordinates into hires texture 
-	float v_scale; //used to map vertex u,v coordinates into hires texture 
-	GrTexInfo info;
+    DWORD addr;  //address of color image
+    DWORD end_addr; 
+    DWORD tex_addr; //address in video memory
+    DWORD width;    //width of color image
+    DWORD height;   //height of color image
+    WORD  format;   //format of color image
+    BOOL  clear;  //flag. texture buffer must be cleared
+    BOOL  drawn;  //flag. if equal to 1, this image was already drawn in current frame
+    float scr_width; //width of rendered image
+    float scr_height; //height of rendered image
+    DWORD tex_width;  //width of texture buffer
+    DWORD tex_height; //height of texture buffer
+    int   tile;     //
+    WORD  tile_uls; //shift from left bound of the texture
+    WORD  tile_ult; //shift from top of the texture
+    DWORD v_shift; //shift from top of the texture
+    DWORD u_shift; //shift from left of the texture
+    float u_scale; //used to map vertex u,v coordinates into hires texture 
+    float v_scale; //used to map vertex u,v coordinates into hires texture 
+    GrTexInfo info;
 } HIRES_COLOR_IMAGE;
 
 typedef struct
 {
-	GrChipID_t tmu;
-	DWORD begin; //start of the block in video memory
-	DWORD end;   //end of the block in video memory
-	BYTE count;  //number of allocated texture buffers
-	BOOL clear_allowed; //stack of buffers can be cleared
-	HIRES_COLOR_IMAGE images[256]; 
+    GrChipID_t tmu;
+    DWORD begin; //start of the block in video memory
+    DWORD end;   //end of the block in video memory
+    BYTE count;  //number of allocated texture buffers
+    BOOL clear_allowed; //stack of buffers can be cleared
+    HIRES_COLOR_IMAGE images[256]; 
 } TEXTURE_BUFFER;
 
 #define NUMTEXBUF 92
@@ -653,7 +653,7 @@ extern DWORD    offset_cursor;
 extern DWORD    offset_textures;
 extern DWORD    offset_texbuf1;
 
-extern BOOL		ucode_error_report;
+extern BOOL     ucode_error_report;
 
 // RDP functions
 void rdp_reset ();
@@ -743,8 +743,8 @@ __inline void CalculateFog (VERTEX *v)
 {
     if (rdp.flags & FOG_ENABLED) 
     {
-		v->f = min(255.0f, max(0.0f, v->z_w * rdp.fog_multiplier + rdp.fog_offset));	
-		v->a = (BYTE)v->f;
+        v->f = min(255.0f, max(0.0f, v->z_w * rdp.fog_multiplier + rdp.fog_offset));    
+        v->a = (BYTE)v->f;
     }
     else
     {

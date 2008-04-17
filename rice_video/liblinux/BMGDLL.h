@@ -65,7 +65,7 @@ BMGError BMG_EXPORT SaveUnpackedArray( const char *filename,
                                   unsigned int width,
                                   unsigned int height,
                                   unsigned char *bits,
-								  int bgra );
+                                  int bgra );
 
 /* saves the contents of an HBITMAP to a file.  The extension of the file name
 // determines the file type.  returns 1 if successfull, 0 otherwise */
@@ -85,8 +85,8 @@ HBITMAP BMG_EXPORT CreateBitmapFromFile( const char *filename,
 /* extracts a BMGImageStruct from any one of the supported image files */
 extern 
 BMGError BMG_EXPORT GetDataFromFile( const char *filename,
-									 struct BMGImageStruct *img,
-									 void *parameters );
+                                     struct BMGImageStruct *img,
+                                     void *parameters );
 
 /* the following functions will read/write image files using raw data */
 extern
@@ -123,15 +123,15 @@ BMGError BMG_EXPORT ReadGIF( const char *filename,
 
 extern
 BMGError BMG_EXPORT ReadPSD( const char *filename, 
-						struct BMGImageStruct *img );
+                        struct BMGImageStruct *img );
 
 extern
 BMGError BMG_EXPORT ReadIFF( const char *filename, 
-						struct BMGImageStruct *img );
+                        struct BMGImageStruct *img );
 
 extern
 BMGError BMG_EXPORT ReadPCX( const char *filename, 
-						struct BMGImageStruct *img );
+                        struct BMGImageStruct *img );
 
 #if defined(__cplusplus)
  }

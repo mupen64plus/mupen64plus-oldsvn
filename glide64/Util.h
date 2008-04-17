@@ -1,20 +1,20 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -36,9 +36,9 @@
 #ifndef Util_H
 #define Util_H
 
-#define NOT_TMU0	0x00
-#define NOT_TMU1	0x01
-#define NOT_TMU2	0x02
+#define NOT_TMU0    0x00
+#define NOT_TMU1    0x01
+#define NOT_TMU2    0x02
 
 void util_init ();
 void clip_z ();
@@ -60,31 +60,31 @@ void fix_tex_coord (VERTEX **v);
 
 // positional and texel coordinate clipping
 #define CCLIP(ux,lx,ut,lt,uc,lc) \
-		if (ux > lx || lx < uc || ux > lc) { rdp.tri_n += 2; return; } \
-		if (ux < uc) { \
-			float p = (uc-ux)/(lx-ux); \
-			ut = p*(lt-ut)+ut; \
-			ux = uc; \
-		} \
-		if (lx > lc) { \
-			float p = (lc-ux)/(lx-ux); \
-			lt = p*(lt-ut)+ut; \
-			lx = lc; \
-		}
+        if (ux > lx || lx < uc || ux > lc) { rdp.tri_n += 2; return; } \
+        if (ux < uc) { \
+            float p = (uc-ux)/(lx-ux); \
+            ut = p*(lt-ut)+ut; \
+            ux = uc; \
+        } \
+        if (lx > lc) { \
+            float p = (lc-ux)/(lx-ux); \
+            lt = p*(lt-ut)+ut; \
+            lx = lc; \
+        }
 
 #define CCLIP2(ux,lx,ut,lt,un,ln,uc,lc) \
-		if (ux > lx || lx < uc || ux > lc) { rdp.tri_n += 2; return; } \
-		if (ux < uc) { \
-			float p = (uc-ux)/(lx-ux); \
-			ut = p*(lt-ut)+ut; \
-			un = p*(ln-un)+un; \
-			ux = uc; \
-		} \
-		if (lx > lc) { \
-			float p = (lc-ux)/(lx-ux); \
-			lt = p*(lt-ut)+ut; \
-			ln = p*(ln-un)+un; \
-			lx = lc; \
-		}
+        if (ux > lx || lx < uc || ux > lc) { rdp.tri_n += 2; return; } \
+        if (ux < uc) { \
+            float p = (uc-ux)/(lx-ux); \
+            ut = p*(lt-ut)+ut; \
+            un = p*(ln-un)+un; \
+            ux = uc; \
+        } \
+        if (lx > lc) { \
+            float p = (lc-ux)/(lx-ux); \
+            lt = p*(lt-ut)+ut; \
+            ln = p*(ln-un)+un; \
+            lx = lc; \
+        }
 
 #endif  // ifndef Util_H

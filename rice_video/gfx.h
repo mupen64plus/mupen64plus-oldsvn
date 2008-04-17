@@ -24,77 +24,77 @@ extern "C" {
 #endif
 
 /* Plugin types */
-#define PLUGIN_TYPE_GFX				2
+#define PLUGIN_TYPE_GFX             2
 
 #ifndef EXPORT
-#define EXPORT						__declspec(dllexport)
+#define EXPORT                      __declspec(dllexport)
 #endif
 
-#define CALL						_cdecl
+#define CALL                        _cdecl
 
 /***** Structures *****/
 typedef struct {
-	uint16 Version;        /* Set to 0x0103 */
-	uint16 Type;           /* Set to PLUGIN_TYPE_GFX */
-	char Name[100];      /* Name of the DLL */
+    uint16 Version;        /* Set to 0x0103 */
+    uint16 Type;           /* Set to PLUGIN_TYPE_GFX */
+    char Name[100];      /* Name of the DLL */
 
-	/* If DLL supports memory these memory options then set them to TRUE or FALSE
-	   if it does not support it */
-	BOOL NormalMemory;    /* a normal uint8 array */ 
-	BOOL MemoryBswaped;  /* a normal uint8 array where the memory has been pre
-	                          bswap on a dword (32 bits) boundry */
+    /* If DLL supports memory these memory options then set them to TRUE or FALSE
+       if it does not support it */
+    BOOL NormalMemory;    /* a normal uint8 array */ 
+    BOOL MemoryBswaped;  /* a normal uint8 array where the memory has been pre
+                              bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
 
 typedef struct {
-	HWND hWnd;			/* Render window */
-	HWND hStatusBar;    /* if render window does not have a status bar then this is NULL */
+    HWND hWnd;          /* Render window */
+    HWND hStatusBar;    /* if render window does not have a status bar then this is NULL */
 
-	BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
-	                       //   bswap on a dword (32 bits) boundry 
-						   //	eg. the first 8 bytes are stored like this:
-	                       //        4 3 2 1   8 7 6 5
+    BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
+                           //   bswap on a dword (32 bits) boundry 
+                           //   eg. the first 8 bytes are stored like this:
+                           //        4 3 2 1   8 7 6 5
 
-	uint8 * HEADER;	// This is the rom header (first 40h bytes of the rom
-					// This will be in the same memory format as the rest of the memory.
-	uint8 * RDRAM;
-	uint8 * DMEM;
-	uint8 * IMEM;
+    uint8 * HEADER; // This is the rom header (first 40h bytes of the rom
+                    // This will be in the same memory format as the rest of the memory.
+    uint8 * RDRAM;
+    uint8 * DMEM;
+    uint8 * IMEM;
 
-	uint32 * MI_INTR_REG;
+    uint32 * MI_INTR_REG;
 
-	uint32 * DPC_START_REG;
-	uint32 * DPC_END_REG;
-	uint32 * DPC_CURRENT_REG;
-	uint32 * DPC_STATUS_REG;
-	uint32 * DPC_CLOCK_REG;
-	uint32 * DPC_BUFBUSY_REG;
-	uint32 * DPC_PIPEBUSY_REG;
-	uint32 * DPC_TMEM_REG;
+    uint32 * DPC_START_REG;
+    uint32 * DPC_END_REG;
+    uint32 * DPC_CURRENT_REG;
+    uint32 * DPC_STATUS_REG;
+    uint32 * DPC_CLOCK_REG;
+    uint32 * DPC_BUFBUSY_REG;
+    uint32 * DPC_PIPEBUSY_REG;
+    uint32 * DPC_TMEM_REG;
 
-	uint32 * VI_STATUS_REG;
-	uint32 * VI_ORIGIN_REG;
-	uint32 * VI_WIDTH_REG;
-	uint32 * VI_INTR_REG;
-	uint32 * VI_V_CURRENT_LINE_REG;
-	uint32 * VI_TIMING_REG;
-	uint32 * VI_V_SYNC_REG;
-	uint32 * VI_H_SYNC_REG;
-	uint32 * VI_LEAP_REG;
-	uint32 * VI_H_START_REG;
-	uint32 * VI_V_START_REG;
-	uint32 * VI_V_BURST_REG;
-	uint32 * VI_X_SCALE_REG;
-	uint32 * VI_Y_SCALE_REG;
+    uint32 * VI_STATUS_REG;
+    uint32 * VI_ORIGIN_REG;
+    uint32 * VI_WIDTH_REG;
+    uint32 * VI_INTR_REG;
+    uint32 * VI_V_CURRENT_LINE_REG;
+    uint32 * VI_TIMING_REG;
+    uint32 * VI_V_SYNC_REG;
+    uint32 * VI_H_SYNC_REG;
+    uint32 * VI_LEAP_REG;
+    uint32 * VI_H_START_REG;
+    uint32 * VI_V_START_REG;
+    uint32 * VI_V_BURST_REG;
+    uint32 * VI_X_SCALE_REG;
+    uint32 * VI_Y_SCALE_REG;
 
-	void (*CheckInterrupts)( void );
+    void (*CheckInterrupts)( void );
 } GFX_INFO;
 
 
 typedef struct
 {
-	uint32 addr;
-	uint32 val;
-	uint32 size;				// 1 = uint8, 2 = uint16, 4=uint32
+    uint32 addr;
+    uint32 val;
+    uint32 size;                // 1 = uint8, 2 = uint16, 4=uint32
 } FrameBufferModifyEntry;
 
 #define NAME_DEFINE(name)  CALL name
@@ -111,7 +111,7 @@ FUNC_TYPE(void) NAME_DEFINE(CaptureScreen) ( char * Directory );
   Function: ChangeWindow
   Purpose:  to change the window between fullscreen and window 
             mode. If the window was in fullscreen this should 
-			change the screen to window mode and vice vesa.
+            change the screen to window mode and vice vesa.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -157,7 +157,7 @@ FUNC_TYPE(void) NAME_DEFINE(DllTest) ( HWND hParent );
   Function: DrawScreen
   Purpose:  This function is called when the emulator receives a
             WM_PAINT message. This allows the gfx to fit in when
-			it is being used in the desktop.
+            it is being used in the desktop.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -177,7 +177,7 @@ FUNC_TYPE(void) NAME_DEFINE(GetDllInfo) ( PLUGIN_INFO * PluginInfo );
   Function: InitiateGFX
   Purpose:  This function is called when the DLL is started to give
             information from the emulator that the n64 graphics
-			uses. This is not called from the emulation thread.
+            uses. This is not called from the emulation thread.
   Input:    Gfx_Info is passed to this function which is defined
             above.
   Output:   TRUE on success
@@ -194,11 +194,11 @@ FUNC_TYPE(BOOL) NAME_DEFINE(InitiateGFX) (GFX_INFO Gfx_Info);
   Function: MoveScreen
   Purpose:  This function is called in response to the emulator
             receiving a WM_MOVE passing the xpos and ypos passed
-			from that message.
+            from that message.
   input:    xpos - the x-coordinate of the upper-left corner of the
             client area of the window.
-			ypos - y-coordinate of the upper-left corner of the
-			client area of the window. 
+            ypos - y-coordinate of the upper-left corner of the
+            client area of the window. 
   output:   none
 *******************************************************************/ 
 FUNC_TYPE(void) NAME_DEFINE(MoveScreen) (int xpos, int ypos);
@@ -243,7 +243,7 @@ FUNC_TYPE(void) NAME_DEFINE(RomOpen) (void);
   Function: ShowCFB
   Purpose:  Useally once Dlists are started being displayed, cfb is
             ignored. This function tells the dll to start displaying
-			them again.
+            them again.
   input:    none
   output:   none
 *******************************************************************/ 
@@ -253,7 +253,7 @@ FUNC_TYPE(void) NAME_DEFINE(ShowCFB) (void);
   Function: UpdateScreen
   Purpose:  This function is called in response to a vsync of the
             screen were the VI bit in MI_INTR_REG has already been
-			set
+            set
   input:    none
   output:   none
 *******************************************************************/ 
@@ -283,9 +283,9 @@ FUNC_TYPE(void) NAME_DEFINE(ViWidthChanged) (void);
   Function: FrameBufferWrite
   Purpose:  This function is called to notify the dll that the
             frame buffer has been modified by CPU at the given address.
-  input:    addr		rdram address
-			val			val
-			size		1 = uint8, 2 = uint16, 4 = uint32
+  input:    addr        rdram address
+            val         val
+            size        1 = uint8, 2 = uint16, 4 = uint32
   output:   none
 *******************************************************************/ 
 FUNC_TYPE(void) NAME_DEFINE(FBWrite)(uint32, uint32);
@@ -295,7 +295,7 @@ FUNC_TYPE(void) NAME_DEFINE(FBWrite)(uint32, uint32);
   Purpose:  This function is called to notify the dll that the
             frame buffer has been modified by CPU at the given address.
   input:    FrameBufferModifyEntry *plist
-			size = size of the plist, max = 1024
+            size = size of the plist, max = 1024
   output:   none
 *******************************************************************/ 
 FUNC_TYPE(void) NAME_DEFINE(FBWList)(FrameBufferModifyEntry *plist, uint32 size);
@@ -304,15 +304,15 @@ FUNC_TYPE(void) NAME_DEFINE(FBWList)(FrameBufferModifyEntry *plist, uint32 size)
   Function: FrameBufferRead
   Purpose:  This function is called to notify the dll that the
             frame buffer memory is beening read at the given address.
-			DLL should copy content from its render buffer to the frame buffer
-			in N64 RDRAM
-			DLL is responsible to maintain its own frame buffer memory addr list
-			DLL should copy 4KB block content back to RDRAM frame buffer.
-			Emulator should not call this function again if other memory
-			is read within the same 4KB range
-  input:    addr		rdram address
-			val			val
-			size		1 = uint8, 2 = uint16, 4 = uint32
+            DLL should copy content from its render buffer to the frame buffer
+            in N64 RDRAM
+            DLL is responsible to maintain its own frame buffer memory addr list
+            DLL should copy 4KB block content back to RDRAM frame buffer.
+            Emulator should not call this function again if other memory
+            is read within the same 4KB range
+  input:    addr        rdram address
+            val         val
+            size        1 = uint8, 2 = uint16, 4 = uint32
   output:   none
 *******************************************************************/ 
 FUNC_TYPE(void) NAME_DEFINE(FBRead)(uint32 addr);
@@ -328,9 +328,9 @@ to notify the video plugin about CPU depth buffer read/write
 operations
 
 size:
-= 1		byte
-= 2		word (16 bit) <-- this is N64 default depth buffer format
-= 4		dword (32 bit)
+= 1     byte
+= 2     word (16 bit) <-- this is N64 default depth buffer format
+= 4     dword (32 bit)
 
 when depth buffer information is not available yet, set all values
 in the FrameBufferInfo structure to 0
@@ -351,9 +351,9 @@ FUNC_TYPE(void) NAME_DEFINE(FBGetFrameBufferInfo)(void *pinfo);
             FALSE if current display is in windowed mode
 
   Attention: After the CPU core call the ChangeWindow function to request
-			 the video plugin to switch between full screen and window mode,
-			 the plugin may not carry out the request at the function call.
-			 The video plugin may want to delay and do the screen switching later.
+             the video plugin to switch between full screen and window mode,
+             the plugin may not carry out the request at the function call.
+             The video plugin may want to delay and do the screen switching later.
              
 *******************************************************************/ 
 EXPORT BOOL CALL GetFullScreenStatus(void);

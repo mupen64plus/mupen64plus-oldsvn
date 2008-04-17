@@ -1,22 +1,22 @@
-#define iPos		v0
-#define iNormal		v1
-#define iColor		v2
-#define iT0			v3
+#define iPos        v0
+#define iNormal     v1
+#define iColor      v2
+#define iT0         v3
 
-#define R_NORMAL	r1
-#define R_DIFFUSE	r2
-#define R_TEMP1		r3
-#define R_TEMP2		r4
-#define R_TEMP3		r5
-#define R_SPECULAR	r6
-#define R_POS		r7
+#define R_NORMAL    r1
+#define R_DIFFUSE   r2
+#define R_TEMP1     r3
+#define R_TEMP2     r4
+#define R_TEMP3     r5
+#define R_SPECULAR  r6
+#define R_POS       r7
 
-#define CV_ZERO			0
-#define CV_ONE			1
-#define CV_HALF			2
-#define CV_TENTH		3
-#define CV_NINE_TENTH	4
-#define CV_200			5
+#define CV_ZERO         0
+#define CV_ONE          1
+#define CV_HALF         2
+#define CV_TENTH        3
+#define CV_NINE_TENTH   4
+#define CV_200          5
 
 #define CV_WORLDVIEWPROJ_0 10
 #define CV_WORLDVIEWPROJ_1 11
@@ -45,25 +45,25 @@
 #define CV_LIGHT6_DIFFUSE 26
 #define CV_LIGHT7_DIFFUSE 27
 
-#define USE_PRIMARY_DEPTH	40
-#define PRIMARY_DEPTH		41
+#define USE_PRIMARY_DEPTH   40
+#define PRIMARY_DEPTH       41
 
-#define FOG_IS_ENABLED		42
+#define FOG_IS_ENABLED      42
 
-#define USE_PRIMARY_COLOR	43
-#define PRIMARY_COLOR		44
+#define USE_PRIMARY_COLOR   43
+#define PRIMARY_COLOR       44
 
-#define LIGHTING_ENABLED	45
+#define LIGHTING_ENABLED    45
 
-#define FORCE_VTX_ALPHA		46
-#define VTX_ALPHA			47
+#define FORCE_VTX_ALPHA     46
+#define VTX_ALPHA           47
 
-#define Z_HACK_ENABLE		49
+#define Z_HACK_ENABLE       49
 
 #define T0_SCALE_X_Y      50
 #define T1_SCALE_X_Y      51
 #define T0_OFFSET_X_Y     52
 #define T1_OFFSET_X_Y     53
 
-#define FOG_MUL			60
-#define FOG_ADD			61
+#define FOG_MUL         60
+#define FOG_ADD         61

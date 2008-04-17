@@ -269,8 +269,8 @@ void C_SF_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    PC++;
@@ -281,8 +281,8 @@ void C_NGLE_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    FCR31 &= ~0x800000;
    PC++;
@@ -293,8 +293,8 @@ void C_SEQ_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] == *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -307,8 +307,8 @@ void C_NGL_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] == *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -321,8 +321,8 @@ void C_LT_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] < *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -335,8 +335,8 @@ void C_NGE_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] < *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -349,8 +349,8 @@ void C_LE_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] <= *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;
@@ -363,8 +363,8 @@ void C_NGT_S()
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_simple[cffs]) || isnan(*reg_cop1_simple[cfft]))
      {
-	printf("Invalid operation exception in C opcode\n");
-	stop=1;
+    printf("Invalid operation exception in C opcode\n");
+    stop=1;
      }
    if (*reg_cop1_simple[cffs] <= *reg_cop1_simple[cfft])
      FCR31 |= 0x800000;

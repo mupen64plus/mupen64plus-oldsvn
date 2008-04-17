@@ -7,10 +7,10 @@
 extern "C" {
 #endif
 
-#define ATTRIB_INTEGER		1
-#define ATTRIB_STRING		2
-#define ATTRIB_SELECT		3
-#define ATTRIB_FLOAT		4
+#define ATTRIB_INTEGER      1
+#define ATTRIB_STRING       2
+#define ATTRIB_SELECT       3
+#define ATTRIB_FLOAT        4
 
 void VCRComp_init();
 

@@ -21,62 +21,62 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class COGLGraphicsContext : public CGraphicsContext
 {
-	friend class OGLRender;
-	friend class COGLRenderTexture;
+    friend class OGLRender;
+    friend class COGLRenderTexture;
 public:
-	virtual ~COGLGraphicsContext();
+    virtual ~COGLGraphicsContext();
 
-	bool Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth, uint32 dwHeight, BOOL bWindowed );
-	void CleanUp();
-	void Clear(ClearFlag dwFlags, uint32 color=0xFF000000, float depth=1.0f);
+    bool Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth, uint32 dwHeight, BOOL bWindowed );
+    void CleanUp();
+    void Clear(ClearFlag dwFlags, uint32 color=0xFF000000, float depth=1.0f);
 
-	void UpdateFrame(bool swaponly=false);
-	int ToggleFullscreen();		// return 0 as the result is windowed
+    void UpdateFrame(bool swaponly=false);
+    int ToggleFullscreen();     // return 0 as the result is windowed
 
-	bool IsExtensionSupported(const char* pExtName);
-	bool IsWglExtensionSupported(const char* pExtName);
-	static void InitDeviceParameters();
+    bool IsExtensionSupported(const char* pExtName);
+    bool IsWglExtensionSupported(const char* pExtName);
+    static void InitDeviceParameters();
 
 protected:
-	friend class OGLDeviceBuilder;
-	COGLGraphicsContext();
-	void InitState(void);
-	void InitOGLExtension(void);
-	void InitOGLExtension_ATI(void);
-	bool SetFullscreenMode();
-	bool SetWindowMode();
+    friend class OGLDeviceBuilder;
+    COGLGraphicsContext();
+    void InitState(void);
+    void InitOGLExtension(void);
+    void InitOGLExtension_ATI(void);
+    bool SetFullscreenMode();
+    bool SetWindowMode();
 
     SDL_Surface *m_pScreen;
 
-	// Important OGL extension features
-	bool	m_bSupportMultiTexture;
-	bool	m_bSupportTextureEnvCombine;
-	bool	m_bSupportSeparateSpecularColor;
-	bool	m_bSupportSecondColor;
-	bool	m_bSupportFogCoord;
-	bool	m_bSupportTextureObject;
+    // Important OGL extension features
+    bool    m_bSupportMultiTexture;
+    bool    m_bSupportTextureEnvCombine;
+    bool    m_bSupportSeparateSpecularColor;
+    bool    m_bSupportSecondColor;
+    bool    m_bSupportFogCoord;
+    bool    m_bSupportTextureObject;
 
-	// Optional OGL extension features;
-	bool	m_bSupportRescaleNormal;
-	bool	m_bSupportLODBias;
+    // Optional OGL extension features;
+    bool    m_bSupportRescaleNormal;
+    bool    m_bSupportLODBias;
 
-	// Nvidia OGL only features
-	bool	m_bSupportTextureMirrorRepeat;
-	bool	m_bSupportTextureLOD;
-	bool	m_bSupportNVRegisterCombiner;
-	bool	m_bSupportBlendColor;
-	bool	m_bSupportBlendSubtract;
-	bool	m_bSupportNVTextureEnvCombine4;
-	
-	// Minimal requirements, I will even not check them at runtime
-	//bool	m_bSupportTextureEnvAdd;
-	//bool	m_bSupportVertexArray;
+    // Nvidia OGL only features
+    bool    m_bSupportTextureMirrorRepeat;
+    bool    m_bSupportTextureLOD;
+    bool    m_bSupportNVRegisterCombiner;
+    bool    m_bSupportBlendColor;
+    bool    m_bSupportBlendSubtract;
+    bool    m_bSupportNVTextureEnvCombine4;
+    
+    // Minimal requirements, I will even not check them at runtime
+    //bool  m_bSupportTextureEnvAdd;
+    //bool  m_bSupportVertexArray;
 
-	const unsigned char*	m_pVendorStr;
-	const unsigned char*	m_pRenderStr;
-	const unsigned char*	m_pExtensionStr;
-	const char*	m_pWglExtensionStr;
-	const unsigned char*	m_pVersionStr;
+    const unsigned char*    m_pVendorStr;
+    const unsigned char*    m_pRenderStr;
+    const unsigned char*    m_pExtensionStr;
+    const char* m_pWglExtensionStr;
+    const unsigned char*    m_pVersionStr;
 };
 
 #endif

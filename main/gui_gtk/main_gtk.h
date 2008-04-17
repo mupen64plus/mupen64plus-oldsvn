@@ -22,12 +22,12 @@ Email                : blight@Ashitaka
 
 typedef struct
 {
-	GtkWidget	*window;
-	GtkWidget	*toplevelVBox;	// vbox containing menubar, toolbar, rombrowser, statusbar
-	GtkWidget	*menuBar;
-	GtkWidget	*toolBar;
-	GtkWidget	*romScrolledWindow, *romTreeView;
-	GtkWidget	*statusBarHBox;
+    GtkWidget   *window;
+    GtkWidget   *toplevelVBox;  // vbox containing menubar, toolbar, rombrowser, statusbar
+    GtkWidget   *menuBar;
+    GtkWidget   *toolBar;
+    GtkWidget   *romScrolledWindow, *romTreeView;
+    GtkWidget   *statusBarHBox;
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;

@@ -29,31 +29,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class COGLColorCombinerTNT2 : public COGLColorCombiner4, CNvTNTCombiner
 {
 public:
-	bool Initialize(void);
+    bool Initialize(void);
 protected:
-	friend class OGLDeviceBuilder;
+    friend class OGLDeviceBuilder;
 
-	void InitCombinerCycle12(void);
+    void InitCombinerCycle12(void);
 
-	virtual void GenerateCombinerSetting(int);
-	virtual void GenerateCombinerSettingConstants(int);
-	
-	COGLColorCombinerTNT2(CRender *pRender);
-	~COGLColorCombinerTNT2() {} ;
+    virtual void GenerateCombinerSetting(int);
+    virtual void GenerateCombinerSettingConstants(int);
+    
+    COGLColorCombinerTNT2(CRender *pRender);
+    ~COGLColorCombinerTNT2() {} ;
 
-	bool m_bTNT2Supported;		// Is this NV OGL extension combiner supported by the video card driver?
+    bool m_bTNT2Supported;      // Is this NV OGL extension combiner supported by the video card driver?
 
 #ifdef _DEBUG
-	void DisplaySimpleMuxString(void);
+    void DisplaySimpleMuxString(void);
 #endif
 
 private:
-	virtual GLint MapRGBArgs(uint8 arg);
-	static GLint MapRGBArgFlags(uint8 arg);
-	virtual GLint MapAlphaArgs(uint8 arg);
-	static GLint MapAlphaArgFlags(uint8 arg);
-	static GLint RGBArgsMap[];
-	static const char* GetOpStr(GLenum op);
+    virtual GLint MapRGBArgs(uint8 arg);
+    static GLint MapRGBArgFlags(uint8 arg);
+    virtual GLint MapAlphaArgs(uint8 arg);
+    static GLint MapAlphaArgFlags(uint8 arg);
+    static GLint RGBArgsMap[];
+    static const char* GetOpStr(GLenum op);
 
 };
 

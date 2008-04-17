@@ -42,7 +42,7 @@ static void calc_point_light (VERTEX *v, float * vpos)
     if (rdp.light[l].nonblack)
     {
       float lvec[3] = {rdp.light[l].x, rdp.light[l].y, rdp.light[l].z};
-   			lvec[0] -= vpos[0];
+            lvec[0] -= vpos[0];
         lvec[1] -= vpos[1];
         lvec[2] -= vpos[2];
         float light_len2 = lvec[0]*lvec[0] + lvec[1]*lvec[1] + lvec[2]*lvec[2];
@@ -130,11 +130,11 @@ static void uc2_vertex ()
     v->ou   = (float)((short*)gfx.RDRAM)[(((addr+i) >> 1) + 4)^1] * rdp.tiles[rdp.cur_tile].s_scale;
     v->ov   = (float)((short*)gfx.RDRAM)[(((addr+i) >> 1) + 5)^1] * rdp.tiles[rdp.cur_tile].t_scale;
     v->a    = ((BYTE*)gfx.RDRAM)[(addr+i + 15)^3];
-	
+    
 #ifdef EXTREME_LOGGING
     FRDP ("before: v%d - x: %f, y: %f, z: %f, flags: %04lx, ou: %f, ov: %f\n", i>>4, x, y, z, v->flags, v->ou, v->ov);
 #endif
-	
+    
     v->x = x*rdp.combined[0][0] + y*rdp.combined[1][0] + z*rdp.combined[2][0] + rdp.combined[3][0];
     v->y = x*rdp.combined[0][1] + y*rdp.combined[1][1] + z*rdp.combined[2][1] + rdp.combined[3][1];
     v->z = x*rdp.combined[0][2] + y*rdp.combined[1][2] + z*rdp.combined[2][2] + rdp.combined[3][2];
@@ -152,22 +152,22 @@ static void uc2_vertex ()
     
     v->uv_calculated = 0xFFFFFFFF;
     v->screen_translated = 0;
-	v->shade_mods_allowed = 1;
-	v->uv_fixed = 0;
-	
+    v->shade_mods_allowed = 1;
+    v->uv_fixed = 0;
+    
     v->scr_off = 0;
     if (v->x < -v->w) v->scr_off |= 1;
     if (v->x > v->w) v->scr_off |= 2;
     if (v->y < -v->w) v->scr_off |= 4;
     if (v->y > v->w) v->scr_off |= 8;
     if (v->w < 0.1f) v->scr_off |= 16;
-	 
+     
     if (rdp.geom_mode & 0x00020000)
     {
       v->vec[0] = ((char*)gfx.RDRAM)[(addr+i + 12)^3];
       v->vec[1] = ((char*)gfx.RDRAM)[(addr+i + 13)^3];
       v->vec[2] = ((char*)gfx.RDRAM)[(addr+i + 14)^3];
-      //	  FRDP("Calc light. x: %f, y: %f z: %f\n", v->vec[0], v->vec[1], v->vec[2]);
+      //      FRDP("Calc light. x: %f, y: %f z: %f\n", v->vec[0], v->vec[1], v->vec[2]);
       //      if (!(rdp.geom_mode & 0x800000))
       {
         if (rdp.geom_mode & 0x80000) 
@@ -240,13 +240,13 @@ static void uc2_culldl ()
   cond |= 0x10;
   
     if (cond == 0x1F)
-	return;
-	//*/
-	
+    return;
+    //*/
+    
 #ifdef EXTREME_LOGGING
     FRDP (" v[%d] = (%02f, %02f, %02f, 0x%02lx)\n", i, rdp.vtx[i].x, rdp.vtx[i].y, rdp.vtx[i].w, rdp.vtx[i].scr_off);
 #endif
-	
+    
     cond |= (~rdp.vtx[i].scr_off) & 0x1F;
     if (cond == 0x1F)
       return;
@@ -278,8 +278,8 @@ static void uc2_tri1()
   
   VERTEX *v[3] = {
     &rdp.vtx[(rdp.cmd0 >> 17) & 0x7F],
-	  &rdp.vtx[(rdp.cmd0 >> 9) & 0x7F],
-	  &rdp.vtx[(rdp.cmd0 >> 1) & 0x7F]
+      &rdp.vtx[(rdp.cmd0 >> 9) & 0x7F],
+      &rdp.vtx[(rdp.cmd0 >> 1) & 0x7F]
   };
   
   if (cull_tri(v))
@@ -287,7 +287,7 @@ static void uc2_tri1()
   else
   {
     update ();
-	
+    
     DrawTri (v);
     rdp.tri_n ++;
   }
@@ -370,14 +370,14 @@ static void uc2_line3d ()
     FRDP("uc2:line3d #%d, #%d - %d, %d\n", rdp.tri_n, rdp.tri_n+1,
       (rdp.cmd0 >> 17) & 0x7F,
       (rdp.cmd0 >> 9) & 0x7F);
-	
+    
     VERTEX *v[3] = {
       &rdp.vtx[(rdp.cmd0 >> 17) & 0x7F],
-		&rdp.vtx[(rdp.cmd0 >> 9) & 0x7F],
-		&rdp.vtx[(rdp.cmd0 >> 9) & 0x7F]
+        &rdp.vtx[(rdp.cmd0 >> 9) & 0x7F],
+        &rdp.vtx[(rdp.cmd0 >> 9) & 0x7F]
     };
     WORD width = (WORD)(rdp.cmd0&0xFF) + 1;
-	
+    
     if (cull_tri(v))
       rdp.tri_n ++;
     else
@@ -537,34 +537,34 @@ static void uc2_matrix ()
     RDP ("modelview mul\n");
     modelview_mul (m);
     break;
-	
+    
   case 1: // modelview mul push
     RDP ("modelview mul push\n");
     modelview_mul_push (m);
     break;
-	
+    
   case 2: // modelview load nopush
     RDP ("modelview load\n");
     modelview_load (m);
     break;
-	
+    
   case 3: // modelview load push
     RDP ("modelview load push\n");
     modelview_load_push (m);
     break;
-	
+    
   case 4: // projection mul nopush
   case 5: // projection mul push, can't push projection
     RDP ("projection mul\n");
     projection_mul (m);
     break;
-	
+    
   case 6: // projection load nopush
   case 7: // projection load push, can't push projection
     RDP ("projection load\n");
     projection_load (m);
     break;
-	
+    
   default:
     FRDP_E ("Unknown matrix command, %02lx", command);
     FRDP ("Unknown matrix command, %02lx", command);
@@ -598,57 +598,57 @@ static void uc2_moveword ()
   {
     // NOTE: right now it's assuming that it sets the integer part first.  This could
     //  be easily fixed, but only if i had something to test with.
-	
+    
   case 0x00:  // moveword matrix
     {
-	  // do matrix pre-mult so it's re-updated next time
-	  if (rdp.update & UPDATE_MULT_MAT)
-	  {
-		rdp.update ^= UPDATE_MULT_MAT;
-		MulMatrices(rdp.model, rdp.proj, rdp.combined);
-	  }
-	  
-	  if (rdp.cmd0 & 0x20)  // fractional part
-	  {
-		int index_x = (rdp.cmd0 & 0x1F) >> 1;
-		int index_y = index_x >> 2;
-		index_x &= 3;
-		
-		float fpart = (rdp.cmd1>>16)/65536.0f;
-		rdp.combined[index_y][index_x] = (float)(int)rdp.combined[index_y][index_x];
-		rdp.combined[index_y][index_x] += fpart;
-		
-		fpart = (rdp.cmd1&0xFFFF)/65536.0f;
-		rdp.combined[index_y][index_x+1] = (float)(int)rdp.combined[index_y][index_x+1];
-		rdp.combined[index_y][index_x+1] += fpart;
-	  }
-	  else
-	  {
-		int index_x = (rdp.cmd0 & 0x1F) >> 1;
-		int index_y = index_x >> 2;
-		index_x &= 3;
-		
-		float fpart = (float)fabs(rdp.combined[index_y][index_x] - (int)rdp.combined[index_y][index_x]);
-		rdp.combined[index_y][index_x] = (short)(rdp.cmd1>>16);
-		
-		fpart = (float)fabs(rdp.combined[index_y][index_x+1] - (int)rdp.combined[index_y][index_x+1]);
-		rdp.combined[index_y][index_x+1] = (short)(rdp.cmd1&0xFFFF);
-	  }
-	  
-	  RDP ("matrix\n");
+      // do matrix pre-mult so it's re-updated next time
+      if (rdp.update & UPDATE_MULT_MAT)
+      {
+        rdp.update ^= UPDATE_MULT_MAT;
+        MulMatrices(rdp.model, rdp.proj, rdp.combined);
+      }
+      
+      if (rdp.cmd0 & 0x20)  // fractional part
+      {
+        int index_x = (rdp.cmd0 & 0x1F) >> 1;
+        int index_y = index_x >> 2;
+        index_x &= 3;
+        
+        float fpart = (rdp.cmd1>>16)/65536.0f;
+        rdp.combined[index_y][index_x] = (float)(int)rdp.combined[index_y][index_x];
+        rdp.combined[index_y][index_x] += fpart;
+        
+        fpart = (rdp.cmd1&0xFFFF)/65536.0f;
+        rdp.combined[index_y][index_x+1] = (float)(int)rdp.combined[index_y][index_x+1];
+        rdp.combined[index_y][index_x+1] += fpart;
+      }
+      else
+      {
+        int index_x = (rdp.cmd0 & 0x1F) >> 1;
+        int index_y = index_x >> 2;
+        index_x &= 3;
+        
+        float fpart = (float)fabs(rdp.combined[index_y][index_x] - (int)rdp.combined[index_y][index_x]);
+        rdp.combined[index_y][index_x] = (short)(rdp.cmd1>>16);
+        
+        fpart = (float)fabs(rdp.combined[index_y][index_x+1] - (int)rdp.combined[index_y][index_x+1]);
+        rdp.combined[index_y][index_x+1] = (short)(rdp.cmd1&0xFFFF);
+      }
+      
+      RDP ("matrix\n");
     }
     break;
-	
+    
   case 0x02:
     rdp.num_lights = data / 24;
     rdp.update |= UPDATE_LIGHTS;
     FRDP ("numlights: %d\n", rdp.num_lights);
     break;
-	
+    
   case 0x04:
     FRDP ("mw_clip %08lx, %08lx\n", rdp.cmd0, rdp.cmd1);
     break;
-	
+    
   case 0x06:  // moveword SEGMENT
     {
       FRDP ("SEGMENT %08lx -> seg%d\n", data, offset >> 2);
@@ -656,8 +656,8 @@ static void uc2_moveword ()
         rdp.segment[(offset >> 2) & 0xF] = data;
     }
     break;
-	
-	
+    
+    
   case 0x08:
     {
       rdp.fog_multiplier = (short)(rdp.cmd1 >> 16);
@@ -670,23 +670,23 @@ static void uc2_moveword ()
     {
       int n = offset / 24;
       FRDP ("lightcol light:%d, %08lx\n", n, data);
-	  
+      
       rdp.light[n].r = (float)((data >> 24) & 0xFF) / 255.0f;
       rdp.light[n].g = (float)((data >> 16) & 0xFF) / 255.0f;
       rdp.light[n].b = (float)((data >> 8) & 0xFF) / 255.0f;
       rdp.light[n].a = 255;
     }
     break;
-	
+    
   case 0x0c:
     RDP_E ("uc2:moveword forcemtx - IGNORED\n");
     RDP ("forcemtx - IGNORED\n");
     break;
-	
+    
   case 0x0e:
     RDP ("perspnorm - IGNORED\n");
     break;
-	
+    
   default:
     FRDP_E("uc2:moveword unknown (index: 0x%08lx, offset 0x%08lx)\n", index, offset);
     FRDP ("unknown (index: 0x%08lx, offset 0x%08lx)\n", index, offset);
@@ -709,7 +709,7 @@ static void uc2_movemem ()
   case 2:
     uc6_obj_movemem ();
     break;
-	
+    
   case 8:   // VIEWPORT
     {
       DWORD a = addr >> 1;
@@ -732,7 +732,7 @@ static void uc2_movemem ()
         trans_x, trans_y, trans_z, a);
     }
     break;
-	
+    
   case 10:  // LIGHT
     {
       int n = ofs / 24;
@@ -756,7 +756,7 @@ static void uc2_movemem ()
       }
       n -= 2;
       if (n > 7) return;
-	  
+      
       // Get the data
       BYTE col = gfx.RDRAM[(addr+0)^3];
       rdp.light[n].r = (float)col / 255.0f;
@@ -789,15 +789,15 @@ static void uc2_movemem ()
         rdp.light[n].dir_x, rdp.light[n].dir_y, rdp.light[n].dir_z);
     }
     break;
-	
+    
   case 14:  // matrix
     {
       // do not update the combined matrix!
       rdp.update &= ~UPDATE_MULT_MAT;
-	  
+      
       int addr = segoffset(rdp.cmd1);
       FRDP ("matrix - addr: %08lx\n", addr);
-	  
+      
       addr >>= 1;
       int x,y;
       for (x=0; x<16; x+=4) { // Adding 4 instead of one, just to remove mult. later
@@ -808,7 +808,7 @@ static void uc2_movemem ()
             ) / 65536.0f;
         }
       }
-	  
+      
 #ifdef EXTREME_LOGGING
       FRDP ("{%f,%f,%f,%f}\n", rdp.combined[0][0], rdp.combined[0][1], rdp.combined[0][2], rdp.combined[0][3]);
       FRDP ("{%f,%f,%f,%f}\n", rdp.combined[1][0], rdp.combined[1][1], rdp.combined[1][2], rdp.combined[1][3]);
@@ -817,7 +817,7 @@ static void uc2_movemem ()
 #endif
     }
     break;
-	
+    
   default:
     FRDP ("uc2:matrix unknown (%d)\n", idx);
     FRDP ("** UNKNOWN %d\n", idx);

@@ -248,6 +248,8 @@ extern AI_register ai_register;
 extern DPC_register dpc_register;
 extern DPS_register dps_register;
 
+extern unsigned char *rdramb;
+
 #ifndef _BIG_ENDIAN
 #define sl(mot) \
 ( \

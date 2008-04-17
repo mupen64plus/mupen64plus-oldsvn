@@ -3,31 +3,31 @@
 
 struct TexEnvCombinerArg
 {
-	GLenum source, operand;
+    GLenum source, operand;
 };
 
 struct TexEnvCombinerStage
 {
-	WORD constant;
-	BOOL used;
-	GLenum combine;
-	TexEnvCombinerArg arg0, arg1, arg2;
-	WORD outputTexture;
+    WORD constant;
+    BOOL used;
+    GLenum combine;
+    TexEnvCombinerArg arg0, arg1, arg2;
+    WORD outputTexture;
 };
 
 struct TexEnvCombiner
 {
-	BOOL usesT0, usesT1, usesNoise;
+    BOOL usesT0, usesT1, usesNoise;
 
-	WORD usedUnits;
-	
-	struct
-	{
-		WORD color, secondaryColor, alpha;
-	} vertex;
+    WORD usedUnits;
+    
+    struct
+    {
+        WORD color, secondaryColor, alpha;
+    } vertex;
 
-	TexEnvCombinerStage color[8];
-	TexEnvCombinerStage alpha[8];
+    TexEnvCombinerStage color[8];
+    TexEnvCombinerStage alpha[8];
 };
 
 void Init_texture_env_combine();

@@ -16,9 +16,9 @@
 #include "pngrw.h"
 
 #ifdef BUILD_BMG_DLL
-#	define BMG_EXPORT __cdecl __declspec( dllexport ) 
+#   define BMG_EXPORT __cdecl __declspec( dllexport ) 
 #else
-#	define BMG_EXPORT __cdecl
+#   define BMG_EXPORT __cdecl
 #endif
 
 #if defined(__cplusplus)

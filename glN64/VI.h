@@ -4,8 +4,8 @@
 
 struct VIInfo
 {
-	u32 width, height;
-	u32 lastOrigin;
+    u32 width, height;
+    u32 lastOrigin;
 };
 
 extern VIInfo VI;

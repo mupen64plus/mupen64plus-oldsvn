@@ -8,14 +8,14 @@
 
 #include <SDL/SDL.h>
 
-#define EXPORT				__declspec(dllexport)
+#define EXPORT              __declspec(dllexport)
 
 #include <stdio.h>
 #include "winlnxdefs.h"
 #include "math.h"
 #include "COLOR.h"
 
-#include <math.h>			// For sqrt()
+#include <math.h>           // For sqrt()
 #include <iostream>
 #include <fstream>
 #include <istream>
@@ -32,7 +32,7 @@
 #endif
 
 #ifndef SAFE_CHECK
-# define SAFE_CHECK(a)	if( (a) == NULL ) {ErrorMsg("Creater out of memory"); throw new std::exception();}
+# define SAFE_CHECK(a)  if( (a) == NULL ) {ErrorMsg("Creater out of memory"); throw new std::exception();}
 #endif
 
 #include "typedefs.h"
@@ -90,8 +90,8 @@
 
 extern WindowSettingStruct windowSetting;
 
-void __cdecl MsgInfo (char * Message, ...);
-void __cdecl ErrorMsg (char * Message, ...);
+void __cdecl MsgInfo (char* Message, ...);
+void __cdecl ErrorMsg (const char* Message, ...);
 
 #define MI_INTR_DP          0x00000020  
 #define MI_INTR_SP          0x00000001  
@@ -104,6 +104,6 @@ extern unsigned char *g_pRDRAMu8;
 
 extern GFX_INFO g_GraphicsInfo;
 
-extern char *project_name;
+extern const char *project_name;
 #endif
 

@@ -13,30 +13,30 @@
 #endif // _WIN32
 
 #ifdef BUILD_BMG_DLL
-#	define BMG_EXPORT __cdecl __declspec( dllexport )
+#   define BMG_EXPORT __cdecl __declspec( dllexport )
 #else
-#	define BMG_EXPORT __cdecl
+#   define BMG_EXPORT __cdecl
 #endif
 
 enum BMG_Error 
 { 
-	BMG_OK = 0,
+    BMG_OK = 0,
     errLib = 1,
     errInvalidPixelFormat = 2,
     errMemoryAllocation = 3,
-	errInvalidSize = 4,
+    errInvalidSize = 4,
     errInvalidBitmapHandle = 5,
     errWindowsAPI = 6,
-	errFileOpen = 7,
+    errFileOpen = 7,
     errUnsupportedFileFormat = 8,
     errInvalidBMGImage = 9,
-	errInvalidFileExtension = 10,
+    errInvalidFileExtension = 10,
     errFileRead = 11,
     errFileWrite = 12,
-	errInvalidGeoTIFFPointer = 13,
+    errInvalidGeoTIFFPointer = 13,
     errUndefinedBGImage = 14,
     errBGImageTooSmall = 15,
-	errCorruptFile = 16
+    errCorruptFile = 16
 };
 
 typedef enum BMG_Error BMGError;
@@ -99,7 +99,7 @@ BMGError BMG_EXPORT ConvertToPseudoGrayScale( struct BMGImageStruct *img );
 /* stores the contents of a bitmap into a BMGImageStruct */
 extern
 BMGError BMG_EXPORT GetDataFromBitmap( HBITMAP hBitmap,
-					              struct BMGImageStruct *img,
+                                  struct BMGImageStruct *img,
                                   int remove_alpha );
 
 /* creates an HBITMAP from a BMGImageStruct */

@@ -1,10 +1,11 @@
 # Makefile for RiceVideoLinux, in Mupen64Plus
 
 # include pre-make file with a bunch of definitions
+FROMPLUGIN=1
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC
+CFLAGS += -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC -Wall
 LDFLAGS	+= -L/usr/X11R6/lib `sdl-config --libs` -lGL -shared -Wl,-Bsymbolic
 
 # set options

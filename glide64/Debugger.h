@@ -1,20 +1,20 @@
 /*
-*	Glide64 - Glide video plugin for Nintendo 64 emulators.
-*	Copyright (c) 2002  Dave2001
+*   Glide64 - Glide video plugin for Nintendo 64 emulators.
+*   Copyright (c) 2002  Dave2001
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-*	You should have received a copy of the GNU General Public License
-*	along with this program; if not, write to the Free Software
-*	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 //****************************************************************
@@ -33,95 +33,95 @@
 //
 //****************************************************************
 
-#define SELECTED_NONE	0x00000000
-#define SELECTED_TRI	0x00000001
-#define SELECTED_TEX	0x00000002
+#define SELECTED_NONE   0x00000000
+#define SELECTED_TRI    0x00000001
+#define SELECTED_TEX    0x00000002
 
 typedef struct TEX_INFO_t
 {
-	DWORD cur_cache[2];	// Current cache #
-	BYTE format;
-	BYTE size;
-	DWORD width, height;
-	WORD line, wid;
-	BYTE palette;
-	BYTE clamp_s, clamp_t;
-	BYTE mirror_s, mirror_t;
-	BYTE mask_s, mask_t;
-	BYTE shift_s, shift_t;
-	WORD ul_s, ul_t, lr_s, lr_t;
-	WORD t_ul_s, t_ul_t, t_lr_s, t_lr_t;
-	float scale_s, scale_t;
-	int tmu;
+    DWORD cur_cache[2]; // Current cache #
+    BYTE format;
+    BYTE size;
+    DWORD width, height;
+    WORD line, wid;
+    BYTE palette;
+    BYTE clamp_s, clamp_t;
+    BYTE mirror_s, mirror_t;
+    BYTE mask_s, mask_t;
+    BYTE shift_s, shift_t;
+    WORD ul_s, ul_t, lr_s, lr_t;
+    WORD t_ul_s, t_ul_t, t_lr_s, t_lr_t;
+    float scale_s, scale_t;
+    int tmu;
 } TEX_INFO;
 
 typedef struct TRI_INFO_t
 {
-	DWORD	nv;			// Number of vertices
-	VERTEX	*v;			// Vertices (2d screen coords) of the triangle, used to outline
-	DWORD	cycle1, cycle2, cycle_mode;	// Combine mode at the time of rendering
-	BYTE	uncombined;	// which is uncombined: 0x01=color 0x02=alpha 0x03=both
-	DWORD	geom_mode;	// geometry mode flags
-	DWORD	othermode_h;	// setothermode_h flags
-	DWORD	othermode_l;	// setothermode_l flags
-	DWORD	tri_n;		// Triangle number
-	DWORD	flags;
+    DWORD   nv;         // Number of vertices
+    VERTEX  *v;         // Vertices (2d screen coords) of the triangle, used to outline
+    DWORD   cycle1, cycle2, cycle_mode; // Combine mode at the time of rendering
+    BYTE    uncombined; // which is uncombined: 0x01=color 0x02=alpha 0x03=both
+    DWORD   geom_mode;  // geometry mode flags
+    DWORD   othermode_h;    // setothermode_h flags
+    DWORD   othermode_l;    // setothermode_l flags
+    DWORD   tri_n;      // Triangle number
+    DWORD   flags;
 
-	int		type;	// 0-normal, 1-texrect, 2-fillrect
+    int     type;   // 0-normal, 1-texrect, 2-fillrect
 
-	// texture info
-	TEX_INFO t[2];
+    // texture info
+    TEX_INFO t[2];
 
-	// colors
-	DWORD fog_color; 
-	DWORD fill_color; 
-	DWORD prim_color; 
-	DWORD blend_color; 
-	DWORD env_color; 
-	DWORD prim_lodmin, prim_lodfrac;
+    // colors
+    DWORD fog_color; 
+    DWORD fill_color; 
+    DWORD prim_color; 
+    DWORD blend_color; 
+    DWORD env_color; 
+    DWORD prim_lodmin, prim_lodfrac;
 
-	TRI_INFO_t	*pNext;
+    TRI_INFO_t  *pNext;
 } TRI_INFO;
 
 typedef struct
 {
-	BOOL capture;	// Capture moment for debugging?
+    BOOL capture;   // Capture moment for debugging?
 
-	DWORD selected;	// Selected object (see flags above)
-	TRI_INFO *tri_sel;
+    DWORD selected; // Selected object (see flags above)
+    TRI_INFO *tri_sel;
 
-	DWORD tex_scroll;	// texture scrolling
-	DWORD tex_sel;
+    DWORD tex_scroll;   // texture scrolling
+    DWORD tex_sel;
 
-	// CAPTURE INFORMATION
-	BYTE *screen;		// Screen capture
-	TRI_INFO *tri_list;	// Triangle information list
-	TRI_INFO *tri_last;	// Last in the list (first in)
+    // CAPTURE INFORMATION
+    BYTE *screen;       // Screen capture
+    TRI_INFO *tri_list; // Triangle information list
+    TRI_INFO *tri_last; // Last in the list (first in)
 
-	DWORD tmu;	// tmu #
+    DWORD tmu;  // tmu #
 
-	DWORD draw_mode;
+    DWORD draw_mode;
 
-	// Page number
-	int page;
+    // Page number
+    int page;
 
 } DEBUGGER;
 
-#define PAGE_GENERAL	0
-#define PAGE_TEX1		1
-#define PAGE_TEX2		2
-#define PAGE_COLORS		3
-#define PAGE_FBL		4
-#define PAGE_OTHERMODE_L	5
-#define PAGE_OTHERMODE_H	6
-#define PAGE_TEXELS		7
-#define PAGE_COORDS		8
-#define PAGE_TEX_INFO	9
+#define PAGE_GENERAL    0
+#define PAGE_TEX1       1
+#define PAGE_TEX2       2
+#define PAGE_COLORS     3
+#define PAGE_FBL        4
+#define PAGE_OTHERMODE_L    5
+#define PAGE_OTHERMODE_H    6
+#define PAGE_TEXELS     7
+#define PAGE_COORDS     8
+#define PAGE_TEX_INFO   9
 
-#define TRI_TRIANGLE	0
-#define TRI_TEXRECT		1
-#define TRI_FILLRECT	2
-#define TRI_BACKGROUND	3
+#define TRI_TRIANGLE    0
+#define TRI_TEXRECT     1
+#define TRI_FILLRECT    2
+#define TRI_BACKGROUND  3
 #ifdef _WIN32
 static char *tri_type[4] = { "TRIANGLE", "TEXRECT", "FILLRECT", "BACKGROUND" };
 #endif // _WIN32

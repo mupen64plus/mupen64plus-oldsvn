@@ -6,183 +6,183 @@
 
 static __inline int GetResult1( DWORD A, DWORD B, DWORD C, DWORD D, DWORD E )
 {
-	int x = 0;
-	int y = 0;
-	int r = 0;
+    int x = 0;
+    int y = 0;
+    int r = 0;
 
-	if (A == C) x += 1; else if (B == C) y += 1;
-	if (A == D) x += 1; else if (B == D) y += 1;
-	if (x <= 1) r += 1; 
-	if (y <= 1) r -= 1;
+    if (A == C) x += 1; else if (B == C) y += 1;
+    if (A == D) x += 1; else if (B == D) y += 1;
+    if (x <= 1) r += 1; 
+    if (y <= 1) r -= 1;
 
-	return r;
+    return r;
 }
 
 static __inline WORD GetResult1_16( WORD A, WORD B, WORD C, WORD D, WORD E )
 {
-	WORD x = 0;
-	WORD y = 0;
-	WORD r = 0;
+    WORD x = 0;
+    WORD y = 0;
+    WORD r = 0;
 
-	if (A == C) x += 1; else if (B == C) y += 1;
-	if (A == D) x += 1; else if (B == D) y += 1;
-	if (x <= 1) r += 1; 
-	if (y <= 1 && r>0) r -= 1;
+    if (A == C) x += 1; else if (B == C) y += 1;
+    if (A == D) x += 1; else if (B == D) y += 1;
+    if (x <= 1) r += 1; 
+    if (y <= 1 && r>0) r -= 1;
 
-	return r;
+    return r;
 }
 
 static __inline int GetResult2( DWORD A, DWORD B, DWORD C, DWORD D, DWORD E) 
 {
-	int x = 0; 
-	int y = 0;
-	int r = 0;
+    int x = 0; 
+    int y = 0;
+    int r = 0;
 
-	if (A == C) x += 1; else if (B == C) y += 1;
-	if (A == D) x += 1; else if (B == D) y += 1;
-	if (x <= 1) r -= 1; 
-	if (y <= 1) r += 1;
+    if (A == C) x += 1; else if (B == C) y += 1;
+    if (A == D) x += 1; else if (B == D) y += 1;
+    if (x <= 1) r -= 1; 
+    if (y <= 1) r += 1;
 
-	return r;
+    return r;
 }
 
 static __inline WORD GetResult2_16( WORD A, WORD B, WORD C, WORD D, WORD E) 
 {
-	WORD x = 0; 
-	WORD y = 0;
-	WORD r = 0;
+    WORD x = 0; 
+    WORD y = 0;
+    WORD r = 0;
 
-	if (A == C) x += 1; else if (B == C) y += 1;
-	if (A == D) x += 1; else if (B == D) y += 1;
-	if (x <= 1 && r>0 ) r -= 1; 
-	if (y <= 1) r += 1;
+    if (A == C) x += 1; else if (B == C) y += 1;
+    if (A == D) x += 1; else if (B == D) y += 1;
+    if (x <= 1 && r>0 ) r -= 1; 
+    if (y <= 1) r += 1;
 
-	return r;
+    return r;
 }
 
 
 static __inline int GetResult( DWORD A, DWORD B, DWORD C, DWORD D )
 {
-	int x = 0; 
-	int y = 0;
-	int r = 0;
+    int x = 0; 
+    int y = 0;
+    int r = 0;
 
-	if (A == C) x += 1; else if (B == C) y += 1;
-	if (A == D) x += 1; else if (B == D) y += 1;
-	if (x <= 1) r += 1; 
-	if (y <= 1) r -= 1;
+    if (A == C) x += 1; else if (B == C) y += 1;
+    if (A == D) x += 1; else if (B == D) y += 1;
+    if (x <= 1) r += 1; 
+    if (y <= 1) r -= 1;
 
-	return r;
+    return r;
 }
 
 static __inline WORD GetResult_16( WORD A, WORD B, WORD C, WORD D )
 {
-	WORD x = 0; 
-	WORD y = 0;
-	WORD r = 0;
+    WORD x = 0; 
+    WORD y = 0;
+    WORD r = 0;
 
-	if (A == C) x += 1; else if (B == C) y += 1;
-	if (A == D) x += 1; else if (B == D) y += 1;
-	if (x <= 1) r += 1; 
-	if (y <= 1 && r>0 ) r -= 1;
+    if (A == C) x += 1; else if (B == C) y += 1;
+    if (A == D) x += 1; else if (B == D) y += 1;
+    if (x <= 1) r += 1; 
+    if (y <= 1 && r>0 ) r -= 1;
 
-	return r;
+    return r;
 }
 
 
 static __inline DWORD INTERPOLATE( DWORD A, DWORD B)
 {
-	if (A != B)
-		return	((A & 0xFEFEFEFE) >> 1) + 
-				((B & 0xFEFEFEFE) >> 1) |
-				(A & B & 0x01010101);
-	else
-		return A;
+    if (A != B)
+        return  ((A & 0xFEFEFEFE) >> 1) + 
+                ((B & 0xFEFEFEFE) >> 1) |
+                (A & B & 0x01010101);
+    else
+        return A;
 }
 
 static __inline WORD INTERPOLATE_16( WORD A, WORD B)
 {
-	if (A != B)
-		return	((A & 0xFEFE) >> 1) + 
-				((B & 0xFEFE) >> 1) |
-				(A & B & 0x0101);
-	else
-		return A;
+    if (A != B)
+        return  ((A & 0xFEFE) >> 1) + 
+                ((B & 0xFEFE) >> 1) |
+                (A & B & 0x0101);
+    else
+        return A;
 }
 
 
 static __inline DWORD Q_INTERPOLATE( DWORD A, DWORD B, DWORD C, DWORD D)
 {
-	DWORD x =	((A & 0xFCFCFCFC) >> 2) +
-				((B & 0xFCFCFCFC) >> 2) +
-				((C & 0xFCFCFCFC) >> 2) +
-				((D & 0xFCFCFCFC) >> 2);
-	DWORD y =	(((A & 0x03030303) +
-				(B & 0x03030303) +
-				(C & 0x03030303) +
-				(D & 0x03030303)) >> 2) & 0x03030303;
-	return x | y;
+    DWORD x =   ((A & 0xFCFCFCFC) >> 2) +
+                ((B & 0xFCFCFCFC) >> 2) +
+                ((C & 0xFCFCFCFC) >> 2) +
+                ((D & 0xFCFCFCFC) >> 2);
+    DWORD y =   (((A & 0x03030303) +
+                (B & 0x03030303) +
+                (C & 0x03030303) +
+                (D & 0x03030303)) >> 2) & 0x03030303;
+    return x | y;
 }
 
 static __inline WORD Q_INTERPOLATE_16( WORD A, WORD B, WORD C, WORD D)
 {
-	WORD x =	((A & 0xFCFC) >> 2) +
-				((B & 0xFCFC) >> 2) +
-				((C & 0xFCFC) >> 2) +
-				((D & 0xFCFC) >> 2);
-	WORD y =	(((A & 0x0303) +
-				(B & 0x0303) +
-				(C & 0x0303) +
-				(D & 0x0303)) >> 2) & 0x0303;
-	return x | y;
+    WORD x =    ((A & 0xFCFC) >> 2) +
+                ((B & 0xFCFC) >> 2) +
+                ((C & 0xFCFC) >> 2) +
+                ((D & 0xFCFC) >> 2);
+    WORD y =    (((A & 0x0303) +
+                (B & 0x0303) +
+                (C & 0x0303) +
+                (D & 0x0303)) >> 2) & 0x0303;
+    return x | y;
 }
 
 
 void Super2xSaI( DWORD *srcPtr, DWORD *destPtr, DWORD width, DWORD height, DWORD pitch)
 {
-	DWORD destWidth = width << 1;
+    DWORD destWidth = width << 1;
 #ifdef _WIN32
-	DWORD destHeight = height << 1;
+    DWORD destHeight = height << 1;
 #endif // _WIN32
 
     DWORD color4, color5, color6;
     DWORD color1, color2, color3;
     DWORD colorA0, colorA1, colorA2, colorA3;
-	DWORD colorB0, colorB1, colorB2, colorB3;
-	DWORD colorS1, colorS2;
-	DWORD product1a, product1b, product2a, product2b;
+    DWORD colorB0, colorB1, colorB2, colorB3;
+    DWORD colorS1, colorS2;
+    DWORD product1a, product1b, product2a, product2b;
 
-	int row0, row1, row2, row3;
-	int col0, col1, col2, col3;
+    int row0, row1, row2, row3;
+    int col0, col1, col2, col3;
 
-	WORD y, x;
+    WORD y, x;
 
-	for (y = 0; y < height; y++)
-	{
-		if (y > 0)
-		{
-			row0 = width;
-			row0 = -row0;
-		}
-		else
-			row0 = 0;
+    for (y = 0; y < height; y++)
+    {
+        if (y > 0)
+        {
+            row0 = width;
+            row0 = -row0;
+        }
+        else
+            row0 = 0;
 
-		row1 = 0;
+        row1 = 0;
 
-		if (y < height - 1)
-		{
-			row2 = width;
+        if (y < height - 1)
+        {
+            row2 = width;
 
-			if (y < height - 2) 
-				row3 = width << 1;
-			else
-				row3 = width;
-		}
-		else
-		{
-			row2 = 0;
-			row3 = 0;
-		}
+            if (y < height - 2) 
+                row3 = width << 1;
+            else
+                row3 = width;
+        }
+        else
+        {
+            row2 = 0;
+            row3 = 0;
+        }
 
         for (x = 0; x < width; x++)
         {
@@ -190,29 +190,29 @@ void Super2xSaI( DWORD *srcPtr, DWORD *destPtr, DWORD width, DWORD height, DWORD
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                        A0 A1 A2 A3
-			if (x > 0)
-				col0 = -1;
-			else
-				col0 = 0;
+            if (x > 0)
+                col0 = -1;
+            else
+                col0 = 0;
 
-			col1 = 0;
+            col1 = 0;
 
-			if (x < width - 1)
-			{
-				col2 = 1;
+            if (x < width - 1)
+            {
+                col2 = 1;
 
-				if (x < width - 2) 
-					col3 = 2;
-				else
-					col3 = 1;
-			}
-			else
-			{
-				col2 = 0;
-				col3 = 0;
-			}
+                if (x < width - 2) 
+                    col3 = 2;
+                else
+                    col3 = 1;
+            }
+            else
+            {
+                col2 = 0;
+                col3 = 0;
+            }
 
-	        colorB0 = *(srcPtr + col0 + row0);
+            colorB0 = *(srcPtr + col0 + row0);
             colorB1 = *(srcPtr + col1 + row0);
             colorB2 = *(srcPtr + col2 + row0);
             colorB3 = *(srcPtr + col3 + row0);
@@ -286,65 +286,65 @@ void Super2xSaI( DWORD *srcPtr, DWORD *destPtr, DWORD width, DWORD height, DWORD
                 product1a = color5;
 
 
-			destPtr[0] = product1a;
-			destPtr[1] = product1b;
-			destPtr[destWidth] = product2a;
-			destPtr[destWidth + 1] = product2b;
+            destPtr[0] = product1a;
+            destPtr[1] = product1b;
+            destPtr[destWidth] = product2a;
+            destPtr[destWidth + 1] = product2b;
 
-			srcPtr++;
-			destPtr += 2;
+            srcPtr++;
+            destPtr += 2;
         }
-		srcPtr += (pitch-width);
-		destPtr += (((pitch-width)<<1)+(pitch<<1));
-	}
+        srcPtr += (pitch-width);
+        destPtr += (((pitch-width)<<1)+(pitch<<1));
+    }
 }
 
 
 void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWORD pitch)
 {
-	DWORD destWidth = width << 1;
+    DWORD destWidth = width << 1;
 #ifdef _WIN32
-	DWORD destHeight = height << 1;
+    DWORD destHeight = height << 1;
 #endif // _WIN32
 
     WORD color4, color5, color6;
     WORD color1, color2, color3;
     WORD colorA0, colorA1, colorA2, colorA3;
-	WORD colorB0, colorB1, colorB2, colorB3;
-	WORD colorS1, colorS2;
-	WORD product1a, product1b, product2a, product2b;
+    WORD colorB0, colorB1, colorB2, colorB3;
+    WORD colorS1, colorS2;
+    WORD product1a, product1b, product2a, product2b;
 
-	int row0, row1, row2, row3;
-	int col0, col1, col2, col3;
+    int row0, row1, row2, row3;
+    int col0, col1, col2, col3;
 
-	WORD y, x;
+    WORD y, x;
 
-	for (y = 0; y < height; y++)
-	{
-		if (y > 0)
-		{
-			row0 = width;
-			row0 = -row0;
-		}
-		else
-			row0 = 0;
+    for (y = 0; y < height; y++)
+    {
+        if (y > 0)
+        {
+            row0 = width;
+            row0 = -row0;
+        }
+        else
+            row0 = 0;
 
-		row1 = 0;
+        row1 = 0;
 
-		if (y < height - 1)
-		{
-			row2 = width;
+        if (y < height - 1)
+        {
+            row2 = width;
 
-			if (y < height - 2) 
-				row3 = width << 1;
-			else
-				row3 = width;
-		}
-		else
-		{
-			row2 = 0;
-			row3 = 0;
-		}
+            if (y < height - 2) 
+                row3 = width << 1;
+            else
+                row3 = width;
+        }
+        else
+        {
+            row2 = 0;
+            row3 = 0;
+        }
 
         for (x = 0; x < width; x++)
         {
@@ -352,29 +352,29 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                        A0 A1 A2 A3
-			if (x > 0)
-				col0 = -1;
-			else
-				col0 = 0;
+            if (x > 0)
+                col0 = -1;
+            else
+                col0 = 0;
 
-			col1 = 0;
+            col1 = 0;
 
-			if (x < width - 1)
-			{
-				col2 = 1;
+            if (x < width - 1)
+            {
+                col2 = 1;
 
-				if (x < width - 2) 
-					col3 = 2;
-				else
-					col3 = 1;
-			}
-			else
-			{
-				col2 = 0;
-				col3 = 0;
-			}
+                if (x < width - 2) 
+                    col3 = 2;
+                else
+                    col3 = 1;
+            }
+            else
+            {
+                col2 = 0;
+                col3 = 0;
+            }
 
-	        colorB0 = *(srcPtr + col0 + row0);
+            colorB0 = *(srcPtr + col0 + row0);
             colorB1 = *(srcPtr + col1 + row0);
             colorB2 = *(srcPtr + col2 + row0);
             colorB3 = *(srcPtr + col3 + row0);
@@ -448,23 +448,23 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
                 product1a = color5;
 
 
-			destPtr[0] = product1a;
-			destPtr[1] = product1b;
-			destPtr[destWidth] = product2a;
-			destPtr[destWidth + 1] = product2b;
+            destPtr[0] = product1a;
+            destPtr[1] = product1b;
+            destPtr[destWidth] = product2a;
+            destPtr[destWidth + 1] = product2b;
 
-			srcPtr++;
-			destPtr += 2;
+            srcPtr++;
+            destPtr += 2;
         }
-		srcPtr += (pitch-width);
-		destPtr += (((pitch-width)<<1)+(pitch<<1));
-	}
+        srcPtr += (pitch-width);
+        destPtr += (((pitch-width)<<1)+(pitch<<1));
+    }
 }
 
 
 /*void SuperEagle(uint8 *srcPtr, uint32 srcPitch,
-	     uint8 *deltaPtr,
-	     BITMAP *dstBitmap, int width, int height)
+         uint8 *deltaPtr,
+         BITMAP *dstBitmap, int width, int height)
 {
     uint32 dstPitch = dstBitmap->w * 2;
     uint32 line;
@@ -479,14 +479,14 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
     if (cpu_mmx && width != 512)
     {
         x_offset = (dstBitmap->w - width * 2);
-	for (height; height; height-=1)
-	{
-	    bP = (uint16 *) srcPtr;
+    for (height; height; height-=1)
+    {
+        bP = (uint16 *) srcPtr;
             xP = (uint16 *) deltaPtr;
-	    dP = bmp_write_line (dstBitmap, line) + x_offset;
+        dP = bmp_write_line (dstBitmap, line) + x_offset;
             _2xSaISuperEagleLine  ((uint8 *) bP, (uint8 *) xP, srcPitch, width, dP, dstPitch, dstBitmap->seg);
             line += 2;
-	    srcPtr += srcPitch;
+        srcPtr += srcPitch;
             deltaPtr += srcPitch;
         }
     }
@@ -500,10 +500,10 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
         uint32 Nextline = srcPitch >> 1;
 
         for (height; height; height-=1)
-	{
-	    bP = (uint16 *) srcPtr;
+    {
+        bP = (uint16 *) srcPtr;
             xP = (uint16 *) deltaPtr;
-	    dP = bmp_write_line (dstBitmap, line) + x_offset;
+        dP = bmp_write_line (dstBitmap, line) + x_offset;
             for (uint32 finish = width; finish; finish -= inc_bP )
             {
 
@@ -547,7 +547,7 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
                       product1a = INTERPOLATE (color5, color6);
                    }
 
-		   if ((color6 == colorS2) ||
+           if ((color6 == colorS2) ||
                        (color2 == colorA1))
                    {
                        product2b = INTERPOLATE (color2, color3);
@@ -576,7 +576,7 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
                       product1b = INTERPOLATE (color5, color6);
                    }
 
-		   if ((color3 == colorA2) ||
+           if ((color3 == colorA2) ||
                        (color4 == color5))
                    {
                        product2a = INTERPOLATE (color5, color2);
@@ -626,10 +626,10 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
                       product2a = Q_INTERPOLATE (color2, color2, color2, product2a);
                       product1b = Q_INTERPOLATE (color6, color6, color6, product1b);
 
-//		      product1a = color5;
-//		      product1b = color6;
-//		      product2a = color2;
-//		      product2b = color3;
+//            product1a = color5;
+//            product1b = color6;
+//            product2a = color2;
+//            product2b = color3;
                 }
                     product1a = product1a | (product1b << 16);
                     product2a = product2a | (product2b << 16);
@@ -646,7 +646,7 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
             line += 2;
             srcPtr += srcPitch;
             deltaPtr += srcPitch;
-	}; //endof: for (height; height; height--)
+    }; //endof: for (height; height; height--)
     }
 }
 
@@ -654,69 +654,69 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
 */
 void _2xSaI( DWORD *srcPtr, DWORD *destPtr, WORD width, WORD height, BOOL clampS, BOOL clampT )
 {
-	WORD destWidth = width << 1;
+    WORD destWidth = width << 1;
 #ifdef _WIN32
-	WORD destHeight = height << 1;
+    WORD destHeight = height << 1;
 #endif // _WIN32
 
     DWORD colorA, colorB, colorC, colorD,
           colorE, colorF, colorG, colorH,
           colorI, colorJ, colorK, colorL,
           colorM, colorN, colorO, colorP;
-	DWORD product, product1, product2;
+    DWORD product, product1, product2;
 
-	int row0, row1, row2, row3;
-	int col0, col1, col2, col3;
+    int row0, row1, row2, row3;
+    int col0, col1, col2, col3;
 
-	WORD y, x;
+    WORD y, x;
 
-	for (y = 0; y < height; y++)
-	{
-		if (y > 0)
-			row0 = -width;
-		else
-			row0 = clampT ? 0 : (height - 1) * width;
+    for (y = 0; y < height; y++)
+    {
+        if (y > 0)
+            row0 = -width;
+        else
+            row0 = clampT ? 0 : (height - 1) * width;
 
-		row1 = 0;
+        row1 = 0;
 
-		if (y < height - 1)
-		{
-			row2 = width;
+        if (y < height - 1)
+        {
+            row2 = width;
 
-			if (y < height - 2) 
-				row3 = width << 1;
-			else
-				row3 = clampT ? width : -y * width;
-		}
-		else
-		{
-			row2 = clampT ? 0 : -y * width;
-			row3 = clampT ? 0 : (1 - y) * width;
-		}
+            if (y < height - 2) 
+                row3 = width << 1;
+            else
+                row3 = clampT ? width : -y * width;
+        }
+        else
+        {
+            row2 = clampT ? 0 : -y * width;
+            row3 = clampT ? 0 : (1 - y) * width;
+        }
 
         for (x = 0; x < width; x++)
         {
-			if (x > 0)
-				col0 = -1;
-			else
-				col0 = clampS ? 0 : width - 1;
+            if (x > 0)
+                col0 = -1;
+            else
+                col0 = clampS ? 0 : width - 1;
 
-			col1 = 0;
+            col1 = 0;
 
-			if (x < width - 1)
-			{
-				col2 = 1;
+            if (x < width - 1)
+            {
+                col2 = 1;
 
-				if (x < width - 2) 
-					col3 = 2;
-				else
-					col3 = clampS ? 1 : -x;
-			}
-			else
-			{
-				col2 = clampS ? 0 : -x;
-				col3 = clampS ? 0 : 1 - x;
-			}
+                if (x < width - 2) 
+                    col3 = 2;
+                else
+                    col3 = clampS ? 1 : -x;
+            }
+            else
+            {
+                col2 = clampS ? 0 : -x;
+                col3 = clampS ? 0 : 1 - x;
+            }
 
 //---------------------------------------
 // Map of the pixels:                    I|E F|J
@@ -820,14 +820,14 @@ void _2xSaI( DWORD *srcPtr, DWORD *destPtr, WORD width, WORD height, BOOL clampS
                     product1 = INTERPOLATE(colorA, colorC);
             }
 
-			destPtr[0] = colorA;
-			destPtr[1] = product;
-			destPtr[destWidth] = product1;
-			destPtr[destWidth + 1] = product2;
+            destPtr[0] = colorA;
+            destPtr[1] = product;
+            destPtr[destWidth] = product1;
+            destPtr[destWidth + 1] = product2;
 
-			srcPtr++;
-			destPtr += 2;
+            srcPtr++;
+            destPtr += 2;
         }
-		destPtr += destWidth;
-	}
+        destPtr += destWidth;
+    }
 }

@@ -34,7 +34,7 @@ unsigned char AlphaComp( unsigned char fg,
                          unsigned char bg );
 
 unsigned char InverseAlphaComp( unsigned char fg,
-							    unsigned char alpha,
+                                unsigned char alpha,
                                 unsigned char bg );
 
 BITMAPINFO InternalCreateBMI( DWORD dwWidth,  /* width */

@@ -59,21 +59,21 @@ void refresh_stat()
    gettimeofday(&tv, NULL);
    if(tv.tv_sec - last_refresh >= 2)
      {
-	unsigned int end =
-	  ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
-	time_in_section[0] = end - last_start[0];
-	printf("gfx=%f%% - audio=%f%% - compiler=%f%%, idle=%f%%\r",
-	       100.0f * (float)time_in_section[1] / (float)time_in_section[0],
-	       100.0f * (float)time_in_section[2] / (float)time_in_section[0],
-	       100.0f * (float)time_in_section[3] / (float)time_in_section[0],
-	       100.0f * (float)time_in_section[4] / (float)time_in_section[0]);
-	fflush(stdout);
-	time_in_section[1] = 0;
-	time_in_section[2] = 0;
-	time_in_section[3] = 0;
-	time_in_section[4] = 0;
-	last_start[0] = end;
-	last_refresh = tv.tv_sec;
+    unsigned int end =
+      ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
+    time_in_section[0] = end - last_start[0];
+    printf("gfx=%f%% - audio=%f%% - compiler=%f%%, idle=%f%%\r",
+           100.0f * (float)time_in_section[1] / (float)time_in_section[0],
+           100.0f * (float)time_in_section[2] / (float)time_in_section[0],
+           100.0f * (float)time_in_section[3] / (float)time_in_section[0],
+           100.0f * (float)time_in_section[4] / (float)time_in_section[0]);
+    fflush(stdout);
+    time_in_section[1] = 0;
+    time_in_section[2] = 0;
+    time_in_section[3] = 0;
+    time_in_section[4] = 0;
+    last_start[0] = end;
+    last_refresh = tv.tv_sec;
      }
 }
 

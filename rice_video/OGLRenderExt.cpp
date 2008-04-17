@@ -26,55 +26,55 @@ extern uObjMtxReal gObjMtxReal;
 
 void OGLRender::DrawText(const char* str, RECT *rect)
 {
-	return;
+    return;
 }
 
-void OGLRender::DrawSpriteR_Render()	// With Rotation
+void OGLRender::DrawSpriteR_Render()    // With Rotation
 {
-	glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
+    glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
 
-	GLboolean cullface = glIsEnabled(GL_CULL_FACE);
-	glDisable(GL_CULL_FACE);
+    GLboolean cullface = glIsEnabled(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
 
-	glBegin(GL_TRIANGLES);
-	glColor4fv(gRDP.fvPrimitiveColor);
+    glBegin(GL_TRIANGLES);
+    glColor4fv(gRDP.fvPrimitiveColor);
 
-	OGLRender::TexCoord(g_texRectTVtx[0]);
-	glVertex3f(g_texRectTVtx[0].x, g_texRectTVtx[0].y, -g_texRectTVtx[0].z);
+    OGLRender::TexCoord(g_texRectTVtx[0]);
+    glVertex3f(g_texRectTVtx[0].x, g_texRectTVtx[0].y, -g_texRectTVtx[0].z);
 
-	OGLRender::TexCoord(g_texRectTVtx[1]);
-	glVertex3f(g_texRectTVtx[1].x, g_texRectTVtx[1].y, -g_texRectTVtx[1].z);
+    OGLRender::TexCoord(g_texRectTVtx[1]);
+    glVertex3f(g_texRectTVtx[1].x, g_texRectTVtx[1].y, -g_texRectTVtx[1].z);
 
-	OGLRender::TexCoord(g_texRectTVtx[2]);
-	glVertex3f(g_texRectTVtx[2].x, g_texRectTVtx[2].y, -g_texRectTVtx[2].z);
+    OGLRender::TexCoord(g_texRectTVtx[2]);
+    glVertex3f(g_texRectTVtx[2].x, g_texRectTVtx[2].y, -g_texRectTVtx[2].z);
 
-	OGLRender::TexCoord(g_texRectTVtx[0]);
-	glVertex3f(g_texRectTVtx[0].x, g_texRectTVtx[0].y, -g_texRectTVtx[0].z);
+    OGLRender::TexCoord(g_texRectTVtx[0]);
+    glVertex3f(g_texRectTVtx[0].x, g_texRectTVtx[0].y, -g_texRectTVtx[0].z);
 
-	OGLRender::TexCoord(g_texRectTVtx[2]);
-	glVertex3f(g_texRectTVtx[2].x, g_texRectTVtx[2].y, -g_texRectTVtx[2].z);
+    OGLRender::TexCoord(g_texRectTVtx[2]);
+    glVertex3f(g_texRectTVtx[2].x, g_texRectTVtx[2].y, -g_texRectTVtx[2].z);
 
-	OGLRender::TexCoord(g_texRectTVtx[3]);
-	glVertex3f(g_texRectTVtx[3].x, g_texRectTVtx[3].y, -g_texRectTVtx[3].z);
+    OGLRender::TexCoord(g_texRectTVtx[3]);
+    glVertex3f(g_texRectTVtx[3].x, g_texRectTVtx[3].y, -g_texRectTVtx[3].z);
 
-	glEnd();
+    glEnd();
 
-	if( cullface ) glEnable(GL_CULL_FACE);
+    if( cullface ) glEnable(GL_CULL_FACE);
 }
 
 
 void OGLRender::DrawObjBGCopy(uObjBg &info)
 {
-	if( IsUsedAsDI(g_CI.dwAddr) )
-	{
+    if( IsUsedAsDI(g_CI.dwAddr) )
+    {
         printf("Unimplemented: write into Z buffer.  Was mostly commented out in Rice Video 6.1.0\n");
-		return;
-	}
-	else
-	{
-		CRender::LoadObjBGCopy(info);
-		CRender::DrawObjBGCopy(info);
-	}
+        return;
+    }
+    else
+    {
+        CRender::LoadObjBGCopy(info);
+        CRender::DrawObjBGCopy(info);
+    }
 }
 
 

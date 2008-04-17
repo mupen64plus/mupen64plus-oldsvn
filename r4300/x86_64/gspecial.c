@@ -101,16 +101,16 @@ void gensllv()
    
    if (rd != ECX)
      {
-	mov_reg32_reg32(rd, rt);
-	shl_reg32_cl(rd);
+    mov_reg32_reg32(rd, rt);
+    shl_reg32_cl(rd);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rt);
-	shl_reg32_cl(temp);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rt);
+    shl_reg32_cl(temp);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -131,16 +131,16 @@ void gensrlv()
    
    if (rd != ECX)
      {
-	mov_reg32_reg32(rd, rt);
-	shr_reg32_cl(rd);
+    mov_reg32_reg32(rd, rt);
+    shr_reg32_cl(rd);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rt);
-	shr_reg32_cl(temp);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rt);
+    shr_reg32_cl(temp);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -161,16 +161,16 @@ void gensrav()
    
    if (rd != ECX)
      {
-	mov_reg32_reg32(rd, rt);
-	sar_reg32_cl(rd);
+    mov_reg32_reg32(rd, rt);
+    sar_reg32_cl(rd);
      }
    else
      {
-	int temp = lru_register();
-	free_register(temp);
-	mov_reg32_reg32(temp, rt);
-	sar_reg32_cl(temp);
-	mov_reg32_reg32(rd, temp);
+    int temp = lru_register();
+    free_register(temp);
+    mov_reg32_reg32(temp, rt);
+    sar_reg32_cl(temp);
+    mov_reg32_reg32(rd, temp);
      }
 #endif
 }
@@ -192,8 +192,8 @@ void genjr()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)JR, 1);
-	return;
+    gencallinterp((unsigned long long)JR, 1);
+    return;
      }
    
    free_registers_move_start();
@@ -264,8 +264,8 @@ void genjalr()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned long long)JALR, 1);
-	return;
+    gencallinterp((unsigned long long)JALR, 1);
+    return;
      }
    
    free_registers_move_start();
@@ -420,18 +420,18 @@ void gendsllv()
    
    if (rd != ECX)
      {
-	mov_reg64_reg64(rd, rt);
-	shl_reg64_cl(rd);
+    mov_reg64_reg64(rd, rt);
+    shl_reg64_cl(rd);
      }
    else
      {
-	int temp;
-	temp = lru_register();
-	free_register(temp);
-	
-	mov_reg64_reg64(temp, rt);
-	shl_reg64_cl(temp);
-	mov_reg64_reg64(rd, temp);
+    int temp;
+    temp = lru_register();
+    free_register(temp);
+    
+    mov_reg64_reg64(temp, rt);
+    shl_reg64_cl(temp);
+    mov_reg64_reg64(rd, temp);
      }
 #endif
 }
@@ -452,18 +452,18 @@ void gendsrlv()
    
    if (rd != ECX)
      {
-	mov_reg64_reg64(rd, rt);
-	shr_reg64_cl(rd);
+    mov_reg64_reg64(rd, rt);
+    shr_reg64_cl(rd);
      }
    else
      {
-	int temp;
-	temp = lru_register();
-	free_register(temp);
-	
-	mov_reg64_reg64(temp, rt);
-	shr_reg64_cl(temp);
-	mov_reg64_reg64(rd, temp);
+    int temp;
+    temp = lru_register();
+    free_register(temp);
+    
+    mov_reg64_reg64(temp, rt);
+    shr_reg64_cl(temp);
+    mov_reg64_reg64(rd, temp);
      }
 #endif
 }
@@ -484,18 +484,18 @@ void gendsrav()
    
    if (rd != ECX)
      {
-	mov_reg64_reg64(rd, rt);
-	sar_reg64_cl(rd);
+    mov_reg64_reg64(rd, rt);
+    sar_reg64_cl(rd);
      }
    else
      {
-	int temp;
-	temp = lru_register();
-	free_register(temp);
-	
-	mov_reg64_reg64(temp, rt);
-	sar_reg64_cl(temp);
-	mov_reg64_reg64(rd, temp);
+    int temp;
+    temp = lru_register();
+    free_register(temp);
+    
+    mov_reg64_reg64(temp, rt);
+    sar_reg64_cl(temp);
+    mov_reg64_reg64(rd, temp);
      }
 #endif
 }
@@ -638,8 +638,8 @@ void genadd()
      add_reg32_reg32(rd, rs);
    else
      {
-	mov_reg32_reg32(rd, rs);
-	add_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    add_reg32_reg32(rd, rt);
      }
 #endif
 }
@@ -662,8 +662,8 @@ void genaddu()
      add_reg32_reg32(rd, rs);
    else
      {
-	mov_reg32_reg32(rd, rs);
-	add_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    add_reg32_reg32(rd, rt);
      }
 #endif
 }
@@ -689,8 +689,8 @@ void gensub()
    }
    else
    {
-	mov_reg32_reg32(rd, rs);
-	sub_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    sub_reg32_reg32(rd, rt);
    }
 #endif
 }
@@ -716,8 +716,8 @@ void gensubu()
    }
    else
      {
-	mov_reg32_reg32(rd, rs);
-	sub_reg32_reg32(rd, rt);
+    mov_reg32_reg32(rd, rs);
+    sub_reg32_reg32(rd, rt);
      }
 #endif
 }
@@ -740,8 +740,8 @@ void genand()
      and_reg64_reg64(rd, rs);
    else
      {
-	mov_reg64_reg64(rd, rs);
-	and_reg64_reg64(rd, rt);
+    mov_reg64_reg64(rd, rs);
+    and_reg64_reg64(rd, rt);
      }
 #endif
 }
@@ -764,8 +764,8 @@ void genor()
      or_reg64_reg64(rd, rs);
    else
      {
-	mov_reg64_reg64(rd, rs);
-	or_reg64_reg64(rd, rt);
+    mov_reg64_reg64(rd, rs);
+    or_reg64_reg64(rd, rt);
      }
 #endif
 }
@@ -788,8 +788,8 @@ void genxor()
      xor_reg64_reg64(rd, rs);
    else
      {
-	mov_reg64_reg64(rd, rs);
-	xor_reg64_reg64(rd, rt);
+    mov_reg64_reg64(rd, rs);
+    xor_reg64_reg64(rd, rt);
      }
 #endif
 }
@@ -879,8 +879,8 @@ void gendadd()
      add_reg64_reg64(rd, rs);
    else
      {
-	mov_reg64_reg64(rd, rs);
-	add_reg64_reg64(rd, rt);
+    mov_reg64_reg64(rd, rs);
+    add_reg64_reg64(rd, rt);
      }
 #endif
 }
@@ -903,8 +903,8 @@ void gendaddu()
      add_reg64_reg64(rd, rs);
    else
      {
-	mov_reg64_reg64(rd, rs);
-	add_reg64_reg64(rd, rt);
+    mov_reg64_reg64(rd, rs);
+    add_reg64_reg64(rd, rt);
      }
 #endif
 }

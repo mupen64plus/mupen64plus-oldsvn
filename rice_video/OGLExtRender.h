@@ -24,26 +24,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class COGLExtRender : public OGLRender
 {
 public:
-	void Initialize(void);
-	void BindTexture(GLuint texture, int unitno);
-	void DisBindTexture(GLuint texture, int unitno);
-	void TexCoord2f(float u, float v);
-	void TexCoord(TLITVERTEX &vtxInfo);
-	void SetTextureUFlag(TextureUVFlag dwFlag, uint32 tile);
-	void SetTextureVFlag(TextureUVFlag dwFlag, uint32 tile);
-	void EnableTexUnit(int unitno, BOOL flag);
-	void SetTexWrapS(int unitno,GLuint flag);
-	void SetTexWrapT(int unitno,GLuint flag);
-	void ApplyTextureFilter();
+    void Initialize(void);
+    void BindTexture(GLuint texture, int unitno);
+    void DisBindTexture(GLuint texture, int unitno);
+    void TexCoord2f(float u, float v);
+    void TexCoord(TLITVERTEX &vtxInfo);
+    void SetTextureUFlag(TextureUVFlag dwFlag, uint32 tile);
+    void SetTextureVFlag(TextureUVFlag dwFlag, uint32 tile);
+    void EnableTexUnit(int unitno, BOOL flag);
+    void SetTexWrapS(int unitno,GLuint flag);
+    void SetTexWrapT(int unitno,GLuint flag);
+    void ApplyTextureFilter();
 
-	void SetTextureToTextureUnitMap(int tex, int unit);
+    void SetTextureToTextureUnitMap(int tex, int unit);
 
 protected:
-	friend class OGLDeviceBuilder;
-	COGLExtRender() {};
-	~COGLExtRender() {};
-	int m_maxTexUnits;
-	int	m_textureUnitMap[8];
+    friend class OGLDeviceBuilder;
+    COGLExtRender() {};
+    ~COGLExtRender() {};
+    int m_maxTexUnits;
+    int m_textureUnitMap[8];
 
 };
 

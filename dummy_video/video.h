@@ -1,13 +1,14 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#ifndef __LINUX__
+#ifdef USEPOSIX
+#include "../main/wintypes.h"
+#endif
+#ifdef USEWIN32
 #include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
 #endif
 
-extern char			pluginName[];
+extern char         pluginName[];
 
 extern void (*CheckInterrupts)( void );
 extern char *screenDirectory;

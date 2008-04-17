@@ -5,15 +5,15 @@
 
 struct DepthBuffer
 {
-	DepthBuffer *higher, *lower;
+    DepthBuffer *higher, *lower;
 
-	u32 address, cleared;
+    u32 address, cleared;
 };
 
 struct DepthBufferInfo
 {
-	DepthBuffer *top, *bottom, *current;
-	int numBuffers;
+    DepthBuffer *top, *bottom, *current;
+    int numBuffers;
 };
 
 extern DepthBufferInfo depthBuffer;

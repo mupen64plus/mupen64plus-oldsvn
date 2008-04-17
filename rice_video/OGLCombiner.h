@@ -26,25 +26,25 @@ class OGLRender;
 class COGLColorCombiner : public CColorCombiner
 {
 public:
-	bool Initialize(void);
-	void InitCombinerBlenderForSimpleTextureDraw(uint32 tile=0);
+    bool Initialize(void);
+    void InitCombinerBlenderForSimpleTextureDraw(uint32 tile=0);
 protected:
-	friend class OGLDeviceBuilder;
+    friend class OGLDeviceBuilder;
 
-	void DisableCombiner(void);
-	void InitCombinerCycleCopy(void);
-	void InitCombinerCycleFill(void);
-	void InitCombinerCycle12(void);
+    void DisableCombiner(void);
+    void InitCombinerCycleCopy(void);
+    void InitCombinerCycleFill(void);
+    void InitCombinerCycle12(void);
 
-	COGLColorCombiner(CRender *pRender);
-	~COGLColorCombiner();
-	OGLRender *m_pOGLRender;
-	
-	bool	m_bSupportAdd;
-	bool	m_bSupportSubtract;
+    COGLColorCombiner(CRender *pRender);
+    ~COGLColorCombiner();
+    OGLRender *m_pOGLRender;
+    
+    bool    m_bSupportAdd;
+    bool    m_bSupportSubtract;
 
 #ifdef _DEBUG
-	void DisplaySimpleMuxString(void);
+    void DisplaySimpleMuxString(void);
 #endif
 
 };
@@ -52,18 +52,18 @@ protected:
 class COGLBlender : public CBlender
 {
 public:
-	void NormalAlphaBlender(void);
-	void DisableAlphaBlender(void);
-	void BlendFunc(uint32 srcFunc, uint32 desFunc);
-	void Enable();
-	void Disable();
+    void NormalAlphaBlender(void);
+    void DisableAlphaBlender(void);
+    void BlendFunc(uint32 srcFunc, uint32 desFunc);
+    void Enable();
+    void Disable();
 
 protected:
-	friend class OGLDeviceBuilder;
-	COGLBlender(CRender *pRender) : CBlender(pRender), m_pOGLRender((OGLRender*)pRender) {};
-	~COGLBlender() {};
+    friend class OGLDeviceBuilder;
+    COGLBlender(CRender *pRender) : CBlender(pRender), m_pOGLRender((OGLRender*)pRender) {};
+    ~COGLBlender() {};
 
-	OGLRender *m_pOGLRender;
+    OGLRender *m_pOGLRender;
 };
 
 

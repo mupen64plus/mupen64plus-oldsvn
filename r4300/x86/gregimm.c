@@ -43,31 +43,31 @@ void genbltz_test()
    
    if (!rs_64bit)
      {
-	int rs = allocate_register((unsigned int *)dst->f.i.rs);
-	
-	cmp_reg32_imm32(rs, 0);
-	jge_rj(12);
-	mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
-	jmp_imm_short(10); // 2
-	mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
+    int rs = allocate_register((unsigned int *)dst->f.i.rs);
+    
+    cmp_reg32_imm32(rs, 0);
+    jge_rj(12);
+    mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
+    jmp_imm_short(10); // 2
+    mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
      }
    else if (rs_64bit == -1)
      {
-	cmp_m32_imm32(((unsigned int *)dst->f.i.rs)+1, 0);
-	jge_rj(12);
-	mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
-	jmp_imm_short(10); // 2
-	mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
+    cmp_m32_imm32(((unsigned int *)dst->f.i.rs)+1, 0);
+    jge_rj(12);
+    mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
+    jmp_imm_short(10); // 2
+    mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
      }
    else
      {
-	int rs2 = allocate_64_register2((unsigned int *)dst->f.i.rs);
-	
-	cmp_reg32_imm32(rs2, 0);
-	jge_rj(12);
-	mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
-	jmp_imm_short(10); // 2
-	mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
+    int rs2 = allocate_64_register2((unsigned int *)dst->f.i.rs);
+    
+    cmp_reg32_imm32(rs2, 0);
+    jge_rj(12);
+    mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
+    jmp_imm_short(10); // 2
+    mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
      }
 }
 
@@ -79,8 +79,8 @@ void genbltz()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZ, 1);
-	return;
+    gencallinterp((unsigned int)BLTZ, 1);
+    return;
      }
    
    genbltz_test();
@@ -97,8 +97,8 @@ void genbltz_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZ_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BLTZ_OUT, 1);
+    return;
      }
    
    genbltz_test();
@@ -115,8 +115,8 @@ void genbltz_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZ_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BLTZ_IDLE, 1);
+    return;
      }
    
    genbltz_test();
@@ -131,31 +131,31 @@ void genbgez_test()
    
    if (!rs_64bit)
      {
-	int rs = allocate_register((unsigned int *)dst->f.i.rs);
-	
-	cmp_reg32_imm32(rs, 0);
-	jl_rj(12);
-	mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
-	jmp_imm_short(10); // 2
-	mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
+    int rs = allocate_register((unsigned int *)dst->f.i.rs);
+    
+    cmp_reg32_imm32(rs, 0);
+    jl_rj(12);
+    mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
+    jmp_imm_short(10); // 2
+    mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
      }
    else if (rs_64bit == -1)
      {
-	cmp_m32_imm32(((unsigned int *)dst->f.i.rs)+1, 0);
-	jl_rj(12);
-	mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
-	jmp_imm_short(10); // 2
-	mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
+    cmp_m32_imm32(((unsigned int *)dst->f.i.rs)+1, 0);
+    jl_rj(12);
+    mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
+    jmp_imm_short(10); // 2
+    mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
      }
    else
      {
-	int rs2 = allocate_64_register2((unsigned int *)dst->f.i.rs);
-	
-	cmp_reg32_imm32(rs2, 0);
-	jl_rj(12);
-	mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
-	jmp_imm_short(10); // 2
-	mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
+    int rs2 = allocate_64_register2((unsigned int *)dst->f.i.rs);
+    
+    cmp_reg32_imm32(rs2, 0);
+    jl_rj(12);
+    mov_m32_imm32((unsigned int *)(&branch_taken), 1); // 10
+    jmp_imm_short(10); // 2
+    mov_m32_imm32((unsigned int *)(&branch_taken), 0); // 10
      }
 }
 
@@ -167,8 +167,8 @@ void genbgez()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZ, 1);
-	return;
+    gencallinterp((unsigned int)BGEZ, 1);
+    return;
      }
    
    genbgez_test();
@@ -185,8 +185,8 @@ void genbgez_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZ_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BGEZ_OUT, 1);
+    return;
      }
    
    genbgez_test();
@@ -203,8 +203,8 @@ void genbgez_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZ_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BGEZ_IDLE, 1);
+    return;
      }
    
    genbgez_test();
@@ -221,8 +221,8 @@ void genbltzl()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZL, 1);
-	return;
+    gencallinterp((unsigned int)BLTZL, 1);
+    return;
      }
    
    genbltz_test();
@@ -239,8 +239,8 @@ void genbltzl_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZL_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BLTZL_OUT, 1);
+    return;
      }
    
    genbltz_test();
@@ -257,8 +257,8 @@ void genbltzl_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZL_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BLTZL_IDLE, 1);
+    return;
      }
    
    genbltz_test();
@@ -275,8 +275,8 @@ void genbgezl()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZL, 1);
-	return;
+    gencallinterp((unsigned int)BGEZL, 1);
+    return;
      }
    
    genbgez_test();
@@ -293,8 +293,8 @@ void genbgezl_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZL_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BGEZL_OUT, 1);
+    return;
      }
    
    genbgez_test();
@@ -311,8 +311,8 @@ void genbgezl_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZL_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BGEZL_IDLE, 1);
+    return;
      }
    
    genbgez_test();
@@ -327,28 +327,28 @@ void genbranchlink()
    
    if (!r31_64bit)
      {
-	int r31 = allocate_register_w((unsigned int *)&reg[31]);
-	
-	mov_reg32_imm32(r31, dst->addr+8);
+    int r31 = allocate_register_w((unsigned int *)&reg[31]);
+    
+    mov_reg32_imm32(r31, dst->addr+8);
      }
    else if (r31_64bit == -1)
      {
-	mov_m32_imm32((unsigned int *)&reg[31], dst->addr + 8);
-	if (dst->addr & 0x80000000)
-	  mov_m32_imm32(((unsigned int *)&reg[31])+1, 0xFFFFFFFF);
-	else
-	  mov_m32_imm32(((unsigned int *)&reg[31])+1, 0);
+    mov_m32_imm32((unsigned int *)&reg[31], dst->addr + 8);
+    if (dst->addr & 0x80000000)
+      mov_m32_imm32(((unsigned int *)&reg[31])+1, 0xFFFFFFFF);
+    else
+      mov_m32_imm32(((unsigned int *)&reg[31])+1, 0);
      }
    else
      {
-	int r311 = allocate_64_register1_w((unsigned int *)&reg[31]);
-	int r312 = allocate_64_register2_w((unsigned int *)&reg[31]);
-	
-	mov_reg32_imm32(r311, dst->addr+8);
-	if (dst->addr & 0x80000000)
-	  mov_reg32_imm32(r312, 0xFFFFFFFF);
-	else
-	  mov_reg32_imm32(r312, 0);
+    int r311 = allocate_64_register1_w((unsigned int *)&reg[31]);
+    int r312 = allocate_64_register2_w((unsigned int *)&reg[31]);
+    
+    mov_reg32_imm32(r311, dst->addr+8);
+    if (dst->addr & 0x80000000)
+      mov_reg32_imm32(r312, 0xFFFFFFFF);
+    else
+      mov_reg32_imm32(r312, 0);
      }
 }
 
@@ -360,8 +360,8 @@ void genbltzal()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZAL, 1);
-	return;
+    gencallinterp((unsigned int)BLTZAL, 1);
+    return;
      }
    
    genbltz_test();
@@ -379,8 +379,8 @@ void genbltzal_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZAL_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BLTZAL_OUT, 1);
+    return;
      }
    
    genbltz_test();
@@ -398,8 +398,8 @@ void genbltzal_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZAL_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BLTZAL_IDLE, 1);
+    return;
      }
    
    genbltz_test();
@@ -417,8 +417,8 @@ void genbgezal()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZAL, 1);
-	return;
+    gencallinterp((unsigned int)BGEZAL, 1);
+    return;
      }
    
    genbgez_test();
@@ -436,8 +436,8 @@ void genbgezal_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZAL_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BGEZAL_OUT, 1);
+    return;
      }
    
    genbgez_test();
@@ -455,8 +455,8 @@ void genbgezal_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZAL_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BGEZAL_IDLE, 1);
+    return;
      }
    
    genbgez_test();
@@ -474,8 +474,8 @@ void genbltzall()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZALL, 1);
-	return;
+    gencallinterp((unsigned int)BLTZALL, 1);
+    return;
      }
    
    genbltz_test();
@@ -493,8 +493,8 @@ void genbltzall_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZALL_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BLTZALL_OUT, 1);
+    return;
      }
    
    genbltz_test();
@@ -512,8 +512,8 @@ void genbltzall_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BLTZALL_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BLTZALL_IDLE, 1);
+    return;
      }
    
    genbltz_test();
@@ -531,8 +531,8 @@ void genbgezall()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZALL, 1);
-	return;
+    gencallinterp((unsigned int)BGEZALL, 1);
+    return;
      }
    
    genbgez_test();
@@ -550,8 +550,8 @@ void genbgezall_out()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZALL_OUT, 1);
-	return;
+    gencallinterp((unsigned int)BGEZALL_OUT, 1);
+    return;
      }
    
    genbgez_test();
@@ -569,8 +569,8 @@ void genbgezall_idle()
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
      {
-	gencallinterp((unsigned int)BGEZALL_IDLE, 1);
-	return;
+    gencallinterp((unsigned int)BGEZALL_IDLE, 1);
+    return;
      }
    
    genbgez_test();

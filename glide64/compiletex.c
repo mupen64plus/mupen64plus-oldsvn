@@ -12,7 +12,7 @@ int main(int argc, char **argv)
    
    while(fread(&a, 1, 1, src))
      {
-	fprintf(dest, "%d,\n", a);
+    fprintf(dest, "%d,\n", a);
      }
    fprintf(dest, "0};\n");
    fclose(src);
