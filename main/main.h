@@ -29,7 +29,6 @@ extern int autoinc_slot;
 extern int *autoinc_save_slot;
 extern int g_Noask;
 extern int g_NoaskParam;
-extern int g_LimitFPS;
 extern int g_MemHasBeenBSwapped;
 extern pthread_t g_EmulationThread;
 extern char *g_GfxPlugin;
