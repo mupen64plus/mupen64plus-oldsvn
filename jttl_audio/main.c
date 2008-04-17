@@ -146,11 +146,11 @@ static Uint8 *buffer = NULL;
 /* Position in buffer array where next audio chunk should be placed */
 static unsigned int buffer_pos = 0;
 /* Audio frequency, this is usually obtained from the game, but for compatibility we set default value */
-static int frequency = DEFAULT_FREQUENCY;
+static int GameFreq = DEFAULT_FREQUENCY;
 /* This is for syncronization, it's ticks saved just before AiLenChanged() returns. */
 static Uint32 last_ticks = 0;
-/* This is amount of ticks that are needed for previous audio chunk to be played */
-static Uint32 expected_ticks = 0;
+/* SpeedFactor is used to increase/decrease game playback speed */
+static Uint32 speed_factor = 100;
 // AI_LEN_REG at previous round */
 static DWORD prev_len_reg = 0;
 // If this is true then left and right channels are swapped */
@@ -165,10 +165,8 @@ static Uint32 LowBufferLoadLevel = LOW_BUFFER_LOAD_LEVEL;
 static Uint32 HighBufferLoadLevel = HIGH_BUFFER_LOAD_LEVEL;
 // Resample or not
 static Uint8 Resample = 1;
-// This actually handles all delaying
-static Uint8 TimeCompensation = 1;
 
-static int realFreq;
+static int OutputFreq;
 static char configdir[PATH_MAX] = {0};
 
 /* ----------- FUNCTIONS ------------- */
@@ -179,7 +177,7 @@ void InitializeSDL();
 
 EXPORT void CALL AiDacrateChanged( int SystemType )
 {
-    int f = frequency;
+    int f = GameFreq;
     switch (SystemType)
     {
         case SYSTEM_NTSC:
@@ -246,37 +244,48 @@ EXPORT void CALL AiLenChanged( void )
 
     // And then syncronization */
 
-       /* If buffer is running slow we speed up the game a bit. Actually we skip the syncronization. */
-       if(buffer_pos < LowBufferLoadLevel)
-       {
-               //wait_time -= (LOW_BUFFER_LOAD_LEVEL - buffer_pos);
-               wait_time = -1;
-           if(buffer_pos < SecondaryBufferSize*4)
-             SDL_PauseAudio(1);
-       }
-       else SDL_PauseAudio(0);
-       if(wait_time != -1) {
-               /* If for some reason game is runnin extremely fast and there is risk buffer is going to
-                 overflow, we slow down the game a bit to keep sound smooth. The overspeed is caused
-                 by inaccuracy in machines clock. */
-               if(buffer_pos > HighBufferLoadLevel)
-               {
-                       wait_time += (float)(buffer_pos - HIGH_BUFFER_LOAD_LEVEL) / (float)(frequency / 250);
-               }
-        expected_ticks = ((float)(prev_len_reg) / (float)(frequency / 250));
+    /* If buffer is running slow we speed up the game a bit. Actually we skip the syncronization. */
+    if (buffer_pos < LowBufferLoadLevel)
+    {
+        wait_time = -1;
+        if(buffer_pos < SecondaryBufferSize*4)
+          SDL_PauseAudio(1);
+    }
+    else
+        SDL_PauseAudio(0);
 
-               if(last_ticks + expected_ticks > SDL_GetTicks()) {
-                       wait_time += (last_ticks + expected_ticks) - SDL_GetTicks();
-#ifdef DEBUG
-                printf("[JttL's SDL Audio plugin] Debug: wait_time: %i, Buffer: %i/%i\n", wait_time, buffer_pos, PrimaryBufferSize);
-#endif
-                SDL_Delay(wait_time);
-            }
+    if (wait_time != -1)
+    {
+        /* Adjust the game frequency by the playback speed factor for the purposes of timing */
+        int InputFreq = GameFreq * speed_factor / 100;
+
+        /* If for some reason game is runnin extremely fast and there is risk buffer is going to
+           overflow, we slow down the game a bit to keep sound smooth. The overspeed is caused
+           by inaccuracy in machines clock. */
+        if (buffer_pos > HighBufferLoadLevel)
+        {
+            int overflow = (buffer_pos - HIGH_BUFFER_LOAD_LEVEL) / 4; /* in samples */
+            wait_time += overflow * 1000 / InputFreq;                 /* in milliseconds */
         }
+        
+        /* calculate how many milliseconds should have elapsed since the last audio chunk was added */
+        int prev_samples = prev_len_reg / 4;
+        int expected_ticks = prev_samples * 1000 / InputFreq;  /* in milliseconds */
+
+        /* now determine if we are ahead of schedule, and if so, wait */
+        int cur_ticks = SDL_GetTicks();
+        if (last_ticks + expected_ticks > cur_ticks)
+        {
+            wait_time += (last_ticks + expected_ticks) - cur_ticks;
+#ifdef DEBUG
+            printf("[JttL's SDL Audio plugin] Debug: wait_time: %i, Buffer: %i/%i\n", wait_time, buffer_pos, PrimaryBufferSize);
+#endif
+            SDL_Delay(wait_time);
+        }
+    }
 
     last_ticks = SDL_GetTicks();
     prev_len_reg = LenReg;
-
 }
 
 EXPORT DWORD CALL AiReadLength( void )
@@ -389,7 +398,7 @@ EXPORT void CALL DllTest ( HWND hParent )
     obtained = malloc(sizeof(SDL_AudioSpec));
     
     // 22050Hz - FM Radio quality
-    desired->freq=frequency;
+    desired->freq=GameFreq;
 
     // Print out message for frequency
     printf("[JttL's SDL Audio plugin] Requesting frequency: %iHz.\n", desired->freq);
@@ -537,23 +546,26 @@ unsigned int _dest_len = 0;
 int error;
 SRC_STATE *src_state;
 SRC_DATA src_data;
-int newsamplerate;
-int oldsamplerate;
 #endif
 
-static void resample(Uint8 *src, int src_len, Uint8 *dest, int dest_len)
+static int resample(Uint8 *input, int input_avail, int oldsamplerate, Uint8 *output, int output_needed, int newsamplerate)
 {
 #ifdef USE_SRC
     if(Resample == 2)
     {
-        if(((_src_len != src_len*2) || (_dest_len != dest_len*2)) && src_len > 0 && dest_len > 0)
+        // the high quality resampler needs more input than the samplerate ratio would indicate to work properly
+        if (input_avail > output_needed * 3 / 2)
+            input_avail = output_needed * 3 / 2; // just to avoid too much short-float-short conversion time
+        if (_src_len < input_avail*2 && input_avail > 0)
         {
             if(_src) free(_src);
-            _src_len = src_len*2;
+            _src_len = input_avail*2;
             _src = malloc(_src_len);
-            
+        }
+        if (_dest_len < output_needed*2 && output_needed > 0)
+        {
             if(_dest) free(_dest);
-            _dest_len = dest_len*2;
+            _dest_len = output_needed*2;
             _dest = malloc(_dest_len);
         }
         memset(_src,0,_src_len);
@@ -563,38 +575,39 @@ static void resample(Uint8 *src, int src_len, Uint8 *dest, int dest_len)
             src_state = src_new (SRC_SINC_BEST_QUALITY, 2, &error);
             if(src_state == NULL)
             {
-                memset(dest, 0, dest_len);
+                memset(output, 0, output_needed);
                 return;
             }
         }
-        src_short_to_float_array ((short *) src, _src, src_len/2);
+        src_short_to_float_array ((short *) input, _src, input_avail/2);
         src_data.end_of_input = 0;
         src_data.data_in = _src;
-        src_data.input_frames = src_len/4;
-        src_data.src_ratio = (1.0 * newsamplerate) / oldsamplerate;
+        src_data.input_frames = input_avail/4;
+        src_data.src_ratio = (float) newsamplerate / oldsamplerate;
         src_data.data_out = _dest;
-        src_data.output_frames = dest_len/4;
+        src_data.output_frames = output_needed/4;
         if ((error = src_process (src_state, &src_data)))
         {
-            memset(dest, 0, dest_len);
-            return;
+            memset(output, 0, output_needed);
+            return input_avail;  // number of bytes consumed
         }
-        src_float_to_short_array (_dest, (short *) dest, dest_len/2);
+        src_float_to_short_array (_dest, (short *) output, output_needed/2);
+        return src_data.input_frames_used * 4;
     }
     else
 #endif
     if(Resample == 1)
     {
-        int *psrc = (int*)src;
-        int *pdest = (int*)dest;
+        int *psrc = (int*)input;
+        int *pdest = (int*)output;
         int i;
         int j=0;
-        int sldf = src_len/4;
+        int sldf = oldsamplerate;
         int const2 = 2*sldf;
-        int dldf = dest_len/4;
+        int dldf = newsamplerate;
         int const1 = const2 - 2*dldf;
         int criteria = const2 - dldf;
-        for(i=0; i<dldf; ++i)
+        for(i = 0; i < output_needed/4; i++)
         {
             pdest[i] = psrc[j];
             if(criteria >= 0)
@@ -604,28 +617,27 @@ static void resample(Uint8 *src, int src_len, Uint8 *dest, int dest_len)
             }
             else criteria += const2;
         }
+        return j * 4; //number of bytes consumed
     }
     else
     {
-        memset(dest, 0, dest_len);
-        memcpy(dest,src,src_len);
+        memset(output, 0, output_needed);
+        memcpy(output,input,input_avail);
+        return input_avail;
     }
 }
 
 void my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
-    if(buffer_pos > (len * frequency) / realFreq)
-    {
-#ifdef USE_SRC
-        newsamplerate = realFreq;
-        oldsamplerate = frequency;
-#endif
-        int rlen = ((len/4 * frequency) / realFreq)*4;
-        resample(buffer, rlen, stream, len);
-        //memcpy(stream, buffer, rlen);
-        memmove(buffer, &buffer[ rlen ], buffer_pos  - rlen);
+    int newsamplerate = OutputFreq * 100 / speed_factor;
+    int oldsamplerate = GameFreq;
 
-        buffer_pos = buffer_pos - rlen ;
+    if (buffer_pos > (len * oldsamplerate) / newsamplerate)
+    {
+        int input_used;
+        input_used = resample(buffer, buffer_pos, oldsamplerate, stream, len, newsamplerate);
+        memmove(buffer, &buffer[input_used], buffer_pos - input_used);
+        buffer_pos -= input_used;
     }
     else
     {
@@ -633,18 +645,15 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
         underrun_count++;
         fprintf(stderr, "[JttL's SDL Audio plugin] Debug: Audio buffer underrun (%i).\n",underrun_count);
 #endif
-        //resample(buffer, buffer_pos, stream, ((buffer_pos/4 * realFreq) / frequency)*8);
-        memset(stream + ((buffer_pos/4 * realFreq) / frequency)*4, 0, len - ((buffer_pos/4 * realFreq) / frequency)*4);
-        //memcpy(stream, buffer, buffer_pos );
+        memset(stream , 0, len);
         buffer_pos = 0;
     }
 }
 EXPORT void CALL RomOpen()
 {
     /* This function is for compatibility with Mupen64. */
-    //semaphore = SDL_CreateSemaphore(0);
     ReadConfig();
-    InitializeAudio( frequency );
+    InitializeAudio( GameFreq );
 }
 void InitializeSDL()
 {
@@ -683,7 +692,7 @@ void InitializeAudio(int freq)
         InitializeSDL();
     }
 
-    frequency = freq; // This is important for the sync
+    GameFreq = freq; // This is important for the sync
     if(hardware_spec != NULL) free(hardware_spec);
     SDL_PauseAudio(1);
     SDL_CloseAudio();
@@ -703,11 +712,11 @@ void InitializeAudio(int freq)
     // 22050Hz - FM Radio quality
     //desired->freq=freq;
     
-    if(freq < 11025) realFreq = 11025;
-    else if(freq < 22050) realFreq = 22050;
-    else realFreq = 44100;
+    if(freq < 11025) OutputFreq = 11025;
+    else if(freq < 22050) OutputFreq = 22050;
+    else OutputFreq = 44100;
     
-    desired->freq = realFreq;
+    desired->freq = OutputFreq;
     
 #ifdef DEBUG
     printf("[JttL's SDL Audio plugin] Debug: Requesting frequency: %iHz.\n", desired->freq);
@@ -795,6 +804,12 @@ EXPORT void CALL ProcessAlist( void )
 {
 }
 
+EXPORT void CALL SetSpeedFactor(int percentage)
+{
+    if (percentage >= 10 && percentage <= 300)
+        speed_factor = percentage;
+}
+
 void ReadConfig()
 {
     FILE * config_file;
@@ -829,14 +844,13 @@ void ReadConfig()
 #ifdef DEBUG
             printf("[JttL's SDL Audio plugin] Debug: Parameter \"%s\", value: \"%i\"\n",&param,atoi(&value[1]));
 #endif
-            if(strcasecmp(param, "DEFAULT_FREQUENCY") == 0) frequency = atoi(value);
+            if(strcasecmp(param, "DEFAULT_FREQUENCY") == 0) GameFreq = atoi(value);
             if(strcasecmp(param, "SWAP_CHANNELS") == 0) SwapChannels = atoi(value);
             if(strcasecmp(param,"PRIMARY_BUFFER_SIZE") == 0) PrimaryBufferSize = atoi(value);
             if(strcasecmp(param,"SECONDARY_BUFFER_SIZE") == 0) SecondaryBufferSize = atoi(value);
             if(strcasecmp(param,"LOW_BUFFER_LOAD_LEVEL") == 0) LowBufferLoadLevel = atoi(value);
             if(strcasecmp(param,"HIGH_BUFFER_LOAD_LEVEL") == 0) HighBufferLoadLevel = atoi(value);
             if(strcasecmp(param,"RESAMPLE") == 0) Resample = atoi(value);
-            if(strcasecmp(param,"TIME_COMPENSATION") == 0) TimeCompensation = atoi(value);
         }
     }
     fclose(config_file);

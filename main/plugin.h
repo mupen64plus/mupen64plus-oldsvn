@@ -273,6 +273,7 @@ extern BOOL (*initiateAudio)(AUDIO_INFO Audio_Info);
 extern void (*processAList)();
 extern void (*romClosed_audio)();
 extern void (*romOpen_audio)();
+extern void (*setSpeedFactor)(int percent);
 
 extern void (*closeDLL_input)();
 extern void (*controllerCommand)(int Control, BYTE * Command);

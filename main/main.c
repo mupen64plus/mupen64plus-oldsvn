@@ -89,7 +89,6 @@ int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_LimitFPS = 1;
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
-            
 pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
             
@@ -113,6 +112,7 @@ static int  g_Fullscreen = 0;           // fullscreen enabled?
 static int  g_EmuMode = 0;              // emumode specified at commandline?
 static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
 static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
+static int  g_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -211,33 +211,6 @@ static unsigned int gettimeofday_msec(void)
 
 void new_frame(void)
 {
-/*
-    unsigned int CurrentFPSTime,Dif;
-    float FPS;
-    static unsigned int LastFPSTime;
-    static unsigned int CounterTime;
-    static int Fps_Counter=0;
-    
-    if(Fps_Counter == 0)
-    {
-    LastFPSTime = gettimeofday_msec();
-    CounterTime = gettimeofday_msec();
-}
-    
-    Fps_Counter++;
-    
-    CurrentFPSTime = gettimeofday_msec();
-    Dif = CurrentFPSTime - LastFPSTime;
-    if (Dif) 
-    {
-    if (CurrentFPSTime - CounterTime > 1000 ) 
-    {
-    FPS = (float) (Fps_Counter * 1000.0 / (CurrentFPSTime - CounterTime));
-    CounterTime = CurrentFPSTime ;
-    Fps_Counter = 0;
-}
-}
-    LastFPSTime = CurrentFPSTime ;*/
 }
 
 void new_vi(void)
@@ -248,9 +221,9 @@ void new_vi(void)
     static unsigned int CounterTime = 0;
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
+
+    double AdjustedLimit = VILimitMilliseconds * 100.0 / g_SpeedFactor;  // adjust for selected emulator speed
     int time;
-    
-    if(!g_LimitFPS) return;
 
     start_section(IDLE_SECTION);
     VI_Counter++;
@@ -265,18 +238,17 @@ void new_vi(void)
     
     Dif = CurrentFPSTime - LastFPSTime;
     
-    if (Dif <  VILimitMilliseconds ) 
+    if (Dif < AdjustedLimit) 
     {
-        CalculatedTime = CounterTime + (double)VILimitMilliseconds * (double)VI_Counter;
+        CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
         time = (int)(CalculatedTime - CurrentFPSTime);
-        if (time>0) 
+        if (time > 0)
         {
             usleep(time * 1000);
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }
-    
-    
+
     if (CurrentFPSTime - CounterTime >= 1000.0 ) 
     {
         CounterTime = gettimeofday_msec();
@@ -492,6 +464,7 @@ void screenshot(void)
 */
 static int sdl_event_filter( const SDL_Event *event )
 {
+    static int SavedSpeedFactor = 100;
     char *event_str = NULL;
 
     switch( event->type )
@@ -520,7 +493,22 @@ static int sdl_event_filter( const SDL_Event *event )
                     if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
                         changeWindow();
                     break;
-
+                case SDLK_F10:
+                    if (g_SpeedFactor > 10)
+                    {
+                        g_SpeedFactor -= 5;
+                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                    }
+                    break;
+                case SDLK_F11:
+                    if (g_SpeedFactor < 300)
+                    {
+                        g_SpeedFactor += 5;
+                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                    }
+                    break;
                 case SDLK_F12:
                     screenshot();
                     break;
@@ -545,28 +533,32 @@ static int sdl_event_filter( const SDL_Event *event )
                             //gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotItem[event->key.keysym.unicode - '1']), TRUE );
                             savestates_select_slot( event->key.keysym.unicode - '0' );
                             break;
-
+                        // Pause
                         case 'p':
                         case 'P':
                             pauseContinueEmulation();
                             break;
-
                         // volume mute/unmute
                         case 'm':
                         case 'M':
                             volMute();
                             break;
-
                         // increase volume
                         case ']':
                             volChange(2);
                             break;
-
                         // decrease volume
                         case '[':
                             volChange(-2);
                             break;
-
+                        // fast-forward
+                        case 'f':
+                        case 'F':
+                            SavedSpeedFactor = g_SpeedFactor;
+                            g_SpeedFactor = 250;
+                            setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                            break;
+                        // pass all other keypresses to the input plugin
                         default:
                             keyDown( 0, event->key.keysym.sym );
                     }
@@ -579,7 +571,11 @@ static int sdl_event_filter( const SDL_Event *event )
             {
                 case SDLK_ESCAPE:
                     break;
-
+                case SDLK_f:
+                    // cancel fast-forward
+                    g_SpeedFactor = SavedSpeedFactor;
+                    setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                    break;
                 default:
                     keyUp( 0, event->key.keysym.sym );
             }
