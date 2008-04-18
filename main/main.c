@@ -566,8 +566,7 @@ static int sdl_event_filter( const SDL_Event *event )
                         case '/':
                         case '?':
                             g_FrameAdvance = 1;
-                            if (g_FrameAdvance)
-                                pauseContinueEmulation();
+                            rompause = 0;
                             break;
                         
                         // pass all other keypresses to the input plugin
