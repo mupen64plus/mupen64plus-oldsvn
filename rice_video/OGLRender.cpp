@@ -69,8 +69,8 @@ void OGLRender::Initialize(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    //Can be disabled.
-    //glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
+    //Can't be disabled, render to texture switch effected.
+    glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
 
     COGLGraphicsContext *pcontext = (COGLGraphicsContext *)(CGraphicsContext::g_pGraphicsContext);
     if( pcontext->IsExtensionSupported("GL_IBM_texture_mirrored_repeat") )
@@ -436,8 +436,8 @@ void OGLRender::SetTextureVFlag(TextureUVFlag dwFlag, uint32 dwTile)
 // Basic render drawing functions
 bool OGLRender::RenderTexRect()
 {
-    //Can be disabled.
-    //glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
+    //Can't be disabled, render to texture switch effected.
+    glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
 
     GLboolean cullface = glIsEnabled(GL_CULL_FACE);
     glDisable(GL_CULL_FACE);
@@ -598,8 +598,7 @@ void OGLRender::DrawSimple2DTexture(float x0, float y0, float x1, float y1, floa
     GLboolean cullface = glIsEnabled(GL_CULL_FACE);
     glDisable(GL_CULL_FACE);
     
-    //Can be disabled.
-    //glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
+    glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
 
     glBegin(GL_TRIANGLES);
     float a = (g_texRectTVtx[0].dcDiffuse >>24)/255.0f;
@@ -767,18 +766,18 @@ void OGLRender::TexCoord(TLITVERTEX &vtxInfo)
 void OGLRender::UpdateScissor()
 {
     if( options.bEnableHacks && g_CI.dwWidth == 0x200 && gRDP.scissor.right == 0x200 && g_CI.dwWidth>(*g_GraphicsInfo.VI_WIDTH_REG & 0xFFF) )
-   {
-         //Hack for RE2 
-         //Ideally we would remove the scissor, but might be needed for Mario Tennis...
+        {
+        //Hack for RE2 
+        //Ideally we would remove the scissor, but might be needed for Mario Tennis...
         uint32 width = *g_GraphicsInfo.VI_WIDTH_REG & 0xFFF;
         uint32 height = (gRDP.scissor.right*gRDP.scissor.bottom)/width;
-      glEnable(GL_SCISSOR_TEST);
+        glEnable(GL_SCISSOR_TEST);
         glScissor(0, int(height*windowSetting.fMultY+windowSetting.statusBarHeightToUse),            int(width*windowSetting.fMultX), int(height*windowSetting.fMultY) );
         //glScissor(0, 0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
     }
     else
     {
-        //UpdateScissorWithClipRatio();
+        UpdateScissorWithClipRatio();
     }
 }
 
@@ -787,18 +786,18 @@ void OGLRender::ApplyRDPScissor(bool force)
     if( !force && status.curScissor == RDP_SCISSOR )    return;
 
     if( options.bEnableHacks && g_CI.dwWidth == 0x200 && gRDP.scissor.right == 0x200 && g_CI.dwWidth>(*g_GraphicsInfo.VI_WIDTH_REG & 0xFFF) )
-    {
-        // Hack for RE2
-        uint32 width = *g_GraphicsInfo.VI_WIDTH_REG & 0xFFF;
+      {
+      //Hack for RE2
+      uint32 width = *g_GraphicsInfo.VI_WIDTH_REG & 0xFFF;
       uint32 height = (gRDP.scissor.right*gRDP.scissor.bottom)/width;
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(0, int(height*windowSetting.fMultY+windowSetting.statusBarHeightToUse),           int(width*windowSetting.fMultX), int(height*windowSetting.fMultY) );
-        //glScissor(0, 0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
-    }
-        //glScissor(0, 0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
- else
- {
-        glScissor(int(gRDP.scissor.left*windowSetting.fMultX),int((windowSetting.uViHeight-gRDP.scissor.bottom)*windowSetting.fMultY+windowSetting.statusBarHeightToUse),            int((gRDP.scissor.right-gRDP.scissor.left)*windowSetting.fMultX), int((gRDP.scissor.bottom-gRDP.scissor.top)*windowSetting.fMultY ));
+      glEnable(GL_SCISSOR_TEST);
+      glScissor(0, int(height*windowSetting.fMultY+windowSetting.statusBarHeightToUse),           int(width*windowSetting.fMultX), int(height*windowSetting.fMultY) );
+      glScissor(0, 0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
+      }
+    else
+    {
+    glScissor(int(gRDP.scissor.left*windowSetting.fMultX),int((windowSetting.uViHeight-gRDP.scissor.bottom)*windowSetting.fMultY+windowSetting.statusBarHeightToUse),            int((gRDP.scissor.right-gRDP.scissor.left)*windowSetting.fMultX), int((gRDP.scissor.bottom-gRDP.scissor.top)*windowSetting.fMultY ));
+    glScissor(0, 0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
     }
 
     status.curScissor = RDP_SCISSOR;
