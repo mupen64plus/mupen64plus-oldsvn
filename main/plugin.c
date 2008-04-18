@@ -238,7 +238,7 @@ void plugin_scan_installdir(void)
     while((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name + strlen(entry->d_name) - 3, ".so") != 0)
-          continue;
+            continue;
         
         plugin_scan_file(entry->d_name, 0);
     }
@@ -355,16 +355,16 @@ void plugin_exec_about(const char *name)
 }
 
 void plugin_load_plugins(const char *gfx_name,
-             const char *audio_name,
-             const char *input_name,
-             const char *RSP_name)
+                         const char *audio_name,
+                         const char *input_name,
+                         const char *RSP_name)
 {
    int i;
    plugin *p;
    void *handle_gfx = NULL,
-    *handle_audio = NULL,
-    *handle_input = NULL,
-    *handle_RSP = NULL;
+        *handle_audio = NULL,
+        *handle_input = NULL,
+        *handle_RSP = NULL;
 
    p = plugin_get_by_name(gfx_name);
    if(p) handle_gfx = p->handle;

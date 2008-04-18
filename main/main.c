@@ -349,8 +349,8 @@ void startEmulation(void)
 {
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
-           *input_plugin = NULL,
-           *RSP_plugin = NULL;
+               *input_plugin = NULL,
+               *RSP_plugin = NULL;
 
     // make sure rom is loaded before running
     if(!rom)
