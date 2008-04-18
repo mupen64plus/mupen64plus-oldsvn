@@ -38,9 +38,9 @@
 #include "TexLoad16b.h"
 #include "TexLoad32b.h"
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <string.h>
-#endif // _WIN32
+#endif
 
 DWORD LoadNone (unsigned char * dst, unsigned char * src, int wid_64, int height, int line, int real_width, int tile)
 {

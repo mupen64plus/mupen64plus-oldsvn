@@ -31,12 +31,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#ifndef __WIN32__
 #include <SDL.h>
-#include "../main/winlnxdefs.h"
-#else
-#include <windows.h>
-#endif
+#include <specific.h>
 
 #include "interupt.h"
 #include "../memory/memory.h"
@@ -414,7 +410,7 @@ void gen_interupt()
        lircCheckInput();
 #endif //WITH_LIRC
 
-#ifndef __WIN32__
+#ifndef USEWIN32
     SDL_PumpEvents();
     refresh_stat();
 #endif
@@ -457,7 +453,7 @@ void gen_interupt()
        lircCheckInput();
 #endif //WITH_LIRC
 
-#ifndef __WIN32__
+#ifndef USEWIN32
     SDL_PumpEvents();
 #endif
     PIF_RAMb[0x3F] = 0x0;

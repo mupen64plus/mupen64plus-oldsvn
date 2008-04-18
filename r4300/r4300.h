@@ -80,7 +80,7 @@ int check_cop1_unusable();
 #define COMPILER_SECTION 3
 #define IDLE_SECTION 4
 
-#ifndef __WIN32__
+#ifndef USEWIN32
 
 //#define PROFILE
 

@@ -26,7 +26,7 @@
 
 
 /************************************************************************
- * 2002-Apr-22, José Fonseca:
+ * 2002-Apr-22, Josï¿½ Fonseca:
  *   Removed non Win32 system-specific stuff
  *
  * 2002-Apr-17, Marcus Geelnard:

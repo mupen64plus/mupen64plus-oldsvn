@@ -37,9 +37,9 @@
 #include "Util.h"
 #include "3dmath.h"
 #include "Debugger.h"
-#ifdef _WIN32
+#ifdef USEWIN32
 #include "resource.h"
-#endif // _WIN32
+#endif
 
 #include "Combine.h"
 
@@ -49,12 +49,12 @@
 #include "CRC.h"
 #include "DepthBufferRender.h"
 
-#ifndef _WIN32
+#ifdef USEPOSIX
 #include <string.h>
 #include <stdlib.h>
 #include "messagebox.h"
 #include <sys/time.h>
-#endif // _WIN32
+#endif
 
 #define G64_VERSION "Wonder Plus"
 #define RELTIME "Date: " __DATE__ " Time: " __TIME__
@@ -100,14 +100,14 @@ long max_tex_size;
 long sup_mirroring;
 BOOL sup_32bit_tex = FALSE;
 
-#ifdef _WIN32
+#ifdef USEWIN32
 #define WINPROC_OVERRIDE
 #ifdef WINPROC_OVERRIDE
 LRESULT CALLBACK WndProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC oldWndProc = NULL;
 WNDPROC myWndProc = NULL;
 #endif
-#endif // _WIN32
+#endif
 
 #ifdef ALTTAB_FIX
 HHOOK hhkLowLevelKybd = NULL;
@@ -330,7 +330,7 @@ void ReadSettings ()
   settings.custom_ini = (BOOL)INI_ReadInt ("custom_ini", 0);
   settings.hotkeys = (BOOL)INI_ReadInt ("hotkeys", 0);
 
-#ifndef _WIN32
+#ifndef USEWIN32
   settings.full_res = (BOOL)INI_ReadInt ("full_res", 7);
   settings.tex_filter = (BOOL)INI_ReadInt ("tex_filter", 0);
   settings.noditheredalpha = (BOOL)INI_ReadInt ("noditheredalpha", 0);
@@ -383,7 +383,7 @@ void ReadSpecialSettings (char name[21])
     settings.tonic = TRUE;
   else if (strstr(name, (const char *)"All") && strstr(name, (const char *)"Star") && strstr(name, (const char *)"Baseball"))
     settings.ASB = TRUE;
-  else if (strstr(name, (const char *)"ÄÞ×´ÓÝ2 Ë¶ØÉ¼ÝÃÞÝ"))
+  else if (strstr(name, (const char *)"ï¿½ï¿½×´ï¿½ï¿½2 Ë¶ï¿½É¼ï¿½ï¿½ï¿½ï¿½"))
     settings.doraemon2 = TRUE;
   else if (strstr(name, (const char *)"SPACE INVADERS"))
     settings.invaders = TRUE;
@@ -573,7 +573,7 @@ void WriteSettings ()
   INI_WriteInt ("custom_ini", settings.custom_ini);
   INI_WriteInt ("hotkeys", settings.hotkeys);
 
-#ifndef _WIN32
+#ifndef USEWIN32
   INI_WriteInt ("full_res", settings.full_res);
   INI_WriteInt ("tex_filter", settings.tex_filter);
   INI_WriteInt ("noditheredalpha", settings.noditheredalpha);
@@ -584,10 +584,10 @@ void WriteSettings ()
   INI_Close ();
 }
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include "font.h"
 #include "cursor.h"
-#endif // _WIN32
+#endif
 
 GRFRAMEBUFFERCOPYEXT grFramebufferCopyExt = NULL;
 GRTEXBUFFEREXT   grTextureBufferExt = NULL;
@@ -648,7 +648,7 @@ void guLoadTextures ()
   else
     offset_font = 0;
 
-#ifdef _WIN32
+#ifdef USEWIN32
   char path[256];
   GetModuleFileName (hInstance, path, 256);
   HMODULE hModule = GetModuleHandle (path);
@@ -659,7 +659,7 @@ void guLoadTextures ()
 #else
    DWORD *data = (DWORD*)font;
    DWORD cur;
-#endif // _WIN32
+#endif
   
   // ** Font texture **
   BYTE *tex8 = (BYTE*)malloc(256*64);
@@ -709,12 +709,12 @@ void guLoadTextures ()
   free (fontTex.data);
   
   // ** Cursor texture **
-#ifdef _WIN32
+#ifdef USEWIN32
   hrsrc = FindResource (hModule, MAKEINTRESOURCE(IDR_CURSOR), RT_RCDATA);
   data = (DWORD*)LoadResource (hModule, hrsrc);
-#else // _WIN32
+#else
    data = (DWORD*)cursor;
-#endif // _WIN32
+#endif
   
   WORD *tex16 = (WORD*)malloc(32*32*2);
   
@@ -790,11 +790,11 @@ BOOL InitGfx (BOOL evoodoo_using_window)
 
   if (!gfx_context)
   {
-#ifdef _WIN32
+#ifdef USEWIN32
     MessageBox (gfx.hWnd, "Error setting display mode", "Error", MB_OK|MB_ICONEXCLAMATION);
-#else // _WIN32
+#else
      messagebox("Error", MB_OK|MB_ICONEXCLAMATION, "Error setting display mode");
-#endif // _WIN32
+#endif
     grSstWinClose (gfx_context);
     grGlideShutdown ();
     return FALSE;
@@ -841,14 +841,14 @@ BOOL InitGfx (BOOL evoodoo_using_window)
 
   grFramebufferCopyExt = (GRFRAMEBUFFERCOPYEXT) grGetProcAddress("grFramebufferCopyExt");
   printf("before\n");
-#ifdef _WIN32
+#ifdef USEWIN32
   HMODULE HGLIDE = GetModuleHandle("glide3x");
   grStippleModeExt = (GRSTIPPLE) GetProcAddress(HGLIDE, "_grStippleMode@4");
   grStipplePatternExt = (GRSTIPPLE) GetProcAddress(HGLIDE, "_grStipplePattern@4");
-#else // _WIN32
+#else
   grStippleModeExt = (GRSTIPPLE) grStippleMode;
   grStipplePatternExt = (GRSTIPPLE) grStipplePattern; 
-#endif // _WIN32
+#endif
   printf("after\n");
   if (grStipplePatternExt)
     grStipplePatternExt(settings.stipple_pattern);
@@ -944,7 +944,7 @@ void ReleaseGfx ()
 // DllMain - called when the DLL is loaded, use this to get the DLL's instance
 //
 
-#ifdef _WIN32
+#ifdef USEWIN32
 //#ifndef GCC
 BOOL CALLBACK ConfigPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK DebugPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -1010,7 +1010,7 @@ BOOL WINAPI DllMain (HINSTANCE hinstDLL,
   }
   return TRUE;
 }
-#endif // _WIN32
+#endif // USEWIN32
 
 void CALL ReadScreen(void **dest, long *width, long *height)
 {
@@ -1136,12 +1136,12 @@ EXPORT void CALL ChangeWindow (void)
   {
     if (!ev_fullscreen)
     {
-      to_fullscreen = TRUE;
-#ifdef _WIN32
-      if (gfx.hStatusBar)
+        to_fullscreen = TRUE;
+#ifdef USEWIN32
+        if (gfx.hStatusBar)
         ShowWindow( gfx.hStatusBar, SW_HIDE );
-      ShowCursor( FALSE );
-#endif // _WIN32
+        ShowCursor( FALSE );
+#endif
       GRWRAPPERFULLSCREENRESOLUTIONEXT grWrapperFullScreenResolutionExt = 
          (GRWRAPPERFULLSCREENRESOLUTIONEXT)grGetProcAddress("grWrapperFullScreenResolutionExt");
       if (grWrapperFullScreenResolutionExt != NULL)
@@ -1164,12 +1164,12 @@ EXPORT void CALL ChangeWindow (void)
         settings.scr_res_y = settings.res_y = resolutions[settings.res_data][1];
       }
       InitGfx(TRUE);
-#ifdef _WN32
+#ifdef USEWIN32
       ShowCursor( TRUE );
       if (gfx.hStatusBar)
         ShowWindow( gfx.hStatusBar, SW_SHOW );
       SetWindowLong (gfx.hWnd, GWL_WNDPROC, (long)oldWndProc);
-#endif // _WIN32
+#endif
     }
   }
   else
@@ -1180,16 +1180,16 @@ EXPORT void CALL ChangeWindow (void)
     if (!fullscreen)
     {
       to_fullscreen = TRUE;
-#ifdef _WIN32
+#ifdef USEWIN32
       if (gfx.hStatusBar)
         ShowWindow( gfx.hStatusBar, SW_HIDE );
       ShowCursor( FALSE );
-#endif // _WIN32
+#endif
     }
     else
     {
       ReleaseGfx ();
-#ifdef _WIN32
+#ifdef USEWIN32
       ShowCursor( TRUE );
       if (gfx.hStatusBar)
         ShowWindow( gfx.hStatusBar, SW_SHOW );
@@ -1197,7 +1197,7 @@ EXPORT void CALL ChangeWindow (void)
     // 1964 crash error when loading another rom.
     // All N64 emu's minimize, restore crashes.
       SetWindowLong (gfx.hWnd, GWL_WNDPROC, (long)oldWndProc);
-#endif // _WIN32
+#endif
     }
   }
 }
@@ -1233,7 +1233,7 @@ EXPORT void CALL CloseDLL (void)
   ZLUT_release();
   ClearCache ();
 }
-#ifdef _WIN32
+#ifdef USEWIN32
 //taken from 1964 sources
 LRESULT APIENTRY About(HWND hDlg, unsigned message, WORD wParam, LONG lParam)
 {
@@ -1246,7 +1246,7 @@ LRESULT APIENTRY About(HWND hDlg, unsigned message, WORD wParam, LONG lParam)
 
     return(FALSE);
 }
-#endif // _WIN32
+#endif
 /******************************************************************
 Function: DllAbout
 Purpose:  This function is optional function that is provided
@@ -1256,9 +1256,9 @@ output:   none
 *******************************************************************/ 
 EXPORT void CALL DllAbout ( HWND hParent )
 {
-#ifdef _WIN32
+#ifdef USEWIN32
   DialogBox(hInstance, "ABOUT", hParent, (DLGPROC) About);
-#else // _WIN32
+#else
    messagebox("Glide64 v"G64_VERSION, MB_OK,
           "Glide64 "G64_VERSION"\nRelease: " RELTIME "\n" 
           "by Gonetz\nOriginal author: Dave2001\nOther developers: Gugaman\n\n"
@@ -1271,7 +1271,7 @@ EXPORT void CALL DllAbout ( HWND hParent )
           "the Emutalk message board who helped or brought encouragement\n\n"
           "Thanks to EmuXHaven for hosting my site:\nhttp://glide64.emuxhaven.net/\n\n"
           "Official development channel: #Glide64 on EFnet\nNO ROM REQUESTS / NO BETA REQUESTS");
-#endif // _WIN32
+#endif
 }
 
 /******************************************************************
@@ -1306,7 +1306,7 @@ input:    a pointer to a PLUGIN_INFO stucture that needs to be
 filled by the function. (see def above)
 output:   none
 *******************************************************************/ 
-#ifdef WIN32
+#ifdef USEWIN32
 # include <fcntl.h>
 # ifndef ATTACH_PARENT_PROCESS
 #  define ATTACH_PARENT_PROCESS ((DWORD)-1)
@@ -1318,7 +1318,7 @@ BOOL (WINAPI * AttachConsolePTR)(DWORD);
 
 EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 {
-#ifdef WIN32x
+#ifdef USEWIN32
   // ZIGGY code to attach to console and use it
   HANDLE libhnd;
   if ((libhnd = LoadLibrary("KERNEL32")) && (AttachConsolePTR = (AttachConsoleType)GetProcAddress((HINSTANCE__*)libhnd, "AttachConsole")) && AttachConsolePTR(ATTACH_PARENT_PROCESS)) 
@@ -1351,7 +1351,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
   // bswap on a dword (32 bits) boundry
 }
 
-#ifndef _WIN32
+#ifndef USEWIN32
 BOOL WINAPI QueryPerformanceCounter(PLARGE_INTEGER counter)
 {
    struct timeval tv;
@@ -1556,7 +1556,7 @@ EXPORT void CALL RomOpen (void)
   {
     BMASK = WMASK;
   }
-#endif // _WIN32
+#endif
   
   OPEN_RDP_LOG ();
   OPEN_RDP_E_LOG ();
@@ -1789,7 +1789,7 @@ void newSwapBuffers()
         }
         output ((float)(settings.res_x - 68), y, 0, out_buf, 0);
       }
-#ifdef _WIN32
+#ifdef USEWIN32
         if (settings.hotkeys)
         {
             if (GetAsyncKeyState (VK_BACK) & 0x0001)
@@ -1875,9 +1875,9 @@ void newSwapBuffers()
               }
             }
     }
-#endif // _WIN32
+#endif
     }
-#ifdef _WIN32
+#ifdef USEWIN32
     if (capture_screen)
     {
       char path[256];
@@ -2001,7 +2001,7 @@ void newSwapBuffers()
       
       capture_screen = 0;
     }
-#endif // _WIN32    
+#endif
     // Capture the screen if debug capture is set
     if (debug.capture)
     {
@@ -2032,14 +2032,14 @@ void newSwapBuffers()
       grLfbUnlock (GR_LFB_READ_ONLY, GR_BUFFER_BACKBUFFER);
     }
 
-#ifdef _WIN32
+#ifdef USEWIN32
     if (fullscreen && debugging)
     {
       debug_keys ();
       debug_cacheviewer ();
       debug_mouse ();
     }
-#endif // _WIN32
+#endif
 
     if (fullscreen)
     {
@@ -2048,10 +2048,10 @@ void newSwapBuffers()
       fps_count ++;
     }
     
-#ifdef _WIN32
+#ifdef USEWIN32
     if (debug.capture)
       debug_capture ();
-#endif // _WIN32
+#endif
 
     if (fullscreen && (debugging || settings.wireframe || settings.buff_clear))
     {
@@ -2063,7 +2063,7 @@ void newSwapBuffers()
     }
     
     frame_count ++;
-#ifdef _WIN32   
+#ifdef USEWIN32
     // Open/close debugger?
     if (GetAsyncKeyState(VK_SCROLL) & 0x0001)
     {
@@ -2094,7 +2094,7 @@ void newSwapBuffers()
     {
       debug.capture = 1;
     }
-#endif // _WIN32
+#endif
   }
 }
 

@@ -1,11 +1,6 @@
-#ifdef __WIN32__
-# include <windows.h>
-# include <stdio.h>
-#else
-# include "wintypes.h"
-# include <string.h>
-# include <stdio.h>
-#endif
+#include <specific.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "hle.h"
 
@@ -14,7 +9,7 @@ extern u8 BufferSpace[0x10000];
 static void SPNOOP () {
     char buff[0x100];
     sprintf (buff, "Unknown/Unimplemented Audio Command %i in ABI 2", (int)(inst1 >> 24));
-#ifdef __WIN32__
+#ifdef USEWIN32
     MessageBox (NULL, buff, "Audio HLE Error", MB_OK);
 #else
     printf( "Audio HLE Error: %s\n", buff );

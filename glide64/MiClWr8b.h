@@ -138,7 +138,7 @@ end_mirror_check:
          : [mask_width] "g" (mask_width), [mask_mask] "g" ((intptr_t)mask_mask), [count] "g" (count), [line] "g" ((intptr_t)line), [line_full] "g" ((intptr_t)line_full)
          : "memory", "cc", "edx"
          );
-#endif // _WIN32
+#endif
 }
 
 //****************************************************************

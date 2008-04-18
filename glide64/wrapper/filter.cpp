@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include "../winlnxdefs.h"
-#endif // _WIN32
+#endif
 
 #include "main.h"
 #include "2xsai.h"

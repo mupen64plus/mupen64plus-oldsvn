@@ -37,10 +37,10 @@
 #include "Util.h"
 #include "Debugger.h"
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <stdarg.h>
 #include <string.h>
-#endif // _WIN32
+#endif
 
 DEBUGGER debug;
 
@@ -248,7 +248,7 @@ void debug_cacheviewer ()
 //
 // debug_capture - does a frame capture event (for debugging)
 //
-#ifdef _WIN32
+#ifdef USEWIN32
 void debug_capture ()
 {
   DWORD i,j;
@@ -997,7 +997,7 @@ void debug_keys ()
   if (GetAsyncKeyState (VK_UP) & 0x0001)
     debug.tex_scroll --;
 }
-#endif // _WIN32
+#endif
 //
 // output - output debugger text
 //

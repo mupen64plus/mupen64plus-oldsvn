@@ -1,9 +1,5 @@
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-#endif // __LINUX__
+
+#include <specific.h>
 
 #define CRC32_POLYNOMIAL     0x04C11DB7
 

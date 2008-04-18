@@ -4,11 +4,11 @@
 //  Copyright (C) 2001 M. Scott Heiman
 //  All Rights Reserved
 //
-// You may use the software for any purpose you see fit.  You may modify
+// You may use the software for any purpose you see fit.ï¿½ You may modify
 // it, incorporate it in a commercial application, use it for school,
-// even turn it in as homework.  You must keep the Copyright in the
-// header and source files.  This software is not in the "Public Domain".
-// You may use this software at your own risk.  I have made a reasonable
+// even turn it in as homework.ï¿½ You must keep the Copyright in the
+// header and source files.ï¿½ This software is not in the "Public Domain".
+//ï¿½You may use this software at your own risk.ï¿½ I have made a reasonable
 // effort to verify that this software works in the manner I expect it to;
 // however,...
 //
@@ -31,9 +31,9 @@
 #include <stdlib.h>
 #include <setjmp.h>
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <string.h>
-#endif // _WIN32
+#endif
 
 const unsigned short BMP_ID = 0x4D42;
 

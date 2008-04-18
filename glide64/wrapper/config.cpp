@@ -1,14 +1,9 @@
-#ifdef _WIN32
-#include <windows.h>
-// #include <gl/gl.h>
-#else // _WIN32
-#include "../winlnxdefs.h"
-#endif // _WIN32
+#include <specific.h>
 #include "glide.h"
 #include "main.h"
-#ifdef _WIN32
+#ifdef USEWIN32
 #include "resource.h"
-#endif // _WIN32
+#endif
 
 typedef struct _wrapper_config
 {
@@ -20,14 +15,14 @@ typedef struct _wrapper_config
   int disable_auxbuf;
 } wrapper_config;
 
-#ifdef _WIN32
+#ifdef USEWIN32
 static HINSTANCE hinstance;
 static HKEY Key = NULL;
 static wrapper_config config;
 static int valid_filter = 0;
 static int valid_dithalpha = 0;
 
-#ifdef WIN32
+#ifdef USEWIN32
 extern "C" {
 BOOL WINAPI DllMain (HINSTANCE hinstDLL, 
                      DWORD fdwReason,
@@ -184,69 +179,69 @@ static BOOL CALLBACK ConfigDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARA
     }
     return TRUE;
 }
-#endif // _WIN32
+#endif
 FX_ENTRY void FX_CALL grConfigWrapperExt(HINSTANCE
 instance, HWND hwnd)
 {
-#ifdef _WIN32
+#ifdef USEWIN32
     DialogBox(hinstance, MAKEINTRESOURCE(IDD_CONFIG_DIAL), hwnd, ConfigDlgProc);
-#endif // _WIN32
+#endif
 }
 
-#ifdef _WIN32
+#ifdef USEWIN32
 int getFullScreenWidth()
 {
     readConfig();
     switch(config.res)
     {
-    case GR_RESOLUTION_320x200:
-        return 320;
-        break;
-    case GR_RESOLUTION_320x240:
-        return 320;
-        break;
-    case GR_RESOLUTION_400x256:
-        return 400;
-        break;
-    case GR_RESOLUTION_512x384:
-        return 512;
-        break;
-    case GR_RESOLUTION_640x200:
-        return 640;
-        break;
-    case GR_RESOLUTION_640x350:
-        return 640;
-        break;
-    case GR_RESOLUTION_640x400:
-        return 640;
-        break;
-    case GR_RESOLUTION_640x480:
-        return 640;
-        break;
-    case GR_RESOLUTION_800x600:
-        return 800;
-        break;
-    case GR_RESOLUTION_960x720:
-        return 960;
-        break;
-    case GR_RESOLUTION_856x480:
-        return 856;
-        break;
-    case GR_RESOLUTION_512x256:
-        return 512;
-        break;
-    case GR_RESOLUTION_1024x768:
-        return 1024;
-        break;
-    case GR_RESOLUTION_1280x1024:
-        return 1280;
-        break;
-    case GR_RESOLUTION_1600x1200:
-        return 1600;
-        break;
-    case GR_RESOLUTION_400x300:
-        return 400;
-        break;
+        case GR_RESOLUTION_320x200:
+            return 320;
+            break;
+        case GR_RESOLUTION_320x240:
+            return 320;
+            break;
+        case GR_RESOLUTION_400x256:
+            return 400;
+            break;
+        case GR_RESOLUTION_512x384:
+            return 512;
+            break;
+        case GR_RESOLUTION_640x200:
+            return 640;
+            break;
+        case GR_RESOLUTION_640x350:
+            return 640;
+            break;
+        case GR_RESOLUTION_640x400:
+            return 640;
+            break;
+        case GR_RESOLUTION_640x480:
+            return 640;
+            break;
+        case GR_RESOLUTION_800x600:
+            return 800;
+            break;
+        case GR_RESOLUTION_960x720:
+            return 960;
+            break;
+        case GR_RESOLUTION_856x480:
+            return 856;
+            break;
+        case GR_RESOLUTION_512x256:
+            return 512;
+            break;
+        case GR_RESOLUTION_1024x768:
+            return 1024;
+            break;
+        case GR_RESOLUTION_1280x1024:
+            return 1280;
+            break;
+        case GR_RESOLUTION_1600x1200:
+            return 1600;
+            break;
+        case GR_RESOLUTION_400x300:
+            return 400;
+            break;
     }
     return 0;
 }
@@ -256,136 +251,136 @@ int getFullScreenHeight()
     readConfig();
     switch(config.res)
     {
-    case GR_RESOLUTION_320x200:
-        return 200;
-        break;
-    case GR_RESOLUTION_320x240:
-        return 240;
-        break;
-    case GR_RESOLUTION_400x256:
-        return 256;
-        break;
-    case GR_RESOLUTION_512x384:
-        return 384;
-        break;
-    case GR_RESOLUTION_640x200:
-        return 200;
-        break;
-    case GR_RESOLUTION_640x350:
-        return 350;
-        break;
-    case GR_RESOLUTION_640x400:
-        return 400;
-        break;
-    case GR_RESOLUTION_640x480:
-        return 480;
-        break;
-    case GR_RESOLUTION_800x600:
-        return 600;
-        break;
-    case GR_RESOLUTION_960x720:
-        return 720;
-        break;
-    case GR_RESOLUTION_856x480:
-        return 480;
-        break;
-    case GR_RESOLUTION_512x256:
-        return 250;
-        break;
-    case GR_RESOLUTION_1024x768:
-        return 768;
-        break;
-    case GR_RESOLUTION_1280x1024:
-        return 1024;
-        break;
-    case GR_RESOLUTION_1600x1200:
-        return 1200;
-        break;
-    case GR_RESOLUTION_400x300:
-        return 300;
-        break;
+        case GR_RESOLUTION_320x200:
+            return 200;
+            break;
+        case GR_RESOLUTION_320x240:
+            return 240;
+            break;
+        case GR_RESOLUTION_400x256:
+            return 256;
+            break;
+        case GR_RESOLUTION_512x384:
+            return 384;
+            break;
+        case GR_RESOLUTION_640x200:
+            return 200;
+            break;
+        case GR_RESOLUTION_640x350:
+            return 350;
+            break;
+        case GR_RESOLUTION_640x400:
+            return 400;
+            break;
+        case GR_RESOLUTION_640x480:
+            return 480;
+            break;
+        case GR_RESOLUTION_800x600:
+            return 600;
+            break;
+        case GR_RESOLUTION_960x720:
+            return 720;
+            break;
+        case GR_RESOLUTION_856x480:
+            return 480;
+            break;
+        case GR_RESOLUTION_512x256:
+            return 250;
+            break;
+        case GR_RESOLUTION_1024x768:
+            return 768;
+            break;
+        case GR_RESOLUTION_1280x1024:
+            return 1024;
+            break;
+        case GR_RESOLUTION_1600x1200:
+            return 1200;
+            break;
+        case GR_RESOLUTION_400x300:
+            return 300;
+            break;
     }
     return 0;
 }
 
-#else // _WIN32
+#else
 
 #include "../rdp.h"
 
-#endif // _WIN32
+#endif
 
 FX_ENTRY GrScreenResolution_t FX_CALL grWrapperFullScreenResolutionExt(void)
 {
-#ifdef _WIN32
+#ifdef USEWIN32
     readConfig();
     return config.res;
-#else // _WIN32
+#else
    return settings.full_res;
-#endif // _WIN32
+#endif
 }
 
 int getFilter()
 {
-#ifdef _WIN32
+#ifdef USEWIN32
     if (!valid_filter)
     {
         readConfig();
         valid_filter = 1;
     }
     return config.filter;
-#else // _WIN32
+#else USEWIN32
    return settings.tex_filter;
 #endif // _WIN32
 }
 
 int getDisableDitheredAlpha()
 {
-#ifdef _WIN32
+#ifdef USEWIN32
     if (!valid_dithalpha)
     {
         readConfig();
         valid_dithalpha = 1;
     }
     return config.disable_dithered_alpha;
-#else // _WIN32
+#else
    return settings.noditheredalpha;
-#endif // _WIN32
+#endif
 }
 
 int getEnableFBO()
 {
-#ifdef _WIN32
+#ifdef USEWIN32
     if (!valid_dithalpha)
     {
         readConfig();
         valid_dithalpha = 1;
     }
     return config.FBO;
-#else // _WIN32
+#else
    return settings.FBO;
-#endif // _WIN32
+#endif
 }
 
 int getDisableAuxbuf()
 {
-#ifdef _WIN32
+#ifdef USEWIN32
     if (!valid_dithalpha)
     {
         readConfig();
         valid_dithalpha = 1;
     }
     return config.disable_auxbuf;
-#else // _WIN32
+#else
    return settings.disable_auxbuf;
-#endif // _WIN32
+#endif
 }
 
 int getDisableGLSL()
 {
-#ifdef _WIN32
+#ifdef USEWIN32
     readConfig();
     return config.disable_glsl;
-#else // _WIN32
+#else
    return settings.noglsl;
-#endif // _WIN32
+#endif
 }

@@ -1,13 +1,10 @@
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
 
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
+#include <specific.h>
+
+#ifndef min
+# define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
+
 #include <math.h>
 #include "glN64.h"
 #include "OpenGL.h"

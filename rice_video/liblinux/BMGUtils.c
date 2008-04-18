@@ -4,11 +4,11 @@
 //  Copyright (C) 2001 M. Scott Heiman
 //  All Rights Reserved
 //
-// You may use the software for any purpose you see fit.  You may modify
+// You may use the software for any purpose you see fit.ï¿½ You may modify
 // it, incorporate it in a commercial application, use it for school,
-// even turn it in as homework.  You must keep the Copyright in the
-// header and source files.  This software is not in the "Public Domain".
-// You may use this software at your own risk.  I have made a reasonable
+// even turn it in as homework.ï¿½ You must keep the Copyright in the
+// header and source files.ï¿½ This software is not in the "Public Domain".
+//ï¿½You may use this software at your own risk.ï¿½ I have made a reasonable
 // effort to verify that this software works in the manner I expect it to;
 // however,...
 //
@@ -28,9 +28,9 @@
 #include <malloc.h>
 #include "BMGUtils.h"
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <string.h>
-#endif // _WIN32
+#endif
 
 /* error strings for all BMG errors */
 char BMGErrorStrings[17][128] = {
@@ -72,7 +72,7 @@ void GetLastBMGErrorMessage( const char **msg )
 {
     if ( LastBMGError == errWindowsAPI )
     {
-#ifdef _WIN32
+#ifdef USEWIN32
           LPVOID lpMsgBuf;
 
           FormatMessage(
@@ -84,17 +84,17 @@ void GetLastBMGErrorMessage( const char **msg )
             0,
             NULL
           );
-#else // _WIN32
-       char* lpMsgBuf = "Erreur BMG\n";
-#endif // _WIN32
+#else
+       char* lpMsgBuf = "Error BMG\n";
+#endif
 
         /* copy the string. */
           strcpy( BMGErrorStrings[(int)LastBMGError], (char *)lpMsgBuf );
 
-#ifdef _WIN32
+#ifdef USEWIN32
         /* Free the buffer. */
           LocalFree( lpMsgBuf );
-#endif // _WIN32
+#endif
     }
 
     *msg = BMGErrorStrings[(int)LastBMGError];

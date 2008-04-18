@@ -1,9 +1,4 @@
-#ifdef USEWIN32
-#include <windows.h>
-#endif
-#ifdef USEPOSIX
-#include "wintypes.h"
-#endif
+#include <specific.h>
 #ifdef USE_GTK
 #include <gtk/gtk.h>
 #endif
@@ -124,7 +119,7 @@ static int audio_ucode(OSTask_t *task)
         {
 /*      char s[1024];
         sprintf(s, "unknown audio\n\tsum:%x", sum);
-#ifdef __WIN32__
+#ifdef USEWIN32
         MessageBox(NULL, s, "unknown task", MB_OK);
 #else
         printf("%s\n", s);
@@ -253,7 +248,7 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
             {
                char s[1024];
                sprintf(s, "unknown jpeg:\n\tsum:%x", sum);
-#ifdef __WIN32__
+#ifdef USEWIN32
                MessageBox(NULL, s, "unknown task", MB_OK);
 #else
                printf("%s\n", s);
@@ -268,7 +263,7 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
     char s[1024];
     FILE *f;
     sprintf(s, "unknown task:\n\ttype:%d\n\tsum:%x\n\tPC:%lx", (int)task->type, sum, (long) rsp.SP_PC_REG);
-#ifdef __WIN32__
+#ifdef USEWIN32
     MessageBox(NULL, s, "unknown task", MB_OK);
 #else
     printf("%s\n", s);
@@ -332,7 +327,7 @@ __declspec(dllexport) void RomClosed (void)
      }
 /*   init_ucode1();
    init_ucode2();*/
-#ifdef __WIN32__
+#ifdef USEWIN32
    firstTime = TRUE;
 #endif
 }

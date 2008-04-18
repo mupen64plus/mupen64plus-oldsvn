@@ -182,7 +182,7 @@ loop_x:
          : [mask_mask] "g" (mask_mask), [count] "g" (count), [line] "g" ((intptr_t)line), [line_full] "g" ((intptr_t)line_full)
          : "memory", "cc", "edx"
          );
-#endif // _WIN32
+#endif
 }
 
 //****************************************************************

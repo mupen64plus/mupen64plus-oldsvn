@@ -1,11 +1,5 @@
-
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# include <stdlib.h>
-#endif // __LINUX__
+#include <specific.h>
+#include <stdlib.h>
 #include "OpenGL.h"
 #include "FrameBuffer.h"
 #include "RSP.h"

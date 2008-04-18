@@ -233,11 +233,11 @@
 #endif
 
 /* enough people need this for various reasons to include it here */
-#ifdef _WIN32
+#ifdef USEWIN32
 #if !defined(MACOS) && !defined(RISCOS) && !defined(_WIN32_WCE)
 #  include <sys/types.h>
 #endif
-#endif // _WIN32
+#endif
 
 #if !defined(PNG_SETJMP_NOT_SUPPORTED) && !defined(PNG_NO_SETJMP_SUPPORTED)
 #  define PNG_SETJMP_SUPPORTED

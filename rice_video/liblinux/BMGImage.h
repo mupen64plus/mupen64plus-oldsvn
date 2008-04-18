@@ -6,11 +6,7 @@
 //  Copyright 2000, 2001 M. Scott Heiman
 */
 
-#ifdef _WIN32
-#include <windows.h>
-#else // _WIN32
-#include "../winlnxdefs.h"
-#endif // _WIN32
+#include <specific.h>
 
 #ifdef BUILD_BMG_DLL
 #   define BMG_EXPORT __cdecl __declspec( dllexport )

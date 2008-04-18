@@ -52,9 +52,9 @@ BYTE *texture;
 #include "TexModCI.h"
 #include "CRC.h"
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <stdlib.h>
-#endif // _WIN32
+#endif
 
 typedef struct TEXINFO_t {
     int real_image_width, real_image_height;    // FOR ALIGNMENT PURPOSES ONLY!!!

@@ -1,18 +1,13 @@
-#ifdef __WIN32__
-# include <windows.h>
-# include <stdio.h>
-#else
-# include "wintypes.h"
-# include <string.h>
-# include <stdio.h>
-#endif
+#include <specific.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "hle.h"
 
 static void SPNOOP () {
     char buff[0x100];
     sprintf (buff, "Unknown/Unimplemented Audio Command %i in ABI 3", (int)(inst1 >> 24));
-#ifdef __WIN32__
+#ifdef USEWIN32
     MessageBox (NULL, buff, "Audio HLE Error", MB_OK);
 #else
     printf( "Audio HLE Error: %s\n", buff );
@@ -240,7 +235,7 @@ static void ENVMIXER3o () {
     //static FILE *dfile = fopen ("d:\\envmix.txt", "wt");
 // ********* Make sure these conditions are met... ***********
     if ((AudioInBuffer | AudioOutBuffer | AudioAuxA | AudioAuxC | AudioAuxE | AudioCount) & 0x3) {
-#ifdef __WIN32__
+#ifdef USEWIN32
         MessageBox (NULL, "Unaligned EnvMixer... please report this to Azimer with the following information: RomTitle, Place in the rom it occurred, and any save state just before the error", "AudioHLE Error", MB_OK);
 #else
         printf( "Unaligned EnvMixer... please report this to Azimer with the following information: RomTitle, Place in the rom it occurred, and any save state just before the error" );
@@ -1016,18 +1011,18 @@ void MP3 ();
 /*
 FFT = Fast Fourier Transform
 DCT = Discrete Cosine Transform
-MPEG-1 Layer 3 retains Layer 2’s 1152-sample window, as well as the FFT polyphase filter for 
-backward compatibility, but adds a modified DCT filter. DCT’s advantages over DFTs (discrete 
+MPEG-1 Layer 3 retains Layer 2ï¿½s 1152-sample window, as well as the FFT polyphase filter for 
+backward compatibility, but adds a modified DCT filter. DCTï¿½s advantages over DFTs (discrete 
 Fourier transforms) include half as many multiply-accumulate operations and half the 
 generated coefficients because the sinusoidal portion of the calculation is absent, and DCT 
-generally involves simpler math. The finite lengths of a conventional DCTs’ bandpass impulse 
+generally involves simpler math. The finite lengths of a conventional DCTsï¿½ bandpass impulse 
 responses, however, may result in block-boundary effects. MDCTs overlap the analysis blocks 
 and lowpass-filter the decoded audio to remove aliases, eliminating these effects. MDCTs also 
 have a higher transform coding gain than the standard DCT, and their basic functions 
 correspond to better bandpass response. 
 
-MPEG-1 Layer 3’s DCT sub-bands are unequally sized, and correspond to the human auditory 
-system’s critical bands. In Layer 3 decoders must support both constant- and variable-bit-rate 
+MPEG-1 Layer 3ï¿½s DCT sub-bands are unequally sized, and correspond to the human auditory 
+systemï¿½s critical bands. In Layer 3 decoders must support both constant- and variable-bit-rate 
 bit streams. (However, many Layer 1 and 2 decoders also handle variable bit rates). Finally, 
 Layer 3 encoders Huffman-code the quantized coefficients before archiving or transmission for 
 additional lossless compression. Bit streams range from 32 to 320 kbps, and 128-kbps rates 

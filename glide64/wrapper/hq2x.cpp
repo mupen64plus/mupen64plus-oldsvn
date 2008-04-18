@@ -20,10 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _WIN32
-#include <conio.h>
-#include <windows.h>
-#endif // _WIN32
+#include <specific.h>
 //#include "Image.h"
 
 static int   LUT16to32[65536];

@@ -706,7 +706,7 @@ BMGError WritePNG( const char *filename, struct BMGImageStruct img )
 #ifdef _BMG_LIBPNG_STANDALONE
 #pragma message ("Creating BMGLibPNG functions")
 
-#ifdef _WIN32
+#ifdef USEWIN32
 /* saves the contents of an HBITMAP to a file.  returns 1 if successfull,
                 // 0 otherwise */
                 BMGError SaveBitmapToPNGFile( HBITMAP hBitmap,      /* bitmap to be saved */
@@ -756,7 +756,7 @@ BMGError WritePNG( const char *filename, struct BMGImageStruct img )
     SetLastBMGError( out );
     return out;
 }
-#endif // _WIN32
+#endif
 
 /* Creates an HBITMAP to an image file.  returns an HBITMAP if successfull,
 // NULL otherwise */

@@ -467,7 +467,7 @@ BMGError ConvertToPseudoGrayScale( struct BMGImageStruct *img )
     return BMG_OK;
 }
 
-#ifdef _WIN32
+#ifdef USEWIN32
 /*******************************************************************************
 // extracts the dimensional information, pixel array, and color table from an
 // HBITMAP.
@@ -992,7 +992,7 @@ void SetBMGBackgroundColor( unsigned char *color )
             4*sizeof(unsigned char) );
 }
 
-#ifdef _WIN32
+#ifdef USEWIN32
 /* defines the background bitmap that is used for alpha blending & transparent
    pixels */
 BMGError SetBMGBackgroundBitmap( HBITMAP hBitmap )

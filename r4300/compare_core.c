@@ -29,12 +29,7 @@
 
 #include <sys/stat.h>
 #include "r4300.h"
-#ifdef USEPOSIX
-#include "../main/wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include <specific.h>
 #include "../main/plugin.h"
 #include "../r4300/recomph.h"
 #include "../memory/memory.h"

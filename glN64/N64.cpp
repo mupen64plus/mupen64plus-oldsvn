@@ -1,9 +1,4 @@
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-#endif
+#include <specific.h>
 #include "N64.h"
 #include "Types.h"
 

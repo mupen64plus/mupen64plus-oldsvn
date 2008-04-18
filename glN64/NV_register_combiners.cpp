@@ -1,17 +1,13 @@
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# include <stdlib.h>
+#include <specific.h>
+#include <stdlib.h>
 
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
-#endif // __LINUX__
+#ifndef min
+# define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+# define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 #include "OpenGL.h"
 #include "Combiner.h"
 #include "NV_register_combiners.h"

@@ -1,10 +1,6 @@
-#ifdef __WIN32__
-# include <windows.h>
-#else
-# include "wintypes.h"
-# include <string.h>
-# include <stdio.h>
-#endif
+#include <specific.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "hle.h"
 

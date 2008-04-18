@@ -1,10 +1,5 @@
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# include <stdlib.h>
-#endif
+#include <specific.h>
+#include <stdlib.h>
 #include "OpenGL.h"
 #include "Combiner.h"
 #include "texture_env.h"

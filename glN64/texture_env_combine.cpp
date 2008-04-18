@@ -1,14 +1,10 @@
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/winlnxdefs.h"
-# include <stdlib.h> // malloc()
+#include <specific.h>
+#include <stdlib.h> // malloc()
 
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
+#ifndef max
+# define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
+
 #include "OpenGL.h"
 #include "Combiner.h"
 #include "texture_env_combine.h"

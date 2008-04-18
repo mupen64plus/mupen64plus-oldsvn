@@ -1,4 +1,4 @@
-#ifndef _WIN32
+#ifndef USEWIN32
 #include "../winlnxdefs.h"
 #include <stdarg.h>
 #include <string.h>
@@ -7,16 +7,13 @@
 #include "glide.h"
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef _WIN32
-#include <windows.h>
-#include <commctrl.h>
-#endif // _WIN32
+#include <specific.h>
 #include "main.h"
-#ifdef _WIN32
-#include "wglext.h"
-#endif // _WIN32
+#ifdef USEWIN32
+#include <GL/wglext.h>
+#endif
 
-#ifndef WIN32
+#ifndef USEWIN32
 BOOL WINAPI QueryPerformanceCounter(PLARGE_INTEGER counter);
 #endif
 

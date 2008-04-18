@@ -35,7 +35,7 @@
 
 #include "Gfx1.3.h"
 
-#ifdef _WIN32
+#ifdef USEWIN32
 
 #include "resource.h"
 #include "ToolTips.h"
@@ -546,7 +546,7 @@ BOOL CALLBACK StatisticsPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
   return 0;
 }
 
-#else // _WIN32
+#else
 
 #include <string.h>
 #include <gtk/gtk.h>
@@ -1260,4 +1260,4 @@ void CALL DllConfig ( HWND hParent )
    gtk_widget_show_all(configDialog->dialog);
 }
 
-#endif // _WIN32
+#endif

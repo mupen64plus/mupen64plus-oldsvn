@@ -3,11 +3,7 @@
 
 #ifdef VCR_SUPPORT
 
-#ifndef __WIN32__
-# include "winlnxdefs.h"
-#else
-# include <windows.h>
-#endif
+#include <specific.h>
 
 #include "plugin.h"
 

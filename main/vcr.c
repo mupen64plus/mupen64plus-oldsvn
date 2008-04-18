@@ -391,14 +391,14 @@ VCR_stopPlayback()
     return -1;
 }
 
-#ifdef __WIN32__
+#ifdef USEWIN32
 void init_readScreen();
 #endif
 
 int
 VCR_startCapture( const char *recFilename, const char *aviFilename )
 {
-#ifdef __WIN32__
+#ifdef USEWIN32
     init_readScreen();
 #endif
     if (readScreen == 0)
@@ -431,7 +431,7 @@ int
 VCR_stopCapture()
 {
     m_capture = 0;
-#ifndef __WIN32__
+#ifndef USEWIN32
     usleep( 100000 );
 #endif
     VCR_stopPlayback();

@@ -315,7 +315,7 @@ void __stdcall MulMatricesSSE(float m1[4][4],float m2[4][4],float r[4][4])
 
         movaps  xmmword ptr[eax+48],xmm4
     }
-#endif // _WIN32
+#endif
 }
 
 MULMATRIX MulMatrices = MulMatricesNOSSE;
@@ -360,7 +360,7 @@ void math_init()
       }
     }
   }
-#endif // _WIN32
+#endif
   if (IsSSE)
   {
     MulMatrices = MulMatricesSSE;

@@ -29,7 +29,8 @@ endif
 
 # include the pre.mk for the specific platform
 ifeq ("$(FROMPLUGIN)","1")
-  include ../$(PLAT)/pre.mk
+  ROOT=..
 else
-  include ./$(PLAT)/pre.mk
+  ROOT=.
 endif
+include $(ROOT)/$(PLAT)/pre.mk

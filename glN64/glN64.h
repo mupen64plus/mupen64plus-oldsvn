@@ -1,12 +1,7 @@
 #ifndef GLN64_H
 #define GLN64_H
 
-#ifdef USEPOSIX
-#include "../main/wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include <specific.h>
 
 #ifndef PATH_MAX
 # define PATH_MAX 1024

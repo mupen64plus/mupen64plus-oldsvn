@@ -1,12 +1,7 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#ifdef USEPOSIX
-#include "../main/wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include <specific.h>
 
 extern char         pluginName[];
 

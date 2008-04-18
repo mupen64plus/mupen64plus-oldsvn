@@ -1,32 +1,16 @@
-#ifdef USEWIN32
-#include <windows.h>
-# include "gl.h"
-# include "glext.h"
-#include "glext.h"
-# include <png.h>
-# include "SDL.h"
-# include <string.h>
-# include <time.h>
-# include <stdlib.h>
+#include <specific.h>
+#include <string.h>
+#include <time.h>
+#include <stdlib.h>
+#include <png.h>
+#include <SDL.h>
+#ifndef min
+# define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# define GL_GLEXT_PROTOTYPES
-# include "gl.h"
-# include "glext.h"
-# include <png.h>
-# include "SDL.h"
-# include <string.h>
-# include <time.h>
-# include <stdlib.h>
-
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
-# define timeGetTime() time(NULL)
+#ifndef max
+# define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#define timeGetTime() time(NULL)
 
 #endif
 #include <math.h>

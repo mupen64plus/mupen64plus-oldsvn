@@ -398,12 +398,12 @@ static void uc2_special2 ()
 {
   RDP ("uc2:special2\n");
 }
-#ifdef _WIN32
+#ifdef USEWIN32
 static void uc2_special1 ()
 {
   RDP ("uc2:special1\n");
 }
-#endif // _WIN32
+#endif
 static void uc2_dma_io ()
 {
   RDP ("uc2:dma_io\n");

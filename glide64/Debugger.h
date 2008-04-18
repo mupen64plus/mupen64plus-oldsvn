@@ -122,9 +122,9 @@ typedef struct
 #define TRI_TEXRECT     1
 #define TRI_FILLRECT    2
 #define TRI_BACKGROUND  3
-#ifdef _WIN32
+#ifdef USEWIN32
 static char *tri_type[4] = { "TRIANGLE", "TEXRECT", "FILLRECT", "BACKGROUND" };
-#endif // _WIN32
+#endif
 extern DEBUGGER debug;
 
 void debug_init ();

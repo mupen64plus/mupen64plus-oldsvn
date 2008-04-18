@@ -71,7 +71,7 @@ void dyna_start(void (*code)())
      mov esp, _save_esp
    }
 #elif defined(__GNUC__) && defined(__i386__)
-#ifdef __WIN32__
+#ifdef USEWIN32
    asm volatile 
       (" movl %%ebp, _save_ebp \n"
        " movl %%esp, _save_esp \n"

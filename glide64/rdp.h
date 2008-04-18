@@ -189,14 +189,14 @@ typedef struct {
   BOOL  clock;
   BOOL  clock_24_hr;
    
-#ifndef _WIN32
+#ifndef USEWIN32
   DWORD full_res;
   DWORD tex_filter;
   BOOL noditheredalpha;
   BOOL noglsl;
   BOOL FBO;
   BOOL disable_auxbuf;
-#endif // _WIN32
+#endif
 
   //Frame buffer emulation options
   BOOL  fb_read_always;

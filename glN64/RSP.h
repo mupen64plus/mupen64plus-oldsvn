@@ -1,14 +1,9 @@
 #ifndef RSP_H
 #define RSP_H
 
-#ifdef USEWIN32
-# include <windows.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# include "SDL.h"
-# include "SDL_thread.h"
-#endif
+#include <specific.h>
+#include <SDL.h>
+#include <SDL_thread.h>
 #include "N64.h"
 #include "GBI.h"
 #include "gSP.h"

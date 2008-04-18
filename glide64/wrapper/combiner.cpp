@@ -1,12 +1,7 @@
-#ifdef _WIN32
-#include <windows.h>
-// #include <gl/gl.h>
-// #include "glext.h"
-#else // _WIN32
-#include "../winlnxdefs.h"
+
+#include <specific.h>
 #include <string.h>
 #include <stdlib.h>
-#endif // _WIN32
 #include <math.h>
 #include "glide.h"
 #include "main.h"
@@ -24,10 +19,10 @@ int fog_enabled;
 static int chroma_enabled;
 static int chroma_other_color;
 static int chroma_other_alpha;
-#ifdef _WIN32
+#ifdef USEWIN32
 static float farF;
 static float nearF;
-#endif // _WIN32
+#endif
 static int dither_enabled;
 int blackandwhite0;
 int blackandwhite1;

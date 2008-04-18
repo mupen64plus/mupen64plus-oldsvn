@@ -26,12 +26,7 @@
 #endif
 
 
-#ifdef USEPOSIX
-#include "../main/wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include <specific.h>
 #include "Controller_1.1.h"
 
 #include "SDL.h"

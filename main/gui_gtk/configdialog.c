@@ -25,7 +25,7 @@ Email                : blight@Ashitaka
 #include "../translate.h"
 #include "../util.h"
 
-#include "../winlnxdefs.h"
+#include <specific.h>
 #include "../plugin.h"
 
 #include <gtk/gtk.h>

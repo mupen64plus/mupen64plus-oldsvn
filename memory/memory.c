@@ -29,12 +29,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef USEPOSIX
-#include "../main/wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include <specific.h>
 
 #include "dma.h"
 #include "../r4300/r4300.h"

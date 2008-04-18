@@ -61,22 +61,11 @@ the plugin
 #ifndef _GFX_H_INCLUDED__
 #define _GFX_H_INCLUDED__
 
-#if defined(WIN32) && defined(GCC)
-// ZIGGY ARRRRGG what a pain in the #$@$
-//# include "Gfx #1.3-mangling.h"
-#ifdef GCC
 #include <stdio.h>
-//#define printf(...)
-#endif
-#endif
 
 #define _WIN32_WINNT 0x0400
 
-#ifdef _WIN32
-#include <windows.h>
-#else // _WIN32
-#include "winlnxdefs.h"
-#endif // _WIN32
+#include <specific.h>
 #include <stdio.h>
 
 #include <ostream>
@@ -84,12 +73,6 @@ the plugin
 
 #include <cstddef>      // offsetof
 #include <cmath>
-#ifdef _WIN32
-#include <io.h>
-#include <direct.h>
-#include <mmsystem.h>
-#include <commctrl.h>
-#endif // _WIN32
 #include <time.h>
 #include <glide.h>
 #include <g3ext.h>
@@ -139,7 +122,7 @@ extern "C" {
 #define FPS                 // fps counter able? (not enabled necessarily)
 
 #define LOGNOTKEY           // Log if not pressing:
-#ifdef WIN32
+#ifdef USEWIN32
 #define LOGKEY      VK_LCONTROL     // this key
 #else
 #include <SDL/SDL.h>
@@ -311,10 +294,10 @@ __inline void FRDP_E (const char *fmt, ...)
 #ifndef GCC
 #define FRDP(x)
 #define FRDP_E(x)
-#else // _WIN32
+#else
 inline void FRDP (const char *fmt, ...) {}
 inline void FRDP_E (const char *fmt, ...) {}
-#endif // _WIN32
+#endif
 #endif
 
 

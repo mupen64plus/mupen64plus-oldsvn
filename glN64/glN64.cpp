@@ -1,14 +1,5 @@
-#ifdef USEWIN32
-# include <windows.h>
-# include <commctrl.h>
-# include <process.h>
-#endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# include <string.h>
-#endif
-# include "gl.h"
-# include "glext.h"
+#include <specific.h>
+#include <string.h>
 #include "glN64.h"
 #include "Debug.h"
 #include "Zilmar GFX 1.3.h"

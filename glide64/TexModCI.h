@@ -33,10 +33,10 @@
 //
 //****************************************************************
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
-#endif // _WIN32
+#endif
 
 static void mod_tex_inter_color_using_factor_CI (DWORD color, DWORD factor)
 {

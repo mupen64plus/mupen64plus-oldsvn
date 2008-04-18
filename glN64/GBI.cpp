@@ -16,15 +16,15 @@
 #include "F3DPD.h"
 #include "Types.h"
 #ifdef USEWIN32
-# include "resource.h"
+# include "Resource.h"
 #endif
-#ifdef USEPOSIX
+#ifdef USE_GTK
 # include <glib.h>
 # include <gtk/gtk.h>
-# include <string.h>
-# include <unistd.h>
-# include <stdlib.h>
-#endif // __LINUX__
+#endif
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include "CRC.h"
 #include "Debug.h"
 

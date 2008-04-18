@@ -41,9 +41,9 @@
 #include "Util.h"
 #include "Combine.h"
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <string.h>
-#endif // _WIN32
+#endif
 
 #define FASTSEARCH  // Enable fast combine mode searching algorithm
 

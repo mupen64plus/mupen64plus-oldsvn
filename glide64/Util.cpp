@@ -41,10 +41,10 @@
 #include "TexCache.h"
 #include "DepthBufferRender.h"
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <string.h>
 #include <stdlib.h>
-#endif // _WIN32
+#endif
 
 #define Vj rdp.vtxbuf2[j]
 #define Vi rdp.vtxbuf2[i]

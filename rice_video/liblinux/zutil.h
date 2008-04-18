@@ -92,7 +92,7 @@ extern const char *z_errmsg[10]; /* indexed by 2-zlib_error */
 #  define OS_CODE  0x06
 #endif
 
-#ifdef WIN32 /* Window 95 & Windows NT */
+#ifdef USEWIN32 /* Window 95 & Windows NT */
 #  define OS_CODE  0x0b
 #endif
 

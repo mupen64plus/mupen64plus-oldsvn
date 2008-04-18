@@ -1619,13 +1619,13 @@ static void uc6_ldtx_rect_r ()
     rdp.cmd1 = addr + 24;
     uc6_obj_rectangle_r ();
 }
-#ifdef _WIN32
+#ifdef USEWIN32
 static void uc6_rdphalf_0 ()
 {
     RDP ("uc6:rdphalf_0\n");
     RDP_E ("uc6:rdphalf_0\n");
 }
-#endif // _WIN32
+#endif
 static void uc6_rdphalf_1 ()
 {
     RDP ("uc6:rdphalf_1\n");

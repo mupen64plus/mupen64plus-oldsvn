@@ -45,15 +45,15 @@ int last_line_ret;  // last line ended in return?
 WORD cr = 0x0A0D;
 static char configdir[PATH_MAX] = {0};
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>
 #include <stdlib.h>
-#endif // _WIN32
+#endif
 
 #include <errno.h>
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <sys/resource.h>
 #endif
 
@@ -70,12 +70,13 @@ BOOL INI_Open ()
     }
     else
     {
-#ifdef _WIN32
+#ifdef USEWIN32
     GetModuleFileName (hInstance, path, PATH_MAX);
-#else // _WIN32
-# ifdef __FreeBSD__
+#endif
+#ifdef __FreeBSD__
    int n = readlink("/proc/curproc/files", path, PATH_MAX);
-#else
+#endif
+#ifdef USEPOSIX
    int n = readlink("/proc/self/exe", path, PATH_MAX);
 #endif
    if (n == -1) strcpy(path, "./");
@@ -109,25 +110,25 @@ BOOL INI_Open ()
       }
      }
 
-#endif // _WIN32
+#endif
 
     // Find the previous backslash
     int i;
     for (i=strlen(path)-1; i>0; i--)
     {
-#ifdef _WIN32
+#ifdef USEWIN32
         if (path[i] == '\\')
-#else // _WIN32
+#else
             if (path[i] == '/')
-#endif // _WIN32
+#endif
             break;
     }
     if (path == 0) return FALSE;
     path[i+1] = 0;
 
-#ifndef _WIN32
+#ifndef USEWIN32
    strcat(path, "plugins/");
-#endif // _WIN32
+#endif
     }
    
     strncat (path, "Glide64.ini", PATH_MAX - strlen(path));
@@ -163,30 +164,31 @@ void INI_InsertSpace(int space)
     char chunk[2048];
     int len, file, start_pos, cur_pos;
 
-#ifdef _WIN32
+#ifdef USEWIN32
     file = _fileno(ini);
-#else // _WIN32
+#else
    file = fileno(ini);
-#endif // _WIN32
+#endif
 
     start_pos = ftell(ini);
     fseek(ini,0,SEEK_END);
 
     // if adding, extend the file
     if (space > 0)
-#ifdef _WIN32
+#ifdef USEWIN32
         _chsize (file, _filelength(file)+space);
-#else // _WIN32
-     {
-    int t1 = ftell(ini);
-    fseek(ini, 0L, SEEK_END);
-    int t2 = ftell(ini);
-    fseek(ini, t1, SEEK_SET);
-    ftruncate(file, t2+space);
-     }
-#endif // _WIN32
+#else
+    {
+        int t1 = ftell(ini);
+        fseek(ini, 0L, SEEK_END);
+        int t2 = ftell(ini);
+        fseek(ini, t1, SEEK_SET);
+        ftruncate(file, t2+space);
+    }
+#endif
 
-    while (1) {
+    while (1) 
+    {
         cur_pos = ftell(ini);
         len = cur_pos - start_pos;
         if (len == 0) break;
@@ -201,17 +203,17 @@ void INI_InsertSpace(int space)
 
     // if deleted, make the file shorter
     if (space < 0)
-#ifdef _WIN32
+#ifdef USEWIN32
         _chsize (file, _filelength(file)+space);
-#else // _WIN32
-     {
-    int t1 = ftell(ini);
-    fseek(ini, 0L, SEEK_END);
-    int t2 = ftell(ini);
-    fseek(ini, t1, SEEK_SET);
-    ftruncate(file, t2+space);
-     }
-#endif // _WIN32
+#else
+    {
+        int t1 = ftell(ini);
+        fseek(ini, 0L, SEEK_END);
+        int t2 = ftell(ini);
+        fseek(ini, t1, SEEK_SET);
+        ftruncate(file, t2+space);
+    }
+#endif
 }
 
 BOOL INI_FindSection (const char *sectionname, BOOL create)
@@ -225,7 +227,8 @@ BOOL INI_FindSection (const char *sectionname, BOOL create)
     last_line = 0;
     sectionfound = 0;
 
-    while(!feof(ini)) {
+    while(!feof(ini)) 
+    {
         ret = 0;
         *line=0;
         fgets(line,255,ini);
@@ -272,11 +275,11 @@ BOOL INI_FindSection (const char *sectionname, BOOL create)
         }
         section[i]=0;
 
-#ifdef _WIN32
+#ifdef USEWIN32
         if(!stricmp(section,sectionname))
-#else // _WIN32
+#else
          if (!strcasecmp(section,sectionname))
-#endif // _WIN32
+#endif
         {
             sectionstart=ftell(ini);
             sectionfound=1;
@@ -359,11 +362,11 @@ const char *INI_ReadString (const char *itemname, char *value, const char *def_v
         while(*p && *p!='=' && *p>' ') *n++ = *p++;
         *n = 0;
 
-#ifdef _WIN32
+#ifdef USEWIN32
         if(!stricmp(name,itemname))
-#else // _WIN32
+#else
          if(!strcasecmp(name,itemname))
-#endif // _WIN32
+#endif
         {
             // skip spaces/equal sign
             while(*p<=' ' || *p=='=') p++;
@@ -453,11 +456,11 @@ void INI_WriteString (const char *itemname, const char *value)
         while(*p && *p!='=' && *p>' ') *n++ = *p++;
         *n = 0;
 
-#ifdef _WIN32
+#ifdef USEWIN32
         if(!stricmp(name,itemname))
-#else // _WIN32
+#else
          if(!strcasecmp(name,itemname))
-#endif // _WIN32
+#endif
         {
             INI_InsertSpace (-i + (strlen(itemname) + strlen(value) + 5));
             sprintf (line, "%s = %s", itemname, value);
@@ -485,11 +488,11 @@ void INI_WriteString (const char *itemname, const char *value)
 int INI_ReadInt (const char *itemname, int def_value, BOOL create)
 {
     char value[64], def[64];
-#ifdef _WIN32
+#ifdef USEWIN32
     _itoa (def_value, def, 10);
-#else // _WIN32
-   sprintf(def, "%d", def_value);
-#endif // _WIN32
+#else
+    sprintf(def, "%d", def_value);
+#endif
     INI_ReadString (itemname, value, def, create);
     return atoi (value);
 }
@@ -497,11 +500,11 @@ int INI_ReadInt (const char *itemname, int def_value, BOOL create)
 void INI_WriteInt (const char *itemname, int value)
 {
     char valstr[64];
-#ifdef _WIN32
+#ifdef USEWIN32
     _itoa (value, valstr, 10);
-#else // _WIN32
+#else
    sprintf(valstr, "%d", value);
-#endif // _WIN32
+#endif
     INI_WriteString (itemname, valstr);
 }
 

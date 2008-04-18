@@ -82,7 +82,7 @@ n** -----------------------------------------------------------------------
 ** Make sure we handle all instances of WIN32
 */
 #ifndef __WIN32__
-#  if defined (_WIN32) || defined (WIN32) || defined(__NT__)
+#  if defined (_WIN32) || defined (WIN32) || defined(__NT__) || defined (USEWIN32)
 #    define __WIN32__
 #  endif
 #endif

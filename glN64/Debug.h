@@ -1,11 +1,7 @@
 #if !defined( DEBUG_H ) && defined( DEBUG )
 #define DEBUG_H
 
-#ifndef __LINUX__
-# include <windows.h>
-#else
-# include "winlnxdefs.h"
-#endif
+#include <specific.h>
 #include <stdio.h>
 
 #define     DEBUG_LOW       0x1000

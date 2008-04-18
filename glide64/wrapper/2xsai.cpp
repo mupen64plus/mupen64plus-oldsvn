@@ -1,8 +1,4 @@
-#ifdef _WIN32
-#include <windows.h>
-#else // _WIN32
-#include "../winlnxdefs.h"
-#endif // _WIN32
+#include <specific.h>
 
 static __inline int GetResult1( DWORD A, DWORD B, DWORD C, DWORD D, DWORD E )
 {
@@ -141,9 +137,9 @@ static __inline WORD Q_INTERPOLATE_16( WORD A, WORD B, WORD C, WORD D)
 void Super2xSaI( DWORD *srcPtr, DWORD *destPtr, DWORD width, DWORD height, DWORD pitch)
 {
     DWORD destWidth = width << 1;
-#ifdef _WIN32
+#ifdef USEWIN32
     DWORD destHeight = height << 1;
-#endif // _WIN32
+#endif
 
     DWORD color4, color5, color6;
     DWORD color1, color2, color3;
@@ -303,9 +299,9 @@ void Super2xSaI( DWORD *srcPtr, DWORD *destPtr, DWORD width, DWORD height, DWORD
 void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWORD pitch)
 {
     DWORD destWidth = width << 1;
-#ifdef _WIN32
+#ifdef USEWIN32
     DWORD destHeight = height << 1;
-#endif // _WIN32
+#endif
 
     WORD color4, color5, color6;
     WORD color1, color2, color3;
@@ -655,9 +651,9 @@ void Super2xSaI_16( WORD *srcPtr, WORD *destPtr, DWORD width, DWORD height, DWOR
 void _2xSaI( DWORD *srcPtr, DWORD *destPtr, WORD width, WORD height, BOOL clampS, BOOL clampT )
 {
     WORD destWidth = width << 1;
-#ifdef _WIN32
+#ifdef USEWIN32
     WORD destHeight = height << 1;
-#endif // _WIN32
+#endif
 
     DWORD colorA, colorB, colorC, colorD,
           colorE, colorF, colorG, colorH,

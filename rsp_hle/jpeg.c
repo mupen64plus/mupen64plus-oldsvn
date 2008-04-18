@@ -27,13 +27,9 @@
  *
 **/
 
-#ifdef __WIN32__
-#include <windows.h>
-#else
-#include "wintypes.h"
+#include <specific.h>
 #include <string.h>
 #include <stdlib.h>
-#endif
 #include <stdio.h>
 
 #include "Rsp_#1.1.h"
@@ -82,7 +78,7 @@ void jpg_uncompress(OSTask_t *task)
      }
    else
      {
-#ifdef __WIN32__
+#ifdef USEWIN32
     MessageBox(NULL, "!flags", "!flags", MB_OK);
 #else
     printf("!flags\n");
@@ -289,7 +285,7 @@ void jpg_uncompress(OSTask_t *task)
     
     if (jpg_data.h == 0)
       {
-#ifdef __WIN32
+#ifdef USEWIN32
          MessageBox(NULL, "h==0", "h==0", MB_OK);
 #else
          printf("h==0\n");

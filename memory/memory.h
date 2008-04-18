@@ -32,7 +32,7 @@
 
 #include "tlb.h"
 
-#ifdef __WIN32__
+#ifdef USEWIN32
 #define byte __byte_
 #endif
 

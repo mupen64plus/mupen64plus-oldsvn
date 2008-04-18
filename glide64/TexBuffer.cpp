@@ -37,9 +37,9 @@
 #include "Gfx1.3.h"
 #include "TexBuffer.h"
 
-#ifndef _WIN32
+#ifndef USEWIN32
 #include <string.h>
-#endif // _WIN32
+#endif
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 

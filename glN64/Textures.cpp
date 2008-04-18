@@ -1,16 +1,13 @@
+#include <specific.h>
+#include <time.h>
+#include <stdlib.h>
 
-#ifdef USEWIN32
-# include <windows.h>
+#ifndef min
+# define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
-#ifdef USEPOSIX
-# include "../main/wintypes.h"
-# include <time.h>
-# include <stdlib.h>
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# define timeGetTime() time(NULL)
+#define timeGetTime() time(NULL)
 #endif
+
 #include <memory.h>
 #include "OpenGL.h"
 #include "Textures.h"

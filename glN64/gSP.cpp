@@ -14,7 +14,7 @@
 #include "S2DEX.h"
 #include "VI.h"
 #include "DepthBuffer.h"
-#ifndef __LINUX__
+#ifdef USEWIN32
 # include "Resource.h"
 #else
 #include <stdlib.h>
