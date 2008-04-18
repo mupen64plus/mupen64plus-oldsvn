@@ -594,37 +594,28 @@ static int resample(Uint8 *input, int input_avail, int oldsamplerate, Uint8 *out
         src_float_to_short_array (_dest, (short *) output, output_needed/2);
         return src_data.input_frames_used * 4;
     }
-    else
 #endif
-    if(Resample == 1)
+    // RESAMPLE == 1
+    int *psrc = (int*)input;
+    int *pdest = (int*)output;
+    int i;
+    int j=0;
+    int sldf = oldsamplerate;
+    int const2 = 2*sldf;
+    int dldf = newsamplerate;
+    int const1 = const2 - 2*dldf;
+    int criteria = const2 - dldf;
+    for(i = 0; i < output_needed/4; i++)
     {
-        int *psrc = (int*)input;
-        int *pdest = (int*)output;
-        int i;
-        int j=0;
-        int sldf = oldsamplerate;
-        int const2 = 2*sldf;
-        int dldf = newsamplerate;
-        int const1 = const2 - 2*dldf;
-        int criteria = const2 - dldf;
-        for(i = 0; i < output_needed/4; i++)
+        pdest[i] = psrc[j];
+        if(criteria >= 0)
         {
-            pdest[i] = psrc[j];
-            if(criteria >= 0)
-            {
-                ++j;
-                criteria += const1;
-            }
-            else criteria += const2;
+            ++j;
+            criteria += const1;
         }
-        return j * 4; //number of bytes consumed
+        else criteria += const2;
     }
-    else
-    {
-        memset(output, 0, output_needed);
-        memcpy(output,input,input_avail);
-        return input_avail;
-    }
+    return j * 4; //number of bytes consumed
 }
 
 void my_audio_callback(void *userdata, Uint8 *stream, int len)
@@ -855,3 +846,4 @@ void ReadConfig()
     }
     fclose(config_file);
 }
+
