@@ -691,11 +691,8 @@ void OGLRender::RenderReset()
 {
     CRender::RenderReset();
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
-
-    // position viewer 
+    glViewportWrapper(0, 0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
+    glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -911,7 +908,7 @@ void OGLRender::glViewportWrapper(GLint XPosition, GLint YPosition, GLsizei Widt
         glViewport(XPosition+XOffset,YPosition+YOffset,CorrectedWidth,CorrectedHeight);
 
         if(Flag)
-            { glOrtho(0, CorrectedWidth, CorrectedHeight, 0, -1, 1); }
+            { glOrtho(0, Width, Height, 0, -1, 1); }
         }
 }
 
