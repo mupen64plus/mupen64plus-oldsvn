@@ -23,7 +23,7 @@ else
 endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -g
+CFLAGS += -fpic -DPIC
 
 # list of object files to generate
 OBJECTS = main.o
