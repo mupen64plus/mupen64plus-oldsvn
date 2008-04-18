@@ -515,10 +515,10 @@ void DrawImage (DRAWIMAGE *d)
                         apply_shade_mods (&(v[s]));
                     ConvertCoordsConvert (v, 4);
                     
-          if (fullscreen)// && /*hack for Zelda MM. Gonetz*/rdp.cur_cache[0]->addr > 0xffff && rdp.cur_cache[0]->crc != 0)
-                    {
-                        grDrawVertexArrayContiguous (GR_TRIANGLE_STRIP, 4, v, sizeof(VERTEX));
-                    }
+              if (fullscreen)// && /*hack for Zelda MM. Gonetz*/rdp.cur_cache[0]->addr > 0xffff && rdp.cur_cache[0]->crc != 0)
+              {
+                  grDrawVertexArrayContiguous (GR_TRIANGLE_STRIP, 4, v, sizeof(VERTEX));
+              }
                     
                     if (debug.capture)
                     {
@@ -546,7 +546,6 @@ void DrawImage (DRAWIMAGE *d)
             // increment whatever caused this split
             tb_u += x_size - (x_size-(nlr_u-cb_u));
             cb_u = nlr_u;
-            if (!d || (void *)d == (void *)0x1) return;
             if (nlr_u == cur_wrap_u*d->imageW) 
             {
                 cur_wrap_u ++;
