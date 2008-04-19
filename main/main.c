@@ -421,6 +421,11 @@ void startEmulation(void)
         pthread_detach(g_EmulationThread);
         info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
+    // if emulation is already running, but it's paused, unpause it
+    else if(rompause)
+    {
+        pauseContinueEmulation();
+    }
 
 }
 

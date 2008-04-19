@@ -450,38 +450,18 @@ void reload()
 static void callback_startEmulation(GtkWidget *widget, gpointer data)
 {
     if(!rom)
-        {
+    {
         if(confirm_message(tr("There is no Rom loaded.\nDo you want to load one?")))
-            { callback_openRom(NULL, NULL); }
+            callback_openRom(NULL, NULL);
         return;
-        }
-
-    if(rompause)
-        {
-        info_message(tr("Emulation continued.")); 
-        rompause = !rompause;
-        }
-
+    }
     startEmulation();
 }
 
 // pause/continue emulation
 static void callback_pauseContinueEmulation(GtkWidget *widget, gpointer data)
 {
-    int isRunning = pauseContinueEmulation();
-
-    if(widget && GTK_IS_TOOL_BUTTON (widget))
-    {
-        GtkToolButton *widget = GTK_TOOL_BUTTON(widget);
-        if(isRunning)
-        {
-            gtk_tool_button_set_label(widget, tr("Pause"));
-        }
-        else
-        {
-            gtk_tool_button_set_label(widget, tr("Resume"));
-        }
-    }
+    pauseContinueEmulation();
 }
 
 // stop emulation
