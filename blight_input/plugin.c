@@ -1043,14 +1043,20 @@ int InitiateRumble(int cntrl)
 
     while ((ep = readdir (dp)))
     {
-        if (!strncmp(ep->d_name,"input:event",11))
+        if (strncmp(ep->d_name,"event",5) == 0)
+        {
+            sprintf(temp,"/dev/input/%s",ep->d_name);
+            iFound = 1;
+            break;
+        }
+        else if (strncmp(ep->d_name,"input:event",11) == 0)
         {
             sscanf(ep->d_name,"input:%s",temp2);
             sprintf(temp,"/dev/input/%s",temp2);
             iFound = 1;
             break;
         }
-        else if (!strncmp(ep->d_name,"input:input",11))
+        else if (strncmp(ep->d_name,"input:input",11) == 0)
         {
             strcat(temp, "/");
             strcat(temp, ep->d_name);
