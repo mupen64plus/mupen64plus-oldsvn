@@ -446,16 +446,22 @@ void reload()
 }
 
 /** emulation **/
-// start emulation
+// start/continue emulation
 static void callback_startEmulation(GtkWidget *widget, gpointer data)
 {
     if(!rom)
-    {
+        {
         if(confirm_message(tr("There is no Rom loaded.\nDo you want to load one?")))
-            callback_openRom(NULL, NULL);
-
+            { callback_openRom(NULL, NULL); }
         return;
-    }
+        }
+
+    if(rompause)
+        {
+        info_message(tr("Emulation continued.")); 
+        rompause = !rompause;
+        }
+
     startEmulation();
 }
 
