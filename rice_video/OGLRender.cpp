@@ -891,20 +891,20 @@ void OGLRender::glViewportWrapper(GLint XPosition, GLint YPosition, GLsizei Widt
         OldFlag=Flag;
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        if((GLfloat)windowSetting.uDisplayWidth/(GLfloat)windowSetting.uDisplayHeight==4.0/3.0)
+        if (windowSetting.uDisplayWidth * 3 == windowSetting.uDisplayHeight * 4)
             {
             CorrectedWidth = Width;
             CorrectedHeight = Height;
             XOffset = YOffset = 0;
             }
-        if((GLfloat)windowSetting.uDisplayWidth/(GLfloat)windowSetting.uDisplayHeight>4.0/3.0)
+        else if ((GLfloat) windowSetting.uDisplayWidth / (GLfloat) windowSetting.uDisplayHeight > 4.0/3.0)
             {
             CorrectedWidth = (GLint)(4.0/3.0*(GLfloat)windowSetting.uDisplayHeight);
             CorrectedHeight = Height;
             XOffset = (windowSetting.uDisplayWidth-CorrectedWidth)/2;
             YOffset = 0;
             }
-        if((GLfloat)windowSetting.uDisplayWidth/(GLfloat)windowSetting.uDisplayHeight<4.0/3.0)
+        else // (GLfloat) windowSetting.uDisplayWidth / (GLfloat) windowSetting.uDisplayHeight < 4.0/3.0
             {
             CorrectedWidth = Width;
             CorrectedHeight = (GLint)(3.0/4.0*(GLfloat)windowSetting.uDisplayWidth);
