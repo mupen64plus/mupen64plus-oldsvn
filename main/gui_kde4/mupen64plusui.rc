@@ -1,0 +1,36 @@
+<!DOCTYPE kpartgui>
+<kpartgui name="mupen64plus" version="2">
+<MenuBar>
+    <Menu name="file" noMerge="1"><text>&amp;Rom</text>
+        <Action name="file_open"/>
+        <Action name="file_open_recent"/>
+        <Action name="file_close"/>
+        <Separator/>
+        <Action name="file_quit"/>
+    </Menu>
+    <Menu name="emulation" noMerge="1"><text>&amp;Emulation</text>
+        <Action name="emulation_start"/>
+        <Action name="emulation_pause_continue"/>
+        <Action name="emulation_stop"/>
+        <Separator/>
+        <Action name="save_state_save_as"/>
+        <Action name="save_state_load"/>
+        <Separator/>
+        <Action name="save_state_save"/>
+        <Action name="save_state_restore"/>
+        <Separator/>
+        <Action name="save_state_current"/>
+    </Menu>
+</MenuBar>
+
+<ToolBar name="mainToolBar" noMerge="1"><text>Main Toolbar</text>
+    <Action name="file_open"/>
+    <Separator/>
+    <Action name="emulation_start"/>
+    <Action name="emulation_pause_continue"/>
+    <Action name="emulation_stop"/>
+    <Separator/>
+    <Action name="fullscreen"/>
+</ToolBar>
+
+</kpartgui>

@@ -1,0 +1,54 @@
+<ui version="4.0" >
+ <class>RomBrowserSettings</class>
+ <widget class="QWidget" name="RomBrowserSettings" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>395</width>
+    <height>296</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2" >
+   <item>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="title" >
+      <string>Directories</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <item>
+       <widget class="RomDirectoriesListWidget" native="1" name="kcfg_RomDirectories" />
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="kcfg_ScanDirectoriesRecursively" >
+     <property name="text" >
+      <string>Scan directories recursively</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="kcfg_ShowFullPathsInFilenames" >
+     <property name="text" >
+      <string>Show full paths in filenames</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RomDirectoriesListWidget</class>
+   <extends>QWidget</extends>
+   <header>romdirectorieslistwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
