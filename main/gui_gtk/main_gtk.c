@@ -463,22 +463,23 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
             { 
             if(confirm_message(tr("There is no Rom loaded.\nDo you want to load one?")))
                 { callback_openRom(NULL, NULL); }
+            }
+        else
+            {
+
+            llist = g_list_first (list);
+         
+            gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
+            gtk_tree_model_get(model, &iter, 5, &entry, -1);
+         
+            g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
+            g_list_free (list);
+         
+            if(open_rom( entry->cFilename ) == 0)
+                { startEmulation(); }
             else
                 { return; }
             }
-
-        llist = g_list_first (list);
-
-        gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-        gtk_tree_model_get(model, &iter, 5, &entry, -1);
-
-        g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
-        g_list_free (list);
-
-        if(open_rom( entry->cFilename ) == 0)
-            { startEmulation(); }
-        else
-            { return; }
         }
     startEmulation();
 }
