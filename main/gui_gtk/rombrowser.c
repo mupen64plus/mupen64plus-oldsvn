@@ -38,6 +38,7 @@ Email                : blight@Ashitaka
 #include <limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <specific.h>
 
 // rom file extensions
 static const char *g_romFileExtensions[] = 
@@ -422,7 +423,7 @@ static void scan_dir( const char *dirname )
             int i;
             for(i=fnlen; i > 0; i--)
             {
-                if(entry->cFilename[i] == '/')
+                if(entry->cFilename[i] == dirsep[0])
                 {
                     newfn = sub_string(entry->cFilename, i+1, fnlen);
                     break;

@@ -323,6 +323,7 @@ void plugin_exec_config(const char *name)
     if(p && p->handle)
     {
         dllConfig = dlsym(p->handle, "DllConfig");
+        initiateControllers = dlsym(handle_input, "InitiateControllers");
         if(dllConfig)
             dllConfig(0);
     }
@@ -412,6 +413,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (viWidthChanged == NULL) viWidthChanged = dummy_void;
     if (captureScreen == NULL) captureScreen = dummy_void;
 
+    gfx_info.hWnd = CreateWindow();
     gfx_info.MemoryBswaped = TRUE;
     gfx_info.HEADER = rom;
     gfx_info.RDRAM = (BYTE*)rdram;

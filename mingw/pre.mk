@@ -19,6 +19,7 @@ CP      = cp
 MD      = mkdir
 FIND    = find
 INSTALL = ginstall
+BINSUFFIX = .exe
 
 # Check for SDL
 ifeq ("$(shell which $(MGWDIR)$(MGWBIN)/sdl-config 2>&1 | head -c 9)", "which: no")
@@ -42,7 +43,7 @@ GTK_LIBS     = `PKG_CONFIG_PATH=$(MGWDIR)$(MGWLIB)/pkgconfig $(MGWDIR)$(MGWBIN)/
 GTHREAD_LIBS = `PKG_CONFIG_PATH=$(MGWDIR)$(MGWLIB)/pkgconfig $(MGWDIR)$(MGWBIN)/pkg-config gthread-2.0 --libs`
 
 # Set base CFLAGS and LDFLAGS for all systems
-CFLAGS = -pipe -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing -DUSEWIN32 -I$(ROOT)/main/win32
+CFLAGS = -pipe -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing -DUSEWIN32 -I$(ROOT)/main/win32 -mconsole
 LDFLAGS =
 
 

@@ -139,8 +139,10 @@ char *get_savespath()
 char *get_iconspath()
 {
     static char path[PATH_MAX];
-    strcpy(path, get_installpath());
-    strcat(path, "icons/");
+    strcpy(path, getexedir());
+    strcat(path, dirsep);
+    strcat(path, "icons");
+    strcat(path, dirsep);
     return path;
 }
 
@@ -712,6 +714,18 @@ static void setPaths(void)
 {
     char buf[PATH_MAX], buf2[PATH_MAX];
 
+    #ifdef USEWIN32
+        strncpy(g_ConfigDir, getexedir(), PATH_MAX);
+        strncat(g_ConfigDir, dirsep, PATH_MAX - strlen(buf));
+        //strncpy(g_ConfigDir, curdir, PATH_MAX);
+        strncat(g_ConfigDir, "config", PATH_MAX - strlen(buf));
+        strncat(g_ConfigDir, dirsep, PATH_MAX - strlen(buf));
+        strncpy(g_InstallDir, getexedir(), PATH_MAX);
+        //strncpy(g_InstallDir, curdir, PATH_MAX);
+    #endif
+
+    fprintf(stderr, "configdir: %s\n", g_ConfigDir);
+
     // if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
     if (strlen(g_ConfigDir) == 0)
     {
@@ -730,7 +744,8 @@ static void setPaths(void)
 
             // create save subdir
             strncpy(buf, g_ConfigDir, PATH_MAX);
-            strncat(buf, "/save", PATH_MAX - strlen(buf));
+            strncat(buf, dirsep, PATH_MAX - strlen(buf));
+            strncat(buf, "save", PATH_MAX - strlen(buf));
             if(mkdirwp(buf, 0755) != 0)
             {
                 // report error, but don't exit
@@ -739,7 +754,8 @@ static void setPaths(void)
 
             // create screenshots subdir
             strncpy(buf, g_ConfigDir, PATH_MAX);
-            strncat(buf, "/screenshots", PATH_MAX - strlen(buf));
+            strncat(buf, dirsep, PATH_MAX - strlen(buf));
+            strncat(buf, "screenshots", PATH_MAX - strlen(buf));
             if(mkdirwp(buf, 0755) != 0)
             {
                 // report error, but don't exit
@@ -749,27 +765,34 @@ static void setPaths(void)
     }
 
     // make sure config dir has a '/' on the end.
-    if(g_ConfigDir[strlen(g_ConfigDir)-1] != '/')
-        strncat(g_ConfigDir, "/", PATH_MAX - strlen(g_ConfigDir));
+    if(g_ConfigDir[strlen(g_ConfigDir)-1] != dirsep[0])
+        strncat(g_ConfigDir, dirsep, PATH_MAX - strlen(g_ConfigDir));
 
     // if install dir was not specified at the commandline, look for it in the default location
     if(strlen(g_InstallDir) == 0)
     {
         strncpy(g_InstallDir, PREFIX, PATH_MAX);
-        strncat(g_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(g_InstallDir));
+        strncat(g_InstallDir, dirsep, PATH_MAX - strlen(g_InstallDir));
+        strncat(g_InstallDir, "share", PATH_MAX - strlen(g_InstallDir));
+        strncat(g_InstallDir, dirsep, PATH_MAX - strlen(g_InstallDir));
+        strncat(g_InstallDir, "mupen64plus", PATH_MAX - strlen(g_InstallDir));
+        strncat(g_InstallDir, dirsep, PATH_MAX - strlen(g_InstallDir));
         
         // if install dir is not in the default location, try the same dir as the binary
         if(!isdir(g_InstallDir))
         {
-            int n = getexedir(buf, PATH_MAX);
+            memset(buf,0,PATH_MAX);
+            strncpy(buf,getexedir(),PATH_MAX);
 
-            if(n > 0)
+            if(buf)
             {
-                buf[n] = '\0';
                 dirname(buf);
                 strncpy(g_InstallDir, buf, PATH_MAX);
 
-                strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
+                strncat(buf, dirsep, PATH_MAX - strlen(buf));
+                strncat(buf, "config", PATH_MAX - strlen(buf));
+                strncat(buf, dirsep, PATH_MAX - strlen(buf));
+                strncat(buf, "mupen64plus.conf", PATH_MAX - strlen(buf));
                 if(!isfile(buf))
                 {
                     // try cwd as last resort
@@ -785,23 +808,24 @@ static void setPaths(void)
     }
 
     // make sure install dir has a '/' on the end.
-    if(g_InstallDir[strlen(g_InstallDir)-1] != '/')
-        strncat(g_InstallDir, "/", PATH_MAX - strlen(g_InstallDir));
+    if(g_InstallDir[strlen(g_InstallDir)-1] != dirsep[0])
+        strncat(g_InstallDir, dirsep, PATH_MAX - strlen(g_InstallDir));
 
-    // make sure install dir is valid
+    // make sure install dir is valid 
     strncpy(buf, g_InstallDir, PATH_MAX);
-    strncat(buf, "config/mupen64plus.conf", PATH_MAX - strlen(buf));
-    if(!isfile(buf))
+    strncat(buf, "config", PATH_MAX - strlen(buf));
+    strncat(buf, dirsep, PATH_MAX - strlen(buf));
+    strncat(buf, "mupen64plus.conf", PATH_MAX - strlen(buf));
+    if(!file_exists(buf))
     {
         printf("Could not locate valid install directory\n");
-        exit(1);
     }
 
     // check user config dir for mupen64plus.conf file. If it's not there, copy all
     // config files from install dir over to user dir.
     strncpy(buf, g_ConfigDir, PATH_MAX);
     strncat(buf, "mupen64plus.conf", PATH_MAX - strlen(buf));
-    if(!isfile(buf))
+    if(!file_exists(buf))
     {
         DIR *dir;
         struct dirent *entry;
@@ -820,7 +844,8 @@ static void setPaths(void)
         while((entry = readdir(dir)) != NULL)
         {
             strncpy(buf, g_InstallDir, PATH_MAX);
-            strncat(buf, "config/", PATH_MAX - strlen(buf));
+            strncat(buf, "config", PATH_MAX - strlen(buf));
+            strncat(buf, dirsep, PATH_MAX - strlen(buf));
             strncat(buf, entry->d_name, PATH_MAX - strlen(buf));
 
             // only copy regular files
@@ -841,7 +866,7 @@ static void setPaths(void)
     // set screenshot dir if it wasn't specified by the user
     if(strlen(g_SshotDir) == 0)
     {
-        snprintf(g_SshotDir, PATH_MAX, "%sscreenshots/", g_ConfigDir);
+        snprintf(g_SshotDir, PATH_MAX, "%sscreenshots%c", g_ConfigDir, dirsep[0]);
         if(!isdir(g_SshotDir))
         {
             printf("Warning: Could not find screenshot dir: %s\n", g_SshotDir);
@@ -850,8 +875,8 @@ static void setPaths(void)
     }
 
     // make sure screenshots dir has a '/' on the end.
-    if(g_SshotDir[strlen(g_SshotDir)-1] != '/')
-        strncat(g_SshotDir, "/", PATH_MAX - strlen(g_SshotDir));
+    if(g_SshotDir[strlen(g_SshotDir)-1] != dirsep[0])
+        strncat(g_SshotDir, dirsep, PATH_MAX - strlen(g_SshotDir));
 }
 
 /*********************************************************************************************************
@@ -929,8 +954,7 @@ int main(int argc, char *argv[])
     // if rom file was specified, run it
     if (g_Filename)
     {
-        if(open_rom(g_Filename) < 0 &&
-           !g_GuiEnabled)
+        if(open_rom(g_Filename) < 0 && !g_GuiEnabled)
         {
             // cleanup and exit
             cheat_delete_all();

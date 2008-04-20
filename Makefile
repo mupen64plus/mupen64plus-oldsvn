@@ -39,6 +39,7 @@ endif
 
 CFLAGS += -DPREFIX=\"$(PREFIX)\"
 
+
 # list of object files to generate
 OBJ_CORE = \
 	main/main.o \
@@ -156,7 +157,9 @@ PLUGINS	= plugins/blight_input.so \
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
-ALL = mupen64plus $(PLUGINS)
+BIN = mupen64plus$(BINSUFFIX)
+DBGBIN = mupen64plus_dbg$(BINSUFFIX)
+ALL = $(BIN) $(PLUGINS)
 OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
@@ -210,11 +213,11 @@ targets:
 
 all: $(ALL)
 
-mupen64plus: $(OBJECTS)
+$(BIN): $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic $(PLATFORMSPECLIB) -o $@
 	$(STRIP) $@
 
-mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
+$(DBGBIN): $(OBJECTS) main/main_gtk.o
 	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic $(PLATFORMSPECLIB) -o $@
 
 install:
@@ -235,7 +238,7 @@ clean:
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o
-	$(RM) -f mupen64plus mupen64plus_dbg 
+	$(RM) -f $(BIN) $(DBGBIN) 
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
 
