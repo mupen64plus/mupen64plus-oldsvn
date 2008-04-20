@@ -94,7 +94,7 @@ KNOWN BUGS:
 #endif
 
 #include "../main/winlnxdefs.h"
-#include "Audio_#1.2.h"
+#include "Audio_1.2.h"
 
 /* Current version number */
 #define VERSION "1.3"
