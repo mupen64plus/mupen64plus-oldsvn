@@ -15,7 +15,7 @@
 #include <limits.h>
 
 #include "../main/winlnxdefs.h"
-#include "Audio_#1.1.h"
+#include "Audio_1.1.h"
 
 static AUDIO_INFO AudioInfo;
 static int dsp;
