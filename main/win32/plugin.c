@@ -445,36 +445,60 @@ static void sucre()
 void plugin_exec_config(const char *name)
 {
     plugin *p = plugin_get_by_name(name);
-
+    if(!g_EmulatorRunning) plugin_load_plugins(name,name,name,name);
     if(p && p->handle)
     {
         dllConfig = GetProcAddress(p->handle, "DllConfig");
-        if(dllConfig)
-            dllConfig(0);
+        if(dllConfig) dllConfig(0);
+        if(!g_EmulatorRunning)
+        {
+            if(closeDLL_gfx) closeDLL_gfx();
+            if(closeDLL_audio) closeDLL_audio();
+            if(closeDLL_input) closeDLL_input();
+            if(closeDLL_RSP) closeDLL_RSP();
+        }
     }
 }
 
 void plugin_exec_test(const char *name)
 {
     plugin *p = plugin_get_by_name(name);
-
+    if(!g_EmulatorRunning)
+    {
+        plugin_load_plugins(name,name,name,name);
+    }
     if(p && p->handle)
     {
         dllTest = GetProcAddress(p->handle, "DllTest");
-        if(dllTest)
-            dllTest(0);
+        if(dllTest) dllTest(0);
+        if(!g_EmulatorRunning)
+        {
+            if(closeDLL_gfx) closeDLL_gfx();
+            if(closeDLL_audio) closeDLL_audio();
+            if(closeDLL_input) closeDLL_input();
+            if(closeDLL_RSP) closeDLL_RSP();
+        }
     }
 }
 
 void plugin_exec_about(const char *name)
 {
     plugin *p = plugin_get_by_name(name);
-
+    if(!g_EmulatorRunning)
+    {
+        plugin_load_plugins(name,name,name,name);
+    }
     if(p && p->handle)
     {
         dllAbout = GetProcAddress(p->handle, "DllAbout");
-        if(dllAbout)
-            dllAbout(0);
+        if(dllAbout) dllAbout(0);
+        if(!g_EmulatorRunning)
+        {
+            if(closeDLL_gfx) closeDLL_gfx();
+            if(closeDLL_audio) closeDLL_audio();
+            if(closeDLL_input) closeDLL_input();
+            if(closeDLL_RSP) closeDLL_RSP();
+        }
     }
 }
 
@@ -538,7 +562,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (viWidthChanged == NULL) viWidthChanged = dummy_void;
     if (captureScreen == NULL) captureScreen = dummy_void;
 
-    gfx_info.hWnd = InitWindow(hinst);
+    gfx_info.hWnd = GetVideo();
     gfx_info.MemoryBswaped = TRUE;
     gfx_info.HEADER = rom;
     gfx_info.RDRAM = (BYTE*)rdram;
@@ -609,6 +633,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (romClosed_audio == NULL) romClosed_audio = dummy_void;
     if (romOpen_audio == NULL) romOpen_audio = dummy_void;
     
+    audio_info.hwnd = GetVideo();
     audio_info.MemoryBswaped = TRUE;
     audio_info.HEADER = rom;
     audio_info.RDRAM = (BYTE*)rdram;
@@ -659,6 +684,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (keyDown == NULL) keyDown = dummy_keyDown;
     if (keyUp == NULL) keyUp = dummy_keyUp;
     
+    control_info.hMainWindow = GetVideo();
     control_info.MemoryBswaped = TRUE;
     control_info.HEADER = rom;
     control_info.Controls = Controls;

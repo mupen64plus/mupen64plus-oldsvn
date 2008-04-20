@@ -28,6 +28,7 @@
 **/
 
 #include <specific.h>
+HWND hwnd;
 
 /* This is MUPEN64's main entry point. It contains code that is common
  * to both the gui and non-gui versions of mupen64. See
@@ -247,6 +248,9 @@ static void * emulationThread( void *_arg )
 
     // clean up
     g_EmulationThread = 0;
+    
+    KillWindow();
+    InitWindow();
 
     SDL_Quit();
 
@@ -358,7 +362,10 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* command_li
         }
     }    
  
-    if (!InitInstance(instance)) 
+    if (!InitInstance()) 
+        fprintf(stderr,"Win32 Error: Unable to initalize instance.\n");
+ 
+    if (!InitWindow()) 
         fprintf(stderr,"Win32 Error: Unable to initalize instance.\n");
 
     // put the program name into argv[0]
@@ -373,6 +380,11 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* command_li
 }
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    switch( uMsg ) 
+    {
+        default:
+            return( DefWindowProc( hWnd, uMsg, wParam, lParam ));
+    }
     return( DefWindowProc( hWnd, uMsg, wParam, lParam ));
 }
 void ErrorExit(char * lpszFunction) 
@@ -396,7 +408,7 @@ void ErrorExit(char * lpszFunction)
 }
 
 
-BOOL InitInstance(HINSTANCE hinstance) 
+BOOL InitInstance() 
 { 
     WNDCLASSEX wcx;
 
@@ -405,7 +417,7 @@ BOOL InitInstance(HINSTANCE hinstance)
     wcx.lpfnWndProc = MainWndProc;
     wcx.cbClsExtra = 0;
     wcx.cbWndExtra = 0;
-    wcx.hInstance = hinstance;
+    wcx.hInstance = hinst;
     wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     if(!wcx.hIcon) ErrorExit("IDI_APPLICATION"); 
     wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -420,19 +432,37 @@ BOOL InitInstance(HINSTANCE hinstance)
  
     if(!RegisterClassEx(&wcx)) ErrorExit("RegisterClassEx");
 } 
- 
-HWND InitWindow(HINSTANCE hinstance) 
+
+HWND InitWindow() 
 { 
-    HWND hwnd;
- 
-    hwnd = CreateWindow("MainWClass", "Mupen64Plus for Windows", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 640, 480, (HWND) NULL, (HMENU) NULL, hinstance, (LPVOID) NULL);
+    hwnd = CreateWindow("MainWClass", "Mupen64Plus for Windows", WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, 640, 480, (HWND) NULL, (HMENU) NULL, hinst, (LPVOID) NULL);
  
     if (!hwnd) ErrorExit("CreateWindow");
 
-    ShowWindow(hwnd, 1); 
-    UpdateWindow(hwnd); 
-    return hwnd; 
+    ShowWindow(hwnd, 0);
+    UpdateWindow(hwnd);
+    return hwnd;
  
+}
+BOOL KillWindow()
+{
+    DestroyWindow(hwnd);
+}
+HWND ShowVideo()
+{
+    ShowWindow(hwnd, 1);
+    UpdateWindow(hwnd);
+    return hwnd;
+}
+HWND HideVideo()
+{
+    ShowWindow(hwnd, 0);
+    UpdateWindow(hwnd);
+    return hwnd;
+}
+HWND GetVideo()
+{
+    return hwnd;
 }
 
 int file_exists(const char *fileName)

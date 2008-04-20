@@ -38,8 +38,14 @@ Email                : blight@Ashitaka
 /* globals */
 extern HANDLE g_EmulationThread;
 extern HINSTANCE hinst;
+extern HWND hwnd;
+extern BOOL g_EmulatorRunning;
 
-HWND InitWindow(HINSTANCE hinstance);
-BOOL InitInstance(HINSTANCE hinstance);
+HWND InitWindow();
+BOOL KillWindow();
+BOOL InitInstance();
+HWND ShowVideo();
+HWND HideVideo();
+HWND GetVideo();
 int file_exists(const char *fileName);
 

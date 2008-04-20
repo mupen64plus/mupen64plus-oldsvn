@@ -56,6 +56,7 @@ Email                : blight@Ashitaka
 #include <sys/time.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <windows.h>
 
 #ifdef CONFIG_PATH
 #include <dirent.h>
@@ -186,7 +187,7 @@ void alert_message(const char *fmt, ...)
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() && self == g_EmulationThread)
+    if(gui_enabled() && self != g_EmulationThread)
     {
         dialog = gtk_dialog_new_with_buttons(tr("Error"),
                                              GTK_WINDOW(g_MainWindow.window),
@@ -236,7 +237,7 @@ int confirm_message(const char *fmt, ...)
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() && self == g_EmulationThread)
+    if(gui_enabled() && self != g_EmulationThread)
     {
         dialog = gtk_dialog_new_with_buttons(tr("Confirm"),
                                              GTK_WINDOW(g_MainWindow.window),
