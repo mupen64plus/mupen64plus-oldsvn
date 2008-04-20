@@ -378,25 +378,16 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void ErrorExit(char * lpszFunction) 
 { 
     // Retrieve the system error message for the last-error code
-
+    fprintf(stderr,"Reporting error in %s...\n", lpszFunction);
     LPVOID lpMsgBuf;
     LPVOID lpDisplayBuf;
     DWORD dw = GetLastError(); 
 
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        dw,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR) &lpMsgBuf,
-        0, NULL );
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |FORMAT_MESSAGE_IGNORE_INSERTS,NULL,dw,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),(LPTSTR) &lpMsgBuf,0, NULL);
 
     // Display the error message and exit the process
-
     lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf)+lstrlen((LPCTSTR)lpszFunction)+40)*sizeof(TCHAR)); 
-    StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("%s failed with error %d: %s"), lpszFunction, dw, lpMsgBuf); 
+    sprintf(lpDisplayBuf, "%s failed with error %d: %s", lpszFunction, dw, lpMsgBuf); 
     MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
 
     LocalFree(lpMsgBuf);
@@ -419,11 +410,12 @@ BOOL InitInstance(HINSTANCE hinstance)
     if(!wcx.hIcon) ErrorExit("IDI_APPLICATION"); 
     wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
     if(!wcx.hCursor) ErrorExit("LoadCursor"); 
-    wcx.hbrBackground = GetStockObject(WHITE_BRUSH);
+    wcx.hbrBackground = GetStockObject(BLACK_BRUSH);
     if(!wcx.hbrBackground) ErrorExit("GetStockObject"); 
     wcx.lpszMenuName =  "MainMenu";
     wcx.lpszClassName = "MainWClass";
-    wcx.hIconSm = LoadImage(hinstance, MAKEINTRESOURCE(5), IMAGE_ICON,  GetSystemMetrics(SM_CXSMICON),  GetSystemMetrics(SM_CYSMICON),  LR_DEFAULTCOLOR); 
+    //wcx.hIconSm = LoadImage(hinstance, MAKEINTRESOURCE(5), IMAGE_ICON,  GetSystemMetrics(SM_CXSMICON),  GetSystemMetrics(SM_CYSMICON),  LR_DEFAULTCOLOR); 
+    wcx.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
     if(!wcx.hIconSm) ErrorExit("LoadImage");
  
     if(!RegisterClassEx(&wcx)) ErrorExit("RegisterClassEx");
@@ -433,7 +425,7 @@ HWND InitWindow(HINSTANCE hinstance)
 { 
     HWND hwnd;
  
-    hwnd = CreateWindow("MainWClass", "Mupen64Plus for Windows", WS_CHILD, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, (HWND) NULL, (HMENU) NULL, hinstance, (LPVOID) NULL);
+    hwnd = CreateWindow("MainWClass", "Mupen64Plus for Windows", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 640, 480, (HWND) NULL, (HMENU) NULL, hinstance, (LPVOID) NULL);
  
     if (!hwnd) ErrorExit("CreateWindow");
 
