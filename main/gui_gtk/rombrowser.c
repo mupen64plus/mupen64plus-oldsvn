@@ -137,8 +137,7 @@ static void romentry_fill( SRomEntry *entry )
 /*********************************************************************************************************
 * cache functions
 */
-void
-rombrowser_readCache( void )
+void rombrowser_readCache( void )
 {
     char filename[PATH_MAX];
     gzFile *f;
@@ -226,7 +225,7 @@ void rombrowser_writeCache( void )
 * rombrowser functions
 */
 // compare function
-gint compare_size( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *ptr2, gpointer user_data )
+gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *ptr2, gpointer user_data )
 {
     GtkSortType SortType;
     int SortColumn;
@@ -485,8 +484,8 @@ void rombrowser_refresh( void )
 
     //Sort list by Filename by default.
     GtkTreeSortable *sortable = GTK_TREE_SORTABLE(model);
-    gtk_tree_sortable_set_sort_func( sortable, 5, compare_size, (gpointer)NULL, (gpointer)NULL );
-    gtk_tree_sortable_set_sort_column_id (sortable, 5, GTK_SORT_ASCENDING);
+    gtk_tree_sortable_set_sort_func( sortable, g_iSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
+    gtk_tree_sortable_set_sort_column_id (sortable, g_iSortColumn, g_SortType);
 }
 
 /*********************************************************************************************************
@@ -508,7 +507,7 @@ static void callback_columnClicked(GtkTreeViewColumn *treeviewcolumn, gpointer u
 
     g_iSortColumn = gtk_tree_view_column_get_sort_column_id(treeviewcolumn);
 
-    gtk_tree_sortable_set_sort_func( sortable, g_iSortColumn, compare_size, user_data, (gpointer)NULL );
+    gtk_tree_sortable_set_sort_func( sortable, g_iSortColumn,  rombrowser_compare, user_data, (gpointer)NULL );
     gtk_tree_sortable_set_sort_column_id (sortable, g_iSortColumn, g_SortType);
 }
 
@@ -625,6 +624,8 @@ static GtkTreeModel *create_store (void)
 
 static void setup_view (GtkWidget *view)
 {
+    g_iSortColumn = 5;
+    g_SortType = GTK_SORT_ASCENDING;
 
     gchar *titles[] = 
         {

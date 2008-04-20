@@ -60,7 +60,7 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
     }
 
     // update rombrowser
-    //gtk_clist_set_text( GTK_TREE_VIEW(g_MainWindow.romTreView), gtk_clist_find_row_from_data( GTK_CLIST(g_MainWindow.romCList), g_RomEntry ), 3, g_RomEntry->info.cComments );
+    rombrowser_refresh();
 }
 
 static void
