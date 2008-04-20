@@ -16,12 +16,7 @@ Email                : blight@Ashitaka
 ***************************************************************************/
 
 #include "../version.h"
-#ifdef USEPOSIX
-#include "../wintypes.h"
-#endif
-#ifdef USEWIN32
-#include <windows.h>
-#endif
+#include <specific.h>
 #include "../guifuncs.h"
 #include "main_gtk.h"
 #include "../main.h"
@@ -49,9 +44,7 @@ Email                : blight@Ashitaka
 #endif
 
 #include <gtk/gtk.h>
-
 #include <SDL.h>
-
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -62,8 +55,6 @@ Email                : blight@Ashitaka
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
-#include <pthread.h>    // POSIX Thread library
-#include <signal.h> // signals
 #include <sys/stat.h>
 
 #ifdef CONFIG_PATH
@@ -146,14 +137,13 @@ void info_message(const char *fmt, ...)
     va_list ap;
     char buf[2049];
     int i;
-    pthread_t self = pthread_self();
+    HANDLE self = GetCurrentThread();
 
     va_start(ap, fmt);
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() &&
-       !pthread_equal(self, g_EmulationThread))
+    if(gui_enabled() && self == g_EmulationThread)
     {
         for(i = 0; statusBarSections[i].name; i++)
         {
@@ -190,14 +180,13 @@ void alert_message(const char *fmt, ...)
           *hbox = NULL,
           *label = NULL,
           *icon = NULL;
-    pthread_t self = pthread_self();
+    HANDLE self = GetCurrentThread();
 
     va_start(ap, fmt);
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() &&
-       !pthread_equal(self, g_EmulationThread))
+    if(gui_enabled() && self == g_EmulationThread)
     {
         dialog = gtk_dialog_new_with_buttons(tr("Error"),
                                              GTK_WINDOW(g_MainWindow.window),
@@ -241,14 +230,13 @@ int confirm_message(const char *fmt, ...)
               *hbox = NULL,
               *label = NULL,
               *icon = NULL;
-    pthread_t self = pthread_self();
+    HANDLE self = GetCurrentThread();
 
     va_start(ap, fmt);
     vsnprintf(buf, 2048, fmt, ap);
     va_end(ap);
 
-    if(gui_enabled() &&
-       !pthread_equal(self, g_EmulationThread))
+    if(gui_enabled() && self == g_EmulationThread)
     {
         dialog = gtk_dialog_new_with_buttons(tr("Confirm"),
                                              GTK_WINDOW(g_MainWindow.window),
