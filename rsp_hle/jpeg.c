@@ -36,7 +36,7 @@
 #endif
 #include <stdio.h>
 
-#include "Rsp_#1.1.h"
+#include "Rsp_1.1.h"
 #include "hle.h"
 
 static struct 
@@ -469,3 +469,4 @@ void jpg_uncompress(OSTask_t *task)
    free(temp2);
    free(temp1);
 }
+
