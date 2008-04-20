@@ -17,13 +17,15 @@
 #include "Types.h"
 #ifndef __LINUX__
 # include "Resource.h"
-#else // !__LINUX__
+#elif defined(USE_GTK)
 # include <glib.h>
 # include <gtk/gtk.h>
 # include <string.h>
 # include <unistd.h>
 # include <stdlib.h>
-#endif // __LINUX__
+#elif defined(USE_KDE4)
+# warning NO KDE GUI YET!
+#endif
 #include "CRC.h"
 #include "Debug.h"
 
@@ -138,7 +140,7 @@ INT_PTR CALLBACK MicrocodeDlgProc( HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARA
 
     return FALSE;
 }
-#else // !__LINUX__
+#elif defined(USE_GTK)
 static int selectedMicrocode = -1;
 static GtkWidget *microcodeWindow = 0;
 static GtkWidget *microcodeList = 0;
@@ -274,7 +276,17 @@ static int MicrocodeDialog()
 
     return selectedMicrocode;
 }
-#endif // __LINUX__
+#elif defined(USE_KDE4)
+# warning "The KDE4 microcode dialog needs to be implemented!!"
+static int MicrocodeDialog()
+{
+    // FIXME
+    return 0;
+}
+
+#else
+# error "No microcode dialog implementation!"
+#endif
 
 MicrocodeInfo *GBI_AddMicrocode()
 {

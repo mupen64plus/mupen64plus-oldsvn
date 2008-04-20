@@ -9,7 +9,7 @@ CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -Wall
 # list of object files to generate
 OBJECTS = \
 	glN64.o \
-	Config_linux.o \
+	Config_gtk2.o \
 	OpenGL.o \
 	N64.o \
 	RSP.o \
@@ -47,7 +47,7 @@ clean:
 
 # build rules
 .cpp.o:
-	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) $(GTK_FLAGS) -c $<
+	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -DUSE_GTK $(GTK_FLAGS) -c $<
 
 glN64.so: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(GTK_LIBS) $(GTHREAD_LIBS) $(LIBGL_LIBS) -o $@
