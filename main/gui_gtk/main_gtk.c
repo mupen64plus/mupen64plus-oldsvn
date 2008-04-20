@@ -89,7 +89,6 @@ static pthread_t g_GuiThread = 0; // main gui thread
 
 static statusBarSection statusBarSections[] = {
     { "status", -1, NULL },
-    { "num_roms", -1, NULL },
     { NULL, -1, NULL }
 };
 
@@ -1372,17 +1371,17 @@ static int create_statusBar( void )
 {
     int i;
 
-    // create status bar
+    //create status bar
     g_MainWindow.statusBarHBox = gtk_hbox_new( FALSE, 5 );
-    gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.statusBarHBox, FALSE, FALSE, 0 );
+    gtk_box_pack_end( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.statusBarHBox, FALSE, FALSE, 0 );
 
     // request context ids
-    for( i = 0; statusBarSections[i].name; i++ )
-    {
+    for( i = 0; statusBarSections[i].name; ++i )
+        {
         statusBarSections[i].bar = gtk_statusbar_new();
         gtk_box_pack_start( GTK_BOX(g_MainWindow.statusBarHBox), statusBarSections[i].bar, (i == 0) ? TRUE : FALSE, TRUE, 0 );
         statusBarSections[i].id = gtk_statusbar_get_context_id( GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].name );
-    }
+        }
 
     return 0;
 }
