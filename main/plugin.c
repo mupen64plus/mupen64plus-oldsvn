@@ -191,6 +191,7 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
         }
         else
         {
+            puts(dlerror());
             printf("Plugin '%s' is an invalid plugin\n", file_name);
             dlclose(handle);
             return FALSE;
