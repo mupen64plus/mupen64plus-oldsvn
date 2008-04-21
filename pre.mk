@@ -45,6 +45,9 @@ GTK_FLAGS	= `pkg-config gtk+-2.0 --cflags` -D_GTK2
 GTK_LIBS	= `pkg-config gtk+-2.0 --libs`
 GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 
+# set KDE flags and libraries
+KDE_FLAGS   = `pkg-config --cflags qt-mt` -I/usr/kde/3.5/include/ -I/usr/include/qt4
+KDE_LIBS    = `pkg-config --libs qt-mt`
 
 # set base program pointers and flags
 CC      = gcc

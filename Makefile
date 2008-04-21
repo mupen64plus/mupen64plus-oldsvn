@@ -33,10 +33,14 @@ endif
 ifeq ($(LIRC), 1)
   CFLAGS += -DWITH_LIRC
 endif
-ifeq ($(NO_GUI), 1)
+ifeq ($(GUI), NONE)
   CFLAGS += -DNO_GUI
 else
+  ifeq ($(GUI), KDE4)
+  CFLAGS += $(KDE_FLAGS)
+  else
   CFLAGS += $(GTK_FLAGS)
+  endif
 endif
 ifndef PREFIX
   PREFIX := /usr/local
@@ -130,6 +134,15 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/rombrowser.o \
 	main/gui_gtk/romproperties.o
 
+OBJ_KDE_GUI = \
+	main/gui_kde4/main.o \
+	main/gui_kde4/mainwidget.o \
+	main/gui_kde4/mainwindow.o \
+	main/gui_kde4/pluginconfig.o \
+	main/gui_kde4/plugins.o \
+	main/gui_kde4/romdirectorieslistwidget.o \
+	main/gui_kde4/rommodel.o
+
 OBJ_DBG = \
         debugger/debugger.o \
 		debugger/breakpoints.o \
@@ -179,9 +192,14 @@ ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
 endif
-ifneq ($(NO_GUI), 1)
-  OBJECTS += $(OBJ_GTK_GUI)
-  LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
+ifeq ($(GUI), KDE4)
+  OBJECTS += $(OBJ_KDE_GUI)
+  LIBS += $(KDE_LIBS)
+else
+  ifneq ($(GUI), NONE)
+    OBJECTS += $(OBJ_GTK_GUI)
+    LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
+  endif
 endif
 
 # build targets
@@ -199,7 +217,9 @@ targets:
 	@echo "    LIRC=1        == enable LIRC support"
 	@echo "    NO_RESAMP=1   == disable libsamplerate support in jttl_audio"
 	@echo "    NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)"
-	@echo "    NO_GUI=1      == build without GUI support"
+	@echo "    GUI=NONE      == build without GUI support"
+	@echo "    GUI=GTK2      == build with GTK2 GUI support (default)"
+	@echo "    GUI=KDE4      == build with KDE4 GUI support"
 	@echo "    PREFIX=path   == specify install/uninstall prefix (default: /usr/local)"
 	@echo "  Debugging Options:"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
