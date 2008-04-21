@@ -5,7 +5,6 @@ include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
 SDLTTF_LIBS	= -lSDL_ttf
-PACKAGE_FLAGS = "-DPACKAGE=\"$(shell grep PACKAGE ./package | cut -d "=" -f 2)\"" "-DVERSION=\"$(shell grep VERSION ./package | cut -d "=" -f 2)\""
 CFLAGS += -DGUI_SDL -fpic -DPIC
 
 # list of object files to generate
@@ -30,10 +29,10 @@ blight_input.so: $(OBJ_BLIGHT)
 	$(STRIP) $@
 
 configdialog_sdl.o: configdialog_sdl.c
-	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) $(PACKAGE_FLAGS) -c $<
+	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 plugin.o: plugin.c
-	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) $(PACKAGE_FLAGS) -c $<
+	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 arial.ttf.c: ttftoh
 	./ttftoh ./font/arial.ttf
