@@ -453,8 +453,8 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
         GList *list = NULL, *llist = NULL;
         SRomEntry *entry;
         GtkTreeIter iter;
-        GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romTreeView));
-        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romTreeView));
+        GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
 
         list = gtk_tree_selection_get_selected_rows (selection, &model);
 
@@ -938,7 +938,7 @@ static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, g
     }
     for( i = 0; i < 6; i++ )
     {
-        w = gtk_tree_view_get_column( GTK_TREE_VIEW(g_MainWindow.romTreeView), i )->width;
+        w = gtk_tree_view_get_column( GTK_TREE_VIEW(g_MainWindow.romDisplay), i )->width;
         if (w != 0)
         {
             char buf[30];
