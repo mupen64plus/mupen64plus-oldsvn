@@ -669,7 +669,7 @@ int create_filter( void )
     label = gtk_label_new_with_mnemonic ( tr("F_ilter:") );
     g_MainWindow.filter = gtk_entry_new();
     gtk_entry_set_text ( GTK_ENTRY(g_MainWindow.filter), "" );
-    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "activate",
+    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "changed",
                        GTK_SIGNAL_FUNC(callback_apply_filter), (gpointer)NULL );
     gtk_label_set_mnemonic_widget ( GTK_LABEL(label), g_MainWindow.filter );
 
