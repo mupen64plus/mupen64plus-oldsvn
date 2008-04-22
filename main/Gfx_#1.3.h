@@ -30,6 +30,15 @@ extern "C" {
 #define CALL                        _cdecl
 
 /***** Structures *****/
+
+typedef struct {
+    char *Text; /* Text that this object will have when displayed */
+    int Corner; /* One of the eight corners */
+    int XOffset; /* Relative X position */
+    int YOffset; /* Relative Y position */
+    float Color[4]; /* Red, Green, Blue, Alpha values */
+} TXT_OBJECT;
+
 typedef struct {
     WORD Version;        /* Set to 0x0103 */
     WORD Type;           /* Set to PLUGIN_TYPE_GFX */
