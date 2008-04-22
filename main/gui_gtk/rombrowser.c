@@ -609,7 +609,7 @@ gboolean callback_buttonPressed( GtkWidget *widget, GdkEventButton *event, gpoin
 // activate filter widget -> filter and resort.
 static void callback_apply_filter( GtkWidget *widget, gpointer data )
 {
-apply_filter();
+    apply_filter();
 }
 
 void apply_filter( void )
@@ -631,6 +631,7 @@ void apply_filter( void )
 
     if(validiter)
         {
+        GdkPixbuf *flag;
         SRomEntry *entry;
         short int counter;
         gchar *line[5];
@@ -639,11 +640,11 @@ void apply_filter( void )
             {
             if ( filter_function( source, &sourceiter, (gpointer)NULL) )
                  {
-                 gtk_tree_model_get ( GTK_TREE_MODEL(source), &sourceiter, 0, &line[0], 1, &line[1], 2, &line[2], 3, &line[3], 4, &line[4], 5, &entry, 6, &entry->flag, -1 );
+                 gtk_tree_model_get ( GTK_TREE_MODEL(source), &sourceiter, 0, &line[0], 1, &line[1], 2, &line[2], 3, &line[3], 4, &line[4], 5, &entry, 6, &flag, -1 );
 
                  GtkTreeIter destinationiter;
                  gtk_list_store_append ( GTK_LIST_STORE(destination), &destinationiter );
-                 gtk_list_store_set ( GTK_LIST_STORE(model), &destinationiter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, entry->flag, -1 );
+                 gtk_list_store_set ( GTK_LIST_STORE(model), &destinationiter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1 );
                  }
             if(!gtk_tree_model_iter_next(source, &sourceiter))
                  { break; }
