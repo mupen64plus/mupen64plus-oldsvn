@@ -96,6 +96,25 @@ typedef struct {
 } GFX_INFO;
 
 /******************************************************************
+  Function: UpdateText
+  Purpose:  This function should be called every VI to update the
+            on screen display
+  input:    pointer to the array of TXT_OBJECT, counter of 
+            TXT_OBJECTs
+  output:   none
+*******************************************************************/
+EXPORT void CALL UpdateText ( TXT_OBJECTs * Text, int Count );
+
+/******************************************************************
+  Function: NewMessage
+  Purpose:  This function adds a new message to the queue
+  input:    pointer to the array of TXT_OBJECT, counter of 
+            TXT_OBJECTs
+  output:   none
+*******************************************************************/
+EXPORT void CALL NewMessage ( char * Text );
+
+/******************************************************************
   Function: CaptureScreen
   Purpose:  This function dumps the current frame to a file
   input:    pointer to the directory to save the file to
