@@ -794,6 +794,13 @@ void DLParser_Process(OSTask * pTask)
     }
 
     status.bScreenIsDrawn = true;
+
+
+    for(int i=0; i<messagecount; i++)
+    {
+        glPrint(basicfont[0], 15, 15+15*i, messagequeue[i]);
+    }
+
     if( options.bSkipFrame )
     {
         skipframe++;
