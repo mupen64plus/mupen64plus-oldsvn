@@ -63,8 +63,7 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
     rombrowser_refresh();
 }
 
-static void
-callback_cancelClicked( GtkWidget *widget, gpointer data )
+static void callback_cancelClicked( GtkWidget *widget, gpointer data )
 {
     gtk_widget_hide( g_RomPropDialog.dialog );
     gtk_grab_remove( g_RomPropDialog.dialog );

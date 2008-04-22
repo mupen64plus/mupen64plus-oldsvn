@@ -26,7 +26,11 @@ typedef struct
     GtkWidget   *toplevelVBox;  // vbox containing menubar, toolbar, rombrowser, statusbar
     GtkWidget   *menuBar;
     GtkWidget   *toolBar;
-    GtkWidget   *romScrolledWindow, *romTreeView;
+    GtkWidget   *filter;
+    GtkWidget   *romScrolledWindow;
+//Make two TreeViews, a visable manually filtered one for the Displaye, and a
+//Non-visable FullList from which we can filter.
+    GtkWidget   *romDisplay, *romFullList;
     GtkWidget   *statusBarHBox;
 } SMainWindow;
 

@@ -24,10 +24,13 @@ Email                : blight@Ashitaka
 
 int create_romBrowser( void );
 void rombrowser_refresh( void );
+void apply_filter( void );
 
 // cache
 void rombrowser_readCache( void );
 void rombrowser_writeCache( void );
+
+gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 
 /** global rom list */
 typedef struct

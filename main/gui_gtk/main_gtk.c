@@ -744,7 +744,6 @@ static void callback_vcrStopRecord( GtkWidget *widget, gpointer data )
     }
 }
 
-
 static void callback_vcrStartPlayback( GtkWidget *widget, gpointer data )
 {
     if( g_EmulationThread )
@@ -1409,6 +1408,9 @@ static int create_mainWindow( void )
 
     // toolbar
     create_toolBar();
+
+    // Filter
+    create_filter();
 
     // rombrowser
     create_romBrowser();
