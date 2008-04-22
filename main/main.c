@@ -46,11 +46,10 @@
 #include <getopt.h> // getopt_long
 #include <libgen.h> // basename, dirname
 
+#include "winlnxdefs.h"
 #include "main.h"
 #include "version.h"
-#include "winlnxdefs.h"
 #include "config.h"
-#include "plugin.h"
 #include "rom.h"
 #include "mupenIniApi.h"
 #include "../r4300/r4300.h"
@@ -125,9 +124,9 @@ int addTextMessage(TXT_OBJECT txt)
     int x;
     for (x = 0; x < TXTOBJECTSIZE; x++) 
     {
-        if (txtobjects[x].Text == null)
+        if (txtobjects[x].Text == NULL)
         {
-            memcpy(txtobjects[x],txt,sizeof(TXT_OBJECT));
+            memcpy(&txtobjects[x],&txt,sizeof(TXT_OBJECT));
             return x;
         }
     }
@@ -136,7 +135,7 @@ int addTextMessage(TXT_OBJECT txt)
 
 void delTextMessage(int element)
 {
-    memset(txtobjects[element],0,sizeof(TEXT_OBJECT));
+    memset(&txtobjects[element],0,sizeof(TXT_OBJECT));
 }
 
 /*********************************************************************************************************

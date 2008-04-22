@@ -19,6 +19,8 @@ Email                : blight@Ashitaka
 #define __MAIN_H__
 
 #include <pthread.h>
+#include "plugin.h"
+#include "winlnxdefs.h"
 
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
@@ -47,7 +49,7 @@ int   gui_enabled(void);
 void new_frame();
 void new_vi();
 
-#define TXTOBJECTSIZE 12;
+#define TXTOBJECTSIZE 12
 int addTextMessage(TXT_OBJECT txt);
 void delTextMessage(int element);
 

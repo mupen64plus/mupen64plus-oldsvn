@@ -400,7 +400,7 @@ void plugin_load_plugins(const char *gfx_name,
     readScreen = dlsym(handle_gfx, "ReadScreen");
     captureScreen = dlsym(handle_gfx, "CaptureScreen");
     updateText = dlsym(handle_gfx, "UpdateText");
-    newMessage = dlysm(handle_gfx, "NewMessage");
+    newMessage = dlsym(handle_gfx, "NewMessage");
     
     fBRead = dlsym(handle_gfx, "FBRead");
     fBWrite = dlsym(handle_gfx, "FBWrite");
