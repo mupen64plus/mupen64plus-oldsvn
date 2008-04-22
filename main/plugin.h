@@ -243,16 +243,7 @@ typedef struct {
                             // CONTROL Controls[4];
 } CONTROL_INFO;
 
-typedef struct {
-    char *Text; /* Text that this object will have when displayed */
-    int Corner; /* One of the eight corners */
-    int XOffset; /* Relative X position */
-    int YOffset; /* Relative Y position */
-    float Color[4]; /* Red, Green, Blue, Alpha values */
-} TXT_OBJECT;
-
 extern CONTROL Controls[4];
-
 
 extern void (*getDllInfo)(PLUGIN_INFO *PluginInfo);
 extern void (*dllConfig)(HWND hParent);
@@ -272,8 +263,6 @@ extern void (*viStatusChanged)();
 extern void (*viWidthChanged)();
 extern void (*readScreen)(void **dest, int *width, int *height);
 extern void (*captureScreen)(char *dirpath);
-extern void (*updateText)(TXT_OBJECT * text, int count);
-extern void (*newMessage)(char * text);
 
 extern void (*aiDacrateChanged)(int SystemType);
 extern void (*aiLenChanged)();

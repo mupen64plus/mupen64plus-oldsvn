@@ -46,10 +46,11 @@
 #include <getopt.h> // getopt_long
 #include <libgen.h> // basename, dirname
 
-#include "winlnxdefs.h"
 #include "main.h"
 #include "version.h"
+#include "winlnxdefs.h"
 #include "config.h"
+#include "plugin.h"
 #include "rom.h"
 #include "mupenIniApi.h"
 #include "../r4300/r4300.h"
@@ -112,32 +113,6 @@ static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified a
 static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
 static int  g_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int  g_FrameAdvance = 0;         // variable to check if we pause on next frame
-
-TXT_OBJECT txtobjects[TXTOBJECTSIZE];
-
-/*********************************************************************************************************
-* text message funcs
-*/
-
-int addTextMessage(TXT_OBJECT txt)
-{
-    int x;
-    for (x = 0; x < TXTOBJECTSIZE; x++) 
-    {
-        if (txtobjects[x].Text == NULL)
-        {
-            memcpy(&txtobjects[x],&txt,sizeof(TXT_OBJECT));
-            return x;
-        }
-    }
-    return -1;
-}
-
-void delTextMessage(int element)
-{
-    memset(&txtobjects[element],0,sizeof(TXT_OBJECT));
-}
-
 /*********************************************************************************************************
 * exported gui funcs
 */
@@ -756,7 +731,6 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    newMessage("Starting Mupen64Plus...\n");
     go();   /* core func */
 
 #ifdef WITH_LIRC

@@ -30,15 +30,6 @@ extern "C" {
 #define CALL                        _cdecl
 
 /***** Structures *****/
-
-typedef struct {
-    char *Text; /* Text that this object will have when displayed */
-    int Corner; /* One of the eight corners */
-    int XOffset; /* Relative X position */
-    int YOffset; /* Relative Y position */
-    float Color[4]; /* Red, Green, Blue, Alpha values */
-} TXT_OBJECT;
-
 typedef struct {
     WORD Version;        /* Set to 0x0103 */
     WORD Type;           /* Set to PLUGIN_TYPE_GFX */
@@ -94,25 +85,6 @@ typedef struct {
 
     void (*CheckInterrupts)( void );
 } GFX_INFO;
-
-/******************************************************************
-  Function: UpdateText
-  Purpose:  This function should be called every VI to update the
-            on screen display
-  input:    pointer to the array of TXT_OBJECT, counter of 
-            TXT_OBJECTs
-  output:   none
-*******************************************************************/
-EXPORT void CALL UpdateText ( TXT_OBJECT * Text, int Count );
-
-/******************************************************************
-  Function: NewMessage
-  Purpose:  This function adds a new message to the queue
-  input:    pointer to the array of TXT_OBJECT, counter of 
-            TXT_OBJECTs
-  output:   none
-*******************************************************************/
-EXPORT void CALL NewMessage ( char * Text );
 
 /******************************************************************
   Function: CaptureScreen

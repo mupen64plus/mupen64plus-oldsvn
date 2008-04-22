@@ -447,6 +447,7 @@ void COGLGraphicsContext::Clear(ClearFlag dwFlags, uint32 color, float depth)
 void COGLGraphicsContext::UpdateFrame(bool swaponly)
 {
     status.gFrameCount++;
+
     glFlush();
     //glFinish();
     //wglSwapIntervalEXT(0);
@@ -512,7 +513,6 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
          lastTick = nowTick;
       }
      }*/
-
 
     glDepthMask(GL_TRUE);
     glClearDepth(1.0);
