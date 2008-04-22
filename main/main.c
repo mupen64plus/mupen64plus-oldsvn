@@ -521,6 +521,12 @@ static int sdl_event_filter( const SDL_Event *event )
                     screenshot();
                     break;
 
+                // Pause
+                case SDLK_PAUSE:
+                    pauseContinueEmulation();
+                    g_FrameAdvance = 0;
+                    break;
+
                 default:
                     switch (event->key.keysym.unicode)
                     {
@@ -540,12 +546,6 @@ static int sdl_event_filter( const SDL_Event *event )
                         case '9':
                             //gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotItem[event->key.keysym.unicode - '1']), TRUE );
                             savestates_select_slot( event->key.keysym.unicode - '0' );
-                            break;
-                        // Pause
-                        case 'p':
-                        case 'P':
-                            pauseContinueEmulation();
-                            g_FrameAdvance = 0;
                             break;
                         // volume mute/unmute
                         case 'm':

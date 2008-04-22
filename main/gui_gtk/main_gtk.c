@@ -1127,7 +1127,7 @@ static int create_menuBar( void )
     emulationStartItem = gtk_menu_item_new_with_mnemonic(tr("_Start"));
     emulationPauseContinueItem = gtk_menu_item_new_with_mnemonic(tr("Pause/_Continue"));
     gtk_widget_add_accelerator(emulationPauseContinueItem, "activate", accelGroup,
-                               GDK_p, 0, GTK_ACCEL_VISIBLE);
+                               GDK_Pause, 0, GTK_ACCEL_VISIBLE);
     emulationStopItem = gtk_menu_item_new_with_mnemonic(tr("Sto_p"));
     gtk_widget_add_accelerator(emulationStopItem, "activate", accelGroup,
                                GDK_Escape, 0, GTK_ACCEL_VISIBLE);
