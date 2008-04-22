@@ -756,6 +756,7 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
+    newMessage("Starting Mupen64Plus...\n");
     go();   /* core func */
 
 #ifdef WITH_LIRC

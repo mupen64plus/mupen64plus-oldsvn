@@ -20,6 +20,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _DLLINTERFACE_H_
 #define _DLLINTERFACE_H_
 
+#include "OGLFreeType.h"
+extern Font *basicfont;
+extern TXT_OBJECT txtobject[12];
+extern char messagequeue[10][255];
+extern int messagetime[10];
+extern int messagecount;
+extern int txtcount;
+
 #include "typedefs.h"
 #include <limits.h> // PATH_MAX
 
