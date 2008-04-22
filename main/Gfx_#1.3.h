@@ -103,7 +103,7 @@ typedef struct {
             TXT_OBJECTs
   output:   none
 *******************************************************************/
-EXPORT void CALL UpdateText ( TXT_OBJECTs * Text, int Count );
+EXPORT void CALL UpdateText ( TXT_OBJECT * Text, int Count );
 
 /******************************************************************
   Function: NewMessage
