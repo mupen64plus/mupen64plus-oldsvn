@@ -28,7 +28,7 @@ typedef struct
     GtkWidget   *toolBar;
     GtkWidget   *filter;
     GtkWidget   *romScrolledWindow;
-//Make two TreeViews, a visable manually filtered one for the Displaye, and a
+//Make two TreeViews, a visable manually filtered one for the Display, and a
 //Non-visable FullList from which we can filter.
     GtkWidget   *romDisplay, *romFullList;
     GtkWidget   *statusBarHBox;

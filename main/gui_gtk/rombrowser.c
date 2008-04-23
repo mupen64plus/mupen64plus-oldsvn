@@ -52,7 +52,7 @@ static void setup_view (GtkWidget *view);
 */
 GList *g_RomList = NULL;
 static GList *g_RomListCache = NULL; // roms in cache
-static GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *n64cart;
+static GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart;
 static GtkWidget *playRomItem;
 static GtkWidget *romPropertiesItem;
 static GtkWidget *refreshRomBrowserItem;
@@ -76,50 +76,50 @@ static void romentry_fill( SRomEntry *entry )
     sprintf( entry->cSize, "%.1f MBits", (float)(entry->info.iSize / (float)0x20000) );
     switch( entry->info.cCountry )
     {
-    case 0:     /* Demo */
+    case 0:    /* Demo */
         strcpy( entry->cCountry, tr("Demo") );
         break;
 
-    case '7':
+    case '7':  /* Beta */
         strcpy( entry->cCountry, tr("Beta") );
         break;
 
-    case 0x41:
+    case 0x41: /* Japan / USA */
         strcpy( entry->cCountry, tr("USA/Japan") );
-        entry->flag = usa;  // FixMe: USA/Japan flag
+        entry->flag = japanusa; 
         break;
 
-    case 0x44:  /* Germany */
+    case 0x44: /* Germany */
         strcpy( entry->cCountry, tr("Germany") );
         entry->flag = germany;
         break;
 
-    case 0x45:  /* USA */
+    case 0x45: /* USA */
         strcpy( entry->cCountry, tr("USA") );
         entry->flag = usa;
         break;
 
-    case 0x46:  /* France */
+    case 0x46: /* France */
         strcpy( entry->cCountry, tr("France") );
         entry->flag = france;
         break;
 
-    case 'I':   /* Italy */
+    case 'I':  /* Italy */
         strcpy( entry->cCountry, tr("Italy") );
         entry->flag = italy;
         break;
 
-    case 0x4A:  /* Japan */
+    case 0x4A: /* Japan */
         strcpy( entry->cCountry, tr("Japan") );
         entry->flag = japan;
         break;
 
-    case 'S':   /* Spain */
+    case 'S':  /* Spain */
         strcpy( entry->cCountry, tr("Spain") );
         entry->flag = spain;
         break;
 
-    case 0x55: case 0x59:       /* Australia */
+    case 0x55: case 0x59:  /* Australia */
         sprintf( entry->cCountry, tr("Australia (0x%2.2X)"), entry->info.cCountry );
         entry->flag = australia;
         break;
@@ -833,6 +833,7 @@ int create_romBrowser( void )
     japan = gdk_pixbuf_new_from_file( get_iconpath("japan.png"), &err );
     spain = gdk_pixbuf_new_from_file( get_iconpath("spain.png"), &err );
     usa = gdk_pixbuf_new_from_file( get_iconpath("usa.png"), &err );
+    japanusa = gdk_pixbuf_new_from_file( get_iconpath("japanusa.png"), &err );
     n64cart = gdk_pixbuf_new_from_file( get_iconpath("n64cart.png"), &err );
 
     //Setup right-click menu.
