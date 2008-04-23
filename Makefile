@@ -162,15 +162,9 @@ OBJ_DBG = \
 		debugger/ui_clist_edit.o
 
 PLUGINS	= plugins/blight_input.so \
-          plugins/dummyaudio.so \
-          plugins/dummyvideo.so \
-          plugins/glN64.so \
           plugins/ricevideo.so \
-          plugins/glide64.so \
           plugins/jttl_audio.so \
-          plugins/mupen64_audio.so \
           plugins/mupen64_hle_rsp_azimer.so \
-          plugins/mupen64_input.so
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -224,7 +218,6 @@ targets:
 	@echo "  Debugging Options:"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
 	@echo "    DBGSYM=1      == add debugging symbols to binaries"
-	@echo "    DBG=1         == build graphical debugger"
 	@echo "    DBG_CORE=1    == print debugging info in r4300 core"
 	@echo "    DBG_COUNT=1   == print R4300 instruction count totals (64-bit dynarec only)"
 	@echo "    DBG_COMPARE=1 == enable core-synchronized r4300 debugging"
@@ -247,19 +240,13 @@ uninstall:
 
 clean:
 	$(MAKE) -C blight_input clean
-	$(MAKE) -C dummy_audio clean
-	$(MAKE) -C dummy_video clean
-	$(MAKE) -C glN64 clean
 	$(MAKE) -C rice_video clean
-	$(MAKE) -C glide64 clean
 	$(MAKE) -C jttl_audio clean
-	$(MAKE) -C mupen64_audio clean
 	$(MAKE) -C rsp_hle clean
-	$(MAKE) -C mupen64_input clean
-	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o
+	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o
 	$(RM) -f mupen64plus mupen64plus_dbg 
-	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
-	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
+	$(RM) -f blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
+	$(RM) -f plugins/jttl_audio.so plugins/ricevideo.so
 
 rebuild: clean all
 
@@ -277,41 +264,17 @@ plugins/blight_input.so: FORCE
 	$(MAKE) -C blight_input all
 	@$(CP) ./blight_input/blight_input.so ./plugins/blight_input.so
 
-plugins/dummyaudio.so: FORCE
-	$(MAKE) -C dummy_audio all
-	@$(CP) ./dummy_audio/dummyaudio.so ./plugins/dummyaudio.so
-
-plugins/dummyvideo.so: FORCE
-	$(MAKE) -C dummy_video all
-	@$(CP) ./dummy_video/dummyvideo.so ./plugins/dummyvideo.so
-
-plugins/glN64.so: FORCE
-	$(MAKE) -C glN64 all
-	@$(CP) ./glN64/glN64.so ./plugins/glN64.so
-
 plugins/ricevideo.so: FORCE
 	$(MAKE) -C rice_video all
 	@$(CP) ./rice_video/ricevideo.so ./plugins/ricevideo.so
-
-plugins/glide64.so: FORCE
-	$(MAKE) -C glide64 all
-	@$(CP) ./glide64/glide64.so ./plugins/glide64.so
 
 plugins/jttl_audio.so: FORCE
 	$(MAKE) -C jttl_audio all
 	@$(CP) ./jttl_audio/jttl_audio.so ./plugins/jttl_audio.so
 
-plugins/mupen64_audio.so: FORCE
-	$(MAKE) -C mupen64_audio all
-	@$(CP) ./mupen64_audio/mupen64_audio.so ./plugins/mupen64_audio.so
-
 plugins/mupen64_hle_rsp_azimer.so: FORCE
 	$(MAKE) -C rsp_hle all
 	@$(CP) ./rsp_hle/mupen64_hle_rsp_azimer.so ./plugins/mupen64_hle_rsp_azimer.so
-
-plugins/mupen64_input.so: FORCE
-	$(MAKE) -C mupen64_input all
-	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
 
 FORCE:
 
