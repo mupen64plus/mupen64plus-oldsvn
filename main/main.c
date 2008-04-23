@@ -466,6 +466,8 @@ int pauseContinueEmulation(void)
 void screenshot(void)
 {
     unsigned char *pchImage = NULL;
+    char * string_token;
+    char rom_header[20];
     int width, height;
 
     if(g_EmulationThread || g_EmulatorRunning)
@@ -477,7 +479,16 @@ void screenshot(void)
         strcpy(filepath, g_SshotDir);
         if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
             strcat(filepath, "/");
-        strcat(filepath, "mupen64plus");
+        
+        strncpy(rom_header,ROM_HEADER->nom,sizeof(rom_header));
+        lowercase(rom_header);
+        string_token = strtok(rom_header," ");
+        while (string_token != NULL)
+        {
+            strcat(filepath, string_token);
+            string_token = strtok(NULL," ");
+        }
+        
         // look for a file
         int i;
         for (i = 0; i < 100; i++)

@@ -446,3 +446,16 @@ int list_length(list_t list)
 
     return len;
 }
+
+void lowercase(char string[])
+{
+   int  i = 0;
+
+   while ( string[i] )
+   {
+      string[i] = tolower(string[i]);
+      i++;
+   }
+
+   return;
+}
