@@ -378,5 +378,5 @@ static void on_close()
 
 //  What should be happening then? Currently, thread is killed.
     run = 0;            // 0(stop) ou 2(run)
-    pthread_kill( thread_n64, 1);   // signal: 1(KILL)
+//    pthread_kill( thread_n64, 1);   // signal: 1(KILL)
 }

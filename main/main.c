@@ -106,9 +106,7 @@ static int  g_GuiEnabled = 1;           // GUI enabled?
 
 static char g_ConfigDir[PATH_MAX] = {0};
 static char g_InstallDir[PATH_MAX] = {0};
-#ifdef DBG
-static int  g_DebuggerEnabled = 0;      // wether the debugger is enabled or not
-#endif
+
 static int  g_Fullscreen = 0;           // fullscreen enabled?
 static int  g_EmuMode = 0;              // emumode specified at commandline?
 static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)

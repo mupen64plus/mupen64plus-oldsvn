@@ -909,14 +909,14 @@ static void callback_debuggerEnableToggled( GtkWidget *widget, gpointer data )
     {
         if(confirm_message(tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
         {
-            callback_emulationStop( NULL, NULL );
+            callback_stopEmulation( NULL, NULL );
             g_DebuggerEnabled = GTK_CHECK_MENU_ITEM(widget)->active;
-            callback_emulationStart( NULL, NULL );
+            callback_startEmulation( NULL, NULL );
         }
         return;
     }
 
-    g_DebuggerEnabled = GTK_CHECK_MENU_ITEM(widget)->active;
+    g_DebuggerEnabled = gtk_check_menu_item_get_active(widget); //GTK_CHECK_MENU_ITEM(widget)->active;
 }
 #endif // DBG
 
@@ -1265,10 +1265,10 @@ static int create_menuBar( void )
     debuggerMenu = gtk_menu_new();
     debuggerMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Debugger"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(debuggerMenuItem), debuggerMenu );
-    debuggerEnableItem = gtk_menu_item_new_with_mnemonic(tr("_Enable"));
+    debuggerEnableItem = gtk_check_menu_item_new_with_mnemonic(tr("_Enable"));
     gtk_menu_append( GTK_MENU(debuggerMenu), debuggerEnableItem );
 
-    gtk_signal_connect_object( GTK_OBJECT(debuggerEnableItem), "toggled", GTK_SIGNAL_FUNC(callback_debuggerEnableToggled), (gpointer)NULL );
+    gtk_signal_connect( GTK_OBJECT(debuggerEnableItem), "toggled", GTK_SIGNAL_FUNC(callback_debuggerEnableToggled), (gpointer)NULL );
 #endif // DBG
 
     // help menu
