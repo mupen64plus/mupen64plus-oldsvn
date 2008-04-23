@@ -2094,7 +2094,6 @@ grLfbLock( GrLock_t type, GrBuffer_t buffer, GrLfbWriteMode_t writeMode,
         if(buffer != GR_BUFFER_AUXBUFFER)
         {
           if (writeMode == GR_LFBWRITEMODE_888) {
-        printf("LfbLock GR_LFBWRITEMODE_888\n");
         info->lfbPtr = frameBuffer;
         info->strideInBytes = width*4;
         info->writeMode = GR_LFBWRITEMODE_888;

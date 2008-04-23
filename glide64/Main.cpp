@@ -1012,11 +1012,11 @@ BOOL WINAPI DllMain (HINSTANCE hinstDLL,
 }
 #endif // _WIN32
 
-void CALL ReadScreen(void **dest, long *width, long *height)
+void CALL ReadScreen(void **dest, int *width, int *height)
 {
   *width = settings.res_x;
   *height = settings.res_y;
-  BYTE * buff = new BYTE [settings.res_x * settings.res_y * 3];
+  BYTE * buff = (BYTE *) malloc(settings.res_x * settings.res_y * 3);
   BYTE * line = buff;
   *dest = (void*)buff;
   
@@ -1031,80 +1031,31 @@ void CALL ReadScreen(void **dest, long *width, long *height)
         line[x*3+2] = 0x40;
       }
     }
-    LOG ("ReadScreen. not in the fullscreen!\n");
+    printf("[Glide64] Cannot save screenshot in windowed mode!\n");
     return;
   }
   
   GrLfbInfo_t info;
   info.size = sizeof(GrLfbInfo_t);
-#if 1
-  printf("plop\n");
-  if (grLfbLock (GR_LFB_READ_ONLY,
-    GR_BUFFER_FRONTBUFFER,
-    GR_LFBWRITEMODE_888,
-    GR_ORIGIN_UPPER_LEFT,
-    FXFALSE,
-    &info))
+  if (grLfbLock(GR_LFB_READ_ONLY, GR_BUFFER_FRONTBUFFER, GR_LFBWRITEMODE_888, GR_ORIGIN_UPPER_LEFT, FXFALSE, &info))
   {
-    DWORD offset_src=info.strideInBytes*(settings.scr_res_y-1);
-    
     // Copy the screen
-    DWORD col;
-    BYTE r, g, b;
     for (DWORD y=0; y<settings.res_y; y++)
     {
-      DWORD *ptr = (DWORD*)((BYTE*)info.lfbPtr + offset_src);
+      BYTE *ptr = (BYTE*) info.lfbPtr + (info.strideInBytes * y);
       for (DWORD x=0; x<settings.res_x; x++)
       {
-        col = *(ptr++);
-        r = (col >> 16);
-        g = (col >> 8) & 0xFF;
-        b = col & 0xFF;
-        line[x*3] = b;
-        line[x*3+1] = g;
-        line[x*3+2] = r;
+        line[x*3]   = ptr[2];  // red
+        line[x*3+1] = ptr[1];  // green
+        line[x*3+2] = ptr[0];  // blue
+        ptr += 4;
       }
       line += settings.res_x * 3;
-      offset_src -= info.strideInBytes;
     }
     
     // Unlock the frontbuffer
     grLfbUnlock (GR_LFB_READ_ONLY, GR_BUFFER_FRONTBUFFER);
   }
-#else
-  if (grLfbLock (GR_LFB_READ_ONLY,
-    GR_BUFFER_FRONTBUFFER,
-    GR_LFBWRITEMODE_565,
-    GR_ORIGIN_UPPER_LEFT,
-    FXFALSE,
-    &info))
-  {
-    DWORD offset_src=info.strideInBytes*(settings.scr_res_y-1);
-    
-    // Copy the screen
-    WORD col;
-    BYTE r, g, b;
-    for (DWORD y=0; y<settings.res_y; y++)
-    {
-      WORD *ptr = (WORD*)((BYTE*)info.lfbPtr + offset_src);
-      for (DWORD x=0; x<settings.res_x; x++)
-      {
-        col = *(ptr++);
-        r = (BYTE)((float)(col >> 11) / 31.0f * 255.0f);
-        g = (BYTE)((float)((col >> 5) & 0x3F) / 63.0f * 255.0f);
-        b = (BYTE)((float)(col & 0x1F) / 31.0f * 255.0f);
-        line[x*3] = b;
-        line[x*3+1] = g;
-        line[x*3+2] = r;
-      }
-      line += settings.res_x * 3;
-      offset_src -= info.strideInBytes;
-    }
-    
-    // Unlock the frontbuffer
-    grLfbUnlock (GR_LFB_READ_ONLY, GR_BUFFER_FRONTBUFFER);
-  }
-#endif
   LOG ("ReadScreen. Success.\n");
 }
 

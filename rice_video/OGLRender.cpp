@@ -907,3 +907,4 @@ void OGLRender::CaptureScreen(char *filename)
 
     free( buffer );
 }
+

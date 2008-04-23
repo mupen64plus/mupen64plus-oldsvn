@@ -546,7 +546,7 @@ EXPORT void CALL DllConfig ( HWND hParent );
 EXPORT void CALL DllTest ( HWND hParent );
 
 
-EXPORT void CALL ReadScreen(void **dest, long *width, long *height);
+EXPORT void CALL ReadScreen(void **dest, int *width, int *height);
 
 /******************************************************************
   Function: DrawScreen

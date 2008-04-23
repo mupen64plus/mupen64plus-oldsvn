@@ -1232,7 +1232,7 @@ void OGL_ReadScreen( void **dest, int *width, int *height )
     glReadBuffer( GL_FRONT );
 //  glReadBuffer( GL_BACK );
     glReadPixels( 0, 0, OGL.width, OGL.height,
-                  GL_BGR, GL_UNSIGNED_BYTE, *dest );
+                  GL_RGB, GL_UNSIGNED_BYTE, *dest );
     glReadBuffer( oldMode );
 }
 

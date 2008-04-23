@@ -1074,7 +1074,7 @@ FUNC_TYPE(void) NAME_DEFINE(ReadScreen)(void **dest, int *width, int *height)
    glReadBuffer( GL_FRONT );
    //      glReadBuffer( GL_BACK );
    glReadPixels( 0, 0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight,
-         GL_BGR, GL_UNSIGNED_BYTE, *dest );
+         GL_RGB, GL_UNSIGNED_BYTE, *dest );
    glReadBuffer( oldMode );
 }
     
