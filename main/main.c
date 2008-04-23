@@ -466,34 +466,37 @@ int pauseContinueEmulation(void)
 void screenshot(void)
 {
     unsigned char *pchImage = NULL;
-    char * string_token;
-    char rom_header[20];
     int width, height;
 
     if(g_EmulationThread || g_EmulatorRunning)
     {
         // start by getting the base file path
         char filepath[PATH_MAX], filename[PATH_MAX];
+        char *pch, ch;
         filepath[0] = 0;
         filename[0] = 0;
         strcpy(filepath, g_SshotDir);
         if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
             strcat(filepath, "/");
         
-        strncpy(rom_header,ROM_HEADER->nom,sizeof(rom_header));
-        lowercase(rom_header);
-        string_token = strtok(rom_header," ");
-        while (string_token != NULL)
+        // add the game's name to the end, convert to lowercase, convert spaces to underscores
+        pch = filepath + strlen(filepath);
+        strncpy(pch, ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
+        pch[20] = 0;
+        do
         {
-            strcat(filepath, string_token);
-            string_token = strtok(NULL," ");
-        }
+            ch = *pch;
+            if (ch == ' ')
+                *pch++ = '_';
+            else
+                *pch++ = tolower(ch);
+        } while (ch != 0);
         
         // look for a file
         int i;
         for (i = 0; i < 100; i++)
         {
-            sprintf(filename, "%s_%03i.png", filepath, i);
+            sprintf(filename, "%s-%03i.png", filepath, i);
             FILE *pFile = fopen(filename, "r");
             if (pFile == NULL)
                 break;

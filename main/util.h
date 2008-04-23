@@ -38,7 +38,6 @@
 
 /** string utilities **/
 char *trim(char *str);
-void lowercase(char string[]);
 char *event_to_str(const SDL_Event *event);
 int event_active(const char *event_str);
 int key_pressed(SDLKey k);

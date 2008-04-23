@@ -68,22 +68,6 @@ char *trim(char *str)
     return str;
 }
 
-/** lowercase
- *    Converts any uppercase chars in the given string to lowercase chars.
- */
-void lowercase(char string[])
-{
-   int  i = 0;
-
-   while ( string[i] )
-   {
-      string[i] = tolower(string[i]);
-      i++;
-   }
-
-   return;
-}
-
 /** event_to_str
  *    Creates a string representation of an SDL input event. If the event is
  *    not supported by this function, NULL is returned.
