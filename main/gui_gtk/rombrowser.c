@@ -500,9 +500,9 @@ void rombrowser_refresh( void )
 //sorting and GtkTreeModelSort can't implement automatic filtering.
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-const gchar *filter;
-char *buffer1, *buffer2;
-short int column;
+    const gchar *filter;
+    char *buffer1, *buffer2;
+    short int column;
 
     filter = gtk_entry_get_text ( GTK_ENTRY(g_MainWindow.filter) );
     //printf("Filter: %s\n", filter);
@@ -510,7 +510,7 @@ short int column;
     switch( g_iSortColumn )
         {
         case 0: //Flag, so sort by country name.
-           column = 1;
+            column = 1;
             break;
         case 1: //ROM Name
             column = 0;
