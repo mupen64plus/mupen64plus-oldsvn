@@ -61,22 +61,10 @@ void cheat_write_config(void);
 void cheat_delete_all(void);
 void cheat_load_current_rom(void);
 
-void additional_enable_code(void);
-void set_store_location(unsigned int address);
-void enabler(unsigned int address);
+rom_cheats_t *cheat_new_rom(void);
+cheat_t *cheat_new_cheat(rom_cheats_t *);
+cheat_code_t *cheat_new_cheat_code(cheat_t *);
+void cheat_delete_rom(rom_cheats_t *);
+void cheat_delete_cheat(rom_cheats_t *, cheat_t *);
+void cheat_delete_cheat_code(cheat_t *, cheat_code_t *);
 
-/* im not sure how to write the base for this function
- * Repeater/Patch Code
- * 5000XXYY ????
- * 8ZZZZZZZ VVVV
- * Used to make extremely long, sequenced codes shorter. 
- * XX is the number of addresses to be written,
- *  YY is the offset between addresses, 
- * ???? is the amount to increment the value (VVVV).
- * Note that this increment is signed, so values higher than 0x8000 will
- * subtract from VVVV rather than being added.
- * These can be preceded by any 'D' code type (EG 0xD0144604 0022)
- * to enable them on demand. The code to be repeated is not limited to constant writes.
- * Any 80/81/88/89 code type appearing below a '50' code should work.
- */
- 

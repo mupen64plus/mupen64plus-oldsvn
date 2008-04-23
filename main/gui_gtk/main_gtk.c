@@ -226,12 +226,14 @@ void alert_message(const char *fmt, ...)
         hbox = gtk_hbox_new(FALSE, 5);
         
         icon = gtk_image_new_from_file(get_iconpath("messagebox-error.png"));
-        gtk_container_add(GTK_CONTAINER(hbox), icon);
+        gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
         
         label = gtk_label_new(buf);
-        gtk_container_add(GTK_CONTAINER(hbox), label);
+        gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+        gtk_widget_set_size_request(label, 165, -1);
+        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
         
-        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 5);
         
         gtk_widget_show_all(dialog);
 
@@ -278,14 +280,16 @@ int confirm_message(const char *fmt, ...)
         hbox = gtk_hbox_new(FALSE, 5);
         
         icon = gtk_image_new_from_file(get_iconpath("messagebox-quest.png"));
-        gtk_container_add(GTK_CONTAINER(hbox), icon);
+        gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
         
         label = gtk_label_new(buf);
-        gtk_container_add(GTK_CONTAINER(hbox), label);
+        gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+        gtk_widget_set_size_request(label, 200, -1);
+        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
         
         gtk_widget_show_all(hbox);
         
-        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 5);
         
         response = gtk_dialog_run(GTK_DIALOG(dialog));
         
@@ -460,8 +464,9 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
 
         if( !list ) //Nothing selected.
             { 
-            if(confirm_message(tr("There is no Rom loaded.\nDo you want to load one?")))
+            if(confirm_message(tr("There is no Rom loaded. Do you want to load one?")))
                 { callback_openRom(NULL, NULL); }
+            return;
             }
         else
             {
@@ -969,8 +974,6 @@ static int create_menuBar( void )
     GtkWidget   *emulationMenuItem;
     GtkWidget   *optionsMenu;
     GtkWidget   *optionsMenuItem;
-    GtkWidget   *cheatMenu;
-    GtkWidget   *cheatMenuItem;
 #ifdef VCR_SUPPORT
     GtkWidget   *vcrMenu;
     GtkWidget   *vcrMenuItem;
@@ -1011,6 +1014,7 @@ static int create_menuBar( void )
     GtkWidget   *optionsInputItem;
     GtkWidget   *optionsRSPItem;
     GtkWidget   *optionsSeparator2;
+    GtkWidget   *optionsCheatsItem;
     GtkWidget   *optionsFullScreenItem;
 
 #ifdef VCR_SUPPORT
@@ -1198,6 +1202,7 @@ static int create_menuBar( void )
     optionsInputItem = gtk_menu_item_new_with_mnemonic(tr("_Input Settings..."));
     optionsRSPItem = gtk_menu_item_new_with_mnemonic(tr("_RSP Settings..."));
     optionsSeparator2 = gtk_menu_item_new();
+    optionsCheatsItem = gtk_menu_item_new_with_mnemonic(tr("C_heats..."));
     optionsFullScreenItem = gtk_menu_item_new_with_mnemonic(tr("_Full Screen"));
     gtk_widget_add_accelerator(optionsFullScreenItem, "activate", accelGroup,
                                GDK_Return, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
@@ -1208,27 +1213,16 @@ static int create_menuBar( void )
     gtk_menu_append( GTK_MENU(optionsMenu), optionsInputItem );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsRSPItem );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsSeparator2 );
+    gtk_menu_append( GTK_MENU(optionsMenu), optionsCheatsItem );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsFullScreenItem );
 
-    gtk_signal_connect_object( GTK_OBJECT(optionsConfigureItem), "activate", GTK_SIGNAL_FUNC(callback_configure), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(optionsVideoItem), "activate", GTK_SIGNAL_FUNC(callback_configureVideo), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(optionsAudioItem), "activate", GTK_SIGNAL_FUNC(callback_configureAudio), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(optionsInputItem), "activate", GTK_SIGNAL_FUNC(callback_configureInput), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(optionsRSPItem), "activate", GTK_SIGNAL_FUNC(callback_configureRSP), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(optionsFullScreenItem), "activate",GTK_SIGNAL_FUNC(callback_fullScreen), (gpointer)NULL );
-
-    // cheat menu
-    cheatMenu = gtk_menu_new();
-    cheatMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Cheats"));
-    gtk_menu_item_set_submenu( GTK_MENU_ITEM(cheatMenuItem), cheatMenu );
-
-    menuItem = gtk_menu_item_new_with_mnemonic(tr("Enable _Cheats..."));
-    g_signal_connect(GTK_OBJECT(menuItem), "activate", G_CALLBACK(cb_enableCheatDialog), NULL);
-    gtk_menu_append(GTK_MENU(cheatMenu), menuItem);
-
-    menuItem = gtk_menu_item_new_with_mnemonic(tr("_Edit Cheats..."));
-    g_signal_connect_swapped(GTK_OBJECT(menuItem), "activate", G_CALLBACK(cb_editCheatDialog), NULL);
-    gtk_menu_append(GTK_MENU(cheatMenu), menuItem);
+    g_signal_connect(optionsConfigureItem, "activate", G_CALLBACK(callback_configure), NULL );
+    g_signal_connect(optionsVideoItem, "activate", G_CALLBACK(callback_configureVideo), NULL );
+    g_signal_connect(optionsAudioItem, "activate", G_CALLBACK(callback_configureAudio), NULL );
+    g_signal_connect(optionsInputItem, "activate", G_CALLBACK(callback_configureInput), NULL );
+    g_signal_connect(optionsRSPItem, "activate", G_CALLBACK(callback_configureRSP), NULL );
+    g_signal_connect(optionsCheatsItem, "activate", G_CALLBACK(cb_cheatDialog), NULL );
+    g_signal_connect(optionsFullScreenItem, "activate", G_CALLBACK(callback_fullScreen), NULL );
 
     // vcr menu
 #ifdef VCR_SUPPORT
@@ -1290,7 +1284,6 @@ static int create_menuBar( void )
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), fileMenuItem );
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), emulationMenuItem );
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), optionsMenuItem );
-    gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), cheatMenuItem );
 #ifdef VCR_SUPPORT
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), vcrMenuItem );
 #endif

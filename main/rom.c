@@ -158,22 +158,22 @@ static int ask_bad(void)
         return 1;
     }
 
-    return confirm_message(tr("The rom you are trying to load is probably a bad dump!\n"
-                           "Be warned that this will probably give unexpected results.\n"
-                           "Do you still want to run it?"));
+    return confirm_message(tr("The rom you are trying to load is probably a bad dump!"
+                           " Be warned that this will probably give unexpected results."
+                           " Do you still want to run it?"));
 }
 
 static int ask_hack(void)
 {
     if(g_Noask)
     {
-        printf(tr("The rom you are trying to load is probably a hack!\n"
-                      "Be warned that this will probably give unexpected results.\n"));
+        printf(tr("The rom you are trying to load is probably a hack!"
+                  " Be warned that this will probably give unexpected results.\n"));
         return 1;
     }
-    return confirm_message(tr("The rom you are trying to load is probably a hack!\n"
-                           "Be warned that this will probably give unexpected results.\n"
-                           "Do you still want to run it?"));
+    return confirm_message(tr("The rom you are trying to load is probably a hack!"
+                           " Be warned that this will probably give unexpected results."
+                           " Do you still want to run it?"));
 }
 
 static void display_loading_progress(int p)

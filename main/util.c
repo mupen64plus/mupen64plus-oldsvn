@@ -68,6 +68,22 @@ char *trim(char *str)
     return str;
 }
 
+/** lowercase
+ *    Converts any uppercase chars in the given string to lowercase chars.
+ */
+void lowercase(char string[])
+{
+   int  i = 0;
+
+   while ( string[i] )
+   {
+      string[i] = tolower(string[i]);
+      i++;
+   }
+
+   return;
+}
+
 /** event_to_str
  *    Creates a string representation of an SDL input event. If the event is
  *    not supported by this function, NULL is returned.
@@ -274,7 +290,7 @@ int copyfile(char *src, char *dest)
 list_node_t *list_append(list_t *list, void *data)
 {
     list_node_t *new_node,
-            *last_node;
+                *last_node;
 
     if(list_empty(*list))
     {
@@ -327,7 +343,7 @@ void list_node_delete(list_t *list, list_node_t *node)
 void list_delete(list_t *list)
 {
     list_node_t *prev = NULL,
-            *curr = NULL;
+                *curr = NULL;
 
     // delete all list nodes in the list
     list_foreach(*list, curr)
@@ -447,15 +463,18 @@ int list_length(list_t list)
     return len;
 }
 
-void lowercase(char string[])
+/** list_find_node
+ *    Searches the given list for a node whose data pointer matches the given data pointer.
+ *    If found, returns a pointer to the node, else, returns NULL.
+ */
+list_node_t *list_find_node(list_t list, void *data)
 {
-   int  i = 0;
+    list_node_t *node = NULL;
 
-   while ( string[i] )
-   {
-      string[i] = tolower(string[i]);
-      i++;
-   }
+    list_foreach(list, node)
+        if(node->data == data)
+            break;
 
-   return;
+    return node;
 }
+

@@ -27,7 +27,6 @@
 
 #include <gtk/gtk.h>
 
-void cb_enableCheatDialog(GtkWidget *widget);
-void cb_editCheatDialog(GtkWidget *widget);
+void cb_cheatDialog(GtkWidget *widget);
 
 #endif // __CHEATDIALOG_H__
