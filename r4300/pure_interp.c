@@ -37,7 +37,8 @@
 #include "interupt.h"
 
 #ifdef DBG
-#include "../debugger/debugger.h"
+extern int debugger_mode;
+extern void update_debugger();
 #endif
 
 unsigned int interp_addr;

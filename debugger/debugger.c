@@ -31,10 +31,7 @@
 
 // State of the Emulation Thread:
 // 0 -> pause, 2 -> run.
-
-int  g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
-
-int run;
+extern int run;
 
 
 //]=-=-=-=-=-=-=-=-=-=-=[ Initialisation du Debugger ]=-=-=-=-=-=-=-=-=-=-=-=[
@@ -97,7 +94,7 @@ void update_debugger()
         gdk_threads_leave();
     }*/
     previousPC = PC->addr;
-    run=2;
+
     // Emulation thread is blocked until a button is clicked.
-    // pthread_cond_wait(&debugger_done_cond, &mutex);
+    pthread_cond_wait(&debugger_done_cond, &mutex);
 }
