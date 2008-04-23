@@ -57,7 +57,7 @@ const unsigned short BMP_ID = 0x4D42;
 BMGError ReadBMP( const char *filename,
               struct BMGImageStruct *img )
 {
-    FILE *file;
+    FILE *file = NULL;
     int error;
     BMGError tmp;
     unsigned char *p, *q; /*, *q_end; */
@@ -205,7 +205,7 @@ err_jmp:
 BMGError WriteBMP( const char *filename,
                    struct BMGImageStruct img )
 {
-    FILE *file;
+    FILE *file = NULL;
     jmp_buf err_jmp;
     int error;
 

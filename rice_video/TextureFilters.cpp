@@ -42,18 +42,18 @@ void Texture2x_32( DrawInfo &srcInfo, DrawInfo &destInfo)
     uint32 g1;
     uint32 r1;
     uint32 a1;
-    uint32 b2;
-    uint32 g2;
-    uint32 r2;
-    uint32 a2;
-    uint32 b3;
-    uint32 g3;
-    uint32 r3;
-    uint32 a3;
-    uint32 b4;
-    uint32 g4;
-    uint32 r4;
-    uint32 a4;
+    uint32 b2 = 0;
+    uint32 g2 = 0;
+    uint32 r2 = 0;
+    uint32 a2 = 0;
+    uint32 b3 = 0;
+    uint32 g3 = 0;
+    uint32 r3 = 0;
+    uint32 a3 = 0;
+    uint32 b4 = 0;
+    uint32 g4 = 0;
+    uint32 r4 = 0;
+    uint32 a4 = 0;
 
 
     for (uint32 ySrc = 0; ySrc < nHeight; ySrc++)
@@ -151,18 +151,18 @@ void Texture2x_16( DrawInfo &srcInfo, DrawInfo &destInfo )
     uint16 g1;
     uint16 r1;
     uint16 a1;
-    uint16 b2;
-    uint16 g2;
-    uint16 r2;
-    uint16 a2;
-    uint16 b3;
-    uint16 g3;
-    uint16 r3;
-    uint16 a3;
-    uint16 b4;
-    uint16 g4;
-    uint16 r4;
-    uint16 a4;
+    uint16 b2 = 0;
+    uint16 g2 = 0;
+    uint16 r2 = 0;
+    uint16 a2 = 0;
+    uint16 b3 = 0;
+    uint16 g3 = 0;
+    uint16 r3 = 0;
+    uint16 a3 = 0;
+    uint16 b4 = 0;
+    uint16 g4 = 0;
+    uint16 r4 = 0;
+    uint16 a4 = 0;
 
     for (uint16 ySrc = 0; ySrc < nHeight; ySrc++)
     {

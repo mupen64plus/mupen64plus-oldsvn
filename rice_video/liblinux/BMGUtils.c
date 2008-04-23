@@ -318,6 +318,9 @@ BITMAPINFO InternalCreateBMI( DWORD dwWidth,  /* width */
    BITMAPINFO bi;         /* bitmap header */
    DWORD dwBytesPerLine;        /* Number of bytes per scanline */
 
+   /* clear the bitmapinfo structure */
+   memset(&bi, 0, sizeof(BITMAPINFO));
+
    /* Make sure bits per pixel is valid */
    if (wBitCount <= 1)
       wBitCount = 1;

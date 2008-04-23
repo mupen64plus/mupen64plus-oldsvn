@@ -292,7 +292,7 @@ bool FrameBufferManager::IsDIaRenderTexture()
     bool foundSetCImg=false;
     bool foundTxtRect=false;
     int height;
-    uint32 newFillColor;
+    uint32 newFillColor = 0;
 
     uint32 dwPC = gDlistStack[gDlistStackPointer].pc;       // This points to the next instruction
 

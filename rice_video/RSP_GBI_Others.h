@@ -63,7 +63,7 @@ void RSP_Mtx_DKR(Gfx *gfx)
 
     //gRSP.DKRCMatrixIndex = ((gfx->words.w0)>>22)&3;
     bool mul=false;
-    int index;
+    int index = 0;
     switch( dwCommand )
     {
     case 0xC0:  // DKR

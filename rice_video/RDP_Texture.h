@@ -1575,7 +1575,7 @@ void DLParser_LoadTile(Gfx *gfx)
     if( options.bUseFullTMEM )
     {
         void (*Interleave)( void *mem, uint32 numDWords );
-        uint32 address, line, y;
+        uint32 address, y;
         uint64 *dest;
         uint8 *src;
 

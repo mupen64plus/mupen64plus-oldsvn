@@ -120,9 +120,9 @@ BMGError ReadPNG( const char *filename,
     unsigned char      *bits, *p, *q;
     unsigned char**     rows = NULL;
     int                 NumColors = 0;
-    unsigned char       BgdRed;
-    unsigned char       BgdGreen;
-    unsigned char       BgdBlue;
+    unsigned char       BgdRed = 0;
+    unsigned char       BgdGreen = 0;
+    unsigned char       BgdBlue = 0;
     int                 PaletteTo32 = 0;
 
     BMGError tmp;
