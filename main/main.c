@@ -99,37 +99,37 @@ char        *g_InputPlugin = NULL;      // pointer to input plugin specified at 
 char        *g_RspPlugin = NULL;        // pointer to rsp plugin specified at commandline (if any)
 
 #ifdef NO_GUI
-static int  g_GuiEnabled = 0;           // GUI enabled?
+static int  l_GuiEnabled = 0;           // GUI enabled?
 #else
-static int  g_GuiEnabled = 1;           // GUI enabled?
+static int  l_GuiEnabled = 1;           // GUI enabled?
 #endif
 
-static char g_ConfigDir[PATH_MAX] = {0};
-static char g_InstallDir[PATH_MAX] = {0};
+static char l_ConfigDir[PATH_MAX] = {0};
+static char l_InstallDir[PATH_MAX] = {0};
 #ifdef DBG
-static int  g_DebuggerEnabled = 0;      // wether the debugger is enabled or not
+static int  l_DebuggerEnabled = 0;       // wether the debugger is enabled or not
 #endif
-static int  g_Fullscreen = 0;           // fullscreen enabled?
-static int  g_EmuMode = 0;              // emumode specified at commandline?
-static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
-static int  g_CurrentFrame = 0;         // frame counter
-static int *g_TestShotList = NULL;      // list of screenshots to take for regression test support
-static int  g_TestShotIdx = 0;          // index of next screenshot frame in list
-static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
-static int  g_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
-static int  g_FrameAdvance = 0;         // variable to check if we pause on next frame
+static int   l_Fullscreen = 0;           // fullscreen enabled?
+static int   l_EmuMode = 0;              // emumode specified at commandline?
+static char  l_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
+static int   l_CurrentFrame = 0;         // frame counter
+static int  *l_TestShotList = NULL;      // list of screenshots to take for regression test support
+static int   l_TestShotIdx = 0;          // index of next screenshot frame in list
+static char *l_Filename = NULL;          // filename to load & run at startup (if given at command line)
+static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
+static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 
 /*********************************************************************************************************
 * exported gui funcs
 */
 char *get_configpath()
 {
-    return g_ConfigDir;
+    return l_ConfigDir;
 }
 
 char *get_installpath()
 {
-    return g_InstallDir;
+    return l_InstallDir;
 }
 
 char *get_savespath()
@@ -158,7 +158,7 @@ char *get_iconpath(char *iconfile)
 
 int gui_enabled(void)
 {
-    return g_GuiEnabled;
+    return l_GuiEnabled;
 }
 
 /*********************************************************************************************************
@@ -217,20 +217,20 @@ static unsigned int gettimeofday_msec(void)
 void new_frame(void)
 {
     // take a screenshot if we need to
-    if (g_TestShotList != NULL)
+    if (l_TestShotList != NULL)
     {
-        int nextshot = g_TestShotList[g_TestShotIdx];
-        if (g_CurrentFrame == nextshot)
+        int nextshot = l_TestShotList[l_TestShotIdx];
+        if (l_CurrentFrame == nextshot)
         {
             screenshot();
             // advance list index to next screenshot frame number.  If it's 0, then quit
-            g_TestShotIdx++;
-            if (g_TestShotList[g_TestShotIdx] == 0) stopEmulation();
+            l_TestShotIdx++;
+            if (l_TestShotList[l_TestShotIdx] == 0) stopEmulation();
         }
     }
 
     // advance the current frame
-    g_CurrentFrame++;
+    l_CurrentFrame++;
 
 }
 
@@ -243,7 +243,7 @@ void new_vi(void)
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
 
-    double AdjustedLimit = VILimitMilliseconds * 100.0 / g_SpeedFactor;  // adjust for selected emulator speed
+    double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
     start_section(IDLE_SECTION);
@@ -278,9 +278,9 @@ void new_vi(void)
     
     LastFPSTime = CurrentFPSTime ;
     end_section(IDLE_SECTION);
-    if (g_FrameAdvance) {
+    if (l_FrameAdvance) {
         rompause = 1;
-        g_FrameAdvance = 0;
+        l_FrameAdvance = 0;
     }
 }
 
@@ -427,7 +427,7 @@ void startEmulation(void)
     }
 
     // in nogui mode, just start the emulator in the main thread
-    if(!g_GuiEnabled)
+    if(!l_GuiEnabled)
     {
         emulationThread(NULL);
     }
@@ -495,7 +495,7 @@ void screenshot(void)
         char *pch, ch;
         filepath[0] = 0;
         filename[0] = 0;
-        strcpy(filepath, g_SshotDir);
+        strcpy(filepath, l_SshotDir);
         if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
             strcat(filepath, "/");
         
@@ -532,7 +532,7 @@ void screenshot(void)
         // free the memory
         free(pchImage);
         // print message -- this allows developers to capture frames and use them in the regression test
-        printf("Captured screenshot for frame %i\n", g_CurrentFrame);
+        printf("Captured screenshot for frame %i\n", l_CurrentFrame);
     }
 }
 
@@ -571,19 +571,19 @@ static int sdl_event_filter( const SDL_Event *event )
                         changeWindow();
                     break;
                 case SDLK_F10:
-                    if (g_SpeedFactor > 10)
+                    if (l_SpeedFactor > 10)
                     {
-                        g_SpeedFactor -= 5;
-                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
-                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                        l_SpeedFactor -= 5;
+                        printf("Emulator playback speed: %i%% \n", l_SpeedFactor);
+                        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     }
                     break;
                 case SDLK_F11:
-                    if (g_SpeedFactor < 300)
+                    if (l_SpeedFactor < 300)
                     {
-                        g_SpeedFactor += 5;
-                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
-                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                        l_SpeedFactor += 5;
+                        printf("Emulator playback speed: %i%% \n", l_SpeedFactor);
+                        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     }
                     break;
                 case SDLK_F12:
@@ -593,7 +593,7 @@ static int sdl_event_filter( const SDL_Event *event )
                 // Pause
                 case SDLK_PAUSE:
                     pauseContinueEmulation();
-                    g_FrameAdvance = 0;
+                    l_FrameAdvance = 0;
                     break;
 
                 default:
@@ -632,14 +632,14 @@ static int sdl_event_filter( const SDL_Event *event )
                         // fast-forward
                         case 'f':
                         case 'F':
-                            SavedSpeedFactor = g_SpeedFactor;
-                            g_SpeedFactor = 250;
-                            setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                            SavedSpeedFactor = l_SpeedFactor;
+                            l_SpeedFactor = 250;
+                            setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                             break;
                         // frame advance
                         case '/':
                         case '?':
-                            g_FrameAdvance = 1;
+                            l_FrameAdvance = 1;
                             rompause = 0;
                             break;
                         
@@ -659,8 +659,8 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
                 case SDLK_f:
                     // cancel fast-forward
-                    g_SpeedFactor = SavedSpeedFactor;
-                    setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                    l_SpeedFactor = SavedSpeedFactor;
+                    setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     break;
                 default:
                     keyUp( 0, event->key.keysym.sym );
@@ -731,7 +731,7 @@ static void * emulationThread( void *_arg )
     g_EmulatorRunning = 1;
 
     // if emu mode wasn't specified at the commandline, set from config file
-    if(!g_EmuMode)
+    if(!l_EmuMode)
         dynacore = config_get_number( "Core", CORE_DYNAREC );
 
     no_audio_delay = config_get_bool("NoAudioDelay", FALSE);
@@ -786,7 +786,7 @@ static void * emulationThread( void *_arg )
     romOpen_audio();
     romOpen_input();
 
-    if (g_Fullscreen)
+    if (l_Fullscreen)
         changeWindow();
 
 #ifdef WITH_LIRC
@@ -794,7 +794,7 @@ static void * emulationThread( void *_arg )
 #endif // WITH_LIRC
 
 #ifdef DBG
-    if( g_DebuggerEnabled )
+    if( l_DebuggerEnabled )
         init_debugger();
 #endif
     // load cheats for the current rom
@@ -821,7 +821,7 @@ static void * emulationThread( void *_arg )
 
     SDL_Quit();
 
-    if (g_Filename != 0)
+    if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is
         // recieved (i.e. mouse movement)
@@ -959,8 +959,8 @@ void parseCommandLine(int argc, char **argv)
     };
     struct option long_options[] =
     {
-        {"nogui", no_argument, &g_GuiEnabled, FALSE},
-        {"fullscreen", no_argument, &g_Fullscreen, TRUE},
+        {"nogui", no_argument, &l_GuiEnabled, FALSE},
+        {"fullscreen", no_argument, &l_Fullscreen, TRUE},
         {"gfx", required_argument, NULL, OPT_GFX},
         {"audio", required_argument, NULL, OPT_AUDIO},
         {"input", required_argument, NULL, OPT_INPUT},
@@ -1029,7 +1029,7 @@ void parseCommandLine(int argc, char **argv)
                 i = atoi(optarg);
                 if(i >= CORE_INTERPRETER && i <= CORE_PURE_INTERPRETER)
                 {
-                    g_EmuMode = TRUE;
+                    l_EmuMode = TRUE;
                     dynacore = i;
                 }
                 else
@@ -1039,19 +1039,19 @@ void parseCommandLine(int argc, char **argv)
                 break;
             case OPT_SSHOTDIR:
                 if(isdir(optarg))
-                    strncpy(g_SshotDir, optarg, PATH_MAX);
+                    strncpy(l_SshotDir, optarg, PATH_MAX);
                 else
                     printf("***Warning: Screen shot directory '%s' is not accessible or not a directory.\n", optarg);
                 break;
             case OPT_CONFIGDIR:
                 if(isdir(optarg))
-                    strncpy(g_ConfigDir, optarg, PATH_MAX);
+                    strncpy(l_ConfigDir, optarg, PATH_MAX);
                 else
                     printf("***Warning: Config directory '%s' is not accessible or not a directory.\n", optarg);
                 break;
             case OPT_INSTALLDIR:
                 if(isdir(optarg))
-                    strncpy(g_InstallDir, optarg, PATH_MAX);
+                    strncpy(l_InstallDir, optarg, PATH_MAX);
                 else
                     printf("***Warning: Install directory '%s' is not accessible or not a directory.\n", optarg);
                 break;
@@ -1068,17 +1068,17 @@ void parseCommandLine(int argc, char **argv)
                     shots++;
                 }
                 // create a list and populate it with the frame counter values at which to take screenshots
-                if ((g_TestShotList = malloc(sizeof(int) * (shots + 1))) != NULL)
+                if ((l_TestShotList = malloc(sizeof(int) * (shots + 1))) != NULL)
                 {
                     int idx = 0;
                     str = optarg;
                     while (str != NULL)
                     {
-                        g_TestShotList[idx++] = atoi(str);
+                        l_TestShotList[idx++] = atoi(str);
                         str = strchr(str, ',');
                         if (str != NULL) str++;
                     }
-                    g_TestShotList[idx] = 0;
+                    l_TestShotList[idx] = 0;
                 }
                 break;
             // print help
@@ -1094,17 +1094,17 @@ void parseCommandLine(int argc, char **argv)
     // if there are still parameters left after option parsing, assume it's the rom filename
     if(optind < argc)
     {
-        g_Filename = argv[optind];
+        l_Filename = argv[optind];
     }
 
-    // if executable name contains "_nogui", set g_GuiEnabled to FALSE.
+    // if executable name contains "_nogui", set l_GuiEnabled to FALSE.
     // This allows creation of a mupen64plus_nogui symlink to mupen64plus instead of passing --nogui
     // for backwards compatability with old mupen64_nogui program name.
     str = strdup(argv[0]);
     basename(str);
     if(strstr(str, "_nogui") != NULL)
     {
-        g_GuiEnabled = FALSE;
+        l_GuiEnabled = FALSE;
     }
     free(str);
 }
@@ -1120,24 +1120,24 @@ static void setPaths(void)
     char buf[PATH_MAX], buf2[PATH_MAX];
 
     // if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
-    if (strlen(g_ConfigDir) == 0)
+    if (strlen(l_ConfigDir) == 0)
     {
-        strncpy(g_ConfigDir, getenv("HOME"), PATH_MAX);
-        strncat(g_ConfigDir, "/.mupen64plus", PATH_MAX - strlen(g_ConfigDir));
+        strncpy(l_ConfigDir, getenv("HOME"), PATH_MAX);
+        strncat(l_ConfigDir, "/.mupen64plus", PATH_MAX - strlen(l_ConfigDir));
 
         // if ~/.mupen64plus dir is not found, create it
-        if(!isdir(g_ConfigDir))
+        if(!isdir(l_ConfigDir))
         {
-            printf("Creating %s to store user data\n", g_ConfigDir);
-            if(mkdir(g_ConfigDir, (mode_t)0755) != 0)
+            printf("Creating %s to store user data\n", l_ConfigDir);
+            if(mkdir(l_ConfigDir, (mode_t)0755) != 0)
             {
-                printf("Error: Could not create %s: ", g_ConfigDir);
+                printf("Error: Could not create %s: ", l_ConfigDir);
                 perror(NULL);
                 exit(errno);
             }
 
             // create save subdir
-            strncpy(buf, g_ConfigDir, PATH_MAX);
+            strncpy(buf, l_ConfigDir, PATH_MAX);
             strncat(buf, "/save", PATH_MAX - strlen(buf));
             if(mkdir(buf, (mode_t)0755) != 0)
             {
@@ -1146,7 +1146,7 @@ static void setPaths(void)
             }
 
             // create screenshots subdir
-            strncpy(buf, g_ConfigDir, PATH_MAX);
+            strncpy(buf, l_ConfigDir, PATH_MAX);
             strncat(buf, "/screenshots", PATH_MAX - strlen(buf));
             if(mkdir(buf, (mode_t)0755) != 0)
             {
@@ -1157,17 +1157,17 @@ static void setPaths(void)
     }
 
     // make sure config dir has a '/' on the end.
-    if(g_ConfigDir[strlen(g_ConfigDir)-1] != '/')
-        strncat(g_ConfigDir, "/", PATH_MAX - strlen(g_ConfigDir));
+    if(l_ConfigDir[strlen(l_ConfigDir)-1] != '/')
+        strncat(l_ConfigDir, "/", PATH_MAX - strlen(l_ConfigDir));
 
     // if install dir was not specified at the commandline, look for it in the default location
-    if(strlen(g_InstallDir) == 0)
+    if(strlen(l_InstallDir) == 0)
     {
-        strncpy(g_InstallDir, PREFIX, PATH_MAX);
-        strncat(g_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(g_InstallDir));
+        strncpy(l_InstallDir, PREFIX, PATH_MAX);
+        strncat(l_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(l_InstallDir));
         
         // if install dir is not in the default location, try the same dir as the binary
-        if(!isdir(g_InstallDir))
+        if(!isdir(l_InstallDir))
         {
             int n = readlink("/proc/self/exe", buf, PATH_MAX);
 
@@ -1175,29 +1175,29 @@ static void setPaths(void)
             {
                 buf[n] = '\0';
                 dirname(buf);
-                strncpy(g_InstallDir, buf, PATH_MAX);
+                strncpy(l_InstallDir, buf, PATH_MAX);
 
                 strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
                 if(!isfile(buf))
                 {
                     // try cwd as last resort
-                    getcwd(g_InstallDir, PATH_MAX);
+                    getcwd(l_InstallDir, PATH_MAX);
                 }
             }
             else
             {
                 // try cwd as last resort
-                getcwd(g_InstallDir, PATH_MAX);
+                getcwd(l_InstallDir, PATH_MAX);
             }
         }
     }
 
     // make sure install dir has a '/' on the end.
-    if(g_InstallDir[strlen(g_InstallDir)-1] != '/')
-        strncat(g_InstallDir, "/", PATH_MAX - strlen(g_InstallDir));
+    if(l_InstallDir[strlen(l_InstallDir)-1] != '/')
+        strncat(l_InstallDir, "/", PATH_MAX - strlen(l_InstallDir));
 
     // make sure install dir is valid
-    strncpy(buf, g_InstallDir, PATH_MAX);
+    strncpy(buf, l_InstallDir, PATH_MAX);
     strncat(buf, "config/mupen64plus.conf", PATH_MAX - strlen(buf));
     if(!isfile(buf))
     {
@@ -1207,14 +1207,14 @@ static void setPaths(void)
 
     // check user config dir for mupen64plus.conf file. If it's not there, copy all
     // config files from install dir over to user dir.
-    strncpy(buf, g_ConfigDir, PATH_MAX);
+    strncpy(buf, l_ConfigDir, PATH_MAX);
     strncat(buf, "mupen64plus.conf", PATH_MAX - strlen(buf));
     if(!isfile(buf))
     {
         DIR *dir;
         struct dirent *entry;
 
-        strncpy(buf, g_InstallDir, PATH_MAX);
+        strncpy(buf, l_InstallDir, PATH_MAX);
         strncat(buf, "config", PATH_MAX - strlen(buf));
         dir = opendir(buf);
 
@@ -1227,17 +1227,17 @@ static void setPaths(void)
 
         while((entry = readdir(dir)) != NULL)
         {
-            strncpy(buf, g_InstallDir, PATH_MAX);
+            strncpy(buf, l_InstallDir, PATH_MAX);
             strncat(buf, "config/", PATH_MAX - strlen(buf));
             strncat(buf, entry->d_name, PATH_MAX - strlen(buf));
 
             // only copy regular files
             if(isfile(buf))
             {
-                strncpy(buf2, g_ConfigDir, PATH_MAX);
+                strncpy(buf2, l_ConfigDir, PATH_MAX);
                 strncat(buf2, entry->d_name, PATH_MAX - strlen(buf2));
                                 
-                printf("Copying %s to %s\n", buf, g_ConfigDir);
+                printf("Copying %s to %s\n", buf, l_ConfigDir);
                 if(copyfile(buf, buf2) != 0)
                     printf("Error copying file\n");
             }
@@ -1247,19 +1247,19 @@ static void setPaths(void)
     }
 
     // set screenshot dir if it wasn't specified by the user
-    if(strlen(g_SshotDir) == 0)
+    if(strlen(l_SshotDir) == 0)
     {
-        snprintf(g_SshotDir, PATH_MAX, "%sscreenshots/", g_ConfigDir);
-        if(!isdir(g_SshotDir))
+        snprintf(l_SshotDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
+        if(!isdir(l_SshotDir))
         {
-            printf("Warning: Could not find screenshot dir: %s\n", g_SshotDir);
-            g_SshotDir[0] = '\0';
+            printf("Warning: Could not find screenshot dir: %s\n", l_SshotDir);
+            l_SshotDir[0] = '\0';
         }
     }
 
     // make sure screenshots dir has a '/' on the end.
-    if(g_SshotDir[strlen(g_SshotDir)-1] != '/')
-        strncat(g_SshotDir, "/", PATH_MAX - strlen(g_SshotDir));
+    if(l_SshotDir[strlen(l_SshotDir)-1] != '/')
+        strncat(l_SshotDir, "/", PATH_MAX - strlen(l_SshotDir));
 }
 
 /*********************************************************************************************************
@@ -1348,7 +1348,7 @@ int main(int argc, char *argv[])
     printf("             |_|         http://code.google.com/p/mupen64plus/  \n\n");                                              
 
     // allow gui subsystem to init and parse gui-specific commandline args first
-    if(g_GuiEnabled)
+    if(l_GuiEnabled)
         gui_init(&argc, &argv);
 
     parseCommandLine(argc, argv);
@@ -1382,7 +1382,7 @@ int main(int argc, char *argv[])
 
     // look for plugins in the install dir and set plugin config dir
     plugin_scan_installdir();
-    plugin_set_configdir(g_ConfigDir);
+    plugin_set_configdir(l_ConfigDir);
 
     /* TODO: autoinc_save_slot acts differently in the gui version than it does in the nogui version. Here, it's a bool, in nogui version, it's a pointer to the current autoinc_slot. Need to research this */
     *autoinc_save_slot = config_get_bool("AutoIncSaveSlot", FALSE);
@@ -1397,21 +1397,21 @@ int main(int argc, char *argv[])
     cheat_read_config();
 
     // build gui, but do not display
-    if(g_GuiEnabled)
+    if(l_GuiEnabled)
         gui_build();
 
     // must be called after building gui
-    info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), g_ConfigDir, g_InstallDir);
+    info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
 
     // only display gui if user wants it
-    if(g_GuiEnabled)
+    if(l_GuiEnabled)
         gui_display();
 
     // if rom file was specified, run it
-    if (g_Filename)
+    if (l_Filename)
     {
-        if(open_rom(g_Filename) < 0 &&
-           !g_GuiEnabled)
+        if(open_rom(l_Filename) < 0 &&
+           !l_GuiEnabled)
         {
             // cleanup and exit
             cheat_delete_all();
@@ -1425,7 +1425,7 @@ int main(int argc, char *argv[])
         startEmulation();
     }
     // Rom file must be specified in nogui mode
-    else if(!g_GuiEnabled)
+    else if(!l_GuiEnabled)
     {
         alert_message("Rom file must be specified in nogui mode.");
         printUsage(argv[0]);
@@ -1440,12 +1440,12 @@ int main(int argc, char *argv[])
     }
 
     // give control of this thread to the gui
-    if(g_GuiEnabled)
+    if(l_GuiEnabled)
         gui_main_loop();
 
     // free allocated memory
-    if (g_TestShotList != NULL)
-        free(g_TestShotList);
+    if (l_TestShotList != NULL)
+        free(l_TestShotList);
 
     // cleanup and exit
     stopEmulation();
