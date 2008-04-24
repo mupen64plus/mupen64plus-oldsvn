@@ -44,7 +44,6 @@ $INSTALL -d -v "${INSTALLDIR}/config" || exit $?
 $INSTALL -m 0644 config/* "${INSTALLDIR}/config" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/doc" || exit $?
 $INSTALL -m 0644 doc/HiRezTexture.txt "${INSTALLDIR}/doc" || exit $?
-$INSTALL -m 0644 doc/readme.pdf "${INSTALLDIR}/doc" || exit $?
 $INSTALL -d -v "${MANDIR}" || exit $?
 $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/icons" || exit $?
