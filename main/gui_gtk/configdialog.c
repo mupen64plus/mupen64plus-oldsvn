@@ -503,9 +503,6 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
     int i;
     char *name;
 
-    // reset back to first tab
-    gtk_notebook_set_current_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), 0 );
-
     // Load configuration
 
     callback_romDirectoryRemoveAll( NULL, NULL );
