@@ -112,9 +112,13 @@ static int  g_DebuggerEnabled = 0;      // wether the debugger is enabled or not
 static int  g_Fullscreen = 0;           // fullscreen enabled?
 static int  g_EmuMode = 0;              // emumode specified at commandline?
 static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
+static int  g_CurrentFrame = 0;         // frame counter
+static int *g_TestShotList = NULL;      // list of screenshots to take for regression test support
+static int  g_TestShotIdx = 0;          // index of next screenshot frame in list
 static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
 static int  g_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int  g_FrameAdvance = 0;         // variable to check if we pause on next frame
+
 /*********************************************************************************************************
 * exported gui funcs
 */
@@ -212,6 +216,22 @@ static unsigned int gettimeofday_msec(void)
 
 void new_frame(void)
 {
+    // take a screenshot if we need to
+    if (g_TestShotList != NULL)
+    {
+        int nextshot = g_TestShotList[g_TestShotIdx];
+        if (g_CurrentFrame == nextshot)
+        {
+            screenshot();
+            // advance list index to next screenshot frame number.  If it's 0, then quit
+            g_TestShotIdx++;
+            if (g_TestShotList[g_TestShotIdx] == 0) stopEmulation();
+        }
+    }
+
+    // advance the current frame
+    g_CurrentFrame++;
+
 }
 
 void new_vi(void)
@@ -511,6 +531,8 @@ void screenshot(void)
         SaveRGBBufferToFile(filename, pchImage, width, height, width * 3);
         // free the memory
         free(pchImage);
+        // print message -- this allows developers to capture frames and use them in the regression test
+        printf("Captured screenshot for frame %i\n", g_CurrentFrame);
     }
 }
 
@@ -892,7 +914,7 @@ static void printUsage(const char *progname)
     printf("Usage: %s [parameter(s)] rom\n"
            "\n"
            "Parameters:\n"
-           "    --nogui         : do not display GUI\n"
+           "    --nogui             : do not display GUI\n"
            "    --fullscreen        : turn fullscreen mode on\n"
            "    --gfx (path)        : use gfx plugin given by (path)\n"
            "    --audio (path)      : use audio plugin given by (path)\n"
@@ -902,8 +924,9 @@ static void printUsage(const char *progname)
            "    --sshotdir (dir)    : set screenshot directory to (dir)\n"
            "    --configdir (dir)   : force config dir (must contain mupen64plus.conf)\n"
            "    --installdir (dir)  : force install dir (place to look for plugins, icons, lang, etc)\n"
-           "    --noask         : don't ask to force load on bad dumps\n"
-           "    -h, --help      : see this help message\n"
+           "    --noask             : don't ask to force load on bad dumps\n"
+           "    --testshots (list)  : take screenshots at frames given in comma-separated list, then quit\n"
+           "    -h, --help          : see this help message\n"
            "\n", basename(str));
 
     free(str);
@@ -916,7 +939,7 @@ static void printUsage(const char *progname)
  */
 void parseCommandLine(int argc, char **argv)
 {
-    int i;
+    int i, shots;
     char *str = NULL;
 
     // option parsing vars
@@ -931,7 +954,8 @@ void parseCommandLine(int argc, char **argv)
         OPT_SSHOTDIR,
         OPT_CONFIGDIR,
         OPT_INSTALLDIR,
-        OPT_NOASK
+        OPT_NOASK,
+        OPT_TESTSHOTS
     };
     struct option long_options[] =
     {
@@ -946,6 +970,7 @@ void parseCommandLine(int argc, char **argv)
         {"configdir", required_argument, NULL, OPT_CONFIGDIR},
         {"installdir", required_argument, NULL, OPT_INSTALLDIR},
         {"noask", no_argument, NULL, OPT_NOASK},
+        {"testshots", required_argument, NULL, OPT_TESTSHOTS},
         {"help", no_argument, NULL, 'h'},
         {0, 0, 0, 0}    // last opt must be empty
     };
@@ -1032,6 +1057,29 @@ void parseCommandLine(int argc, char **argv)
                 break;
             case OPT_NOASK:
                 g_Noask = g_NoaskParam = TRUE;
+                break;
+            case OPT_TESTSHOTS:
+                // count the number of integers in the list
+                shots = 1;
+                str = optarg;
+                while ((str = strchr(str, ',')) != NULL)
+                {
+                    str++;
+                    shots++;
+                }
+                // create a list and populate it with the frame counter values at which to take screenshots
+                if ((g_TestShotList = malloc(sizeof(int) * (shots + 1))) != NULL)
+                {
+                    int idx = 0;
+                    str = optarg;
+                    while (str != NULL)
+                    {
+                        g_TestShotList[idx++] = atoi(str);
+                        str = strchr(str, ',');
+                        if (str != NULL) str++;
+                    }
+                    g_TestShotList[idx] = 0;
+                }
                 break;
             // print help
             case 'h':
@@ -1394,6 +1442,10 @@ int main(int argc, char *argv[])
     // give control of this thread to the gui
     if(g_GuiEnabled)
         gui_main_loop();
+
+    // free allocated memory
+    if (g_TestShotList != NULL)
+        free(g_TestShotList);
 
     // cleanup and exit
     stopEmulation();
