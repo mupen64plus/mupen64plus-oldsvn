@@ -44,6 +44,16 @@ list_t g_Cheats = NULL; // list of all supported cheats
 static rom_cheats_t *g_Current = NULL; // current loaded rom
 
 // private functions
+static unsigned short read_address_16bit(unsigned int address)
+{
+    return *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16)));
+}
+
+static unsigned short read_address_8bit(unsigned int address)
+{
+    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8)));
+}
+
 static void update_address_16bit(unsigned int address, unsigned short new_value)
 {
     *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16))) = new_value;
@@ -70,7 +80,7 @@ static int address_equal_to_16bit(unsigned int address, unsigned short value)
 
 // individual application - returns 0 if we are supposed to skip the next cheat
 // (only really used on conditional codes)
-static int execute_cheat(unsigned int address, unsigned short value)
+static int execute_cheat(unsigned int address, unsigned short value, unsigned short *old_value)
 {
     switch (address & 0xFF000000)
     {
@@ -79,6 +89,9 @@ static int execute_cheat(unsigned int address, unsigned short value)
         case 0xA0000000:
         case 0xA8000000:
         case 0xF0000000:
+            // if pointer to old value is valid and uninitialized, write current value to it
+            if(old_value && *old_value == CHEAT_CODE_MAGIC_VALUE)
+                *old_value = read_address_8bit(address);
             update_address_8bit(address,value);
             return 1;
             break;
@@ -87,6 +100,9 @@ static int execute_cheat(unsigned int address, unsigned short value)
         case 0xA1000000:
         case 0xA9000000:
         case 0xF1000000:
+            // if pointer to old value is valid and uninitialized, write current value to it
+            if(old_value && *old_value == CHEAT_CODE_MAGIC_VALUE)
+                *old_value = read_address_16bit(address);
             update_address_16bit(address,value);
             return 1;
             break;
@@ -108,8 +124,8 @@ static int execute_cheat(unsigned int address, unsigned short value)
             break;
         case 0xEE000000:
             // most likely, this doesnt do anything.
-            execute_cheat(0xF1000318, 0x0040);
-            execute_cheat(0xF100031A, 0x0000);
+            execute_cheat(0xF1000318, 0x0040, NULL);
+            execute_cheat(0xF100031A, 0x0000, NULL);
             return 1;
             break;
         default:
@@ -140,6 +156,7 @@ void cheat_apply_cheats(int entry)
         cheat = (cheat_t *)node1->data;
         if(cheat->always_enabled || cheat->enabled)
         {
+            cheat->was_enabled = 1;
             switch(entry)
             {
                 case ENTRY_BOOT:
@@ -149,7 +166,7 @@ void cheat_apply_cheats(int entry)
 
                         // code should only be written once at boot time
                         if((code->address & 0xF0000000) == 0xF0000000)
-                            execute_cheat(code->address, code->value);
+                            execute_cheat(code->address, code->value, &code->old_value);
                     }
                     break;
                 case ENTRY_VI:
@@ -174,11 +191,19 @@ void cheat_apply_cheats(int entry)
                             }
 
                             // if condition true, execute next cheat code
-                            if(execute_cheat(code->address, code->value))
+                            if(execute_cheat(code->address, code->value, NULL))
                             {
                                 node2 = node2->next;
                                 code = (cheat_code_t *)node2->data;
-                                execute_cheat(code->address, code->value);
+
+                                // if code needs GS button pressed, don't save old value
+                                if(((code->address & 0xFF000000) == 0xD8000000 ||
+                                    (code->address & 0xFF000000) == 0xD9000000 ||
+                                    (code->address & 0xFF000000) == 0xDA000000 ||
+                                    (code->address & 0xFF000000) == 0xDB000000))
+                                   execute_cheat(code->address, code->value, NULL);
+                                else
+                                   execute_cheat(code->address, code->value, &code->old_value);
                             }
                             // if condition false, skip next code
                             else
@@ -195,11 +220,38 @@ void cheat_apply_cheats(int entry)
                                 (code->address & 0xFF000000) == 0xA9000000)
                         {
                             if(gs_button_pressed())
-                                execute_cheat(code->address, code->value);
+                                execute_cheat(code->address, code->value, NULL);
                         }
                         // normal cheat code
                         else
-                            execute_cheat(code->address, code->value);
+                        {
+                            // exclude boot-time cheat codes
+                            if((code->address & 0xF0000000) != 0xF0000000)
+                                execute_cheat(code->address, code->value, &code->old_value);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        // if cheat was enabled, but is now disabled, restore old memory values
+        else if(cheat->was_enabled)
+        {
+            cheat->was_enabled = 0;
+            switch(entry)
+            {
+                case ENTRY_VI:
+                    list_foreach(cheat->cheat_codes, node2)
+                    {
+                        code = (cheat_code_t *)node2->data;
+              
+                        // set memory back to old value and clear saved copy of old value
+                        if(code->old_value != CHEAT_CODE_MAGIC_VALUE)
+                        {
+                            execute_cheat(code->address, code->old_value, NULL);
+                            code->old_value = CHEAT_CODE_MAGIC_VALUE;
+                        }
                     }
                     break;
                 default:
@@ -392,9 +444,13 @@ void cheat_delete_all(void)
  */
 void cheat_load_current_rom(void)
 {
-    list_node_t *node;
+    list_node_t *node, *node2;
     rom_cheats_t *rom_cheat = NULL;
+    cheat_t *cheat = NULL;
+    cheat_code_t *cheatcode = NULL;
     unsigned int crc1, crc2;
+
+    g_Current = NULL;
 
     if(!ROM_HEADER) return;
 
@@ -417,11 +473,23 @@ void cheat_load_current_rom(void)
            crc2 == rom_cheat->crc2)
         {
             g_Current = rom_cheat;
-            return;
         }
     }
-    // not found
-    g_Current = NULL;
+
+    // if rom was found, clear any old saved values from cheat codes
+    if(g_Current)
+    {
+        list_foreach(g_Current->cheats, node)
+        {
+            cheat = (cheat_t *)node->data;
+
+            list_foreach(cheat->cheat_codes, node2)
+            {
+                cheatcode = (cheat_code_t *)node2->data;
+                cheatcode->old_value = CHEAT_CODE_MAGIC_VALUE;
+            }
+        }
+    }
 }
 
 /** cheat_new_rom
@@ -467,6 +535,7 @@ cheat_code_t *cheat_new_cheat_code(cheat_t *cheat)
         return NULL;
 
     memset(code, 0, sizeof(cheat_code_t));
+    code->old_value = CHEAT_CODE_MAGIC_VALUE; // initialize old_value
     list_append(&cheat->cheat_codes, code);
 
     return code;

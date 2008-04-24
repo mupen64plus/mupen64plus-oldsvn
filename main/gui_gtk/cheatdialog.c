@@ -627,7 +627,6 @@ static GtkWidget *edit_cheat_widget(cheat_t *cheat, GtkTreeSelection *selection)
     viewport = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(viewport),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    //gtk_container_set_border_width(GTK_CONTAINER(viewport), 10);
     gtk_widget_set_size_request(viewport, -1, 200);
     gtk_box_pack_start(GTK_BOX(hbox), viewport, FALSE, FALSE, 10);
 

@@ -46,6 +46,7 @@ typedef struct {
     char *name;
     int enabled; // cheat enabled until mupen64plus is closed
     int always_enabled; // always enabled (written to config)
+    int was_enabled; // cheat was previously enabled, but has now been disabled
     list_t cheat_codes; // list of cheat_code_t's
 } cheat_t;
 
@@ -53,7 +54,10 @@ typedef struct {
 typedef struct {
     unsigned int address;
     unsigned short value;
+    unsigned short old_value; // value before cheat was applied
 } cheat_code_t;
+
+#define CHEAT_CODE_MAGIC_VALUE 0xcafe // use this to know that old_value is uninitialized
 
 void cheat_apply_cheats(int entry);
 void cheat_read_config(void);
