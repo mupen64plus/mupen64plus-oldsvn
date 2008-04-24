@@ -574,7 +574,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     if (l_SpeedFactor > 10)
                     {
                         l_SpeedFactor -= 5;
-                        printf("Emulator playback speed: %i%% \n", l_SpeedFactor);
+                        info_message(tr("Emulator playback speed: %i%%"), l_SpeedFactor);
                         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     }
                     break;
@@ -582,7 +582,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     if (l_SpeedFactor < 300)
                     {
                         l_SpeedFactor += 5;
-                        printf("Emulator playback speed: %i%% \n", l_SpeedFactor);
+                        info_message(tr("Emulator playback speed: %i%%"), l_SpeedFactor);
                         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     }
                     break;
