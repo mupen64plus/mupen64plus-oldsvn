@@ -390,46 +390,38 @@ static GtkWidget *edit_rom_info_widget(rom_cheats_t *romcheat, GtkTreeSelection 
     char crc[9];
 
     GtkWidget *label;
-    GtkWidget *hbox, *vbox;
+    GtkWidget *table;
     GtkWidget *textbox;
 
-    vbox = gtk_vbox_new(FALSE, 10);
+    table = gtk_table_new(2, 3, FALSE);
 
     // Rom name
-    hbox = gtk_hbox_new(FALSE, 10);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-
     label = gtk_label_new(tr("Name:"));
-    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 5);
 
     textbox = gtk_entry_new();
-    gtk_editable_delete_text(GTK_EDITABLE(textbox), 0, -1);
     if(romcheat->rom_name)
         gtk_editable_insert_text(GTK_EDITABLE(textbox), romcheat->rom_name, strlen(romcheat->rom_name), &i);
 
     // connect signal such that as the user changes the Rom name in the textbox, it's updated in the model
     g_signal_connect(textbox, "changed", G_CALLBACK(cb_romNameChanged), selection);
-    gtk_box_pack_start(GTK_BOX(hbox), textbox, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), textbox, 1, 3, 0, 1, GTK_FILL, GTK_FILL, 5, 5);
 
     // Rom CRC
-    hbox = gtk_hbox_new(FALSE, 10);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-    
     label = gtk_label_new(tr("CRC:"));
-    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 5);
 
     // CRC1 textbox
     textbox = gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(textbox), 8);
     gtk_widget_set_size_request(textbox, 85, -1);
     snprintf(crc, 9, "%.8x", romcheat->crc1);
-    gtk_editable_delete_text(GTK_EDITABLE(textbox), 0, -1);
     gtk_editable_insert_text(GTK_EDITABLE(textbox), crc, 8, &i);
 
     // connect signal such that as the user changes the CRC value in the textbox, it's updated in the rom_cheats_t struct
     g_signal_connect(textbox, "changed", G_CALLBACK(cb_crcChanged), &romcheat->crc1);
 
-    gtk_box_pack_start(GTK_BOX(hbox), textbox, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), textbox, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 5, 5);
 
     // CRC2 textbox
     textbox = gtk_entry_new();
@@ -442,9 +434,9 @@ static GtkWidget *edit_rom_info_widget(rom_cheats_t *romcheat, GtkTreeSelection 
     // connect signal such that as the user changes the CRC value in the textbox, it's updated in the rom_cheats_t struct
     g_signal_connect(textbox, "changed", G_CALLBACK(cb_crcChanged), &romcheat->crc2);
 
-    gtk_box_pack_start(GTK_BOX(hbox), textbox, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), textbox, 2, 3, 1, 2, GTK_FILL, GTK_FILL, 5, 5);
 
-    return vbox;
+    return table;
 }
 
 // Updates tree model and cheat_t structure with new cheat name
@@ -591,49 +583,46 @@ static GtkWidget *edit_cheat_widget(cheat_t *cheat, GtkTreeSelection *selection)
 {
     int i;
 
-    GtkWidget *hbox, *vbox, *vbox2;
+    GtkWidget *table;
+    GtkWidget *hbox, *vbox;
     GtkWidget *label;
     GtkWidget *textbox;
     GtkWidget *button;
     GtkWidget *code_treeview;
     GtkWidget *viewport;
 
-    vbox = gtk_vbox_new(FALSE, 0);
+    table = gtk_table_new(5, 2, FALSE);
 
     // Cheat name
-    hbox = gtk_hbox_new(FALSE, 10);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-
     label = gtk_label_new(tr("Name:"));
-    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 5);
 
     textbox = gtk_entry_new();
-    gtk_editable_delete_text(GTK_EDITABLE(textbox), 0, -1);
     if(cheat->name)
         gtk_editable_insert_text(GTK_EDITABLE(textbox), cheat->name, strlen(cheat->name), &i);
 
     // connect signal such that as the user changes the cheat name in the textbox, it's updated in the model
     g_signal_connect(textbox, "changed", G_CALLBACK(cb_cheatNameChanged), selection);
-    gtk_box_pack_start(GTK_BOX(hbox), textbox, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), textbox, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 5, 5);
 
     // Cheat enable
     button = gtk_radio_button_new_with_label(NULL, tr("Disabled"));
     g_signal_connect(button, "toggled", G_CALLBACK(cb_cheatDisabled), cheat);
-    gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), button, 1, 2, 1, 2, GTK_FILL, GTK_FILL, 5, 0);
 
     button = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(button), tr("Enabled (This session only)"));
     g_signal_connect(button, "toggled", G_CALLBACK(cb_cheatEnabled), cheat);
     if(cheat->enabled) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-    gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), button, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 5, 0);
 
     button = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(button), tr("Enabled (Always)"));
     g_signal_connect(button, "toggled", G_CALLBACK(cb_cheatEnabledAlways), cheat);
     if(cheat->always_enabled) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-    gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
+    gtk_table_attach(GTK_TABLE(table), button, 1, 2, 3, 4, GTK_FILL, GTK_FILL, 5, 0);
 
     // create tree view of cheat codes (address/value pairs)
     hbox = gtk_hbox_new(FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 10);
+    gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 4, 5, GTK_FILL, GTK_FILL, 5, 5);
 
     viewport = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(viewport),
@@ -646,20 +635,20 @@ static GtkWidget *edit_cheat_widget(cheat_t *cheat, GtkTreeSelection *selection)
     gtk_container_add(GTK_CONTAINER(viewport), code_treeview);
 
     // create column of add/remove buttons next to cheat codes
-    vbox2 = gtk_vbox_new(FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(hbox), vbox2, FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 0);
 
     // add cheat code button
     button = gtk_button_new_from_stock(GTK_STOCK_ADD);
     g_signal_connect(button, "clicked", G_CALLBACK(cb_addCode), code_treeview);
-    gtk_box_pack_start(GTK_BOX(vbox2), button, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
 
     // remove cheat code button
     button = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
     g_signal_connect(button, "clicked", G_CALLBACK(cb_removeCode), code_treeview);
-    gtk_box_pack_start(GTK_BOX(vbox2), button, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 5);
 
-    return vbox;
+    return table;
 }
 
 // Update contents of the detail frame with the details of the selected rom or cheat
@@ -734,7 +723,7 @@ void cb_cheatDialog(GtkWidget *widget)
     GtkTreeSelection *selection;
 
     // Create Dialog Window
-    dialog = gtk_dialog_new_with_buttons(tr("Add/Edit Cheats"),
+    dialog = gtk_dialog_new_with_buttons(tr("Configure Cheats"),
                                          GTK_WINDOW(g_MainWindow.window),
                                          GTK_DIALOG_DESTROY_WITH_PARENT,
                                          GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
