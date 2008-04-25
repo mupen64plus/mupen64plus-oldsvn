@@ -36,7 +36,6 @@
 #include <glib.h>
 
 #include "debugger.h"
-#include "decoder.h"
 
 #include "ui_clist_edit.h"
 
@@ -47,6 +46,7 @@ GtkWidget *winBreakpoints;
 
 void init_breakpoints();
 int add_breakpoint( uint32 address );
-int check_breakpoints( uint32 address );
+//int check_breakpoints( uint32 address );
+void update_breakpoints();
 
 #endif  // BREAKPOINTS_H

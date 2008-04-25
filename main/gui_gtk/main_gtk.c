@@ -1267,6 +1267,7 @@ static int create_menuBar( void )
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(debuggerMenuItem), debuggerMenu );
     debuggerEnableItem = gtk_check_menu_item_new_with_mnemonic(tr("_Enable"));
     gtk_menu_append( GTK_MENU(debuggerMenu), debuggerEnableItem );
+    gtk_check_menu_item_set_active( GTK_MENU(debuggerEnableItem), g_DebuggerEnabled );
 
     gtk_signal_connect( GTK_OBJECT(debuggerEnableItem), "toggled", GTK_SIGNAL_FUNC(callback_debuggerEnableToggled), (gpointer)NULL );
 #endif // DBG

@@ -26,7 +26,7 @@
  *
 **/
 
-#include <glib.h>
+//#include <glib.h>
 #include "debugger.h"
 
 // State of the Emulation Thread:
@@ -61,6 +61,7 @@ void update_debugger()
 // Update debugger state and display.
 // Should be called after each R4300 instruction.
 {
+
     if(run==2) {
         if( check_breakpoints(PC->addr)==-1 ) {
             previousPC = PC->addr;
@@ -69,8 +70,11 @@ void update_debugger()
         else {
             run = 0;
             switch_button_to_run();
-            gdk_beep();
         }
+    }
+    else if ( previousPC == PC->addr )
+    {
+        return;
     }
 
     update_debugger_frontend();

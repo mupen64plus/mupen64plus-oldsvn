@@ -44,16 +44,6 @@
 #include "debugger.h"
 
 
-int desasm_opened;
-
-extern pthread_t thread_n64;
-
-GtkWidget *winDesasm;
-
-void init_desasm();
 int get_instruction( uint32 address, uint32 *ptr_instruction );
-void update_desasm( uint32 focused_address );
-void update_desasm_color( uint32 address );
 
-void switch_button_to_run();
 #endif  // DESASM_H

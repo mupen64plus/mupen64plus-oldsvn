@@ -139,50 +139,6 @@ void init_desasm()
 
 //]=-=-=-=-=-=-=-=-=-=-=[ Mise-a-jour Desassembleur ]=-=-=-=-=-=-=-=-=-=-=[
 
-int get_instruction( uint32 address, uint32 *ptr_instruction )
-// Returns 0 if returned value *ptr_instruction is valid.
-//    (code based on prefetch() in r4300/pure_interpreter.c)
-{
-    uint32 addr;
-
-    addr = address;
-    if ( (addr>=0x80000000) && (addr<0xc0000000) )
-    {
-    //=== Read in Physical Memory Space================/
-        if ((addr>=0xa4000000) && (addr<0xa4001000)){
-            ptr_instruction[0] = SP_DMEM[ (addr&0xFFF)/4 ];
-            return 0;
-        }
-        else if ((addr>=0x80000000) && (addr<0x80800000)){
-            ptr_instruction[0] = rdram[ (addr&0xFFFFFF)/4 ];
-            return 0;
-        }
-        else if ((addr>=0xB0000000) && (addr < 0xB0000000+taille_rom)){
-            //Why code could not be executed directly from ROM? Look at PALadin...;)
-            ptr_instruction[0] = ((unsigned int*)rom)[(addr&0xFFFFFF)/4];
-            return 0;
-        }else {
-                printf("[DASM] error: reading code at 0x%lX.\n", addr );
-            return 1;
-        }
-    } else {
-    //=== Read in Virtual Memory Space (via TLB)=======/
-        uint32 physical_address;
-
-        printf("[DASM] reading at 0x%lX in virtual memory space.\n", addr );
-
-        if (tlb_LUT_r[addr>>12])
-            physical_address = (tlb_LUT_r[addr>>12]&0xFFFFF000)|(addr&0xFFF);
-        else {
-            printf("[DASM] reading at 0x%lX would perturb TLB emulation.\n", addr );
-            return 2;
-        }
-                
-        return get_instruction( physical_address, ptr_instruction );
-    }
-}
-
-
 int add_instr( uint32 address )
 // Add an disassembled instruction to the display
 {
@@ -376,6 +332,7 @@ static void on_click( GtkWidget *clist, GdkEventButton *event )
             enable_breakpoint( break_number );
             gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_BP);
         }
+    update_breakpoints();
     }
 }
 
@@ -386,5 +343,4 @@ static void on_close()
 
 //  What should be happening then? Currently, thread is killed.
     run = 0;            // 0(stop) ou 2(run)
-//    pthread_kill( thread_n64, 1);   // signal: 1(KILL)
 }

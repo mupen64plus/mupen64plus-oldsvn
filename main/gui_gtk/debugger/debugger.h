@@ -40,7 +40,6 @@
 
 #include "breakpoints.h"
 #include "desasm.h"
-#include "decoder.h"
 #include "registers.h"
 #include "regTLB.h"
 

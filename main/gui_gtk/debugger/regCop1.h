@@ -36,7 +36,6 @@
 #include <glib.h>
 
 #include "debugger.h"
-#include "decoder.h"
 
 
 int FGR_opened;

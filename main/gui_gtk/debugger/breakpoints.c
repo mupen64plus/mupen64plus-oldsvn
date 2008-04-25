@@ -36,7 +36,6 @@
 #include "breakpoints.h"
 
 static int selected[BREAKPOINTS_MAX_NUMBER];
-static int nb_breakpoints;
 
 static void on_row_selection(GtkCList *clist, gint row);
 static void on_row_unselection(GtkCList *clist, gint row);
@@ -46,6 +45,7 @@ static void on_close();
 
 static GtkWidget *clBreakpoints;
 
+static GdkColor color_BPEnabled, color_BPDisabled;
 
 //]=-=-=-=-=-=-=-=-=-=-=-=[ Breakpoints Initialisation ]=-=-=-=-=-=-=-=-=-=-=-=[
 
@@ -104,6 +104,14 @@ void init_breakpoints()
     gtk_signal_connect( GTK_OBJECT(buAdd), "clicked", on_add, NULL );
     gtk_signal_connect( GTK_OBJECT(buRemove), "clicked", on_remove, NULL );
     gtk_signal_connect( GTK_OBJECT(winBreakpoints), "destroy", on_close, NULL );
+
+    color_BPEnabled.red=0xFFFF;
+    color_BPEnabled.green=0x7A00;
+    color_BPEnabled.blue=0x7A00;
+
+    color_BPDisabled.red=0x7A00;
+    color_BPDisabled.green=0x7A00;
+    color_BPDisabled.blue=0x7A00;
 }
 
 
@@ -111,49 +119,44 @@ void init_breakpoints()
 
 //]=-=-=-=-=-=-=-=-=-=-=-=[ Update Breakpoints Display ]=-=-=-=-=-=-=-=-=-=-=-=[
 
-void remove_breakpoint_by_row( int row )
+void update_breakpoints( )
 {
-    int i=0;
-    uint32 address;
-    
-    address = (uint32) gtk_clist_get_row_data( GTK_CLIST(clBreakpoints), row);
-    while(g_Breakpoints[i].address!=address)
+    int num_rows=0;
+
+    char line[1][16];
+    line[0][0] = 0;
+
+    gtk_clist_freeze( GTK_CLIST(clBreakpoints) );
+    gtk_clist_clear( GTK_CLIST(clBreakpoints) );
+    int i;
+    for( i=0; i < g_NumBreakpoints; i++)
+	gtk_clist_append( GTK_CLIST(clBreakpoints), line );
+
+    for( i=0; i < g_NumBreakpoints; i++ )
     {
-        i++;
+        sprintf( line, "0x%lX", g_Breakpoints[i].address);
+        gtk_clist_set_text( GTK_CLIST(clBreakpoints), i, 0, line );
+        if(BPT_CHECK_FLAG(g_Breakpoints[i], BPT_FLAG_ENABLED))
+            gtk_clist_set_background( GTK_CLIST(clBreakpoints), i, &color_BPEnabled);
+        else
+            gtk_clist_set_background( GTK_CLIST(clBreakpoints), i, &color_BPDisabled);
     }
-
-    remove_breakpoint_by_num( i );
-
-    gtk_clist_remove( GTK_CLIST(clBreakpoints), row);
+    gtk_clist_thaw( GTK_CLIST(clBreakpoints) );
 }
 
-
-/*int remove_breakpoint_by_address( uint32 address )
+void remove_breakpoint_by_row( int row )
 {
-    int row;
-
-    row = gtk_clist_find_row_from_data( GTK_CLIST(clBreakpoints),(gpointer) address);
-    if( row != -1 ) {
-        remove_breakpoint_by_row( row );
-    }
-    return row;
-}*/
-
-
-/*int check_breakpoints( uint32 address )
-{
-    int i=0;
+    //uint32 address;
     
-    while( i != nb_breakpoints )
-    {
-        if( bp_addresses[i]!=address )
-            i++;
-        else
-            return gtk_clist_find_row_from_data( GTK_CLIST(clBreakpoints),(gpointer) address);
-    }
-    return -1;
-}*/
+    //address = (uint32) gtk_clist_get_row_data( GTK_CLIST(clBreakpoints), row);
+    
+    //int i = lookup_breakpoint( address );
 
+    remove_breakpoint_by_num( row );
+
+    //gtk_clist_remove( GTK_CLIST(clBreakpoints), row);
+    update_breakpoints();
+}
 
 
 //]=-=-=-=-=-=-=[ Les Fonctions de Retour des Signaux (CallBack) ]=-=-=-=-=-=-=[
@@ -180,6 +183,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     }
     printf( "%lX\n", address);
     gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer) address );
+
     g_Breakpoints[g_NumBreakpoints-1].address=address;
     return TRUE;
 }
@@ -200,8 +204,9 @@ static void on_add()
 // TODO:    line[1] = malloc(16*sizeof(char)); // - enabled/disabled
     
     sprintf( line[0], "0x%lX", address);
+
     new_row = gtk_clist_append( GTK_CLIST(clBreakpoints), line );
-    gtk_clist_set_row_data( GTK_CLIST(clBreakpoints), new_row, (gpointer) address );
+    gtk_clist_set_text( GTK_CLIST(clBreakpoints), new_row, 0, (gpointer) address );
 
     clist_edit_by_row(GTK_CLIST(clBreakpoints), new_row, 0, modify_address, NULL);
     //FIXME:color are not updated +everything

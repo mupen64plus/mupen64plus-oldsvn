@@ -887,7 +887,7 @@ static void printUsage(const char *progname)
     printf("Usage: %s [parameter(s)] rom\n"
            "\n"
            "Parameters:\n"
-           "    --nogui         : do not display GUI\n"
+           "    --nogui             : do not display GUI\n"
            "    --fullscreen        : turn fullscreen mode on\n"
            "    --gfx (path)        : use gfx plugin given by (path)\n"
            "    --audio (path)      : use audio plugin given by (path)\n"
@@ -897,7 +897,11 @@ static void printUsage(const char *progname)
            "    --sshotdir (dir)    : set screenshot directory to (dir)\n"
            "    --configdir (dir)   : force config dir (must contain mupen64plus.conf)\n"
            "    --installdir (dir)  : force install dir (place to look for plugins, icons, lang, etc)\n"
-           "    --noask         : don't ask to force load on bad dumps\n"
+           "    --noask             : don't ask to force load on bad dumps\n"
+#ifdef DBG
+           "    --debugger          : start with debugger enabled\n"
+#endif 
+
            "    -h, --help      : see this help message\n"
            "\n", basename(str));
 
@@ -926,6 +930,9 @@ void parseCommandLine(int argc, char **argv)
         OPT_SSHOTDIR,
         OPT_CONFIGDIR,
         OPT_INSTALLDIR,
+#ifdef DBG
+	OPT_DEBUGGER,
+#endif
         OPT_NOASK
     };
     struct option long_options[] =
@@ -941,6 +948,9 @@ void parseCommandLine(int argc, char **argv)
         {"configdir", required_argument, NULL, OPT_CONFIGDIR},
         {"installdir", required_argument, NULL, OPT_INSTALLDIR},
         {"noask", no_argument, NULL, OPT_NOASK},
+#ifdef DBG
+        {"debugger", no_argument, NULL, OPT_DEBUGGER},
+#endif
         {"help", no_argument, NULL, 'h'},
         {0, 0, 0, 0}    // last opt must be empty
     };
@@ -1028,6 +1038,11 @@ void parseCommandLine(int argc, char **argv)
             case OPT_NOASK:
                 g_Noask = g_NoaskParam = TRUE;
                 break;
+#ifdef DBG
+            case OPT_DEBUGGER:
+                g_DebuggerEnabled = TRUE;
+                break;
+#endif
             // print help
             case 'h':
             case '?':

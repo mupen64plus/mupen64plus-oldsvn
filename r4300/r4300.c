@@ -1816,6 +1816,10 @@ void go()
      printf ("R4300 Core mode: Pure Interpreter\n");
      dynacore = 0;
      interpcore = 1;
+#ifdef DBG
+         if (debugger_mode)
+           update_debugger();
+#endif     
      pure_interpreter();
      }
    debug_count+= Count;

@@ -36,7 +36,6 @@
 #include <glib.h>
 
 
-#include "decoder.h"
 #include "regGPR.h"
 #include "regSpecial.h"
 #include "regCop0.h"
@@ -49,8 +48,6 @@
 
 
 int registers_opened;
-
-extern pthread_t thread_n64;
 
 void init_registers();
 void update_registers();
