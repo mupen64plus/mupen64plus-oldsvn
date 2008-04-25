@@ -92,7 +92,7 @@ int         g_NoaskParam = 0;           // was --noask passed at the commandline
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
-            
+int         g_EmulatorRecording = 0;    // are we recording emulation       
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)

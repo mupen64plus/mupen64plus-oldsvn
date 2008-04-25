@@ -30,11 +30,13 @@ extern int *autoinc_save_slot;
 extern int g_Noask;
 extern int g_NoaskParam;
 extern int g_MemHasBeenBSwapped;
+extern int g_EmulatorRecording;
 extern pthread_t g_EmulationThread;
 extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;
 extern char *g_InputPlugin;
 extern char *g_RspPlugin;
+
 
 char *get_configpath(void);
 char *get_installpath(void);
