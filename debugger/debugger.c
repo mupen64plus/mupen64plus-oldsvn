@@ -31,7 +31,10 @@
 
 // State of the Emulation Thread:
 // 0 -> pause, 2 -> run.
-extern int run;
+
+int  g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
+int debugger_mode;
+int run;
 
 
 //]=-=-=-=-=-=-=-=-=-=-=[ Initialisation du Debugger ]=-=-=-=-=-=-=-=-=-=-=-=[
@@ -50,9 +53,18 @@ void init_debugger()
     color_ident.green = 0xFFFF;
     color_ident.blue = 0xFFFF;
 
+    gdk_threads_enter();
     init_registers();
+    gdk_threads_leave();
+
+    gdk_threads_enter();
     init_desasm();
+    gdk_threads_leave();
+
+    gdk_threads_enter();
     init_breakpoints();
+    gdk_threads_leave();
+
     //init_TLBwindow();
 
     pthread_mutex_init( &mutex, NULL);
@@ -94,7 +106,6 @@ void update_debugger()
         gdk_threads_leave();
     }*/
     previousPC = PC->addr;
-
     // Emulation thread is blocked until a button is clicked.
     pthread_cond_wait(&debugger_done_cond, &mutex);
 }

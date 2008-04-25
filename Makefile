@@ -38,6 +38,9 @@ ifeq ($(GUI), NONE)
 else
   ifeq ($(GUI), KDE4)
   CFLAGS += $(KDE_FLAGS)
+    ifeq ($(DBG), 1)
+      CFLAGS += $(GTK_FLAGS)
+    endif
   else
   CFLAGS += $(GTK_FLAGS)
   endif
