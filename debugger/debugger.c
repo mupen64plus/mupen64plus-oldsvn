@@ -36,6 +36,10 @@ int  g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
 int debugger_mode;
 int run;
 
+pthread_cond_t  debugger_done_cond;
+pthread_mutex_t mutex;
+
+uint32 previousPC;
 
 //]=-=-=-=-=-=-=-=-=-=-=[ Initialisation du Debugger ]=-=-=-=-=-=-=-=-=-=-=-=[
 
@@ -44,28 +48,7 @@ void init_debugger()
     debugger_mode = 1;
     run = 0;
 
-//]=-=-=[ Initialisation des Couleurs ]=-=-=[
-    color_modif.red = 0x0000;
-    color_modif.green = 0xA000;
-    color_modif.blue = 0xFFFF;
-
-    color_ident.red = 0xFFFF;
-    color_ident.green = 0xFFFF;
-    color_ident.blue = 0xFFFF;
-
-    gdk_threads_enter();
-    init_registers();
-    gdk_threads_leave();
-
-    gdk_threads_enter();
-    init_desasm();
-    gdk_threads_leave();
-
-    gdk_threads_enter();
-    init_breakpoints();
-    gdk_threads_leave();
-
-    //init_TLBwindow();
+    init_debugger_frontend();
 
     pthread_mutex_init( &mutex, NULL);
     pthread_cond_init( &debugger_done_cond, NULL);
@@ -90,21 +73,8 @@ void update_debugger()
         }
     }
 
-    if(registers_opened) {
-        gdk_threads_enter();
-        update_registers();
-        gdk_threads_leave();
-    }   
-    if(desasm_opened) {
-        gdk_threads_enter();
-        update_desasm( PC->addr );
-        gdk_threads_leave();
-    }
-    /*if(regTLB_opened) {
-        gdk_threads_enter();
-        update_TLBwindow();
-        gdk_threads_leave();
-    }*/
+    update_debugger_frontend();
+
     previousPC = PC->addr;
     // Emulation thread is blocked until a button is clicked.
     pthread_cond_wait(&debugger_done_cond, &mutex);

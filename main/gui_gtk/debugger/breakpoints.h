@@ -1,14 +1,14 @@
-/*
- * debugger/regTLB.h
- * 
- * 
- * Debugger for Mupen64 - davFr
- * Copyright (C) 2002 davFr - robind@esiee.fr
+/**
+ * Mupen64 - breakpoints.h
+ * Copyright (C) 2002 DavFr - robind@esiee.fr
  *
- * Mupen64 is copyrighted (C) 2002 Hacktarux
- * Mupen64 homepage: http://mupen64.emulation64.com
- *         email address: hacktarux@yahoo.fr
+ * If you want to contribute to this part of the project please
+ * contact me (or Hacktarux) first.
  * 
+ * Mupen64 homepage: http://mupen64.emulation64.com
+ * email address: hacktarux@yahoo.fr
+ * 
+ *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
  * cence as published by the Free Software Foundation; either
@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGTLB_H
-#define REGTLB_H
+#ifndef BREAKPOINTS_H
+#define BREAKPOINTS_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,23 +35,19 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
-
 #include "debugger.h"
 #include "decoder.h"
 
-
-int regTLB_opened;
-
-GtkWidget *winTLB, *frTLB;
+#include "ui_clist_edit.h"
 
 
-void init_regTLB();
-void update_regTLB();
+int breakpoints_opened;
 
-void init_TLBwindow();
-void update_TLBwindow();
+GtkWidget *winBreakpoints;
 
-#endif //REGTLB_H
+void init_breakpoints();
+int add_breakpoint( uint32 address );
+int remove_breakpoint_by_address( uint32 address );
+int check_breakpoints( uint32 address );
+
+#endif  // BREAKPOINTS_H

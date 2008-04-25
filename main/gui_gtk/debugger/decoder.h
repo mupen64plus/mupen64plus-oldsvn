@@ -1,6 +1,5 @@
 /*
- * debugger/regPI.h
- * 
+ * debugger/decoder.h
  * 
  * Debugger for Mupen64 - davFr
  * Copyright (C) 2002 davFr - robind@esiee.fr
@@ -26,28 +25,12 @@
  *
 **/
 
-#ifndef REGPI_H
-#define REGPI_H
+ 
+#ifndef DECODER_H
+#define DECODER_H
 
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-#include <gtk/gtk.h>
-#include <glib.h>
+#include <stdio.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
+void decode_op(uint32 instr, char *op, char *args );
 
-#include "debugger.h"
-
-
-
-GtkWidget *frRegPI;
-
-int regPI_opened;
-
-void init_regPI();
-void update_regPI();
-
-#endif //REGPI_H
+#endif //DECODER_H

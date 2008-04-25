@@ -1,5 +1,5 @@
 /*
- * debugger/regCop0.h
+ * debugger/regPI.h
  * 
  * 
  * Debugger for Mupen64 - davFr
@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGCOP0_H
-#define REGCOP0_H
+#ifndef REGPI_H
+#define REGPI_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,19 +35,15 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
-
 #include "debugger.h"
 
 
 
-GtkWidget *frCop0;
+GtkWidget *frRegPI;
 
-int regCop0_opened;
+int regPI_opened;
 
-void init_regCop0();
-void update_regCop0();
+void init_regPI();
+void update_regPI();
 
-#endif //REGCOP0_H
+#endif //REGPI_H

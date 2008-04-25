@@ -1,5 +1,5 @@
 /*
- * debugger/regAI.h
+ * debugger/registers.h
  * 
  * 
  * Debugger for Mupen64 - davFr
@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGAI_H
-#define REGAI_H
+#ifndef REGISTERS_H
+#define REGISTERS_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,19 +35,24 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
 
-#include "debugger.h"
+#include "decoder.h"
+#include "regGPR.h"
+#include "regSpecial.h"
+#include "regCop0.h"
+#include "regCop1.h"
+#include "regAI.h"
+#include "regPI.h"
+#include "regRI.h"
+#include "regSI.h"
+#include "regVI.h"
 
 
+int registers_opened;
 
-GtkWidget *frRegAI;
+extern pthread_t thread_n64;
 
-int regAI_opened;
+void init_registers();
+void update_registers();
 
-void init_regAI();
-void update_regAI();
-
-#endif //REGAI_H
+#endif //REGISTERS_H

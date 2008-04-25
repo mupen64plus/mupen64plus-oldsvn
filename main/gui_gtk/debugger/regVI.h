@@ -35,10 +35,6 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
-
 #include "debugger.h"
 
 

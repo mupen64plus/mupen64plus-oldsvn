@@ -1,5 +1,5 @@
 /*
- * debugger/regRI.h
+ * debugger/regTLB.h
  * 
  * 
  * Debugger for Mupen64 - davFr
@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGRI_H
-#define REGRI_H
+#ifndef REGTLB_H
+#define REGTLB_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,19 +35,19 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
-
 #include "debugger.h"
+#include "decoder.h"
 
 
+int regTLB_opened;
 
-GtkWidget *frRegRI;
+GtkWidget *winTLB, *frTLB;
 
-int regRI_opened;
 
-void init_regRI();
-void update_regRI();
+void init_regTLB();
+void update_regTLB();
 
-#endif //REGRI_H
+void init_TLBwindow();
+void update_TLBwindow();
+
+#endif //REGTLB_H

@@ -1,5 +1,5 @@
 /*
- * debugger/regGPR.h
+ * debugger/desasm.h
  * 
  * 
  * Debugger for Mupen64 - davFr
@@ -26,27 +26,30 @@
  *
 **/
 
-#ifndef REGGPR_H
-#define REGGPR_H
+
+#ifndef DESASM_H
+#define DESASM_H
 
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
 #include <gtk/gtk.h>
-#include <glib.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
+#include <glib.h>
 
 #include "debugger.h"
 
 
-GtkWidget *frGPR;
+int desasm_opened;
 
-int GPR_opened;
+extern pthread_t thread_n64;
 
-void init_GPR();
-void update_GPR();
+GtkWidget *winDesasm;
 
-#endif //REGGPR_H
+void init_desasm();
+int get_instruction( uint32 address, uint32 *ptr_instruction );
+void update_desasm( uint32 focused_address );
+void update_desasm_color( uint32 address );
+
+void switch_button_to_run();
+#endif  // DESASM_H

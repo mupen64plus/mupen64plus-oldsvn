@@ -27,36 +27,29 @@
  *
 **/
 
-#ifndef DEBUGGER_H
-#define DEBUGGER_H
+#ifndef GTK_DEBUGGER_H
+#define GTK_DEBUGGER_H
 
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
+#include <gtk/gtk.h>
+#include <glib.h>
 
-extern int debugger_mode;  // Debugger option enabled.
+#include "../../../debugger/debugger.h"
 
-extern int g_DebuggerEnabled;      // wether the debugger is enabled or not
+#include "breakpoints.h"
+#include "desasm.h"
+#include "decoder.h"
+#include "registers.h"
+#include "regTLB.h"
+
+#define DEBUGGER_VERSION "0.0.2 - WIP2"
 
 
+extern GdkColor    color_modif,    // Color of modified register.
+                   color_ident;    // Unchanged register.
 
-// State of the Emulation Thread:
-//  0 -> pause, 1 -> step, 2 -> run.
-extern int run;
+extern GtkWidget   *winRegisters;
 
-extern uint32 previousPC;
-
-void init_debugger();
-void update_debugger();
-
-extern void init_debugger_frontend();
-extern void update_debugger_frontend();
-
-extern pthread_cond_t  debugger_done_cond;
-extern pthread_mutex_t mutex;
-
-#endif //DEBUGGER_H
+#endif //GTK_DEBUGGER_H

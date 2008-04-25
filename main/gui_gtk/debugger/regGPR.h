@@ -1,5 +1,5 @@
 /*
- * debugger/regSpecial.h
+ * debugger/regGPR.h
  * 
  * 
  * Debugger for Mupen64 - davFr
@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGSPECIAL_H
-#define REGSPECIAL_H
+#ifndef REGGPR_H
+#define REGGPR_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,19 +35,14 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
-
 #include "debugger.h"
-#include "decoder.h"
 
 
-int regSpecial_opened;
+GtkWidget *frGPR;
 
-GtkWidget   *frRegSpecial;
+int GPR_opened;
 
-void init_regSpecial();
-void update_regSpecial();
+void init_GPR();
+void update_GPR();
 
-#endif //REGSPECIAL_H
+#endif //REGGPR_H

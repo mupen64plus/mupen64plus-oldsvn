@@ -147,22 +147,25 @@ OBJ_KDE_GUI = \
 	main/gui_kde4/rommodel.o
 
 OBJ_DBG = \
-        debugger/debugger.o \
-		debugger/breakpoints.o \
-		debugger/desasm.o \
-		debugger/decoder.o \
-		debugger/registers.o \
-		debugger/regGPR.o \
-		debugger/regCop0.o \
-		debugger/regSpecial.o \
-		debugger/regCop1.o \
-		debugger/regAI.o \
-		debugger/regPI.o \
-		debugger/regRI.o \
-		debugger/regSI.o \
-		debugger/regVI.o \
-		debugger/regTLB.o \
-		debugger/ui_clist_edit.o
+        debugger/debugger.o 
+
+OBJ_GTK_DBG_GUI = \
+	main/gui_gtk/debugger/debugger.o \
+	main/gui_gtk/debugger/breakpoints.o \
+	main/gui_gtk/debugger/desasm.o \
+	main/gui_gtk/debugger/decoder.o \
+	main/gui_gtk/debugger/registers.o \
+	main/gui_gtk/debugger/regGPR.o \
+	main/gui_gtk/debugger/regCop0.o \
+	main/gui_gtk/debugger/regSpecial.o \
+	main/gui_gtk/debugger/regCop1.o \
+	main/gui_gtk/debugger/regAI.o \
+	main/gui_gtk/debugger/regPI.o \
+	main/gui_gtk/debugger/regRI.o \
+	main/gui_gtk/debugger/regSI.o \
+	main/gui_gtk/debugger/regVI.o \
+	main/gui_gtk/debugger/regTLB.o \
+	main/gui_gtk/debugger/ui_clist_edit.o
 
 PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
@@ -183,9 +186,8 @@ OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
-ifeq ($(DBG), 1)
+ifeq ($(DBGSYM), 1)
   ALL += mupen64plus_dbg
-  OBJECTS += $(OBJ_DBG)
 endif
 ifeq ($(VCR), 1)
   OBJECTS += $(OBJ_VCR)
@@ -203,6 +205,9 @@ else
     OBJECTS += $(OBJ_GTK_GUI)
     LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
   endif
+endif
+ifeq ($(DBG), 1)
+  OBJECTS += $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
 endif
 
 # build targets
@@ -239,7 +244,7 @@ mupen64plus: $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 	$(STRIP) $@
 
-mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
+mupen64plus_dbg: $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 
 install:
