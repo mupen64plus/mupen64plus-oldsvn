@@ -55,6 +55,12 @@ void savestates_select_slot(unsigned int s)
    slot = s;
 }
 
+// returns the currently selected save slot
+unsigned int savestates_get_slot(void)
+{
+   return slot;
+}
+
 void savestates_select_filename(const char *fn)
 {
    slot += 10;

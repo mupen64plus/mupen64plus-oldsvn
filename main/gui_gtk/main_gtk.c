@@ -578,15 +578,34 @@ static void callback_Load( GtkWidget *widget, gpointer data )
     }
 }
 
-/** Slot **/
-static void callback_Default( GtkWidget *widget, gpointer data )
+// user changed savestate slot
+static void cb_SaveSlotSelected(GtkMenuItem *item, int slot)
 {
-    savestates_select_slot( 0 );
+    // if menu item is active, set save slot
+    if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
+        savestates_select_slot(slot);
 }
 
-static void callback_slot( GtkObject *data )
+// user opened save slot menu. Make sure current save slot is selected.
+static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
 {
-    savestates_select_slot( (long) data );
+    unsigned int i, slot;
+    GtkWidget *slotItem = GTK_WIDGET(g_slist_nth_data(slots, savestates_get_slot()));
+
+
+    for(i=0; i<g_slist_length(slots); i++)
+    {
+        GtkWidget *slotItem = GTK_WIDGET(g_slist_nth_data(slots, i));
+        slot = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(slotItem), "slot_num"));
+
+        // if this menu item represents the current selected save slot, make sure it's selected
+        if(slot == savestates_get_slot())
+        {
+            if(!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(slotItem)))
+                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(slotItem), TRUE);
+            break;
+        }
+    }
 }
 
 /** configuration **/
@@ -961,8 +980,7 @@ static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, g
 * gui creation
 */
 // static widgets to change their state from emulation thread
-static GtkWidget       *slotDefaultItem;
-static GtkWidget       *slotItem[9];
+static GtkWidget       *slotItem;
 
 // menuBar
 static int create_menuBar( void )
@@ -1005,8 +1023,6 @@ static int create_menuBar( void )
     GtkWidget   *emulationSlotItem;
     GtkWidget   *emulationSlotMenu;
 
-    GtkWidget   *slotSeparator;
-
     GtkWidget   *optionsConfigureItem;
     GtkWidget   *optionsSeparator1;
     GtkWidget   *optionsVideoItem;
@@ -1039,7 +1055,6 @@ static int create_menuBar( void )
     GtkAccelGroup *accelGroup;
 
     GSList *group = NULL;
-    GSList *slot_group = NULL;
     list_t langList;
     list_node_t *node;
     char *language;
@@ -1145,7 +1160,7 @@ static int create_menuBar( void )
                                GDK_F7, 0, GTK_ACCEL_VISIBLE);
     emulationLoadItem = gtk_menu_item_new_with_mnemonic(tr("Load State"));
     emulationSeparator2 = gtk_menu_item_new();
-    emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("Current save state"));
+    emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("Current save slot"));
 
     gtk_menu_append( GTK_MENU(emulationMenu), emulationStartItem );
     gtk_menu_append( GTK_MENU(emulationMenu), emulationPauseContinueItem );
@@ -1158,38 +1173,36 @@ static int create_menuBar( void )
     gtk_menu_append( GTK_MENU(emulationMenu), emulationSeparator2 );
     gtk_menu_append( GTK_MENU(emulationMenu), emulationSlotItem);
 
-    gtk_signal_connect_object( GTK_OBJECT(emulationStartItem), "activate", GTK_SIGNAL_FUNC(callback_startEmulation), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(emulationPauseContinueItem), "activate", GTK_SIGNAL_FUNC(callback_pauseContinueEmulation), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(emulationStopItem), "activate", GTK_SIGNAL_FUNC(callback_stopEmulation), (gpointer)NULL );
+    g_signal_connect(emulationStartItem, "activate", G_CALLBACK(callback_startEmulation), NULL );
+    g_signal_connect(emulationPauseContinueItem, "activate", G_CALLBACK(callback_pauseContinueEmulation), NULL );
+    g_signal_connect(emulationStopItem, "activate", G_CALLBACK(callback_stopEmulation), NULL );
 
-    gtk_signal_connect_object( GTK_OBJECT(emulationSaveItem), "activate", GTK_SIGNAL_FUNC(callback_Save), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(emulationSaveAsItem), "activate", GTK_SIGNAL_FUNC(callback_SaveAs), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(emulationRestoreItem), "activate", GTK_SIGNAL_FUNC(callback_Restore), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(emulationLoadItem), "activate", GTK_SIGNAL_FUNC(callback_Load), (gpointer)NULL );
+    g_signal_connect(emulationSaveItem, "activate", G_CALLBACK(callback_Save), NULL );
+    g_signal_connect(emulationSaveAsItem, "activate", G_CALLBACK(callback_SaveAs), NULL );
+    g_signal_connect(emulationRestoreItem, "activate", G_CALLBACK(callback_Restore), NULL );
+    g_signal_connect(emulationLoadItem, "activate", G_CALLBACK(callback_Load), NULL );
 
     // slot menu
     emulationSlotMenu = gtk_menu_new();
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(emulationSlotItem), emulationSlotMenu );
-    slotDefaultItem = gtk_radio_menu_item_new_with_label( slot_group, tr("Default") );
-    slot_group = gtk_radio_menu_item_group( GTK_RADIO_MENU_ITEM(slotDefaultItem) );
-    slotSeparator = gtk_menu_item_new();
-    for (i = 0; i < 9; i++)
+    slotItem = NULL;
+    for (i = 0; i < 10; i++)
     {
-        snprintf( buffer, 1000, tr( "Slot %d" ), i+1 );
-        slotItem[i] = gtk_radio_menu_item_new_with_label( slot_group, buffer );
-        slot_group = gtk_radio_menu_item_group( GTK_RADIO_MENU_ITEM(slotItem[i]) );
+        snprintf(buffer, 1000, tr("Slot _%d"), i);
+
+        if(slotItem)
+            slotItem = gtk_radio_menu_item_new_with_mnemonic_from_widget(GTK_RADIO_MENU_ITEM(slotItem), buffer);
+        else
+            slotItem = gtk_radio_menu_item_new_with_mnemonic(NULL, buffer);
+
+        g_object_set_data(G_OBJECT(slotItem), "slot_num", GUINT_TO_POINTER(i));
+        gtk_menu_append(GTK_MENU(emulationSlotMenu), slotItem);
+        g_signal_connect(slotItem, "activate", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(i));
     }
 
-    gtk_menu_append( GTK_MENU(emulationSlotMenu), slotDefaultItem );
-    gtk_menu_append( GTK_MENU(emulationSlotMenu), slotSeparator );
-    for (i = 0; i < 9; i++)
-        gtk_menu_append( GTK_MENU(emulationSlotMenu), slotItem[i] );
-
-    gtk_signal_connect_object( GTK_OBJECT(slotDefaultItem), "activate", GTK_SIGNAL_FUNC(callback_Default), (gpointer)NULL );
-
-    for (i = 0; i < 9; i++)
-        gtk_signal_connect_object( GTK_OBJECT(slotItem[i]), "activate",
-                       GTK_SIGNAL_FUNC(callback_slot), (gpointer) (long) i );
+    // set callback so selected save state slot is updated in the menu everytime it's opened
+    g_signal_connect(emulationSlotItem, "activate", G_CALLBACK(cb_UpdateSelectedSlot),
+                     gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(slotItem)));
 
     // options menu
     optionsMenu = gtk_menu_new();
