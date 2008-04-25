@@ -23,3 +23,43 @@
 **/
 
 
+// Rename to input_handler.c
+
+#include "plugin.h"
+#include "rom.h"
+#include "savestates.h"
+#include "main.h"
+#include "inputrecording.h"
+#include "../memory/memory.h"
+
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <zlib.h>
+
+int l_CurrentSample = 0;
+int l_CurrentVI = 0;
+
+void _NewVI()
+{
+	l_CurrentVI++;
+	// What other functions do we need to hook?
+}
+
+void _GetKeys( int Control, BUTTONS *Keys )
+{
+	// Since we handle input here now, we always want to start with getKeys.
+    getKeys(Control, &Keys);
+    
+    if (g_EmulatorPlayback)
+    {
+        // read keys from file.
+    }
+    
+    if (g_EmulatorRecording)
+    {
+        // record keys
+    }
+}  

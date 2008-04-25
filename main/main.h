@@ -31,6 +31,7 @@ extern int g_Noask;
 extern int g_NoaskParam;
 extern int g_MemHasBeenBSwapped;
 extern int g_EmulatorRecording;
+extern int g_EmulatorPlayback;
 extern pthread_t g_EmulationThread;
 extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;

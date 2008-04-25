@@ -22,4 +22,29 @@
  *
 **/
 
+void _GetKeys( int Control, BUTTONS *Keys );
 
+typedef struct {
+	char signature[4];
+    unsigned int version_number;
+    int movie_uid;
+    unsigned int total_vi;
+    unsigned int rerecord_count;
+    char fps;
+    char controllers;
+    short reserved1;
+    unsigned int start_type;
+    short reserved2;
+    unsigned int controller_flags;
+    char reserved3[160];
+    char rom_name[32];
+    unsigned int rom_crc;
+    short rom_cc;
+    char reserved4[56];
+    char video_plugin[64];
+    char sound_plugin[64];
+    char input_plugin[64];
+    char rsp_plugin[64];
+    char utf_authorname[222];
+    char utf_moviedesc[256];  
+} m64_header;
