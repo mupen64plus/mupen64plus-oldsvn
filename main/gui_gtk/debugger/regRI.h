@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGRI_H
-#define REGRI_H
+#ifndef GUIGTK_REGRI_H
+#define GUIGTK_REGRI_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ int regRI_opened;
 void init_regRI();
 void update_regRI();
 
-#endif //REGRI_H
+#endif //GUIGTK_REGRI_H

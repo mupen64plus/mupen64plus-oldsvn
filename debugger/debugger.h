@@ -38,6 +38,8 @@
 #include "../r4300/r4300.h"
 #include "../memory/memory.h"
 
+#include "breakpoints.h"
+
 extern int debugger_mode;  // Debugger option enabled.
 
 extern int g_DebuggerEnabled;      // wether the debugger is enabled or not

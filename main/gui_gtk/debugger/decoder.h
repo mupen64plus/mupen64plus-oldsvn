@@ -26,11 +26,11 @@
 **/
 
  
-#ifndef DECODER_H
-#define DECODER_H
+#ifndef GUIGTK_DECODER_H
+#define GUIGTK_DECODER_H
 
 #include <stdio.h>
 
 void decode_op(uint32 instr, char *op, char *args );
 
-#endif //DECODER_H
+#endif //GUIGTK_DECODER_H

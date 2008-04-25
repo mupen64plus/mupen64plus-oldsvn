@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGGPR_H
-#define REGGPR_H
+#ifndef GUIGTK_REGGPR_H
+#define GUIGTK_REGGPR_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -45,4 +45,4 @@ int GPR_opened;
 void init_GPR();
 void update_GPR();
 
-#endif //REGGPR_H
+#endif //GUIGTK_REGGPR_H

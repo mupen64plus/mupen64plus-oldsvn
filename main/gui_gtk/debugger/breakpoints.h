@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef BREAKPOINTS_H
-#define BREAKPOINTS_H
+#ifndef GUIGTK_BREAKPOINTS_H
+#define GUIGTK_BREAKPOINTS_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -47,7 +47,6 @@ GtkWidget *winBreakpoints;
 
 void init_breakpoints();
 int add_breakpoint( uint32 address );
-int remove_breakpoint_by_address( uint32 address );
 int check_breakpoints( uint32 address );
 
 #endif  // BREAKPOINTS_H

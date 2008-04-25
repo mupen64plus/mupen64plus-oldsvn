@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGAI_H
-#define REGAI_H
+#ifndef GUIGTK_REGAI_H
+#define GUIGTK_REGAI_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ int regAI_opened;
 void init_regAI();
 void update_regAI();
 
-#endif //REGAI_H
+#endif //GUIGTK_REGAI_H

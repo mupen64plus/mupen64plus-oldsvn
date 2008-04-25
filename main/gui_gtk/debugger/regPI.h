@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGPI_H
-#define REGPI_H
+#ifndef GUIGTK_REGPI_H
+#define GUIGTK_REGPI_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ int regPI_opened;
 void init_regPI();
 void update_regPI();
 
-#endif //REGPI_H
+#endif //GUIGTK_REGPI_H

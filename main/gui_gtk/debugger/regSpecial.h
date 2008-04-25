@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGSPECIAL_H
-#define REGSPECIAL_H
+#ifndef GUIGTK_REGSPECIAL_H
+#define GUIGTK_REGSPECIAL_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ GtkWidget   *frRegSpecial;
 void init_regSpecial();
 void update_regSpecial();
 
-#endif //REGSPECIAL_H
+#endif //GUIGTK_REGSPECIAL_H

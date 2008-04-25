@@ -27,8 +27,8 @@
 **/
 
 
-#ifndef DESASM_H
-#define DESASM_H
+#ifndef GUIGTK_DESASM_H
+#define GUIGTK_DESASM_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -52,4 +52,4 @@ void update_desasm( uint32 focused_address );
 void update_desasm_color( uint32 address );
 
 void switch_button_to_run();
-#endif  // DESASM_H
+#endif  // GUIGTK_DESASM_H

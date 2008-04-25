@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGCOP1_H
-#define REGCOP1_H
+#ifndef GUIGTK_REGCOP1_H
+#define GUIGTK_REGCOP1_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ GtkWidget   *frFGR;
 void init_FGR();
 void update_FGR();
 
-#endif //REGR4300_H
+#endif //GUIGTK_REGR4300_H

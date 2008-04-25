@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGTLB_H
-#define REGTLB_H
+#ifndef GUIGTK_REGTLB_H
+#define GUIGTK_REGTLB_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -50,4 +50,4 @@ void update_regTLB();
 void init_TLBwindow();
 void update_TLBwindow();
 
-#endif //REGTLB_H
+#endif //GUIGTK_REGTLB_H

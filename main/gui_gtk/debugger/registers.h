@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGISTERS_H
-#define REGISTERS_H
+#ifndef GUIGTK_REGISTERS_H
+#define GUIGTK_REGISTERS_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -55,4 +55,4 @@ extern pthread_t thread_n64;
 void init_registers();
 void update_registers();
 
-#endif //REGISTERS_H
+#endif //GUIGTK_REGISTERS_H

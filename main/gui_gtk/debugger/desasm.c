@@ -354,19 +354,27 @@ static void on_click( GtkWidget *clist, GdkEventButton *event )
     //FIXME: minor corner case - Bad color when clicked row is PC.
     int clicked_row;
     uint32 clicked_address;
+    int break_number;
     
     if(event->type==GDK_2BUTTON_PRESS) {
         gtk_clist_get_selection_info( GTK_CLIST(clist), event->x, event->y, &clicked_row, NULL);
         clicked_address =(uint32) gtk_clist_get_row_data( GTK_CLIST(clist), clicked_row);
         printf( "[DASM] click on row: %d\t address: 0x%lX\n", clicked_row, clicked_address );
 
-        if( check_breakpoints(clicked_address)==-1 ) {
+	break_number = lookup_breakpoint(clicked_address);
+        if( break_number==-1 ) {
             add_breakpoint( clicked_address );
             gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_BP);
         }
-        else {
-            remove_breakpoint_by_address( clicked_address );
+        else if(BPT_CHECK_FLAG(g_Breakpoints[break_number], BPT_FLAG_ENABLED))
+        {
+            disable_breakpoint( break_number );
             gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_normal);
+        }
+        else
+        {
+            enable_breakpoint( break_number );
+            gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_BP);
         }
     }
 }

@@ -32,26 +32,35 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <gtk/gtk.h>
-#include <glib.h>
-
-#include "types.h"
-#include "../r4300/r4300.h"
-#include "../memory/memory.h"
 
 #include "debugger.h"
-#include "decoder.h"
 
-#include "ui_clist_edit.h"
+#define BREAKPOINTS_MAX_NUMBER  128
+
+#define BPT_FLAG_ENABLED        0x01
+#define BPT_FLAG_CONDITIONAL	0x02
+#define BPT_FLAG_COUNTER	0x04
+
+#define BPT_CHECK_FLAG(a, b)  ((a.flags & b) == b)
+#define BPT_SET_FLAG(a, b)    a.flags = (a.flags | b);
+#define BPT_CLEAR_FLAG(a, b)  a.flags = (a.flags & (~b));
+#define BPT_TOGGLE_FLAG(a, b) a.flags = (a.flags ^ b);
+
+typedef struct _breakpoint {
+    uint32 address;
+    uint32 flags;
+    //uint32 condition;  //Placeholder for breakpoint condition
+    } breakpoint;
+
+extern int g_NumBreakpoints;
+extern breakpoint g_Breakpoints[];
 
 
-int breakpoints_opened;
-
-GtkWidget *winBreakpoints;
-
-void init_breakpoints();
 int add_breakpoint( uint32 address );
-int remove_breakpoint_by_address( uint32 address );
+void remove_breakpoint_by_address( uint32 address );
+void enable_breakpoint( int breakpoint );
+void disable_breakpoint( int breakpoint );
 int check_breakpoints( uint32 address );
+int lookup_breakpoint( uint32 address );
 
 #endif  // BREAKPOINTS_H

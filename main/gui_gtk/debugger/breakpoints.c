@@ -35,9 +35,6 @@
 
 #include "breakpoints.h"
 
-#define BREAKPOINTS_MAX_NUMBER  128
-
-static uint32 bp_addresses[BREAKPOINTS_MAX_NUMBER];
 static int selected[BREAKPOINTS_MAX_NUMBER];
 static int nb_breakpoints;
 
@@ -61,9 +58,7 @@ void init_breakpoints()
             *buAdd, *buRemove;
 
     breakpoints_opened = 1;
-    for(i=0; i<BREAKPOINTS_MAX_NUMBER; i++) {
-        bp_addresses[i]=0;
-    }
+
     for(i=0; i<BREAKPOINTS_MAX_NUMBER; i++) {
         selected[i]=0;
     }
@@ -116,49 +111,24 @@ void init_breakpoints()
 
 //]=-=-=-=-=-=-=-=-=-=-=-=[ Update Breakpoints Display ]=-=-=-=-=-=-=-=-=-=-=-=[
 
-int add_breakpoint( uint32 address )
-{
-    if( nb_breakpoints == BREAKPOINTS_MAX_NUMBER ) {
-        printf("BREAKPOINTS_MAX_NUMBER have been reached.\n");
-        return -1;
-    }
-    else {
-        int new_row;    //index of the appended row.
-        char **line;
-        line = malloc(1*sizeof(char*));    // new breakpoint:
-        line[0] = malloc(16*sizeof(char)); // - address
-// TODO:    line[1] = malloc(16*sizeof(char)); // - enabled/disabled
-    
-        sprintf( line[0], "0x%lX", address);
-        new_row = gtk_clist_append( GTK_CLIST(clBreakpoints), line );
-        gtk_clist_set_row_data( GTK_CLIST(clBreakpoints), new_row, (gpointer) address );
-
-        bp_addresses[nb_breakpoints]=address;
-        nb_breakpoints++;
-
-        return new_row;
-    }
-}
-
-
 void remove_breakpoint_by_row( int row )
 {
     int i=0;
     uint32 address;
     
     address = (uint32) gtk_clist_get_row_data( GTK_CLIST(clBreakpoints), row);
-    while(bp_addresses[i]!=address)
+    while(g_Breakpoints[i].address!=address)
     {
         i++;
     }
-    nb_breakpoints--;
-    bp_addresses[i]=bp_addresses[nb_breakpoints];
+
+    remove_breakpoint_by_num( i );
 
     gtk_clist_remove( GTK_CLIST(clBreakpoints), row);
 }
 
 
-int remove_breakpoint_by_address( uint32 address )
+/*int remove_breakpoint_by_address( uint32 address )
 {
     int row;
 
@@ -167,10 +137,10 @@ int remove_breakpoint_by_address( uint32 address )
         remove_breakpoint_by_row( row );
     }
     return row;
-}
+}*/
 
 
-int check_breakpoints( uint32 address )
+/*int check_breakpoints( uint32 address )
 {
     int i=0;
     
@@ -182,7 +152,7 @@ int check_breakpoints( uint32 address )
             return gtk_clist_find_row_from_data( GTK_CLIST(clBreakpoints),(gpointer) address);
     }
     return -1;
-}
+}*/
 
 
 
@@ -210,15 +180,29 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     }
     printf( "%lX\n", address);
     gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer) address );
-    bp_addresses[nb_breakpoints-1]=address;
+    g_Breakpoints[g_NumBreakpoints-1].address=address;
     return TRUE;
 }
 
 static void on_add()
 {
-    int new_row;
+    int new_row;    //index of the appended row.
+    char **line;
+
+    if(add_breakpoint(address) == -1)
+	{
+	//TODO: warn max number of breakpoints reached
+	return;
+	}
+
+    line = malloc(1*sizeof(char*));    // new breakpoint:
+    line[0] = malloc(16*sizeof(char)); // - address
+// TODO:    line[1] = malloc(16*sizeof(char)); // - enabled/disabled
     
-    new_row = add_breakpoint( 0x0 );
+    sprintf( line[0], "0x%lX", address);
+    new_row = gtk_clist_append( GTK_CLIST(clBreakpoints), line );
+    gtk_clist_set_row_data( GTK_CLIST(clBreakpoints), new_row, (gpointer) address );
+
     clist_edit_by_row(GTK_CLIST(clBreakpoints), new_row, 0, modify_address, NULL);
     //FIXME:color are not updated +everything
 }

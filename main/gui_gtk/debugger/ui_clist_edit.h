@@ -10,8 +10,8 @@
  */
 
 
-#ifndef UI_CLIST_EDIT_H
-#define UI_CLIST_EDIT_H
+#ifndef GUIGTK_UI_CLIST_EDIT_H
+#define GUIGTK_UI_CLIST_EDIT_H
 
 
 typedef struct _ClistEditData ClistEditData;

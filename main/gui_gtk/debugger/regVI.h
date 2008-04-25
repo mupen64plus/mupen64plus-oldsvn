@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGVI_H
-#define REGVI_H
+#ifndef GUIGTK_REGVI_H
+#define GUIGTK_REGVI_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ int regVI_opened;
 void init_regVI();
 void update_regVI();
 
-#endif //REGVI_H
+#endif //GUIGTK_REGVI_H

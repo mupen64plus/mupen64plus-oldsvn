@@ -27,8 +27,8 @@
  *
 **/
 
-#ifndef GTK_DEBUGGER_H
-#define GTK_DEBUGGER_H
+#ifndef GUIGTK_DEBUGGER_H
+#define GUIGTK_DEBUGGER_H
 
 #include <stdlib.h>
 #include <string.h>

@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGSI_H
-#define REGSI_H
+#ifndef GUIGTK_REGSI_H
+#define GUIGTK_REGSI_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ int regSI_opened;
 void init_regSI();
 void update_regSI();
 
-#endif //REGSI_H
+#endif //GUIGTK_REGSI_H

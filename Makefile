@@ -147,7 +147,8 @@ OBJ_KDE_GUI = \
 	main/gui_kde4/rommodel.o
 
 OBJ_DBG = \
-        debugger/debugger.o 
+        debugger/debugger.o \
+	debugger/breakpoints.o
 
 OBJ_GTK_DBG_GUI = \
 	main/gui_gtk/debugger/debugger.o \

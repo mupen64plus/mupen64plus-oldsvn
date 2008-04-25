@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef REGCOP0_H
-#define REGCOP0_H
+#ifndef GUIGTK_REGCOP0_H
+#define GUIGTK_REGCOP0_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,4 +46,4 @@ int regCop0_opened;
 void init_regCop0();
 void update_regCop0();
 
-#endif //REGCOP0_H
+#endif //GUIGTK_REGCOP0_H
