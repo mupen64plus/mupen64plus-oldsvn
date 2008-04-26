@@ -497,8 +497,8 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
 
    for(int i=0; i<status.MsgCount; i++)
    {
-       glColor4f(1.0,1.0,1.0,((float)status.MsgTime[i]/60.0));
-       glPrint(*status.BasicFont, 15, 20+i*20, status.MsgQueue[i]);
+       float color[4]= { 1.0,1.0,1.0,((float)status.MsgTime[i]/60.0) };
+       glPrint(*status.BasicFont, 15, 20+i*20, (float*)color, status.MsgQueue[i]);
        status.MsgTime[i]--;
        if(status.MsgTime[i] < 0)
        {
@@ -559,7 +559,7 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
                FinalY = (Viewport[3]/2)-(bounds.H/2)+g_TxtObjects[i].YOffset;
            break;
        }
-       glPrint(*status.BasicFont, FinalX, FinalY, g_TxtObjects[i].Text);
+       glPrint(*status.BasicFont, FinalX, FinalY, g_TxtObjects[i].Color, g_TxtObjects[i].Text);
    }
    glFinish();
    

@@ -49,7 +49,7 @@ struct OGLFT_Boundary
 {
     float W,H;
 };
-void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...);
+void glPrint(const Font &ft_font, float x, float y, float color[4], const char *fmt, ...);
 OGLFT_Boundary PreflightTextSize(const Font &ft_font, const char *fmt, ...);
 
 

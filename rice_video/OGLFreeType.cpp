@@ -23,8 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "OGLFreeType.h"
 
 //OpenGL Headers 
-#include <GL/gl.h>
+#include "stdafx.h"
+#include "glh_genext.h"
 #include <GL/glu.h>
+#include "OGLCombiner.h"
 
 inline int next_p2 ( int a )
 {
@@ -175,7 +177,7 @@ OGLFT_Boundary PreflightTextSize(const Font &ft_font, const char *fmt, ...)
     return size;
 }
 
-void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...)  
+void glPrint(const Font &ft_font, float x, float y, float color[4], const char *fmt, ...)  
 {
     pushProjectionMatrix();					
 	
@@ -216,35 +218,33 @@ void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...)
         lines.push_back(line);
     }
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);	
-    
-    glMatrixMode(GL_MODELVIEW);
+    CRender::g_pRender->m_pColorCombiner->DisableCombiner();
+    glPushClientAttrib(GL_ALL_CLIENT_ATTRIB_BITS);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_EDGE_FLAG_ARRAY);
+    glDisableClientState(GL_INDEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_FOG_COORDINATE_ARRAY_EXT);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
     glDisable(GL_SCISSOR_TEST);
     glDisable(GL_STENCIL_TEST);
-    glDisable(GL_FOG);
-    glDisable(GL_COLOR_LOGIC_OP);
-    glDisable(GL_COLOR_MATERIAL);
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
-    glDisable(GL_POLYGON_OFFSET_FILL);
-    glDisable(GL_FRAGMENT_PROGRAM_ARB);
-    glDisable(GL_TEXTURE_1D);
     glEnable(GL_TEXTURE_2D);
-    glDisable(GL_TEXTURE_3D);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_BLEND);
+    glBlendColorEXT(0,0,0,0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glActiveTextureARB(GL_TEXTURE0_ARB);
+    glEnable(GL_TEXTURE_2D);
     glListBase(font);
+    
+    glColor4fv(color);
 
     float modelview_matrix[16];	
+    glMatrixMode(GL_MODELVIEW);
     glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
     
     for(unsigned int i=0;i<lines.size();i++) 
@@ -259,7 +259,8 @@ void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...)
         glPopMatrix();
     }
 
-    glPopAttrib();		
+    glPopAttrib();
+    glPopClientAttrib();
 
     PopProjectionMatrix();
     OGLCheckErrors();
