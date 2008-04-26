@@ -674,7 +674,7 @@ void UpdateScreenStep2 (void)
 
 FUNC_TYPE(void) NAME_DEFINE(UpdateText) ( TXT_OBJECT * Text, int Count )
 {
-    if(Count > 12) throw std::runtime_error("Too many text objects!");
+    if(Count > 12) fprintf(stderr,"Too many text objects!\n");
     
     memcpy(g_TxtObjects, Text, sizeof(TXT_OBJECT[Count]));
     status.TxtCount = Count;

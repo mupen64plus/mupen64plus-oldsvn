@@ -168,7 +168,7 @@ OGLFT_Boundary PreflightTextSize(const Font &ft_font, const char *fmt, ...)
     size.H = ft_font.h;
     while(*pointer)
     {
-        size.W += w[*pointer];
+        size.W += ft_font.w[*pointer];
         pointer++;
     }
     
