@@ -84,9 +84,6 @@ static void *emulationThread( void *_arg );
 static void sighandler( int signal, siginfo_t *info, void *context ); // signal handler
 
 /** globals **/
-// TODO: Improve the auto-incrementing savestate system.
-int         autoinc_slot = 0;
-int         *autoinc_save_slot = &autoinc_slot;
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
@@ -690,7 +687,7 @@ static int sdl_event_filter( const SDL_Event *event )
             else if(strcmp(event_str, config_get_string("Joy Mapping Load State", "")) == 0)
                 savestates_job |= LOADSTATE;
             else if(strcmp(event_str, config_get_string("Joy Mapping Increment Slot", "")) == 0)
-                ;// TODO: Will add after reviewing statesave slot function (Issue 35)
+                savestates_inc_slot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Screenshot", "")) == 0)
                 screenshot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Mute", "")) == 0)
@@ -1384,8 +1381,7 @@ int main(int argc, char *argv[])
     plugin_scan_installdir();
     plugin_set_configdir(l_ConfigDir);
 
-    /* TODO: autoinc_save_slot acts differently in the gui version than it does in the nogui version. Here, it's a bool, in nogui version, it's a pointer to the current autoinc_slot. Need to research this */
-    *autoinc_save_slot = config_get_bool("AutoIncSaveSlot", FALSE);
+    savestates_set_autoinc_slot(config_get_bool("AutoIncSaveSlot", FALSE));
 
     // if --noask was not specified at the commandline, try config file
     if(!g_NoaskParam)

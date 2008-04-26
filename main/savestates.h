@@ -37,4 +37,7 @@ void savestates_load();
 
 void savestates_select_slot(unsigned int s);
 unsigned int savestates_get_slot(void);
+void savestates_set_autoinc_slot(int b);
+int savestates_get_autoinc_slot(void);
+void savestates_inc_slot(void);
 void savestates_select_filename(const char* fn);

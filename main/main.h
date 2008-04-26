@@ -25,8 +25,6 @@ Email                : blight@Ashitaka
 #endif
 
 /* globals */
-extern int autoinc_slot;
-extern int *autoinc_save_slot;
 extern int g_Noask;
 extern int g_NoaskParam;
 extern int g_MemHasBeenBSwapped;

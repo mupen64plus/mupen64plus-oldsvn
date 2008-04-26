@@ -366,8 +366,8 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
         i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton) );
     config_put_bool( "NoCompiledJump", i );
    
-        autoinc_slot = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton) );
-        config_put_bool( "AutoIncSaveSlot", autoinc_slot );
+        savestates_set_autoinc_slot(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton)));
+        config_put_bool("AutoIncSaveSlot", savestates_get_autoinc_slot());
 
     // if --noask was specified at the commandline, don't modify config
     if(!g_NoaskParam)

@@ -42,11 +42,11 @@
 #include "../r4300/interupt.h"
 
 extern unsigned int interp_addr;
-extern int *autoinc_save_slot;
 
 int savestates_job = 0;
 
 static unsigned int slot = 0;
+static int autoinc_save_slot = 0;
 static char fname[1024];
 
 void savestates_select_slot(unsigned int s)
@@ -59,6 +59,25 @@ void savestates_select_slot(unsigned int s)
 unsigned int savestates_get_slot(void)
 {
    return slot;
+}
+
+// sets save state slot autoincrement on or off
+void savestates_set_autoinc_slot(int b)
+{
+    autoinc_save_slot = b;
+}
+
+// returns save state slot autoincrement on or off
+int savestates_get_autoinc_slot(void)
+{
+    return autoinc_save_slot != 0;
+}
+
+// increment save slot
+void savestates_inc_slot(void)
+{
+    if(++slot == 10)
+        slot = 0;
 }
 
 void savestates_select_filename(const char *fn)
@@ -74,13 +93,8 @@ void savestates_save()
    gzFile f;
    int len, i;
    
-   if (*autoinc_save_slot)
-     {
-    if (++slot == 10)
-      {
-         slot = 0;
-      }
-     }
+   if (autoinc_save_slot)
+       savestates_inc_slot();
    
    if (slot <= 9)
      {
