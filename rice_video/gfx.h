@@ -99,11 +99,21 @@ typedef struct
 
 typedef struct {
     char *Text; /* Text that this object will have when displayed */
-    int Corner; /* One of the eight corners */
+    int Corner; /* One of the 9 corners */
     int XOffset; /* Relative X position */
     int YOffset; /* Relative Y position */
     float Color[4]; /* Red, Green, Blue, Alpha values */
 } TXT_OBJECT;
+/******************************************************************
+   int Corner;
+   0    1    2 |Explanation:
+    \ __|__/   | Corner starts at 0 and rotates clockwise until it
+     |     |   | reaches the other side, then we go to the center.
+   7-|  8  |-3 |
+     |_____|   |Offset always effects the same:
+    /   |   \  | +X = Leftward   +Y = Upward
+   6    5    4 | With no offset, the text will touch the border.
+*******************************************************************/
 
 #define NAME_DEFINE(name)  CALL name
 #define FUNC_TYPE(type) EXPORT type

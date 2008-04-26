@@ -507,7 +507,7 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
    }
    for(int i=0; i<status.TxtCount; i++)
    {
-       OGLFT_Boundary bounds = PreflightTextSize(*status.BasicFont, g_TxtObjects[i]);
+       OGLFT_Boundary bounds = PreflightTextSize(*status.BasicFont, g_TxtObjects[i].Text);
        int FinalX, FinalY;
        int Viewport[4];
        glGetIntegerv(GL_VIEWPORT, Viewport);
@@ -551,6 +551,11 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
            // Middle Left
            case 7:
                FinalX = g_TxtObjects[i].XOffset;
+               FinalY = (Viewport[3]/2)-(bounds.H/2)+g_TxtObjects[i].YOffset;
+           break;
+           // Center
+           case 8:
+               FinalX = (Viewport[2]/2)-(bounds.W/2)+g_TxtObjects[i].XOffset;
                FinalY = (Viewport[3]/2)-(bounds.H/2)+g_TxtObjects[i].YOffset;
            break;
        }
