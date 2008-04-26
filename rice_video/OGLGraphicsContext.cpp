@@ -498,7 +498,7 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
    for(int i=0; i<status.MsgCount; i++)
    {
        float color[4]= { 1.0,1.0,1.0,((float)status.MsgTime[i]/60.0) };
-       glPrint(*status.BasicFont, 15, 20+i*20, (float*)color, status.MsgQueue[i]);
+       glPrint(*status.BasicFont, 15, 20+i*(status.BasicFontSize+(5*(status.BasicFontSize/16))), (float*)color, status.MsgQueue[i]);
        status.MsgTime[i]--;
        if(status.MsgTime[i] < 0)
        {

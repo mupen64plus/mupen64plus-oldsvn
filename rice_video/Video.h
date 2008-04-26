@@ -82,6 +82,7 @@ typedef enum
 typedef struct {
 
     Font    *BasicFont;
+    float   BasicFontSize;
 
     bool    bGameIsRunning;
     uint32  dwTvSystem;

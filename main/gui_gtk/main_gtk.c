@@ -576,7 +576,7 @@ static void callback_Load( GtkWidget *widget, gpointer data )
 /** Slot **/
 static void callback_Default( GtkWidget *widget, gpointer data )
 {
-    //savestates_select_slot( 0 );
+    savestates_select_slot( 0 );
 }
 
 static void callback_slot( GtkObject *data )

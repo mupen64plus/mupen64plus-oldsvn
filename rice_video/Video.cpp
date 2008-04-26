@@ -248,11 +248,12 @@ void StartVideo(void)
         throw 0;
     }
     
-    char *string = (char *)malloc(255);
-    memset(string, 0, 255);
+    char *string = (char *)malloc(256);
+    memset(string, 0, 256);
     strcpy(string, g_ConfigDir);
     strcat(string, "font.ttf");
-    status.BasicFont = new Font(string, 16);
+    status.BasicFontSize = 16.0/(640.0/(double)windowSetting.uDisplayWidth);
+    status.BasicFont = new Font(string, status.BasicFontSize);
     
     g_CritialSection.Unlock();
 }
