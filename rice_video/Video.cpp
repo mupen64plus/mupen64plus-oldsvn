@@ -256,9 +256,8 @@ void StartVideo(void)
     char *string = (char *)malloc(255);
     memset(string, 0, 255);
     strcpy(string, g_ConfigDir);
-    strcat(string, "/font.ttf");
-    basicfont = (Font *)malloc(sizeof(Font));
-    basicfont[0] = Font(string, 16);
+    strcat(string, "font.ttf");
+    basicfont = new Font(string, 16);
     
     g_CritialSection.Unlock();
 }

@@ -34,6 +34,7 @@ OBJECTS = OGLGraphicsContext.o \
 	liblinux/bmp.o \
 	liblinux/BMGImage.o \
 	liblinux/pngrw.o \
+	OGLError.o \
 	OGLRender.o \
 	OGLTexture.o \
 	OGLFragmentShaders.o \

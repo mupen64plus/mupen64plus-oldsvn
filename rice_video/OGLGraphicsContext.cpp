@@ -495,6 +495,13 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
         }
     */
 
+   for(int i=0; i<messagecount; i++)
+   {
+       glPrint(*basicfont, 15, 20, messagequeue[i]);
+       fprintf(stderr, "Message[%i]: %s\n", i, messagequeue[i]);
+   }
+   glFinish();
+   
    SDL_GL_SwapBuffers();
    
    /*if(options.bShowFPS)

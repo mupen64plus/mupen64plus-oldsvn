@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _DLLINTERFACE_H_
 
 #include "OGLFreeType.h"
+
 extern Font *basicfont;
 extern TXT_OBJECT txtobject[12];
 extern char messagequeue[10][255];

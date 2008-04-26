@@ -19,7 +19,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 //Include our header file.
+#include "OGLError.h"
 #include "OGLFreeType.h"
+
+//OpenGL Headers 
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 inline int next_p2 ( int a )
 {
@@ -28,14 +33,13 @@ inline int next_p2 ( int a )
     return rval;
 }
 
-///Create a display list coresponding to the give character.
 void makeDList ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base ) 
 {
     
-    if(FT_Load_Glyph( face, FT_Get_Char_Index( face, ch ), FT_LOAD_DEFAULT )) throw std::runtime_error("FT_Load_Glyph failed");
+    if(FT_Load_Glyph( face, FT_Get_Char_Index( face, ch ), FT_LOAD_DEFAULT )) fprintf(stderr, "FT_Load_Glyph failed");
     
     FT_Glyph glyph;
-    if(FT_Get_Glyph( face->glyph, &glyph )) throw std::runtime_error("FT_Get_Glyph failed");
+    if(FT_Get_Glyph( face->glyph, &glyph )) fprintf(stderr, "FT_Get_Glyph failed");
     
     FT_Glyph_To_Bitmap( &glyph, ft_render_mode_normal, 0, 1 );
     FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
@@ -56,8 +60,6 @@ void makeDList ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base )
         }
     }
 
-
-	//Now we just setup some texture paramaters.
     glBindTexture( GL_TEXTURE_2D, tex_base[ch]);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
@@ -90,6 +92,7 @@ void makeDList ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base )
 
 Font::Font(const char * fname, unsigned int h) 
 {
+    fprintf(stderr, "OGLFreeType: Loading Font %s...\n",fname);
     textures = new GLuint[128];
 
     this->h=h;
@@ -104,7 +107,9 @@ Font::Font(const char * fname, unsigned int h)
     FT_Set_Char_Size( face, h << 6, h << 6, 96, 96);
     
     list_base=glGenLists(128);
+    OGLCheckErrors();
     glGenTextures( 128, textures );
+    OGLCheckErrors();
     
     for(unsigned char i=0;i<128;i++) makeDList(face,i,list_base,textures);
     
@@ -183,23 +188,29 @@ void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...)
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);	
     
-    glColor4f(1,1,1,1);
     glMatrixMode(GL_MODELVIEW);
     glDisable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+    glDisable(GL_SCISSOR_TEST);
+    glDisable(GL_STENCIL_TEST);
     glDisable(GL_FOG);
     glDisable(GL_COLOR_LOGIC_OP);
-    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);
     glDisable(GL_CLIP_PLANE2);
     glDisable(GL_CLIP_PLANE3);
     glDisable(GL_CLIP_PLANE4);
     glDisable(GL_CLIP_PLANE5);
-    glDisable(GL_SCISSOR_TEST);
-    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_POLYGON_OFFSET_FILL);
+    glDisable(GL_FRAGMENT_PROGRAM_ARB);
+    glDisable(GL_TEXTURE_1D);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_3D);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     glListBase(font);
 
@@ -221,5 +232,5 @@ void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...)
     glPopAttrib();		
 
     PopProjectionMatrix();
-    glColor4f(0,0,0,0);
+    OGLCheckErrors();
 }

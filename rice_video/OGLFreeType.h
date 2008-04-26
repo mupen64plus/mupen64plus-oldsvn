@@ -18,6 +18,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifndef __OGLFREETYPE_H__
+#define __OGLFREETYPE_H__
 
 //FreeType Headers
 #include <ft2build.h>
@@ -25,10 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <freetype/ftglyph.h>
 #include <freetype/ftoutln.h>
 #include <freetype/fttrigon.h>
-
-//OpenGL Headers 
-#include <GL/gl.h>
-#include <GL/glu.h>
 
 //Some STL headers
 #include <vector>
@@ -48,17 +46,15 @@ using std::string;
 
 //This holds all of the information related to any
 //freetype font that we want to create.  
-struct Font {
-	float h;			///< Holds the height of the font.
-	GLuint * textures;	///< Holds the texture id's 
-	GLuint list_base;	///< Holds the first display list id
+class Font 
+{
+    public:
+        Font(const char * fname, unsigned int h);
+        ~Font();
 
-	//The init function will create a font of
-	//of the height h from the file fname.
-	Font(const char * fname, unsigned int h);
-
-	//Free all the resources assosiated with the font.
-	~Font();
+        float h;
+        unsigned int *textures;
+        unsigned int list_base;
 };
 
 //The flagship function of the library - this thing will print
@@ -67,3 +63,4 @@ struct Font {
 void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...);
 
 
+#endif
