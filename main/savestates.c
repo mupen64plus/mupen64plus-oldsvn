@@ -51,8 +51,12 @@ static char fname[1024];
 
 void savestates_select_slot(unsigned int s)
 {
-   if (s > 9) return;
+   if (s > 9 || s == slot) return;
    slot = s;
+
+   char msg[255];
+   sprintf(msg,"Save State Slot Selected: %i",s+1);
+   newMessage(msg);
 }
 
 void savestates_select_filename(const char *fn)
@@ -140,6 +144,10 @@ void savestates_save()
    gzwrite(f, buf, len);
    
    gzclose(f);
+
+   char msg[255];
+   sprintf(msg,"Saved State: %i",slot+1);
+   newMessage(msg);
 }
 
 void savestates_load()
@@ -245,4 +253,8 @@ void savestates_load()
      last_addr = interp_addr;
    else
      last_addr = PC->addr;
+
+   char msg[255];
+   sprintf(msg,"Loaded State: %i",slot+1);
+   newMessage(msg);
 }

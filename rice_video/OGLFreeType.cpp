@@ -98,11 +98,11 @@ Font::Font(const char * fname, unsigned int h)
     this->h=h;
     
     FT_Library library;
-    if (FT_Init_FreeType( &library ))  fprintf(stderr,"FT_Init_FreeType failed");
+    if (FT_Init_FreeType( &library ))  fprintf(stderr,"FT_Init_FreeType failed\n");
     
     FT_Face face;
     
-    if (FT_New_Face( library, fname, 0, &face )) fprintf(stderr,"FT_New_Face failed (there is probably a problem with your font file)");
+    if (FT_New_Face( library, fname, 0, &face )) fprintf(stderr,"FT_New_Face failed (there is probably a problem with your font file)\n");
     
     FT_Set_Char_Size( face, h << 6, h << 6, 96, 96);
     
@@ -112,6 +112,11 @@ Font::Font(const char * fname, unsigned int h)
     OGLCheckErrors();
     
     for(unsigned char i=0;i<128;i++) makeDList(face,i,list_base,textures);
+    for(unsigned char i=0;i<128;i++)
+    {
+        if(FT_Load_Glyph( face, FT_Get_Char_Index( face, i ), FT_LOAD_DEFAULT )) fprintf(stderr, "FT_Load_Glyph failed\n");
+        w[i] = face->glyph->advance.x;
+    }
     
     FT_Done_Face(face);
     
@@ -143,6 +148,31 @@ inline void PopProjectionMatrix()
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
     glPopAttrib();
+}
+
+OGLFT_Boundary PreflightTextSize(const Font &ft_font, const char *fmt, ...)
+{
+    OGLFT_Boundary size;
+    char text[256];
+    char *pointer = &text[0];
+    va_list ap;
+
+    if (fmt == NULL) *text=0;
+    else 
+    {
+        va_start(ap, fmt);
+        vsprintf(text, fmt, ap);
+        va_end(ap);
+    }
+
+    size.H = ft_font.h;
+    while(*pointer)
+    {
+        size.W += w[*pointer];
+        pointer++;
+    }
+    
+    return size;
 }
 
 void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...)  

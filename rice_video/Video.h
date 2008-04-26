@@ -22,13 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "OGLFreeType.h"
 
-extern Font *basicfont;
-extern TXT_OBJECT txtobject[12];
-extern char messagequeue[10][255];
-extern int messagetime[10];
-extern int messagecount;
-extern int txtcount;
-
 #include "typedefs.h"
 #include <limits.h> // PATH_MAX
 
@@ -87,6 +80,9 @@ typedef enum
 } CurScissorType;
 
 typedef struct {
+
+    Font    *BasicFont;
+
     bool    bGameIsRunning;
     uint32  dwTvSystem;
     float   fRatio;
@@ -146,6 +142,11 @@ typedef struct {
     char    CPUCoreMsgToDisplay[256];
     bool    CPUCoreMsgIsSet;
 
+    char    MsgQueue[10][255];
+    int     MsgTime[10];
+    int     MsgCount;
+    int     TxtCount;
+
     bool    bAllowLoadFromTMEM;
 
     // Frame buffer simulation related status variables
@@ -165,8 +166,10 @@ typedef struct {
 
 extern PluginStatus status;
 extern char generalText[];
+extern TXT_OBJECT g_TxtObjects[12];
 
 void SetVIScales();
+void DeleteOldestMessage();
 extern void _VIDEO_DisplayTemporaryMessage2(const char *msg, ...);
 extern void _VIDEO_DisplayTemporaryMessage(const char *msg);
 extern void XBOX_Debugger_Log(const char *Message, ...);

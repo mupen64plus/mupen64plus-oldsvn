@@ -1,5 +1,4 @@
 /*
-Copyright (C) 2003 Sven Olsen
 Copyright (C) 2008 nmn
 
 This program is free software; you can redistribute it and/or
@@ -15,42 +14,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
 */
 
-#ifndef __OGLFREETYPE_H__
-#define __OGLFREETYPE_H__
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-#include <ft2build.h>
-#include <freetype/freetype.h>
-#include <freetype/ftglyph.h>
-#include <freetype/ftoutln.h>
-#include <freetype/fttrigon.h>
-
-#include <vector>
-#include <string>
-
-using std::vector;
-using std::string;
-
-class Font 
+bool OGLCheckErrors()
 {
-    public:
-        Font(const char * fname, unsigned int h);
-        ~Font();
+    if(glGetError())
+    {
+        fprintf(stderr,"OpenGL Error: %s\n", gluErrorString(glGetError()));
+        return false;
+    }
+    return true;
+}
 
-        float h;
-        float w[256];
-        unsigned int *textures;
-        unsigned int list_base;
-};
-
-struct OGLFT_Boundary
+void SegFault()
 {
-    float W,H;
-};
-void glPrint(const Font &ft_font, float x, float y, const char *fmt, ...);
-OGLFT_Boundary PreflightTextSize(const Font &ft_font, const char *fmt, ...);
-
-
-#endif
+    int *aBadPointer=0x00000000;
+    *aBadPointer=0;
+}

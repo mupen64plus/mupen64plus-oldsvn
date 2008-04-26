@@ -28,18 +28,13 @@ PluginStatus status;
 char generalText[256];
 
 GFX_INFO g_GraphicsInfo;
+TXT_OBJECT g_TxtObjects[12];
 
 uint32 g_dwRamSize = 0x400000;
 uint32* g_pRDRAMu32 = NULL;
 signed char *g_pRDRAMs8 = NULL;
 unsigned char *g_pRDRAMu8 = NULL;
-Font *basicfont;
 
-TXT_OBJECT txtobject[12];
-char messagequeue[10][255];
-int messagetime[10];
-int messagecount;
-int txtcount;
 
 static char g_ConfigDir[PATH_MAX] = {0};
 
@@ -257,7 +252,7 @@ void StartVideo(void)
     memset(string, 0, 255);
     strcpy(string, g_ConfigDir);
     strcat(string, "font.ttf");
-    basicfont = new Font(string, 16);
+    status.BasicFont = new Font(string, 16);
     
     g_CritialSection.Unlock();
 }
@@ -681,25 +676,26 @@ FUNC_TYPE(void) NAME_DEFINE(UpdateText) ( TXT_OBJECT * Text, int Count )
 {
     if(Count > 12) throw std::runtime_error("Too many text objects!");
     
-    memcpy(txtobject, Text, sizeof(TXT_OBJECT[Count]));
-    txtcount = Count;
+    memcpy(g_TxtObjects, Text, sizeof(TXT_OBJECT[Count]));
+    status.TxtCount = Count;
 }
 
 void DeleteOldestMessage()
 {
     for(int i=0; i<9; i++)
     {
-        strncpy(messagequeue[messagecount], messagequeue[messagecount+1], 255);
+        memcpy(status.MsgQueue[i], status.MsgQueue[i+1], 255);
+        status.MsgTime[i] = status.MsgTime[i+1];
     }
-    memset(messagequeue[9], 0, 255);
+    status.MsgCount--;
 }
 
 FUNC_TYPE(void) NAME_DEFINE(NewMessage) ( char * Text )
 {
-    if(messagecount >= 9) DeleteOldestMessage();
-    messagetime[messagecount] = 120;
-    strncpy(messagequeue[messagecount], Text, 255);
-    messagecount++;
+    if(status.MsgCount >= 9) DeleteOldestMessage();
+    status.MsgTime[status.MsgCount] = 240;
+    strncpy(status.MsgQueue[status.MsgCount], Text, 255);
+    status.MsgCount++;
 }
 
 
