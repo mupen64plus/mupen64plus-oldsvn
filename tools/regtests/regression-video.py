@@ -237,7 +237,7 @@ class RegTester:
                 testrun.start()
                 testrun.join(60.0)
                 if testrun.isAlive():
-                    report += "    Error: Test run '%s' timed out!\n" % exeparms
+                    report += "    Error: Test run timed out after 60 seconds:  '%s'\n" % " ".join(exeparms)
                     os.kill(testrun.pid, 9)
                     testrun.join(10.0)
                 
