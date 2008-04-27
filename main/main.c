@@ -478,10 +478,15 @@ int pauseContinueEmulation(void)
         return 1;
 
     if (rompause)
+    {
         info_message(tr("Emulation continued."));
+        newMessage("Emulation continued.\n");
+    }
     else
+    {
         info_message(tr("Emulation paused."));
-    
+        newMessage("Emulation continued.\n");
+    }
     rompause = !rompause;
     return rompause;
 }
