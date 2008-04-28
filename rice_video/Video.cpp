@@ -28,11 +28,13 @@ PluginStatus status;
 char generalText[256];
 
 GFX_INFO g_GraphicsInfo;
+TXT_OBJECT g_TxtObjects[12];
 
 uint32 g_dwRamSize = 0x400000;
 uint32* g_pRDRAMu32 = NULL;
 signed char *g_pRDRAMs8 = NULL;
 unsigned char *g_pRDRAMu8 = NULL;
+
 
 static char g_ConfigDir[PATH_MAX] = {0};
 
@@ -245,7 +247,14 @@ void StartVideo(void)
         ErrorMsg("Error to start video");
         throw 0;
     }
-
+    
+    char *string = (char *)malloc(256);
+    memset(string, 0, 256);
+    strcpy(string, g_ConfigDir);
+    strcat(string, "font.ttf");
+    status.BasicFontSize = 16.0/(640.0/(double)windowSetting.uDisplayWidth);
+    status.BasicFont = new Font(string, status.BasicFontSize);
+    
     g_CritialSection.Unlock();
 }
 
@@ -664,23 +673,50 @@ void UpdateScreenStep2 (void)
     g_CritialSection.Unlock();
 }
 
+FUNC_TYPE(void) NAME_DEFINE(UpdateText) ( TXT_OBJECT * Text, int Count )
+{
+    if(Count > 12) fprintf(stderr,"Too many text objects!\n");
+    
+    memcpy(g_TxtObjects, Text, sizeof(TXT_OBJECT[Count]));
+    status.TxtCount = Count;
+}
+
+void DeleteOldestMessage()
+{
+    for(int i=0; i<9; i++)
+    {
+        memcpy(status.MsgQueue[i], status.MsgQueue[i+1], 255);
+        status.MsgTime[i] = status.MsgTime[i+1];
+    }
+    status.MsgCount--;
+}
+
+FUNC_TYPE(void) NAME_DEFINE(NewMessage) ( char * Text )
+{
+    if(status.MsgCount >= 9) DeleteOldestMessage();
+    status.MsgTime[status.MsgCount] = 240;
+    strncpy(status.MsgQueue[status.MsgCount], Text, 255);
+    status.MsgCount++;
+}
+
+
 FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void)
 {
-   if(options.bShowFPS)
-     {
-    static unsigned int lastTick=0;
-    static int frames=0;
-    unsigned int nowTick = SDL_GetTicks();
-    frames++;
-    if(lastTick + 5000 <= nowTick)
-      {
-         char caption[200];
-         sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", FILE_VERSION, frames/5.0);
-         SDL_WM_SetCaption(caption, caption);
-         frames = 0;
-         lastTick = nowTick;
-      }
-     }
+    if(options.bShowFPS)
+    {
+        static unsigned int lastTick=0;
+        static int frames=0;
+        unsigned int nowTick = SDL_GetTicks();
+        frames++;
+        if(lastTick + 5000 <= nowTick)
+        {
+            char caption[200];
+            sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", FILE_VERSION, frames/5.0);
+            SDL_WM_SetCaption(caption, caption);
+            frames = 0;
+            lastTick = nowTick;
+        }
+    }
 #ifdef USING_THREAD
     if (videoThread)
     {
@@ -688,8 +724,8 @@ FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void)
         WaitForSingleObject( threadFinished, INFINITE );
     }
 #else
-     UpdateScreenStep2();
-#endif
+    UpdateScreenStep2();
+#endif  
 }
 
 //---------------------------------------------------------------------------------------

@@ -794,6 +794,8 @@ void DLParser_Process(OSTask * pTask)
     }
 
     status.bScreenIsDrawn = true;
+
+
     if( options.bSkipFrame )
     {
         skipframe++;

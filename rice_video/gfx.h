@@ -89,7 +89,6 @@ typedef struct {
     void (*CheckInterrupts)( void );
 } GFX_INFO;
 
-
 typedef struct
 {
     uint32 addr;
@@ -97,8 +96,46 @@ typedef struct
     uint32 size;                // 1 = uint8, 2 = uint16, 4=uint32
 } FrameBufferModifyEntry;
 
+
+typedef struct {
+    char *Text; /* Text that this object will have when displayed */
+    int Corner; /* One of the 9 corners */
+    int XOffset; /* Relative X position */
+    int YOffset; /* Relative Y position */
+    float Color[4]; /* Red, Green, Blue, Alpha values */
+} TXT_OBJECT;
+/******************************************************************
+   int Corner;
+   0    1    2 |Explanation:
+    \ __|__/   | Corner starts at 0 and rotates clockwise until it
+     |     |   | reaches the other side, then we go to the center.
+   7-|  8  |-3 |
+     |_____|   |Offset always effects the same:
+    /   |   \  | +X = Leftward   +Y = Upward
+   6    5    4 | With no offset, the text will touch the border.
+*******************************************************************/
+
 #define NAME_DEFINE(name)  CALL name
 #define FUNC_TYPE(type) EXPORT type
+
+/******************************************************************
+  Function: UpdateText
+  Purpose:  This function should be called every VI to update the
+            on screen display
+  input:    pointer to the array of TXT_OBJECT, counter of 
+            TXT_OBJECT
+  output:   none
+*******************************************************************/
+FUNC_TYPE(void) NAME_DEFINE(UpdateText) ( TXT_OBJECT * Text, int Count );
+
+/******************************************************************
+  Function: NewMessage
+  Purpose:  This function adds a new message to the queue
+  input:    text for the new message
+  output:   none
+*******************************************************************/
+FUNC_TYPE(void) NAME_DEFINE(NewMessage) ( char * Text );
+
 /******************************************************************
   Function: CaptureScreen
   Purpose:  This function dumps the current frame to a file

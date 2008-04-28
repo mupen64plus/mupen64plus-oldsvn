@@ -243,7 +243,26 @@ typedef struct {
                             // CONTROL Controls[4];
 } CONTROL_INFO;
 
+typedef struct {
+    char *Text; /* Text that this object will have when displayed */
+    int Corner; /* One of the 9 corners */
+    int XOffset; /* Relative X position */
+    int YOffset; /* Relative Y position */
+    float Color[4]; /* Red, Green, Blue, Alpha values */
+} TXT_OBJECT;
+/******************************************************************
+   int Corner;
+   0    1    2 |Explanation:
+    \ __|__/   | Corner starts at 0 and rotates clockwise until it
+     |     |   | reaches the other side, then we go to the center.
+   7-|  8  |-3 |
+     |_____|   |Offset always effects the same:
+    /   |   \  | +X = Leftward   +Y = Upward
+   6    5    4 | With no offset, the text will touch the border.
+*******************************************************************/
+
 extern CONTROL Controls[4];
+
 
 extern void (*getDllInfo)(PLUGIN_INFO *PluginInfo);
 extern void (*dllConfig)(HWND hParent);
@@ -263,6 +282,8 @@ extern void (*viStatusChanged)();
 extern void (*viWidthChanged)();
 extern void (*readScreen)(void **dest, int *width, int *height);
 extern void (*captureScreen)(char *dirpath);
+extern void (*updateText)(TXT_OBJECT * text, int count);
+extern void (*newMessage)(char * text);
 
 extern void (*aiDacrateChanged)(int SystemType);
 extern void (*aiLenChanged)();
