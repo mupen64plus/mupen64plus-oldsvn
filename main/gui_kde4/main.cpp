@@ -51,9 +51,9 @@ static KAboutData* aboutData = 0;
 static MainWindow* mainWindow = 0;
 static KApplication* application = 0;
 
-// parses AND REMOVES any gui-specific commandline arguments. This is called
-// before mupen64 parses any of its commandline options.
-void gui_parseArgs(int *argc, char ***argv)
+// Initializes gui subsystem. Also parses AND REMOVES any gui-specific commandline
+// arguments. This is called before mupen64plus parses any of its commandline options.
+void gui_init(int *argc, char ***argv)
 {
     aboutData = new KAboutData(
         "mupen64plus", 0, ki18n("Mupen64Plus"),
