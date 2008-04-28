@@ -385,11 +385,20 @@ pad_button_clicked( int _arg )
             case SDL_JOYAXISMOTION:
                 if( event.jaxis.which == config[cont].device )
                 {
-                    if( event.jaxis.value >= 15000 || event.jaxis.value <= -15000 )
+
+                    if( event.jaxis.value >= 15000 )
                     {
-                        config[cont].axis[axis].axis = event.jaxis.axis;
-                        return;
+                        config[cont].axis[axis].axis_a = event.jaxis.axis;
+                        config[cont].axis[axis].axis_dir_a = 1;
+                        waitevent = 0;
                     }
+                    else if( event.jaxis.value <= -15000 )
+                    {
+                        config[cont].axis[axis].axis_a = event.jaxis.axis;
+                        config[cont].axis[axis].axis_dir_a = -1;
+                        waitevent = 0;
+                    }
+                    
                 }
                 break;
 
@@ -413,11 +422,32 @@ pad_button_clicked( int _arg )
             }
         }
 
-        // read key/button b
-        sprintf( text, "Press a key/button for '%s'",
-                (_arg == X_AXIS) ? "right" : "down" );
-        display_dialog( button_names[_arg], text, "" );
+        display_dialog( button_names[_arg], "Press ESCAPE to continue the", "configuration of this axis...");
 
+ 
+        waitevent = 1;
+        while( waitevent )
+        {
+            if( SDL_WaitEvent( &event ) == 0 )
+            {
+                fprintf( stderr, "["PLUGIN_NAME"]: SDL_WaitEvent(): %s\n", SDL_GetError() );
+                return;
+            }
+
+            switch( event.type )
+            {
+            case SDL_KEYDOWN:
+                if( event.key.keysym.sym == SDLK_ESCAPE )
+                {
+                    waitevent = 0;
+                }
+                break;
+            }
+        }
+       // read key/button b
+        sprintf( text, "a key/button for '%s'",
+                (_arg == X_AXIS) ? "right" : "down" );
+        display_dialog( button_names[_arg], "Move any axis or press", text );        
         waitevent = 1;
         while( waitevent )
         {
@@ -447,7 +477,25 @@ pad_button_clicked( int _arg )
                     waitevent = 0;
                 }
                 break;
+            case SDL_JOYAXISMOTION:
+                if( event.jaxis.which == config[cont].device )
+                {
 
+                    if( event.jaxis.value >= 15000 )
+                    {
+                        config[cont].axis[axis].axis_b = event.jaxis.axis;
+                        config[cont].axis[axis].axis_dir_b = 1;
+                        waitevent = 0;
+                    }
+                    else if( event.jaxis.value <= -15000 )
+                    {
+                        config[cont].axis[axis].axis_b = event.jaxis.axis;
+                        config[cont].axis[axis].axis_dir_b = -1;
+                        waitevent = 0;
+                    }
+                }
+               
+                break;
             case SDL_JOYHATMOTION:
                 if( event.jhat.which == config[cont].device &&
                     (event.jhat.value == SDL_HAT_UP || event.jhat.value == SDL_HAT_DOWN ||
@@ -553,7 +601,7 @@ display_button_map( int button, int x, int y )
     memset(&dstrect,0,sizeof(SDL_Rect));
     memset(&dstrect2,0,sizeof(SDL_Rect));
     const char *key_a, *key_b;
-    char button_a[200], button_b[200], axis[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
+    char button_a[200], button_b[200], axis[200], axis_a[200], axis_b[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
     int a;
 
     // draw the dialog
@@ -595,10 +643,18 @@ display_button_map( int button, int x, int y )
         else
             strcpy( button_b, "None" );
 
-        if( config[cont].axis[a].axis >= 0 )
-            sprintf( axis, "%c Axis", axis_names[config[cont].axis[a].axis] );
+        if( config[cont].axis[a].axis_a >= 0 )
+           sprintf( axis_a, "%c Axis %c", axis_names[config[cont].axis[a].axis_a],
+           (config[cont].axis[a].axis_dir_a > 0) ? '+' : '-' );
         else
-            strcpy( axis, "None" );
+            strcpy( axis_a, "None" );
+            
+        if( config[cont].axis[a].axis_b >= 0 )
+           sprintf( axis_b, "%c Axis %c", axis_names[config[cont].axis[a].axis_b],
+           (config[cont].axis[a].axis_dir_b > 0) ? '+' : '-' );
+        else
+            strcpy( axis_b, "None" );
+
 
         if( config[cont].axis[a].hat >= 0 )
         {
@@ -618,14 +674,16 @@ display_button_map( int button, int x, int y )
             write_text( screen, dstrect2.x + 10, dstrect2.y,      black, gray, "Keys: Up = %s, Down = %s", key_a, key_b );
             write_text( screen, dstrect2.x + 10, dstrect2.y + 20, black, gray, "Buttons: Up = %s, Down = %s", button_a, button_b );
             write_text( screen, dstrect2.x + 10, dstrect2.y + 40, black, gray, "Hat: %s; Up = %s, Down = %s", hat, hat_pos_a, hat_pos_b );
+            write_text( screen, dstrect2.x + 10, dstrect2.y + 60, black, gray, "Axis: Up = %s, Down = %s", axis_a, axis_b );
         }
         else
         {
             write_text( screen, dstrect2.x + 10, dstrect2.y,      black, gray, "Keys: Left = %s, Right = %s", key_a, key_b );
             write_text( screen, dstrect2.x + 10, dstrect2.y + 20, black, gray, "Buttons: Left = %s, Right = %s", button_a, button_b );
             write_text( screen, dstrect2.x + 10, dstrect2.y + 40, black, gray, "Hat: %s; Left = %s, Right = %s", hat, hat_pos_a, hat_pos_b );
+            write_text( screen, dstrect2.x + 10, dstrect2.y + 60, black, gray, "Axis: Left = %s, Right = %s", axis_a, axis_b );
         }
-        write_text( screen, dstrect2.x + 10, dstrect2.y + 60, black, gray, "Axis: %s", axis );
+        
     }
     else
     {
@@ -908,7 +966,10 @@ configure_thread( void *_arg )
                         {
                             int axis = button - Y_AXIS;
 
-                            config[cont].axis[axis].axis = -1;
+                            config[cont].axis[axis].axis_a = -1;
+                            config[cont].axis[axis].axis_dir_a = 0;
+                            config[cont].axis[axis].axis_b = -1;
+                            config[cont].axis[axis].axis_dir_b = 0;
                             config[cont].axis[axis].button_a = -1;
                             config[cont].axis[axis].button_b = -1;
                             config[cont].axis[axis].key_a = SDLK_UNKNOWN;

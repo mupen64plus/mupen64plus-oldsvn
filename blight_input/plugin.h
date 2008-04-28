@@ -83,7 +83,8 @@ typedef struct
 {
     int button_a, button_b;         // up/down or left/right; -1 if not assigned
     SDLKey key_a, key_b;            // up/down or left/right; SDLK_UNKNOWN if not assigned
-    int axis;                       // axis index; -1 if not assigned
+    int axis_a, axis_b;             // axis index; -1 if not assigned
+    int axis_dir_a, axis_dir_b;     // direction (1 = X+, 0, -1 = X-)
     int hat, hat_pos_a, hat_pos_b;  // hat + hat position up/down and left/right; -1 if not assigned
 } SAxisMap;
 

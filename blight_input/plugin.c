@@ -152,7 +152,7 @@ void read_configuration( void )
     FILE *f;
     int cont, plugged, plugin, mouse, i, b, dev;
     char line[200], device[200], key_a[200], key_b[200], button_a[200], button_b[200],
-             axis[200], button[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
+             axis[200], axis_a[200], axis_b[200], button[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
     const char *p;
     char path[PATH_MAX];
 
@@ -175,7 +175,10 @@ void read_configuration( void )
         {
             controller[i].axis[b].button_a = controller[i].axis[b].button_b = -1;
             controller[i].axis[b].key_a = controller[i].axis[b].key_a = SDLK_UNKNOWN;
-            controller[i].axis[b].axis = -1;
+            controller[i].axis[b].axis_a = -1;
+            controller[i].axis[b].axis_dir_a = 1;
+            controller[i].axis[b].axis_b = -1;
+            controller[i].axis[b].axis_dir_b = 1;
             controller[i].axis[b].hat = -1;
             controller[i].axis[b].hat_pos_a = -1;
             controller[i].axis[b].hat_pos_b = -1;
@@ -238,12 +241,12 @@ void read_configuration( void )
             b = get_button_num_by_name( button );
             if( (b == X_AXIS) || (b == Y_AXIS) )
             {
-                num = sscanf( p, "key( %s , %s ); button( %s , %s ); axis( %s ); hat( %s , %s , %s )",
-                    key_a, key_b, button_a, button_b, axis, hat, hat_pos_a, hat_pos_b );
+                num = sscanf( p, "key( %s , %s ); button( %s , %s ); axis( %s , %s ); hat( %s , %s , %s )",
+                    key_a, key_b, button_a, button_b, axis_a, axis_b, hat, hat_pos_a, hat_pos_b );
 
 #ifdef _DEBUG
-                printf( "%s, %d: num = %d, key_a = %s, key_b = %s, button_a = %s, button_b = %s, axis = %s, hat = %s, hat_pos_a = %s, hat_pos_b = %s\n", __FILE__, __LINE__, num,
-                        key_a, key_b, button_a, button_b, axis, hat, hat_pos_a, hat_pos_b );
+                printf( "%s, %d: num = %d, key_a = %s, key_b = %s, button_a = %s, button_b = %s, axis_a = %s, axis_b = %s, hat = %s, hat_pos_a = %s, hat_pos_b = %s\n", __FILE__, __LINE__, num,
+                        key_a, key_b, button_a, button_b, axis_a, axis_b, hat, hat_pos_a, hat_pos_b );
 #endif
                 if( sscanf( key_a, "%d", (int *)&controller[cont].axis[b - Y_AXIS].key_a ) != 1 )
                     controller[cont].axis[b - Y_AXIS].key_a = -1;
@@ -253,8 +256,33 @@ void read_configuration( void )
                     controller[cont].axis[b - Y_AXIS].button_a = -1;
                 if( sscanf( button_b, "%d", &controller[cont].axis[b - Y_AXIS].button_b ) != 1 )
                     controller[cont].axis[b - Y_AXIS].button_b = -1;
-                if( sscanf( axis, "%d", &controller[cont].axis[b - Y_AXIS].axis ) != 1 )
-                    controller[cont].axis[b - Y_AXIS].axis = -1;
+                num = sscanf( axis_a, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_a, (char *)&controller[cont].axis[b - Y_AXIS].axis_dir_a );
+                if( num != 2 )
+                {
+                    controller[cont].axis[b - Y_AXIS].axis_a = -1;
+                    controller[cont].axis[b - Y_AXIS].axis_dir_a = 0;
+                }
+                else
+                {
+                    if( controller[cont].axis[b - Y_AXIS].axis_dir_a == '+' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_a = 1;
+                    if( controller[cont].axis[b - Y_AXIS].axis_dir_a == '-' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_a = -1;
+                }
+              
+                num = sscanf( axis_b, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_b, (char *)&controller[cont].axis[b - Y_AXIS].axis_dir_b );
+                if( num != 2 )
+                {
+                    controller[cont].axis[b - Y_AXIS].axis_b = -1;
+                    controller[cont].axis[b - Y_AXIS].axis_dir_b = 0;
+                }
+                else
+                {
+                    if( controller[cont].axis[b - Y_AXIS].axis_dir_b == '+' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_b = 1;
+                    if( controller[cont].axis[b - Y_AXIS].axis_dir_b == '-' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_b = -1;
+                }
                 if( sscanf( hat, "%d", &controller[cont].axis[b - Y_AXIS].hat ) != 1 )
                     controller[cont].axis[b - Y_AXIS].hat = -1;
                 controller[cont].axis[b - Y_AXIS].hat_pos_a = get_hat_pos_by_name( hat_pos_a );
@@ -315,7 +343,7 @@ write_configuration( void )
     FILE *f;
     int i, b;
     char cKey_a[100], cKey_b[100];
-    char cButton_a[100], cButton_b[100], cAxis[100];
+    char cButton_a[100], cButton_b[100], cAxis[100], cAxis_a[100], cAxis_b[100];
     char cHat[100];
     char cMouse[100];
     char path[PATH_MAX];
@@ -398,18 +426,23 @@ write_configuration( void )
             else
                 strcpy( cButton_b, "None" );
 
-            if( controller[i].axis[b].axis >= 0 )
-                sprintf( cAxis, "%d", controller[i].axis[b].axis );
+            if( controller[i].axis[b].axis_a >= 0 )
+                sprintf( cAxis_a, "%d%c", controller[i].axis[b].axis_a, (controller[i].axis[b].axis_dir_a <= 0) ? '-' : '+' );
             else
-                strcpy( cAxis, "None" );
-
+                strcpy( cAxis_a, "None" );
+                
+            if( controller[i].axis[b].axis_b >= 0 )
+                sprintf( cAxis_b, "%d%c", controller[i].axis[b].axis_b, (controller[i].axis[b].axis_dir_b <= 0) ? '-' : '+' );
+            else
+                strcpy( cAxis_b, "None" );
+           
             if( controller[i].axis[b].hat >= 0 )
                 sprintf( cHat, "%d", controller[i].axis[b].hat );
             else
                 strcpy( cHat, "None" );
 
-            fprintf( f, "%s=key( %s , %s ); button( %s , %s ); axis( %s ); hat( %s , %s , %s )\n", button_names[b+16],
-                        cKey_a, cKey_b, cButton_a, cButton_b, cAxis, cHat, HAT_POS_NAME(controller[i].axis[b].hat_pos_a), HAT_POS_NAME(controller[i].axis[b].hat_pos_b) );
+            fprintf( f, "%s=key( %s , %s ); button( %s , %s ); axis( %s , %s ); hat( %s , %s , %s )\n", button_names[b+16],
+                        cKey_a, cKey_b, cButton_a, cButton_b, cAxis_a, cAxis_b, cHat, HAT_POS_NAME(controller[i].axis[b].hat_pos_a), HAT_POS_NAME(controller[i].axis[b].hat_pos_b) );
         }
         fprintf( f, "\n" );
     }
@@ -828,7 +861,7 @@ void
 GetKeys( int Control, BUTTONS *Keys )
 {
     struct input_event play;
-    int b, axis_val, axis_max_val;
+    int b, axis_val, axis_max_val, axis_val_tmp;
     SDL_Event event;
     Uint8 *keystate = SDL_GetKeyState( NULL );
 
@@ -868,10 +901,65 @@ GetKeys( int Control, BUTTONS *Keys )
             // from the N64 func ref: The 3D Stick data is of type signed char and in
             // the range between 80 and -80. (32768 / 409 = ~80.1)
             axis_val = 0;
-
-            if( controller[Control].axis[b].axis >= 0 )
-                axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis ) / 409;
-
+            axis_val_tmp = 0;
+            
+            
+            if( controller[Control].axis[b].axis_a >= 0 )
+            {
+                axis_val_tmp = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a );
+                // if you push a positive axis... and your directions are flipped...
+                if( (controller[Control].axis[b].axis_dir_a < 0) && (axis_val_tmp <= -6000) )
+                {
+                    if (b == 0)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / 409;
+                    }
+                }
+                else if( (controller[Control].axis[b].axis_dir_a > 0) && (axis_val_tmp >= 6000) )
+                {
+                    if (b == 1)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / 409;
+                    }
+                }
+            }
+            // up and left
+            if( controller[Control].axis[b].axis_b >= 0 )
+            {
+                axis_val_tmp = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b );
+                // if you push a positive axis... and your directions are flipped...
+                if( (controller[Control].axis[b].axis_dir_b < 0) && (axis_val_tmp <= -6000) )
+                {
+                    if (b == 1)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / 409;
+                    }
+                }
+                else if( (controller[Control].axis[b].axis_dir_b > 0) && (axis_val_tmp >= 6000) )
+                {
+                    if (b == 0)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / 409;
+                    }
+                }
+            }
+            
             if( controller[Control].axis[b].hat >= 0 )
             {
                 if( controller[Control].axis[b].hat_pos_a >= 0 )
