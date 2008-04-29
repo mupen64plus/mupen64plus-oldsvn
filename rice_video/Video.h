@@ -78,7 +78,6 @@ typedef enum
 } CurScissorType;
 
 typedef struct {
-
     bool    bGameIsRunning;
     uint32  dwTvSystem;
     float   fRatio;

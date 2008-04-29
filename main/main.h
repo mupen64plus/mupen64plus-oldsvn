@@ -19,8 +19,6 @@ Email                : blight@Ashitaka
 #define __MAIN_H__
 
 #include <pthread.h>
-#include "plugin.h"
-#include "winlnxdefs.h"
 
 #ifndef PATH_MAX
 #  define PATH_MAX 1024

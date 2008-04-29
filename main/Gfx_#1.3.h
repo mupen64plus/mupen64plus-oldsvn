@@ -87,25 +87,6 @@ typedef struct {
 } GFX_INFO;
 
 /******************************************************************
-  Function: UpdateText
-  Purpose:  This function should be called every VI to update the
-            on screen display
-  input:    pointer to the array of TXT_OBJECT, counter of 
-            TXT_OBJECTs
-  output:   none
-*******************************************************************/
-EXPORT void CALL UpdateText ( TXT_OBJECT * Text, int Count );
-
-/******************************************************************
-  Function: NewMessage
-  Purpose:  This function adds a new message to the queue
-  input:    pointer to the array of TXT_OBJECT, counter of 
-            TXT_OBJECTs
-  output:   none
-*******************************************************************/
-EXPORT void CALL NewMessage ( char * Text );
-
-/******************************************************************
   Function: CaptureScreen
   Purpose:  This function dumps the current frame to a file
   input:    pointer to the directory to save the file to
@@ -302,6 +283,21 @@ EXPORT void CALL ReadScreen (void **dest, int *width, int *height);
   output:   none
 *******************************************************************/
 EXPORT void CALL SetConfigDir( char *configDir );
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetRenderingCallback
+  Purpose:  Allows emulator to register a callback function that will
+            be called by the graphics plugin just before the the
+            frame buffers are swapped.
+            This was added as a way for the emulator to draw emulator-
+            specific things to the screen, e.g. On-screen display.
+  input:    pointer to callback function. The function expects
+            to receive the current window width and height.
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int));
 
 #if defined(__cplusplus)
 }

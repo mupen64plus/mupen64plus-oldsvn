@@ -89,6 +89,7 @@ typedef struct {
     void (*CheckInterrupts)( void );
 } GFX_INFO;
 
+
 typedef struct
 {
     uint32 addr;
@@ -96,10 +97,8 @@ typedef struct
     uint32 size;                // 1 = uint8, 2 = uint16, 4=uint32
 } FrameBufferModifyEntry;
 
-
 #define NAME_DEFINE(name)  CALL name
 #define FUNC_TYPE(type) EXPORT type
-
 /******************************************************************
   Function: CaptureScreen
   Purpose:  This function dumps the current frame to a file

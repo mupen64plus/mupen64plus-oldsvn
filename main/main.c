@@ -46,10 +46,11 @@
 #include <getopt.h> // getopt_long
 #include <libgen.h> // basename, dirname
 
-#include "winlnxdefs.h"
 #include "main.h"
 #include "version.h"
+#include "winlnxdefs.h"
 #include "config.h"
+#include "plugin.h"
 #include "rom.h"
 #include "mupenIniApi.h"
 #include "../r4300/r4300.h"
@@ -113,8 +114,6 @@ static char g_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified a
 static char *g_Filename = NULL;         // filename to load & run at startup (if given at command line)
 static int  g_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int  g_FrameAdvance = 0;         // variable to check if we pause on next frame
-
-
 /*********************************************************************************************************
 * exported gui funcs
 */
