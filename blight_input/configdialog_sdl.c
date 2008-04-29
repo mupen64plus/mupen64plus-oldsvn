@@ -359,7 +359,6 @@ pad_button_clicked( int _arg )
 
     if( _arg == Y_AXIS || _arg == X_AXIS )
     {
-
         // read key/button a
         sprintf( text, "a key/button for '%s'",
                 (_arg == X_AXIS) ? "left" : "up" );
@@ -431,33 +430,23 @@ pad_button_clicked( int _arg )
 
         if(usesaxisforconf)
         {
-            sprintf( text, "%i", axisused);
-            display_dialog( button_names[_arg], "Waiting for Axis to return", text );
-            SDL_Delay(500);
-        }
-        waitevent = 1;
-        while( usesaxisforconf == 1 && SDL_PollEvent( &event ) == 1 )
-        {
-            while( SDL_PollEvent( &event ) == 1 ) { SDL_Delay(10); }
-
-            switch( event.type )
+            sprintf(text, "Axis %i selected.", axisused);
+            display_dialog( button_names[_arg], text, "Please center joystick");
+            waitevent = 1;
+            while(waitevent)
             {
-            case SDL_JOYAXISMOTION:
-                if( event.jaxis.which == config[cont].device)
+                if( SDL_WaitEvent( &event ) == 0 )
                 {
-                    if( event.jaxis.value >= -15000 && event.jaxis.axis == axisused )
-                    {
-                        waitevent = 0;
-                    }
-                    else if( event.jaxis.value <= 15000 && event.jaxis.axis == axisused )
-                    {
-                        waitevent = 0;
-                    }
+                    fprintf( stderr, "["PLUGIN_NAME"]: SDL_WaitEvent(): %s\n", SDL_GetError() );
+                    return;
                 }
-                break;
+                if (event.type == SDL_JOYAXISMOTION && event.jaxis.which == config[cont].device)
+                {
+                    if (event.jaxis.axis == axisused && event.jaxis.value >= -10000 && event.jaxis.value <= 10000)
+                        waitevent = 0;
+                }
             }
         }
-        while( SDL_PollEvent( &event ) == 1 ) { SDL_Delay(50); }
         // read key/button b
         sprintf( text, "a key/button for '%s'",
                 (_arg == X_AXIS) ? "right" : "down" );
@@ -495,14 +484,18 @@ pad_button_clicked( int _arg )
                 if( event.jaxis.which == config[cont].device )
                 {
 
-                    if( event.jaxis.value >= 15000 )
+                    if (event.jaxis.value >= 15000)
                     {
+                        if (config[cont].axis[axis].axis_a == event.jaxis.axis && config[cont].axis[axis].axis_dir_a == 1)
+                            break;
                         config[cont].axis[axis].axis_b = event.jaxis.axis;
                         config[cont].axis[axis].axis_dir_b = 1;
                         waitevent = 0;
                     }
-                    else if( event.jaxis.value <= -15000 )
+                    else if (event.jaxis.value <= -15000)
                     {
+                        if (config[cont].axis[axis].axis_a == event.jaxis.axis && config[cont].axis[axis].axis_dir_a == -1)
+                            break;
                         config[cont].axis[axis].axis_b = event.jaxis.axis;
                         config[cont].axis[axis].axis_dir_b = -1;
                         waitevent = 0;
