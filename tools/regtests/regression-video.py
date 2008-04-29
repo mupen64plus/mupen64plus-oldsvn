@@ -297,7 +297,10 @@ class RegTester:
                 refimage = os.path.join(refdir, videoname, filename)
                 testimage = os.path.join(self.screenshotdir, videoname, filename)
                 diffimage = os.path.join(self.screenshotdir, videoname, os.path.splitext(filename)[0] + "_DIFF.png")
-                similarity = commands.getoutput("compare -metric PSNR %s %s %s" % (refimage, testimage, diffimage))
+                cmd = ("/usr/bin/compare", "-metric", "PSNR", refimage, testimage, diffimage)
+                pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+                similarity = pipe.read().strip()
+                pipe.close()
                 if similarity == "inf":
                     os.unlink(diffimage)
                 else:
