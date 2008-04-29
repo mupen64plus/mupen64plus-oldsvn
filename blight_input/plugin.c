@@ -978,7 +978,7 @@ GetKeys( int Control, BUTTONS *Keys )
                     axis_val = -80;
 
             if( b == 0 )
-                controller[Control].buttons.stick_x = -axis_val;
+                controller[Control].buttons.stick_x = axis_val;
             else
                 controller[Control].buttons.stick_y = axis_val;
         }

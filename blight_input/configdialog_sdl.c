@@ -354,9 +354,12 @@ pad_button_clicked( int _arg )
     SDLKey key_a = 0;
     int button_a = 0;
     int hat_pos_a = 0;
+    int usesaxisforconf = 0;
+    int axisused = 0;
 
     if( _arg == Y_AXIS || _arg == X_AXIS )
     {
+
         // read key/button a
         sprintf( text, "a key/button for '%s'",
                 (_arg == X_AXIS) ? "left" : "up" );
@@ -390,12 +393,16 @@ pad_button_clicked( int _arg )
                     {
                         config[cont].axis[axis].axis_a = event.jaxis.axis;
                         config[cont].axis[axis].axis_dir_a = 1;
+                        usesaxisforconf = 1;
+                        axisused = event.jaxis.axis;
                         waitevent = 0;
                     }
                     else if( event.jaxis.value <= -15000 )
                     {
                         config[cont].axis[axis].axis_a = event.jaxis.axis;
                         config[cont].axis[axis].axis_dir_a = -1;
+                        usesaxisforconf = 1;
+                        axisused = event.jaxis.axis;
                         waitevent = 0;
                     }
                     
@@ -422,29 +429,36 @@ pad_button_clicked( int _arg )
             }
         }
 
-        display_dialog( button_names[_arg], "Press ESCAPE to continue the", "configuration of this axis...");
-
- 
-        waitevent = 1;
-        while( waitevent )
+        if(usesaxisforconf)
         {
-            if( SDL_WaitEvent( &event ) == 0 )
-            {
-                fprintf( stderr, "["PLUGIN_NAME"]: SDL_WaitEvent(): %s\n", SDL_GetError() );
-                return;
-            }
+            sprintf( text, "%i", axisused);
+            display_dialog( button_names[_arg], "Waiting for Axis to return", text );
+            SDL_Delay(500);
+        }
+        waitevent = 1;
+        while( usesaxisforconf == 1 && SDL_PollEvent( &event ) == 1 )
+        {
+            while( SDL_PollEvent( &event ) == 1 ) { SDL_Delay(10); }
 
             switch( event.type )
             {
-            case SDL_KEYDOWN:
-                if( event.key.keysym.sym == SDLK_ESCAPE )
+            case SDL_JOYAXISMOTION:
+                if( event.jaxis.which == config[cont].device)
                 {
-                    waitevent = 0;
+                    if( event.jaxis.value >= -15000 && event.jaxis.axis == axisused )
+                    {
+                        waitevent = 0;
+                    }
+                    else if( event.jaxis.value <= 15000 && event.jaxis.axis == axisused )
+                    {
+                        waitevent = 0;
+                    }
                 }
                 break;
             }
         }
-       // read key/button b
+        while( SDL_PollEvent( &event ) == 1 ) { SDL_Delay(50); }
+        // read key/button b
         sprintf( text, "a key/button for '%s'",
                 (_arg == X_AXIS) ? "right" : "down" );
         display_dialog( button_names[_arg], "Move any axis or press", text );        
