@@ -84,7 +84,7 @@ void osd_render(unsigned int width, unsigned int height)
 {
     l_font->setForegroundColor(1., 0., 0., 1.);
     l_font->setHorizontalJustification(OGLFT::Face::CENTER);
-    l_font->draw(100., 100., "Test String");
+    l_font->draw(0., 0., "Test String");
     glFinish();
 }
 
