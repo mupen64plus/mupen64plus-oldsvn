@@ -135,5 +135,5 @@ FREETYPE_FLAGS	= `freetype-config --cflags`
 
 PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
 
-LIBGL_LIBS	= -L/usr/X11R6/lib -lGL
+LIBGL_LIBS	= -L/usr/X11R6/lib -lGL -lGLU
 

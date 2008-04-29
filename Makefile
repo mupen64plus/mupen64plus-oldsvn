@@ -4,7 +4,7 @@
 include ./pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-LDFLAGS += -lz -lm -lpng -lGL -lGLU
+LDFLAGS += -lz -lm -lpng
 
 # set executable stack as a linker option for X86 architecture, for dynamic recompiler
 ifeq ($(CPU), X86)

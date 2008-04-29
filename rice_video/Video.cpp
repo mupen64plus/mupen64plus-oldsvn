@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 PluginStatus status;
 char generalText[256];
-void (*renderCallback)(uint32, uint32) = NULL;
+void (*renderCallback)(unsigned int, unsigned int) = NULL;
 
 GFX_INFO g_GraphicsInfo;
 
