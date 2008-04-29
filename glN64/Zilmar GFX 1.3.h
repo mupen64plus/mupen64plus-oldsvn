@@ -284,6 +284,21 @@ EXPORT void CALL ReadScreen (void **dest, int *width, int *height);
 *******************************************************************/
 EXPORT void CALL SetConfigDir( char *configDir );
 
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetRenderingCallback
+  Purpose:  Allows emulator to register a callback function that will
+            be called by the graphics plugin just before the the
+            frame buffers are swapped.
+            This was added as a way for the emulator to draw emulator-
+            specific things to the screen, e.g. On-screen display.
+  input:    pointer to callback function. The function expects
+            to receive the current window width and height.
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int));
+
 #if defined(__cplusplus)
 }
 #endif

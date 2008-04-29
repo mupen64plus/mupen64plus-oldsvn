@@ -97,44 +97,8 @@ typedef struct
 } FrameBufferModifyEntry;
 
 
-typedef struct {
-    char *Text; /* Text that this object will have when displayed */
-    int Corner; /* One of the 9 corners */
-    int XOffset; /* Relative X position */
-    int YOffset; /* Relative Y position */
-    float Color[4]; /* Red, Green, Blue, Alpha values */
-} TXT_OBJECT;
-/******************************************************************
-   int Corner;
-   0    1    2 |Explanation:
-    \ __|__/   | Corner starts at 0 and rotates clockwise until it
-     |     |   | reaches the other side, then we go to the center.
-   7-|  8  |-3 |
-     |_____|   |Offset always effects the same:
-    /   |   \  | +X = Leftward   +Y = Upward
-   6    5    4 | With no offset, the text will touch the border.
-*******************************************************************/
-
 #define NAME_DEFINE(name)  CALL name
 #define FUNC_TYPE(type) EXPORT type
-
-/******************************************************************
-  Function: UpdateText
-  Purpose:  This function should be called every VI to update the
-            on screen display
-  input:    pointer to the array of TXT_OBJECT, counter of 
-            TXT_OBJECT
-  output:   none
-*******************************************************************/
-FUNC_TYPE(void) NAME_DEFINE(UpdateText) ( TXT_OBJECT * Text, int Count );
-
-/******************************************************************
-  Function: NewMessage
-  Purpose:  This function adds a new message to the queue
-  input:    text for the new message
-  output:   none
-*******************************************************************/
-FUNC_TYPE(void) NAME_DEFINE(NewMessage) ( char * Text );
 
 /******************************************************************
   Function: CaptureScreen
@@ -416,6 +380,21 @@ EXPORT void CALL ReadScreen(void **dest, int *width, int *height);
   output:   none
 *******************************************************************/
 EXPORT void CALL SetConfigDir(char *configDir);
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetRenderingCallback
+  Purpose:  Allows emulator to register a callback function that will
+            be called by the graphics plugin just before the the
+            frame buffers are swapped.
+            This was added as a way for the emulator to draw emulator-
+            specific things to the screen, e.g. On-screen display.
+  input:    pointer to callback function. The function expects
+            to receive the current window width and height.
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int));
 
 FUNC_TYPE(void) NAME_DEFINE(SetMaxTextureMem)(DWORD mem);
 

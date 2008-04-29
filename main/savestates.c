@@ -56,7 +56,7 @@ void savestates_select_slot(unsigned int s)
 
    char msg[255];
    sprintf(msg,"Save State Slot Selected: %i",s+1);
-   newMessage(msg);
+   //newMessage(msg);
 }
 
 void savestates_select_filename(const char *fn)
@@ -147,7 +147,7 @@ void savestates_save()
 
    char msg[255];
    sprintf(msg,"Saved State: %i",slot+1);
-   newMessage(msg);
+   //newMessage(msg);
 }
 
 void savestates_load()
@@ -256,5 +256,5 @@ void savestates_load()
 
    char msg[255];
    sprintf(msg,"Loaded State: %i",slot+1);
-   newMessage(msg);
+   //newMessage(msg);
 }

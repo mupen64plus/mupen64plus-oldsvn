@@ -409,6 +409,23 @@ void *list_nth_node_data(list_t list, int n)
     return curr != NULL ? curr->data : curr;
 }
 
+/** list_first_node
+ *    Returns the first node in list.
+ */
+list_node_t *list_first_node(list_t list)
+{
+    return list;
+}
+
+/** list_first_data
+ *    Returns the data pointer of the first node in list.
+ */
+void *list_first_data(list_t list)
+{
+    if(list) return list->data;
+    return NULL;
+}
+
 /** list_last_node
  *    Returns the last node in list.
  */
@@ -421,6 +438,16 @@ list_node_t *list_last_node(list_t list)
     }
 
     return list;
+}
+
+/** list_last_data
+ *    Returns the data pointer of the last node in list.
+ */
+void *list_last_data(list_t list)
+{
+    list_node_t *node = list_last_node(list);
+    if(node) return node->data;
+    return NULL;
 }
 
 /** list_empty

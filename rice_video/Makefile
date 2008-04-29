@@ -5,7 +5,7 @@ include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC -Wall
-LDFLAGS	+= -L/usr/X11R6/lib `sdl-config --libs` -lGL -lGLU -shared -Wl,-Bsymbolic
+LDFLAGS	+= -L/usr/X11R6/lib `sdl-config --libs` -lGL -shared -Wl,-Bsymbolic
 
 # set options
 
@@ -34,7 +34,6 @@ OBJECTS = OGLGraphicsContext.o \
 	liblinux/bmp.o \
 	liblinux/BMGImage.o \
 	liblinux/pngrw.o \
-	OGLError.o \
 	OGLRender.o \
 	OGLTexture.o \
 	OGLFragmentShaders.o \
@@ -43,7 +42,6 @@ OBJECTS = OGLGraphicsContext.o \
 	OGLExtCombiner.o \
 	OGLCombiner.o \
 	OGLExtRender.o \
-	OGLFreeType.o \
 	blender.o \
 	math.o \
 	Combiner.o \

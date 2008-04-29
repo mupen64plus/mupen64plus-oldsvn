@@ -28,6 +28,7 @@ extern char         pluginName[];
 extern void (*CheckInterrupts)( void );
 extern char *screenDirectory;
 extern char configdir[PATH_MAX];
+extern void (*renderCallback)(unsigned int, unsigned int);
 
 #endif
 

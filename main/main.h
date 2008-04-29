@@ -37,7 +37,6 @@ extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;
 extern char *g_InputPlugin;
 extern char *g_RspPlugin;
-extern TXT_OBJECT txtobjects[12]; 
 
 char *get_configpath(void);
 char *get_installpath(void);
@@ -48,10 +47,6 @@ int   gui_enabled(void);
 
 void new_frame();
 void new_vi();
-
-#define TXTOBJECTSIZE 12
-int addTextMessage(TXT_OBJECT txt);
-void delTextMessage(int element);
 
 int open_rom(const char *filename);
 int close_rom(void);

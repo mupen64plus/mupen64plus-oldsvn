@@ -1215,6 +1215,11 @@ OGL_SwapBuffers()
         lastTicks = ticks;
     }
 
+    // if emulator defined a render callback function, call it before buffer swap
+
+    if(renderCallback)
+        (*renderCallback)(OGL.width, OGL.height);
+
     SDL_GL_SwapBuffers();
 }
 

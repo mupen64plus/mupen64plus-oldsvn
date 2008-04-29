@@ -20,8 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _DLLINTERFACE_H_
 #define _DLLINTERFACE_H_
 
-#include "OGLFreeType.h"
-
 #include "typedefs.h"
 #include <limits.h> // PATH_MAX
 
@@ -80,9 +78,6 @@ typedef enum
 } CurScissorType;
 
 typedef struct {
-
-    Font    *BasicFont;
-    float   BasicFontSize;
 
     bool    bGameIsRunning;
     uint32  dwTvSystem;
@@ -143,11 +138,6 @@ typedef struct {
     char    CPUCoreMsgToDisplay[256];
     bool    CPUCoreMsgIsSet;
 
-    char    MsgQueue[10][255];
-    int     MsgTime[10];
-    int     MsgCount;
-    int     TxtCount;
-
     bool    bAllowLoadFromTMEM;
 
     // Frame buffer simulation related status variables
@@ -167,10 +157,9 @@ typedef struct {
 
 extern PluginStatus status;
 extern char generalText[];
-extern TXT_OBJECT g_TxtObjects[12];
+extern void (*renderCallback)(uint32, uint32);
 
 void SetVIScales();
-void DeleteOldestMessage();
 extern void _VIDEO_DisplayTemporaryMessage2(const char *msg, ...);
 extern void _VIDEO_DisplayTemporaryMessage(const char *msg);
 extern void XBOX_Debugger_Log(const char *Message, ...);

@@ -4,7 +4,7 @@
 include ./pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-LDFLAGS += -lz -lm -lpng
+LDFLAGS += -lz -lm -lpng -lGL -lGLU
 
 # set executable stack as a linker option for X86 architecture, for dynamic recompiler
 ifeq ($(CPU), X86)
@@ -61,6 +61,7 @@ OBJ_CORE = \
 	main/md5.o \
 	main/mupenIniApi.o \
 	main/plugin.o \
+	main/osd.o \
 	main/rom.o \
 	main/savestates.o \
 	main/unzip.o \
@@ -126,6 +127,9 @@ OBJ_VCR	= \
 OBJ_LIRC = \
 	main/lirc.o
 
+OBJ_OPENGL = \
+	opengl/OGLFT.o
+
 OBJ_GTK_GUI = \
 	main/gui_gtk/main_gtk.o \
 	main/gui_gtk/aboutdialog.o \
@@ -176,7 +180,7 @@ SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
 ALL = mupen64plus $(PLUGINS)
-OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC)
+OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options

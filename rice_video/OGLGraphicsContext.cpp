@@ -495,74 +495,12 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
         }
     */
 
-   for(int i=0; i<status.MsgCount; i++)
-   {
-       float color[4]= { 1.0,1.0,1.0,((float)status.MsgTime[i]/60.0) };
-       glPrint(*status.BasicFont, 15, 20+i*(status.BasicFontSize+(5*(status.BasicFontSize/16))), (float*)color, status.MsgQueue[i]);
-       status.MsgTime[i]--;
-       if(status.MsgTime[i] < 0)
-       {
-           DeleteOldestMessage();
-       }
-   }
-   for(int i=0; i<status.TxtCount; i++)
-   {
-       OGLFT_Boundary bounds = PreflightTextSize(*status.BasicFont, g_TxtObjects[i].Text);
-       int FinalX, FinalY;
-       int Viewport[4];
-       glGetIntegerv(GL_VIEWPORT, Viewport);
-       switch(g_TxtObjects[i].Corner)
-       {
-           // Top Left
-           case 0:
-               FinalX = g_TxtObjects[i].XOffset;
-               FinalY = Viewport[3]-bounds.H+g_TxtObjects[i].YOffset;
-           break;
-           // Top Center
-           case 1:
-               FinalX = (Viewport[2]/2)-(bounds.W/2)+g_TxtObjects[i].XOffset;
-               FinalY = Viewport[3]-bounds.H+g_TxtObjects[i].YOffset;
-           break;
-           // Top Right
-           case 2:
-               FinalX = Viewport[2]-bounds.W+g_TxtObjects[i].XOffset;
-               FinalY = Viewport[3]-bounds.H+g_TxtObjects[i].YOffset;
-           break;
-           // Middle Right
-           case 3:
-               FinalX = Viewport[2]-bounds.W+g_TxtObjects[i].XOffset;
-               FinalY = (Viewport[3]/2)-(bounds.H/2)+g_TxtObjects[i].YOffset;
-           break;
-           // Bottom Right
-           case 4:
-               FinalX = Viewport[2]-bounds.W+g_TxtObjects[i].XOffset;
-               FinalY = g_TxtObjects[i].YOffset;
-           break;
-           // Bottom Center
-           case 5:
-               FinalX = (Viewport[2]/2)-(bounds.W/2)+g_TxtObjects[i].XOffset;
-               FinalY = g_TxtObjects[i].YOffset;
-           break;
-           // Bottom Left
-           case 6:
-               FinalX = g_TxtObjects[i].XOffset;
-               FinalY = g_TxtObjects[i].YOffset;
-           break;
-           // Middle Left
-           case 7:
-               FinalX = g_TxtObjects[i].XOffset;
-               FinalY = (Viewport[3]/2)-(bounds.H/2)+g_TxtObjects[i].YOffset;
-           break;
-           // Center
-           case 8:
-               FinalX = (Viewport[2]/2)-(bounds.W/2)+g_TxtObjects[i].XOffset;
-               FinalY = (Viewport[3]/2)-(bounds.H/2)+g_TxtObjects[i].YOffset;
-           break;
-       }
-       glPrint(*status.BasicFont, FinalX, FinalY, g_TxtObjects[i].Color, g_TxtObjects[i].Text);
-   }
-   glFinish();
    
+   // if emulator defined a render callback function, call it before buffer swap
+   if(renderCallback)
+       (*renderCallback)((unsigned int)windowSetting.uDisplayWidth,
+                         (unsigned int)windowSetting.uDisplayHeight);
+
    SDL_GL_SwapBuffers();
    
    /*if(options.bShowFPS)
