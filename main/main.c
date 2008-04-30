@@ -103,9 +103,7 @@ static int  l_GuiEnabled = 1;           // GUI enabled?
 
 static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
-#ifdef DBG
-static int  l_DebuggerEnabled = 0;       // wether the debugger is enabled or not
-#endif
+
 static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static char  l_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
@@ -791,7 +789,7 @@ static void * emulationThread( void *_arg )
 #endif // WITH_LIRC
 
 #ifdef DBG
-    if( l_DebuggerEnabled )
+    if( g_DebuggerEnabled )
         init_debugger();
 #endif
     // load cheats for the current rom

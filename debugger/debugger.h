@@ -50,7 +50,11 @@
 
 
 
-int debugger_mode;  // Debugger option enabled.
+extern int debugger_mode;  // Debugger option enabled.
+
+extern int g_DebuggerEnabled;
+
+
 
 // State of the Emulation Thread:
 //  0 -> pause, 1 -> step, 2 -> run.
