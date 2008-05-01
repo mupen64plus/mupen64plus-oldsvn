@@ -384,7 +384,9 @@ void gen_interupt()
                 vi_counter++;
             }
             else
+            {
                 cheat_apply_cheats(ENTRY_VI);
+            }
 #ifdef VCR_SUPPORT
             VCR_updateScreen();
 #else
@@ -531,7 +533,9 @@ void gen_interupt()
             remove_interupt_event();
             break;
     }
+
     exception_general();
+
     if (savestates_job & SAVESTATE) 
     {
         savestates_save();
