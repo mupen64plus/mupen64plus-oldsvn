@@ -28,14 +28,98 @@
 #include <stdio.h>
 #include "desasm.h"
 
-//TODO: Lots and lots
-// to differanciate between update (need reload) and scroll (doesn't need reload)
-// to reorganise whole code.
- 
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
 
-//static uint16 max_row=30;   //i plan to update this value on widget resizing.
-//static uint32 previous_focus;
+int  lines_recompiled;
+uint32 addr_recompiled;
 
+char opcode_recompiled[564][MAX_DISASSEMBLY];
+char args_recompiled[564][MAX_DISASSEMBLY];
+int  opaddr_recompiled[564];
+
+char* get_recompiled_opcode(uint32 addr, int index)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    if(index < lines_recompiled)
+        return opcode_recompiled[index];
+    else
+        return NULL;
+}
+
+char* get_recompiled_args(uint32 addr, int index)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    if(index < lines_recompiled)
+        return args_recompiled[index];
+    else
+        return NULL;
+}
+
+int get_recompiled_addr(uint32 addr, int index)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    if(index < lines_recompiled)
+        return opaddr_recompiled[index];
+    else
+        return 0;
+}
+
+int get_num_recompiled(uint32 addr)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    return lines_recompiled;
+}
+
+void decode_recompiled(uint32 addr)
+{
+    unsigned char *assemb, *end_addr;
+
+    lines_recompiled=0;
+
+    if(blocks[addr>>12] == NULL)
+        return;
+    
+    assemb = (blocks[addr>>12]->code) + 
+      (blocks[addr>>12]->block[(addr&0xFFF)/4].local_addr);
+
+    end_addr = blocks[addr>>12]->code;
+
+    if( (addr & 0xFFF) == 0xFFF)
+        end_addr += blocks[addr>>12]->code_length;
+    else
+        end_addr += blocks[addr>>12]->block[(addr&0xFFF)/4+1].local_addr;
+    
+    while(assemb < end_addr)
+    {
+        opaddr_recompiled[lines_recompiled] = assemb;
+        assemb += host_decode_op(assemb, opcode_recompiled[lines_recompiled], 
+                                 args_recompiled[lines_recompiled]);
+        lines_recompiled++;
+    }
+    addr_recompiled=addr;
+}
+
+#else
+
+char* get_recompiled(uint32 addr, int index)
+{
+    return NULL;
+}
+
+int get_num_recompiled(uint32 addr)
+{
+    return 0;
+}
+
+#endif
 //]=-=-=-=-=-=-=-=-=-=-=[ Mise-a-jour Desassembleur ]=-=-=-=-=-=-=-=-=-=-=[
 
 int get_instruction( uint32 address, uint32 *ptr_instruction )
@@ -79,4 +163,24 @@ int get_instruction( uint32 address, uint32 *ptr_instruction )
                 
         return get_instruction( physical_address, ptr_instruction );
     }
+}
+
+
+void get_dynacomp()
+{
+/*    precomp_block *blk;
+    else
+        {
+        gtk_clist_get_selection_info( GTK_CLIST(clist), event->x, event->y, &clicked_row, NULL);
+        clicked_address =(uint32) gtk_clist_get_row_data( GTK_CLIST(clist), clicked_row);
+        blk = blocks[clicked_address >> 12];
+        int numblks = blk->block[(clicked_address+1) & 0xFFF].local_addr - blk->block[clicked_address & 0xFFF].local_addr;
+        unsigned char *assemb = (blk->code) + blk->block[clicked_address & 0xFFF].local_addr;
+        printf("%x %x: ", clicked_address, blk->code);
+int i;
+for(i=0; i<numblks; i++)
+printf("%02x ", assemb[i]);
+printf("\n");
+        }
+*/
 }

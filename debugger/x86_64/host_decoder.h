@@ -26,12 +26,12 @@
 **/
 
  
-#ifndef DECODER_H
-#define DECODER_H
+#ifndef HOST_DECODER_H
+#define HOST_DECODER_H
 
 #include <stdio.h>
-#include "types.h"
+#include "../types.h"
 
-void r4300_decode_op(uint32 instr, char *op, char *args );
+int host_decode_op(unsigned char* addr, char *op, char *args );
 
 #endif //DECODER_H

@@ -27,19 +27,18 @@
 
 #include <stdio.h>
 #include "desasm.h"
+#include "ui_disasm_list.h"
 
 //TODO: Lots and lots
 // to differanciate between update (need reload) and scroll (doesn't need reload)
 // to reorganise whole code.
  
-// Status of the Emulation Thread:
-//   0 -> pause, 2 -> run.
-extern int run;
-
 static uint16 max_row=30;   //i plan to update this value on widget resizing.
 static uint32 previous_focus;
 
 static GtkWidget *clDesasm, *buRun;
+static DisasmList *cmDesasm;
+
 static GdkColor color_normal, color_BP, color_PC, color_PC_on_BP;
 
 // Callback functions
@@ -77,18 +76,29 @@ void init_desasm()
     gtk_container_add( GTK_CONTAINER(winDesasm), boxH1 );
 
     //=== Creation of the Disassembled Code Display ===/
-    clDesasm = gtk_clist_new( 3 );
+    cmDesasm = disasm_list_new();
+
+    clDesasm = gtk_tree_view_new_with_model(GTK_TREE_MODEL(cmDesasm));
+    g_object_unref(cmDesasm);
+
+    GtkCellRenderer    *renderer;
+    GtkTreeViewColumn  *col;
+    renderer = gtk_cell_renderer_text_new();
+    col = gtk_tree_view_column_new_with_attributes("Address", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
+    col = gtk_tree_view_column_new_with_attributes("Opcode", renderer, "text", 1, NULL);
+    gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
+    col = gtk_tree_view_column_new_with_attributes("Args", renderer, "text", 2, NULL);
+    gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
+
     gtk_box_pack_start( GTK_BOX(boxH1), clDesasm, FALSE, FALSE, 0 );
-    gtk_clist_set_auto_sort( GTK_CLIST(clDesasm), TRUE );
-    gtk_clist_set_column_width( GTK_CLIST(clDesasm), 0, 75 );
-    gtk_clist_set_column_width( GTK_CLIST(clDesasm), 1, 95 );
-    gtk_clist_set_column_width( GTK_CLIST(clDesasm), 2, 130 );
+
     
-    adj = gtk_adjustment_new(0, -500, 500, 1, max_row, max_row);
+    // adj = gtk_adjustment_new(0, -500, 500, 1, max_row, max_row);
     // (doubles) value, lower, upper, step_increment, page_increment, page_size.
 
-    scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(adj) );
-    gtk_box_pack_start( GTK_BOX(boxH1), scrollbar1, FALSE, FALSE, 0 );
+    //    scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(adj) );
+    // gtk_box_pack_start( GTK_BOX(boxH1), scrollbar1, FALSE, FALSE, 0 );
     
     //=== Creation of the Buttons =====================/
     boxV1 = gtk_vbox_new( FALSE, 2 );
@@ -104,10 +114,10 @@ void init_desasm()
     gtk_widget_show_all( winDesasm );
 
     //=== Signal Connection ===========================/
-    gtk_signal_connect( GTK_OBJECT(clDesasm), "button_press_event",
-                    GTK_SIGNAL_FUNC(on_click), NULL );
-    gtk_signal_connect( GTK_OBJECT(adj), "value-changed",
-                    GTK_SIGNAL_FUNC(on_scroll), NULL );
+    //gtk_signal_connect( GTK_OBJECT(clDesasm), "button_press_event",
+    //                GTK_SIGNAL_FUNC(on_click), NULL );
+    //gtk_signal_connect( GTK_OBJECT(adj), "value-changed",
+    //                GTK_SIGNAL_FUNC(on_scroll), NULL );
     gtk_signal_connect( GTK_OBJECT(buRun), "clicked", on_run, NULL );
     gtk_signal_connect( GTK_OBJECT(buStep), "clicked", on_step, NULL );
     gtk_signal_connect( GTK_OBJECT(buGoTo), "clicked", on_goto, NULL );
@@ -162,11 +172,11 @@ int add_instr( uint32 address )
         strcpy( line[2], "Behind TLB");
     }
     else {
-        decode_op( instr, line[1], line[2] );
+        r4300_decode_op( instr, line[1], line[2] );
     }
-    new_row=gtk_clist_append( GTK_CLIST(clDesasm), line );
-    gtk_clist_set_selectable( GTK_CLIST(clDesasm), new_row, FALSE );
-    gtk_clist_set_row_data( GTK_CLIST(clDesasm), new_row, (gpointer) address );
+    //new_row=gtk_clist_append( GTK_CLIST(clDesasm), line );
+    //gtk_clist_set_selectable( GTK_CLIST(clDesasm), new_row, FALSE );
+    //gtk_clist_set_row_data( GTK_CLIST(clDesasm), new_row, (gpointer) address );
 
     return new_row;
 }
@@ -189,10 +199,10 @@ void reload_instr( uint32 address, int row )
         strcpy( args, "Behind TLB");
     }
     else {
-        decode_op( instr, opcode, args );
+        r4300_decode_op( instr, opcode, args );
     }
-    gtk_clist_set_text( GTK_CLIST(clDesasm), row, 1, opcode);
-    gtk_clist_set_text( GTK_CLIST(clDesasm), row, 2, args);
+    //gtk_clist_set_text( GTK_CLIST(clDesasm), row, 1, opcode);
+    //gtk_clist_set_text( GTK_CLIST(clDesasm), row, 2, args);
 }
 
 
@@ -203,12 +213,12 @@ void update_desasm( uint32 focused_address )
     int i, row;
     uint32 address;
 
-    gtk_clist_freeze( GTK_CLIST(clDesasm) );
+    //gtk_clist_freeze( GTK_CLIST(clDesasm) );
 
     //=== Disassembly cleaning ========================/
-    for (i=0; i<max_row; i++) {
-        gtk_clist_remove( GTK_CLIST(clDesasm), 0);
-    }
+    //for (i=0; i<max_row; i++) {
+    //    gtk_clist_remove( GTK_CLIST(clDesasm), 0);
+    //}
     
     //=== Disassembly filling =========================/
     //Display starts 8 instructions
@@ -216,18 +226,18 @@ void update_desasm( uint32 focused_address )
     for (i=0; i<max_row; i++) {
         address = address + 0x4;
         row = add_instr( address );
-        if( check_breakpoints(address) != -1 )
-            gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_BP);
+    //    if( check_breakpoints(address) != -1 )
+    //        gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_BP);
     }
 
     //=== Update Color of new PC Row =================/
-    row = gtk_clist_find_row_from_data( GTK_CLIST(clDesasm), (gpointer) PC->addr);
-    if( check_breakpoints(PC->addr) == -1 )
-        gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_PC);
-    else
-        gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_PC_on_BP);
+    //row = gtk_clist_find_row_from_data( GTK_CLIST(clDesasm), (gpointer) PC->addr);
+    //if( check_breakpoints(PC->addr) == -1 )
+    //    gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_PC);
+    //else
+    //    gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_PC_on_BP);
 
-    gtk_clist_thaw( GTK_CLIST(clDesasm) );
+    //gtk_clist_thaw( GTK_CLIST(clDesasm) );
     previous_focus = focused_address;
 }
 
@@ -237,8 +247,8 @@ void update_desasm_color( uint32 address )
     int row;    // row whose color has to be updated.
     GdkColor *new_color;
 
-    row = gtk_clist_find_row_from_data( GTK_CLIST(clDesasm), (gpointer) address );
-    if( row != -1) {
+    //row = gtk_clist_find_row_from_data( GTK_CLIST(clDesasm), (gpointer) address );
+    /*if( row != -1) {
         if( check_breakpoints(address) == -1 ) {
             if( address != PC->addr )
                 new_color = &color_normal;
@@ -251,8 +261,8 @@ void update_desasm_color( uint32 address )
             else
                 new_color = &color_PC_on_BP;
         }
-    }
-    gtk_clist_set_background( GTK_CLIST(clDesasm), row, new_color);
+    }*/
+    //gtk_clist_set_background( GTK_CLIST(clDesasm), row, new_color);
 }
 
 

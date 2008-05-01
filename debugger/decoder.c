@@ -1398,9 +1398,7 @@ static void SD(){
 
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ DECODE_OP ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
-
-
-void decode_op( uint32 instr, char *opcode, char *arguments )
+void r4300_decode_op( uint32 instr, char *opcode, char *arguments )
 {
     mot = instr;
     op = opcode;
