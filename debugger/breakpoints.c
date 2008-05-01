@@ -42,11 +42,24 @@ int add_breakpoint( uint32 address )
         return -1;
     }
     g_Breakpoints[g_NumBreakpoints].address=address;
+    g_Breakpoints[g_NumBreakpoints].endaddr=address;
+    BPT_SET_FLAG(g_Breakpoints[g_NumBreakpoints], BPT_FLAG_WRITE);
 
     enable_breakpoint(g_NumBreakpoints);
 
     return g_NumBreakpoints++;
 
+}
+
+int add_breakpoint_struct(breakpoint* newbp)
+{
+	 if( g_NumBreakpoints == BREAKPOINTS_MAX_NUMBER ) {
+        printf("BREAKPOINTS_MAX_NUMBER have been reached.\n");//REMOVE ME
+        return -1;
+    }
+	memcpy(&g_Breakpoints[g_NumBreakpoints], newbp, sizeof(breakpoint));
+	printf("newbp %08X - %08X\n", g_Breakpoints[g_NumBreakpoints].address, g_Breakpoints[g_NumBreakpoints].endaddr);
+    return g_NumBreakpoints++;
 }
 
 void enable_breakpoint( int breakpoint )
@@ -68,7 +81,7 @@ void remove_breakpoint_by_num( int bpt )
 
 void remove_breakpoint_by_address( uint32 address )
 {
-    int bpt = lookup_breakpoint( address );
+    int bpt = lookup_breakpoint( address, 0 );
     if(bpt==-1)
         {
         printf("Tried to remove Nonexistant breakpoint %x!", address);
@@ -77,13 +90,17 @@ void remove_breakpoint_by_address( uint32 address )
         remove_breakpoint_by_num( bpt );
 }
 
-int lookup_breakpoint( uint32 address )
+int lookup_breakpoint( uint32 address, uint32 flags)
 {
     int i=0;
     while( i != g_NumBreakpoints )
     {
-        if( g_Breakpoints[i].address==address )
+        if((address >= g_Breakpoints[i].address) && (address <= g_Breakpoints[i].endaddr) && (!flags || ((g_Breakpoints[i].flags & flags) == flags)))
+        {
+        	printf("Bpt %d (0x%08X - 0x%08X) matches 0x%08X\n", i, g_Breakpoints[i].address,
+        		g_Breakpoints[i].endaddr, address);
             return i;
+		}
         else
             i++;
     }
@@ -92,8 +109,36 @@ int lookup_breakpoint( uint32 address )
 
 int check_breakpoints( uint32 address )
 {
-    int bpt=lookup_breakpoint( address );
-    if( (bpt != -1) && BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED) )
+    int bpt=lookup_breakpoint( address, BPT_FLAG_ENABLED | BPT_FLAG_EXEC );
+    //if( (bpt != -1) && BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED))
         return bpt;
+    //return -1;
+}
+
+
+int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags )
+{
+	//This function handles memory read/write breakpoints. size specifies the address
+	//range to check, flags specifies the flags that all need to be set.
+	//It automatically stops and updates the debugger on hit, so the memory access
+	//functions only need to call it and can discard the result.
+	
+	int i, bpt;
+	for(i=address; i<=(address + size); i++)
+	{
+    	bpt=lookup_breakpoint( address, flags );
+    	if(bpt != -1)
+    	{
+    		run = 0;
+            switch_button_to_run();
+            update_debugger_frontend();
+            
+             previousPC = PC->addr;
+    		// Emulation thread is blocked until a button is clicked.
+    		pthread_cond_wait(&debugger_done_cond, &mutex);
+            
+    		return bpt;
+		}
+	}
     return -1;
 }

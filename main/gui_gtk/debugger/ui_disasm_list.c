@@ -399,7 +399,7 @@ disasm_list_iter_next (GtkTreeModel  *tree_model,
   // Is this a disassembly line, or recompiler disassemby line?
   if(((uint32)iter->user_data2) == -1)
   {
-    if(((uint32)iter->user_data) >= STARTADDR+0x100)
+    if(((uint32)iter->user_data) >= STARTADDR+0x80)
         return FALSE;
     iter->stamp    = disasm_list->stamp;
     iter->user_data+= 4;

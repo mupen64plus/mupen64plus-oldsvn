@@ -45,6 +45,7 @@ int breakpoints_opened;
 GtkWidget *winBreakpoints;
 
 void init_breakpoints();
+void get_breakpoint_display_string(char* buf, breakpoint* bpt);
 int add_breakpoint( uint32 address );
 //int check_breakpoints( uint32 address );
 void update_breakpoints();

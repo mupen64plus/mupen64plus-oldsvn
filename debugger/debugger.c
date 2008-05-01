@@ -63,7 +63,7 @@ void update_debugger()
 {
 
     if(run==2) {
-        if( check_breakpoints(PC->addr)==-1 ) {
+    	if( check_breakpoints(PC->addr)==-1 ) {
             previousPC = PC->addr;
             return;
         }

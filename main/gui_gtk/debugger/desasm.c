@@ -91,14 +91,16 @@ void init_desasm()
     col = gtk_tree_view_column_new_with_attributes("Args", renderer, "text", 2, NULL);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
 
-    gtk_box_pack_start( GTK_BOX(boxH1), clDesasm, FALSE, FALSE, 0 );
+    adj = gtk_adjustment_new(0, -500, 500, 1, max_row, max_row);
+    gtk_tree_view_set_vadjustment( GTK_TREE_VIEW( clDesasm ), GTK_ADJUSTMENT(adj));
+
+    gtk_box_pack_start( GTK_BOX(boxH1), clDesasm, TRUE, TRUE, 0 );
 
     
-    // adj = gtk_adjustment_new(0, -500, 500, 1, max_row, max_row);
     // (doubles) value, lower, upper, step_increment, page_increment, page_size.
 
-    //    scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(adj) );
-    // gtk_box_pack_start( GTK_BOX(boxH1), scrollbar1, FALSE, FALSE, 0 );
+        scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(adj) );
+    gtk_box_pack_start( GTK_BOX(boxH1), scrollbar1, FALSE, FALSE, 0 );
     
     //=== Creation of the Buttons =====================/
     boxV1 = gtk_vbox_new( FALSE, 2 );
@@ -327,7 +329,7 @@ static void on_click( GtkWidget *clist, GdkEventButton *event )
         clicked_address =(uint32) gtk_clist_get_row_data( GTK_CLIST(clist), clicked_row);
         printf( "[DASM] click on row: %d\t address: 0x%lX\n", clicked_row, clicked_address );
 
-	break_number = lookup_breakpoint(clicked_address);
+	break_number = lookup_breakpoint(clicked_address, BPT_FLAG_EXEC);
         if( break_number==-1 ) {
             add_breakpoint( clicked_address );
             gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_BP);
