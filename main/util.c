@@ -274,7 +274,7 @@ int copyfile(char *src, char *dest)
 list_node_t *list_append(list_t *list, void *data)
 {
     list_node_t *new_node,
-            *last_node;
+                *last_node;
 
     if(list_empty(*list))
     {
@@ -327,7 +327,7 @@ void list_node_delete(list_t *list, list_node_t *node)
 void list_delete(list_t *list)
 {
     list_node_t *prev = NULL,
-            *curr = NULL;
+                *curr = NULL;
 
     // delete all list nodes in the list
     list_foreach(*list, curr)
@@ -473,3 +473,19 @@ int list_length(list_t list)
 
     return len;
 }
+
+/** list_find_node
+ *    Searches the given list for a node whose data pointer matches the given data pointer.
+ *    If found, returns a pointer to the node, else, returns NULL.
+ */
+list_node_t *list_find_node(list_t list, void *data)
+{
+    list_node_t *node = NULL;
+
+    list_foreach(list, node)
+        if(node->data == data)
+            break;
+
+    return node;
+}
+

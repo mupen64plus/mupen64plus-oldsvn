@@ -50,17 +50,48 @@ enum osd_corner {
 
     OSD_BOTTOM_LEFT,    // 6 in the picture above
     OSD_BOTTOM_CENTER,  // 7 in the picture above
-    OSD_BOTTOM_RIGHT    // 8 in the picture above
+    OSD_BOTTOM_RIGHT,   // 8 in the picture above
+
+    OSD_NUM_CORNERS
 };
+
+enum osd_message_state {
+    OSD_APPEAR,     // OSD message is appearing on the screen
+    OSD_DISPLAY,    // OSD message is being displayed on the screen
+    OSD_DISAPPEAR,  // OSD message is disappearing from the screen
+
+    OSD_NUM_STATES
+};
+
+enum osd_animation_type {
+    OSD_NONE,
+    OSD_FADE,
+
+    OSD_NUM_ANIM_TYPES
+};
+
+typedef struct {
+    char *text; // Text that this object will have when displayed
+    enum osd_corner corner; // One of the 9 corners
+    int xoffset; // Relative X position
+    int yoffset; // Relative Y position
+    float color[3]; // Red, Green, Blue values
+    int state; // display state of current message
+    enum osd_animation_type animation[OSD_NUM_STATES]; // animations for each display state
+    int timeout[OSD_NUM_STATES]; // timeouts for each display state
+    int frames; // number of frames in this state
+} osd_message_t;
+
+enum { R, G, B }; // for referencing color array
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void osd_init(void);
+void osd_exit(void);
 void osd_render(unsigned int width, unsigned int height);
-void osd_set_default_timeout(int);
-void osd_new_message(const char *);
+osd_message_t * osd_new_message(const char *, ...);
 
 #ifdef __cplusplus
 }

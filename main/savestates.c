@@ -54,9 +54,7 @@ void savestates_select_slot(unsigned int s)
    if (s > 9 || s == slot) return;
    slot = s;
 
-   char msg[255];
-   sprintf(msg,"Save State Slot Selected: %i",s+1);
-   //newMessage(msg);
+   osd_new_message("Save State Slot Selected: %i", s+1);
 }
 
 void savestates_select_filename(const char *fn)
@@ -145,9 +143,7 @@ void savestates_save()
    
    gzclose(f);
 
-   char msg[255];
-   sprintf(msg,"Saved State: %i",slot+1);
-   //newMessage(msg);
+   osd_new_message("Saved State: %i", slot+1);
 }
 
 void savestates_load()
@@ -254,7 +250,5 @@ void savestates_load()
    else
      last_addr = PC->addr;
 
-   char msg[255];
-   sprintf(msg,"Loaded State: %i",slot+1);
-   //newMessage(msg);
+   osd_new_message("Loaded State: %i", slot+1);
 }

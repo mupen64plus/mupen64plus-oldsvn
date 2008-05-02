@@ -735,12 +735,14 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    //newMessage("Starting Mupen64Plus...\n");
+    osd_new_message("Starting Mupen64Plus...");
     go();   /* core func */
 
 #ifdef WITH_LIRC
     lircStop();
 #endif // WITH_LIRC
+
+    osd_exit();
 
     romClosed_RSP();
     romClosed_input();

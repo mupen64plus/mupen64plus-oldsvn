@@ -68,6 +68,7 @@ list_node_t *list_last_node(list_t list);
 void *list_last_data(list_t list);
 int inline list_empty(list_t list);
 int list_length(list_t list);
+list_node_t *list_find_node(list_t list, void *data);
 
 // cycles through each listnode in list setting curr_node to current node.
 #define list_foreach(list, curr_node) \
