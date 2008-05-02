@@ -22,7 +22,20 @@
  *
 **/
 
+#ifndef __WIN32__
+# include "winlnxdefs.h"
+#else
+# include <windows.h>
+#endif
+
+#include "plugin.h"
+
+extern int g_UseSaveData;
+
+int BeginPlayback( char *sz_filename );
 void _GetKeys( int Control, BUTTONS *Keys );
+void EndPlaybackAndRecording();
+void CleanUpSaveFiles();
 
 typedef struct {
 	char signature[4];
@@ -32,7 +45,8 @@ typedef struct {
     unsigned int rerecord_count;
     char fps;
     char controllers;
-    short reserved1;
+    short core_type; // was: reserved1
+    unsigned int input_samples;
     unsigned int start_type;
     short reserved2;
     unsigned int controller_flags;

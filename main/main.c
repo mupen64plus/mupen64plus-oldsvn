@@ -58,8 +58,8 @@
 #include "../r4300/recomph.h"
 #include "../memory/memory.h"
 #include "savestates.h"
-#include "vcr.h"
-#include "vcr_compress.h"
+#include "inputrecording.h"
+// #include "vcr_compress.h"
 #include "guifuncs.h" // gui-specific functions
 #include "util.h"
 #include "translate.h"
@@ -237,6 +237,7 @@ void new_frame(void)
 
 void new_vi(void)
 {
+	_NewVI();
     int Dif;
     unsigned int CurrentFPSTime;
     static unsigned int LastFPSTime = 0;
@@ -356,7 +357,7 @@ int close_rom(void)
         free(rom);
         rom = NULL;
     }
-
+    
     // clear Byte-swapped flag, since ROM is now deleted
     g_MemHasBeenBSwapped = 0;
     info_message(tr("Rom closed."));
@@ -426,7 +427,10 @@ void startEmulation(void)
         alert_message(tr("No RSP plugin specified."));
         return;
     }
-
+    
+    // cleanup variables for re-recording.
+    EndPlaybackAndRecording();
+    
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
     {
@@ -455,7 +459,7 @@ void startEmulation(void)
 void stopEmulation(void)
 {
     if(g_EmulationThread || g_EmulatorRunning)
-    {
+    {    
         info_message(tr("Stopping emulation."));
         rompause = 0;
         stop_it();
@@ -927,6 +931,7 @@ static void printUsage(const char *progname)
            "    --installdir (dir)  : force install dir (place to look for plugins, icons, lang, etc)\n"
            "    --noask             : don't ask to force load on bad dumps\n"
            "    --testshots (list)  : take screenshots at frames given in comma-separated list, then quit\n"
+           "    --playback (path)   : playback .m64 file given by (path)\n"
            "    -h, --help          : see this help message\n"
            "\n", basename(str));
 
@@ -956,7 +961,8 @@ void parseCommandLine(int argc, char **argv)
         OPT_CONFIGDIR,
         OPT_INSTALLDIR,
         OPT_NOASK,
-        OPT_TESTSHOTS
+        OPT_TESTSHOTS,
+        OPT_PLAYBACK
     };
     struct option long_options[] =
     {
@@ -972,6 +978,7 @@ void parseCommandLine(int argc, char **argv)
         {"installdir", required_argument, NULL, OPT_INSTALLDIR},
         {"noask", no_argument, NULL, OPT_NOASK},
         {"testshots", required_argument, NULL, OPT_TESTSHOTS},
+        {"playback", required_argument, NULL, OPT_PLAYBACK},
         {"help", no_argument, NULL, 'h'},
         {0, 0, 0, 0}    // last opt must be empty
     };
@@ -1058,6 +1065,9 @@ void parseCommandLine(int argc, char **argv)
                 break;
             case OPT_NOASK:
                 g_Noask = g_NoaskParam = TRUE;
+                break;
+            case OPT_PLAYBACK:
+                BeginPlayback(optarg);
                 break;
             case OPT_TESTSHOTS:
                 // count the number of integers in the list
@@ -1403,7 +1413,9 @@ int main(int argc, char *argv[])
 
     // must be called after building gui
     info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
-
+    
+    // removes any old entries from recording
+    CleanUpSaveFiles();
     // only display gui if user wants it
     if(l_GuiEnabled)
         gui_display();
