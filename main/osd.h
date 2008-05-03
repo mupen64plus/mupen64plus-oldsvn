@@ -93,6 +93,7 @@ void osd_init(void);
 void osd_exit(void);
 void osd_render(unsigned int width, unsigned int height);
 osd_message_t * osd_new_message(const char *, ...);
+void osd_update_message(osd_message_t *, const char *, ...);
 void osd_delete_message(osd_message_t *);
 
 #ifdef __cplusplus

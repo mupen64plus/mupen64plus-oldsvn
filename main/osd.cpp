@@ -297,6 +297,25 @@ osd_message_t * osd_new_message(const char *fmt, ...)
     return msg;
 }
 
+// update message string
+extern "C"
+void osd_update_message(osd_message_t *msg, const char *fmt, ...)
+{
+    va_list ap;
+    char buf[PATH_MAX];
+
+    if(!msg) return;
+
+    va_start(ap, fmt);
+    vsnprintf(buf, PATH_MAX, fmt, ap);
+    va_end(ap);
+
+    if(msg->text)
+        free(msg->text);
+
+    msg->text = strdup(buf);
+}
+
 // remove message from message queue
 extern "C"
 void osd_delete_message(osd_message_t *msg)
