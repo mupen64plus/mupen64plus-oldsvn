@@ -79,6 +79,7 @@ typedef struct {
     int state; // display state of current message
     enum osd_animation_type animation[OSD_NUM_STATES]; // animations for each display state
     int timeout[OSD_NUM_STATES]; // timeouts for each display state
+#define OSD_INFINITE_TIMEOUT 0xffffffff
     int frames; // number of frames in this state
 } osd_message_t;
 
@@ -92,6 +93,7 @@ void osd_init(void);
 void osd_exit(void);
 void osd_render(unsigned int width, unsigned int height);
 osd_message_t * osd_new_message(const char *, ...);
+void osd_delete_message(osd_message_t *);
 
 #ifdef __cplusplus
 }

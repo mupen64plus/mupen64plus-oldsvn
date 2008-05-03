@@ -166,21 +166,6 @@ static void animation_fade(osd_message_t *msg)
     l_font->setForegroundColor(msg->color[R], msg->color[G], msg->color[B], alpha);
 }
 
-// remove message from message queue
-static void delete_message(osd_message_t *msg)
-{
-    list_node_t *node;
-
-    if(!msg) return;
-
-    if(msg->text)
-        free(msg->text);
-
-    node = list_find_node(l_messageQueue, msg);
-    free(msg);
-    list_node_delete(&l_messageQueue, node);
-}
-
 // public functions
 extern "C"
 void osd_init(void)
@@ -241,13 +226,13 @@ void osd_render(unsigned int width, unsigned int height)
         // if previous message was marked for deletion, delete it
         if(msg_to_delete)
         {
-            delete_message(msg_to_delete);
+            osd_delete_message(msg_to_delete);
             msg_to_delete = NULL;
         }
 
         // update message state
-        msg->frames++;
-        if(msg->frames >= msg->timeout[msg->state])
+        if(msg->timeout[msg->state] != OSD_INFINITE_TIMEOUT &&
+           ++msg->frames >= msg->timeout[msg->state])
         {
             // if message is in last state, mark it for deletion and continue to the next message
             if(msg->state >= OSD_NUM_STATES - 1)
@@ -266,7 +251,7 @@ void osd_render(unsigned int width, unsigned int height)
 
     // if last message was marked for deletion, delete it
     if(msg_to_delete)
-        delete_message(msg_to_delete);
+        osd_delete_message(msg_to_delete);
 
     glFinish();
 }
@@ -310,4 +295,20 @@ osd_message_t * osd_new_message(const char *fmt, ...)
     list_append(&l_messageQueue, msg);
 
     return msg;
+}
+
+// remove message from message queue
+extern "C"
+void osd_delete_message(osd_message_t *msg)
+{
+    list_node_t *node;
+
+    if(!msg) return;
+
+    if(msg->text)
+        free(msg->text);
+
+    node = list_find_node(l_messageQueue, msg);
+    free(msg);
+    list_node_delete(&l_messageQueue, node);
 }
