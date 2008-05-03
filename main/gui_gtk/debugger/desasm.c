@@ -92,7 +92,7 @@ void init_desasm()
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
 
     adj = gtk_adjustment_new(0, -500, 500, 1, max_row, max_row);
-    gtk_tree_view_set_vadjustment( GTK_TREE_VIEW( clDesasm ), GTK_ADJUSTMENT(adj));
+    //gtk_tree_view_set_vadjustment( GTK_TREE_VIEW( clDesasm ), GTK_ADJUSTMENT(adj));
 
     gtk_box_pack_start( GTK_BOX(boxH1), clDesasm, TRUE, TRUE, 0 );
 
@@ -118,8 +118,8 @@ void init_desasm()
     //=== Signal Connection ===========================/
     //gtk_signal_connect( GTK_OBJECT(clDesasm), "button_press_event",
     //                GTK_SIGNAL_FUNC(on_click), NULL );
-    //gtk_signal_connect( GTK_OBJECT(adj), "value-changed",
-    //                GTK_SIGNAL_FUNC(on_scroll), NULL );
+    gtk_signal_connect( GTK_OBJECT(adj), "value-changed",
+                    GTK_SIGNAL_FUNC(on_scroll), NULL );
     gtk_signal_connect( GTK_OBJECT(buRun), "clicked", on_run, NULL );
     gtk_signal_connect( GTK_OBJECT(buStep), "clicked", on_step, NULL );
     gtk_signal_connect( GTK_OBJECT(buGoTo), "clicked", on_goto, NULL );
@@ -215,13 +215,6 @@ void update_desasm( uint32 focused_address )
     int i, row;
     uint32 address;
 
-    //gtk_clist_freeze( GTK_CLIST(clDesasm) );
-
-    //=== Disassembly cleaning ========================/
-    //for (i=0; i<max_row; i++) {
-    //    gtk_clist_remove( GTK_CLIST(clDesasm), 0);
-    //}
-    
     //=== Disassembly filling =========================/
     //Display starts 8 instructions
     address = focused_address - 0x020;  //8 instructions before.
@@ -240,6 +233,8 @@ void update_desasm( uint32 focused_address )
     //    gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_PC_on_BP);
 
     //gtk_clist_thaw( GTK_CLIST(clDesasm) );
+    disasm_list_update(cmDesasm, focused_address);
+    gtk_widget_queue_draw( clDesasm );
     previous_focus = focused_address;
 }
 

@@ -40,7 +40,7 @@ struct _DisasmList
 {
   GObject         parent;      /* this MUST be the first member */
 
-  //  guint           num_rows;    /* number of rows that we have   */
+  guint           startAddr;    /* number of rows that we have   */
 
   gint            stamp;       /* Random integer to check whether an iter belongs to our model */
 };
@@ -58,5 +58,8 @@ struct _DisasmListClass
 GType             disasm_list_get_type (void);
 
 DisasmList       *disasm_list_new (void);
+
+void disasm_list_update (GtkTreeModel *tree_model, guint address);
+
 
 #endif /* _disasm_list_h_included_ */

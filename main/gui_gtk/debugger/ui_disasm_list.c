@@ -57,8 +57,8 @@ static gboolean     disasm_list_iter_parent     (GtkTreeModel      *tree_model,
 static GObjectClass *parent_class = NULL;  /* GObject stuff - nothing to worry about */
 
 
-#define STARTADDR 0xA4000040
-
+#define PRELINES    5
+#define POSTLINES   20
 /*****************************************************************************
  *
  *  disasm_list_get_type: here we register our new type and its interfaces
@@ -165,7 +165,7 @@ static void
 disasm_list_init (DisasmList *disasm_list)
 {
   g_assert (DISASM_LIST_N_COLUMNS == 3);
-
+  disasm_list->startAddr = 0xA4000040;
   disasm_list->stamp = g_random_int();  /* Random int to check whether an iter belongs to our model */
 
 }
@@ -273,7 +273,7 @@ disasm_list_get_iter (GtkTreeModel *tree_model,
 
   // We simply store a pointer to our Disasm record in the iter
   iter->stamp      = disasm_list->stamp;
-  iter->user_data  = (uint32*) (indices[0]*4 + STARTADDR);
+  iter->user_data  = (uint32*) ((indices[0]-PRELINES)*4 + (DISASM_LIST(tree_model)->startAddr));
 
   if(depth==2)
       iter->user_data2 = (uint32*) indices[1];
@@ -306,7 +306,7 @@ disasm_list_get_path (GtkTreeModel *tree_model,
 
   path = gtk_tree_path_new();
 
-  gtk_tree_path_append_index(path, ((unsigned int)(iter->user_data - STARTADDR)) / 4);
+  gtk_tree_path_append_index(path, ((unsigned int)(iter->user_data - disasm_list->startAddr)) / 4 + PRELINES);
 
   if(((uint32)iter->user_data2)!=-1)
       gtk_tree_path_append_index(path, ((uint32)iter->user_data2));
@@ -399,7 +399,7 @@ disasm_list_iter_next (GtkTreeModel  *tree_model,
   // Is this a disassembly line, or recompiler disassemby line?
   if(((uint32)iter->user_data2) == -1)
   {
-    if(((uint32)iter->user_data) >= STARTADDR+0x80)
+    if(((uint32)iter->user_data) >= disasm_list->startAddr+(POSTLINES*4))
         return FALSE;
     iter->stamp    = disasm_list->stamp;
     iter->user_data+= 4;
@@ -444,7 +444,7 @@ disasm_list_iter_children (GtkTreeModel *tree_model,
 
     /* Set iter to first item in list */
     iter->stamp     = disasm_list->stamp;
-    iter->user_data = (uint32*)STARTADDR;
+    iter->user_data = (uint32*)disasm_list->startAddr-PRELINES;
     iter->user_data2= (uint32*)-1;
   }
   else if (((uint32)parent->user_data2)==-1)
@@ -537,7 +537,7 @@ disasm_list_iter_nth_child (GtkTreeModel *tree_model,
   if(parent==NULL)
   {
       iter->stamp = disasm_list->stamp;
-      iter->user_data = (uint32*)(STARTADDR + n*4);
+      iter->user_data = (uint32*)(disasm_list->startAddr - PRELINES + n*4);
       iter->user_data2= (uint32*)-1;
   }
   else if(((uint32)parent->user_data2) == -1)
@@ -601,3 +601,16 @@ disasm_list_new (void)
   return newDisasmlist;
 }
 
+
+
+void disasm_list_update (GtkTreeModel *tree_model, guint address)
+{
+  DisasmList    *disasm_list;
+
+  if(!(DISASM_IS_LIST(tree_model)))
+    return;
+
+  disasm_list = DISASM_LIST(tree_model);
+  
+  disasm_list->startAddr = address;
+}
