@@ -1338,6 +1338,8 @@ void NOTCOMPILED()
 
    if ((PC->addr>>16) == 0xa400)
      recompile_block((int *) SP_DMEM, blocks[0xa4000000>>12], PC->addr);
+   else if (PC->addr>>16 == 0xbfc0)
+     recompile_block((int *) PIF_ROM, blocks[PC->addr>>12], PC->addr);
    else
      {
     unsigned int paddr = 0;

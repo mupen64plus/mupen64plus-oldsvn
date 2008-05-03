@@ -56,6 +56,7 @@
 #include "mupenIniApi.h"
 #include "../r4300/r4300.h"
 #include "../r4300/recomph.h"
+#include "../r4300/interupt.h"
 #include "../memory/memory.h"
 #include "savestates.h"
 #include "vcr.h"
@@ -565,6 +566,11 @@ static int sdl_event_filter( const SDL_Event *event )
                     if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
                         changeWindow();
                     break;
+
+                case SDLK_F9:
+                    add_interupt_event(SOFT_INT, 0);  // Soft Reset Interrupt
+                    break;
+
                 case SDLK_F10:
                     if (l_SpeedFactor > 10)
                     {
@@ -581,6 +587,7 @@ static int sdl_event_filter( const SDL_Event *event )
                         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     }
                     break;
+
                 case SDLK_F12:
                     screenshot();
                     break;

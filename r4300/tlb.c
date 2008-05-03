@@ -450,10 +450,14 @@ void ERET()
 {
    update_count();
    if (Status & 0x4)
-     {
-    printf ("erreur dans ERET\n");
-    stop=1;
-     }
+   {
+     // fixme RG remove
+     //printf ("erreur dans ERET\n");
+     //stop=1;
+     printf("ERET Error Returning to 0x%8x\n", ErrorEPC);
+     Status &= 0xFFFFFFFB;
+     jump_to(ErrorEPC);
+   }
    else
      {
     Status &= 0xFFFFFFFD;
@@ -464,3 +468,4 @@ void ERET()
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
+

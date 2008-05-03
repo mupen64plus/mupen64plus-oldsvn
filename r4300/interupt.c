@@ -334,6 +334,9 @@ void gen_interupt()
 #endif //WITH_LIRC
     }
 
+    // dont service interrupts when ERL is set
+    if (Status & 4) return;
+
     if (stop == 1)
     {
         vi_counter = 0; // debug
@@ -515,7 +518,7 @@ void gen_interupt()
             if ((Status & 7) != 1) return;
             if (!(Status & Cause & 0xFF00)) return;
             break;
-    
+
         case DP_INT:
             remove_interupt_event();
             dpc_register.dpc_status &= ~2;
@@ -528,6 +531,47 @@ void gen_interupt()
             if ((Status & 7) != 1) return;
             if (!(Status & Cause & 0xFF00)) return;
             break;
+
+        case SOFT_INT:
+            // Soft Reset -- remove interrupt event from queue
+            remove_interupt_event();
+            // reset TS and NMI
+            // set BEV, SR, and ERL
+            Status = (Status & ~0x280000) | 0x500004;
+            // set ErrorEPC with last instruction address and set next instruction address to reset vector
+            if (interpcore)
+            {
+                ErrorEPC = interp_addr;
+                interp_addr = 0xBFC00000;
+                last_addr = interp_addr;
+            }
+            else
+            {
+                ErrorEPC = PC->addr;
+                jump_to(0xBFC00000);
+                last_addr = PC->addr;
+            }
+            if(delay_slot==1 || delay_slot==3)
+            {
+                ErrorEPC-=4;
+            }
+            // jump there
+            if (dynacore)
+            {
+                dyna_jump();
+                if (!dyna_interp) delay_slot = 0;
+            }
+            if (!dynacore || dyna_interp)
+            {
+                dyna_interp = 0;
+                if (delay_slot)
+                {
+                    if (interpcore) skip_jump = interp_addr;
+                    else skip_jump = PC->addr;
+                    next_interupt = 0;
+                }
+            }
+            return;
 
         default:
             remove_interupt_event();

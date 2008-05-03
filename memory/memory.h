@@ -51,6 +51,7 @@ extern unsigned char *SP_DMEMb;
 extern unsigned int *SP_IMEM;
 extern unsigned int PIF_RAM[0x40/4];
 extern unsigned char *PIF_RAMb;
+extern unsigned int PIF_ROM[0x800/4];
 extern unsigned int rdram[0x800000/4];
 extern unsigned int address, word;
 extern unsigned char byte;
