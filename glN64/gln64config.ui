@@ -1,0 +1,231 @@
+<ui version="4.0" >
+ <class>glN64ConfigWidget</class>
+ <widget class="QWidget" name="glN64ConfigWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>263</width>
+    <height>335</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <property name="margin" >
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="title" >
+      <string>Display</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2" >
+      <property name="fieldGrowthPolicy" >
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="rowWrapPolicy" >
+       <enum>QFormLayout::DontWrapRows</enum>
+      </property>
+      <item row="0" column="0" >
+       <widget class="QLabel" name="label" >
+        <property name="minimumSize" >
+         <size>
+          <width>1</width>
+          <height>1</height>
+         </size>
+        </property>
+        <property name="text" >
+         <string>Resolution:</string>
+        </property>
+        <property name="buddy" >
+         <cstring>kcfg_Resolution</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QComboBox" name="kcfg_Resolution" >
+        <property name="editable" >
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text" >
+          <string>320 x 400</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>400 x 300</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>480 x 360</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>640 x 480</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>800 x 600</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>960 x 720</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1024 x 768</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1152 x 864</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1280 x 960</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1280 x 1024</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1440 x 1080</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1600 x 1200</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1680 x 1050</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>1920 x 1200</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QCheckBox" name="kcfg_DrawFog" >
+        <property name="text" >
+         <string>Draw Fog</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QCheckBox" name="kcfg_TwoExSaiTextureScaling" >
+        <property name="text" >
+         <string>2xSAI Texture Scaling</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" >
+       <widget class="QCheckBox" name="kcfg_AnisotropicFiltering" >
+        <property name="text" >
+         <string>Anisotropic Filtering</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" >
+       <widget class="QCheckBox" name="kcfg_ForceBilinearFiltering" >
+        <property name="text" >
+         <string>Force Biliner Filtering</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" >
+       <widget class="QCheckBox" name="kcfg_DitheredAlphaTesting" >
+        <property name="text" >
+         <string>Dithered Alpha Testing</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2" >
+     <property name="title" >
+      <string>Textures</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout" >
+      <property name="fieldGrowthPolicy" >
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="labelAlignment" >
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <item row="0" column="0" >
+       <widget class="QLabel" name="label_2" >
+        <property name="text" >
+         <string>Bit Depth</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QComboBox" name="kcfg_BitDepth" >
+        <item>
+         <property name="text" >
+          <string>16-bit only (faster)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>16-bit and 32-bit (normal)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>32-bit (best for 2xSAI)</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="label_3" >
+        <property name="text" >
+         <string>Cache Size</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QSpinBox" name="kcfg_CacheSize" >
+        <property name="suffix" >
+         <string> MB</string>
+        </property>
+        <property name="maximum" >
+         <number>2048</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QCheckBox" name="kcfg_HwFramebufferTextures" >
+        <property name="text" >
+         <string>HW Framebuffer Textures</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
