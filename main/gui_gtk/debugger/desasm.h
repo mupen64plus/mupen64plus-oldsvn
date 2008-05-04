@@ -45,8 +45,8 @@ int desasm_opened;
 GtkWidget *winDesasm;
 
 void init_desasm();
+void refresh_desasm();
 void update_desasm( uint32 focused_address );
-void update_desasm_color( uint32 address );
 
 void switch_button_to_run();
 #endif  // GUIGTK_DESASM_H

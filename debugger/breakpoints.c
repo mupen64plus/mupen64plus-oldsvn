@@ -110,9 +110,9 @@ int lookup_breakpoint( uint32 address, uint32 flags)
 int check_breakpoints( uint32 address )
 {
     int bpt=lookup_breakpoint( address, BPT_FLAG_ENABLED | BPT_FLAG_EXEC );
-    //if( (bpt != -1) && BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED))
+    if( (bpt != -1) && BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED))
         return bpt;
-    //return -1;
+    return -1;
 }
 
 

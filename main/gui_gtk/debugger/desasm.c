@@ -50,6 +50,34 @@ static void on_goto();
 
 static void on_close();
 
+void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
+                       GtkTreeModel *tree_model, GtkTreeIter *iter,gpointer data)
+{
+  if(((int)iter->user_data2)==-1 && PC!=NULL)
+    {
+      if(check_breakpoints((int)iter->user_data) != -1)
+	{
+	  if(PC->addr == ((int)iter->user_data))
+	    g_object_set(G_OBJECT(cell), "cell-background-gdk", 
+			 &color_PC_on_BP, "cell-background-set", TRUE, NULL);
+	  else
+	    g_object_set(G_OBJECT(cell), "cell-background-gdk", &color_BP,
+			 "cell-background-set", TRUE, NULL);
+	}
+      else
+	{
+	  if(PC->addr == ((int)iter->user_data))
+	    g_object_set(G_OBJECT(cell), "cell-background-gdk", &color_PC,
+			 "cell-background-set", TRUE, NULL);
+	  else
+	    g_object_set(G_OBJECT(cell), "cell-background-set", FALSE, NULL);
+	}
+    }
+  else
+    g_object_set(G_OBJECT(cell), "cell-background-set", FALSE, NULL);
+
+  return;
+}
 
 
 //]}=-=-=-=-=-=-=-=-=-=-=[ Initialisation Desassembleur ]=-=-=-=-=-=-=-=-=-=-={[
@@ -85,6 +113,8 @@ void init_desasm()
     GtkTreeViewColumn  *col;
     renderer = gtk_cell_renderer_text_new();
     col = gtk_tree_view_column_new_with_attributes("Address", renderer, "text", 0, NULL);
+    gtk_tree_view_column_set_cell_data_func(col, renderer, disasm_set_color, NULL, NULL);
+
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
     col = gtk_tree_view_column_new_with_attributes("Opcode", renderer, "text", 1, NULL);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
@@ -92,7 +122,7 @@ void init_desasm()
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
 
     adj = gtk_adjustment_new(0, -500, 500, 1, max_row, max_row);
-    //gtk_tree_view_set_vadjustment( GTK_TREE_VIEW( clDesasm ), GTK_ADJUSTMENT(adj));
+
 
     gtk_box_pack_start( GTK_BOX(boxH1), clDesasm, TRUE, TRUE, 0 );
 
@@ -212,54 +242,15 @@ void update_desasm( uint32 focused_address )
 //Display disassembled instructions around a 'focused_address'
 //  (8 instructions before 'focused_address', the rest after).
 {
-    int i, row;
-    uint32 address;
-
-    //=== Disassembly filling =========================/
-    //Display starts 8 instructions
-    address = focused_address - 0x020;  //8 instructions before.
-    for (i=0; i<max_row; i++) {
-        address = address + 0x4;
-        row = add_instr( address );
-    //    if( check_breakpoints(address) != -1 )
-    //        gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_BP);
-    }
-
-    //=== Update Color of new PC Row =================/
-    //row = gtk_clist_find_row_from_data( GTK_CLIST(clDesasm), (gpointer) PC->addr);
-    //if( check_breakpoints(PC->addr) == -1 )
-    //    gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_PC);
-    //else
-    //    gtk_clist_set_background( GTK_CLIST(clDesasm), row, &color_PC_on_BP);
-
-    //gtk_clist_thaw( GTK_CLIST(clDesasm) );
     disasm_list_update(cmDesasm, focused_address);
     gtk_widget_queue_draw( clDesasm );
     previous_focus = focused_address;
 }
 
 
-void update_desasm_color( uint32 address )
+void refresh_desasm()
 {
-    int row;    // row whose color has to be updated.
-    GdkColor *new_color;
-
-    //row = gtk_clist_find_row_from_data( GTK_CLIST(clDesasm), (gpointer) address );
-    /*if( row != -1) {
-        if( check_breakpoints(address) == -1 ) {
-            if( address != PC->addr )
-                new_color = &color_normal;
-            else
-                new_color = &color_PC;
-        }
-        else {
-            if( address != PC->addr )
-                new_color = &color_BP;
-            else
-                new_color = &color_PC_on_BP;
-        }
-    }*/
-    //gtk_clist_set_background( GTK_CLIST(clDesasm), row, new_color);
+  gtk_widget_queue_draw( clDesasm );
 }
 
 

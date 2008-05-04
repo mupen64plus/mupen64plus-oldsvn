@@ -203,6 +203,7 @@ void remove_breakpoint_by_row( int row )
     
     //gtk_clist_remove( GTK_CLIST(clBreakpoints), row);
     update_breakpoints();
+    refresh_desasm();
 }
 
 
@@ -278,6 +279,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
 	gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer) newbp.address );
     
 	update_breakpoints();
+        refresh_desasm();
     return FALSE; //don't add the typed string, update_breakpoints() handles it
 }
 
@@ -300,6 +302,8 @@ static void on_add()
     free(line[0]);
     free(line);
 	
+    refresh_desasm();
+
 /*
 	if(add_breakpoint(address) == -1)
 	{
@@ -335,12 +339,12 @@ static void on_remove()
     	if( selected[i] == 1 ) {
             address = (uint32) gtk_clist_get_row_data( GTK_CLIST(clBreakpoints), i);
             remove_breakpoint_by_row( i );
-            update_desasm_color( address );
             selected[i] = 0;
         }
     }
     gtk_clist_unselect_all( GTK_CLIST(clBreakpoints) );
     gtk_clist_thaw( GTK_CLIST(clBreakpoints) );
+    refresh_desasm();
 }
 
 
@@ -378,6 +382,7 @@ static void _toggle(int flag)
 		}
 	}
 	update_breakpoints();
+	refresh_desasm();
 }
 
 
@@ -386,6 +391,7 @@ static void on_edit()
 	//FIXME: not yet implemented. should display the textbox again as if we were entering
 	//a new breakpoint, and update the selected one. probably disable the button if more
 	//than one or none selected.
+  refresh_desasm();
 }
 
 
