@@ -44,6 +44,8 @@ int l_CurrentVI = 0;
 char l_InputDisplay[64];
 int l_LastInput = 0;
 
+int l_TotalSamples = 0;
+
 int g_UseSaveData = 1; // TAS will always use its own version of savedata. This is a global variable
 
 FILE *PlaybackFile;
@@ -58,13 +60,38 @@ int BeginPlayback(char *sz_filename)
     	printf("Could not open file %s for playback.",sz_filename);
     	return 0;
     }
-	
+    g_EmulatorPlayback = 1;
+	printf("Reading header file of the m64 file.\n");
 	fread(&Header,sizeof(Header),1,PlaybackFile);
+	SetupEmulationState();
 	// todo: verify all header information
-	
-	// hack: assume playback from start
-	g_UseSaveData = 1;
-	g_EmulatorPlayback = 1;
+
+    return 1;
+}
+
+int SetupEmulationState()
+{
+    if (Header.signature[0] != 0x4D && Header.signature[1] != 0x36
+    && Header.signature[2] != 0x34 && Header.signature[3] != 0x1A)
+    {
+    	printf("Invalid signature in header file.\n");
+    	return 0;
+    }
+    
+    if (Header.version_number != 3) 
+    {
+    	printf("Invalid version number: %i\n",Header.version_number);
+    }
+    
+    printf("Movie UID: %i\n",Header.movie_uid);
+    printf("Total VI's: %i\n",Header.total_vi);
+    printf("Rerecord Count: %i\n",Header.rerecord_count);
+    printf("FPS: %i\n",Header.fps);
+    printf("Controllers: %i\n",Header.controllers);
+    // todo: enable this many controllers
+    printf("Input Samples: %i\n",Header.input_samples);
+    l_TotalSamples = Header.input_samples;
+    
     return 1;
 }
 
@@ -135,8 +162,16 @@ void InputToString ()
     printf("Input: %s\n",l_InputDisplay);
 }
 
+void _StartROM()
+{
+	l_CurrentSample = 0;
+	l_CurrentVI = 0;
+	g_UseSaveData = 1;
+}
+
 void EndPlaybackAndRecording()
 {
+	l_TotalSamples = 0;
 	l_CurrentSample = 0;
 	l_CurrentVI = 0;
 	g_UseSaveData = 1;
@@ -176,6 +211,11 @@ void _GetKeys( int Control, BUTTONS *Keys )
         if (Control == 3)
         {
         	l_CurrentSample++;
+        	if (l_CurrentSample > l_TotalSamples)
+        	{
+        		printf("Playback complete.\n");
+        		EndPlaybackAndRecording();
+        	}
         }
         // read keys from file.
     }

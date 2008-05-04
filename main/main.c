@@ -429,7 +429,7 @@ void startEmulation(void)
     }
     
     // cleanup variables for re-recording.
-    EndPlaybackAndRecording();
+    _StartROM();
     
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
