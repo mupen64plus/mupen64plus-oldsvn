@@ -46,7 +46,8 @@
 #include "../main/main.h"
 #include "../main/plugin.h"
 #include "../main/savestates.h"
-#include "../main/vcr.h"
+#include "../main/inputrecording.h"
+//#include "../main/vcr.h"
 #include "../main/cheat.h"
 #ifdef WITH_LIRC
 #include "../main/lirc.h"
