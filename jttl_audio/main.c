@@ -175,6 +175,8 @@ void InitializeAudio(int freq);
 void ReadConfig();
 void InitializeSDL();
 
+int critical_failure = 0;
+    
 EXPORT void CALL AiDacrateChanged( int SystemType )
 {
     int f = GameFreq;
@@ -196,7 +198,8 @@ EXPORT void CALL AiDacrateChanged( int SystemType )
 
 EXPORT void CALL AiLenChanged( void )
 {
-
+    if (critical_failure == 1)
+        return;
     DWORD LenReg = *AudioInfo.AI_LEN_REG;
     Uint8 *p = (Uint8*)(AudioInfo.RDRAM + (*AudioInfo.AI_DRAM_ADDR_REG & 0xFFFFFF));
 #ifdef DEBUG
@@ -473,6 +476,7 @@ EXPORT void CALL DllTest ( HWND hParent )
     if((init_audio == TRUE) && ( init_timer == TRUE ) && ( open_audio_device == TRUE ) && (format_match == TRUE) && (freq_match == TRUE)) 
     {
         sprintf(tMsg,"Audio test successful.");
+        critical_failure = 0;
     }
     else 
     {
@@ -497,6 +501,7 @@ EXPORT void CALL DllTest ( HWND hParent )
         {
             sprintf(tMsg,"%sUnable to get the requested output frequency.\n",tMsg);
         }
+        critical_failure = 1;
     }
 
     label = gtk_label_new(tMsg);
@@ -512,10 +517,12 @@ EXPORT void CALL DllTest ( HWND hParent )
     if((init_audio == TRUE) && ( init_timer == TRUE ) && ( open_audio_device == TRUE ) && (format_match == TRUE) && (freq_match == TRUE)) 
     {
         printf("[JttL's SDL Audio plugin] Audio test successful.");
+        critical_failure = 0;
     }
     else 
     {
         printf("[JttL's SDL Audio plugin] Audio test failed. See above for details.");
+        critical_failure = 1;
     }
 #endif
 }
@@ -550,6 +557,7 @@ SRC_DATA src_data;
 
 static int resample(Uint8 *input, int input_avail, int oldsamplerate, Uint8 *output, int output_needed, int newsamplerate)
 {
+
 #ifdef USE_SRC
     if(Resample == 2)
     {
@@ -663,8 +671,10 @@ void InitializeSDL()
     if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
     {
         fprintf(stderr, "[JttL's SDL Audio plugin] Error: Failed to initialize SDL audio subsystem.\n[JttL's SDL Audio plugin] Error: Forcing exit.\n");
-        exit(-1);
+        critical_failure = 1;
+        return;
     }
+    critical_failure = 0;
 
 }
 void InitializeAudio(int freq)
@@ -682,7 +692,8 @@ void InitializeAudio(int freq)
 #endif
         InitializeSDL();
     }
-
+    if (critical_failure == 1)
+        return;
     GameFreq = freq; // This is important for the sync
     if(hardware_spec != NULL) free(hardware_spec);
     SDL_PauseAudio(1);
@@ -737,7 +748,8 @@ void InitializeAudio(int freq)
     if ( SDL_OpenAudio(desired, obtained) < 0 )
     {
         fprintf(stderr, "[JttL's SDL Audio plugin] Error: Couldn't open audio: %s\n", SDL_GetError());
-        exit(-1);
+        critical_failure = 1;
+        return;
     }
     /* desired spec is no longer needed */
 
@@ -765,6 +777,8 @@ void InitializeAudio(int freq)
 }
 EXPORT void CALL RomClosed( void )
 {
+   if (critical_failure == 1)
+       return;
     printf("[JttL's SDL Audio plugin] Cleaning up SDL sound plugin...\n");
     
     // Pause SDL Audio (Should be done before clean up)
