@@ -46,8 +46,9 @@ GTK_LIBS	= `pkg-config gtk+-2.0 --libs`
 GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 
 # set KDE flags and libraries
-KDE_FLAGS   = `pkg-config --cflags qt-mt` -I/usr/kde/3.5/include/ -I/usr/include/qt4
-KDE_LIBS    = `pkg-config --libs qt-mt`
+QT_FLAGS    = `pkg-config QtGui --cflags` `pkg-config QtCore --cflags`
+KDE_FLAGS   = -I`kde4-config --path include` -I/usr/include/kde4/KDE $(QT_FLAGS)
+KDE_LIBS    = -lQtCore -lQtGui -lkdecore -lkdeui -lkio -L/usr/lib64/kde4/devel
 
 # set base program pointers and flags
 CC      = gcc

@@ -8,7 +8,7 @@ CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -Wall
 
 ifeq ($(GUI), KDE4)
   LDFLAGS += $(KDE_LIBS)
-  OBJECTS = Config_kde4.o ui_gln64config.o
+  OBJECTS = Config_kde4.o
 else
   LDFLAGS += $(GTK_LIBS) $(GTHREAD_LIBS)
   OBJECTS = Config_gtk2.o
@@ -56,13 +56,10 @@ clean:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 ui_gln64config.h: gln64config.ui
-	uic $< -o $@
-
-ui_gln64config.cpp: ui_gln64config.h
-	uic -impl $*.h $< -o $@
+	uic-qt4 $< -o $@
 
 gln64settings.h: gln64.kcfg gln64settings.kcfgc
-	kconfig_compiler gln64.kcfg gln64settings.kcfgc
+	kconfig_compiler4 gln64.kcfg gln64settings.kcfgc
 
 glN64.so: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -o $@

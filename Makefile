@@ -37,7 +37,8 @@ ifeq ($(GUI), NONE)
   CFLAGS += -DNO_GUI
 else
   ifeq ($(GUI), KDE4)
-  CFLAGS += $(KDE_FLAGS)
+  CFLAGS += $(KDE_FLAGS) $(GTK_FLAGS)
+  LDFLAGS += $(KDE_LIBS)
     ifeq ($(DBG), 1)
       CFLAGS += $(GTK_FLAGS)
     endif
@@ -144,7 +145,23 @@ OBJ_KDE_GUI = \
 	main/gui_kde4/pluginconfig.o \
 	main/gui_kde4/plugins.o \
 	main/gui_kde4/romdirectorieslistwidget.o \
-	main/gui_kde4/rommodel.o
+	main/gui_kde4/rommodel.o \
+	main/gui_kde4/settings.o
+
+OBJ_KDE_MOC = \
+	main/gui_kde4/mainwidget.moc \
+	main/gui_kde4/mainwindow.moc \
+	main/gui_kde4/pluginconfig.moc \
+	main/gui_kde4/plugins.moc \
+	main/gui_kde4/romdirectorieslistwidget.moc \
+	main/gui_kde4/rommodel.moc
+
+OBJ_KDE_HEADERS = \
+	main/gui_kde4/mupen64plus.h \
+	main/gui_kde4/ui_romdirectorieslistwidget.h \
+	main/gui_kde4/ui_pluginssettingswidget.h \
+	main/gui_kde4/ui_mainsettingswidget.h \
+	main/gui_kde4/ui_rombrowsersettingswidget.h
 
 OBJ_DBG = \
         debugger/debugger.o \
@@ -197,12 +214,19 @@ ifeq ($(LIRC), 1)
 endif
 ifeq ($(GUI), KDE4)
   OBJECTS += $(OBJ_KDE_GUI)
-  LIBS += $(KDE_LIBS)
+  LIBS += $(KDE_LIBS) $(GTK_LIBS)
 else
   ifneq ($(GUI), NONE)
     OBJECTS += $(OBJ_GTK_GUI)
     LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
   endif
+endif
+
+# select proper compiler for final mupen64plus linking
+ifeq ($(GUI), KDE4)
+  MUPENCC = $(CXX)
+else
+  MUPENCC = $(CC)
 endif
 
 # build targets
@@ -236,11 +260,11 @@ targets:
 all: $(ALL)
 
 mupen64plus: $(OBJECTS)
-	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
+	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 	$(STRIP) $@
 
 mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
-	$(CC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
+	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 
 install:
 	./install.sh $(PREFIX)
@@ -263,6 +287,7 @@ clean:
 	$(RM) -f mupen64plus mupen64plus_dbg 
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
+	$(RM) -f main/gui_kde4/settings.cpp main/gui_kde4/settings.h main/gui_kde4/*.moc main/gui_kde4/ui_*.h
 
 rebuild: clean all
 
@@ -318,3 +343,14 @@ plugins/mupen64_input.so: FORCE
 
 FORCE:
 
+# KDE4 build rules
+main/gui_kde4/ui_%.h: main/gui_kde4/%.ui
+	uic-qt4 $< -o $@
+
+main/gui_kde4/mupen64plus.h: main/gui_kde4/mupen64plus.kcfg main/gui_kde4/settings.kcfgc
+	cd main/gui_kde4; kconfig_compiler4 mupen64plus.kcfg settings.kcfgc
+
+$(OBJ_KDE_GUI): $(OBJ_KDE_MOC) $(OBJ_KDE_HEADERS)
+
+main/gui_kde4/%.moc: main/gui_kde4/%.h
+	moc-qt4 $(KDE_FLAGS) -i $< -o $@
