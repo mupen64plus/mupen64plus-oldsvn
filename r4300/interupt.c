@@ -542,13 +542,13 @@ void gen_interupt()
             if (interpcore)
             {
                 ErrorEPC = interp_addr;
-                interp_addr = 0xBFC00000;
+                interp_addr = 0xa4000040;
                 last_addr = interp_addr;
             }
             else
             {
                 ErrorEPC = PC->addr;
-                jump_to(0xBFC00000);
+                jump_to(0xa4000040);
                 last_addr = PC->addr;
             }
             if(delay_slot==1 || delay_slot==3)

@@ -451,12 +451,8 @@ void ERET()
    update_count();
    if (Status & 0x4)
    {
-     // fixme RG remove
-     //printf ("erreur dans ERET\n");
-     //stop=1;
-     printf("ERET Error Returning to 0x%8x\n", ErrorEPC);
-     Status &= 0xFFFFFFFB;
-     jump_to(ErrorEPC);
+     printf ("erreur dans ERET\n");
+     stop=1;
    }
    else
      {

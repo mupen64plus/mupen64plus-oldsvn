@@ -68,7 +68,6 @@ unsigned char *SP_DMEMb = (unsigned char *)(SP_DMEM);
 unsigned char *SP_IMEMb = (unsigned char*)(SP_DMEM+0x1000/4);
 unsigned int PIF_RAM[0x40/4];
 unsigned char *PIF_RAMb = (unsigned char *)(PIF_RAM);
-unsigned int PIF_ROM[0x800/4]= { /* Insert PIF_ROM data here */ };
 
 // address : address of the read/write operation being done
 unsigned int address = 0;
@@ -132,15 +131,6 @@ int init_memory(int DoByteSwap)
      roml = (void *)rom;
      for (i=0; i<(taille_rom/4); i++) roml[i] = sl(roml[i]);
    }
-
-   static int swap_pif_rom = 1;
-/* fixme RG
-   if (swap_pif_rom)
-   {
-       for (i=0; i<(0x800/4); i++) PIF_ROM[i] = sl(PIF_ROM[i]);
-       swap_pif_rom = 0;
-   }
-*/
 
    //init hash tables
    for (i=0; i<(0x10000); i++)
@@ -3526,24 +3516,15 @@ void write_rom()
    lastwrite = word;
 }
 
-#define EMU64_DEBUG
-
 void read_pif()
 {
-    if (*address_low < 0x7C0)
-    {
-        *rdword = sl(*((unsigned int *) ((unsigned char *) PIF_ROM + (address & 0x7FF))));
-        return;
-    }
 #ifdef EMU64_DEBUG
-/* fixme RG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
     printf("error in reading a word in PIF at address %08x\n", address);
     *rdword = 0;
     return;
      }
-*/
 #endif
    *rdword = sl(*((unsigned int *)(PIF_RAMb + (address & 0x7FF) - 0x7C0)));
 }
