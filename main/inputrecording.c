@@ -47,6 +47,8 @@ int l_LastInput = 0;
 int l_TotalSamples = 0;
 
 int g_UseSaveData = 1; // TAS will always use its own version of savedata. This is a global variable
+int l_ForceManual = 0; // use manual settings - ie: do not let emulator configure for you.
+
 
 FILE *PlaybackFile;
 m64_header Header;
@@ -64,9 +66,35 @@ int BeginPlayback(char *sz_filename)
 	printf("Reading header file of the m64 file.\n");
 	fread(&Header,sizeof(Header),1,PlaybackFile);
 	SetupEmulationState();
-	// todo: verify all header information
+	
 
     return 1;
+}
+
+int BeginRecording(char *sz_filename)
+{
+    RecrodingFile = fopen(sz_filename,"wb");
+    if (!RecordingFile)
+    {
+        EndPlaybackAndRecording();
+        printf("Could not create file %s for plaback.",sz_filename);
+    }
+    
+    g_EmulatorRecording = 1;
+    printf("Writing header file to m64 file.\n");
+    WriteEmulationState();
+}
+
+int WriteEmulationState()
+{
+    Header.signature[0] = 0x4D;
+    Header.signature[1] = 0x36;
+    Header.signature[2] = 0x34;
+    Header.signature[3] = 0x1A;
+    
+    Header.version_number = 3;
+    
+    
 }
 
 int SetupEmulationState()
@@ -88,9 +116,21 @@ int SetupEmulationState()
     printf("Rerecord Count: %i\n",Header.rerecord_count);
     printf("FPS: %i\n",Header.fps);
     printf("Controllers: %i\n",Header.controllers);
-    // todo: enable this many controllers
+    // todo: enable this many controllers, check force_manual
     printf("Input Samples: %i\n",Header.input_samples);
     l_TotalSamples = Header.input_samples;
+    printf("Start Type: %s\n", (Header.start_type == 1 ? "Snapshot" : "Start"));
+    if (Header.start_type == 1)
+    {
+        // todo: look for .st of the same file name
+    }
+    //todo: check  020 4-byte unsigned int: controller flags
+    
+    printf("ROM Name: %s\n",Header.rom_name);
+    printf("ROM CRC: %i\n",Header.rom_crc);
+    printf("ROM CC: %i\n",Header.rom_cc);
+    
+    //todo: plugin checking
     
     return 1;
 }
