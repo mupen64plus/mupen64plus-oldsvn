@@ -43,7 +43,7 @@
 #include "../main/main.h"
 #include "../main/plugin.h"
 #include "../main/guifuncs.h"
-#include "../main/vcr.h"
+#include "../main/inputrecording.h"
 
 static unsigned char eeprom[0x800];
 static unsigned char mempack[4][0x8000];
@@ -91,17 +91,27 @@ void EepromCommand(BYTE *Command)
          FILE *f;
          int i;
          filename = malloc(strlen(get_savespath())+
-                   strlen(ROM_SETTINGS.goodname)+4+1);
+         strlen(ROM_SETTINGS.goodname)+4+1);
          strcpy(filename, get_savespath());
-         strcat(filename, ROM_SETTINGS.goodname);
+         if (g_EmulatorPlayback == 1)
+         {
+             strcat(filename, "CurrentPlayback");
+         }
+         else
+         {
+             strcat(filename, ROM_SETTINGS.goodname);
+         }
          strcat(filename, ".eep");
-         f = fopen(filename, "rb");
-         if (f)
-           {
-          fread(eeprom, 1, 0x800, f);
-          fclose(f);
-           }
-         else for (i=0; i<0x800; i++) eeprom[i] = 0;
+         if (g_UseSaveData == 1)
+         {
+             f = fopen(filename, "rb");
+             if (f)
+             {
+                 fread(eeprom, 1, 0x800, f);
+                 fclose(f);
+             }
+             else for (i=0; i<0x800; i++) eeprom[i] = 0;
+         } else for (i=0; i<0x800; i++) eeprom[i] = 0;
          free(filename);
          memcpy(&Command[4], eeprom + Command[3]*8, 8);
       }
@@ -114,25 +124,45 @@ void EepromCommand(BYTE *Command)
          filename = malloc(strlen(get_savespath())+
                    strlen(ROM_SETTINGS.goodname)+4+1);
          strcpy(filename, get_savespath());
-         strcat(filename, ROM_SETTINGS.goodname);
-         strcat(filename, ".eep");
-         f = fopen(filename, "rb");
-         if (f)
-           {
-          fread(eeprom, 1, 0x800, f);
-          fclose(f);
-           }
-         else for (i=0; i<0x800; i++) eeprom[i] = 0;
-         memcpy(eeprom + Command[3]*8, &Command[4], 8);
-         f = fopen(filename, "wb");
-         if (f == NULL)
+         if (g_EmulatorPlayback == 1)
          {
-           printf("Warning: Couldn't open EEPROM file '%s' for writing.\n", filename);
+             strcat(filename, "CurrentPlayback");
          }
          else
          {
-           fwrite(eeprom, 1, 0x800, f);
-           fclose(f);
+             strcat(filename, ROM_SETTINGS.goodname);
+         }
+         strcat(filename, ".eep");
+         if (g_UseSaveData == 1)
+         {
+             f = fopen(filename, "rb");
+             if (f)
+             {
+               fread(eeprom, 1, 0x800, f);
+               fclose(f);
+             }
+             else
+             {
+                 for (i=0; i<0x800; i++) eeprom[i] = 0;
+             }             
+         }
+         else
+         {
+         	 for (i=0; i<0x800; i++) eeprom[i] = 0;
+         }
+         memcpy(eeprom + Command[3]*8, &Command[4], 8);
+         if (g_UseSaveData == 1)
+         {
+             f = fopen(filename, "wb");
+             if (f == NULL)
+             {
+                printf("Warning: Couldn't open EEPROM file '%s' for writing.\n", filename);
+             }
+             else
+             {
+               fwrite(eeprom, 1, 0x800, f);
+               fclose(f);
+             }
          }
          free(filename);
       }
@@ -202,11 +232,9 @@ void internal_ReadController(int Control, BYTE *Command)
     if (Controls[Control].Present)
       {
          BUTTONS Keys;
-#ifdef VCR_SUPPORT
-         VCR_getKeys(Control, &Keys);
-#else
-         getKeys(Control, &Keys);
-#endif
+         
+         _GetKeys(Control, &Keys);
+
          *((unsigned int *)(Command + 3)) = Keys.Value;
 #ifdef COMPARE_CORE
          check_input_sync(Command+3);

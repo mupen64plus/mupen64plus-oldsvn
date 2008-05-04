@@ -46,7 +46,8 @@
 #include "flashram.h"
 #include "../main/main.h"
 #include "../main/plugin.h"
-#include "../main/vcr.h"
+#include "../main/inputrecording.h"
+//#include "../main/vcr.h"
 
 /* definitions of the rcp's structures and memory area */
 RDRAM_register rdram_register;
