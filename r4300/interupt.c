@@ -538,18 +538,17 @@ void gen_interupt()
             // reset TS and NMI
             // set BEV, SR, and ERL
             Status = (Status & ~0x280000) | 0x500004;
-            reset_go();
             // set ErrorEPC with last instruction address and set next instruction address to reset vector
             if (interpcore)
             {
                 ErrorEPC = interp_addr;
-                interp_addr = 0xa4000040;
+                interp_addr = 0xBFC00000;
                 last_addr = interp_addr;
             }
             else
             {
                 ErrorEPC = PC->addr;
-                jump_to(0xa4000040);
+                jump_to(0xBFC00000);
                 last_addr = PC->addr;
             }
             if(delay_slot==1 || delay_slot==3)

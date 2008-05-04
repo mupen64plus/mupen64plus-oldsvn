@@ -65,7 +65,6 @@ extern int no_audio_delay;
 extern int no_compiled_jump;
 
 void go();
-void reset_go();
 void pure_interpreter();
 void compare_core();
 void jump_to_func();
