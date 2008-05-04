@@ -61,5 +61,7 @@ DisasmList       *disasm_list_new (void);
 
 void disasm_list_update (GtkTreeModel *tree_model, guint address);
 
+gboolean disasm_list_get_iter (GtkTreeModel *tree_model,
+		      GtkTreeIter  *iter, GtkTreePath  *path);
 
 #endif /* _disasm_list_h_included_ */

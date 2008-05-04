@@ -43,7 +43,7 @@ int add_breakpoint( uint32 address )
     }
     g_Breakpoints[g_NumBreakpoints].address=address;
     g_Breakpoints[g_NumBreakpoints].endaddr=address;
-    BPT_SET_FLAG(g_Breakpoints[g_NumBreakpoints], BPT_FLAG_WRITE);
+    BPT_SET_FLAG(g_Breakpoints[g_NumBreakpoints], BPT_FLAG_EXEC);
 
     enable_breakpoint(g_NumBreakpoints);
 

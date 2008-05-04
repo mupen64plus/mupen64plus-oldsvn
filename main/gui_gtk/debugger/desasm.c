@@ -42,7 +42,8 @@ static DisasmList *cmDesasm;
 static GdkColor color_normal, color_BP, color_PC, color_PC_on_BP;
 
 // Callback functions
-static void on_click( GtkWidget *widget, GdkEventButton *event );
+static void on_click( GtkTreeView *widget, GtkTreePath *path, 
+		      GtkTreeViewColumn *col, gpointer user_data );
 static void on_scroll(GtkAdjustment *adjustment, gpointer user_data);
 static void on_step();
 static void on_run();
@@ -146,8 +147,8 @@ void init_desasm()
     gtk_widget_show_all( winDesasm );
 
     //=== Signal Connection ===========================/
-    //gtk_signal_connect( GTK_OBJECT(clDesasm), "button_press_event",
-    //                GTK_SIGNAL_FUNC(on_click), NULL );
+    gtk_signal_connect( GTK_OBJECT(clDesasm), "row-activated",
+                    GTK_SIGNAL_FUNC(on_click), NULL );
     gtk_signal_connect( GTK_OBJECT(adj), "value-changed",
                     GTK_SIGNAL_FUNC(on_scroll), NULL );
     gtk_signal_connect( GTK_OBJECT(buRun), "clicked", on_run, NULL );
@@ -302,38 +303,38 @@ static void on_scroll(GtkAdjustment *adjustment, gpointer user_data)
 }
 
 
-static void on_click( GtkWidget *clist, GdkEventButton *event )
+
+static void on_click( GtkTreeView *widget, GtkTreePath *path, 
+		       GtkTreeViewColumn *col, gpointer user_data )
 //Add a breakpoint on double-clicked linelines.
 {
-    //FIXME: minor corner case - Bad color when clicked row is PC.
-    int clicked_row;
-    uint32 clicked_address;
-    int break_number;
-    
-    if(event->type==GDK_2BUTTON_PRESS) {
-        gtk_clist_get_selection_info( GTK_CLIST(clist), event->x, event->y, &clicked_row, NULL);
-        clicked_address =(uint32) gtk_clist_get_row_data( GTK_CLIST(clist), clicked_row);
-        printf( "[DASM] click on row: %d\t address: 0x%lX\n", clicked_row, clicked_address );
+  uint32 clicked_address;
+  int break_number;
+  GtkTreeIter iter;
+  gint depth;
 
-	break_number = lookup_breakpoint(clicked_address, BPT_FLAG_EXEC);
-        if( break_number==-1 ) {
-            add_breakpoint( clicked_address );
-            gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_BP);
-        }
-        else if(BPT_CHECK_FLAG(g_Breakpoints[break_number], BPT_FLAG_ENABLED))
-        {
-            disable_breakpoint( break_number );
-            gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_normal);
-        }
-        else
-        {
-            enable_breakpoint( break_number );
-            gtk_clist_set_background(  GTK_CLIST(clist), clicked_row, &color_BP);
-        }
-    update_breakpoints();
-    }
+  if(gtk_tree_path_get_depth(path) > 1)
+    return;// do nothing if it is recompiler disassembly
+
+  disasm_list_get_iter(DISASM_LIST(cmDesasm), &iter, path);
+
+  clicked_address =(uint32) iter.user_data;
+
+  break_number = lookup_breakpoint(clicked_address, BPT_FLAG_EXEC);
+
+  if( break_number==-1 ) {
+    add_breakpoint( clicked_address );
+  }
+  else if(BPT_CHECK_FLAG(g_Breakpoints[break_number], BPT_FLAG_ENABLED)) {
+    disable_breakpoint( break_number );
+  }
+  else {
+    enable_breakpoint( break_number );
+  }
+
+  update_breakpoints();
+  refresh_desasm();
 }
-
 
 static void on_close()
 {

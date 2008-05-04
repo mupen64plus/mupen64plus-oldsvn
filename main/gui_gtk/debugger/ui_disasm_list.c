@@ -18,10 +18,10 @@ static gint         disasm_list_get_n_columns   (GtkTreeModel      *tree_model);
 static GType        disasm_list_get_column_type (GtkTreeModel      *tree_model,
                                                  gint               index);
 
-static gboolean     disasm_list_get_iter        (GtkTreeModel      *tree_model,
+/*static gboolean     disasm_list_get_iter        (GtkTreeModel      *tree_model,
                                                  GtkTreeIter       *iter,
                                                  GtkTreePath       *path);
-
+*///moved to ui_disasm_list.h
 static GtkTreePath *disasm_list_get_path        (GtkTreeModel      *tree_model,
                                                  GtkTreeIter       *iter);
 
@@ -250,7 +250,7 @@ disasm_list_get_column_type (GtkTreeModel *tree_model,
  *
  *****************************************************************************/
 
-static gboolean
+gboolean
 disasm_list_get_iter (GtkTreeModel *tree_model,
                       GtkTreeIter  *iter,
                       GtkTreePath  *path)
