@@ -68,6 +68,7 @@ OBJ_CORE = \
 	main/savestates.o \
 	main/unzip.o \
 	main/volume.o \
+	main/inputrecording.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \

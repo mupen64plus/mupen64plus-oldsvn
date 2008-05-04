@@ -119,7 +119,7 @@ endif
 SDL_FLAGS	= `sdl-config --cflags`
 SDL_LIBS	= `sdl-config --libs`
 
-ifeq ($(VCR), 1)
+ifeq ($(AVI), 1)
   # test for presence of avifile
   ifneq ($(shell avifile-config --version), 0)
     # throw error

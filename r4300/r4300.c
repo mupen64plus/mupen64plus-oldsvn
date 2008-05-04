@@ -27,7 +27,8 @@
  *
 **/
 
-#include "../main/vcr.h"
+#include "../main/inputrecording.h"
+//#include "../main/vcr.h"
 #include "r4300.h"
 #include "ops.h"
 #include "../memory/memory.h"
@@ -1757,7 +1758,7 @@ void go()
              (unsigned int)hi,
              (unsigned int)(lo >> 32),
              (unsigned int)lo);
-          printf("après %d instructions soit %x\n",(unsigned int)(debug_count+Count)
+          printf("aprï¿½s %d instructions soit %x\n",(unsigned int)(debug_count+Count)
              ,(unsigned int)(debug_count+Count));
           getchar();
            }*/
