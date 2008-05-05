@@ -472,9 +472,8 @@ int pauseContinueEmulation(void)
             osd_delete_message(msg);
 
         msg = osd_new_message(tr("Pause"));
-        msg->corner = OSD_TOP_RIGHT;
-        msg->timeout[OSD_APPEAR] = 0;
-        msg->timeout[OSD_DISPLAY] = OSD_INFINITE_TIMEOUT;
+        osd_message_set_corner(msg, OSD_TOP_RIGHT);
+        osd_message_set_static(msg);
     }
     
     rompause = !rompause;

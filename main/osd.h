@@ -95,6 +95,8 @@ void osd_render();
 osd_message_t * osd_new_message(const char *, ...);
 void osd_update_message(osd_message_t *, const char *, ...);
 void osd_delete_message(osd_message_t *);
+void osd_message_set_corner(osd_message_t *, enum osd_corner);
+void osd_message_set_static(osd_message_t *);
 
 #ifdef __cplusplus
 }
