@@ -99,7 +99,7 @@ GTKOBJECTS = \
 	messagebox.o
 
 OBJECTS	+= $(GTKOBJECTS) $(WRAPPEROBJECTS)
-TARGET	= glide64.so
+TARGET	= glide64$(LIBSUFFIX)
 
 CFLAGS += -MMD -MP -MQ $@
 DEPS := $(OBJECTS:.o=.d)

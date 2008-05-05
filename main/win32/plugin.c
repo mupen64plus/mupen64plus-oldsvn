@@ -46,6 +46,9 @@
 #include "../../r4300/r4300.h"
 #include "../../memory/memory.h"
 
+#include <SDL/SDL.h>
+#include <SDL/SDL_syswm.h>
+
 CONTROL Controls[4];
 
 static GFX_INFO gfx_info;
@@ -62,7 +65,7 @@ void (*dllAbout)(HWND hParent);
 static void dummy_void() {}
 static BOOL dummy_initiateGFX(GFX_INFO Gfx_Info) { return TRUE; }
 static BOOL dummy_initiateAudio(AUDIO_INFO Audio_Info) { return TRUE; }
-static void dummy_initiateControllers(HWND MainWindow, CONTROL_INFO Control_Info) {}
+static void dummy_initiateControllers(CONTROL_INFO Control_Info) {}
 static void dummy_aiDacrateChanged(int SystemType) {}
 static DWORD dummy_aiReadLength() { return 0; }
 //static void dummy_aiUpdate(BOOL Wait) {}
@@ -106,7 +109,7 @@ void (*romOpen_audio)() = dummy_void;
 void (*closeDLL_input)() = dummy_void;
 void (*controllerCommand)(int Control, BYTE * Command) = dummy_controllerCommand;
 void (*getKeys)(int Control, BUTTONS *Keys) = dummy_getKeys;
-void (*initiateControllers)(HWND MainWindow, CONTROL_INFO ControlInfo) = dummy_initiateControllers;
+void (*initiateControllers)(CONTROL_INFO ControlInfo) = dummy_initiateControllers;
 void (*readController)(int Control, BYTE *Command) = dummy_readController;
 void (*romClosed_input)() = dummy_void;
 void (*romOpen_input)() = dummy_void;
@@ -282,17 +285,17 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
     char *bname = NULL;
     char filepath[PATH_MAX];
 
-    if(strstr(file_name, "/"))
+    if(strstr(file_name, dirsep))
         realpath(file_name, filepath);
     else
         strncpy(filepath, file_name, PATH_MAX);
 
     // if this is not an absolute path, assume plugin file is in install dir
-    if(filepath[0] != '/')
+    if(filepath[0] != dirsep[0])
     {
         bname = strdup(filepath);
         basename(bname);
-        snprintf(filepath, PATH_MAX, "%splugins%c%s", get_installpath(), dirsep[0], bname);
+        snprintf(filepath, PATH_MAX, "%splugins%c%s", getexedir(), dirsep[0], bname);
     }
 
     handle = LoadLibrary(filepath);
@@ -347,10 +350,12 @@ void plugin_scan_installdir(void)
 {
     DIR *dir;
     char cwd[PATH_MAX];
+    char plugin[PATH_MAX];
     struct dirent *entry;
 
-    strncpy(cwd, get_installpath(), PATH_MAX);
+    strncpy(cwd, getexedir(), PATH_MAX);
     strncat(cwd, "plugins", PATH_MAX - strlen(cwd));
+    strncat(cwd, dirsep, PATH_MAX - strlen(cwd));
     dir = opendir(cwd);
 
     if(dir == NULL)
@@ -361,7 +366,7 @@ void plugin_scan_installdir(void)
 
     while((entry = readdir(dir)) != NULL)
     {
-        if (strcmp(entry->d_name + strlen(entry->d_name) - 3, ".so") != 0)
+        if (strcmp(entry->d_name + strlen(entry->d_name) - 4, ".dll") != 0)
           continue;
         
         plugin_scan_file(entry->d_name, 0);
@@ -507,6 +512,13 @@ void plugin_load_plugins(const char *gfx_name,
              const char *input_name,
              const char *RSP_name)
 {
+	
+	SDL_SysWMinfo info;
+    SDL_VERSION(&info.version);
+    if (SDL_GetWMInfo(&info) == -1)
+        return;
+	HWND hWnd = info.window;
+
    int i;
    plugin *p;
    void *handle_gfx = NULL,
@@ -562,7 +574,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (viWidthChanged == NULL) viWidthChanged = dummy_void;
     if (captureScreen == NULL) captureScreen = dummy_void;
 
-    gfx_info.hWnd = GetVideo();
+    gfx_info.hWnd = hWnd;
     gfx_info.MemoryBswaped = TRUE;
     gfx_info.HEADER = rom;
     gfx_info.RDRAM = (BYTE*)rdram;
@@ -633,7 +645,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (romClosed_audio == NULL) romClosed_audio = dummy_void;
     if (romOpen_audio == NULL) romOpen_audio = dummy_void;
     
-    audio_info.hwnd = GetVideo();
+    audio_info.hwnd = hWnd;
     audio_info.MemoryBswaped = TRUE;
     audio_info.HEADER = rom;
     audio_info.RDRAM = (BYTE*)rdram;
@@ -684,7 +696,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (keyDown == NULL) keyDown = dummy_keyDown;
     if (keyUp == NULL) keyUp = dummy_keyUp;
     
-    control_info.hMainWindow = GetVideo();
+    control_info.hMainWindow = hWnd;
     control_info.MemoryBswaped = TRUE;
     control_info.HEADER = rom;
     control_info.Controls = Controls;
@@ -694,7 +706,7 @@ void plugin_load_plugins(const char *gfx_name,
          Controls[i].RawData = FALSE;
          Controls[i].Plugin = PLUGIN_NONE;
       }
-    initiateControllers(GetVideo(), control_info);
+    initiateControllers(control_info);
      }
    else
      {

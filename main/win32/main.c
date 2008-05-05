@@ -135,12 +135,12 @@ void stopEmulation(void)
         info_message(tr("Stopping emulation."));
         rompause = 0;
         stop_it();
-
+		
         Sleep(500);
         if(g_EmulationThread)
             TerminateThread(g_EmulationThread, 0);
-
-        g_EmulatorRunning = 0;
+			
+	    g_EmulationThread = 0;
 
         info_message(tr("Emulation stopped."));
     }
@@ -167,10 +167,6 @@ static void * emulationThread( void *_arg )
 
     no_audio_delay = config_get_bool("NoAudioDelay", FALSE);
     no_compiled_jump = config_get_bool("NoCompiledJump", FALSE);
-    
-    char *_putenv = (char *)malloc(256);
-    snprintf( _putenv, 256, "SDL_WINDOWID=%i", (int)GetVideo());
-    SDL_putenv(_putenv);
 
     // init sdl
     SDL_Init(SDL_INIT_VIDEO);
@@ -216,10 +212,10 @@ static void * emulationThread( void *_arg )
     {
         init_memory(0);
     }
-
+	
     // load the plugins and attach the ROM to them
     plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
-    ShowVideo();
+	
     romOpen_gfx();
     romOpen_audio();
     romOpen_input();
@@ -256,10 +252,6 @@ static void * emulationThread( void *_arg )
 
     // clean up
     g_EmulationThread = 0;
-    
-    HideVideo();
-    KillWindow();
-    InitWindow();
 
     SDL_Quit();
 
@@ -320,15 +312,11 @@ static void sighandler(int signal, int fpesignal)
 HINSTANCE hinst;
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* command_line, int show_command)
 {
-    if (!InitInstance()) 
-        fprintf(stderr,"Win32 Error: Unable to initalize instance.\n");
+    //if (!InitInstance()) 
+    //    fprintf(stderr,"Win32 Error: Unable to initalize instance.\n");
  
-    if (!InitWindow()) 
-        fprintf(stderr,"Win32 Error: Unable to initalize instance.\n");
-    
-    char *_putenv = (char *)malloc(256);
-    snprintf( _putenv, 256, "SDL_WINDOWID=%i", (int)GetVideo());
-    SDL_putenv(_putenv);
+    //if (!InitWindow()) 
+    //    fprintf(stderr,"Win32 Error: Unable to initalize instance.\n");
 
     fflush(stderr);
     int    argc;
@@ -391,15 +379,23 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, char* command_li
     free(argv);
     return result;
 }
+
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch( uMsg ) 
     {
+		/*case WM_KeyDown:
+			keyDown(wParam, lParam);
+		break;
+		case WM_KeyUp:
+			keyUp(wParam, lParam);
+		break;*/
         default:
             return( DefWindowProc( hWnd, uMsg, wParam, lParam ));
     }
     return( DefWindowProc( hWnd, uMsg, wParam, lParam ));
 }
+
 void ErrorExit(char * lpszFunction) 
 { 
     // Retrieve the system error message for the last-error code
@@ -448,8 +444,8 @@ BOOL InitInstance()
 
 HWND InitWindow() 
 { 
+	if(hwnd) KillWindow();
     hwnd = CreateWindow("MainWClass", "Mupen64Plus for Windows", WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, 640, 480, (HWND) NULL, (HMENU) NULL, hinst, (LPVOID) NULL);
- 
     if (!hwnd) ErrorExit("CreateWindow");
 
     ShowWindow(hwnd, 0);
@@ -460,6 +456,7 @@ HWND InitWindow()
 BOOL KillWindow()
 {
     DestroyWindow(hwnd);
+	hwnd = NULL;
 }
 HWND ShowVideo()
 {
@@ -484,8 +481,8 @@ int file_exists(const char *fileName)
 
     fileAttr = GetFileAttributesA(fileName);
     if (0xFFFFFFFF == fileAttr)
-        return FALSE;
-    return TRUE;
+        return 0;
+    return 1;
 }
 
 
@@ -501,8 +498,6 @@ static void setPaths(void)
     
     strncpy(g_ConfigDir, gethomedir(), PATH_MAX);
     
-    fprintf(stderr, "config dir: %s\n", g_ConfigDir);
-    
     if (strlen(g_ConfigDir) == 0)
     {
         strncpy(g_ConfigDir, getexedir(), PATH_MAX);
@@ -517,9 +512,8 @@ static void setPaths(void)
         printf("Creating %s to store user data\n", g_ConfigDir);
         if(mkdirwp(g_ConfigDir, 0755) != 0)
         {
-            printf("Error: Could not create %s: ", g_ConfigDir);
-            perror(NULL);
-            exit(errno);
+            printf("Warning: Could not create %s\n: ", g_ConfigDir);
+			goto nocreate;
         }
 
             // create save subdir
@@ -529,7 +523,7 @@ static void setPaths(void)
         if(mkdirwp(buf, 0755) != 0)
         {
                 // report error, but don't exit
-            printf("Warning: Could not create %s: %s", buf, strerror(errno));
+            printf("Warning: Could not create %s: %s\n", buf, strerror(errno));
         }
 
             // create screenshots subdir
@@ -539,9 +533,10 @@ static void setPaths(void)
         if(mkdirwp(buf, 0755) != 0)
         {
                 // report error, but don't exit
-            printf("Warning: Could not create %s: %s", buf, strerror(errno));
+            printf("Warning: Could not create %s: %s\n", buf, strerror(errno));
         }
     }
+	nocreate:
     // make sure config dir has a '/' on the end.
     if(g_ConfigDir[strlen(g_ConfigDir)-1] != dirsep[0])
         strncat(g_ConfigDir, dirsep, 1);
@@ -549,7 +544,8 @@ static void setPaths(void)
     // if install dir was not specified at the commandline, look for it in the default location
     if(strlen(g_InstallDir) == 0)
     {
-        memcpy(g_InstallDir, getexedir(), PATH_MAX);
+        memset(buf,0,PATH_MAX);
+        strncpy(buf,getexedir(),PATH_MAX);
         fprintf(stderr, "EXE dir: %s\n", buf);
         
         // if install dir is not in the default location, try the same dir as the binary
@@ -651,4 +647,6 @@ static void setPaths(void)
     // make sure screenshots dir has a '/' on the end.
     if(g_SshotDir[strlen(g_SshotDir)-1] != dirsep[0])
         strncat(g_SshotDir, dirsep, PATH_MAX - strlen(g_SshotDir));
+    
+    fprintf(stderr, "config dir: %s\n", g_ConfigDir);
 }

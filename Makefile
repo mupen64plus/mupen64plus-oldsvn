@@ -143,16 +143,16 @@ OBJ_DBG = \
 		debugger/regTLB.o \
 		debugger/ui_clist_edit.o
 
-PLUGINS	= plugins/blight_input.so \
-		  plugins/dummyaudio.so \
-          plugins/dummyvideo.so \
-          plugins/glN64.so \
-          plugins/ricevideo.so \
-          plugins/glide64.so \
-          plugins/jttl_audio.so \
-          plugins/mupen64_audio.so \
-          plugins/mupen64_hle_rsp_azimer.so \
-          plugins/mupen64_input.so
+PLUGINS	= plugins/blight_input$(LIBSUFFIX) \
+		  plugins/dummyaudio$(LIBSUFFIX) \
+          plugins/dummyvideo$(LIBSUFFIX) \
+          plugins/glN64$(LIBSUFFIX) \
+          plugins/ricevideo$(LIBSUFFIX) \
+          plugins/glide64$(LIBSUFFIX) \
+          plugins/jttl_audio$(LIBSUFFIX) \
+          plugins/mupen64_audio$(LIBSUFFIX) \
+          plugins/mupen64_hle_rsp_azimer$(LIBSUFFIX) \
+          plugins/mupen64_input$(LIBSUFFIX)
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -192,7 +192,8 @@ targets:
 	@echo "    uninstall     == Uninstall Mupen64Plus and all plugins"
 	@echo "  Options:"
 	@echo "    PLAT=generic  == use GCC in a generic way."
-	@echo "    PLAT=mingw    == use MinGW specifically."
+	@echo "    PLAT=win32    == use native MinGW"
+	@echo "    PLAT=mingw    == use cross MinGW specifically."
 	@echo "    PLAT=cygwin   == use Cygwin specifically."
 	@echo "    PLAT=msvc     == use Microsoft C Compiler."
 	@echo "    BITS=32       == build 32-bit binaries on 64-bit machine"
@@ -239,8 +240,8 @@ clean:
 	$(MAKE) -C mupen64_input clean
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o
 	$(RM) -f $(BIN) $(DBGBIN) 
-	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
-	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
+	$(RM) -f plugins/mupen64_input$(LIBSUFFIX) blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input$(LIBSUFFIX) plugins/mupen64_hle_rsp_azimer$(LIBSUFFIX) 
+	$(RM) -f plugins/dummyaudio$(LIBSUFFIX) plugins/dummyvideo$(LIBSUFFIX) plugins/mupen64_audio$(LIBSUFFIX) plugins/jttl_audio$(LIBSUFFIX) plugins/glN64$(LIBSUFFIX) plugins/ricevideo$(LIBSUFFIX) plugins/glide64$(LIBSUFFIX)
 
 rebuild: clean all
 
@@ -254,45 +255,45 @@ rebuild: clean all
 main/vcr_compress.o: main/vcr_compress.cpp
 	$(CXX) -o $@ $(CFLAGS) $(AVIFILE_FLAGS) -c $<
 
-plugins/blight_input.so: FORCE
-	#$(MAKE) -C blight_input all
-	#@$(CP) ./blight_input/blight_input.so ./plugins/blight_input.so
+plugins/blight_input$(LIBSUFFIX): FORCE
+	$(MAKE) -C blight_input all
+	@$(CP) ./blight_input/blight_input$(LIBSUFFIX) ./plugins/blight_input$(LIBSUFFIX)
 
-plugins/dummyaudio.so: FORCE
+plugins/dummyaudio$(LIBSUFFIX): FORCE
 	$(MAKE) -C dummy_audio all
-	@$(CP) ./dummy_audio/dummyaudio.so ./plugins/dummyaudio.so
+	@$(CP) ./dummy_audio/dummyaudio$(LIBSUFFIX) ./plugins/dummyaudio$(LIBSUFFIX)
 
-plugins/dummyvideo.so: FORCE
+plugins/dummyvideo$(LIBSUFFIX): FORCE
 	$(MAKE) -C dummy_video all
-	@$(CP) ./dummy_video/dummyvideo.so ./plugins/dummyvideo.so
+	@$(CP) ./dummy_video/dummyvideo$(LIBSUFFIX) ./plugins/dummyvideo$(LIBSUFFIX)
 
-plugins/glN64.so: FORCE
+plugins/glN64$(LIBSUFFIX): FORCE
 	#$(MAKE) -C glN64 all
-	#@$(CP) ./glN64/glN64.so ./plugins/glN64.so
+	#@$(CP) ./glN64/glN64$(LIBSUFFIX) ./plugins/glN64$(LIBSUFFIX)
 
-plugins/ricevideo.so: FORCE
+plugins/ricevideo$(LIBSUFFIX): FORCE
 	#$(MAKE) -C rice_video all
-	#@$(CP) ./rice_video/ricevideo.so ./plugins/ricevideo.so
+	#@$(CP) ./rice_video/ricevideo$(LIBSUFFIX) ./plugins/ricevideo$(LIBSUFFIX)
 
-plugins/glide64.so: FORCE
+plugins/glide64$(LIBSUFFIX): FORCE
 	#$(MAKE) -C glide64 all
-	#@$(CP) ./glide64/glide64.so ./plugins/glide64.so
+	#@$(CP) ./glide64/glide64$(LIBSUFFIX) ./plugins/glide64$(LIBSUFFIX)
 
-plugins/jttl_audio.so: FORCE
+plugins/jttl_audio$(LIBSUFFIX): FORCE
 	$(MAKE) -C jttl_audio all
-	@$(CP) ./jttl_audio/jttl_audio.so ./plugins/jttl_audio.so
+	@$(CP) ./jttl_audio/jttl_audio$(LIBSUFFIX) ./plugins/jttl_audio$(LIBSUFFIX)
 
-plugins/mupen64_audio.so: FORCE
+plugins/mupen64_audio$(LIBSUFFIX): FORCE
 	#$(MAKE) -C mupen64_audio all
-	#@$(CP) ./mupen64_audio/mupen64_audio.so ./plugins/mupen64_audio.so
+	#@$(CP) ./mupen64_audio/mupen64_audio$(LIBSUFFIX) ./plugins/mupen64_audio$(LIBSUFFIX)
 
-plugins/mupen64_hle_rsp_azimer.so: FORCE
+plugins/mupen64_hle_rsp_azimer$(LIBSUFFIX): FORCE
 	$(MAKE) -C rsp_hle all
-	@$(CP) ./rsp_hle/mupen64_hle_rsp_azimer.so ./plugins/mupen64_hle_rsp_azimer.so
+	@$(CP) ./rsp_hle/mupen64_hle_rsp_azimer$(LIBSUFFIX) ./plugins/mupen64_hle_rsp_azimer$(LIBSUFFIX)
 
-plugins/mupen64_input.so: FORCE
+plugins/mupen64_input$(LIBSUFFIX): FORCE
 	$(MAKE) -C mupen64_input all
-	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
+	@$(CP) ./mupen64_input/mupen64_input$(LIBSUFFIX) ./plugins/mupen64_input$(LIBSUFFIX)
 
 FORCE:
 

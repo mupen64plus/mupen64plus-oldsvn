@@ -4,6 +4,8 @@
 FROMPLUGIN=1
 include ../pre.mk
 
+PLUGIN_NAME=glN64$(LIBSUFFIX)
+
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -Wall 
 
@@ -47,10 +49,10 @@ OBJECTS += glN64.o \
 	F3DWRUS.o
 
 # build targets
-all: glN64.so
+all: $(PLUGIN_NAME)
 
 clean:
-	rm -f *.o *.so gln64settings.cpp gln64settings.h* ui_gln64config.*
+	rm -f *.o *$(LIBSUFFIX) gln64settings.cpp gln64settings.h* ui_gln64config.*
 
 # build rules
 .cpp.o:
@@ -65,7 +67,7 @@ ui_gln64config.cpp: ui_gln64config.h
 gln64settings.h: gln64.kcfg gln64settings.kcfgc
 	kconfig_compiler gln64.kcfg gln64settings.kcfgc
 
-glN64.so: $(OBJECTS)
+$(PLUGIN_NAME): $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -o $@
 	$(STRIP) $@
 

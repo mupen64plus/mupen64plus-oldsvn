@@ -51,7 +51,7 @@ typedef struct {
 } CONTROL;
 
 typedef struct {
-/*  DWORD Value;
+  DWORD Value;
     struct {
         unsigned R_DPAD       : 1;
         unsigned L_DPAD       : 1;
@@ -76,11 +76,11 @@ typedef struct {
 
         signed   X_AXIS       : 8;
     };
-*/
+
     unsigned short button;
     char  stick_y;
     char  stick_x;
-    unsigned char  errno;
+    unsigned char  errnum;
 } BUTTONS;
 
 typedef struct {

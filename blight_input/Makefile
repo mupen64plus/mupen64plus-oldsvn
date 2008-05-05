@@ -16,16 +16,17 @@ OBJ_BLIGHT = \
 	pad.o
 
 # build targets
-all: blight_input.so
+PLUGIN_NAME = blight_input$(LIBSUFFIX)
+all: $(PLUGIN_NAME)
 
 clean:
-	rm -f *.o *.so ttftoh arial.ttf.c
+	rm -f *.o *$(LIBSUFFIX) ttftoh arial.ttf.c
 
 # build rules
 .c.o:
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) $(FREETYPE_FLAGS) -c $<
 
-blight_input.so: $(OBJ_BLIGHT)
+$(PLUGIN_NAME): $(OBJ_BLIGHT)
 	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SDLTTF_LIBS) $(FREETYPE_LIBS) -o $@
 	$(STRIP) $@
 

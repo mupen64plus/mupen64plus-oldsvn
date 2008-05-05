@@ -10,18 +10,20 @@ CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM
 # list of object files to generate
 OBJECTS = \
 	video.o \
+	
+PLUGIN_NAME = dummyvideo$(LIBSUFFIX)
 
 # build targets
-all: dummyvideo.so
+all: $(PLUGIN_NAME)
 
 clean:
-	rm -f *.o *.so
+	rm -f *.o *$(LIBSUFFIX)
 
 # build rules
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) $(GTK_FLAGS) -c $<
 
-dummyvideo.so: $(OBJECTS)
+$(PLUGIN_NAME): $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(GTK_LIBS) $(GTHREAD_LIBS) $(LIBGL_LIBS) -o $@
 	$(STRIP) $@
 

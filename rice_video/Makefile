@@ -14,6 +14,8 @@ ifeq ($(DBG), 1)
   CFLAGS += -D_DEBUG
 endif
 
+PLUGIN_NAME=ricevideo$(LIBSUFFIX)
+
 # list of object files to generate
 OBJECTS = OGLGraphicsContext.o \
     Debugger.o \
@@ -99,14 +101,14 @@ targets:
 	@echo "    DBG=1      == turn on debugging functions"
 	@echo "    DBGSYM=1   == add debugging symbols to binaries"
 
-all: ricevideo.so
+all: $(PLUGIN_NAME)
 
-ricevideo.so: $(OBJECTS)
+$(PLUGIN_NAME): $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
 	$(STRIP) $@
 
 clean:
-	$(RM) -rf ricevideo.so $(OBJECTS)
+	$(RM) -rf $(PLUGIN_NAME) $(OBJECTS)
 
 rebuild: clean all
 

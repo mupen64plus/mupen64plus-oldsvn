@@ -9,18 +9,19 @@ CFLAGS += -fpic -DPIC
 
 # list of object files to generate
 OBJECTS = audio.o
+PLUGIN_NAME = dummyaudio$(LIBSUFFIX)
 
 # build targets
-all: dummyaudio.so
+all: $(PLUGIN_NAME)
 
 clean:
-	rm -f *.o *.so
+	rm -f *.o *$(LIBSUFFIX)
 
 # build rules
 .c.o:
 	$(CC) -o $@ $(CFLAGS) -c $<
 
-dummyaudio.so: $(OBJECTS)
+$(PLUGIN_NAME): $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) -o $@
 	$(STRIP) $@
 

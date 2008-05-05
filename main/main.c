@@ -140,7 +140,6 @@ char *get_iconspath()
 {
     static char path[PATH_MAX];
     strcpy(path, getexedir());
-    strcat(path, dirsep);
     strcat(path, "icons");
     strcat(path, dirsep);
     return path;
@@ -151,6 +150,7 @@ char *get_iconpath(char *iconfile)
     static char path[PATH_MAX];
     strcpy(path, get_iconspath());
     strcat(path, iconfile);
+	fprintf(stderr, "Icon at: %s :: %s\n",path,iconfile);
     return path;
 }
 
@@ -470,6 +470,7 @@ static int sdl_event_filter( const SDL_Event *event )
                             break;
 
                         default:
+							fprintf(stderr, "Sending key to plugin: %i\n", event->key.keysym.sym);
                             keyDown( 0, event->key.keysym.sym );
                     }
             }

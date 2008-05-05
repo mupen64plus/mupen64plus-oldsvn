@@ -228,6 +228,11 @@ typedef union {
 
         signed   X_AXIS       : 8;
     };
+
+    unsigned short button;
+    char  stick_y;
+    char  stick_x;
+    unsigned char  errnum;
 } BUTTONS;
 
 typedef struct {
@@ -277,7 +282,7 @@ extern void (*romOpen_audio)();
 extern void (*closeDLL_input)();
 extern void (*controllerCommand)(int Control, BYTE * Command);
 extern void (*getKeys)(int Control, BUTTONS *Keys);
-extern void (*initiateControllers)(HWND MainWindow, CONTROL_INFO ControlInfo);
+extern void (*initiateControllers)(CONTROL_INFO ControlInfo);
 extern void (*readController)(int Control, BYTE *Command);
 extern void (*romClosed_input)();
 extern void (*romOpen_input)();

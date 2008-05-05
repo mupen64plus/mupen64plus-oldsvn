@@ -20,6 +20,7 @@ MD      = mkdir
 FIND    = find
 INSTALL = ginstall
 BINSUFFIX = .exe
+LIBSUFFIX = .dll
 
 # Check for SDL
 ifeq ("$(shell which $(MGWDIR)$(MGWBIN)/sdl-config 2>&1 | head -c 9)", "which: no")

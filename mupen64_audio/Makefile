@@ -10,17 +10,19 @@ CFLAGS += -fpic -DPIC
 # list of object files to generate
 OBJECTS = main.o
 
+PLUGIN_NAME=mupen64_audio$(LIBSUFFIX)
+
 # build targets
-all: mupen64_audio.so
+all: $(PLUGIN_NAME)
 
 clean:
-	rm -f *.o *.so
+	rm -f *.o *$(LIBSUFFIX)
 
 # build rules
 .c.o:
 	$(CC) -o $@ $(CFLAGS) $(GTK_FLAGS) -DUSE_GTK -c $<
 
-mupen64_audio.so: $(OBJECTS)
+$(PLUGIN_NAME): $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(GTK_LIBS) -lpthread -o $@
 	$(STRIP) $@
 

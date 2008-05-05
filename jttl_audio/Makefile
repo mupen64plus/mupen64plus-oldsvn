@@ -29,17 +29,19 @@ CFLAGS += -fpic -DPIC
 # list of object files to generate
 OBJECTS = main.o
 
+PLUGIN_NAME=jttl_audio$(LIBSUFFIX)
+
 # build targets
-all: jttl_audio.so
+all: $(PLUGIN_NAME)
 
 clean:
-	rm -f *.o *.so
+	rm -f *.o *$(LIBSUFFIX)
 
 # build rules
 .c.o:
 	$(CC) $(CFLAGS) $(SDL_FLAGS) $(GTK_FLAGS) $(SRC_FLAGS) -DUSE_GTK -c -o $@ $<
 
-jttl_audio.so: $(OBJECTS)
+$(PLUGIN_NAME): $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(GTK_LIBS) $(SRC_LIBS) -o $@
 	$(STRIP) $@
 

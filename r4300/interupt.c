@@ -410,10 +410,8 @@ void gen_interupt()
        lircCheckInput();
 #endif //WITH_LIRC
 
-#ifndef __WIN32__
     SDL_PumpEvents();
     refresh_stat();
-#endif
     new_vi();
     if (vi_register.vi_v_sync == 0) vi_register.vi_delay = 500000;
     else vi_register.vi_delay = ((vi_register.vi_v_sync + 1)*1500);
@@ -453,9 +451,7 @@ void gen_interupt()
        lircCheckInput();
 #endif //WITH_LIRC
 
-#ifndef __WIN32__
     SDL_PumpEvents();
-#endif
     PIF_RAMb[0x3F] = 0x0;
     remove_interupt_event();
     MI_register.mi_intr_reg |= 0x02;

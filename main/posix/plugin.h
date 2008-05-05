@@ -197,10 +197,11 @@ typedef struct {
     void (*CheckInterrupts)( void );
 } AUDIO_INFO;
 
+
 typedef struct {
-    BOOL Present;
-    BOOL RawData;
-    int  Plugin;
+	BOOL Present;
+	BOOL RawData;
+	int  Plugin;
 } CONTROL;
 
 typedef union {
@@ -228,19 +229,24 @@ typedef union {
 
         signed   X_AXIS       : 8;
     };
+
+    unsigned short button;
+    char  stick_y;
+    char  stick_x;
+    unsigned char  errnum;
 } BUTTONS;
 
 typedef struct {
-    HWND hMainWindow;
-    HINSTANCE hinst;
+	HWND hMainWindow;
+	HINSTANCE hinst;
 
-    BOOL MemoryBswaped;     // If this is set to TRUE, then the memory has been pre
-                            //   bswap on a dword (32 bits) boundry, only effects header. 
-                            //  eg. the first 8 bytes are stored like this:
-                            //        4 3 2 1   8 7 6 5
-    BYTE * HEADER;          // This is the rom header (first 40h bytes of the rom)
-    CONTROL *Controls;      // A pointer to an array of 4 controllers .. eg:
-                            // CONTROL Controls[4];
+	BOOL MemoryBswaped;		// If this is set to TRUE, then the memory has been pre
+							//   bswap on a dword (32 bits) boundry, only effects header. 
+							//	eg. the first 8 bytes are stored like this:
+							//        4 3 2 1   8 7 6 5
+	BYTE * HEADER;			// This is the rom header (first 40h bytes of the rom)
+	CONTROL *Controls;		// A pointer to an array of 4 controllers .. eg:
+							// CONTROL Controls[4];
 } CONTROL_INFO;
 
 extern CONTROL Controls[4];
@@ -277,7 +283,7 @@ extern void (*romOpen_audio)();
 extern void (*closeDLL_input)();
 extern void (*controllerCommand)(int Control, BYTE * Command);
 extern void (*getKeys)(int Control, BUTTONS *Keys);
-extern void (*initiateControllers)(HWND MainWindow, CONTROL_INFO ControlInfo);
+extern void (*initiateControllers)(CONTROL_INFO ControlInfo);
 extern void (*readController)(int Control, BYTE *Command);
 extern void (*romClosed_input)();
 extern void (*romOpen_input)();

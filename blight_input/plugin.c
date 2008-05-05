@@ -20,7 +20,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
+
+#ifdef __linux__
 #include <linux/input.h>
+#endif
 
 #include "plugin.h"
 
@@ -420,9 +423,11 @@ write_configuration( void )
 
 BYTE lastCommand[6];
 
+#ifdef __linux__
 struct ff_effect ffeffect[3];
 struct ff_effect ffstrong[3];
 struct ff_effect ffweak[3];
+#endif
 
 BYTE DataCRC( BYTE *Data, int iLenght )
 {
@@ -482,7 +487,10 @@ void
 ControllerCommand(int Control, BYTE *Command)
 {
     BYTE *Data = &Command[5];
+	
+#ifdef __linux__
     struct input_event play;
+#endif
 
     if (Control == -1)
         return;
@@ -514,6 +522,7 @@ ControllerCommand(int Control, BYTE *Command)
             if (controller[Control].control.Plugin == PLUGIN_RAW)
             {
                 DWORD dwAddress = (Command[3] << 8) + (Command[4] & 0xE0);
+#ifdef __linux__
                 if( dwAddress == PAK_IO_RUMBLE && controller[Control].event_joystick != 0)
                 {
                     if( *Data )
@@ -536,6 +545,7 @@ ControllerCommand(int Control, BYTE *Command)
                     }
                 }
                 Data[32] = DataCRC( Data, 32 );
+#endif
             }
             break;
         case RD_RESETCONTROLLER:
@@ -827,7 +837,9 @@ GetDllInfo( PLUGIN_INFO *PluginInfo )
 void
 GetKeys( int Control, BUTTONS *Keys )
 {
+#ifdef __linux__
     struct input_event play;
+#endif
     int b, axis_val, axis_max_val;
     SDL_Event event;
     Uint8 *keystate = SDL_GetKeyState( NULL );
@@ -1001,6 +1013,7 @@ GetKeys( int Control, BUTTONS *Keys )
     /* handle mempack / rumblepak switching */
     if (controller[Control].buttons.button & button_bits[14])
     {
+#ifdef __linux__
         controller[Control].control.Plugin = PLUGIN_MEMPAK;
         if (controller[Control].event_joystick != 0)
         {
@@ -1010,9 +1023,11 @@ GetKeys( int Control, BUTTONS *Keys )
             if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
                 perror("Error starting rumble effect");
         }
+#endif
     }
     if (controller[Control].buttons.button & button_bits[15])
     {
+#ifdef __linux__
         controller[Control].control.Plugin = PLUGIN_RAW;
         if (controller[Control].event_joystick != 0)
         {
@@ -1022,6 +1037,7 @@ GetKeys( int Control, BUTTONS *Keys )
             if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
                 perror("Error starting rumble effect");
         }
+#endif
     }
 }
 
@@ -1080,6 +1096,7 @@ int InitiateRumble(int cntrl)
         return 0;
     }
 
+#ifdef __linux__
     if (ioctl(controller[cntrl].event_joystick, EVIOCGBIT(EV_FF, sizeof(unsigned long) * 4), features) == -1)
     {
         printf("["PLUGIN_NAME"]: Linux kernel communication failed for force feedback (rumble).\n", temp);
@@ -1120,6 +1137,7 @@ int InitiateRumble(int cntrl)
     ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffweak[cntrl]);
 
     printf("["PLUGIN_NAME"]: Rumble activated on N64 joystick #%i\n", cntrl + 1);
+#endif
 }
 
 /******************************************************************

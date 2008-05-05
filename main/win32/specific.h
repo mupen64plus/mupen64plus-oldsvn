@@ -28,12 +28,8 @@ static inline char *getexedir()
     memset(path,0,PATH_MAX);
     GetModuleFileNameA(NULL, path, PATH_MAX);
 
-    /*int fnlen = strlen(path);
-    char *newfn = NULL;
-    int i;
-
     while(path[strlen(path)-1] != dirsep[0])
-        path[strlen(path)-1] = '\0';*/
+        path[strlen(path)-1] = '\0';
 
     return path;
 }

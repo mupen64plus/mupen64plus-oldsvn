@@ -147,7 +147,7 @@ EXPORT void CALL GetKeys(int Control, BUTTONS * Keys )
   output:   none
 *******************************************************************/  
 EXPORT void CALL InitiateControllers (CONTROL_INFO ControlInfo)
-{
+{	
    control_info = ControlInfo;
    control_info.Controls[0].Present = TRUE;
    control_info.Controls[0].Plugin = PLUGIN_MEMPAK;

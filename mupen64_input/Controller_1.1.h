@@ -75,6 +75,11 @@ typedef union {
 
         signed   X_AXIS       : 8;
     };
+
+    unsigned short button;
+    char  stick_y;
+    char  stick_x;
+    unsigned char  errnum;
 } BUTTONS;
 
 typedef struct {

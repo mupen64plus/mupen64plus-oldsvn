@@ -13,6 +13,8 @@ MD      = mkdir
 FIND    = find
 PROF    = gprof
 INSTALL = ginstall
+BINSUFFIX = 
+LIBSUFFIX = .so
 
 # Check for SDL
 ifeq ("$(shell which sdl-config 2>&1 | head -c 9)", "which: no")

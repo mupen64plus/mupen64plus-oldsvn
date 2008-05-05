@@ -4,6 +4,8 @@
 FROMPLUGIN=1
 include ../pre.mk
 
+PLUGIN_NAME=mupen64_hle_rsp_azimer$(LIBSUFFIX)
+
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC
 
@@ -11,10 +13,10 @@ CFLAGS += -fpic -DPIC
 OBJECTS = main.o disasm.o jpeg.o ucode3.o ucode2.o ucode1.o ucode3mp3.o
 
 # build targets
-all: mupen64_hle_rsp_azimer.so
+all: $(PLUGIN_NAME)
 
 clean:
-	rm -f *.o *.so
+	rm -f *.o *$(LIBSUFFIX)
 
 # build rules
 .c.o:
@@ -22,7 +24,7 @@ clean:
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) -c $<
 
-mupen64_hle_rsp_azimer.so: $(OBJECTS)
+$(PLUGIN_NAME): $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(GTK_LIBS) -o $@
 	$(STRIP) $@
 
