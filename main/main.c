@@ -450,13 +450,32 @@ void stopEmulation(void)
 
 int pauseContinueEmulation(void)
 {
+    static osd_message_t *msg = NULL;
+
     if (!g_EmulatorRunning)
         return 1;
 
     if (rompause)
+    {
         info_message(tr("Emulation continued."));
+        if(msg)
+        {
+            osd_delete_message(msg);
+            msg = NULL;
+        }
+    }
     else
+    {
         info_message(tr("Emulation paused."));
+
+        if(msg)
+            osd_delete_message(msg);
+
+        msg = osd_new_message(tr("Pause"));
+        msg->corner = OSD_TOP_RIGHT;
+        msg->timeout[OSD_APPEAR] = 0;
+        msg->timeout[OSD_DISPLAY] = OSD_INFINITE_TIMEOUT;
+    }
     
     rompause = !rompause;
     return rompause;

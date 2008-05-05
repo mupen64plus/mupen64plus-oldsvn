@@ -132,9 +132,9 @@ static void draw_message(osd_message_t *msg, int width, int height)
     (*l_animations[msg->animation[msg->state]])(msg);
 
     // xoffset moves message left
-    x -= (float)msg->xoffset;
+    x -= msg->xoffset;
     // yoffset moves message up
-    y += (float)msg->yoffset;
+    y += msg->yoffset;
 
     l_font->draw(x, y, msg->text);
 }
@@ -164,6 +164,24 @@ static void animation_fade(osd_message_t *msg)
         alpha = elapsed_frames / total_frames;
 
     l_font->setForegroundColor(msg->color[R], msg->color[G], msg->color[B], alpha);
+}
+
+// sets message Y offset depending on where they are in the message queue
+static float get_message_offset(osd_message_t *msg, int i)
+{
+    float offset = l_font->height() * (float)i;
+
+    switch(msg->corner)
+    {
+        case OSD_TOP_LEFT:
+        case OSD_TOP_CENTER:
+        case OSD_TOP_RIGHT:
+            return -offset;
+            break;
+        default:
+            return offset;
+            break;
+    }
 }
 
 // public functions
@@ -218,6 +236,8 @@ void osd_render()
 {
     list_node_t *node;
     osd_message_t *msg, *msg_to_delete = NULL;
+    // keeps track of how many messages are in each corner
+    int corner_ctr[OSD_NUM_CORNERS] = {0};
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     GLint viewport[4];
@@ -265,7 +285,13 @@ void osd_render()
             msg->frames = 0;
         }
 
+        // offset y depending on how many other messages are in the same corner
+        msg->yoffset += get_message_offset(msg, corner_ctr[msg->corner]);
+
         draw_message(msg, viewport[2], viewport[2]);
+
+        msg->yoffset -= get_message_offset(msg, corner_ctr[msg->corner]);
+        corner_ctr[msg->corner]++;
     }
 
     // if last message was marked for deletion, delete it

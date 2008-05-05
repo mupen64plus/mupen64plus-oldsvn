@@ -336,19 +336,6 @@ void gen_interupt()
    //if (!skip_jump)
      //printf("interrupt:%x (%x)\n", q->type, Count);
 
-   // if paused, poll for input events
-   while(rompause)
-   {
-        struct timespec ts;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 10000000;
-        nanosleep(&ts, NULL); // sleep for 10 milliseconds
-        SDL_PumpEvents();
-#ifdef WITH_LIRC
-    lircCheckInput();
-#endif //WITH_LIRC
-   }
-
    if (stop == 1) {
      vi_counter = 0; // debug
      dyna_stop();
@@ -421,6 +408,20 @@ void gen_interupt()
     SDL_PumpEvents();
     refresh_stat();
 #endif
+
+   // if paused, poll for input events
+   while(rompause)
+   {
+        struct timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 10000000;
+        nanosleep(&ts, NULL); // sleep for 10 milliseconds
+        SDL_PumpEvents();
+#ifdef WITH_LIRC
+    lircCheckInput();
+#endif //WITH_LIRC
+   }
+
     new_vi();
     if (vi_register.vi_v_sync == 0) vi_register.vi_delay = 500000;
     else vi_register.vi_delay = ((vi_register.vi_v_sync + 1)*1500);
