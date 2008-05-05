@@ -91,7 +91,7 @@ void (*viStatusChanged)() = dummy_void;
 void (*viWidthChanged)() = dummy_void;
 void (*readScreen)(void **dest, int *width, int *height) = 0;
 void (*captureScreen)(char *dirpath) = 0;
-void (*setRenderingCallback)(void (*callback)(unsigned int, unsigned int)) = dummy_void;
+void (*setRenderingCallback)(void (*callback)()) = dummy_void;
 
 void (*aiDacrateChanged)(int SystemType) = dummy_aiDacrateChanged;
 void (*aiLenChanged)() = dummy_void;

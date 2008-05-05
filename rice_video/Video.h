@@ -156,7 +156,7 @@ typedef struct {
 
 extern PluginStatus status;
 extern char generalText[];
-extern void (*renderCallback)(unsigned int, unsigned int);
+extern void (*renderCallback)();
 
 void SetVIScales();
 extern void _VIDEO_DisplayTemporaryMessage2(const char *msg, ...);

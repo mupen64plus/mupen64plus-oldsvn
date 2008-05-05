@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 PluginStatus status;
 char generalText[256];
-void (*renderCallback)(unsigned int, unsigned int) = NULL;
+void (*renderCallback)() = NULL;
 
 GFX_INFO g_GraphicsInfo;
 
@@ -1105,7 +1105,7 @@ FUNC_TYPE(void) NAME_DEFINE(SetConfigDir)(char *configDir)
   input:    pointer to a callback function.
   output:   none
 *******************************************************************/
-EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int))
+EXPORT void CALL SetRenderingCallback(void (*callback)())
 {
     renderCallback = callback;
 }

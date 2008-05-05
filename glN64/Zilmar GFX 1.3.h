@@ -297,7 +297,7 @@ EXPORT void CALL SetConfigDir( char *configDir );
             to receive the current window width and height.
   output:   none
 *******************************************************************/
-EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int));
+EXPORT void CALL SetRenderingCallback(void (*callback)());
 
 #if defined(__cplusplus)
 }

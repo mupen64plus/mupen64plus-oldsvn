@@ -293,11 +293,10 @@ EXPORT void CALL SetConfigDir( char *configDir );
             frame buffers are swapped.
             This was added as a way for the emulator to draw emulator-
             specific things to the screen, e.g. On-screen display.
-  input:    pointer to callback function. The function expects
-            to receive the current window width and height.
+  input:    pointer to callback function.
   output:   none
 *******************************************************************/
-EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int));
+EXPORT void CALL SetRenderingCallback(void (*callback)());
 
 #if defined(__cplusplus)
 }

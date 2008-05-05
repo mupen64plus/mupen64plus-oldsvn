@@ -2012,10 +2012,15 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU32 depth )
 
 }
 
+
+extern void (*renderCallback)();
+
 // #include <unistd.h>
 FX_ENTRY void FX_CALL
 grBufferSwap( FxU32 swap_interval )
 {
+  if(renderCallback)
+    (*renderCallback)();
   int i;
     LOG("grBufferSwap(%d)\r\n", swap_interval);
   //printf("swap\n");

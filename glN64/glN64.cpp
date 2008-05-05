@@ -33,7 +33,7 @@ char        *screenDirectory;
 u32 last_good_ucode = -1;
 void (*CheckInterrupts)( void );
 char        configdir[PATH_MAX] = {0};
-void (*renderCallback)(unsigned int, unsigned int) = NULL;
+void (*renderCallback)() = NULL;
 
 #ifndef __LINUX__
 LONG        windowedStyle;
@@ -410,7 +410,7 @@ EXPORT void CALL SetConfigDir (char *configDir)
     strncpy(configdir, configDir, PATH_MAX);
 }
 
-EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int))
+EXPORT void CALL SetRenderingCallback(void (*callback)())
 {
     renderCallback = callback;
 }

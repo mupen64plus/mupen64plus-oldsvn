@@ -188,7 +188,7 @@ DWORD   offset_texbuf1 = 0;
 BOOL    capture_screen = 0;
 char    capture_path[256];
 
-void (*renderCallback)(unsigned int, unsigned int) = NULL;
+void (*renderCallback)() = NULL;
 
 
 void ChangeSize ()
@@ -1639,7 +1639,7 @@ void DrawFrameBuffer ()
     }
 }
 
-EXPORT void CALL SetRenderingCallback(void (*callback)(unsigned int, unsigned int))
+EXPORT void CALL SetRenderingCallback(void (*callback)())
 {
     renderCallback = callback;
 }
@@ -1712,8 +1712,6 @@ EXPORT void CALL UpdateScreen (void)
       DrawFrameBuffer();
       RDP("DrawFrameBuffer done\n");
       rdp.updatescreen = 1;
-      if(renderCallback)
-          (*renderCallback)(settings.res_x, settings.res_y);
       newSwapBuffers ();
     }
     return;
@@ -1721,8 +1719,6 @@ EXPORT void CALL UpdateScreen (void)
   //*/  
   if (settings.swapmode == 0)
   {
-  	if(renderCallback)
-       (*renderCallback)(settings.res_x, settings.res_y);
     newSwapBuffers ();
   }
 }

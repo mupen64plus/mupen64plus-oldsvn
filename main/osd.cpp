@@ -214,11 +214,11 @@ void osd_exit(void)
 
 // renders the current osd message queue to the screen
 extern "C"
-void osd_render(unsigned int width, unsigned int height)
+void osd_render()
 {
     list_node_t *node;
     osd_message_t *msg, *msg_to_delete = NULL;
-    
+
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -227,17 +227,17 @@ void osd_render(unsigned int width, unsigned int height)
     glLoadIdentity();
     gluOrtho2D(viewport[0],viewport[2],viewport[1],viewport[3]);
     glMatrixMode(GL_MODELVIEW);
-     
+
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
     glDisable(GL_SCISSOR_TEST);
     glDisable(GL_STENCIL_TEST);
-     
+
     glEnable (GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-     
+
     list_foreach(l_messageQueue, node)
     {
         msg = (osd_message_t *)node->data;
@@ -265,20 +265,19 @@ void osd_render(unsigned int width, unsigned int height)
             msg->frames = 0;
         }
 
-        draw_message(msg, width, height);
+        draw_message(msg, viewport[2], viewport[2]);
     }
 
     // if last message was marked for deletion, delete it
     if(msg_to_delete)
         osd_delete_message(msg_to_delete);
-     
+
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-         
-    glPopAttrib();
-    glFinish();
 
+    glFinish();
+    glPopAttrib();
 }
 
 // creates a new osd_message_t, adds it to the message queue and returns it in case

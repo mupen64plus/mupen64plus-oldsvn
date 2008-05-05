@@ -1218,7 +1218,7 @@ OGL_SwapBuffers()
     // if emulator defined a render callback function, call it before buffer swap
 
     if(renderCallback)
-        (*renderCallback)(OGL.width, OGL.height);
+        (*renderCallback)();
 
     SDL_GL_SwapBuffers();
 }
