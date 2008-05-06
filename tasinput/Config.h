@@ -20,8 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	Modified for TAS by Nitsuja
 */
 
+
+
 #ifndef _CONFIG_H_INCLUDED__
 #define _CONFIG_H_INCLUDED__
+
+#include "../main/winlnxdefs.h"
 
 #define IDT_TIMER1 1
 #define IDT_TIMER2 2

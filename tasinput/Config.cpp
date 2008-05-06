@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <commctrl.h>
 #define DIRECTINPUT_VERSION 0x0700
 #include <dinput.h>
+
 #include "Controller.h"
 #include "DI.h"
 #include "DefDI.h"

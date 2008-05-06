@@ -220,6 +220,17 @@ EXPORT void CALL WM_KeyUp( WPARAM wParam, LPARAM lParam );
 *******************************************************************/  	
 EXPORT void CALL SetKeys(int Control, BUTTONS ControllerInput);
 
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetConfigDir
+  Purpose:  To pass the location where config files should be read/
+            written to.
+  input:    path to config directory
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetConfigDir( char *configDir );
+
 #if defined(__cplusplus)
 }
 #endif
