@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	Modified for TAS by Nitsuja
 */
 
+#include "../main/winlnxdefs.h"
 #include <windows.h>
 #include <commctrl.h>
 #define DIRECTINPUT_VERSION 0x0700
