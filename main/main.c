@@ -802,7 +802,10 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    go();   /* core func */
+    // call r4300 CPU core and run the game
+    r4300_reset_hard();
+    r4300_reset_soft();
+    r4300_execute();
 
 #ifdef WITH_LIRC
     lircStop();

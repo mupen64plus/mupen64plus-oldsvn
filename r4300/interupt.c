@@ -536,8 +536,10 @@ void gen_interupt()
             // Soft Reset -- remove interrupt event from queue
             remove_interupt_event();
             // reset TS and NMI
-            // set BEV, SR, and ERL
-            Status = (Status & ~0x280000) | 0x500004;
+            // set BEV, and SR
+            Status = (Status & ~0x280000) | 0x500000;
+            // simulate the soft reset code in the PIF ROM
+            r4300_reset_soft();
             // set ErrorEPC with last instruction address and set next instruction address to reset vector
             if (interpcore)
             {

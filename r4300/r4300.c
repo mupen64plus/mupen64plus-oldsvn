@@ -43,7 +43,7 @@ extern int debugger_mode;
 extern void update_debugger();
 #endif
 
-unsigned int i, dynacore = 0, interpcore = 0;
+unsigned int dynacore = 0, interpcore = 0;
 int no_audio_delay = 0;
 int no_compiled_jump = 0;
 int stop, llbit, rompause;
@@ -1490,103 +1490,83 @@ void init_blocks()
 #endif
 }
 
-
-void go()
+void r4300_reset_hard()
 {
-   long long CRC = 0;
-   unsigned int j;
-   
-   j=0;
-   debug_count = 0;
-   printf("Starting r4300 emulator\n");
-   memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFBC);
-   delay_slot=0;
-   stop = 0;
-   rompause = 0;
-   for (i=0;i<32;i++)
-     {
-    reg[i]=0;
-    reg_cop0[i]=0;
-    reg_cop1_fgr_32[i]=0;
-    reg_cop1_fgr_64[i]=0;
-    
-    reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
-    reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
-    
-    // --------------tlb------------------------
-    tlb_e[i].mask=0;
-    tlb_e[i].vpn2=0;
-    tlb_e[i].g=0;
-    tlb_e[i].asid=0;
-    tlb_e[i].pfn_even=0;
-    tlb_e[i].c_even=0;
-    tlb_e[i].d_even=0;
-    tlb_e[i].v_even=0;
-    tlb_e[i].pfn_odd=0;
-    tlb_e[i].c_odd=0;
-    tlb_e[i].d_odd=0;
-    tlb_e[i].v_odd=0;
-    tlb_e[i].r=0;
-    //tlb_e[i].check_parity_mask=0x1000;
-    
-    tlb_e[i].start_even=0;
-    tlb_e[i].end_even=0;
-    tlb_e[i].phys_even=0;
-    tlb_e[i].start_odd=0;
-    tlb_e[i].end_odd=0;
-    tlb_e[i].phys_odd=0;
-     }
-   for (i=0; i<0x100000; i++)
-     {
-    tlb_LUT_r[i] = 0;
-    tlb_LUT_w[i] = 0;
-     }
-   llbit=0;
-   hi=0;
-   lo=0;
-   FCR0=0x511;
-   FCR31=0;
-   
-   /* clear instruction counters */
-#if defined(COUNT_INSTR)
-   for (i = 0; i < 131; i++)
-     instr_count[i] = 0;
-#endif
+    unsigned int i;
 
-   //--------
-   /*reg[20]=1;
-   reg[22]=0x3F;
-   reg[29]=0xFFFFFFFFA0400000LL;
-   Random=31;
-   Status=0x70400004;
-   Config=0x66463;
-   PRevID=0xb00;*/
-   //--------
+    // clear r4300 registers and TLB entries
+    for (i = 0; i < 32; i++)
+    {
+        reg[i]=0;
+        reg_cop0[i]=0;
+        reg_cop1_fgr_32[i]=0;
+        reg_cop1_fgr_64[i]=0;
+
+        reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
+        reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
+
+        // --------------tlb------------------------
+        tlb_e[i].mask=0;
+        tlb_e[i].vpn2=0;
+        tlb_e[i].g=0;
+        tlb_e[i].asid=0;
+        tlb_e[i].pfn_even=0;
+        tlb_e[i].c_even=0;
+        tlb_e[i].d_even=0;
+        tlb_e[i].v_even=0;
+        tlb_e[i].pfn_odd=0;
+        tlb_e[i].c_odd=0;
+        tlb_e[i].d_odd=0;
+        tlb_e[i].v_odd=0;
+        tlb_e[i].r=0;
+        //tlb_e[i].check_parity_mask=0x1000;
+
+        tlb_e[i].start_even=0;
+        tlb_e[i].end_even=0;
+        tlb_e[i].phys_even=0;
+        tlb_e[i].start_odd=0;
+        tlb_e[i].end_odd=0;
+        tlb_e[i].phys_odd=0;
+    }
+    for (i=0; i<0x100000; i++)
+    {
+        tlb_LUT_r[i] = 0;
+        tlb_LUT_w[i] = 0;
+    }
+    llbit=0;
+    hi=0;
+    lo=0;
+    FCR0=0x511;
+    FCR31=0;
+
+    // set COP0 registers
+    Random = 31;
+    Status= 0x34000000;
+    Config= 0x6e463;
+    PRevID = 0xb00;
+    Count = 0x5000;
+    Cause = 0x5C;
+    Context = 0x7FFFF0;
+    EPC = 0xFFFFFFFF;
+    BadVAddr = 0xFFFFFFFF;
+    ErrorEPC = 0xFFFFFFFF;
    
-   // the following values are extracted from the pj64 source code
-   // thanks to Zilmar and Jabo
-   
-   reg[6] = 0xFFFFFFFFA4001F0CLL;
-   reg[7] = 0xFFFFFFFFA4001F08LL;
-   reg[8] = 0x00000000000000C0LL;
-   reg[10]= 0x0000000000000040LL;
-   reg[11]= 0xFFFFFFFFA4000040LL;
-   reg[29]= 0xFFFFFFFFA4001FF0LL;
-   
-   Random = 31;
-   Status= 0x34000000;
-   Config= 0x6e463;
-   PRevID = 0xb00;
-   Count = 0x5000;
-   Cause = 0x5C;
-   Context = 0x7FFFF0;
-   EPC = 0xFFFFFFFF;
-   BadVAddr = 0xFFFFFFFF;
-   ErrorEPC = 0xFFFFFFFF;
-   
-   for (i = 0x40/4; i < (0x1000/4); i++)
-     CRC += SP_DMEM[i];
-   switch(CRC) {
+    rounding_mode = 0x33F;
+}
+
+void r4300_reset_soft()
+{
+    long long CRC = 0;
+    unsigned int i;
+
+    // copy boot code from ROM to SP_DMEM
+    memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFC0);
+
+    // figure out which ROM type is loaded
+    for (i = 0x40/4; i < (0x1000/4); i++)
+        CRC += SP_DMEM[i];
+    switch(CRC)
+    {
     case 0x000000D0027FDF31LL:
     case 0x000000CFFB631223LL:
       CIC_Chip = 1;
@@ -1605,259 +1585,211 @@ void go()
       break;
     default:
       CIC_Chip = 2;
-   }
-   
-   switch(ROM_HEADER->Country_code&0xFF)
-     {
-      case 0x44:
-      case 0x46:
-      case 0x49:
-      case 0x50:
-      case 0x53:
-      case 0x55:
-      case 0x58:
-      case 0x59:
-    switch (CIC_Chip) {
-     case 2:
-       reg[5] = 0xFFFFFFFFC0F1D859LL;
-       reg[14]= 0x000000002DE108EALL;
-       break;
-     case 3:
-       reg[5] = 0xFFFFFFFFD4646273LL;
-       reg[14]= 0x000000001AF99984LL;
-       break;
-     case 5:
-       SP_IMEM[1] = 0xBDA807FC;
-       reg[5] = 0xFFFFFFFFDECAAAD1LL;
-       reg[14]= 0x000000000CF85C13LL;
-       reg[24]= 0x0000000000000002LL;
-       break;
-     case 6:
-       reg[5] = 0xFFFFFFFFB04DC903LL;
-       reg[14]= 0x000000001AF99984LL;
-       reg[24]= 0x0000000000000002LL;
-       break;
     }
-    reg[23]= 0x0000000000000006LL;
-    reg[31]= 0xFFFFFFFFA4001554LL;
-    break;
-      case 0x37:
-      case 0x41:
-      case 0x45:
-      case 0x4A:
-      default:
-    switch (CIC_Chip) {
-     case 2:
-       reg[5] = 0xFFFFFFFFC95973D5LL;
-       reg[14]= 0x000000002449A366LL;
-       break;
-     case 3:
-       reg[5] = 0xFFFFFFFF95315A28LL;
-       reg[14]= 0x000000005BACA1DFLL;
-       break;
-     case 5:
-       SP_IMEM[1] = 0x8DA807FC;
-       reg[5] = 0x000000005493FB9ALL;
-       reg[14]= 0xFFFFFFFFC2C20384LL;
-       break;
-     case 6:
-       reg[5] = 0xFFFFFFFFE067221FLL;
-       reg[14]= 0x000000005CD2B70FLL;
-       break;
+
+    // This needs to be here for CIC-6105 boot code
+    SP_IMEM[0] = 0x3C0DBFC0;
+    SP_IMEM[1] = 0xBDA807FC;
+    SP_IMEM[2] = 0x25AD07C0;
+    SP_IMEM[3] = 0x31080080;
+    SP_IMEM[4] = 0x5500FFFC;
+    SP_IMEM[5] = 0x3C0DBFC0;
+    SP_IMEM[6] = 0x8DA80024;
+    SP_IMEM[7] = 0x3C0BB000;
+
+    // set up r4300 registers
+    reg[1]  = 0x0000000000000000LL;
+    reg[2]  = 0xFFFFFFFFD1731BE9LL; /* for CIC-6105 */
+    reg[3]  = 0xFFFFFFFFD1731BE9LL;
+    reg[4]  = 0x0000000000001BE9LL;
+    reg[5]  = 0xFFFFFFFFF45231E5LL;
+    reg[6]  = 0xFFFFFFFFA4001F0CLL; /* in SP_IMEM */
+    reg[7]  = 0xFFFFFFFFA4001F08LL; /* in SP_IMEM */
+    reg[8]  = 0x00000000000000C0LL; /* 0x70? */
+    reg[9]  = 0x0000000000000000LL;
+    reg[10] = 0x0000000000000040LL;
+    reg[11] = 0xFFFFFFFFA4000040LL; /* for CIC-6105 , bootcode address? */
+    reg[12] = 0xFFFFFFFFD1330BC3LL;
+    reg[13] = 0xFFFFFFFFD1330BC3LL;
+    reg[14] = 0x0000000025613A26LL;
+    reg[15] = 0x000000002EA04317LL;
+    reg[16] = 0x0000000000000000LL;
+    reg[17] = 0x0000000000000000LL;
+    reg[18] = 0x0000000000000000LL;
+    reg[19] = 0x0000000000000000LL;
+
+    reg[20] = 0x0000000000000001LL; /* NTSC; presumably this is only for the boot code */
+    reg[21] = 0x0000000000000000LL;
+
+    switch (CIC_Chip)
+    {
+        case 1:
+            reg[22] = 0x3f;
+            break;
+        case 2:
+            reg[22] = 0x3f;
+            break;
+        case 3:
+            reg[22] = 0x78;
+            break;
+        case 4:
+            reg[22] = 0x3f;
+            break;
+        case 5:
+            reg[22] = 0x91;
+            break;
+        case 6:
+            reg[22] = 0x85;
+            break;
+        default:
+            reg[22] = 0x0;
+            break;
     }
-    reg[20]= 0x0000000000000001LL;
-    reg[24]= 0x0000000000000003LL;
-    reg[31]= 0xFFFFFFFFA4001550LL;
-     }
-   switch (CIC_Chip) {
-    case 1:
-      reg[22]= 0x000000000000003FLL;
-      break;
-    case 2:
-      reg[1] = 0x0000000000000001LL;
-      reg[2] = 0x000000000EBDA536LL;
-      reg[3] = 0x000000000EBDA536LL;
-      reg[4] = 0x000000000000A536LL;
-      reg[12]= 0xFFFFFFFFED10D0B3LL;
-      reg[13]= 0x000000001402A4CCLL;
-      reg[15]= 0x000000003103E121LL;
-      reg[22]= 0x000000000000003FLL;
-      reg[25]= 0xFFFFFFFF9DEBB54FLL;
-      break;
-    case 3:
-      reg[1] = 0x0000000000000001LL;
-      reg[2] = 0x0000000049A5EE96LL;
-      reg[3] = 0x0000000049A5EE96LL;
-      reg[4] = 0x000000000000EE96LL;
-      reg[12]= 0xFFFFFFFFCE9DFBF7LL;
-      reg[13]= 0xFFFFFFFFCE9DFBF7LL;
-      reg[15]= 0x0000000018B63D28LL;
-      reg[22]= 0x0000000000000078LL;
-      reg[25]= 0xFFFFFFFF825B21C9LL;
-      break;
-    case 5:
-      SP_IMEM[0] = 0x3C0DBFC0;
-      SP_IMEM[2] = 0x25AD07C0;
-      SP_IMEM[3] = 0x31080080;
-      SP_IMEM[4] = 0x5500FFFC;
-      SP_IMEM[5] = 0x3C0DBFC0;
-      SP_IMEM[6] = 0x8DA80024;
-      SP_IMEM[7] = 0x3C0BB000;
-      reg[2] = 0xFFFFFFFFF58B0FBFLL;
-      reg[3] = 0xFFFFFFFFF58B0FBFLL;
-      reg[4] = 0x0000000000000FBFLL;
-      reg[12]= 0xFFFFFFFF9651F81ELL;
-      reg[13]= 0x000000002D42AAC5LL;
-      reg[15]= 0x0000000056584D60LL;
-      reg[22]= 0x0000000000000091LL;
-      reg[25]= 0xFFFFFFFFCDCE565FLL;
-      break;
-    case 6:
-      reg[2] = 0xFFFFFFFFA95930A4LL;
-      reg[3] = 0xFFFFFFFFA95930A4LL;
-      reg[4] = 0x00000000000030A4LL;
-      reg[12]= 0xFFFFFFFFBCB59510LL;
-      reg[13]= 0xFFFFFFFFBCB59510LL;
-      reg[15]= 0x000000007A3C07F4LL;
-      reg[22]= 0x0000000000000085LL;
-      reg[25]= 0x00000000465E3F72LL;
-      break;
-   }
-   
-   rounding_mode = 0x33F;
 
-   last_addr = 0xa4000040;
-   next_interupt = 624999;
-   init_interupt();
-   interpcore = 0;
+    reg[23] = 0x0000000000000006LL;
+    reg[24] = 0x0000000000000000LL;
+    reg[25] = 0xFFFFFFFFD73F2993LL;
+    reg[26] = 0x0000000000000000LL;
+    reg[27] = 0x0000000000000000LL;
+    reg[28] = 0x0000000000000000LL;
+    reg[29] = 0xFFFFFFFFA4001FF0LL; /* in SP_IMEM */
+    reg[30] = 0x0000000000000000LL;
+    reg[31] = 0xFFFFFFFFA4001554LL;
 
-   if (dynacore == 0)
-     {
-     printf ("R4300 Core mode: Interpreter\n");
-     init_blocks();
-     last_addr = PC->addr;
-     while (!stop)
-      {
-         //if ((debug_count+Count) >= 0x78a8091) break; // obj 0x16aeb8a
-         //if ((debug_count+Count) >= 0x16b1360)
-         /*if ((debug_count+Count) >= 0xf203ae0)
-           {
-          printf ("PC=%x:%x\n", (unsigned int)(PC->addr), 
-              (unsigned int)(rdram[(PC->addr&0xFFFFFF)/4]));
-          for (j=0; j<16; j++)
-            printf ("reg[%2d]:%8x%8x        reg[%d]:%8x%8x\n",   
-                j,
-                (unsigned int)(reg[j] >> 32),
-                (unsigned int)reg[j],
-                j+16,
-                (unsigned int)(reg[j+16] >> 32),
-                (unsigned int)reg[j+16]);
-          printf("hi:%8x%8x        lo:%8x%8x\n",
-             (unsigned int)(hi >> 32),
-             (unsigned int)hi,
-             (unsigned int)(lo >> 32),
-             (unsigned int)lo);
-          printf("après %d instructions soit %x\n",(unsigned int)(debug_count+Count)
-             ,(unsigned int)(debug_count+Count));
-          getchar();
-           }*/
-         /*if ((debug_count+Count) >= 0x80000000) 
-           printf("%x:%x, %x\n", (int)PC->addr, 
-              (int)rdram[(PC->addr & 0xFFFFFF)/4],
-              (int)(debug_count+Count));*/
-#ifdef COMPARE_CORE
-         if (PC->ops == FIN_BLOCK && 
-         (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
-         virtual_to_physical_address(PC->addr, 2);
-         compare_core();
+#ifdef EURO
+    reg[5]  = 0xFFFFFFFFDECAAAD1LL;
+    reg[14] = 0x000000000CF85C13LL;
+    reg[20] = 0x0000000000000000LL;
+    reg[23] = 0x0000000000000006LL;
+    reg[24] = 0x0000000000000002LL;
+    reg[31] = 0xFFFFFFFFA4001554LL;
+#else
+    reg[5]  = 0x000000005493FB9ALL;
+    reg[14] = 0xFFFFFFFFC2C20384LL;
+    reg[20] = 0x0000000000000001LL;
+    reg[23] = 0x0000000000000000LL;
+    reg[24] = 0x0000000000000003LL;
+    reg[31] = 0xFFFFFFFFA4001550LL;
 #endif
-         PC->ops();
-         /*if (j!= (Count & 0xFFF00000))
-           {
-          j = (Count & 0xFFF00000);
-          printf("%x\n", j);
-           }*/
-         //check_PC;
-#ifdef DBG
-         if (debugger_mode)
-           update_debugger();
-#endif
-      }
-     }
-#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
-   else if (dynacore == 1)
-     {
-     dynacore = 1;
-     printf ("R4300 Core mode: Dynamic Recompiler\n");
-     init_blocks();
-     code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
-     dyna_start(code);
-     PC++;
 
-#if defined(PROFILE_R4300)
-     pfProfile = fopen("instructionaddrs.dat", "ab");
-     for (i=0; i<0x100000; i++)
-       if (invalid_code[i] == 0 && blocks[i] != NULL && blocks[i]->code != NULL && blocks[i]->block != NULL)
-         {
-         unsigned char *x86addr;
-         int mipsop;
-         // store final code length for this block
-         mipsop = -1; /* -1 == end of x86 code block */
-         x86addr = blocks[i]->code + blocks[i]->code_length;
-         fwrite(&mipsop, 1, 4, pfProfile);
-         fwrite(&x86addr, 1, sizeof(char *), pfProfile);
-         }
-     fclose(pfProfile);
-     pfProfile = NULL;
-#endif
-     }
-#endif
-   else
-     {
-     printf ("R4300 Core mode: Pure Interpreter\n");
-     dynacore = 0;
-     interpcore = 1;
-     pure_interpreter();
-     }
-   debug_count+= Count;
-   printf("R4300 core finished.\n",(unsigned int)debug_count);
-   for (i=0; i<0x100000; i++)
-   {
-     if (blocks[i])
-     {
-       if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
-       if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
-       if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }
-       if (blocks[i]->riprel_table) { free(blocks[i]->riprel_table); blocks[i]->riprel_table = NULL; }
-       free(blocks[i]);
-       blocks[i] = NULL;
-     }
-   }
-   if (!dynacore && interpcore) free(PC);
+}
 
-   /* print instruction counts */
+void r4300_execute()
+{
+    long long CRC = 0;
+    unsigned int i;
+
+    debug_count = 0;
+    printf("Starting r4300 emulator\n");
+
+    delay_slot=0;
+    stop = 0;
+    rompause = 0;
+
+    /* clear instruction counters */
 #if defined(COUNT_INSTR)
-   if (dynacore)
-   {
-     unsigned int iTypeCount[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-     unsigned int iTotal = 0;
-     printf("Instruction counters:\n");
-     for (i = 0; i < 131; i++)
-     {
-       printf("%8s: %08i  ", instr_name[i], instr_count[i]);
-       if (i % 5 == 4) printf("\n");
-       iTypeCount[instr_type[i]] += instr_count[i];
-       iTotal += instr_count[i];
-     }
-     printf("\nInstruction type summary (total instructions = %i)\n", iTotal);
-     for (i = 0; i < 11; i++)
-     {
-       printf("%20s: %04.1f%% (%i)\n", instr_typename[i], (float) iTypeCount[i] * 100.0 / iTotal, iTypeCount[i]);
-     }
-   }
+    for (i = 0; i < 131; i++)
+        instr_count[i] = 0;
+#endif
+   
+    last_addr = 0xa4000040;
+    next_interupt = 624999;
+    init_interupt();
+    interpcore = 0;
+
+    if (dynacore == 0)
+    {
+        printf ("R4300 Core mode: Interpreter\n");
+        init_blocks();
+        last_addr = PC->addr;
+        while (!stop)
+        {
+#ifdef COMPARE_CORE
+            if (PC->ops == FIN_BLOCK && 
+            (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
+            virtual_to_physical_address(PC->addr, 2);
+            compare_core();
+#endif
+            PC->ops();
+#ifdef DBG
+            if (debugger_mode)
+                update_debugger();
+#endif
+        }
+    }
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
+    else if (dynacore == 1)
+    {
+        dynacore = 1;
+        printf ("R4300 Core mode: Dynamic Recompiler\n");
+        init_blocks();
+        code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
+        dyna_start(code);
+        PC++;
+#if defined(PROFILE_R4300)
+        pfProfile = fopen("instructionaddrs.dat", "ab");
+        for (i=0; i<0x100000; i++)
+            if (invalid_code[i] == 0 && blocks[i] != NULL && blocks[i]->code != NULL && blocks[i]->block != NULL)
+            {
+                unsigned char *x86addr;
+                int mipsop;
+                // store final code length for this block
+                mipsop = -1; /* -1 == end of x86 code block */
+                x86addr = blocks[i]->code + blocks[i]->code_length;
+                fwrite(&mipsop, 1, 4, pfProfile);
+                fwrite(&x86addr, 1, sizeof(char *), pfProfile);
+            }
+        fclose(pfProfile);
+        pfProfile = NULL;
+#endif
+    }
+#endif
+    else
+    {
+        printf ("R4300 Core mode: Pure Interpreter\n");
+        dynacore = 0;
+        interpcore = 1;
+        pure_interpreter();
+    }
+    debug_count+= Count;
+    printf("R4300 core finished.\n",(unsigned int)debug_count);
+    for (i=0; i<0x100000; i++)
+    {
+        if (blocks[i])
+        {
+            if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
+            if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
+            if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }
+            if (blocks[i]->riprel_table) { free(blocks[i]->riprel_table); blocks[i]->riprel_table = NULL; }
+            free(blocks[i]);
+            blocks[i] = NULL;
+        }
+    }
+    if (!dynacore && interpcore) free(PC);
+
+    /* print instruction counts */
+#if defined(COUNT_INSTR)
+    if (dynacore)
+    {
+        unsigned int iTypeCount[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        unsigned int iTotal = 0;
+        printf("Instruction counters:\n");
+        for (i = 0; i < 131; i++)
+        {
+            printf("%8s: %08i  ", instr_name[i], instr_count[i]);
+            if (i % 5 == 4) printf("\n");
+            iTypeCount[instr_type[i]] += instr_count[i];
+            iTotal += instr_count[i];
+        }
+        printf("\nInstruction type summary (total instructions = %i)\n", iTotal);
+        for (i = 0; i < 11; i++)
+        {
+            printf("%20s: %04.1f%% (%i)\n", instr_typename[i], (float) iTypeCount[i] * 100.0 / iTotal, iTypeCount[i]);
+        }
+    }
 #endif
 
 #ifdef VCR_SUPPORT
-   VCR_coreStopped();
+    VCR_coreStopped();
 #endif
 }
