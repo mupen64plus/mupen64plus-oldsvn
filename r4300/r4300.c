@@ -1562,11 +1562,20 @@ void r4300_reset_soft()
     // copy boot code from ROM to SP_DMEM
     memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFC0);
 
+   // the following values are extracted from the pj64 source code
+   // thanks to Zilmar and Jabo
+   
+   reg[6] = 0xFFFFFFFFA4001F0CLL;
+   reg[7] = 0xFFFFFFFFA4001F08LL;
+   reg[8] = 0x00000000000000C0LL;
+   reg[10]= 0x0000000000000040LL;
+   reg[11]= 0xFFFFFFFFA4000040LL;
+   reg[29]= 0xFFFFFFFFA4001FF0LL;
+   
     // figure out which ROM type is loaded
-    for (i = 0x40/4; i < (0x1000/4); i++)
-        CRC += SP_DMEM[i];
-    switch(CRC)
-    {
+   for (i = 0x40/4; i < (0x1000/4); i++)
+     CRC += SP_DMEM[i];
+   switch(CRC) {
     case 0x000000D0027FDF31LL:
     case 0x000000CFFB631223LL:
       CIC_Chip = 1;
@@ -1585,92 +1594,124 @@ void r4300_reset_soft()
       break;
     default:
       CIC_Chip = 2;
+   }
+
+   switch(ROM_HEADER->Country_code&0xFF)
+     {
+      case 0x44:
+      case 0x46:
+      case 0x49:
+      case 0x50:
+      case 0x53:
+      case 0x55:
+      case 0x58:
+      case 0x59:
+    switch (CIC_Chip) {
+     case 2:
+       reg[5] = 0xFFFFFFFFC0F1D859LL;
+       reg[14]= 0x000000002DE108EALL;
+       break;
+     case 3:
+       reg[5] = 0xFFFFFFFFD4646273LL;
+       reg[14]= 0x000000001AF99984LL;
+       break;
+     case 5:
+       SP_IMEM[1] = 0xBDA807FC;
+       reg[5] = 0xFFFFFFFFDECAAAD1LL;
+       reg[14]= 0x000000000CF85C13LL;
+       reg[24]= 0x0000000000000002LL;
+       break;
+     case 6:
+       reg[5] = 0xFFFFFFFFB04DC903LL;
+       reg[14]= 0x000000001AF99984LL;
+       reg[24]= 0x0000000000000002LL;
+       break;
     }
-
-    // This needs to be here for CIC-6105 boot code
-    SP_IMEM[0] = 0x3C0DBFC0;
-    SP_IMEM[1] = 0xBDA807FC;
-    SP_IMEM[2] = 0x25AD07C0;
-    SP_IMEM[3] = 0x31080080;
-    SP_IMEM[4] = 0x5500FFFC;
-    SP_IMEM[5] = 0x3C0DBFC0;
-    SP_IMEM[6] = 0x8DA80024;
-    SP_IMEM[7] = 0x3C0BB000;
-
-    // set up r4300 registers
-    reg[1]  = 0x0000000000000000LL;
-    reg[2]  = 0xFFFFFFFFD1731BE9LL; /* for CIC-6105 */
-    reg[3]  = 0xFFFFFFFFD1731BE9LL;
-    reg[4]  = 0x0000000000001BE9LL;
-    reg[5]  = 0xFFFFFFFFF45231E5LL;
-    reg[6]  = 0xFFFFFFFFA4001F0CLL; /* in SP_IMEM */
-    reg[7]  = 0xFFFFFFFFA4001F08LL; /* in SP_IMEM */
-    reg[8]  = 0x00000000000000C0LL; /* 0x70? */
-    reg[9]  = 0x0000000000000000LL;
-    reg[10] = 0x0000000000000040LL;
-    reg[11] = 0xFFFFFFFFA4000040LL; /* for CIC-6105 , bootcode address? */
-    reg[12] = 0xFFFFFFFFD1330BC3LL;
-    reg[13] = 0xFFFFFFFFD1330BC3LL;
-    reg[14] = 0x0000000025613A26LL;
-    reg[15] = 0x000000002EA04317LL;
-    reg[16] = 0x0000000000000000LL;
-    reg[17] = 0x0000000000000000LL;
-    reg[18] = 0x0000000000000000LL;
-    reg[19] = 0x0000000000000000LL;
-
-    reg[20] = 0x0000000000000001LL; /* NTSC; presumably this is only for the boot code */
-    reg[21] = 0x0000000000000000LL;
-
-    switch (CIC_Chip)
-    {
-        case 1:
-            reg[22] = 0x3f;
-            break;
-        case 2:
-            reg[22] = 0x3f;
-            break;
-        case 3:
-            reg[22] = 0x78;
-            break;
-        case 4:
-            reg[22] = 0x3f;
-            break;
-        case 5:
-            reg[22] = 0x91;
-            break;
-        case 6:
-            reg[22] = 0x85;
-            break;
-        default:
-            reg[22] = 0x0;
-            break;
+    reg[23]= 0x0000000000000006LL;
+    reg[31]= 0xFFFFFFFFA4001554LL;
+    break;
+      case 0x37:
+      case 0x41:
+      case 0x45:
+      case 0x4A:
+      default:
+    switch (CIC_Chip) {
+     case 2:
+       reg[5] = 0xFFFFFFFFC95973D5LL;
+       reg[14]= 0x000000002449A366LL;
+       break;
+     case 3:
+       reg[5] = 0xFFFFFFFF95315A28LL;
+       reg[14]= 0x000000005BACA1DFLL;
+       break;
+     case 5:
+       SP_IMEM[1] = 0x8DA807FC;
+       reg[5] = 0x000000005493FB9ALL;
+       reg[14]= 0xFFFFFFFFC2C20384LL;
+       break;
+     case 6:
+       reg[5] = 0xFFFFFFFFE067221FLL;
+       reg[14]= 0x000000005CD2B70FLL;
+       break;
     }
-
-    reg[23] = 0x0000000000000006LL;
-    reg[24] = 0x0000000000000000LL;
-    reg[25] = 0xFFFFFFFFD73F2993LL;
-    reg[26] = 0x0000000000000000LL;
-    reg[27] = 0x0000000000000000LL;
-    reg[28] = 0x0000000000000000LL;
-    reg[29] = 0xFFFFFFFFA4001FF0LL; /* in SP_IMEM */
-    reg[30] = 0x0000000000000000LL;
-    reg[31] = 0xFFFFFFFFA4001554LL;
-
-#ifdef EURO
-    reg[5]  = 0xFFFFFFFFDECAAAD1LL;
-    reg[14] = 0x000000000CF85C13LL;
-    reg[20] = 0x0000000000000000LL;
-    reg[23] = 0x0000000000000006LL;
-    reg[24] = 0x0000000000000002LL;
-    reg[31] = 0xFFFFFFFFA4001554LL;
-#else
-    reg[5]  = 0x000000005493FB9ALL;
-    reg[14] = 0xFFFFFFFFC2C20384LL;
-    reg[20] = 0x0000000000000001LL;
-    reg[23] = 0x0000000000000000LL;
-    reg[24] = 0x0000000000000003LL;
-    reg[31] = 0xFFFFFFFFA4001550LL;
-#endif
+    reg[20]= 0x0000000000000001LL;
+    reg[24]= 0x0000000000000003LL;
+    reg[31]= 0xFFFFFFFFA4001550LL;
+     }
+   switch (CIC_Chip) {
+    case 1:
+      reg[22]= 0x000000000000003FLL;
+      break;
+    case 2:
+      reg[1] = 0x0000000000000001LL;
+      reg[2] = 0x000000000EBDA536LL;
+      reg[3] = 0x000000000EBDA536LL;
+      reg[4] = 0x000000000000A536LL;
+      reg[12]= 0xFFFFFFFFED10D0B3LL;
+      reg[13]= 0x000000001402A4CCLL;
+      reg[15]= 0x000000003103E121LL;
+      reg[22]= 0x000000000000003FLL;
+      reg[25]= 0xFFFFFFFF9DEBB54FLL;
+      break;
+    case 3:
+      reg[1] = 0x0000000000000001LL;
+      reg[2] = 0x0000000049A5EE96LL;
+      reg[3] = 0x0000000049A5EE96LL;
+      reg[4] = 0x000000000000EE96LL;
+      reg[12]= 0xFFFFFFFFCE9DFBF7LL;
+      reg[13]= 0xFFFFFFFFCE9DFBF7LL;
+      reg[15]= 0x0000000018B63D28LL;
+      reg[22]= 0x0000000000000078LL;
+      reg[25]= 0xFFFFFFFF825B21C9LL;
+      break;
+    case 5:
+      SP_IMEM[0] = 0x3C0DBFC0;
+      SP_IMEM[2] = 0x25AD07C0;
+      SP_IMEM[3] = 0x31080080;
+      SP_IMEM[4] = 0x5500FFFC;
+      SP_IMEM[5] = 0x3C0DBFC0;
+      SP_IMEM[6] = 0x8DA80024;
+      SP_IMEM[7] = 0x3C0BB000;
+      reg[2] = 0xFFFFFFFFF58B0FBFLL;
+      reg[3] = 0xFFFFFFFFF58B0FBFLL;
+      reg[4] = 0x0000000000000FBFLL;
+      reg[12]= 0xFFFFFFFF9651F81ELL;
+      reg[13]= 0x000000002D42AAC5LL;
+      reg[15]= 0x0000000056584D60LL;
+      reg[22]= 0x0000000000000091LL;
+      reg[25]= 0xFFFFFFFFCDCE565FLL;
+      break;
+    case 6:
+      reg[2] = 0xFFFFFFFFA95930A4LL;
+      reg[3] = 0xFFFFFFFFA95930A4LL;
+      reg[4] = 0x00000000000030A4LL;
+      reg[12]= 0xFFFFFFFFBCB59510LL;
+      reg[13]= 0xFFFFFFFFBCB59510LL;
+      reg[15]= 0x000000007A3C07F4LL;
+      reg[22]= 0x0000000000000085LL;
+      reg[25]= 0x00000000465E3F72LL;
+      break;
+   }
 
 }
 
