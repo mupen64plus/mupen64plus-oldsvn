@@ -207,35 +207,11 @@ int add_instr( uint32 address )
     else {
         r4300_decode_op( instr, line[1], line[2] );
     }
-    //new_row=gtk_clist_append( GTK_CLIST(clDesasm), line );
+
     //gtk_clist_set_selectable( GTK_CLIST(clDesasm), new_row, FALSE );
-    //gtk_clist_set_row_data( GTK_CLIST(clDesasm), new_row, (gpointer) address );
+
 
     return new_row;
-}
-
-
-void reload_instr( uint32 address, int row )
-//No more used for the moment.
-{
-    uint32 instr;
-    char opcode[32];
-    char args[32];
-
-    int status = get_instruction( address, &instr);
-    if( status == 1 ) {
-        strcpy( opcode, "X+X+X+X");
-        strcpy( args, "UNREADABLE");
-    }
-    else if( status == 2 ) {
-        strcpy( opcode, "???????");
-        strcpy( args, "Behind TLB");
-    }
-    else {
-        r4300_decode_op( instr, opcode, args );
-    }
-    //gtk_clist_set_text( GTK_CLIST(clDesasm), row, 1, opcode);
-    //gtk_clist_set_text( GTK_CLIST(clDesasm), row, 2, args);
 }
 
 

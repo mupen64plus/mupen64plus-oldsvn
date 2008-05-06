@@ -331,6 +331,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
   char opcode[64];
   char args[128];
   uint32 instr;
+  int ret;
 
   g_return_if_fail (DISASM_IS_LIST (tree_model));
   g_return_if_fail (iter != NULL);
@@ -346,14 +347,25 @@ disasm_list_get_value (GtkTreeModel *tree_model,
       g_value_set_string(value, opcode);
       break;
     case 1:
-      get_instruction( iter->user_data, &instr );
-      r4300_decode_op( instr, opcode, args );
-      g_value_set_string(value, opcode);
-      break;
     case 2:
-      get_instruction( iter->user_data, &instr );
-      r4300_decode_op( instr, opcode, args );
-      g_value_set_string(value, args);
+      ret=get_instruction( iter->user_data, &instr );
+      if(ret==0)
+	  r4300_decode_op( instr, opcode, args );
+      else if(ret==1)
+	{
+	  strcpy( opcode, "X+X+X+X");
+	  strcpy( args, "UNREADABLE");
+	}
+      else
+	{
+	  strcpy( opcode, "???????");
+	  strcpy( args, "Behind TLB");
+	}
+      if(column==1)
+	g_value_set_string(value, opcode);
+      else
+	g_value_set_string(value, args);
+
       break;
     default:
       g_value_set_string(value, "xxx");
