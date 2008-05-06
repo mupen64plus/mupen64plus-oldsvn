@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Config.h"
 #include "resource.h"
 
-#define PLUGIN_NAME "TAS Input Plugin 0.6"
+#define PLUGIN_NAME "TAS Input Plugin 0.6 - Linux"
 
 #define PI 3.14159265358979f
 
@@ -193,8 +193,9 @@ int WINAPI DllMain ( HINSTANCE hInstance, DWORD fdwReason, PVOID pvReserved)
 
 EXPORT void CALL CloseDLL (void)
 {
-	//Stop and Close Direct Input
-	FreeDirectInput();
+
+    printf( "["PLUGIN_NAME"]: Closing...\n" );
+    // some type of writeout for configuration
 }
 
 EXPORT void CALL ControllerCommand ( int Control, BYTE * Command)
@@ -231,6 +232,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 
 EXPORT void CALL GetKeys(int Control, BUTTONS * Keys )
 {
+	
 	if(Control >= 0 && Control < NUMBER_OF_CONTROLS && Controller[Control].bActive)
 		status[Control].GetKeys(Keys);
 	else
@@ -1143,25 +1145,29 @@ EXPORT void CALL ReadController ( int Control, BYTE * Command )
 }
 
 EXPORT void CALL RomClosed (void) {
-	romIsOpen = false;
-	for(int i=0; i<NUMBER_OF_CONTROLS; i++)
-		status[i].StopThread();
+
+    // quit SDL joystick subsystem
+    SDL_QuitSubSystem( SDL_INIT_JOYSTICK );
+
+    // release/ungrab mouse
+    SDL_WM_GrabInput( SDL_GRAB_OFF );
+    SDL_ShowCursor( 1 );
+    
+    romIsOpen = false;
 }
 
 
 EXPORT void CALL RomOpen (void) {
-	RomClosed();
-	romIsOpen = true;
 
-	HKEY hKey;
-	DWORD dwSize, dwType, dwDWSize, dwDWType;
-
-	dwType = REG_BINARY;
-	dwSize = sizeof(DEFCONTROLLER);
-	dwDWType = REG_DWORD;
-	dwDWSize = sizeof(DWORD);
-	
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, SUBKEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS ) {
+	// init SDL joystick subsystem
+    if( !SDL_WasInit( SDL_INIT_JOYSTICK ) )
+        if( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) == -1 )
+        {
+            fprintf( stderr, "["PLUGIN_NAME"]: Couldn't init SDL joystick subsystem: %s\n", SDL_GetError() );
+            return;
+        }
+   romIsOpen = true;    
+	/*if (RegOpenKeyEx(HKEY_CURRENT_USER, SUBKEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS ) {
 		for ( BYTE Control = 0; Control<NUMBER_OF_CONTROLS; Control++ ) {
 			RegQueryValueEx(hKey, Controller[Control].szName, 0, &dwType, (LPBYTE)&Controller[Control], &dwSize);
 			if ( Controller[Control].bActive )
@@ -1186,7 +1192,7 @@ EXPORT void CALL RomOpen (void) {
 		if(Controller[i].bActive)
 			status[i].StartThread(i);
 		else
-			status[i].Control = i;
+			status[i].Control = i;*/
 }
 
 EXPORT void CALL WM_KeyDown( WPARAM wParam, LPARAM lParam )
