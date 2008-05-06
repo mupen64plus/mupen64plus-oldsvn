@@ -191,6 +191,7 @@ PLUGINS	= plugins/blight_input.so \
           plugins/mupen64_audio.so \
           plugins/mupen64_hle_rsp_azimer.so \
           plugins/mupen64_input.so
+          plugins/tasinput.so
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -340,6 +341,10 @@ plugins/mupen64_hle_rsp_azimer.so: FORCE
 plugins/mupen64_input.so: FORCE
 	$(MAKE) -C mupen64_input all
 	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
+
+plugins/tasinput.so: FORCE
+	$(MAKE) -C tasinput all
+	@$(CP) ./tasinput/tasinput.so ./plugins/tasinput.so
 
 FORCE:
 
