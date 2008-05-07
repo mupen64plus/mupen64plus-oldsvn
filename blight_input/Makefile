@@ -5,15 +5,15 @@ include ../pre.mk
 
 # list of object files to generate
 OBJ_BLIGHT = \
-	plugin.o \
-	pad.o
+	plugin.o
 
 OBJ_GTK_GUI = \
 	gui_gtk/configdialog.o
 
 OBJ_SDL_GUI = \
 	gui_sdl/arial.ttf.o \
-	gui_sdl/configdialog_sdl.o
+	gui_sdl/configdialog.o \
+	gui_sdl/pad.o
 
 # local CFLAGS, LIBS, and LDFLAGS
 ifeq ($(GUI), GTK)

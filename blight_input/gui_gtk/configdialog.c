@@ -1,6 +1,6 @@
 #ifdef GUI_GTK
 
-#include "configdialog.h"
+#include "../gui.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -1036,7 +1036,7 @@ init_and_run( void *_arg )
 
 // config function
 void
-configure_sdl( SController *controller )
+configure( SController *controller )
 {
     // we must initialize SDL from within the new thread in order to call SDL_PumpEvents
     g_psController = controller;

@@ -25,13 +25,7 @@
 #include "plugin.h"
 
 #include "../main/winlnxdefs.h"
-
-#ifdef GUI_SDL
-# include "gui_sdl/configdialog_sdl.h"
-#elif defined( GUI_GTK )
-# include "gui_gtk/configdialog.h"
-#endif
-
+#include "gui.h" // gui functions
 #include "Controller_1.1.h"
 
 #ifdef GUI_GTK
@@ -779,11 +773,7 @@ DllConfig( HWND hParent )
     if( !romopen )
     {
         read_configuration();
-#ifdef GUI_SDL
-        configure_sdl( controller );
-#elif defined( GUI_GTK )
-        configure_gtk( controller );
-#endif
+        configure( controller );
     }
 }
 

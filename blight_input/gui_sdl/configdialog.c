@@ -1,6 +1,6 @@
 #ifdef GUI_SDL
 
-#include "configdialog_sdl.h"
+#include "../gui.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -9,7 +9,7 @@
 #include "SDL_thread.h"
 #include "SDL_ttf.h"
 
-#include "../pad.h"    // pad image
+#include "pad.h"    // pad image
 #include "arial.ttf.h"  // arial font
 #define FONT_SIZEPT 15
 
@@ -1045,7 +1045,7 @@ init_and_run( void *_arg )
 
 // config function
 void
-configure_sdl( SController *controller )
+configure( SController *controller )
 {
     // we must initialize SDL from within the new thread in order to call SDL_PumpEvents
     g_psController = controller;
