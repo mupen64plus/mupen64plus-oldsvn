@@ -136,6 +136,10 @@ void update_memory(void){
 uint32 read_memory_32(uint32 addr){
   switch(get_memory_type(addr))
     {
+    case MEM_NOMEM:
+      if(tlb_LUT_r[addr>>12])
+	return read_memory_32((tlb_LUT_r[addr>>12]&0xFFFFF000)|(addr&0xFFF));
+      return MEM_INVALID;
     case MEM_RDRAM:
       return *((uint32 *)(rdramb + (addr & 0xFFFFFF)));
     case MEM_RSPMEM:
@@ -167,6 +171,10 @@ uint32 get_memory_flags(uint32 addr){
 
   switch(type)
     {
+    case MEM_NOMEM:
+      if(tlb_LUT_r[addr>>12])
+	flags|=MEM_FLAG_READABLE;
+      break;
     case MEM_RSPMEM:
       if((addr & 0xFFFF) < 0x2000)
 	flags|=MEM_FLAG_READABLE;

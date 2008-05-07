@@ -33,7 +33,6 @@
 int g_NumBreakpoints=0;
 breakpoint g_Breakpoints[BREAKPOINTS_MAX_NUMBER];
 
-//]=-=-=-=-=-=-=-=-=-=-=-=[ Update Breakpoints Display ]=-=-=-=-=-=-=-=-=-=-=-=[
 
 int add_breakpoint( uint32 address )
 {

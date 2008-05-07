@@ -56,7 +56,9 @@ void init_debugger_frontend()
     init_breakpoints();
     gdk_threads_leave();
 
-    //init_TLBwindow();
+    gdk_threads_enter();
+    init_TLBwindow();
+    gdk_threads_leave();
 }
 
 
@@ -73,9 +75,9 @@ void update_debugger_frontend()
         update_desasm( PC->addr );
         gdk_threads_leave();
     }
-    /*if(regTLB_opened) {
+    if(regTLB_opened) {
         gdk_threads_enter();
         update_TLBwindow();
         gdk_threads_leave();
-    }*/
+    }
 }

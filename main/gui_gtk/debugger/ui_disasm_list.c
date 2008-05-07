@@ -331,7 +331,6 @@ disasm_list_get_value (GtkTreeModel *tree_model,
   char opcode[64];
   char args[128];
   uint32 instr;
-  int ret;
 
   g_return_if_fail (DISASM_IS_LIST (tree_model));
   g_return_if_fail (iter != NULL);
@@ -348,18 +347,15 @@ disasm_list_get_value (GtkTreeModel *tree_model,
       break;
     case 1:
     case 2:
-      ret=get_instruction( iter->user_data, &instr );
-      if(ret==0)
-	  r4300_decode_op( instr, opcode, args );
-      else if(ret==1)
+      if((get_memory_flags(iter->user_data) & MEM_FLAG_READABLE) != 0)
 	{
-	  strcpy( opcode, "X+X+X+X");
-	  strcpy( args, "UNREADABLE");
+	  instr = read_memory_32(iter->user_data);
+	  r4300_decode_op( instr, opcode, args );
 	}
       else
 	{
-	  strcpy( opcode, "???????");
-	  strcpy( args, "Behind TLB");
+	  strcpy( opcode, "X+X+X+X");
+	  sprintf( args, "UNREADABLE (%d)",get_memory_type(iter->user_data));
 	}
       if(column==1)
 	g_value_set_string(value, opcode);

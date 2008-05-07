@@ -160,7 +160,7 @@ void update_regPC()
     uint32  instr;
     char txt[128];
 
-    get_instruction( PC->addr, &instr);
+    instr = read_memory_32( PC->addr );
     sprintf(txt, "%.16lX: 0x%.8lX", PC->addr, instr );
     gtk_entry_set_text(GTK_ENTRY (enRegPC), txt );
 }

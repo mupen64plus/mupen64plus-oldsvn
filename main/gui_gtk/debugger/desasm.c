@@ -178,42 +178,7 @@ void init_desasm()
 }
 
 
-
-
 //]=-=-=-=-=-=-=-=-=-=-=[ Mise-a-jour Desassembleur ]=-=-=-=-=-=-=-=-=-=-=[
-
-int add_instr( uint32 address )
-// Add an disassembled instruction to the display
-{
-    uint32  instr;
-    int new_row;    //index of the append row.
-    char    **line;
-    int status;
-    line = malloc(3*sizeof(char*)); // desassembled instruction:
-    line[0] = malloc(32*sizeof(char)); // - address
-    line[1] = malloc(32*sizeof(char)); // - OP-code
-    line[2] = malloc(32*sizeof(char)); // - parameters
-
-    sprintf( line[0], "%lX", address);
-    status = get_instruction( address, &instr);
-    if( status == 1) {
-        strcpy( line[1], "X+X+X+X");
-        strcpy( line[2], "UNREADABLE");
-    }
-    else if( status == 2 ) {
-        strcpy( line[1], "???????");
-        strcpy( line[2], "Behind TLB");
-    }
-    else {
-        r4300_decode_op( instr, line[1], line[2] );
-    }
-
-    //gtk_clist_set_selectable( GTK_CLIST(clDesasm), new_row, FALSE );
-
-
-    return new_row;
-}
-
 
 void update_desasm( uint32 focused_address )
 //Display disassembled instructions around a 'focused_address'

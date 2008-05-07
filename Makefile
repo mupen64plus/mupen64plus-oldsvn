@@ -150,7 +150,6 @@ OBJ_KDE_GUI = \
 OBJ_DBG = \
         debugger/debugger.o \
 	debugger/decoder.o \
-	debugger/desasm.o \
 	debugger/memory.o \
 	debugger/breakpoints.o
 
