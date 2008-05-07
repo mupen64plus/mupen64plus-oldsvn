@@ -41,3 +41,5 @@ void savestates_set_autoinc_slot(int b);
 int savestates_get_autoinc_slot(void);
 void savestates_inc_slot(void);
 void savestates_select_filename(const char* fn);
+char* savestates_get_filename();
+

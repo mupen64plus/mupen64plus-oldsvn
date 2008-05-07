@@ -659,6 +659,29 @@ void apply_filter( void )
     gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(sortable), g_iSortColumn, g_SortType );
 }
 
+static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
+{
+    if(g_MainWindow.accelUnsafeActive)
+        { gtk_window_remove_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe); }
+    return FALSE;
+}
+
+
+static gboolean callback_filter_unselected( GtkWidget *widget, gpointer data )
+{
+    if(g_MainWindow.accelUnsafeActive)
+        { gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe); }
+    return FALSE;
+}
+
+static gboolean callback_filter_grab_unselected( GtkWidget *widget, gpointer data )
+{
+    if(!g_MainWindow.accelUnsafeActive)
+        { gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe); }
+    gtk_window_set_focus(GTK_WINDOW(g_MainWindow.window), NULL);
+    return FALSE;
+}
+
 // create GUI filter widgets.
 int create_filter( void )
 {
@@ -672,6 +695,13 @@ int create_filter( void )
     gtk_entry_set_text ( GTK_ENTRY(g_MainWindow.filter), "" );
     gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "changed",
                        GTK_SIGNAL_FUNC(callback_apply_filter), (gpointer)NULL );
+    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "focus-in-event",
+                        GTK_SIGNAL_FUNC(callback_filter_selected), (gpointer)NULL );
+    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "focus-out-event",
+                      GTK_SIGNAL_FUNC(callback_filter_unselected), (gpointer)NULL );
+    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "grab-notify",
+                     GTK_SIGNAL_FUNC(callback_filter_grab_unselected), (gpointer)NULL );
+
     gtk_label_set_mnemonic_widget ( GTK_LABEL(label), g_MainWindow.filter );
 
     gtk_box_pack_start ( GTK_BOX(Hbox), label, FALSE, FALSE, 5 );

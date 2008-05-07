@@ -508,6 +508,7 @@ static void callback_Save( GtkWidget *widget, gpointer data )
 }
 
 // Save As
+//Need to add default filename here...
 static void callback_SaveAs( GtkWidget *widget, gpointer data )
 {
     if( g_EmulationThread )
@@ -581,9 +582,20 @@ static void callback_Load( GtkWidget *widget, gpointer data )
 // user changed savestate slot
 static void cb_SaveSlotSelected(GtkMenuItem *item, int slot)
 {
-    // if menu item is active, set save slot
     if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
-        savestates_select_slot(slot);
+        {
+        savestates_select_slot(slot); 
+        char Buffer[128];
+        if(rom)
+            {
+            char *filename = savestates_get_filename();
+            snprintf(Buffer, 127, "%s %s.", tr("Set save slot to"), filename);
+            free(filename);
+            }
+        else 
+            { snprintf(Buffer, 63, "%s %d.", tr("Set save slot to"), slot); }
+        statusbar_message( "status", Buffer);
+        }
 }
 
 // user opened save slot menu. Make sure current save slot is selected.
@@ -591,7 +603,6 @@ static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
 {
     unsigned int i, slot;
     GtkWidget *slotItem = GTK_WIDGET(g_slist_nth_data(slots, savestates_get_slot()));
-
 
     for(i=0; i<g_slist_length(slots); i++)
     {
@@ -602,11 +613,17 @@ static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
         if(slot == savestates_get_slot())
         {
             if(!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(slotItem)))
+                {
+                g_signal_handlers_disconnect_by_func(slotItem, G_CALLBACK(cb_SaveSlotSelected), NULL);
                 gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(slotItem), TRUE);
+                g_signal_connect(slotItem, "activate", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(slot));
+                }
             break;
         }
     }
 }
+
+ //g_signal_connect(slotItem, "toggled", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(i));      }
 
 /** configuration **/
 // configure
@@ -1052,8 +1069,6 @@ static int create_menuBar( void )
 
     GtkWidget   *helpAboutItem;
 
-    GtkAccelGroup *accelGroup;
-
     GSList *group = NULL;
     list_t langList;
     list_node_t *node;
@@ -1063,8 +1078,11 @@ static int create_menuBar( void )
     int i, lang_found;
 
     // accelerator group
-    accelGroup = gtk_accel_group_new();
-    gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), accelGroup);
+    g_MainWindow.accelGroup = gtk_accel_group_new();
+    g_MainWindow.accelUnsafe = gtk_accel_group_new();
+    g_MainWindow.accelUnsafeActive = TRUE;
+    gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelGroup);
+    gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe);
 
     // menubar
     g_MainWindow.menuBar = gtk_menu_bar_new();
@@ -1075,14 +1093,14 @@ static int create_menuBar( void )
     fileMenuItem = gtk_menu_item_new_with_mnemonic(tr("_File"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(fileMenuItem), fileMenu );
     fileLoadRomItem = gtk_menu_item_new_with_mnemonic(tr("_Open Rom..."));
-    gtk_widget_add_accelerator(fileLoadRomItem, "activate", accelGroup,
+    gtk_widget_add_accelerator(fileLoadRomItem, "activate", g_MainWindow.accelGroup,
                                GDK_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     fileCloseRomItem = gtk_menu_item_new_with_mnemonic(tr("_Close Rom"));
     fileSeparator1 = gtk_menu_item_new();
     fileLanguageItem = gtk_menu_item_new_with_mnemonic(tr("_Language"));
     fileSeparator2 = gtk_menu_item_new();
     fileExitItem = gtk_menu_item_new_with_mnemonic(tr("_Exit"));
-    gtk_widget_add_accelerator(fileExitItem, "activate", accelGroup,
+    gtk_widget_add_accelerator(fileExitItem, "activate", g_MainWindow.accelGroup,
                                GDK_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     gtk_menu_append( GTK_MENU(fileMenu), fileLoadRomItem );
     gtk_menu_append( GTK_MENU(fileMenu), fileCloseRomItem );
@@ -1144,23 +1162,23 @@ static int create_menuBar( void )
     emulationMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Emulation"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(emulationMenuItem), emulationMenu );
     emulationStartItem = gtk_menu_item_new_with_mnemonic(tr("_Start"));
-    emulationPauseContinueItem = gtk_menu_item_new_with_mnemonic(tr("Pause/_Continue"));
-    gtk_widget_add_accelerator(emulationPauseContinueItem, "activate", accelGroup,
+    emulationPauseContinueItem = gtk_menu_item_new_with_mnemonic(tr("_Pause"));
+    gtk_widget_add_accelerator(emulationPauseContinueItem, "activate", g_MainWindow.accelGroup,
                                GDK_Pause, 0, GTK_ACCEL_VISIBLE);
-    emulationStopItem = gtk_menu_item_new_with_mnemonic(tr("Sto_p"));
-    gtk_widget_add_accelerator(emulationStopItem, "activate", accelGroup,
+    emulationStopItem = gtk_menu_item_new_with_mnemonic(tr("S_top"));
+    gtk_widget_add_accelerator(emulationStopItem, "activate", g_MainWindow.accelGroup,
                                GDK_Escape, 0, GTK_ACCEL_VISIBLE);
     emulationSeparator1 = gtk_menu_item_new();
     emulationSaveItem = gtk_menu_item_new_with_mnemonic(tr("Save State"));
-    gtk_widget_add_accelerator(emulationSaveItem, "activate", accelGroup,
+    gtk_widget_add_accelerator(emulationSaveItem, "activate", g_MainWindow.accelGroup,
                                GDK_F5, 0, GTK_ACCEL_VISIBLE);
     emulationSaveAsItem = gtk_menu_item_new_with_mnemonic(tr("Save State As"));
     emulationRestoreItem = gtk_menu_item_new_with_mnemonic(tr("Restore State"));
-    gtk_widget_add_accelerator(emulationRestoreItem, "activate", accelGroup,
+    gtk_widget_add_accelerator(emulationRestoreItem, "activate", g_MainWindow.accelGroup,
                                GDK_F7, 0, GTK_ACCEL_VISIBLE);
     emulationLoadItem = gtk_menu_item_new_with_mnemonic(tr("Load State"));
     emulationSeparator2 = gtk_menu_item_new();
-    emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("Current save slot"));
+    emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("_Current save slot"));
 
     gtk_menu_append( GTK_MENU(emulationMenu), emulationStartItem );
     gtk_menu_append( GTK_MENU(emulationMenu), emulationPauseContinueItem );
@@ -1184,21 +1202,20 @@ static int create_menuBar( void )
 
     // slot menu
     emulationSlotMenu = gtk_menu_new();
-    gtk_menu_item_set_submenu( GTK_MENU_ITEM(emulationSlotItem), emulationSlotMenu );
-    slotItem = NULL;
-    for (i = 0; i < 10; i++)
-    {
-        snprintf(buffer, 1000, tr("Slot _%d"), i);
 
-        if(slotItem)
-            slotItem = gtk_radio_menu_item_new_with_mnemonic_from_widget(GTK_RADIO_MENU_ITEM(slotItem), buffer);
-        else
-            slotItem = gtk_radio_menu_item_new_with_mnemonic(NULL, buffer);
+    gtk_menu_item_set_submenu( GTK_MENU_ITEM(emulationSlotItem), emulationSlotMenu );
+    slotItem = gtk_radio_menu_item_new_with_mnemonic(NULL, buffer);
+    for (i = 0; i < 10; ++i)
+        {
+        snprintf(buffer, 999, tr(" Slot _%d"), i);
+
+        slotItem = gtk_radio_menu_item_new_with_mnemonic_from_widget(GTK_RADIO_MENU_ITEM(slotItem), buffer); 
 
         g_object_set_data(G_OBJECT(slotItem), "slot_num", GUINT_TO_POINTER(i));
         gtk_menu_append(GTK_MENU(emulationSlotMenu), slotItem);
+        gtk_widget_add_accelerator(slotItem, "activate", g_MainWindow.accelUnsafe, GDK_0+i, 0, GTK_ACCEL_VISIBLE);
         g_signal_connect(slotItem, "activate", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(i));
-    }
+        }
 
     // set callback so selected save state slot is updated in the menu everytime it's opened
     g_signal_connect(emulationSlotItem, "activate", G_CALLBACK(cb_UpdateSelectedSlot),
@@ -1217,7 +1234,7 @@ static int create_menuBar( void )
     optionsSeparator2 = gtk_menu_item_new();
     optionsCheatsItem = gtk_menu_item_new_with_mnemonic(tr("C_heats..."));
     optionsFullScreenItem = gtk_menu_item_new_with_mnemonic(tr("_Full Screen"));
-    gtk_widget_add_accelerator(optionsFullScreenItem, "activate", accelGroup,
+    gtk_widget_add_accelerator(optionsFullScreenItem, "activate", g_MainWindow.accelGroup,
                                GDK_Return, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
     gtk_menu_append( GTK_MENU(optionsMenu), optionsConfigureItem );
     gtk_menu_append( GTK_MENU(optionsMenu), optionsSeparator1 );
@@ -1361,7 +1378,7 @@ static int create_toolBar( void )
     gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar),tr("Open"),tr("Open Rom"),"",openImage,GTK_SIGNAL_FUNC(callback_openRom),NULL);
     gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Start"),tr("Start Emulation"),"",playImage,GTK_SIGNAL_FUNC(callback_startEmulation),NULL);
-    gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Pause"),tr("Pause/continue Emulation"),"",pauseImage,GTK_SIGNAL_FUNC(callback_pauseContinueEmulation),NULL );
+    gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Pause"),tr("Pause/ Continue Emulation"),"",pauseImage,GTK_SIGNAL_FUNC(callback_pauseContinueEmulation),NULL );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Stop"),tr("Stop Emulation"),"",stopImage,GTK_SIGNAL_FUNC(callback_stopEmulation),NULL );
     gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Fullscreen"),tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );

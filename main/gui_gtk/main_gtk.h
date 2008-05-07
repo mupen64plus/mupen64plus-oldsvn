@@ -32,6 +32,9 @@ typedef struct
 //Non-visable FullList from which we can filter.
     GtkWidget   *romDisplay, *romFullList;
     GtkWidget   *statusBarHBox;
+    GtkAccelGroup *accelGroup;
+    GtkAccelGroup *accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
+    gboolean accelUnsafeActive; //From getting keypresses, so must be deactivated.
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;

@@ -51,8 +51,8 @@ static char fname[1024];
 
 void savestates_select_slot(unsigned int s)
 {
-   if (s > 9) return;
-   slot = s;
+    if(s > 9) return;
+    slot = s;
 }
 
 // returns the currently selected save slot
@@ -87,28 +87,33 @@ void savestates_select_filename(const char *fn)
    strcpy(fname, fn);
 }
 
+char* savestates_get_filename()
+{
+    size_t length;
+    length = strlen(ROM_SETTINGS.goodname)+4+1;
+    char *filename = (char*)malloc(length);
+    snprintf(filename, length, "%s.st%d", ROM_SETTINGS.goodname, slot);
+    return filename;
+} 
+
 void savestates_save()
 {
    char *filename, buf[1024];
    gzFile f;
    int len, i;
-   
+
    if (autoinc_save_slot)
-       savestates_inc_slot();
-   
-   if (slot <= 9)
-     {
-    filename = malloc(strlen(get_savespath())+
-              strlen(ROM_SETTINGS.goodname)+4+1);
-    strcpy(filename, get_savespath());
-    strcat(filename, ROM_SETTINGS.goodname);
-    strcat(filename, ".st");
-    sprintf(buf, "%d", slot);
-    strcat(filename, buf);
-     }
-   else
-     {
-    filename = malloc(strlen(fname)+1);
+        { savestates_inc_slot(); }
+
+    if (slot <= 9)
+        {
+        len = strlen(get_savespath())+strlen(ROM_SETTINGS.goodname)+4+1;
+        filename = malloc(len);
+        snprintf(filename, len, "%s%s.st%d", get_savespath(), ROM_SETTINGS.goodname, slot);
+        }
+    else
+        {
+        filename = malloc(strlen(fname)+1);
     strcpy(filename, fname);
     slot -= 10;
      }
@@ -167,17 +172,13 @@ void savestates_load()
    char *filename, buf[1024];
    gzFile f;
    int len, i;
-   
-   if (slot <= 9)
-     {
-    filename = malloc(strlen(get_savespath())+
-              strlen(ROM_SETTINGS.goodname)+4+1);
-    strcpy(filename, get_savespath());
-    strcat(filename, ROM_SETTINGS.goodname);
-    strcat(filename, ".st");
-    sprintf(buf, "%d", slot);
-    strcat(filename, buf);
-     }
+
+    if (slot <= 9)
+        {
+        len = strlen(get_savespath())+strlen(ROM_SETTINGS.goodname)+4+1;
+        filename = malloc(len);
+        snprintf(filename, len, "%s%s.st%d", get_savespath(), ROM_SETTINGS.goodname, slot);
+        }
    else
      {
     filename = malloc(strlen(fname)+1);
