@@ -1,20 +1,11 @@
-#ifdef GUI_SDL
+#ifdef GUI_GTK
 
-#include "configdialog_sdl.h"
+#include "configdialog.h"
 
 #include <stdarg.h>
 #include <string.h>
 
-#include "SDL.h"
-#include "SDL_thread.h"
-#include "SDL_ttf.h"
-
-#include "pad.h"    // pad image
-#include "arial.ttf.h"  // arial font
-#define FONT_SIZEPT 15
-
-#define SCREEN_W    640
-#define SCREEN_H    480
+#include <SDL.h>
 
 // callback structure
 typedef struct
@@ -1061,4 +1052,4 @@ configure_sdl( SController *controller )
     // everything ok
 }
 
-#endif // GUI_SDL
+#endif // GUI_GTK

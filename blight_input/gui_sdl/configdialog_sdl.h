@@ -5,7 +5,7 @@
 #ifndef __CONFIGDIALOG_SDL_H__
 #define __CONFIGDIALOG_SDL_H__
 
-#include "plugin.h"
+#include "../plugin.h"
 
 void configure_sdl( SController *controller );
 

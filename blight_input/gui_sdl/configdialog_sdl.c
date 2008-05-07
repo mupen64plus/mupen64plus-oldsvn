@@ -9,7 +9,7 @@
 #include "SDL_thread.h"
 #include "SDL_ttf.h"
 
-#include "pad.h"    // pad image
+#include "../pad.h"    // pad image
 #include "arial.ttf.h"  // arial font
 #define FONT_SIZEPT 15
 

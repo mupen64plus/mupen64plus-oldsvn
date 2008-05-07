@@ -27,9 +27,9 @@
 #include "../main/winlnxdefs.h"
 
 #ifdef GUI_SDL
-# include "configdialog_sdl.h"
+# include "gui_sdl/configdialog_sdl.h"
 #elif defined( GUI_GTK )
-# include "configdialog_gtk.h"
+# include "gui_gtk/configdialog.h"
 #endif
 
 #include "Controller_1.1.h"
@@ -558,8 +558,8 @@ ControllerCommand(int Control, BYTE *Command)
   output:   none
 *******************************************************************/
 #ifdef GUI_SDL
-# include "SDL_ttf.h"
-# include "arial.ttf.h" // arial font
+# include "gui_sdl/SDL_ttf.h"
+# include "gui_sdl/arial.ttf.h" // arial font
 # include <stdarg.h>
 
 # define FONT_SIZEPT 15

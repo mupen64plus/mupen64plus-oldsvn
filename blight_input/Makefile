@@ -3,16 +3,6 @@
 # include pre-make file with a bunch of definitions
 include ../pre.mk
 
-# local CFLAGS, LIBS, and LDFLAGS
-SDLTTF_LIBS	= -lSDL_ttf
-CFLAGS += -DGUI_SDL -fpic -DPIC
-
-ifeq ($(GUI), SDL)
-  CFLAGS += -DGUI_SDL
-  OBJ_BLIGHT += $(OBJ_SDL_GUI)
-  LIBS += -lSDL_ttf
-endif
-
 # list of object files to generate
 OBJ_BLIGHT = \
 	plugin.o \
@@ -25,34 +15,39 @@ OBJ_SDL_GUI = \
 	gui_sdl/arial.ttf.o \
 	gui_sdl/configdialog_sdl.o
 
+# local CFLAGS, LIBS, and LDFLAGS
+ifeq ($(GUI), GTK)
+  CFLAGS += -DGUI_GTK $(GTK_FLAGS)
+  OBJ_BLIGHT += $(OBJ_GTK_GUI)
+  LIBS += $(GTK_LIBS)
+else
+  CFLAGS += -DGUI_SDL $(SDL_FLAGS)
+  OBJ_BLIGHT += $(OBJ_SDL_GUI)
+  LIBS += -lSDL_ttf $(SDL_LIBS)
+endif
+
 # build targets
 all: blight_input.so
 
 clean:
-	rm -f *.o *.so ttftoh arial.ttf.c
+	rm -f *.so *.o gui_sdl/*.o gui_sdl/ttftoh gui_sdl/arial.ttf.c gui_gtk/*.o
 
 # build rules
 .c.o:
-	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) $(FREETYPE_FLAGS) -c $<
+	$(CC) -o $@ $(CFLAGS) -c $<
 
 blight_input.so: $(OBJ_BLIGHT)
-	$(CC) $^ $(LDFLAGS) $(LIBS) -o $@
+	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(LIBS) -o $@
 	$(STRIP) $@
 
-gui_sdl/configdialog_sdl.o: configdialog_sdl.c
-	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
+gui_sdl/arial.ttf.c: gui_sdl/ttftoh
+	./gui_sdl/ttftoh ./font/arial.ttf
+	$(MV) ./font/arial.ttf.h ./gui_sdl/arial.ttf.c
 
-plugin.o: plugin.c
-	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
-
-arial.ttf.c: ttftoh
-	./ttftoh ./font/arial.ttf
-	$(MV) ./font/arial.ttf.h ./arial.ttf.c
-
-gui_sdl/ttftoh: ttftoh.o
+gui_sdl/ttftoh: gui_sdl/ttftoh.o
 	$(CC) $^ -o $@
 	$(STRIP) $@
 
-gui_sdl/ttftoh.o: ttftoh.c
+gui_sdl/ttftoh.o: gui_sdl/ttftoh.c
 	$(CC) -o $@ -O3 -c $<
 
