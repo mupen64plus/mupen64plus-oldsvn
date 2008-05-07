@@ -584,17 +584,8 @@ static void cb_SaveSlotSelected(GtkMenuItem *item, int slot)
 {
     if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
         {
-        savestates_select_slot(slot); 
-        char Buffer[128];
-        if(rom)
-            {
-            char *filename = savestates_get_filename();
-            snprintf(Buffer, 127, "%s %s.", tr("Set save slot to"), filename);
-            free(filename);
-            }
-        else 
-            { snprintf(Buffer, 63, "%s %d.", tr("Set save slot to"), slot); }
-        statusbar_message( "status", Buffer);
+        if(slot!=savestates_get_slot()) //Only actually change slot when not a GUI update.
+            { savestates_select_slot(slot); }
         }
 }
 
@@ -605,25 +596,20 @@ static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
     GtkWidget *slotItem = GTK_WIDGET(g_slist_nth_data(slots, savestates_get_slot()));
 
     for(i=0; i<g_slist_length(slots); i++)
-    {
+        {
         GtkWidget *slotItem = GTK_WIDGET(g_slist_nth_data(slots, i));
         slot = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(slotItem), "slot_num"));
 
-        // if this menu item represents the current selected save slot, make sure it's selected
-        if(slot == savestates_get_slot())
-        {
+        //Make menu item represent the current selected save slot.
+        if(slot==savestates_get_slot())
+            {
             if(!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(slotItem)))
-                {
-                g_signal_handlers_disconnect_by_func(slotItem, G_CALLBACK(cb_SaveSlotSelected), NULL);
-                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(slotItem), TRUE);
-                g_signal_connect(slotItem, "activate", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(slot));
-                }
+                { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(slotItem), TRUE); }
             break;
+            }
         }
-    }
 }
-
- //g_signal_connect(slotItem, "toggled", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(i));      }
+//g_signal_connect(slotItem, "toggled", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(i));      }
 
 /** configuration **/
 // configure

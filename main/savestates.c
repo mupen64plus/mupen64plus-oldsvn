@@ -53,6 +53,16 @@ void savestates_select_slot(unsigned int s)
 {
     if(s > 9) return;
     slot = s;
+    char buffer[128];
+    if(rom)
+        {
+        char *filename = savestates_get_filename();
+        snprintf(buffer, 127, "%s %s.", tr("Set save slot to"), filename);
+        free(filename);
+        }
+    else 
+        { snprintf(buffer, 127, "%s %d.", tr("Set save slot to"), slot); }
+    info_message(buffer);
 }
 
 // returns the currently selected save slot
