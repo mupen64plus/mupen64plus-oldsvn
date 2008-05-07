@@ -8,11 +8,11 @@ OBJ_BLIGHT = \
 	plugin.o
 
 OBJ_GTK_GUI = \
-	gui_gtk/configdialog.o
+	gui_gtk/gui.o
 
 OBJ_SDL_GUI = \
 	gui_sdl/arial.ttf.o \
-	gui_sdl/configdialog.o \
+	gui_sdl/gui.o \
 	gui_sdl/pad.o
 
 # local CFLAGS, LIBS, and LDFLAGS

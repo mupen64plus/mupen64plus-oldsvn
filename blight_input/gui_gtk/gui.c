@@ -1,20 +1,9 @@
-#ifdef GUI_SDL
-
 #include "../gui.h"
 
 #include <stdarg.h>
 #include <string.h>
 
-#include "SDL.h"
-#include "SDL_thread.h"
-#include "SDL_ttf.h"
-
-#include "pad.h"    // pad image
-#include "arial.ttf.h"  // arial font
-#define FONT_SIZEPT 15
-
-#define SCREEN_W    640
-#define SCREEN_H    480
+#include <SDL.h>
 
 // callback structure
 typedef struct
@@ -1061,4 +1050,46 @@ configure( SController *controller )
     // everything ok
 }
 
-#endif // GUI_SDL
+/** Plugin About Dialog **/
+static int about_shown = 0;
+
+static void about_ok_clicked(GtkWidget *widget, gpointer data)
+{
+    gtk_widget_hide_all( GTK_WIDGET(data) );
+    gtk_widget_destroy( GTK_WIDGET(data) );
+    about_shown = 0;
+}
+
+void about(void)
+{
+    GtkWidget *window;
+    GtkWidget *vbox;
+    GtkWidget *label;
+    GtkWidget *button;
+
+    if( about_shown )
+        return;
+
+    window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    gtk_window_set_title( GTK_WINDOW(window), PLUGIN_NAME );
+    gtk_container_set_border_width( GTK_CONTAINER(window), 10 );
+    gtk_window_set_policy( GTK_WINDOW(window), FALSE, FALSE, TRUE );
+
+    vbox = gtk_vbox_new( FALSE, 10 );
+    label = gtk_label_new( PLUGIN_NAME" version "PLUGIN_VERSION"\n\n"
+                "This is a N64 input plugin using SDL.\n"
+                "(c) 2002 by blight" );
+    button = gtk_button_new_with_label( "Ok" );
+
+    gtk_container_add( GTK_CONTAINER(window), GTK_WIDGET(vbox) );
+    gtk_box_pack_start( GTK_BOX(vbox), GTK_WIDGET(label), TRUE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX(vbox), GTK_WIDGET(button), TRUE, FALSE, 0 );
+
+    gtk_signal_connect( GTK_OBJECT(button), "clicked",
+            GTK_SIGNAL_FUNC(about_ok_clicked), (gpointer) window);
+
+    // show the window
+    about_shown = 1;
+    gtk_widget_show_all( GTK_WIDGET(window) );
+}
+

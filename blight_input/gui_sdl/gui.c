@@ -1,11 +1,21 @@
-#ifdef GUI_GTK
-
 #include "../gui.h"
 
 #include <stdarg.h>
 #include <string.h>
 
-#include <SDL.h>
+#include "SDL.h"
+#include "SDL_thread.h"
+#include "SDL_ttf.h"
+
+#include "pad.h"    // pad image
+#include "arial.ttf.h"  // arial font
+#define FONT_SIZEPT 15
+
+#define CONFIG_DIALOG_WIDTH 640
+#define CONFIG_DIALOG_HEIGHT 480
+
+#define ABOUT_DIALOG_WIDTH 300
+#define ABOUT_DIALOG_HEIGHT 145
 
 // callback structure
 typedef struct
@@ -684,7 +694,7 @@ configure_thread( void *_arg )
         // draw the controller tab
         dstrect.x = 10;
         dstrect.y = 10;
-        dstrect.w = (SCREEN_W - 20) / 4;
+        dstrect.w = (CONFIG_DIALOG_WIDTH - 20) / 4;
         dstrect.h = 25;
         for( i = 0; i < 4; i++ )
         {
@@ -707,15 +717,15 @@ configure_thread( void *_arg )
 
         dstrect.x = 10;
         dstrect.y = 35;
-        dstrect.w = SCREEN_W - 20;
-        dstrect.h = SCREEN_H - 80;
+        dstrect.w = CONFIG_DIALOG_WIDTH - 20;
+        dstrect.h = CONFIG_DIALOG_HEIGHT - 80;
         SDL_FillRect( screen, &dstrect, u32black );
         dstrect.x++; dstrect.y++; dstrect.w -= 2; dstrect.h -= 2;
         SDL_FillRect( screen, &dstrect, u32gray );
 
         // draw the pad
-        dstrect.x = (SCREEN_W - pad->w) / 2;
-        dstrect.y = (SCREEN_H - pad->h) / 2;
+        dstrect.x = (CONFIG_DIALOG_WIDTH - pad->w) / 2;
+        dstrect.y = (CONFIG_DIALOG_HEIGHT - pad->h) / 2;
         dstrect.w = pad->w;
         dstrect.h = pad->h;
         SDL_BlitSurface( pad, NULL, screen, &dstrect );
@@ -1052,4 +1062,108 @@ configure( SController *controller )
     // everything ok
 }
 
-#endif // GUI_GTK
+/** Plugin About Dialog **/
+void about(void)
+{
+    SDL_RWops *rw;
+    SDL_Surface *screen;
+    SDL_Rect rect;
+    // colors
+    Uint32 u32black, u32gray, u32dark_gray;
+    SDL_Color black      = { 0x00, 0x00, 0x00, 0 };
+    SDL_Color gray       = { 0xAA, 0xAA, 0xAA, 0 };
+    SDL_Color dark_gray  = { 0x66, 0x66, 0x66, 0 };
+
+    // init sdl
+    if( !SDL_WasInit( SDL_INIT_VIDEO ) )
+        if( SDL_InitSubSystem( SDL_INIT_VIDEO ) < 0 )
+        {
+            fprintf( stderr, "["PLUGIN_NAME"]: Couldn't init SDL video subsystem: %s\n", SDL_GetError() );
+            return;
+        }
+
+    // init sdl_ttf2
+    if( !TTF_WasInit() )
+        if( TTF_Init() < 0 )
+        {
+            fprintf( stderr, "["PLUGIN_NAME"]: Couldn't init TTF library: %s\n", SDL_GetError() );
+            SDL_QuitSubSystem( SDL_INIT_VIDEO );
+            return;
+        }
+
+    // open font
+    rw = SDL_RWFromMem( (char *)arial.data, arial.size );
+    font = TTF_OpenFontRW( rw, 0, FONT_SIZEPT );
+    if( font == NULL )
+    {
+        fprintf( stderr, "["PLUGIN_NAME"]: Couldn't load %d pt font: %s\n", FONT_SIZEPT, SDL_GetError() );
+        TTF_Quit();
+        SDL_QuitSubSystem( SDL_INIT_VIDEO );
+        return;
+    }
+    TTF_SetFontStyle( font, TTF_STYLE_NORMAL );
+
+    // display dialog (set video mode)
+    screen = SDL_SetVideoMode( ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT, 0, SDL_SWSURFACE );
+    if( !screen )
+    {
+        fprintf( stderr, "["PLUGIN_NAME"]: Couldn't set video mode %dx%d: %s\n", ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT, SDL_GetError() );
+        TTF_Quit();
+        SDL_QuitSubSystem( SDL_INIT_VIDEO );
+        return;
+    }
+    SDL_WM_SetCaption( PLUGIN_NAME" "PLUGIN_VERSION, NULL );
+
+    // create colors
+    u32black      = SDL_MapRGBA( screen->format, black.r, black.g, black.b, 0 );
+    u32gray       = SDL_MapRGBA( screen->format, gray.r, gray.g, gray.b, 0 );
+    u32dark_gray  = SDL_MapRGBA( screen->format, dark_gray.r, dark_gray.g, dark_gray.b, 0 );
+
+    // draw dialog
+    SDL_FillRect( screen, NULL, u32dark_gray );
+
+    rect.x = rect.y = 5; rect.w = ABOUT_DIALOG_WIDTH - 10; rect.h = ABOUT_DIALOG_HEIGHT - 40;
+    SDL_FillRect( screen, &rect, u32black );
+    rect.x += 1; rect.y += 1; rect.w -= 2; rect.h -= 2;
+    SDL_FillRect( screen, &rect, u32gray );
+
+    write_text( screen, 15, 15, black, gray, PLUGIN_NAME" v"PLUGIN_VERSION":" );
+    write_text( screen, 15, 35, black, gray, "coded by blight" );
+    write_text( screen, 15, 55, black, gray, "This plugin uses the SDL library for input." );
+    write_text( screen, 15, 75, black, gray, "Go to www.libsdl.org for more information." );
+
+    rect.x = (ABOUT_DIALOG_WIDTH - 90) / 2; rect.y = ABOUT_DIALOG_HEIGHT - 30; rect.w = 90; rect.h = 25;
+    SDL_FillRect( screen, &rect, u32black );
+    rect.x += 1; rect.y += 1; rect.w -= 2; rect.h -= 2;
+    SDL_FillRect( screen, &rect, u32gray );
+    
+    write_text( screen, rect.x + 33, rect.y + 2, black, gray, "Ok" );
+
+    for(;;)
+    {
+        SDL_Event event;
+        SDL_Flip( screen );
+        if( SDL_PollEvent( &event ) )
+        {
+            if( event.type == SDL_KEYDOWN )
+            {
+                if( event.key.keysym.sym == SDLK_ESCAPE )
+                    break;
+            }
+            else if( event.type == SDL_MOUSEBUTTONDOWN )
+            {
+                if( event.button.button == SDL_BUTTON_LEFT )
+                {
+                    if( event.button.x >= rect.x && event.button.x <= rect.x + rect.w &&
+                        event.button.y >= rect.y && event.button.y <= rect.y + rect.h )
+                        break;
+                }
+            }
+        }
+    }
+    TTF_Quit();
+    SDL_FreeSurface( screen );
+    SDL_QuitSubSystem( SDL_INIT_VIDEO );
+}
+
+
