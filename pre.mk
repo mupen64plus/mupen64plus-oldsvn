@@ -63,7 +63,7 @@ PROF    = gprof
 INSTALL = ginstall
 
 # set base CFLAGS and LDFLAGS for all systems
-CFLAGS = -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
+CFLAGS = -pipe -O0 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
 LDFLAGS =
 
 # set special flags per-system

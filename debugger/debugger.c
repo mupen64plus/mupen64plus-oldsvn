@@ -50,6 +50,8 @@ void init_debugger()
 
     init_debugger_frontend();
 
+    init_host_disassembler();
+
     pthread_mutex_init( &mutex, NULL);
     pthread_cond_init( &debugger_done_cond, NULL);
 }

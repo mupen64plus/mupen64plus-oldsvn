@@ -115,8 +115,7 @@ ifneq ($(NO_ASM), 1)
       r4300/$(DYNAREC)/gspecial.o \
       r4300/$(DYNAREC)/gtlb.o \
       r4300/$(DYNAREC)/regcache.o \
-      r4300/$(DYNAREC)/rjump.o \
-      debugger/$(DYNAREC)/host_decoder.o
+      r4300/$(DYNAREC)/rjump.o
 else
   OBJ_DYNAREC = r4300/empty_dynarec.o
 endif
@@ -212,6 +211,7 @@ else
 endif
 ifeq ($(DBG), 1)
   OBJECTS += $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
+  LIBS += -lopcodes -lbfd
 endif
 
 # build targets

@@ -20,12 +20,113 @@
 
 #if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
 
+#include <dis-asm.h>
+#include <stdarg.h>
+
 int  lines_recompiled;
 uint32 addr_recompiled;
+int  num_decoded;
 
 char opcode_recompiled[564][MAX_DISASSEMBLY];
 char args_recompiled[564][MAX_DISASSEMBLY];
 int  opaddr_recompiled[564];
+
+disassemble_info dis_info;
+
+void process_opcode_out(void *strm, const char *fmt, ...){
+  va_list ap = {0};
+  va_start(ap, fmt);
+  char *arg;
+  char buff[256];
+
+  if(num_decoded==0)
+    {
+      if(strcmp(fmt,"%s")==0)
+	{
+	  arg = va_arg(ap, char*);
+	  strcpy(opcode_recompiled[lines_recompiled],arg);
+	}
+      else
+	strcpy(opcode_recompiled[lines_recompiled],"OPCODE-X");
+      num_decoded++;
+      *(args_recompiled[lines_recompiled])=0;
+    }
+  else
+    {
+      vsprintf(buff, fmt, ap);
+      sprintf(args_recompiled[lines_recompiled],"%s%s", args_recompiled[lines_recompiled],buff);
+    }
+  va_end(ap);
+}
+
+// Callback function that will be called by libopcodes to read the 
+// bytes to disassemble ('read_memory_func' member of 'disassemble_info').
+int read_memory_func(bfd_vma memaddr, bfd_byte *myaddr, 
+                            unsigned int length, disassemble_info *info) {
+  char* from = (char*)(memaddr);
+  char* to =   (char*)myaddr;
+  
+  while (length-- != 0) {
+    *to++ = *from++;
+  }
+  return (0);
+}
+
+void init_host_disassembler(void){
+
+  dis_info.fprintf_func = process_opcode_out;
+  dis_info.bytes_per_line=40;
+  dis_info.endian = 1;
+  dis_info.mach = bfd_mach_i386_i8086;
+  dis_info.disassembler_options = (char*) "i386,suffix";
+  dis_info.read_memory_func = read_memory_func;
+}
+
+void decode_recompiled(uint32 addr)
+{
+    unsigned char *assemb, *end_addr;
+    unsigned char *as_inc;
+
+    lines_recompiled=0;
+
+    if(blocks[addr>>12] == NULL)
+        return;
+
+    if(blocks[addr>>12]->block[(addr&0xFFF)/4].ops == NOTCOMPILED)
+    //      recompile_block((int *) SP_DMEM, blocks[addr>>12], addr);
+      {
+	strcpy(opcode_recompiled[0],"NOTCOMPILED");
+	strcpy(args_recompiled[0],"NOTCOMPILED");
+	opaddr_recompiled[0]=0;
+	addr_recompiled=0;
+	lines_recompiled++;
+	return;
+      }
+
+    assemb = (blocks[addr>>12]->code) + 
+      (blocks[addr>>12]->block[(addr&0xFFF)/4].local_addr);
+
+    end_addr = blocks[addr>>12]->code;
+
+    if( (addr & 0xFFF) == 0xFFF)
+        end_addr += blocks[addr>>12]->code_length;
+    else
+        end_addr += blocks[addr>>12]->block[(addr&0xFFF)/4+1].local_addr;
+
+    for(as_inc=assemb; as_inc<end_addr; as_inc++)
+      printf("%02x", *as_inc);
+    while(assemb < end_addr)
+      {
+        opaddr_recompiled[lines_recompiled] = (uint32)assemb;
+	num_decoded=0;
+	assemb += print_insn_i386((uint64)assemb, &dis_info);
+        //assemb += host_decode_op(assemb, opcode_recompiled[lines_recompiled], 
+        //                         args_recompiled[lines_recompiled]);
+        lines_recompiled++;
+      }
+    addr_recompiled=addr;
+    printf("\n");
+}
 
 char* get_recompiled_opcode(uint32 addr, int index)
 {
@@ -68,50 +169,6 @@ int get_num_recompiled(uint32 addr)
     return lines_recompiled;
 }
 
-void decode_recompiled(uint32 addr)
-{
-    unsigned char *assemb, *end_addr;
-    unsigned char *as_inc;
-
-    lines_recompiled=0;
-
-    if(blocks[addr>>12] == NULL)
-        return;
-
-    if(blocks[addr>>12]->block[(addr&0xFFF)/4].ops == NOTCOMPILED)
-    //      recompile_block((int *) SP_DMEM, blocks[addr>>12], addr);
-      {
-	strcpy(opcode_recompiled[0],"NOTCOMPILED");
-	strcpy(args_recompiled[0],"NOTCOMPILED");
-	opaddr_recompiled[0]=0;
-	addr_recompiled=0;
-	lines_recompiled++;
-	return;
-      }
-
-    assemb = (blocks[addr>>12]->code) + 
-      (blocks[addr>>12]->block[(addr&0xFFF)/4].local_addr);
-
-    end_addr = blocks[addr>>12]->code;
-
-    if( (addr & 0xFFF) == 0xFFF)
-        end_addr += blocks[addr>>12]->code_length;
-    else
-        end_addr += blocks[addr>>12]->block[(addr&0xFFF)/4+1].local_addr;
-
-    for(as_inc=assemb; as_inc<end_addr; as_inc++)
-      printf("%02x", *as_inc);
-    while(assemb < end_addr)
-      {
-        opaddr_recompiled[lines_recompiled] = assemb;
-        assemb += host_decode_op(assemb, opcode_recompiled[lines_recompiled], 
-                                 args_recompiled[lines_recompiled]);
-        lines_recompiled++;
-      }
-    addr_recompiled=addr;
-    printf("\n");
-}
-
 #else
 
 char* get_recompiled(uint32 addr, int index)
@@ -122,6 +179,11 @@ char* get_recompiled(uint32 addr, int index)
 int get_num_recompiled(uint32 addr)
 {
     return 0;
+}
+
+void init_host_disassembler(void)
+{
+
 }
 
 #endif
