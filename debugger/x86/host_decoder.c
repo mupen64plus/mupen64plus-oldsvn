@@ -100,12 +100,14 @@ static int decode_mod(char *buff) {
 	    numbytes++;
 	    if((*opaddr & 0x07)==5)
 	      {
-		sprintf(buff, "[%s*%x+0x%08x]", regs[((*(opaddr))>>3)&0x7], pow2((*opaddr)>>6), *((uint32*)(opaddr+1)));
+		sprintf(buff, "[%s*%x+0x%08x]", regs[((*opaddr)>>3)&0x7], pow2((*opaddr)>>6), *((uint32*)(opaddr+1)));
 		opaddr++;
 		return 4;
 	      }
 	    else
-	      RESERV();
+	      {
+		sprintf(buff, "[%s*%x+0x%08x+%s]", regs[((*opaddr)>>3)&0x7], pow2((*opaddr)>>6), *((uint32*)(opaddr+1)));
+	      }
 	  }
 	else
 	  {
@@ -127,15 +129,15 @@ static int decode_mod(char *buff) {
 }
 
 static void JE_NEAR(){
-    set_op("JE");
-    numbytes+=4;
-    sprintf(args, "[0x%08x]", *((uint32*)opaddr));
+  set_op("JE");
+  numbytes+=4;
+  sprintf(args, "[0x%08x]", *((uint32*)opaddr));
 }
 
 void decode_second()
 {
-    numbytes++;
-    switch(*(opaddr++))
+  numbytes++;
+  switch(*(opaddr++))
     {
     case 0x84: JE_NEAR();            break;
     default:   RESERV();
@@ -145,107 +147,134 @@ void decode_second()
 ///////////////////////////////////////////////////////////////////////////////
 
 static void MOV_EAX_MEM(){
-    set_op("MOV");
-    if(ARCH_PTR==32) {
-      numbytes+=4;
-      sprintf(args, "EAX, [0x%08X]", *((uint32*)opaddr));
-    }
-    else {
-      numbytes+=8;
-      sprintf(args, "EAX, [0x%016X]", *((uint64*)opaddr));
-    }
+  set_op("MOV");
+  if(ARCH_PTR==32) {
+    numbytes+=4;
+    sprintf(args, "EAX, [0x%08X]", *((uint32*)opaddr));
+  }
+  else {
+    numbytes+=8;
+    sprintf(args, "EAX, [0x%016X]", *((uint64*)opaddr));
+  }
 }
 
 static void MOV_REG_IMM(){
-    set_op("MOV");
-    switch(bitmod)
+  set_op("MOV");
+  switch(bitmod)
     {
     case 32:
-        numbytes+=4;
-        sprintf(args, "%s, 0x%08x", regs[(*(opaddr-1))&0x7],*((uint32*)opaddr));
-        break;
+      numbytes+=4;
+      sprintf(args, "%s, 0x%08x", regs[(*(opaddr-1))&0x7],*((uint32*)opaddr));
+      break;
     case 64:
-        numbytes+=8;
-        sprintf(args, "%s, 0x%016x", regs[(*(opaddr-1))&0x7],*((uint64*)opaddr));
-        break;
+      numbytes+=8;
+      sprintf(args, "%s, 0x%016x", regs[(*(opaddr-1))&0x7],*((uint64*)opaddr));
+      break;
     }
 }
 
 static void MOV_MEM_IMM(){
-    char modbyte[256];
-    int modsize = decode_mod(modbyte);
-    set_op("MOV");
-    numbytes+=modsize;
-    switch(bitmod)
+  char modbyte[256];
+  int modsize = decode_mod(modbyte);
+  set_op("MOV");
+  numbytes+=modsize;
+  switch(bitmod)
     {
     case 32:
-        numbytes+=4;   
-        sprintf(args, "%s, 0x%08x", modbyte, *((uint32*)(opaddr+modsize)));
-        break;
+      numbytes+=4;   
+      sprintf(args, "%s, 0x%08x", modbyte, *((uint32*)(opaddr+modsize)));
+      break;
     case 64:
-        numbytes+=8;
-	sprintf(args, "%s, 0x%016x", modbyte, *((uint64*)(opaddr+modsize)));
-        break;
+      numbytes+=8;
+      sprintf(args, "%s, 0x%016x", modbyte, *((uint64*)(opaddr+modsize)));
+      break;
     }
 }
 
 static void CMP_REG_MRM(){
-    char modbyte[256];
-    int modsize = decode_mod(modbyte);
-    set_op("CMP");
-    numbytes+=modsize;
-    sprintf(args, "%s, %s", regs[((*opaddr)>>3)&0x7], modbyte);
+  char modbyte[256];
+  int modsize = decode_mod(modbyte);
+  set_op("CMP");
+  numbytes+=modsize;
+  sprintf(args, "%s, %s", regs[((*opaddr)>>3)&0x7], modbyte);
 }
 
 static void CMP_EAX_IMM(){
-    set_op("CMP");
-    numbytes+=4;
-    sprintf(args, "EAX, 0x%08X", *((uint32*)opaddr));
+  set_op("CMP");
+  numbytes+=4;
+  sprintf(args, "EAX, 0x%08X", *((uint32*)opaddr));
 }
 
 static void AND_EAX_IMM(){
-    set_op("AND");
-    numbytes+=4;
-    sprintf(args, "EAX, 0x%08X", *((uint32*)opaddr));
+  set_op("AND");
+  numbytes+=4;
+  sprintf(args, "EAX, 0x%08X", *((uint32*)opaddr));
 }
 
 static void ADD_EAX_IMM(){
-    set_op("ADD");
-    numbytes+=4;
-    sprintf(args, "EAX, 0x%08X", *((uint32*)opaddr));
+  set_op("ADD");
+  numbytes+=4;
+  sprintf(args, "EAX, 0x%08X", *((uint32*)opaddr));
 }
 
 static void INT_IMM8(){
-    numbytes++;
-    set_op("INT");
-    sprintf(args, "0x%02x", *opaddr);
+  numbytes++;
+  set_op("INT");
+  sprintf(args, "0x%02x", *opaddr);
 }
 
 static void JNZ_REL(){
-    set_op("JNZ");
-    numbytes++;
-    if(ARCH_PTR==32)
-      sprintf(args, "0x%08x",((uint32)(opaddr+1+(*opaddr))));
-    else
-      sprintf(args, "0x%016x",((uint64)(opaddr+1+(*opaddr))));
+  set_op("JNZ");
+  numbytes++;
+  if(ARCH_PTR==32)
+    sprintf(args, "0x%08x",((uint32)(opaddr+1+(*opaddr))));
+  else
+    sprintf(args, "0x%016x",((uint64)(opaddr+1+(*opaddr))));
 }
 
 static void JZ_REL(){
-    set_op("JZ");
-    numbytes++;
-    if(ARCH_PTR==32)
-      sprintf(args, "0x%08x",((uint32)(opaddr+1+(*opaddr))));
-    else
-      sprintf(args, "0x%016x",((uint64)(opaddr+1+(*opaddr))));
+  set_op("JZ");
+  numbytes++;
+  if(ARCH_PTR==32)
+    sprintf(args, "0x%08x",((uint32)(opaddr+1+(*opaddr))));
+  else
+    sprintf(args, "0x%016x",((uint64)(opaddr+1+(*opaddr))));
 }
 
-static void JMP_REL(){
+static void JA_REL(){
+  set_op("JA");
+  numbytes++;
+  if(ARCH_PTR==32)
+    sprintf(args, "0x%08x",((uint32)(opaddr+1+(*opaddr))));
+  else
+    sprintf(args, "0x%016x",((uint64)(opaddr+1+(*opaddr))));
+}
+
+static void JMP_REL_W(){
+  set_op("JMP");
+  numbytes+=4;
+  if(ARCH_PTR==32)
+    sprintf(args, "0x%08x", ((uint32)(opaddr+4+*((uint32*)opaddr))));
+  else
+    sprintf(args, "0x%016x", ((uint32)(opaddr+4+*((uint32*)opaddr))));
+}
+
+static void JMP_REL_B(){
     set_op("JMP");
     numbytes++;
     if(ARCH_PTR==32)
       sprintf(args, "0x%08x",((uint32)(opaddr+1+(*opaddr))));
     else
       sprintf(args, "0x%016x",((uint64)(opaddr+1+(*opaddr))));
+}
+
+static void CALL_REL_IMM(){
+  set_op("CALL");
+  numbytes+=4;
+  if(ARCH_PTR==32)
+    sprintf(args, "0x%08x", ((uint32)(opaddr+4+*((uint32*)opaddr))));
+  else
+    sprintf(args, "0x%016x", ((uint32)(opaddr+4+*((uint32*)opaddr))));
 }
 
 static void MOV_MRM_REG(){
@@ -318,6 +347,11 @@ static void BSH_C1_MRM(){
   numbytes+=1+modsize;
 }
 
+static void CLC(){
+  set_op("CLC");
+  sprintf(args, "");
+}
+
 static void INC_DEC_CALL(){
   char modbyte[256];
 
@@ -360,6 +394,7 @@ decode_prefix_or_first()
         break;
     case 0x74: JZ_REL();        break;
     case 0x75: JNZ_REL();       break;
+    case 0x77: JA_REL();        break;
     case 0x81: LOGIC_MRM_IMM();     break;
     case 0x89: MOV_MRM_REG();   break;
     case 0x8B: MOV_MRM_MRM();   break;
@@ -376,7 +411,10 @@ decode_prefix_or_first()
     case 0xC1: BSH_C1_MRM();    break;
     case 0xC7: MOV_MEM_IMM();   break;
     case 0xCD: INT_IMM8();      break;
-    case 0xEB: JMP_REL();       break;
+    case 0xE8: CALL_REL_IMM();  break;
+    case 0xE9: JMP_REL_W();       break;
+    case 0xEB: JMP_REL_B();       break;
+    case 0xF8: CLC();           break;
     case 0xFF: INC_DEC_CALL();  break;
     default:   RESERV();
     }
