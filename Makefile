@@ -151,6 +151,7 @@ OBJ_DBG = \
         debugger/debugger.o \
 	debugger/decoder.o \
 	debugger/desasm.o \
+	debugger/memory.o \
 	debugger/breakpoints.o
 
 OBJ_GTK_DBG_GUI = \
