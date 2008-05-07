@@ -39,6 +39,7 @@
 #include "../memory/memory.h"
 
 #include "breakpoints.h"
+#include "memory.h"
 
 extern int debugger_mode;  // Debugger option enabled.
 

@@ -23,10 +23,10 @@
 
 #define MEM_INVALID 0xFFFFFFFF
 
-
 #define MEM_FLAG_READABLE    0x01
 #define MEM_FLAG_WRITABLE    0x02
 
+#define MAX_DISASSEMBLY 64
 
 enum {
   MEM_NOMEM,
@@ -49,11 +49,16 @@ enum {
   MEM_MI
 };
 
-extern void update_memory(void);
+int get_instruction( uint32 address, uint32 *ptr_instruction );
+char* get_recompiled_opcode( uint32 address, int index );
+char* get_recompiled_args( uint32 address, int index );
+int get_recompiled_addr( uint32 address, int index );
+int get_num_recompiled( uint32 address );
 
-extern uint32 read_memory_32(uint32);
-extern void write_memory_32(uint32, uint32);
-extern uint32 get_memory_flags(uint32);
-extern int get_memory_type(uint32);
+
+uint32 read_memory_32(uint32);
+void write_memory_32(uint32, uint32);
+uint32 get_memory_flags(uint32);
+int get_memory_type(uint32);
 
 #endif //__DEBUGGER_MEMORY_H__

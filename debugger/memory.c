@@ -16,6 +16,117 @@
 
 #include "memory.h"
 
+#include "../r4300/ops.h"
+
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
+
+int  lines_recompiled;
+uint32 addr_recompiled;
+
+char opcode_recompiled[564][MAX_DISASSEMBLY];
+char args_recompiled[564][MAX_DISASSEMBLY];
+int  opaddr_recompiled[564];
+
+char* get_recompiled_opcode(uint32 addr, int index)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    if(index < lines_recompiled)
+        return opcode_recompiled[index];
+    else
+        return NULL;
+}
+
+char* get_recompiled_args(uint32 addr, int index)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    if(index < lines_recompiled)
+        return args_recompiled[index];
+    else
+        return NULL;
+}
+
+int get_recompiled_addr(uint32 addr, int index)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    if(index < lines_recompiled)
+        return opaddr_recompiled[index];
+    else
+        return 0;
+}
+
+int get_num_recompiled(uint32 addr)
+{
+    if(addr != addr_recompiled)
+        decode_recompiled(addr);
+
+    return lines_recompiled;
+}
+
+void decode_recompiled(uint32 addr)
+{
+    unsigned char *assemb, *end_addr;
+    unsigned char *as_inc;
+
+    lines_recompiled=0;
+
+    if(blocks[addr>>12] == NULL)
+        return;
+
+    if(blocks[addr>>12]->block[(addr&0xFFF)/4].ops == NOTCOMPILED)
+    //      recompile_block((int *) SP_DMEM, blocks[addr>>12], addr);
+      {
+	strcpy(opcode_recompiled[0],"NOTCOMPILED");
+	strcpy(args_recompiled[0],"NOTCOMPILED");
+	opaddr_recompiled[0]=0;
+	addr_recompiled=0;
+	lines_recompiled++;
+	return;
+      }
+
+    assemb = (blocks[addr>>12]->code) + 
+      (blocks[addr>>12]->block[(addr&0xFFF)/4].local_addr);
+
+    end_addr = blocks[addr>>12]->code;
+
+    if( (addr & 0xFFF) == 0xFFF)
+        end_addr += blocks[addr>>12]->code_length;
+    else
+        end_addr += blocks[addr>>12]->block[(addr&0xFFF)/4+1].local_addr;
+
+    for(as_inc=assemb; as_inc<end_addr; as_inc++)
+      printf("%02x", *as_inc);
+    while(assemb < end_addr)
+      {
+        opaddr_recompiled[lines_recompiled] = assemb;
+        assemb += host_decode_op(assemb, opcode_recompiled[lines_recompiled], 
+                                 args_recompiled[lines_recompiled]);
+        lines_recompiled++;
+      }
+    addr_recompiled=addr;
+    printf("\n");
+}
+
+#else
+
+char* get_recompiled(uint32 addr, int index)
+{
+    return NULL;
+}
+
+int get_num_recompiled(uint32 addr)
+{
+    return 0;
+}
+
+#endif
+
+
 void update_memory(void){
   int i;
   for(i=0; i<0x10000; i++)
@@ -56,8 +167,11 @@ uint32 get_memory_flags(uint32 addr){
 
   switch(type)
     {
-    case MEM_RDRAM:
     case MEM_RSPMEM:
+      if((addr & 0xFFFF) < 0x2000)
+	flags|=MEM_FLAG_READABLE;
+      break;
+    case MEM_RDRAM:
     case MEM_ROM:
       flags|=MEM_FLAG_READABLE;
     }
