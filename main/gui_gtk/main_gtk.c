@@ -609,7 +609,6 @@ static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
             }
         }
 }
-//g_signal_connect(slotItem, "toggled", G_CALLBACK(cb_SaveSlotSelected), GUINT_TO_POINTER(i));      }
 
 /** configuration **/
 // configure
