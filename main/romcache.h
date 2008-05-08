@@ -26,7 +26,7 @@ typedef struct {
     char MD5[33];
     char goodname[256];
     char path[PATH_MAX];
-    unsigned long os_timestamp;
+    int os_timestamp;
 } cache_entry;
 
 typedef struct {

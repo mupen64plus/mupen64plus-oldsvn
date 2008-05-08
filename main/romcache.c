@@ -66,7 +66,10 @@ int load_initial_cache()
     FILE *f = NULL;
     long filesize = 0;
     char *cache_data;
-    cache_entry cacheinfo = NULL;
+    cache_entry cacheinfo;
+    list_node_t *node, *node2;
+    int x = 0;
+    
     
     sprintf(filename, "%s%s", get_configpath(), CACHE_FILE);
     f = fopen(filename,"r");
@@ -110,10 +113,6 @@ int load_initial_cache()
         {
             *end_of_line = 0;
             next_line = end_of_line + 1;
-            
-            /* This next section should start building the g_RomBrowserCache */
-            sscanf(this_line, "%s,%s,%s,%i",cacheinfo.MD5,cacheinfo.goodname,cacheinfo.path,cacheinfo.os_timestamp);
-            
         }
         
         this_line = next_line;
@@ -121,6 +120,7 @@ int load_initial_cache()
       
     // Free up the cache data
     free(cache_data);
+    
     return 1;    
 }
 
