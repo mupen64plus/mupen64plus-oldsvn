@@ -53,6 +53,7 @@
 #include "config.h"
 #include "plugin.h"
 #include "rom.h"
+#include "romcache.h"
 #include "mupenIniApi.h"
 #include "../r4300/r4300.h"
 #include "../r4300/recomph.h"
@@ -82,12 +83,14 @@ static void parseCommandLine(int argc, char **argv);
 static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
 static void *emulationThread( void *_arg );
 static void sighandler( int signal, siginfo_t *info, void *context ); // signal handler
+extern void *rom_cache_system(void *_arg);
 
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 pthread_t   g_EmulationThread = 0;      // core thread handle
+pthread_t   g_RomCacheThread = 0;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
             
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
@@ -1393,14 +1396,19 @@ int main(int argc, char *argv[])
     // build gui, but do not display
     if(l_GuiEnabled)
         gui_build();
-
+   
     // must be called after building gui
     info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
-
+    
+    if(pthread_create(&g_RomCacheThread, NULL, rom_cache_system, NULL) != 0)
+    {
+        g_RomCacheThread = 0;
+        alert_message(tr("Couldn't spawn rom cache thread!"));
+    }
     // only display gui if user wants it
     if(l_GuiEnabled)
         gui_display();
-
+    
     // if rom file was specified, run it
     if (l_Filename)
     {

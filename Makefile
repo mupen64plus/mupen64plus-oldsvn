@@ -55,6 +55,7 @@ CFLAGS += -DPREFIX=\"$(PREFIX)\"
 # list of object files to generate
 OBJ_CORE = \
 	main/main.o \
+	main/romcache.o \
 	main/util.o \
 	main/translate.o \
 	main/guifuncs.o \
