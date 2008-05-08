@@ -1,7 +1,5 @@
 /* GIMP RGBA C-Source image dump (pad.c) */
 
-#ifdef GUI_SDL
-
 const struct {
   unsigned int   width;
   unsigned int   height;
@@ -13463,5 +13461,3 @@ const struct {
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
 };
-
-#endif // GUI_SDL

@@ -15,8 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifdef GUI_SDL
-
 #ifndef __PAD_IMAGE_H__
 #define __PAD_IMAGE_H__
 
@@ -28,5 +26,3 @@ extern const struct {
 } pad_image;
 
 #endif // __PAD_IMAGE_H__
-
-#endif // GUI_SDL

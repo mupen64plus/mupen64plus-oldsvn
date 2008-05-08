@@ -17,11 +17,11 @@ OBJ_SDL_GUI = \
 
 # local CFLAGS, LIBS, and LDFLAGS
 ifeq ($(GUI), GTK)
-  CFLAGS += -DGUI_GTK $(GTK_FLAGS)
+  CFLAGS += $(GTK_FLAGS)
   OBJ_BLIGHT += $(OBJ_GTK_GUI)
   LIBS += $(GTK_LIBS)
 else
-  CFLAGS += -DGUI_SDL $(SDL_FLAGS)
+  CFLAGS += $(SDL_FLAGS)
   OBJ_BLIGHT += $(OBJ_SDL_GUI)
   LIBS += -lSDL_ttf $(SDL_LIBS)
 endif

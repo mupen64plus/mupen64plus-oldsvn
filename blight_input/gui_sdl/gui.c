@@ -1,4 +1,5 @@
 #include "../gui.h"
+#include "../plugin.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -27,10 +28,6 @@ typedef struct
     int w;
     int h;
 } SCallback;
-
-// extern functions
-extern void read_configuration( void ); // from plugin.c
-extern int write_configuration( void ); // from plugin.c
 
 // colors
 static Uint32 u32black, u32gray, u32dark_gray, u32gray_border, u32white;

@@ -28,7 +28,7 @@
 #include "gui.h" // gui functions
 #include "Controller_1.1.h"
 
-#include "SDL.h"
+#include <SDL.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
