@@ -21,14 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
-#if 0
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#if 0 // OGLFT_NO_QT
-#include <qregexp.h>
-#endif
-#endif
+#include <string.h>
 #include "OGLFT.h"
 
 int wstrlen(const wchar_t * s) 
@@ -784,11 +777,16 @@ namespace OGLFT
 
         glTranslatef(x, y, 0.);
 
-        glColor4f(foreground_color_[R], foreground_color_[G], foreground_color_[B], foreground_color_[A]);
+        //glColor4f(foreground_color_[R], foreground_color_[G], foreground_color_[B], foreground_color_[A]);
+        glColor4f(1.0, 1.0, 1.0, 1.0);
 
-        glRasterPos2i(0, 0);
+        glRasterPos3i(0, 0, 0);
 
         draw(s);
+
+        GLfloat color[4];
+        glGetFloatv(GL_CURRENT_RASTER_COLOR, color);
+        printf("lighting: %i  color: %f %f %f %f\n", (int) glIsEnabled(GL_LIGHTING), color[0], color[1], color[2], color[3]);
 
         if(horizontal_justification_ != ORIGIN || vertical_justification_ != BASELINE) glPopMatrix();
 
@@ -1242,7 +1240,9 @@ namespace OGLFT
         {
             GLubyte* bitmap_ptr = &bitmap.buffer[bitmap.pitch * (bitmap.rows - r - 1)];
 
-            for(int p=0; p<width; p++) *inverse_ptr++ = *bitmap_ptr++;
+            memmove(inverse_ptr, bitmap_ptr, width);
+            inverse_ptr += width;
+            bitmap_ptr += width;
         }
 
         return inverse;
@@ -1327,6 +1327,7 @@ namespace OGLFT
 
         GLubyte* inverted_bitmap = invertBitmap(bitmap_glyph->bitmap);
 
+        printf("rendering.\t");
         glBitmap(bitmap_glyph->bitmap.width, bitmap_glyph->bitmap.rows,
                  -bitmap_glyph->left,
                  bitmap_glyph->bitmap.rows - bitmap_glyph->top,
@@ -2391,368 +2392,6 @@ namespace OGLFT
         std::cerr << "hmm. error during tessellation?:" << gluErrorString(error_code)<< std::endl;
     }
 
-#if 0 // OGLFT_NO_SOLID
-    Solid::Solid (const char* filename, float point_size, FT_UInt resolution)
-        : Filled(filename, point_size, resolution)
-    {
-        if(!isValid()) return;
-    
-        init();
-    }
-
-    Solid::Solid (FT_Face face, float point_size, FT_UInt resolution)
-        : Filled(face, point_size, resolution)
-    {
-        init();
-    }
-
-    void Solid::init (void)
-    {
-        interface_.move_to = (FT_Outline_MoveTo_Func)moveToCallback;
-        interface_.line_to = (FT_Outline_LineTo_Func)lineToCallback;
-        interface_.conic_to = (FT_Outline_ConicTo_Func)conicToCallback;
-        interface_.cubic_to = (FT_Outline_CubicTo_Func)cubicToCallback;
-        interface_.shift = 0;
-        interface_.delta = 0;
-
-        // Set up for extrusion. Default depth is 1 (units of what?)
-        extrusion_.depth_ = 1.;
-        extrusion_.up_[X] = 0.;
-        extrusion_.up_[Y] = 1.;
-        extrusion_.up_[Z] = 0.;
-        extrusion_.n_polyline_pts_ = N_POLYLINE_PTS;
-
-        assign(extrusion_.point_array_[0], 0., 0., extrusion_.depth_ + 1.);
-        assign(extrusion_.point_array_[1], 0., 0., extrusion_.depth_);
-        assign(extrusion_.point_array_[2], 0., 0., 0.);
-        assign(extrusion_.point_array_[3], 0., 0., -1.);
-
-        // Turn on closed contours and smooth vertices; turn off end capping
-        gleSetJoinStyle(TUBE_JN_RAW | TUBE_CONTOUR_CLOSED | TUBE_NORM_EDGE);
-    }
-
-    Solid::~Solid (void)
-    {
-    
-    }
-    
-    // Note: as usual, setting this clears the caches
-    void Solid::setDepth (double depth)
-    {
-        if(depth > 0. && depth != extrusion_.depth_)
-        {
-            extrusion_.depth_ = depth;
-
-            assign(extrusion_.point_array_[0], 0., 0., extrusion_.depth_ + 1.);
-            assign(extrusion_.point_array_[1], 0., 0., extrusion_.depth_);
-
-            clearCaches();
-        }
-    }
-
-    void Solid::renderGlyph (FT_Face face, FT_UInt glyph_index)
-    {
-        FT_Error error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
-
-        if(error != 0) return;
-
-        FT_OutlineGlyph g;
-
-        error = FT_Get_Glyph(face->glyph, (FT_Glyph*)&g);
-
-        if(error != 0) return;
-
-        vector_scale_ = (point_size_ * resolution_)/ (72. * face->units_per_EM);
-
-        if(character_rotation_.active_)
-        {
-            glPushMatrix();
-
-            glTranslatef((face->glyph->metrics.width / 2. + face->glyph->metrics.horiBearingX)/ 64. * vector_scale_, rotation_offset_y_, 0.);
-    
-            if(character_rotation_.x_ != 0.)
-            glRotatef(character_rotation_.x_, 1., 0., 0.);
-    
-            if(character_rotation_.y_ != 0.)
-            glRotatef(character_rotation_.y_, 0., 1., 0.);
-    
-            if(character_rotation_.z_ != 0.)
-            glRotatef(character_rotation_.z_, 0., 0., 1.);
-    
-            glTranslatef(-(face->glyph->metrics.width / 2. + face->glyph->metrics.horiBearingX)/ 64. * vector_scale_, -rotation_offset_y_, 0.);
-        }
-
-        contour_open_ = false;
-
-        // In theory, TrueType contours are defined clockwise and Type1 contours
-        // are defined counter-clockwise. Trust the flag set by FreeType to
-        // indicate this since it is critical to getting the orientation of the
-        // surface normals correct.
-        if(g->outline.flags & FT_OUTLINE_REVERSE_FILL)
-        {
-            extrusion_.normal_sign_.x_ = -1;
-            extrusion_.normal_sign_.y_ = 1;
-        }
-        else 
-        {
-            extrusion_.normal_sign_.x_ = 1;
-            extrusion_.normal_sign_.y_ = -1;
-        }
-        // The Big Kahuna: the FreeType glyph decomposition routine traverses
-        // the outlines of the font by calling the various routines stored in
-        // extrude_interface_. These in turn call the gleExtrusion routine.
-
-        error = FT_Outline_Decompose(&g->outline, &interface_, this);
-        FT_Done_Glyph((FT_Glyph)g);
-
-        // Some glyphs may be empty (the 'blank' for instance!)
-
-        if(contour_open_)
-        {
-            extrusion_.contour_normals_.push_back(extrusion_.contour_normals_.front());
-
-            gleExtrusion(extrusion_.contour_.size(), 
-                         &extrusion_.contour_.begin()->p_,
-                         &extrusion_.contour_normals_[1].p_,
-                         extrusion_.up_,
-                         extrusion_.n_polyline_pts_,
-                         extrusion_.point_array_,
-                         0);
-
-            extrusion_.contour_.clear();
-            extrusion_.contour_normals_.clear();
-        }
-
-        if(character_rotation_.active_)
-        {
-            glPopMatrix();
-        }
-
-        // Apply the front and back faces of the solid character (recall that
-        // drawing a character advances the MODELVIEW, so defend against that
-        // with the stack operations)
-
-        glPushMatrix();
-        depth_offset_ = 0.;
-        Filled::renderGlyph(face, glyph_index);
-        glPopMatrix();
-
-        glPushMatrix();
-        depth_offset_ = extrusion_.depth_;
-        Filled::renderGlyph(face, glyph_index);
-        glPopMatrix();
-
-        // Drawing a character always advances the MODELVIEW.
-
-        glTranslatef(face->glyph->advance.x / 64. * vector_scale_,face->glyph->advance.y / 64. * vector_scale_, 0.);
-
-        for(VILI vili = vertices_.begin(); vili != vertices_.end(); vili++)
-        delete *vili;
-
-        vertices_.clear();
-    }
-
-    int Solid::moveToCallback (FT_Vector* to, Solid* solid)
-    {
-        if(solid->contour_open_)
-        {
-
-            // A word of explanation: since you can't predict when the
-            // contour is going to end (its end is signaled by calling this
-            // routine, i.e., the contour ends when another is started
-            // abruptly), only the lineTo and arcTo functions generate contour
-            // points. The upshot is that the normals, which are computed for the
-            // current segment, are one behind the segment described in the
-            // the contour array. To make things match up at the end, the first
-            // normal is copied to the end of the normal array and the extrusion
-            // routine is passed the list of normals starting at the second entry.
-      
-            solid->extrusion_.contour_normals_.
-            push_back(solid->extrusion_.contour_normals_.front());
-#if 1
-            gleExtrusion(solid->extrusion_.contour_.size(),
-                         &solid->extrusion_.contour_.begin()->p_,
-                         &solid->extrusion_.contour_normals_[1].p_,
-                         solid->extrusion_.up_,
-                         solid->extrusion_.n_polyline_pts_,
-                         solid->extrusion_.point_array_,
-                         0);
-#endif
-            solid->extrusion_.contour_.clear();
-            solid->extrusion_.contour_normals_.clear();
-        }
-
-        solid->last_vertex_ = VertexInfo(to, solid->colorTess(), solid->textureTess());
-
-        solid->contour_open_ = true;
-
-        return 0;
-    }
-
-    int Solid::lineToCallback (FT_Vector* to, Solid* solid)
-    {
-        VertexInfo vertex(to, solid->colorTess(), solid->textureTess());
-
-        VertexInfo normal(solid->extrusion_.normal_sign_.y_ *
-        (vertex.v_[Y] - solid->last_vertex_.v_[Y]),
-        solid->extrusion_.normal_sign_.x_ *
-        (vertex.v_[X] - solid->last_vertex_.v_[X]));
-
-        solid->last_vertex_ = vertex;
-
-        vertex.v_[X] *= solid->vector_scale_;
-        vertex.v_[Y] *= solid->vector_scale_;
-
-        normal.normalize();
-
-        solid->extrusion_.contour_.push_back(vertex);
-        solid->extrusion_.contour_normals_.push_back(normal);
-
-        return 0;
-    }
-
-    int Solid::conicToCallback (FT_Vector* control, FT_Vector* to, Solid* solid)
-    {
-        // This is crude: Step off conics with a fixed number of increments
-
-        VertexInfo to_vertex(to, solid->colorTess(), solid->textureTess());
-        VertexInfo control_vertex(control, solid->colorTess(), solid->textureTess());
-
-        double b[2], c[2], d[2], f[2], df[2], d2f[2];
-
-        b[X] = solid->last_vertex_.v_[X] - 2 * control_vertex.v_[X] +
-        to_vertex.v_[X];
-        b[Y] = solid->last_vertex_.v_[Y] - 2 * control_vertex.v_[Y] +
-        to_vertex.v_[Y];
-
-        c[X] = -2 * solid->last_vertex_.v_[X] + 2 * control_vertex.v_[X];
-        c[Y] = -2 * solid->last_vertex_.v_[Y] + 2 * control_vertex.v_[Y];
-
-        d[X] = solid->last_vertex_.v_[X];
-        d[Y] = solid->last_vertex_.v_[Y];
-
-        f[X] = d[X];
-        f[Y] = d[Y];
-        df[X] = c[X] * solid->delta_ + b[X] * solid->delta2_;
-        df[Y] = c[Y] * solid->delta_ + b[Y] * solid->delta2_;
-        d2f[X] = 2 * b[X] * solid->delta2_;
-        d2f[Y] = 2 * b[Y] * solid->delta2_;
-
-        for(unsigned int i=0; i<solid->tessellation_steps_-1; i++)
-        {
-    
-            f[X] += df[X];
-            f[Y] += df[Y];
-    
-            VertexInfo vertex(f, solid->colorTess(), solid->textureTess());
-    
-            VertexInfo normal(solid->extrusion_.normal_sign_.y_ * df[Y],
-            solid->extrusion_.normal_sign_.x_ * df[X]);
-    
-            vertex.v_[X] *= solid->vector_scale_;
-            vertex.v_[Y] *= solid->vector_scale_;
-    
-            normal.normalize();
-    
-            solid->extrusion_.contour_.push_back(vertex);
-            solid->extrusion_.contour_normals_.push_back(normal);
-    
-            df[X] += d2f[X];
-            df[Y] += d2f[Y];
-        }
-
-        VertexInfo vertex(to, solid->colorTess(), solid->textureTess());
-
-        VertexInfo normal(solid->extrusion_.normal_sign_.y_ * df[Y],
-        solid->extrusion_.normal_sign_.x_ * df[X]);
-
-        vertex.v_[X] *= solid->vector_scale_;
-        vertex.v_[Y] *= solid->vector_scale_;
-
-        normal.normalize();
-
-        solid->extrusion_.contour_.push_back(vertex);
-        solid->extrusion_.contour_normals_.push_back(normal);
-
-        solid->last_vertex_ = to_vertex;
-
-        return 0;
-    }
-
-    int Solid::cubicToCallback (FT_Vector* control1, FT_Vector* control2, FT_Vector* to, Solid* solid)
-    {
-        // This is crude: Step off cubics with a fixed number of increments
-
-        VertexInfo to_vertex(to, solid->colorTess(), solid->textureTess());
-        VertexInfo control1_vertex(control1, solid->colorTess(), solid->textureTess());
-        VertexInfo control2_vertex(control2, solid->colorTess(), solid->textureTess());
-
-        double a[2], b[2], c[2], d[2], f[2], df[2], d2f[2], d3f[2];
-
-        a[X] = -solid->last_vertex_.v_[X] + 3 * control1_vertex.v_[X] -3 * control2_vertex.v_[X] + to_vertex.v_[X];
-        a[Y] = -solid->last_vertex_.v_[Y] + 3 * control1_vertex.v_[Y] -3 * control2_vertex.v_[Y] + to_vertex.v_[Y];
-
-        b[X] = 3 * solid->last_vertex_.v_[X] - 6 * control1_vertex.v_[X] + 3 * control2_vertex.v_[X];
-        b[Y] = 3 * solid->last_vertex_.v_[Y] - 6 * control1_vertex.v_[Y] + 3 * control2_vertex.v_[Y];
-
-        c[X] = -3 * solid->last_vertex_.v_[X] + 3 * control1_vertex.v_[X];
-        c[Y] = -3 * solid->last_vertex_.v_[Y] + 3 * control1_vertex.v_[Y];
-
-        d[X] = solid->last_vertex_.v_[X];
-        d[Y] = solid->last_vertex_.v_[Y];
-
-        f[X] = d[X];
-        f[Y] = d[Y];
-        df[X] = c[X] * solid->delta_ + b[X] * solid->delta2_ + a[X] * solid->delta3_;
-        df[Y] = c[Y] * solid->delta_ + b[Y] * solid->delta2_ + a[Y] * solid->delta3_;
-        d2f[X] = 2 * b[X] * solid->delta2_ + 6 * a[X] * solid->delta3_;
-        d2f[Y] = 2 * b[Y] * solid->delta2_ + 6 * a[Y] * solid->delta3_;
-        d3f[X] = 6 * a[X] * solid->delta3_;
-        d3f[Y] = 6 * a[Y] * solid->delta3_;
-
-        for(unsigned int i=0; i<solid->tessellation_steps_-1; i++)
-        {
-            f[X] += df[X];
-            f[Y] += df[Y];
-
-            VertexInfo vertex(f, solid->colorTess(), solid->textureTess());
-
-            VertexInfo normal(solid->extrusion_.normal_sign_.y_ * df[Y],
-            solid->extrusion_.normal_sign_.x_ * df[X]);
-
-            vertex.v_[X] *= solid->vector_scale_;
-            vertex.v_[Y] *= solid->vector_scale_;
-
-            normal.normalize();
-
-            solid->extrusion_.contour_.push_back(vertex);
-            solid->extrusion_.contour_normals_.push_back(normal);
-
-            df[X] += d2f[X];
-            df[Y] += d2f[Y];
-            d2f[X] += d3f[X];
-            d2f[Y] += d3f[Y];
-        }
-
-        VertexInfo vertex(to, solid->colorTess(), solid->textureTess());
-
-        VertexInfo normal(solid->extrusion_.normal_sign_.y_ * df[Y],
-        solid->extrusion_.normal_sign_.x_ * df[X]);
-
-        vertex.v_[X] *= solid->vector_scale_;
-        vertex.v_[Y] *= solid->vector_scale_;
-
-        normal.normalize();
-
-        solid->extrusion_.contour_.push_back(vertex);
-        solid->extrusion_.contour_normals_.push_back(normal);
-
-        solid->last_vertex_ = to_vertex;
-
-        return 0;
-    }
-#endif // OGLFT_NO_SOLID
-
     Texture::Texture (const char* filename, float point_size, FT_UInt resolution)
         : Face(filename, point_size, resolution)
     {
@@ -3342,3 +2981,4 @@ namespace OGLFT
     }
 
 } // close OGLFT namespace
+

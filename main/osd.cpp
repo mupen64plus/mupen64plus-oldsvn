@@ -239,24 +239,42 @@ void osd_render()
     // keeps track of how many messages are in each corner
     int corner_ctr[OSD_NUM_CORNERS] = {0};
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // save all the attributes
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    bool bFragmentProg = glIsEnabled(GL_FRAGMENT_PROGRAM_ARB);
+
+    // save the matrices and set up new ones
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
     gluOrtho2D(viewport[0],viewport[2],viewport[1],viewport[3]);
-    glMatrixMode(GL_MODELVIEW);
 
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // setup for drawing text
+    glDisable(GL_FOG);
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
     glDisable(GL_SCISSOR_TEST);
     glDisable(GL_STENCIL_TEST);
-
-    glEnable (GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glDisable(GL_FRAGMENT_PROGRAM_ARB);
+    glDisable(GL_REGISTER_COMBINERS_NV);
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_TEXTURE_1D);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_3D);
+    glDisable(GL_BLEND);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
+    glDisableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
+    glShadeModel(GL_FLAT);
 
     list_foreach(l_messageQueue, node)
     {
@@ -298,12 +316,18 @@ void osd_render()
     if(msg_to_delete)
         osd_delete_message(msg_to_delete);
 
+    // restore the matrices
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
+
+    // restore the attributes
+    glPopAttrib();
+    if (bFragmentProg)
+        glEnable(GL_FRAGMENT_PROGRAM_ARB);
 
     glFinish();
-    glPopAttrib();
 }
 
 // creates a new osd_message_t, adds it to the message queue and returns it in case
