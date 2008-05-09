@@ -270,7 +270,7 @@ void osd_render()
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_3D);
     glDisable(GL_BLEND);
-    glDisableClientState(GL_COLOR_ARRAY);
+    //glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
