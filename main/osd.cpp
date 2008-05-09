@@ -245,7 +245,8 @@ void osd_render()
     // save all the attributes
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     bool bFragmentProg = glIsEnabled(GL_FRAGMENT_PROGRAM_ARB);
-
+    bool bColorArray = glIsEnabled(GL_COLOR_ARRAY);
+    
     // save the matrices and set up new ones
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -270,7 +271,7 @@ void osd_render()
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_3D);
     glDisable(GL_BLEND);
-    //glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
@@ -326,6 +327,8 @@ void osd_render()
     glPopAttrib();
     if (bFragmentProg)
         glEnable(GL_FRAGMENT_PROGRAM_ARB);
+    if (bColorArray)
+        glEnableClientState(GL_COLOR_ARRAY);
 
     glFinish();
 }
