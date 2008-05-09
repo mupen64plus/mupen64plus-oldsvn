@@ -41,6 +41,8 @@
 
 
 int breakpoints_opened;
+int breakpoints_editing; //1 when editing a breakpoint, 0 when adding
+
 
 GtkWidget *winBreakpoints;
 

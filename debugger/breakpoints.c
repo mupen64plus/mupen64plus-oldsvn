@@ -128,6 +128,9 @@ int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags )
     	bpt=lookup_breakpoint( address, flags );
     	if(bpt != -1)
     	{
+    		if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_LOG))
+    			log_breakpoint(PC->addr, flags, address);
+    			
     		run = 0;
             switch_button_to_run();
             update_debugger_frontend();
@@ -140,4 +143,15 @@ int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags )
 		}
 	}
     return -1;
+}
+
+int log_breakpoint(uint32 PC, uint32 Flag, uint32 Access)
+{
+	char msg[32];
+	
+	if(Flag & BPT_FLAG_READ) sprintf(msg, "0x%08X read 0x%08X", PC, Access);
+	else if(Flag & BPT_FLAG_WRITE) sprintf(msg, "0x%08X wrote 0x%08X", PC, Access);
+	else sprintf(msg, "0x%08X executed", PC);
+	printf("BPT: %s\n", msg);
+	//todo: log to file
 }

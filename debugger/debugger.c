@@ -63,15 +63,20 @@ void update_debugger()
 // Update debugger state and display.
 // Should be called after each R4300 instruction.
 {
-
+	int bpt;
+	
     if(run==2) {
-    	if( check_breakpoints(PC->addr)==-1 ) {
+    	bpt = check_breakpoints(PC->addr);
+    	if( bpt==-1 ) {
             previousPC = PC->addr;
             return;
         }
         else {
             run = 0;
             switch_button_to_run();
+            
+            if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_LOG))
+    			log_breakpoint(PC->addr, BPT_FLAG_EXEC, 0);
         }
     }
     else if ( previousPC == PC->addr )

@@ -227,6 +227,24 @@ void write_memory_32(uint32 addr, uint32 value){
     }
 }
 
+uint8 read_memory_8(uint32 addr)
+{
+	uint32 word;
+	
+	word = read_memory_32(addr & ~3);
+	return (word >> ((3 - (addr & 3)) * 8)) & 0xFF;
+}
+
+void write_memory_8(uint32 addr, uint8 value)
+{
+	uint32 word, mask;
+	
+	word = read_memory_32(addr & ~3);
+	mask = 0xFF << ((3 - (addr & 3)) * 8);
+	word = (word & ~mask) | (value << ((3 - (addr & 3)) * 8));
+	write_memory_32(addr & ~3, word);
+}
+
 uint32 get_memory_flags(uint32 addr){
   int type=get_memory_type(addr);
   uint32 flags = 0;

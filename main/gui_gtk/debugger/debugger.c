@@ -55,6 +55,10 @@ void init_debugger_frontend()
     gdk_threads_enter();
     init_breakpoints();
     gdk_threads_leave();
+    
+    gdk_threads_enter();
+    init_memedit();
+    gdk_threads_leave();
 
     gdk_threads_enter();
     init_TLBwindow();
@@ -78,6 +82,11 @@ void update_debugger_frontend()
     if(regTLB_opened) {
         gdk_threads_enter();
         update_TLBwindow();
+        gdk_threads_leave();
+    }
+    if(memedit_opened) {
+        gdk_threads_enter();
+        update_memory_editor();
         gdk_threads_leave();
     }
 }

@@ -43,6 +43,7 @@
 #define BPT_FLAG_READ			0x08
 #define BPT_FLAG_WRITE			0x10
 #define BPT_FLAG_EXEC			0x20
+#define BPT_FLAG_LOG			0x40 //Log to the console when this breakpoint hits.
 
 #define BPT_CHECK_FLAG(a, b)  ((a.flags & b) == b)
 #define BPT_SET_FLAG(a, b)    a.flags = (a.flags | b);
@@ -68,5 +69,6 @@ void disable_breakpoint( int breakpoint );
 int check_breakpoints( uint32 address );
 int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags );
 int lookup_breakpoint( uint32 address, uint32 flags );
+int log_breakpoint(uint32 PC, uint32 Flag, uint32 Access);
 
 #endif  // BREAKPOINTS_H

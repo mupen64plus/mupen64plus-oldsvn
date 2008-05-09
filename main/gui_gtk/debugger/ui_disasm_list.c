@@ -1,5 +1,6 @@
 #include "ui_disasm_list.h"
 #include "debugger.h"
+#include "../../../debugger/memory.h"
 
 /* boring declarations of local functions */
 

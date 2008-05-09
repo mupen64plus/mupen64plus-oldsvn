@@ -42,6 +42,7 @@
 #include "desasm.h"
 #include "registers.h"
 #include "regTLB.h"
+#include "memedit.h"
 
 #define DEBUGGER_VERSION "0.0.2 - WIP2"
 

@@ -114,8 +114,6 @@ void init_breakpoints()
     
     buEdit = gtk_button_new_with_label( "Edit" );
     gtk_box_pack_start( GTK_BOX(boxV1), buEdit, FALSE, FALSE, 0 );
-    
-    gtk_widget_set_sensitive(buEdit, FALSE); //not yet implemented
 
     gtk_widget_show_all(winBreakpoints);
 
@@ -148,18 +146,20 @@ void get_breakpoint_display_string(char* buf, breakpoint* bpt)
 {
 	if(bpt->address == bpt->endaddr)
 	{
-		sprintf(buf, "%c%c%c 0x%08X",
+		sprintf(buf, "%c%c%c%c 0x%08X",
     		(bpt->flags & BPT_FLAG_READ) ? 'R' : '-',
         	(bpt->flags & BPT_FLAG_WRITE) ? 'W' : '-',
         	(bpt->flags & BPT_FLAG_EXEC) ? 'X' : '-',
+        	(bpt->flags & BPT_FLAG_LOG) ? 'L' : '-',
         	bpt->address);
 	}
 	else
 	{
-		sprintf(buf, "%c%c%c 0x%08X - 0x%08X",
+		sprintf(buf, "%c%c%c$c 0x%08X - 0x%08X",
     		(bpt->flags & BPT_FLAG_READ) ? 'R' : '-',
         	(bpt->flags & BPT_FLAG_WRITE) ? 'W' : '-',
         	(bpt->flags & BPT_FLAG_EXEC) ? 'X' : '-',
+        	(bpt->flags & BPT_FLAG_LOG) ? 'L' : '-',
         	bpt->address, bpt->endaddr);
 	}
 }
@@ -224,15 +224,17 @@ static void on_row_unselection(GtkCList *clist, gint row)
 static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *new, gpointer data)
 {
     breakpoint newbp; //New breakpoint to be added
-    int i;
+    int i, j;
+    char line[64];
 
 	//printf( "modify_address %lX \"%s\"\n", address, new);
     
-    //Input format: "[*][r][w][x] address [endaddr]"
+    //Input format: "[*][r][w][x][l] address [endaddr]"
     //*: if present, disabled by default
     //r: if present, break on read
     //w: if present, break on write
     //x: if present, break on execute (if none of r, w, x is specified execute is the default)
+    //l (L): if present, log to the console when this breakpoint hits.
     //address: where to break
     //endaddr: if specified, break on all addresses address <= x <= endaddr
     
@@ -241,17 +243,29 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     newbp.address = 0;
     newbp.endaddr = 0;
     
-    //Read flags
+    //Copy line, stripping dashes, so sscanf() will work for getting addresses when editing
+    j = 0;
     for(i=0; new[i]; i++)
     {
-    	if((new[i] == ' ') //if space,
-    	|| ((new[i] >= '0') && (new[i] <= '9')) //number,
-    	|| ((new[i] >= 'A') && (new[i] <= 'F')) //A-F,
-    	|| ((new[i] >= 'a') && (new[i] <= 'f'))) break; //or a-f, address begins here.
-    	else if(new[i] == '*') newbp.flags &= ~BPT_FLAG_ENABLED;
-    	else if((new[i] == 'r') || (new[i] == 'R')) newbp.flags |= BPT_FLAG_READ;
-    	else if((new[i] == 'w') || (new[i] == 'w')) newbp.flags |= BPT_FLAG_WRITE;
-    	else if((new[i] == 'x') || (new[i] == 'x')) newbp.flags |= BPT_FLAG_EXEC;
+    	if(new[i] == '-') continue;
+    	line[j] = new[i];
+    	j++;
+    	if((j + 1) >= sizeof(line)) break;
+	}
+	line[j] = 0;
+    
+    //Read flags
+    for(i=0; line[i]; i++)
+    {
+    	if((line[i] == ' ') //if space,
+    	|| ((line[i] >= '0') && (line[i] <= '9')) //number,
+    	|| ((line[i] >= 'A') && (line[i] <= 'F')) //A-F,
+    	|| ((line[i] >= 'a') && (line[i] <= 'f'))) break; //or a-f, address begins here.
+    	else if(line[i] == '*') newbp.flags &= ~BPT_FLAG_ENABLED;
+    	else if((line[i] == 'r') || (line[i] == 'R')) newbp.flags |= BPT_FLAG_READ;
+    	else if((line[i] == 'w') || (line[i] == 'W')) newbp.flags |= BPT_FLAG_WRITE;
+    	else if((line[i] == 'x') || (line[i] == 'X')) newbp.flags |= BPT_FLAG_EXEC;
+    	else if((line[i] == 'l') || (line[i] == 'L')) newbp.flags |= BPT_FLAG_LOG;
 	}
 	
 	//If none of r/w/x specified, default to exec
@@ -259,8 +273,8 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
 		BPT_SET_FLAG(newbp, BPT_FLAG_EXEC);
 		
 	//Read address
-	printf("Address \"%s\"\n", &new[i]);
-	i = sscanf(&new[i], "%lX %lx", &newbp.address, &newbp.endaddr);
+	//printf("Address \"%s\"\n", &line[i]);
+	i = sscanf(&line[i], "%lX %lx", &newbp.address, &newbp.endaddr);
 	if(!i)
 	{
 		//fixme: better way to display error message
@@ -269,11 +283,19 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
 	}
 	else if(i == 1) newbp.endaddr = newbp.address;
 	
-	printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
-    if(add_breakpoint_struct(&newbp) == -1)
-    {
-    	//fixme: warning message
-    	return FALSE;
+	if(breakpoints_editing)
+	{
+		printf("Updating breakpoint #%u on 0x%08X - 0x%08X flags 0x%08X\n", ced->row, newbp.address, newbp.endaddr, newbp.flags);
+		memcpy(&g_Breakpoints[ced->row], &newbp, sizeof(breakpoint));
+	}
+	else
+	{
+		printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
+		if(add_breakpoint_struct(&newbp) == -1)
+		{
+			//fixme: warning message
+			return FALSE;
+		}
 	}
 	
 	gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer) newbp.address );
@@ -289,6 +311,7 @@ static void on_add()
     char **line;
 
 	//fixme: hacks ahoy! 
+	breakpoints_editing = 0;
 	line = malloc(1*sizeof(char*));
 	line[0] = malloc(64*sizeof(char));
 	
@@ -388,10 +411,24 @@ static void _toggle(int flag)
 
 static void on_edit()
 {
+	int i, row = -1;
 	//FIXME: not yet implemented. should display the textbox again as if we were entering
 	//a new breakpoint, and update the selected one. probably disable the button if more
 	//than one or none selected.
-  refresh_desasm();
+	
+	for(i=0; i < g_NumBreakpoints; i++)
+	{
+		if(selected[i])
+		{
+			row = i;
+			break;
+		}
+	}
+	if(row == -1) return;
+	breakpoints_editing = 1;
+	clist_edit_by_row(GTK_CLIST(clBreakpoints), row, 0, modify_address, NULL);
+	
+	refresh_desasm();
 }
 
 

@@ -60,6 +60,8 @@ int get_num_recompiled( uint32 address );
 
 uint32 read_memory_32(uint32);
 void write_memory_32(uint32, uint32);
+uint8 read_memory_8(uint32 addr);
+void write_memory_8(uint32 addr, uint8 value);
 uint32 get_memory_flags(uint32);
 int get_memory_type(uint32);
 
