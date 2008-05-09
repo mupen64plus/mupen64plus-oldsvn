@@ -23,11 +23,16 @@
 **/
 
 typedef struct {
-    char MD5[33];
+    char MD5[32];
     char goodname[256];
-    char path[PATH_MAX];
+    char path[1024];
     int os_timestamp;
 } cache_entry;
+
+typedef struct {
+	char MAGIC[4];
+	int entries;
+} cache_header;
 
 typedef struct {
 	char MD5[33];
@@ -38,5 +43,6 @@ typedef struct {
     char headername[20];
 } rom_info;
 
+int rebuild_cache_file();
 int load_initial_cache();
 void *rom_cache_system(void *_arg);

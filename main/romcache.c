@@ -32,8 +32,10 @@
 
 #define CACHE_FILE "rombrowser2.cache"
 #define DATABASE_FILE "mupen64plus.ini"
-
+#define MAGIC_HEADER "RCS}"
+    
 void *rom_cache_system(void *_arg);
+char cache_filename[PATH_MAX];
 
 static const char *g_romFileExtensions[] = 
 {
@@ -46,11 +48,15 @@ list_t g_RomBrowserCache = NULL; // list of cache_entrys
 void * rom_cache_system( void *_arg )
 {
     int caching_done = 0;
+    int rebuild_cache = 0;
     
-    // if gui
+    sprintf(cache_filename, "%s%s", get_configpath(), CACHE_FILE);
+    
     if (load_initial_cache() == 0)
     {
         printf("[error] load_initial_cache() returned 0\n");
+        remove(cache_filename);
+        rebuild_cache_file();
     }
     else
     {
@@ -59,24 +65,35 @@ void * rom_cache_system( void *_arg )
     
 }
 
+int rebuild_cache_file()
+{
+	printf("[rcs] rebuilding the cache file\n");
+    FILE *f = NULL;
+    unsigned int dummy_zero = 10;
+    f = fopen(cache_filename,"wb");
+    if (!f)
+    {
+    	printf("[error] could not create %s\n",cache_filename);
+        return 0;
+    }
+    
+    fwrite(MAGIC_HEADER,sizeof(MAGIC_HEADER),1,f);
+    fwrite(dummy_zero,1,sizeof(int),f);
+}
 
 int load_initial_cache()
 {
-    char filename[PATH_MAX];
     FILE *f = NULL;
     long filesize = 0;
-    char *cache_data;
-    cache_entry cacheinfo;
-    list_node_t *node, *node2;
-    int x = 0;
+    cache_header header;
+    cache_entry *cache_data;
+    int num_entrys = 0;
     
-    
-    sprintf(filename, "%s%s", get_configpath(), CACHE_FILE);
-    f = fopen(filename,"r");
+    f = fopen(cache_filename,"r");
     
     if (!f)
     {
-    	printf("[error] Could not load %s\n",filename);
+    	printf("[error] Could not load %s\n",cache_filename);
         return 0;
     }
     
@@ -86,42 +103,50 @@ int load_initial_cache()
     rewind(f);
     
     // Allocate enough memory for the cache data, then close the file.
-    cache_data = malloc(filesize + 1);
-    if (cache_data == NULL)
+    if(fread(&header,sizeof(header),1,f) != sizeof(header))
     {
-        printf("[error] Could not allocate memory for cache_data. (%i bytes)\n",filesize);
-        return 0;
+    	
+        if (strcmp(header.MAGIC,MAGIC_HEADER))
+        {
+        	printf("[error] the rom cache header is malformed.\n");
+            return 0;
+        }
+        else
+        {
+        	printf("[rcs] rom cache header is correct\n", header.MAGIC);
+        }
+        
+        num_entrys = header.entries;
+        cache_data = malloc(num_entrys * sizeof(cache_entry));
+        if (cache_data == NULL)
+        {
+            printf("[error] Could not allocate memory for cache_data. (%i bytes)\n",(sizeof(cache_entry)*num_entrys));
+            return 0;
+        }        
     }
-    
+
     // Read our data into our array.
-    if(fread(cache_data,1,filesize,f) != filesize)
+    if(fread(cache_data,sizeof(cache_entry),num_entrys,f) != (sizeof(cache_entry)*num_entrys))
     {
-        printf("[error] Could not read rom cache file.\n");
+        printf("[error] malformed rom cache structure.\n");
         return 0;
     }
     
     // Close our file, it's no longer needed.
     fclose(f);
-        
-    char *this_line = cache_data;
-    
-    while(this_line != NULL)
-    {
-        char *next_line = NULL;
-        char *end_of_line = strchr(this_line, '\n');
-        if (end_of_line != NULL)
-        {
-            *end_of_line = 0;
-            next_line = end_of_line + 1;
-        }
-        
-        this_line = next_line;
-    }
-      
+
     // Free up the cache data
     free(cache_data);
     
     return 1;    
+}
+
+int cache_rom_list()
+{
+	char filename[PATH_MAX];
+	FILE *f = NULL;
+	// note: check headers first
+	return 1;
 }
 
 
