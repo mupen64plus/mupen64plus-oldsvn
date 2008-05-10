@@ -4,7 +4,7 @@
 include ./pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-LDFLAGS += -lz -lm -lpng
+LDFLAGS += -lz -lm -lpng -lfreetype
 
 # set executable stack as a linker option for X86 architecture, for dynamic recompiler
 ifeq ($(CPU), X86)
@@ -46,7 +46,8 @@ ifndef PREFIX
   PREFIX := /usr/local
 endif
 
-CFLAGS += -DPREFIX=\"$(PREFIX)\"
+FREETYPEINC = $(shell pkg-config --cflags freetype2)
+CFLAGS += -DPREFIX=\"$(PREFIX)\" $(FREETYPEINC)
 
 # list of object files to generate
 OBJ_CORE = \
