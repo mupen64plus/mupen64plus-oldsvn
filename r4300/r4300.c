@@ -46,7 +46,7 @@ extern void update_debugger();
 unsigned int dynacore = 0, interpcore = 0;
 int no_audio_delay = 0;
 int no_compiled_jump = 0;
-int stop, llbit, rompause;
+int stop, llbit, rompause, reset_r4300;
 long long int reg[32], hi, lo;
 long long int local_rs, local_rt;
 unsigned int reg_cop0[32];
@@ -1552,13 +1552,16 @@ void r4300_reset_hard()
     ErrorEPC = 0xFFFFFFFF;
    
     rounding_mode = 0x33F;
+    
+    reset_r4300 = 0;
 }
 
 void r4300_reset_soft()
 {
     long long CRC = 0;
     unsigned int i;
-
+    
+    reset_r4300 = 1;
     // copy boot code from ROM to SP_DMEM
     memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFC0);
 
@@ -1571,7 +1574,6 @@ void r4300_reset_soft()
    reg[10]= 0x0000000000000040LL;
    reg[11]= 0xFFFFFFFFA4000040LL;
    reg[29]= 0xFFFFFFFFA4001FF0LL;
-   
     // figure out which ROM type is loaded
    for (i = 0x40/4; i < (0x1000/4); i++)
      CRC += SP_DMEM[i];
@@ -1595,7 +1597,6 @@ void r4300_reset_soft()
     default:
       CIC_Chip = 2;
    }
-
    switch(ROM_HEADER->Country_code&0xFF)
      {
       case 0x44:
@@ -1627,8 +1628,10 @@ void r4300_reset_soft()
        reg[24]= 0x0000000000000002LL;
        break;
     }
+    
     reg[23]= 0x0000000000000006LL;
     reg[31]= 0xFFFFFFFFA4001554LL;
+    
     break;
       case 0x37:
       case 0x41:
@@ -1712,7 +1715,6 @@ void r4300_reset_soft()
       reg[25]= 0x00000000465E3F72LL;
       break;
    }
-
 }
 
 void r4300_execute()
@@ -1726,6 +1728,7 @@ void r4300_execute()
     delay_slot=0;
     stop = 0;
     rompause = 0;
+    
 
     /* clear instruction counters */
 #if defined(COUNT_INSTR)
@@ -1793,7 +1796,7 @@ void r4300_execute()
         pure_interpreter();
     }
     debug_count+= Count;
-    printf("R4300 core finished.\n",(unsigned int)debug_count);
+    fprintf(stderr,"R4300 core finished.\n",(unsigned int)debug_count);
     for (i=0; i<0x100000; i++)
     {
         if (blocks[i])

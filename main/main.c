@@ -805,8 +805,11 @@ static void * emulationThread( void *_arg )
     // call r4300 CPU core and run the game
     r4300_reset_hard();
     r4300_reset_soft();
-    r4300_execute();
-
+    while (reset_r4300 == 1)
+    {
+    	reset_r4300 = 0;
+    	r4300_execute();
+    }
 #ifdef WITH_LIRC
     lircStop();
 #endif // WITH_LIRC

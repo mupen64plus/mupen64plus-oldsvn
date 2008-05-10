@@ -533,6 +533,7 @@ void gen_interupt()
             break;
 
         case SOFT_INT:
+          
             // Soft Reset -- remove interrupt event from queue
             remove_interupt_event();
             // reset TS and NMI
@@ -540,31 +541,42 @@ void gen_interupt()
             Status = (Status & ~0x280000) | 0x500000;
             // simulate the soft reset code in the PIF ROM
             r4300_reset_soft();
+            stop=1;
+            dyna_stop();
+                        
+           // r4300_execute();
+/*            fprintf(stderr,"after");
             // set ErrorEPC with last instruction address and set next instruction address to reset vector
             if (interpcore)
             {
                 ErrorEPC = interp_addr;
                 interp_addr = 0xa4000040;
                 last_addr = interp_addr;
+                fprintf(stderr,"if");
             }
             else
             {
                 ErrorEPC = PC->addr;
                 jump_to(0xa4000040);
                 last_addr = PC->addr;
+                fprintf(stderr,"else");
             }
             if(delay_slot==1 || delay_slot==3)
             {
+            	fprintf(stderr,"ds");
                 ErrorEPC-=4;
             }
             // jump there
             if (dynacore)
             {
+            	fprintf(stderr,"dyna");
                 dyna_jump();
                 if (!dyna_interp) delay_slot = 0;
+                fprintf(stderr,"dyna2");
             }
             if (!dynacore || dyna_interp)
             {
+            	fprintf(stderr,"!dyna3");
                 dyna_interp = 0;
                 if (delay_slot)
                 {
@@ -572,7 +584,9 @@ void gen_interupt()
                     else skip_jump = PC->addr;
                     next_interupt = 0;
                 }
+                fprintf(stderr,"!dyna4");
             }
+            fprintf(stderr,"returning");*/
             return;
 
         default:
