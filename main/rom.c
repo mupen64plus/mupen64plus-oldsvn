@@ -174,12 +174,8 @@ unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype
                 gzseek(gzromfile, 0L, SEEK_SET);
                 *romsize=0;
                 localrom=malloc(100000);
-                do
-                    { 
-                    i=gzread(gzromfile, localrom, 100000); 
-                    *romsize += i;
-                    }
-                while(i);
+                while((i=gzread(gzromfile, localrom, 100000)))
+                    { *romsize += i; }
                 gzseek(gzromfile, 0L, SEEK_SET);
                 free(localrom);
                 localrom = malloc(*loadlength);
@@ -463,7 +459,7 @@ int fill_header(const char *filename)
     strncpy(buffer, filename, 1023);
 
     if((localrom=load_rom(filename, &romsize, &compressiontype, &imagetype, &headerlength))==NULL)
-        { return -1; }
+        { return 0; }
 
     if((localrom[0]!=0x80)||(localrom[1]!=0x37)||(localrom[2]!=0x12)||(localrom[3]!=0x40))
         {
@@ -490,7 +486,7 @@ int calculateMD5(const char *filename, char digeststring[32])
     strncpy(buffer, filename, 1023);
 
     if((localrom=load_rom(filename, &romsize, &compressiontype, &imagetype, &romsize))==NULL)
-        { return -1; }
+        { return 0; }
 
     if((localrom[0]!=0x80)||(localrom[1]!=0x37)||(localrom[2]!=0x12)||(localrom[3]!=0x40))
         {
