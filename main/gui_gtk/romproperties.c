@@ -73,7 +73,8 @@ static void callback_cancelClicked( GtkWidget *widget, gpointer data )
 static void callback_calculateMd5Clicked( GtkWidget *widget, gpointer data )
 {
     char digeststring[32];
-    calculateMD5(g_RomEntry->cFilename, &digeststring);
+    if(!calculateMD5(g_RomEntry->cFilename, &digeststring))
+        { return; }
 
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), digeststring);
 

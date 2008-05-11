@@ -444,21 +444,21 @@ int rom_read(const char *filename)
     if(strcmp(entry->refMD5, ""))
         { entry = ini_search_by_md5(entry->refMD5); }
     ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
-    printf("EEPROM type : %d\n", ROM_SETTINGS.eeprom_16kb);
+    printf("EEPROM type: %d\n", ROM_SETTINGS.eeprom_16kb);
     ini_closeFile();
     return 0;
 }
 
 int fill_header(const char *filename)
 {
-    int compressiontype, imagetype;
+    int compressiontype, imagetype, romsize;
     int headerlength = 0x40;
     char buffer[1024];
     unsigned char *localrom;
 
     strncpy(buffer, filename, 1023);
 
-    if((localrom=load_rom(filename, &headerlength, &compressiontype, &imagetype, &headerlength))==NULL)
+    if((localrom=load_rom(filename, &romsize, &compressiontype, &imagetype, &headerlength))==NULL)
         { return -1; }
 
     if((localrom[0]!=0x80)||(localrom[1]!=0x37)||(localrom[2]!=0x12)||(localrom[3]!=0x40))
@@ -468,11 +468,11 @@ int fill_header(const char *filename)
         }
 
     if(ROM_HEADER == NULL)
-        { ROM_HEADER= malloc(sizeof(rom_header)); }
-    memcpy(ROM_HEADER, rom, 0x40);
-    free(rom);
-    rom = NULL;
-    return taille_rom;
+        { ROM_HEADER = malloc(0x40); }
+    memcpy(ROM_HEADER, localrom, 0x40);
+
+    free(localrom);
+    return romsize;
 }
 
 int calculateMD5(const char *filename, char digeststring[32])
@@ -501,6 +501,7 @@ int calculateMD5(const char *filename, char digeststring[32])
     for ( i = 0; i < 16; ++i ) 
         { sprintf(digeststring+i*2, "%02X", digest[i]); }
 
+    free(localrom);
     return 1;
 }
 
