@@ -305,13 +305,8 @@ int open_rom( const char *filename )
     }
 
     // clear Byte-swapped flag, since ROM is now deleted
+    //This is (and never was) set in the code below... 
     g_MemHasBeenBSwapped = 0;
-
-    if(!fill_header(filename))
-    {
-        alert_message(tr("Couldn't load Rom!"));
-        return -2;
-    }
 
     if((rc = rom_read(filename)) != 0)
     {
@@ -323,6 +318,8 @@ int open_rom( const char *filename )
 
         return -3;
     }
+    //Quit here to make sure bad roms aren't loaded when testing rom handling code.
+    //return -2;
     InitTimer();
 
     return 0;

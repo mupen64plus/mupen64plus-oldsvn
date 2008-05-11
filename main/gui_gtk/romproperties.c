@@ -72,11 +72,14 @@ static void callback_cancelClicked( GtkWidget *widget, gpointer data )
 // calculate md5
 static void callback_calculateMd5Clicked( GtkWidget *widget, gpointer data )
 {
-    //gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), "Hm..." );
+    char digeststring[32];
+    calculateMD5(g_RomEntry->cFilename, &digeststring);
 
-    // show dialog
-    //gtk_widget_show_all( g_RomPropDialog.dialog );
-    //gtk_grab_add( g_RomPropDialog.dialog );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), digeststring);
+
+    //show dialog
+    gtk_widget_show_all( g_RomPropDialog.dialog );
+    gtk_grab_add( g_RomPropDialog.dialog );
 }
 
 // hide on delete
