@@ -52,4 +52,6 @@ extern GdkColor    color_modif,    // Color of modified register.
 
 extern GtkWidget   *winRegisters;
 
+extern PangoFontDescription *debugger_font_desc;
+
 #endif //GTK_DEBUGGER_H

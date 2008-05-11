@@ -154,3 +154,30 @@ static void on_close()
 {
     registers_opened = 0;
 }
+
+
+
+/* Function to create a CList with labels in the left column.  Created to
+ * simplify the init_reg*() functions for the hardware registers.
+ */
+GtkCList * init_hwreg_clist(int n, char **regnames)
+{
+    int i;
+    GtkCList *cl;
+    char *txt[2];
+    
+    txt[1] = "MMMMMMMMMM";
+    
+    cl = gtk_clist_new(2);
+    gtk_widget_modify_font(GTK_WIDGET(cl), debugger_font_desc);
+    
+    for (i=0; i<n; i++) {
+        txt[0] = regnames[i];
+        gtk_clist_append(cl, txt);
+    }
+        
+    gtk_clist_set_column_width(cl, 0, gtk_clist_optimal_column_width(cl, 0));
+    gtk_clist_set_column_width(cl, 1, gtk_clist_optimal_column_width(cl, 1));
+    
+    return cl;
+}

@@ -34,16 +34,21 @@ GdkColor    color_modif,    // Color of modified register.
 
 GtkWidget   *winRegisters;
 
+PangoFontDescription *debugger_font_desc;
+
 void init_debugger_frontend()
 {
-    color_modif.red = 0x0000;
-    color_modif.green = 0xA000;
+    color_modif.red = 0x8000;
+    color_modif.green = 0xD000;
     color_modif.blue = 0xFFFF;
 
     color_ident.red = 0xFFFF;
     color_ident.green = 0xFFFF;
     color_ident.blue = 0xFFFF;
 
+    debugger_font_desc = pango_font_description_from_string("Monospace 9");
+    
+    
     gdk_threads_enter();
     init_registers();
     gdk_threads_leave();

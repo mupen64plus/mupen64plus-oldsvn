@@ -43,50 +43,26 @@ static char *mnemonicSI[]=
     "SI_PIF_ADDR_WR64B_REG",    "SI_STATUS_REG",
 };
 
-
+static unsigned int *regptrsSI[] = {
+    &si_register.si_dram_addr,
+    &si_register.si_pif_addr_rd64b,
+    &si_register.si_pif_addr_wr64b,
+    &si_register.si_stat
+};
 
 //]=-=-=-=-=-=-=-=[ Initialisation of Serial Interface Display ]=-=-=-=-=-=-=-[
 
 void init_regSI()
 {
-    GtkWidget *boxH1,
-            *boxV1,
-                *labRegSI[32];
     int i;
-    char **txt;
-    txt=malloc( sizeof(char*) );
-    txt[0]=malloc( 64*sizeof(char) );
-
 
     frRegSI = gtk_frame_new("Serial Interface");
 
-    boxH1 = gtk_hbox_new( FALSE, 2);
-    gtk_container_add( GTK_CONTAINER(frRegSI), boxH1 );
-    gtk_container_set_border_width( GTK_CONTAINER(boxH1), 5);
-
-    //=== Creation of Labels "SD_*_REG" Column =======/
-    boxV1 = gtk_vbox_new( FALSE, 0);
-    gtk_box_pack_start( GTK_BOX(boxH1), boxV1, FALSE, FALSE, 0);
-
-    labRegSI[0] = gtk_label_new( mnemonicSI[0] );
-    gtk_box_pack_start( GTK_BOX(boxV1), labRegSI[0], FALSE, TRUE, 1);
-    for( i=1; i<4; i++)
-    {
-        labRegSI[i] = gtk_label_new( mnemonicSI[i] );
-        gtk_box_pack_start( GTK_BOX(boxV1), labRegSI[i], FALSE, TRUE, 0);
-    }
-
     //=== Creation of Registers Value Display ========/
-    clRegSI = gtk_clist_new(1);
-    gtk_box_pack_start( GTK_BOX(boxH1), clRegSI, TRUE, TRUE, 0);
-    gtk_clist_set_selection_mode( GTK_CLIST(clRegSI), GTK_SELECTION_SINGLE);
-    gtk_clist_set_column_width( GTK_CLIST(clRegSI), 0, 130);
-    strcpy( txt[0], "Undefined");
-    for( i=0; i<4; i++)
-    {
-        gtk_clist_append( GTK_CLIST(clRegSI), txt);
-    }
-
+    clRegSI = init_hwreg_clist(4, mnemonicSI);
+    gtk_container_add(GTK_CONTAINER(frRegSI), clRegSI);
+    gtk_clist_set_selection_mode(GTK_CLIST(clRegSI), GTK_SELECTION_SINGLE);
+    
     //=== Fantom Registers Initialisation ============/
     for( i=0; i<4; i++)
     {
@@ -103,48 +79,20 @@ void init_regSI()
 void update_regSI()
 {
     char txt[24];
+    int i;
+    
+    gtk_clist_freeze(GTK_CLIST(clRegSI));
 
-    gtk_clist_freeze( GTK_CLIST(clRegSI) );
-
-    if( gui_fantom_reg_SI[0] != si_register.si_dram_addr ) {
-        gui_fantom_reg_SI[0] = si_register.si_dram_addr;
-        sprintf( txt, "%.16lX", si_register.si_dram_addr);
-        gtk_clist_set_text( GTK_CLIST(clRegSI), 0, 0, txt );
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 0, &color_modif);
-    } else {
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 0, &color_ident);
+    for (i=0; i<4; i++) {
+        if (gui_fantom_reg_SI[i] != (uint32)(*regptrsSI[i])) {
+            gui_fantom_reg_SI[i] = (uint32)(*regptrsSI[i]);
+            sprintf(txt, "%.8lX", *regptrsSI[i]);
+            gtk_clist_set_text(GTK_CLIST(clRegSI), i, 1, txt);
+            gtk_clist_set_background(GTK_CLIST(clRegSI), i, &color_modif);
+        } else {
+            gtk_clist_set_background(GTK_CLIST(clRegSI), i, &color_ident);
+        }
     }
-
-    if( gui_fantom_reg_SI[1] != si_register.si_pif_addr_rd64b )
-    {
-        gui_fantom_reg_SI[1] = si_register.si_pif_addr_rd64b;
-        sprintf( txt, "%.16lX", si_register.si_pif_addr_rd64b);
-        gtk_clist_set_text( GTK_CLIST(clRegSI), 1, 0, txt );
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 1, &color_modif);
-    } else {
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 1, &color_ident);
-    }
-
-    if( gui_fantom_reg_SI[2] != si_register.si_pif_addr_wr64b )
-    {
-        gui_fantom_reg_SI[2] = si_register.si_pif_addr_wr64b;
-        sprintf( txt, "%.16lX", si_register.si_pif_addr_wr64b);
-        gtk_clist_set_text( GTK_CLIST(clRegSI), 2, 0, txt );
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 2, &color_modif);
-    } else {
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 2, &color_ident);
-    }
-
-
-    if( gui_fantom_reg_SI[3] != si_register.si_stat )
-    {
-        gui_fantom_reg_SI[3] = si_register.si_stat;
-        sprintf( txt, "%.16lX", si_register.si_stat );
-        gtk_clist_set_text( GTK_CLIST(clRegSI), 3, 0, txt );
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 3, &color_modif);
-    } else {
-        gtk_clist_set_background( GTK_CLIST(clRegSI), 3, &color_ident);
-    }
-
-    gtk_clist_thaw( GTK_CLIST(clRegSI) );
+    
+    gtk_clist_thaw(GTK_CLIST(clRegSI));
 }

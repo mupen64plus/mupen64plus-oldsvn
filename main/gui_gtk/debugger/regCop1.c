@@ -36,18 +36,35 @@ GtkWidget   *clFGR2;
 
 //]=-=-=-=-=-=-=-=-=-=-=[ Mise-a-jour Affichage Registre ]=-=-=-=-=-=-=-=-=-=-=[
 
+static GtkWidget * init_FGR_col()
+{
+    GtkCList *cl;
+    int i;
+    char *txt[2];
+    char txt_regnum[6];
+    
+    txt[0] = txt_regnum;
+    txt[1] = "MMMMMMMMMM";
+    
+    cl = gtk_clist_new(2);
+    gtk_widget_modify_font(GTK_WIDGET(cl), debugger_font_desc);
+    gtk_clist_set_column_resizeable(cl, 0, FALSE);
+    gtk_clist_set_column_resizeable(cl, 1, FALSE);
+    for (i=0; i<32; i++) {
+        sprintf(txt_regnum, "%d", i);
+        gtk_clist_append(cl, txt);
+    }
+    gtk_clist_set_column_width(cl, 0, gtk_clist_optimal_column_width(cl, 0));
+    gtk_clist_set_column_width(cl, 1, gtk_clist_optimal_column_width(cl, 1));
+    
+    return GTK_WIDGET(cl);
+}
+
 void init_FGR()
 {
     GtkWidget *boxH1,
-            *boxV1,
-                *labFGR[32];
-    
+            *boxV1;
     int i;
-    char **txt;
-    txt=malloc( 2*sizeof(char*) );
-    txt[0]=malloc( 64*sizeof(char) );
-    txt[1]=malloc( 64*sizeof(char) );
-
 
     FGR_opened = 1;
 
@@ -57,55 +74,20 @@ void init_FGR()
     gtk_container_add( GTK_CONTAINER(frFGR), boxH1 );
     gtk_container_set_border_width( GTK_CONTAINER(boxH1), 5 );
 
-    //=== Creation of Labels "regXX" Column ============/
-    boxV1 = gtk_vbox_new( FALSE, 0);
-    gtk_box_pack_start( GTK_BOX(boxH1), boxV1, FALSE, FALSE, 0);
-
-    sprintf( txt[0], "fgr%d", 0);
-    labFGR[0] = gtk_label_new( txt[0] );
-    gtk_label_set_justify( GTK_LABEL(labFGR[0]), GTK_JUSTIFY_RIGHT );
-    gtk_box_pack_start( GTK_BOX(boxV1), labFGR[0], FALSE, FALSE, 1 );
-    for( i=1; i<32; i++)
-    {
-        sprintf( txt[0], "fgr%d", i);
-        labFGR[i]=gtk_label_new( txt[0] );
-        gtk_label_set_justify( GTK_LABEL(labFGR[i]), GTK_JUSTIFY_RIGHT);
-        gtk_box_pack_start( GTK_BOX(boxV1), labFGR[i], FALSE, FALSE, 0);
-    }
-
     //==== Simple Precision Registers Display ============/
-    clFGR = gtk_clist_new(1);
+    clFGR = init_FGR_col();
     gtk_box_pack_start( GTK_BOX(boxH1), clFGR, TRUE, TRUE, 0);
-    gtk_clist_set_selection_mode( GTK_CLIST(clFGR), GTK_SELECTION_SINGLE);
-    gtk_clist_set_column_width( GTK_CLIST(clFGR), 0, 130);
-    strcpy( txt[0], "Undefined" );
-    for( i=0; i<32; i++)
-    {
-        gtk_clist_append( GTK_CLIST(clFGR), txt);
-    }
 
     //==== Double Precision Registers Display ============/
-    clFGR2 = gtk_clist_new(1);
+    clFGR2 = init_FGR_col();
     gtk_box_pack_start( GTK_BOX(boxH1), clFGR2, TRUE, TRUE, 0);
-    gtk_clist_set_selection_mode( GTK_CLIST(clFGR2), GTK_SELECTION_SINGLE);
-    gtk_clist_set_column_width( GTK_CLIST(clFGR2), 0, 130);
-    strcpy( txt[0], "Undefined" );
-    for( i=0; i<32; i++)
-    {
-        gtk_clist_append( GTK_CLIST(clFGR2), txt);
-    }
 
     //=== Fantom Registers Initialisation ============/
     for( i=0; i<32; i++) {
         gui_fantom_simple[i] = 1,2345678; // Some improbable value
-    }
-    for( i=0; i<32; i++) {
         gui_fantom_double[i] = 9,8765432;
     }
 }
-
-
-
 
 //]=-=-=-=-=-=-=-=-=-=[ Mise-a-jour Cop1 Registers Display ]=-=-=-=-=-=-=-=-=-=[
 
@@ -120,7 +102,7 @@ void update_FGR()
         {
             gui_fantom_simple[i] = *reg_cop1_simple[i];
             sprintf(txt, "%f", *reg_cop1_simple[i] );
-            gtk_clist_set_text( GTK_CLIST(clFGR), i, 0, txt );
+            gtk_clist_set_text( GTK_CLIST(clFGR), i, 1, txt );
             gtk_clist_set_background( GTK_CLIST(clFGR), i, &color_modif);
         } else {
             gtk_clist_set_background( GTK_CLIST(clFGR), i, &color_ident);
@@ -134,7 +116,7 @@ void update_FGR()
         {
             gui_fantom_double[i] = *reg_cop1_double[i];
             sprintf(txt, "%f", *reg_cop1_double[i] );
-            gtk_clist_set_text( GTK_CLIST(clFGR2), i, 0, txt );
+            gtk_clist_set_text( GTK_CLIST(clFGR2), i, 1, txt );
             gtk_clist_set_background( GTK_CLIST(clFGR2), i, &color_modif);
         } else {
             gtk_clist_set_background( GTK_CLIST(clFGR2), i, &color_ident);

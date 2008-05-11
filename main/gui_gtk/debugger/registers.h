@@ -51,5 +51,6 @@ int registers_opened;
 
 void init_registers();
 void update_registers();
+GtkCList * init_hwreg_clist(int n, char **regnames);
 
 #endif //GUIGTK_REGISTERS_H
