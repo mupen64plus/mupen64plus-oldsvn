@@ -266,32 +266,33 @@ int rom_read(const char *filename)
         return -1;
         }
 
+    printf("Compression: ");
     switch(compressiontype)
         {
         case UNCOMPRESSED:
-            printf("Uncompressed rom file.\n");
+            printf("Uncompressed\n");
             break;
         case ZIP_COMPRESSION:
-            printf("Rom in .zip archive.\n");
+            printf(".zip\n");
             break;
         case GZIP_COMPRESSION:
-            printf("Rom gzip compressed.\n");
-            break;
-        }
-    switch(imagetype)
-        {
-        case Z64IMAGE:
-            printf("Native .z64 image.\n");
-            break;
-        case V64IMAGE:
-            printf("Byteswapped .v64 image.\n");
-            break;
-        case N64IMAGE:
-            printf("Wordswapped .n64 image.\n");
+            printf("gzip\n");
             break;
         }
 
-    
+    printf("Imagetype: ");
+    switch(imagetype)
+        {
+        case Z64IMAGE:
+            printf(".z64 (native)\n");
+            break;
+        case V64IMAGE:
+            printf(".v64 (byteswapped)\n");
+            break;
+        case N64IMAGE:
+            printf(".n64 (wordswapped)\n");
+            break;
+        }
 
     printf("Rom size: %d bytes (or %d Mb or %d Megabits)\n",
     taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
@@ -300,7 +301,7 @@ int rom_read(const char *filename)
     md5_init(&state);
     md5_append(&state, (const md5_byte_t *)rom, taille_rom);
     md5_finish(&state, digest);
-    printf("MD5:");
+    printf("MD5: ");
     for ( i = 0; i < 16; ++i ) 
         { printf("%02X", digest[i]); }
     printf("\n");
@@ -315,8 +316,8 @@ int rom_read(const char *filename)
                             ROM_HEADER->init_PI_BSB_DOM1_PGS_REG,
                             ROM_HEADER->init_PI_BSB_DOM1_PWD_REG,
                             ROM_HEADER->init_PI_BSB_DOM1_PGS_REG2);
-    printf("ClockRate=%x\n", sl((unsigned int)ROM_HEADER->ClockRate));
-    printf("Version:%x\n", sl((unsigned int)ROM_HEADER->Release));
+    printf("ClockRate = %x\n", sl((unsigned int)ROM_HEADER->ClockRate));
+    printf("Version: %x\n", sl((unsigned int)ROM_HEADER->Release));
     printf("CRC: %x %x\n", sl((unsigned int)ROM_HEADER->CRC1), sl((unsigned int)ROM_HEADER->CRC2));
     printf ("Name: %s\n", ROM_HEADER->nom);
     if(sl(ROM_HEADER->Manufacturer_ID) == 'N')
@@ -333,35 +334,35 @@ int rom_read(const char *filename)
             printf("Beta\n");
             break;
         case 0x41:
-            printf("Country : USA / Japan\n");
+            printf("Country: USA / Japan\n");
             break;
         case 0x44: 
-            printf("Country : Germany\n");
+            printf("Country: Germany\n");
             break;
         case 0x45:
-            printf("Country : USA\n");
+            printf("Country: USA\n");
             break;
         case 0x46:
-            printf("Country : France\n");
+            printf("Country: France\n");
             break;
         case 'I':
-            printf("Country : Italy");
+            printf("Country: Italy");
             break;
         case 0x4A: 
-            printf("Country : Japan\n");
+            printf("Country: Japan\n");
             break;
         case 'S':
-            printf("Country : Spain\n");
+            printf("Country: Spain\n");
             break;
         case 0x55: case 0x59: 
-            printf("Country : Australia (0x%2.2X)\n", ROM_HEADER->Country_code);
+            printf("Country: Australia (0x%2.2X)\n", ROM_HEADER->Country_code);
             break;
         case 0x50: case 0x58: case 0x20:
         case 0x21: case 0x38: case 0x70:
-            printf("Country : Europe (0x%02X)\n", ROM_HEADER->Country_code);
+            printf("Country: Europe (0x%02X)\n", ROM_HEADER->Country_code);
         break;
         default:
-            printf("Country Code : %x\n", ROM_HEADER->Country_code);
+            printf("Country Code: %x\n", ROM_HEADER->Country_code);
         }
     printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
