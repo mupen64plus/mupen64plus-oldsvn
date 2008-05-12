@@ -24,6 +24,9 @@
 
 // On-screen Display
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include <limits.h>
 
 #include "../opengl/OGLFT.h"
@@ -239,6 +242,11 @@ void osd_render()
     // keeps track of how many messages are in each corner
     int corner_ctr[OSD_NUM_CORNERS] = {0};
 
+    // if list is empty, then just skip it all
+    if (l_messageQueue == NULL)
+        return;
+
+    // get the viewport dimensions
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -246,7 +254,20 @@ void osd_render()
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     bool bFragmentProg = glIsEnabled(GL_FRAGMENT_PROGRAM_ARB);
     bool bColorArray = glIsEnabled(GL_COLOR_ARRAY);
-    
+    bool bTexCoordArray = glIsEnabled(GL_TEXTURE_COORD_ARRAY);
+    bool bSecColorArray = glIsEnabled(GL_SECONDARY_COLOR_ARRAY);
+
+    // deactivate all the texturing units
+    int  iActiveTex;
+    bool bTexture2D[8];
+    glGetIntegerv(GL_ACTIVE_TEXTURE_ARB, &iActiveTex);
+    for (int i = 0; i < 8; i++)
+    {
+        glActiveTexture(GL_TEXTURE0_ARB + i);
+        bTexture2D[i] = glIsEnabled(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_2D);
+    }
+
     // save the matrices and set up new ones
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -267,14 +288,11 @@ void osd_render()
     glDisable(GL_FRAGMENT_PROGRAM_ARB);
     glDisable(GL_REGISTER_COMBINERS_NV);
     glDisable(GL_COLOR_MATERIAL);
-    glDisable(GL_TEXTURE_1D);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_TEXTURE_3D);
+
     glDisable(GL_BLEND);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
-    glDisableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
     glShadeModel(GL_FLAT);
 
     list_foreach(l_messageQueue, node)
@@ -324,11 +342,24 @@ void osd_render()
     glPopMatrix();
 
     // restore the attributes
+    for (int i = 0; i < 8; i++)
+    {
+        glActiveTexture(GL_TEXTURE0_ARB + i);
+        if (bTexture2D[i])
+            glEnable(GL_TEXTURE_2D);
+        else
+            glDisable(GL_TEXTURE_2D);
+    }
+    glActiveTexture(iActiveTex);
     glPopAttrib();
     if (bFragmentProg)
         glEnable(GL_FRAGMENT_PROGRAM_ARB);
     if (bColorArray)
         glEnableClientState(GL_COLOR_ARRAY);
+    if (bTexCoordArray)
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (bSecColorArray)
+        glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
 
     glFinish();
 }
