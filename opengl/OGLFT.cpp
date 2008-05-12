@@ -777,16 +777,11 @@ namespace OGLFT
 
         glTranslatef(x, y, 0.);
 
-        //glColor4f(foreground_color_[R], foreground_color_[G], foreground_color_[B], foreground_color_[A]);
-        glColor4f(1.0, 1.0, 1.0, 1.0);
+        glColor4f(foreground_color_[R], foreground_color_[G], foreground_color_[B], foreground_color_[A]);
 
         glRasterPos3i(0, 0, 0);
 
         draw(s);
-
-        GLfloat color[4];
-        glGetFloatv(GL_CURRENT_RASTER_COLOR, color);
-        printf("lighting: %i  color: %f %f %f %f\n", (int) glIsEnabled(GL_LIGHTING), color[0], color[1], color[2], color[3]);
 
         if(horizontal_justification_ != ORIGIN || vertical_justification_ != BASELINE) glPopMatrix();
 
@@ -1327,7 +1322,6 @@ namespace OGLFT
 
         GLubyte* inverted_bitmap = invertBitmap(bitmap_glyph->bitmap);
 
-        printf("rendering.\t");
         glBitmap(bitmap_glyph->bitmap.width, bitmap_glyph->bitmap.rows,
                  -bitmap_glyph->left,
                  bitmap_glyph->bitmap.rows - bitmap_glyph->top,
