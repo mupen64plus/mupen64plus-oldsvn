@@ -1,25 +1,17 @@
 #define SAVE_CBUFFER
 
-#ifndef _WIN32
 #include "../winlnxdefs.h"
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
 #include <SDL/SDL.h>
-#endif
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include "glide.h"
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef _WIN32
-#include <windows.h>
-#include <commctrl.h>
-// #include <gl/gl.h>
-// #include <gl/glu.h>
-#endif // _WIN32
 #include "main.h"
-#ifdef _WIN32
-#include "wglext.h"
-#endif // _WIN32
 
 #ifdef VPDEBUG
 #include <IL/il.h>
@@ -62,42 +54,6 @@ static inline void opt_glCopyTexImage2D( GLenum target,
     }
 }
 #define glCopyTexImage2D opt_glCopyTexImage2D
-
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-PFNGLBLENDFUNCSEPARATEEXTPROC glBlendFuncSeparateEXT;
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-PFNGLFOGCOORDFPROC glFogCoordfEXT;
-#ifdef _WIN32
-PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
-#endif // _WIN32
-
-PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebufferEXT;
-PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2DEXT;
-PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffersEXT;
-PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbufferEXT = NULL;
-PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT = NULL;
-PFNGLGENRENDERBUFFERSEXTPROC glGenRenderbuffersEXT = NULL;
-PFNGLRENDERBUFFERSTORAGEEXTPROC glRenderbufferStorageEXT = NULL;
-PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbufferEXT = NULL;
-PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatusEXT;
-PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
-
-PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB;
-PFNGLSHADERSOURCEARBPROC glShaderSourceARB;
-PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
-PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
-PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
-PFNGLLINKPROGRAMARBPROC glLinkProgramARB;
-PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
-PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
-PFNGLUNIFORM1IARBPROC glUniform1iARB;
-PFNGLUNIFORM4IARBPROC glUniform4iARB;
-PFNGLUNIFORM4FARBPROC glUniform4fARB;
-PFNGLUNIFORM1FARBPROC glUniform1fARB;
-PFNGLDELETEOBJECTARBPROC glDeleteObjectARB;
-PFNGLGETINFOLOGARBPROC glGetInfoLogARB;
-PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
-PFNGLSECONDARYCOLOR3FPROC glSecondaryColor3f;
 
 typedef struct
 {
@@ -738,14 +694,6 @@ grSstWinOpen(
         display_warning("Your video card doesn't support GL_ARB_texture_mirrored_repeat extension");
   show_warning = 0;
 
-#ifdef _WIN32
-        glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)wglGetProcAddress("glMultiTexCoord2fARB");
-#else // _WIN32
-        glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glActiveTextureARB");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)SDL_GL_GetProcAddress("glMultiTexCoord2fARB");
-#endif // _WIN32
-  
   nbTextureUnits = 0;
     glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &nbTextureUnits);
     if (nbTextureUnits == 1) display_warning("You need a video card that has at least 2 texture units");
@@ -780,55 +728,13 @@ grSstWinOpen(
         npot_support = 1;
     }
 
-#ifdef _WIN32
-    glBlendFuncSeparateEXT = (PFNGLBLENDFUNCSEPARATEEXTPROC)wglGetProcAddress("glBlendFuncSeparateEXT");
-#else // _WIN32
-    glBlendFuncSeparateEXT = (PFNGLBLENDFUNCSEPARATEEXTPROC)SDL_GL_GetProcAddress("glBlendFuncSeparateEXT");
-#endif // _WIN32
-
     if (isExtensionSupported("GL_EXT_fog_coord") == FALSE)
         fog_coord_support = 0;
     else
         fog_coord_support = 1;
 
-#ifdef _WIN32
-    glFogCoordfEXT = (PFNGLFOGCOORDFPROC)wglGetProcAddress("glFogCoordfEXT");
-#else // _WIN32
-    glFogCoordfEXT = (PFNGLFOGCOORDFPROC)SDL_GL_GetProcAddress("glFogCoordfEXT");
-#endif // _WIN32
-
-#ifdef _WIN32
-    wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
-#endif // _WIN32
-
-#ifdef _WIN32
-    glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)wglGetProcAddress("glBindFramebufferEXT");
-    glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)wglGetProcAddress("glFramebufferTexture2DEXT");
-    glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)wglGetProcAddress("glGenFramebuffersEXT");
-    glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)wglGetProcAddress("glCheckFramebufferStatusEXT");
-    glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)wglGetProcAddress("glDeleteFramebuffersEXT");
-
-  glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)wglGetProcAddress("glBindRenderbufferEXT");
-    glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)wglGetProcAddress("glDeleteRenderbuffersEXT");
-    glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)wglGetProcAddress("glGenRenderbuffersEXT");
-    glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)wglGetProcAddress("glRenderbufferStorageEXT");
-  glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)wglGetProcAddress("glFramebufferRenderbufferEXT");
-#else // _WIN32
-    glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindFramebufferEXT");
-    glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
-    glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenFramebuffersEXT");
-    glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
-    glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
-
-  glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindRenderbufferEXT");
-    glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteRenderbuffersEXT");
-    glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenRenderbuffersEXT");
-    glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)SDL_GL_GetProcAddress("glRenderbufferStorageEXT");
-  glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glFramebufferRenderbufferEXT");
-#endif // _WIN32
-
   int getEnableFBO();
-  use_fbo = getEnableFBO() && glFramebufferRenderbufferEXT;
+  use_fbo = getEnableFBO();
 
   printf("use_fbo %d\n", use_fbo);
 
@@ -838,44 +744,6 @@ grSstWinOpen(
         isExtensionSupported("GL_ARB_vertex_shader") && !getDisableGLSL())
     {
         glsl_support = 1;
-
-#ifdef _WIN32
-        glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)wglGetProcAddress("glCreateShaderObjectARB");
-        glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)wglGetProcAddress("glShaderSourceARB");
-        glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)wglGetProcAddress("glCompileShaderARB");
-        glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)wglGetProcAddress("glCreateProgramObjectARB");
-        glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)wglGetProcAddress("glAttachObjectARB");
-        glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)wglGetProcAddress("glLinkProgramARB");
-        glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)wglGetProcAddress("glUseProgramObjectARB");
-        glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)wglGetProcAddress("glGetUniformLocationARB");
-        glUniform1iARB = (PFNGLUNIFORM1IARBPROC)wglGetProcAddress("glUniform1iARB");
-        glUniform4iARB = (PFNGLUNIFORM4IARBPROC)wglGetProcAddress("glUniform4iARB");
-        glUniform4fARB = (PFNGLUNIFORM4FARBPROC)wglGetProcAddress("glUniform4fARB");
-        glUniform1fARB = (PFNGLUNIFORM1FARBPROC)wglGetProcAddress("glUniform1fARB");
-        glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)wglGetProcAddress("glDeleteObjectARB");
-        glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)wglGetProcAddress("glGetInfoLogARB");
-        glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)wglGetProcAddress("glGetObjectParameterivARB");
-
-        glSecondaryColor3f = (PFNGLSECONDARYCOLOR3FPROC)wglGetProcAddress("glSecondaryColor3f");
-#else // _WIN32
-        glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)SDL_GL_GetProcAddress("glCreateShaderObjectARB");
-        glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)SDL_GL_GetProcAddress("glShaderSourceARB");
-        glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)SDL_GL_GetProcAddress("glCompileShaderARB");
-        glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)SDL_GL_GetProcAddress("glCreateProgramObjectARB");
-        glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)SDL_GL_GetProcAddress("glAttachObjectARB");
-        glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)SDL_GL_GetProcAddress("glLinkProgramARB");
-        glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)SDL_GL_GetProcAddress("glUseProgramObjectARB");
-        glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)SDL_GL_GetProcAddress("glGetUniformLocationARB");
-        glUniform1iARB = (PFNGLUNIFORM1IARBPROC)SDL_GL_GetProcAddress("glUniform1iARB");
-        glUniform4iARB = (PFNGLUNIFORM4IARBPROC)SDL_GL_GetProcAddress("glUniform4iARB");
-        glUniform4fARB = (PFNGLUNIFORM4FARBPROC)SDL_GL_GetProcAddress("glUniform4fARB");
-        glUniform1fARB = (PFNGLUNIFORM1FARBPROC)SDL_GL_GetProcAddress("glUniform1fARB");
-        glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)SDL_GL_GetProcAddress("glDeleteObjectARB");
-        glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)SDL_GL_GetProcAddress("glGetInfoLogARB");
-        glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)SDL_GL_GetProcAddress("glGetObjectParameterivARB");
-
-        glSecondaryColor3f = (PFNGLSECONDARYCOLOR3FPROC)SDL_GL_GetProcAddress("glSecondaryColor3f");
-#endif // _WIN32
     }
     else
         glsl_support = 0;
@@ -1006,7 +874,7 @@ grSstWinClose( GrContext_t context )
     // ZIGGY : I found the problem : it is a function pointer, when the extension isn't supported , it is then zero, so just need to check the pointer prior to do the call.
 #endif
   {
-    if (use_fbo && glBindFramebufferEXT)
+    if (use_fbo)
       glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
   }
 #ifndef GCC

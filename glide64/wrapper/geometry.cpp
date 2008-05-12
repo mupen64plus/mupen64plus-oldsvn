@@ -1,11 +1,8 @@
 #include <stdio.h>
-#ifdef _WIN32
-#include <windows.h>
-// #include <gl/gl.h>
-// #include "glext.h"
-#else // _WIN32
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include "../winlnxdefs.h"
-#endif // _WIN32
 #include "glide.h"
 #include "main.h"
 

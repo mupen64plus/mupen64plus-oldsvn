@@ -1,6 +1,4 @@
-#ifndef __LINUX__
-# include <windows.h>
-#else
+
 # include "../main/winlnxdefs.h"
 # include <time.h>
 # include <stdlib.h>
@@ -8,8 +6,11 @@
 #  define min(a,b) ((a) < (b) ? (a) : (b))
 # endif
 # define timeGetTime() time(NULL)
-#endif
+
 #include <memory.h>
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include "OpenGL.h"
 #include "Textures.h"
 #include "GBI.h"
@@ -728,7 +729,7 @@ void TextureCache_ActivateTexture( u32 t, CachedTexture *texture )
 {
     // If multitexturing, set the appropriate texture
     if (OGL.ARB_multitexture)
-        glActiveTextureARB( GL_TEXTURE0_ARB + t );
+        glActiveTexture( GL_TEXTURE0_ARB + t );
 
     // Bind the cached texture
     glBindTexture( GL_TEXTURE_2D, texture->glName );
@@ -764,7 +765,7 @@ void TextureCache_ActivateDummy( u32 t )
 {
 //TextureCache_ActivateTexture( t, cache.dummy );
     if (OGL.ARB_multitexture)
-        glActiveTextureARB( GL_TEXTURE0_ARB + t );
+        glActiveTexture( GL_TEXTURE0_ARB + t );
 
     glBindTexture( GL_TEXTURE_2D, cache.dummy->glName );
 
@@ -810,7 +811,7 @@ void TextureCache_UpdateBackground()
 
     // If multitexturing, set the appropriate texture
     if (OGL.ARB_multitexture)
-        glActiveTextureARB( GL_TEXTURE0_ARB );
+        glActiveTexture( GL_TEXTURE0_ARB );
 
     cache.current[0] = TextureCache_AddTop();
 
@@ -1038,7 +1039,7 @@ void TextureCache_Update( u32 t )
 
     // If multitexturing, set the appropriate texture
     if (OGL.ARB_multitexture)
-        glActiveTextureARB( GL_TEXTURE0_ARB + t );
+        glActiveTexture( GL_TEXTURE0_ARB + t );
 
     cache.current[t] = TextureCache_AddTop();
 
@@ -1130,7 +1131,7 @@ void TextureCache_Update( u32 t )
 void TextureCache_ActivateNoise( u32 t )
 {
     if (OGL.ARB_multitexture)
-        glActiveTextureARB( GL_TEXTURE0_ARB + t );
+        glActiveTexture( GL_TEXTURE0_ARB + t );
 
     glBindTexture( GL_TEXTURE_2D, cache.glNoiseNames[RSP.DList & 0x1F] );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );

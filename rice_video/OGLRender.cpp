@@ -16,8 +16,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 #include "stdafx.h"
-#include "glh_genext.h"
 
 // Fix me, use OGL internal L/T and matrix stack
 // Fix me, use OGL lookupAt function
@@ -860,11 +861,11 @@ void OGLRender::SetFogColor(uint32 r, uint32 g, uint32 b, uint32 a)
 
 void OGLRender::DisableMultiTexture()
 {
-    glActiveTextureARB(GL_TEXTURE1_ARB);
+    glActiveTexture(GL_TEXTURE1_ARB);
     EnableTexUnit(1,FALSE);
-    glActiveTextureARB(GL_TEXTURE0_ARB);
+    glActiveTexture(GL_TEXTURE0_ARB);
     EnableTexUnit(0,FALSE);
-    glActiveTextureARB(GL_TEXTURE0_ARB);
+    glActiveTexture(GL_TEXTURE0_ARB);
     EnableTexUnit(0,TRUE);
 }
 

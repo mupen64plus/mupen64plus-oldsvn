@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ===========================================================================
 
 #include "stdafx.h"
-#include "glh_genext.h"
+#include <GL/gl.h>
 
 COGLRenderTexture::COGLRenderTexture(int width, int height, RenderTextureInfo* pInfo, TextureUsage usage)
     :   CRenderTexture(width, height, pInfo, usage),

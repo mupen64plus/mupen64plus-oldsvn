@@ -1,17 +1,8 @@
-#ifndef __LINUX__
-# include <windows.h>
-# include <GL/gl.h>
-# include "glext.h"
-#else // !__LINUX__
+
 # include "../main/winlnxdefs.h"
 #define GL_GLEXT_PROTOTYPES
-#define __WIN32__
-#include "gl.h" 
-#include "glext.h"
-#undef __WIN32__
+#include <GL/gl.h>
 #include <png.h>
-//# include <GL/gl.h>
-//# include <GL/glext.h>
 # include "SDL.h"
 # include <string.h>
 # include <time.h>
@@ -25,7 +16,6 @@
 # endif
 # define timeGetTime() time(NULL)
 
-#endif // __LINUX__
 #include <math.h>
 #include <stdio.h>
 #include "glN64.h"

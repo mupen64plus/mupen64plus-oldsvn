@@ -22,11 +22,6 @@
 
 #include <vector>
 
-#include "gl/gl.h"
-#include "gl/glu.h"
-#include "glext.h"
-#include "glh_extension_ati.h"
-
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
 #endif

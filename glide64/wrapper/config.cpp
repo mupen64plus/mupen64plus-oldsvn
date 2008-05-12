@@ -1,14 +1,10 @@
-#ifdef _WIN32
-#include <windows.h>
-// #include <gl/gl.h>
-#else // _WIN32
+
 #include "../winlnxdefs.h"
-#endif // _WIN32
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include "glide.h"
 #include "main.h"
-#ifdef _WIN32
-#include "resource.h"
-#endif // _WIN32
 
 typedef struct _wrapper_config
 {

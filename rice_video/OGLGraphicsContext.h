@@ -42,7 +42,6 @@ protected:
     COGLGraphicsContext();
     void InitState(void);
     void InitOGLExtension(void);
-    void InitOGLExtension_ATI(void);
     bool SetFullscreenMode();
     bool SetWindowMode();
 
