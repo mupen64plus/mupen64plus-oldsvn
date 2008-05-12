@@ -67,7 +67,7 @@ void * rom_cache_system( void *_arg )
 
 int rebuild_cache_file()
 {
-	printf("[rcs] rebuilding the cache file\n");
+    printf("[rcs] rebuilding the cache file\n");
     FILE *f = NULL;
     unsigned int dummy_zero = 10;
     f = fopen(cache_filename,"wb");
@@ -77,8 +77,8 @@ int rebuild_cache_file()
         return 0;
     }
     
-    fwrite(MAGIC_HEADER,sizeof(MAGIC_HEADER),1,f);
-    fwrite(dummy_zero,1,sizeof(int),f);
+    fwrite(MAGIC_HEADER,1,sizeof(MAGIC_HEADER),f);
+    fwrite(&dummy_zero,1,sizeof(int),f);
 }
 
 int load_initial_cache()
