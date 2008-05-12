@@ -209,6 +209,7 @@ void savestates_load()
         }
 
     f = gzopen(file, "rb");
+    free(file);
 
     if(f==NULL)
         {

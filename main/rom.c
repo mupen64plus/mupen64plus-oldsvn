@@ -49,104 +49,176 @@
 #include "main.h"
 #include "util.h"
 
-static FILE *rom_file;
-static gzFile *z_rom_file;
-static unzFile zip;
-static unz_file_info pfile_info;
-static int i, tmp, z;
+//Supported rom compressiontypes.
+enum 
+{
+    UNCOMPRESSED,
+    ZIP_COMPRESSION,
+    GZIP_COMPRESSION,
+    //7ZIP_COMPRESSION,
+    //BZIP_COMPRESSION
+};
 
-int taille_rom;
+//Supported rom image types.
+enum 
+{
+    Z64IMAGE,
+    V64IMAGE,
+    N64IMAGE
+};
+
+//Global loaded rom memory space.
 unsigned char *rom;
+//Global loaded rom size.
+int taille_rom;
+//Global loaded rom header information.
 rom_header *ROM_HEADER;
 rom_settings ROM_SETTINGS;
 
-static void findsize()
+int is_valid_rom(unsigned char buffer[4])
 {
-   if (!z)
-     {
-    fseek(rom_file, 0L, SEEK_END);
-    taille_rom=ftell(rom_file);
-    printf ("rom size: %d bytes (or %d Mb or %d Megabits)\n", 
-        taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
-    fseek(rom_file, 0L, SEEK_SET);
-     }
-   else if (z == 1)
-     {
-    taille_rom=0;
-    rom=malloc(100000);
-    for(;;)
-      {
-         i = gzread(z_rom_file, rom, 100000);
-         taille_rom += i;
-         printf ("rom size: %d bytes (or %d Mb or %d Megabits)\r",
-             taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
-         fflush(stdout);
-         if (!i) break;
-      }
-    free(rom);
-    rom = NULL;
-    printf("\n");
-    gzseek(z_rom_file, 0L, SEEK_SET);
-     }
+    //Test if rom is a native .z64 image with header 0x80371240. [ABCD]
+    if((buffer[0]==0x80)&&(buffer[1]==0x37)&&(buffer[2]==0x12)&&(buffer[3]==0x40))
+        { return 1; }
+    //Test if rom is a byteswapped .v64 image with header 0x37804012. [BADC]
+    else if((buffer[0]==0x37)&&(buffer[1]==0x80)&&(buffer[2]==0x40)&&(buffer[3]==0x12))
+        { return 1; }
+    //Test if rom is a wordswapped .n64 image with header  0x40123780. [DCBA]
+    else if((buffer[0]==0x40)&&(buffer[1]==0x12)&&(buffer[2]==0x37)&&(buffer[3]==0x80))
+        { return 1; }
+    else
+        { return 0; }
 }
 
-static int find_file(char *argv)
+/*
+ * Open a rom.
+ * Determins compression type by testing if the decompressed file has a valid rom 4 byte header.
+ * Loads loadlength of the rom into rom. //
+ * and byteswaps if necessary.
+ */
+unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype, int *imagetype, int *loadlength)
 {
-   z=0;
-   i=strlen(argv);
-     {
-    unsigned char buf[4];
-    char szFileName[255], extraField[255], szComment[255];
-    zip = unzOpen(argv);
-    if (zip != NULL) 
-      {
-         unzGoToFirstFile(zip);
-         do
-           {
-          unzGetCurrentFileInfo(zip, &pfile_info, szFileName, 255,
-                    extraField, 255, szComment, 255);
-          unzOpenCurrentFile(zip);
-          if (pfile_info.uncompressed_size >= 4)
+    int i, romread = 0;
+    char temp;
+    unsigned char buffer[4];
+    unsigned char *localrom;
+
+    FILE *romfile;
+    gzFile *gzromfile;
+    unzFile zipromfile;
+    unz_file_info fileinfo;
+    char szFileName[256], szExtraField[256], szComment[256];
+
+    //Uncompressed roms.
+    romfile=fopen(filename, "rb");
+    if(romfile!=NULL)
+        {
+        fread(buffer, 1, 4, romfile);
+        if(is_valid_rom(buffer))
             {
-               unzReadCurrentFile(zip, buf, 4);
-               if ((*((unsigned int*)buf) != 0x40123780) &&
-                (*((unsigned int*)buf) != 0x12408037) &&
-                (*((unsigned int*)buf) != 0x80371240))
-             {
-                unzCloseCurrentFile(zip);
-             }
-               else
-             {
-                taille_rom = pfile_info.uncompressed_size;
-                unzCloseCurrentFile(zip);
-                z = 2;
-                return 0;
-             }
+            *compressiontype = UNCOMPRESSED;
+            fseek(romfile, 0L, SEEK_END);
+            *romsize=ftell(romfile);
+            fseek(romfile, 0L, SEEK_SET);
+            localrom = malloc(*loadlength);
+            fread(localrom, 1, *loadlength, romfile); 
+            fclose(romfile);
+            romread = 1;
             }
-           }
-         while (unzGoToNextFile(zip) != UNZ_END_OF_LIST_OF_FILE);
-         unzClose(zip);
-         return 1;
-      }
-     }
-   if((i>3) && (argv[i-3]=='.') && 
-      (tolower(argv[i-2])=='g') && (tolower(argv[i-1])=='z'))
-     argv[i-3]=0;
-   rom_file=NULL;
-   z_rom_file=NULL;
-   rom_file=fopen(argv, "rb");
-   if (rom_file == NULL)
-     {
-    z_rom_file=gzopen(strcat(argv, ".gz"), "rb");
-    if (z_rom_file == NULL)
-      {
-         argv[i-3]=0;
-         z_rom_file=gzopen(strcat(argv, ".GZ"), "rb");
-         if (z_rom_file == NULL) return 1;
-      }
-    z = 1;
-     }
-   return 0;
+       }
+
+    //Zipped roms.
+    if(romread==0)
+        {
+        zipromfile = unzOpen(filename);
+        if(zipromfile!=NULL) 
+            {
+            unzGoToFirstFile(zipromfile);
+            //Get first valid rom in archive.
+            do
+                {
+                unzGetCurrentFileInfo(zipromfile, &fileinfo, szFileName, 255, 
+                szExtraField, 255, szComment, 255);
+                unzOpenCurrentFile(zipromfile);
+                if(fileinfo.uncompressed_size>=4)
+                   {
+                   unzReadCurrentFile(zipromfile, buffer, 4);
+                   if(is_valid_rom(buffer))
+                       { 
+                       *compressiontype = ZIP_COMPRESSION;
+                       *romsize = fileinfo.uncompressed_size;
+                       localrom = malloc(*loadlength);
+                       unzOpenCurrentFile(zipromfile);
+                       unzReadCurrentFile(zipromfile, localrom, *loadlength);
+                       unzCloseCurrentFile(zipromfile);
+                       romread = 1;
+                       break; //Prevent error from .zips with multiple roms.
+                       }
+                   }
+                }
+            while (unzGoToNextFile(zipromfile) != UNZ_END_OF_LIST_OF_FILE);
+            unzClose(zipromfile);
+            }
+        }
+
+    //Gzipped roms.
+    if(romread==0)
+        { 
+        gzromfile=gzopen(filename, "rb");
+        if(gzromfile!=NULL)
+            {
+            gzread(gzromfile, buffer, 4);
+            if(is_valid_rom(buffer))
+                {
+                *compressiontype = GZIP_COMPRESSION;
+                gzseek(gzromfile, 0L, SEEK_SET);
+                *romsize=0;
+                localrom=malloc(100000);
+                while((i=gzread(gzromfile, localrom, 100000)))
+                    { *romsize += i; }
+                gzseek(gzromfile, 0L, SEEK_SET);
+                free(localrom);
+                localrom = malloc(*loadlength);
+                gzread(gzromfile, localrom, *loadlength); 
+                gzclose(gzromfile);
+                romread = 1;
+                }
+            }
+        }
+
+    //File invalid, or valid rom not found in file.
+    if(romread==0)
+        { return NULL; }
+
+    //Btyeswap if .v64 image.
+    if(localrom[0]==0x37)
+        {
+        *imagetype = V64IMAGE;
+        for ( i = 0; i < (*loadlength/2); ++i )
+            {
+            temp=localrom[i*2];
+            localrom[i*2]=localrom[i*2+1];
+            localrom[i*2+1]=temp;
+            }
+        }
+    //Wordswap if .n64 image.
+    else if(localrom[0]==0x40)
+        {
+        *imagetype = N64IMAGE;
+        for ( i = 0; i < (*loadlength/4); ++i )
+            {
+            temp=localrom[i*4];
+            localrom[i*4]=localrom[i*4+3];
+            localrom[i*4+3]=temp;
+            temp=localrom[i*4+1];
+            localrom[i*4+1]=localrom[i*4+2];
+            localrom[i*4+2]=temp;
+            }
+        }
+    else
+        { *imagetype = Z64IMAGE; }
+
+return localrom;
 }
 
 static int ask_bad(void)
@@ -157,7 +229,6 @@ static int ask_bad(void)
                       "Be warned that this will probably give unexpected results.\n"));
         return 1;
     }
-
     return confirm_message(tr("The rom you are trying to load is probably a bad dump!"
                            " Be warned that this will probably give unexpected results."
                            " Do you still want to run it?"));
@@ -166,421 +237,272 @@ static int ask_bad(void)
 static int ask_hack(void)
 {
     if(g_Noask)
-    {
-        printf(tr("The rom you are trying to load is probably a hack!"
-                  " Be warned that this will probably give unexpected results.\n"));
+        {
+        printf(tr("The rom you are trying to load is probably a hack!\n"
+                  "Be warned that this will probably give unexpected results.\n"));
         return 1;
-    }
+        }
     return confirm_message(tr("The rom you are trying to load is probably a hack!"
                            " Be warned that this will probably give unexpected results."
                            " Do you still want to run it?"));
 }
 
-static void display_loading_progress(int p)
+int rom_read(const char *filename)
 {
-    // this info can clutter up the console
-    if(gui_enabled())
-        info_message(tr("Loading Rom: %d%%"), p);
+    md5_state_t state;
+    md5_byte_t digest[16];
+    mupenEntry *entry;
+    char buffer[1024], *s;
 
-    if(p == 100)
-    {
-        info_message(tr("Rom \"%s\" loaded."), ROM_HEADER->nom);
-    }
-}
+    int compressiontype, imagetype, i;
 
-int rom_read(const char *argv)
-{
-   md5_state_t state;
-   md5_byte_t digest[16];
-   mupenEntry *entry;
-   char buf[1024], arg[1024], *s;
-   
-   strncpy(arg, argv, 1000);
-   if (find_file(arg))
-     {
-    strncpy(arg, "roms/", 1000);
-    if (find_file(strncat(arg, argv, 1000)))
-      {
-         rom_file=fopen("path.cfg", "rb");
-         if(rom_file) fscanf(rom_file, "%1000s", buf);
-         else buf[0]=0;
-         if(rom_file) fclose(rom_file);
-         strncpy(arg, argv, 1000);
-         if (find_file(strcat(buf, arg)))
-           {
-          printf ("file not found or wrong path\n");
-          return -1;
-           }
-      }
-     }
-/*------------------------------------------------------------------------*/   
-   findsize();
-   
-   if (rom) free(rom);
-   rom = malloc(taille_rom);
+    if(rom)
+        { free(rom); }
 
-   tmp=0;
-   if (!z)
-     {
-    for (i=0; i<taille_rom;i+=fread(rom+i, 1, 1000, rom_file))
-      {
-         if (tmp!=(int)((i/(float)taille_rom)*100))
-           {
-          tmp=(int)(i/(float)(taille_rom)*100);
-          display_loading_progress(tmp);
-           }
-      }
-     }
-   else if (z == 1)
-     {
-    for (i=0; i<taille_rom;i+=gzread(z_rom_file, rom+i, 1000))
-      {
-         if (tmp!=(int)((i/(float)taille_rom)*100))
-           {
-          tmp=(int)(i/(float)(taille_rom)*100);
-          display_loading_progress(tmp);
-           }
-      }
-     }
-   else
-     {
-    unzOpenCurrentFile(zip);
-    for (i=0; i<taille_rom;i+=unzReadCurrentFile(zip, rom+i, 1000))
-      {
-         if (tmp!=(int)((i/(float)taille_rom)*100))
-           {
-          tmp=(int)(i/(float)(taille_rom)*100);
-          display_loading_progress(tmp);
-           }
-      }
-    unzCloseCurrentFile(zip);
-     }
-   if (!z) fclose(rom_file);
-   else if (z==1) gzclose(z_rom_file);
-   else unzClose(zip);
-   
-   if (rom[0]==0x37)
-     {
-    printf ("byteswaping rom...\n");
-    for (i=0; i<(taille_rom/2); i++)
-      {
-         tmp=rom[i*2];
-         rom[i*2]=rom[i*2+1];
-         rom[i*2+1]=tmp;
-      }
-    printf ("rom byteswaped\n");
-     }
-   if (rom[0]==0x40)
-     {
-    for (i=0; i<(taille_rom/4); i++)
-      {
-         tmp=rom[i*4];
-         rom[i*4]=rom[i*4+3];
-         rom[i*4+3]=tmp;
-         tmp=rom[i*4+1];
-         rom[i*4+1]=rom[i*4+2];
-         rom[i*4+2]=tmp;
-      }
-    printf("rom byteswaped\n");
-     }
-   else if ((rom[0] != 0x80) || (rom[1] != 0x37) || (rom[2] != 0x12) || (rom[3] != 0x40))
-     {
-    printf("wrong file format !\n");
-    free(rom);
-    rom = NULL;
-    return -2;
-     }
-   printf("rom loaded successfully\n");
-  
-   if (!ROM_HEADER) ROM_HEADER = malloc(sizeof(rom_header));
-   memcpy(ROM_HEADER, rom, sizeof(rom_header));
-   trim((char *)ROM_HEADER->nom); // remove trailing whitespace from Rom name
+    strncpy(buffer, filename, 1023);
+    if ((rom=load_rom(filename, &taille_rom, &compressiontype, &imagetype, &taille_rom))==NULL)
+        {
+        printf ("File not found or wrong path.\n");
+        return -1;
+        }
 
-   display_loading_progress(100);
-   printf ("%x %x %x %x\n", ROM_HEADER->init_PI_BSB_DOM1_LAT_REG,
-       ROM_HEADER->init_PI_BSB_DOM1_PGS_REG,
-       ROM_HEADER->init_PI_BSB_DOM1_PWD_REG,
-       ROM_HEADER->init_PI_BSB_DOM1_PGS_REG2);
-   printf("ClockRate=%x\n", sl((unsigned int)ROM_HEADER->ClockRate));
-   printf("Version:%x\n", sl((unsigned int)ROM_HEADER->Release));
-   printf("CRC: %x %x\n", sl((unsigned int)ROM_HEADER->CRC1), sl((unsigned int)ROM_HEADER->CRC2));
-   printf ("name: %s\n", ROM_HEADER->nom);
-   if (sl(ROM_HEADER->Manufacturer_ID) == 'N') printf ("Manufacturer: Nintendo\n");
-   else printf ("Manufacturer: %x\n", (unsigned int)(ROM_HEADER->Manufacturer_ID));
-   printf("Cartridge_ID: %x\n", ROM_HEADER->Cartridge_ID);
-   switch(ROM_HEADER->Country_code)
-     {
-      case 0x0044:
-    printf("Country : Germany\n");
-    break;
-      case 0x0045:
-    printf("Country : United States\n");
-    break;
-      case 0x004A:
-    printf("Country : Japan\n");
-    break;
-      case 0x0050:
-    printf("European cartridge\n");
-    break;
-      case 0x0055:
-    printf("Country : Australie\n");
-      default:
-    printf("Country Code : %x\n", ROM_HEADER->Country_code);
-     }
-   printf ("size: %d\n", (unsigned int)(sizeof(rom_header)));
-   printf ("PC= %x\n", sl((unsigned int)ROM_HEADER->PC));
-   
-   // loading rom settings and checking if it's a good dump
-   md5_init(&state);
-   md5_append(&state, (const md5_byte_t *)rom, taille_rom);
-   md5_finish(&state, digest);
-   printf("md5 code:");
-   for (i=0; i<16; i++) printf("%02X", digest[i]);
-   printf("\n");
-   
-   ini_openFile();
-   
-   for (i=0; i<16; i++) sprintf(arg+i*2, "%02X", digest[i]);
-   arg[32] = 0;
-   strcpy(ROM_SETTINGS.MD5, arg);
-   if ((entry = ini_search_by_md5(arg)) == NULL)
-     {
-    char mycrc[1024];
-    printf("%lx\n", (long)entry);
-    sprintf(mycrc, "%08X-%08X-C%02X",
-        (int)sl(ROM_HEADER->CRC1), (int)sl(ROM_HEADER->CRC2),
-        ROM_HEADER->Country_code);
-    if ((entry = ini_search_by_CRC(mycrc)) == NULL)
-      {
-         strcpy(ROM_SETTINGS.goodname, (char *) ROM_HEADER->nom);
-         strcat(ROM_SETTINGS.goodname, " (unknown rom)");
-         printf("%s\n", ROM_SETTINGS.goodname);
-         ROM_SETTINGS.eeprom_16kb = 0;
-             ini_closeFile();
-         return 0;
-      }
+    printf("Compression: ");
+    switch(compressiontype)
+        {
+        case UNCOMPRESSED:
+            printf("Uncompressed\n");
+            break;
+        case ZIP_COMPRESSION:
+            printf(".zip\n");
+            break;
+        case GZIP_COMPRESSION:
+            printf("gzip\n");
+            break;
+        }
+
+    printf("Imagetype: ");
+    switch(imagetype)
+        {
+        case Z64IMAGE:
+            printf(".z64 (native)\n");
+            break;
+        case V64IMAGE:
+            printf(".v64 (byteswapped)\n");
+            break;
+        case N64IMAGE:
+            printf(".n64 (wordswapped)\n");
+            break;
+        }
+
+    printf("Rom size: %d bytes (or %d Mb or %d Megabits)\n",
+    taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
+
+    // loading rom settings and checking if it's a good dump
+    md5_init(&state);
+    md5_append(&state, (const md5_byte_t *)rom, taille_rom);
+    md5_finish(&state, digest);
+    printf("MD5: ");
+    for ( i = 0; i < 16; ++i ) 
+        { printf("%02X", digest[i]); }
+    printf("\n");
+
+    if(ROM_HEADER)
+        { free(ROM_HEADER); }
+    ROM_HEADER = malloc(sizeof(rom_header));
+    memcpy(ROM_HEADER, rom, sizeof(rom_header));
+    trim((char *)ROM_HEADER->nom); // remove trailing whitespace from Rom name
+
+    printf("%x %x %x %x\n", ROM_HEADER->init_PI_BSB_DOM1_LAT_REG,
+                            ROM_HEADER->init_PI_BSB_DOM1_PGS_REG,
+                            ROM_HEADER->init_PI_BSB_DOM1_PWD_REG,
+                            ROM_HEADER->init_PI_BSB_DOM1_PGS_REG2);
+    printf("ClockRate = %x\n", sl((unsigned int)ROM_HEADER->ClockRate));
+    printf("Version: %x\n", sl((unsigned int)ROM_HEADER->Release));
+    printf("CRC: %x %x\n", sl((unsigned int)ROM_HEADER->CRC1), sl((unsigned int)ROM_HEADER->CRC2));
+    printf ("Name: %s\n", ROM_HEADER->nom);
+    if(sl(ROM_HEADER->Manufacturer_ID) == 'N')
+        { printf ("Manufacturer: Nintendo\n"); }
     else
-      {
-         if (!ask_bad())
-           {
-          free(rom);
-          rom = NULL;
-          free(ROM_HEADER);
-          ROM_HEADER = NULL;
-                  ini_closeFile();
-          return -3;
-           }
-         strcpy(ROM_SETTINGS.goodname, entry->goodname);
-         strcat(ROM_SETTINGS.goodname, " (bad dump)");
-         if (strcmp(entry->refMD5, ""))
-           entry = ini_search_by_md5(entry->refMD5);
-         ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
-             ini_closeFile();
-         return 0;
-      }
-     }
-   s=entry->goodname;
-   for (i=strlen(s); i > 0 && s[i-1] != '['; i--);
-   if (i != 0)
-     {
-    if (s[i] == 'T' || s[i] == 't' || s[i] == 'h' || s[i] == 'f' || s[i] == 'o')
-      {
-         if (!ask_hack())
-           {
-          free(rom);
-          rom = NULL;
-          free(ROM_HEADER);
-          ROM_HEADER = NULL;
-                  ini_closeFile();
-          return -3;
-           }
-      }
-    if (s[i] == 'b')
-      {
-         if (!ask_bad())
-           {
-          free(rom);
-          rom = NULL;
-          free(ROM_HEADER);
-          ROM_HEADER = NULL;
-                  ini_closeFile();
-          return -3;
-           }
-      }
-     }
-   strcpy(ROM_SETTINGS.goodname, entry->goodname);
-   
-   if (strcmp(entry->refMD5, ""))
-     entry = ini_search_by_md5(entry->refMD5);
-   ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
-   printf("eeprom type:%d\n", ROM_SETTINGS.eeprom_16kb);
-   ini_closeFile();
-   return 0;
-}
+        { printf("Manufacturer: %x\n", (unsigned int)(ROM_HEADER->Manufacturer_ID)); }
+    printf("Cartridge_ID: %x\n", ROM_HEADER->Cartridge_ID);
+    switch(ROM_HEADER->Country_code)
+        {
+        case 0:
+            printf("Demo\n");
+            break;
+        case '7':
+            printf("Beta\n");
+            break;
+        case 0x41:
+            printf("Country: USA / Japan\n");
+            break;
+        case 0x44: 
+            printf("Country: Germany\n");
+            break;
+        case 0x45:
+            printf("Country: USA\n");
+            break;
+        case 0x46:
+            printf("Country: France\n");
+            break;
+        case 'I':
+            printf("Country: Italy");
+            break;
+        case 0x4A: 
+            printf("Country: Japan\n");
+            break;
+        case 'S':
+            printf("Country: Spain\n");
+            break;
+        case 0x55: case 0x59: 
+            printf("Country: Australia (0x%2.2X)\n", ROM_HEADER->Country_code);
+            break;
+        case 0x50: case 0x58: case 0x20:
+        case 0x21: case 0x38: case 0x70:
+            printf("Country: Europe (0x%02X)\n", ROM_HEADER->Country_code);
+        break;
+        default:
+            printf("Country Code: %x\n", ROM_HEADER->Country_code);
+        }
+    printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
-int fill_header(const char *argv)
-{
-   char arg[1024];
-   strncpy(arg, argv, 1000);
-   if (find_file(arg))
-     {
-    printf ("file not found or wrong path\n");
+    //Check the ini via MD5... This needs rework for RCS.
+    ini_openFile();
+
+    for ( i = 0; i < 16; ++i ) 
+        { sprintf(buffer+i*2, "%02X", digest[i]); }
+    buffer[32] = '\0';
+    strcpy(ROM_SETTINGS.MD5, buffer);
+    if((entry=ini_search_by_md5(buffer))==NULL)
+        {
+        char mycrc[1024];
+        printf("%lx\n", (long)entry);
+        sprintf(mycrc, "%08X-%08X-C%02X",
+               (int)sl(ROM_HEADER->CRC1), (int)sl(ROM_HEADER->CRC2),
+               ROM_HEADER->Country_code);
+        if((entry=ini_search_by_CRC(mycrc))==NULL)
+            {
+            strcpy(ROM_SETTINGS.goodname, (char *) ROM_HEADER->nom);
+            strcat(ROM_SETTINGS.goodname, " (unknown rom)");
+            printf("%s\n", ROM_SETTINGS.goodname);
+            ROM_SETTINGS.eeprom_16kb = 0;
+            ini_closeFile();
+            return 0;
+            }
+        else
+            {
+            if(!ask_bad())
+                {
+                free(rom);
+                rom = NULL;
+                free(ROM_HEADER);
+                ROM_HEADER = NULL;
+                ini_closeFile();
+                return -3;
+                }
+            strcpy(ROM_SETTINGS.goodname, entry->goodname);
+            strcat(ROM_SETTINGS.goodname, " (bad dump)");
+            if(strcmp(entry->refMD5, ""))
+                { entry = ini_search_by_md5(entry->refMD5); }
+            ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
+            ini_closeFile();
+            return 0;
+            }
+        }
+
+    s=entry->goodname;
+    for ( i = strlen(s); i > 0 && s[i-1] != '['; --i );
+    if(i!=0)
+           {
+       if(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o')
+           {
+           if(!ask_hack())
+               {
+               free(rom);
+               rom = NULL;
+               free(ROM_HEADER);
+               ROM_HEADER = NULL;
+               ini_closeFile();
+               return -3;
+               }
+           }
+       if(s[i]=='b')
+            {
+            if(!ask_bad())
+                {
+                free(rom);
+                rom = NULL;
+                free(ROM_HEADER);
+                ROM_HEADER = NULL;
+                ini_closeFile();
+                return -3;
+                }
+            }
+        }
+    strcpy(ROM_SETTINGS.goodname, entry->goodname);
+
+    if(strcmp(entry->refMD5, ""))
+        { entry = ini_search_by_md5(entry->refMD5); }
+    ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
+    printf("EEPROM type: %d\n", ROM_SETTINGS.eeprom_16kb);
+    ini_closeFile();
     return 0;
-     }
-/*------------------------------------------------------------------------*/   
-   findsize();
-   if (rom) free(rom);
-   rom = malloc(0x40);
-   
-   tmp=0;
-   
-   if (!z)
-     fread(rom, 1, 0x40, rom_file);
-   else if (z == 1)
-     gzread(z_rom_file, rom, 0x40);
-   else
-     {
-    unzOpenCurrentFile(zip);
-    unzReadCurrentFile(zip, rom, 0x40);
-    unzCloseCurrentFile(zip);
-     }
-   if (!z) fclose(rom_file);
-   else if (z==1) gzclose(z_rom_file);
-   else unzClose(zip);
-   
-   if (rom[0]==0x37)
-     {
-    for (i=0; i<(0x40/2); i++)
-      {
-         tmp=rom[i*2];
-         rom[i*2]=rom[i*2+1];
-         rom[i*2+1]=tmp;
-      }
-     }
-   if (rom[0]==0x40)
-     {
-    for (i=0; i<(0x40/4); i++)
-      {
-         tmp=rom[i*4];
-         rom[i*4]=rom[i*4+3];
-         rom[i*4+3]=tmp;
-         tmp=rom[i*4+1];
-         rom[i*4+1]=rom[i*4+2];
-         rom[i*4+2]=tmp;
-      }
-     }
-   else if ((rom[0] != 0x80) || (rom[1] != 0x37) || (rom[2] != 0x12) || (rom[3] != 0x40))
-     {
-    free(rom);
-    rom = NULL;
-    return 0;
-     }
-   
-   if (ROM_HEADER == NULL) ROM_HEADER= malloc(sizeof(rom_header));
-   memcpy(ROM_HEADER, rom, 0x40);
-   free(rom);
-   rom = NULL;
-   return taille_rom;
 }
 
-static void display_MD5calculating_progress(int p)
+int fill_header(const char *filename)
 {
-    info_message(tr("Calculating Rom MD5: %d%%"), p);
+    int compressiontype, imagetype, romsize;
+    int headerlength = 0x40;
+    char buffer[1024];
+    unsigned char *localrom;
+
+    strncpy(buffer, filename, 1023);
+
+    if((localrom=load_rom(filename, &romsize, &compressiontype, &imagetype, &headerlength))==NULL)
+        { return 0; }
+
+    if((localrom[0]!=0x80)||(localrom[1]!=0x37)||(localrom[2]!=0x12)||(localrom[3]!=0x40))
+        {
+        free(localrom);
+        return 0;
+        }
+
+    if(ROM_HEADER == NULL)
+        { ROM_HEADER = malloc(0x40); }
+    memcpy(ROM_HEADER, localrom, 0x40);
+
+    free(localrom);
+    return romsize;
 }
 
-void calculateMD5(const char *argv, unsigned char digest[16])
+int calculateMD5(const char *filename, char digeststring[32])
 {
-   md5_state_t state;
-   char arg[1024];
-   
-   strncpy(arg, argv, 1000);
-   if (find_file(arg))
-     {
-    printf("file not found or wrong path\n");
-    return;
-     }
-/*------------------------------------------------------------------------*/   
-   findsize();
-   if (rom) free(rom);
-   rom = malloc(taille_rom);
-   
-   tmp=0;
-   if (!z)
-     {
-    for (i=0; i<taille_rom;i+=fread(rom+i, 1, 1000, rom_file))
-      {
-         if (tmp!=(int)((i/(float)taille_rom)*100))
-           {
-          tmp=(int)(i/(float)(taille_rom)*100);
-          display_MD5calculating_progress(tmp);
-           }
-      }
-     }
-   else if (z == 1)
-     {
-    for (i=0; i<taille_rom;i+=gzread(z_rom_file, rom+i, 1000))
-      {
-         if (tmp!=(int)((i/(float)taille_rom)*100))
-           {
-          tmp=(int)(i/(float)(taille_rom)*100);
-          display_MD5calculating_progress(tmp);
-           }
-      }
-     }
-   else
-     {
-    unzOpenCurrentFile(zip);
-    for (i=0; i<taille_rom;i+=unzReadCurrentFile(zip, rom+i, 1000))
-      {
-         if (tmp!=(int)((i/(float)taille_rom)*100))
-           {
-          tmp=(int)(i/(float)(taille_rom)*100);
-          display_MD5calculating_progress(tmp);
-           }
-      }
-    unzCloseCurrentFile(zip);
-     }
-   if (!z) fclose(rom_file);
-   else if (z==1) gzclose(z_rom_file);
-   else unzClose(zip);
-   
-   display_MD5calculating_progress(100);
-   
-   if (rom[0]==0x37)
-     {
-    printf ("byteswaping rom...\n");
-    for (i=0; i<(taille_rom/2); i++)
-      {
-         tmp=rom[i*2];
-         rom[i*2]=rom[i*2+1];
-         rom[i*2+1]=tmp;
-      }
-    printf ("rom byteswaped\n");
-     }
-   if (rom[0]==0x40)
-     {
-    for (i=0; i<(taille_rom/4); i++)
-      {
-         tmp=rom[i*4];
-         rom[i*4]=rom[i*4+3];
-         rom[i*4+3]=tmp;
-         tmp=rom[i*4+1];
-         rom[i*4+1]=rom[i*4+2];
-         rom[i*4+2]=tmp;
-      }
-    printf("rom byteswaped\n");
-     }
-   else if ((rom[0] != 0x80) || (rom[1] != 0x37) || (rom[2] != 0x12) || (rom[3] != 0x40))
-     {
-    printf("wrong file format !\n");
-    free(rom);
-    rom = NULL;
-    return;
-     }
-   md5_init(&state);
-   md5_append(&state, (const md5_byte_t *)rom, taille_rom);
-   md5_finish(&state, digest);
-   display_MD5calculating_progress(-1);
-   free(rom);
-   rom = NULL;
+    int compressiontype, imagetype, romsize, i;
+    char buffer[1024];
+    unsigned char *localrom;
+    md5_state_t state;
+    md5_byte_t digest[16];
+
+    strncpy(buffer, filename, 1023);
+
+    if((localrom=load_rom(filename, &romsize, &compressiontype, &imagetype, &romsize))==NULL)
+        { return 0; }
+
+    if((localrom[0]!=0x80)||(localrom[1]!=0x37)||(localrom[2]!=0x12)||(localrom[3]!=0x40))
+        {
+        free(localrom);
+        return 0;
+        }
+
+    md5_init(&state);
+    md5_append(&state, (const md5_byte_t *)localrom, romsize);
+    md5_finish(&state, digest);
+
+    for ( i = 0; i < 16; ++i ) 
+        { sprintf(digeststring+i*2, "%02X", digest[i]); }
+
+    free(localrom);
+    return 1;
 }
+
+

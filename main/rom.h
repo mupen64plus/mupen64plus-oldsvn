@@ -30,9 +30,9 @@
 #ifndef ROM_H
 #define ROM_H
 
-int rom_read(const char *argv);
-int fill_header(const char *argv);
-void calculateMD5(const char *argv, unsigned char digest[16]);
+int rom_read(const char *filename);
+int fill_header(const char *filename);
+int calculateMD5(const char *filename, char digeststring[32]);
 extern unsigned char *rom;
 extern int taille_rom;
 
