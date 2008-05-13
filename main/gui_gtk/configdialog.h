@@ -54,6 +54,7 @@ typedef struct
     GtkWidget   *romShowFullPathsCheckButton;
     GtkWidget       *noAudioDelayCheckButton;
     GtkWidget       *noCompiledJumpCheckButton;
+    GtkWidget       *noMemoryExpansion;
 } SConfigDialog;
 extern SConfigDialog g_ConfigDialog;
 

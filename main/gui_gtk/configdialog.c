@@ -359,12 +359,15 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
     if( i != config_get_bool( "RomBrowserShowFullPaths", FALSE ) ) g_RefreshRomBrowser = 1;
     config_put_bool( "RomBrowserShowFullPaths", i );
 
-   
-        i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noAudioDelayCheckButton) );
+
+    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noAudioDelayCheckButton) );
     config_put_bool( "NoAudioDelay", i );
-   
-        i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton) );
+
+    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton) );
     config_put_bool( "NoCompiledJump", i );
+
+    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion) );
+    config_put_bool( "NoMemoryExpansion", i );
    
         savestates_set_autoinc_slot(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton)));
         config_put_bool("AutoIncSaveSlot", savestates_get_autoinc_slot());
@@ -664,6 +667,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton), config_get_bool( "RomBrowserShowFullPaths", FALSE ) );
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noAudioDelayCheckButton), config_get_bool( "NoAudioDelay", FALSE ) );
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton), config_get_bool( "NoCompiledJump", FALSE ) );
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion), config_get_bool( "NoMemoryExpansion", FALSE ) );
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton), config_get_bool( "AutoIncSaveSlot", FALSE ) );
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton), !g_Noask );
     // if --noask was specified at the commandline, disable checkbox
@@ -935,7 +939,7 @@ int create_configDialog( void )
     
         // Create a frame for CPU core options
         {
-            frame = gtk_frame_new( tr("CPU Core Settings") );
+            frame = gtk_frame_new( tr("Emulation Settings") );
             gtk_box_pack_start( GTK_BOX(g_ConfigDialog.configMupen), frame, FALSE, FALSE, 0 );
             vbox = gtk_vbox_new( TRUE, 6 );
             gtk_container_set_border_width( GTK_CONTAINER(vbox), 10 );
@@ -952,8 +956,10 @@ int create_configDialog( void )
 
             g_ConfigDialog.noAudioDelayCheckButton = gtk_check_button_new_with_label("Disable audio synchronization (For compatibility)");
             g_ConfigDialog.noCompiledJumpCheckButton = gtk_check_button_new_with_label("Disable compiled jump (For compatibility)");
+            g_ConfigDialog.noMemoryExpansion = gtk_check_button_new_with_label("Disable Memory Expansion");
             gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noAudioDelayCheckButton, FALSE, FALSE, 0);
             gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noCompiledJumpCheckButton, FALSE, FALSE, 0);
+            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noMemoryExpansion, FALSE, FALSE, 0);
         }
 
         // Create a frame for misc GUI options
