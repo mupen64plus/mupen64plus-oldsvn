@@ -64,7 +64,8 @@ static void draw_message(osd_message_t *msg, int width, int height)
         return;
 
     // set color. alpha is hard coded to 1. animation can change this
-    l_font->setForegroundColor(msg->color[R], msg->color[G], msg->color[B], 1.);
+    l_font->setForegroundColor(msg->color[R], msg->color[G], msg->color[B], 1.0);
+    l_font->setBackgroundColor(0.0, 0.0, 0.0, 0.0);
 
     // set justification based on corner
     switch(msg->corner)
@@ -289,7 +290,9 @@ void osd_render()
     glDisable(GL_REGISTER_COMBINERS_NV);
     glDisable(GL_COLOR_MATERIAL);
 
-    glDisable(GL_BLEND);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
