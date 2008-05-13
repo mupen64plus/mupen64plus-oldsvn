@@ -36,6 +36,7 @@
 #include "guifuncs.h"
 #include "translate.h"
 #include "rom.h"
+#include "osd.h"
 #include "../memory/memory.h"
 #include "../memory/flashram.h"
 #include "../r4300/r4300.h"
@@ -54,7 +55,7 @@ void savestates_select_slot(unsigned int s)
    if (s > 9 || s == slot) return;
    slot = s;
 
-   osd_new_message("Save State Slot Selected: %i", s+1);
+   osd_new_message(OSD_BOTTOM_LEFT, "Save State Slot Selected: %i", s+1);
 }
 
 void savestates_select_filename(const char *fn)
@@ -143,7 +144,7 @@ void savestates_save()
    
    gzclose(f);
 
-   osd_new_message("Saved State: %i", slot+1);
+   osd_new_message(OSD_BOTTOM_LEFT, "Saved State: %i", slot+1);
 }
 
 void savestates_load()
@@ -250,5 +251,5 @@ void savestates_load()
    else
      last_addr = PC->addr;
 
-   osd_new_message("Loaded State: %i", slot+1);
+   osd_new_message(OSD_BOTTOM_LEFT, "Loaded State: %i", slot+1);
 }

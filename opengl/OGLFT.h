@@ -446,52 +446,6 @@ namespace OGLFT
             static void errorCallback ( GLenum error_code );
     };
 
-#if 0 // OGLFT_NO_SOLID
-    class Solid : public Filled {
-    private:
-    FT_Outline_Funcs interface_;
-    static const unsigned int N_POLYLINE_PTS = 4;
-    struct glePoint2D 
-    {
-        double p_[2];
-        glePoint2D ( double p[2] ) { p_[X] = p[X]; p_[Y] = p[Y]; }
-        glePoint2D ( double x, double y ) { p_[X] = x; p_[Y] = y; }
-        glePoint2D ( const VertexInfo& v ) { p_[X] = v.v_[X]; p_[Y] = v.v_[Y]; }
-    };
-    struct 
-    {
-        double depth_;
-        struct 
-        {
-            int x_, y_;
-        } normal_sign_;
-        std::vector< glePoint2D > contour_;
-        std::vector< glePoint2D > contour_normals_;
-        gleDouble up_[3];
-        int n_polyline_pts_;
-        gleDouble point_array_[N_POLYLINE_PTS][3];
-    } extrusion_;
-
-    public:
-        Solid ( const char* filename, float point_size = 12, FT_UInt resolution = 100 );
-        Solid ( FT_Face face, float point_size = 12, FT_UInt resolution = 100 );
-        ~Solid ( void );
-        void setDepth ( double depth );
-        double depth ( void ) const { return extrusion_.depth_; }
-
-    private:
-        // It would be nice if C/C++ had real matrix notation (like Perl!)
-        void assign ( gleDouble a[3], double x, double y, double z ) { a[X] = x; a[Y] = y; a[Z] = z; }
-        
-        void init ( void );
-        void renderGlyph ( FT_Face face, FT_UInt glyph_index );
-        static int moveToCallback ( FT_Vector* to, Solid* solid );
-        static int lineToCallback ( FT_Vector* to, Solid* solid );
-        static int conicToCallback ( FT_Vector* control, FT_Vector* to, Solid* solid );
-        static int cubicToCallback ( FT_Vector* control1, FT_Vector* control2,
-        FT_Vector* to, Solid* solid );
-    };
-#endif /* OGLFT_NO_SOLID */
     class Raster : public Face 
     {
         protected:

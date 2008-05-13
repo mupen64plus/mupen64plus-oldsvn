@@ -266,6 +266,39 @@ int copyfile(char *src, char *dest)
 
 /** linked list functions **/
 
+/** list_prepend
+ *    Allocates a new list node, attaches it to the beginning of list and sets the
+ *    node data pointer to data.
+ *    Returns - the new list node.
+ */
+list_node_t *list_prepend(list_t *list, void *data)
+{
+    list_node_t *new_node,
+                *first_node;
+
+    if(list_empty(*list))
+    {
+        (*list) = malloc(sizeof(list_node_t));
+        (*list)->data = data;
+        (*list)->prev = NULL;
+        (*list)->next = NULL;
+        return *list;
+    }
+
+    // create new node and prepend it to the list
+    first_node = *list;
+    new_node = malloc(sizeof(list_node_t));
+    first_node->prev = new_node;
+    *list = new_node;
+
+    // set members in new node and return it
+    new_node->data = data;
+    new_node->prev = NULL;
+    new_node->next = first_node;
+
+    return new_node;
+}
+
 /** list_append
  *    Allocates a new list node, attaches it to the end of list and sets the
  *    node data pointer to data.

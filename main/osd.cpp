@@ -47,6 +47,8 @@ static OGLFT::Monochrome *l_font;
 static void animation_none(osd_message_t *);
 static void animation_fade(osd_message_t *);
 
+static float fCornerScroll[OSD_NUM_CORNERS]; 
+
 // animation handlers
 static void (*l_animations[OSD_NUM_ANIM_TYPES])(osd_message_t *) = {
     animation_none, // animation handler for OSD_NONE
@@ -171,9 +173,9 @@ static void animation_fade(osd_message_t *msg)
 }
 
 // sets message Y offset depending on where they are in the message queue
-static float get_message_offset(osd_message_t *msg, int i)
+static float get_message_offset(osd_message_t *msg, float fLinePos)
 {
-    float offset = l_font->height() * (float)i;
+    float offset = l_font->height() * fLinePos;
 
     switch(msg->corner)
     {
@@ -196,6 +198,10 @@ void osd_init(void)
 
     snprintf(fontpath, PATH_MAX, "%sfonts/%s", get_installpath(), FONT_FILENAME);
     l_font = new OGLFT::Monochrome(fontpath, 16);
+
+    // clear statics
+    for (int i = 0; i < OSD_NUM_CORNERS; i++)
+        fCornerScroll[i] = 0.0;
 
     if(!l_font || !l_font->isValid())
     {
@@ -326,12 +332,21 @@ void osd_render()
         }
 
         // offset y depending on how many other messages are in the same corner
-        msg->yoffset += get_message_offset(msg, corner_ctr[msg->corner]);
+        float fStartOffset = (float) corner_ctr[msg->corner] + fCornerScroll[msg->corner] + 0.5;
+        msg->yoffset += get_message_offset(msg, fStartOffset);
 
         draw_message(msg, viewport[2], viewport[2]);
 
-        msg->yoffset -= get_message_offset(msg, corner_ctr[msg->corner]);
+        msg->yoffset -= get_message_offset(msg, fStartOffset);
         corner_ctr[msg->corner]++;
+    }
+
+    // do the scrolling
+    for (int i = 0; i < OSD_NUM_CORNERS; i++)
+    {
+        fCornerScroll[i] += 0.1;
+        if (fCornerScroll[i] >= 0.0)
+            fCornerScroll[i] = 0.0;
     }
 
     // if last message was marked for deletion, delete it
@@ -371,7 +386,7 @@ void osd_render()
 // the user wants to modify its parameters. Note, if the message can't be created,
 // NULL is returned.
 extern "C"
-osd_message_t * osd_new_message(const char *fmt, ...)
+osd_message_t * osd_new_message(enum osd_corner eCorner, const char *fmt, ...)
 {
     va_list ap;
     char buf[PATH_MAX];
@@ -386,13 +401,14 @@ osd_message_t * osd_new_message(const char *fmt, ...)
     // set default values
     memset(msg, 0, sizeof(osd_message_t));
     msg->text = strdup(buf);
-    msg->corner = OSD_BOTTOM_LEFT;
     // default to white
     msg->color[R] = 1.;
     msg->color[G] = 1.;
     msg->color[B] = 1.;
 
+    msg->corner = eCorner;
     msg->state = OSD_APPEAR;
+    fCornerScroll[eCorner] -= 1.0;  // start this one before the beginning of the list and scroll it in
 
     msg->animation[OSD_APPEAR] = OSD_FADE;
     msg->animation[OSD_DISPLAY] = OSD_NONE;
@@ -403,7 +419,7 @@ osd_message_t * osd_new_message(const char *fmt, ...)
     msg->timeout[OSD_DISAPPEAR] = 40;
 
     // add to message queue
-    list_append(&l_messageQueue, msg);
+    list_prepend(&l_messageQueue, msg);
 
     return msg;
 }
@@ -458,3 +474,4 @@ void osd_message_set_static(osd_message_t *msg)
         msg->state = OSD_DISPLAY;
         msg->frames = 0;
 }
+

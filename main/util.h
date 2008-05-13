@@ -56,6 +56,7 @@ typedef struct _list_node {
 
 typedef list_node_t * list_t;
 
+list_node_t *list_prepend(list_t *list, void *data);
 list_node_t *list_append(list_t *list, void *data);
 void list_node_delete(list_t *list, list_node_t *node);
 void list_delete(list_t *list);
