@@ -335,7 +335,7 @@ void osd_render()
         float fStartOffset = (float) corner_ctr[msg->corner] + fCornerScroll[msg->corner] + 0.5;
         msg->yoffset += get_message_offset(msg, fStartOffset);
 
-        draw_message(msg, viewport[2], viewport[2]);
+        draw_message(msg, viewport[2], viewport[3]);
 
         msg->yoffset -= get_message_offset(msg, fStartOffset);
         corner_ctr[msg->corner]++;
