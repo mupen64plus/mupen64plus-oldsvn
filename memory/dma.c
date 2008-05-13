@@ -233,17 +233,36 @@ void dma_pi_write()
 
     if ((debug_count+Count) < 0x100000)
     {
+        
         switch(CIC_Chip)
         {
             case 1:
             case 2:
             case 3:
             case 6:
-                rdram[0x318/4] = 0x800000;
+            {
+                if ( config_get_bool( "NoMemoryExpansion", 0 ) )
+                {
+                    rdram[0x318/4] = 0x400000;
+                }
+                else
+                {
+                    rdram[0x318/4] = 0x800000;
+                }
                 break;
+            }
             case 5:
-                rdram[0x3F0/4] = 0x800000;
+            {
+                if ( config_get_bool( "NoMemoryExpansion", 0 ) )
+                {
+                    rdram[0x3F0/4] = 0x400000;
+                }
+                else
+                {
+                    rdram[0x3F0/4] = 0x800000;
+                }
                 break;
+            }
         }
     }
 
@@ -253,7 +272,7 @@ void dma_pi_write()
     
     return;
 }
-
+    
 void dma_sp_write()
 {
     int i;
