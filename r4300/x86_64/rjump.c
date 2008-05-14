@@ -34,6 +34,8 @@
 
 void dyna_jump()
 {
+   if (stop == 1)
+   { return; }
    if (PC->reg_cache_infos.need_map)
      *return_address = (unsigned long) (PC->reg_cache_infos.jump_wrapper);
    else
