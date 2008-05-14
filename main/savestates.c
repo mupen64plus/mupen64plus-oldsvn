@@ -172,7 +172,6 @@ void savestates_load()
    
    if (f == NULL)
    {
-     alert_message(tr("Load state error: file doesn't exist"));
      osd_new_message(OSD_BOTTOM_LEFT, "Load state error: slot %i file doesn't exist", slot);
      return;
    }
