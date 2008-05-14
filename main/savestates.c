@@ -47,20 +47,19 @@ extern int *autoinc_save_slot;
 
 int savestates_job = 0;
 
-static unsigned int slot = 0;
-static char fname[1024];
+static unsigned int slot = 1;
+static char fname[1024] = {0};
 
 void savestates_select_slot(unsigned int s)
 {
-   if (s > 9 || s == slot) return;
+   if (s < 1 || s > 10 || s == slot) return;
    slot = s;
 
-   osd_new_message(OSD_BOTTOM_LEFT, "Save State Slot Selected: %i", s+1);
+   osd_new_message(OSD_BOTTOM_LEFT, "Slot Selected: %i", s);
 }
 
 void savestates_select_filename(const char *fn)
 {
-   slot += 10;
    if (strlen((char *) fn) >= 1024) return;
    strcpy(fname, fn);
 }
@@ -72,29 +71,28 @@ void savestates_save()
    int len, i;
    
    if (*autoinc_save_slot)
+   {
+     if (++slot > 10)
      {
-    if (++slot == 10)
-      {
-         slot = 0;
-      }
+       slot = 1;
      }
+   }
    
-   if (slot <= 9)
-     {
-    filename = malloc(strlen(get_savespath())+
-              strlen(ROM_SETTINGS.goodname)+4+1);
-    strcpy(filename, get_savespath());
-    strcat(filename, ROM_SETTINGS.goodname);
-    strcat(filename, ".st");
-    sprintf(buf, "%d", slot);
-    strcat(filename, buf);
-     }
+   if (fname[0] != 0)  // a specific filename was given
+   {
+     filename = malloc(strlen(fname)+1);
+     strcpy(filename, fname);
+     fname[0] = 0;
+   }
    else
-     {
-    filename = malloc(strlen(fname)+1);
-    strcpy(filename, fname);
-    slot -= 10;
-     }
+   {
+     filename = malloc(strlen(get_savespath()) + strlen(ROM_SETTINGS.goodname)+16);
+     strcpy(filename, get_savespath());
+     strcat(filename, ROM_SETTINGS.goodname);
+     strcat(filename, ".st");
+     sprintf(buf, "%d", slot - 1);
+     strcat(filename, buf);
+   }
     
    f = gzopen(filename, "wb");
    free(filename);
@@ -144,7 +142,7 @@ void savestates_save()
    
    gzclose(f);
 
-   osd_new_message(OSD_BOTTOM_LEFT, "Saved State: %i", slot+1);
+   osd_new_message(OSD_BOTTOM_LEFT, "Saved State: %i", slot);
 }
 
 void savestates_load()
@@ -153,39 +151,41 @@ void savestates_load()
    gzFile f;
    int len, i;
    
-   if (slot <= 9)
-     {
-    filename = malloc(strlen(get_savespath())+
-              strlen(ROM_SETTINGS.goodname)+4+1);
-    strcpy(filename, get_savespath());
-    strcat(filename, ROM_SETTINGS.goodname);
-    strcat(filename, ".st");
-    sprintf(buf, "%d", slot);
-    strcat(filename, buf);
-     }
+   if (fname[0] != 0)  // a specific filename was given
+   {
+     filename = malloc(strlen(fname)+1);
+     strcpy(filename, fname);
+     fname[0] = 0;
+   }
    else
-     {
-    filename = malloc(strlen(fname)+1);
-    strcpy(filename, fname);
-    slot -= 10;
-     }
+   {
+     filename = malloc(strlen(get_savespath()) + strlen(ROM_SETTINGS.goodname)+16);
+     strcpy(filename, get_savespath());
+     strcat(filename, ROM_SETTINGS.goodname);
+     strcat(filename, ".st");
+     sprintf(buf, "%d", slot - 1);
+     strcat(filename, buf);
+   }
+
    f = gzopen(filename, "rb");
    free(filename);
    
    if (f == NULL)
-     {
-    alert_message(tr("The save state you're trying to load doesn't exist"));
-    return;
-     }
+   {
+     alert_message(tr("Load state error: file doesn't exist"));
+     osd_new_message(OSD_BOTTOM_LEFT, "Load state error: slot %i file doesn't exist", slot);
+     return;
+   }
    
    gzread(f, buf, 32);
    if (memcmp(buf, ROM_SETTINGS.MD5, 32))
-     {
-    alert_message(tr("You're trying to load a save state from either another rom\n"
-                  "or another dump."));
-    gzclose(f);
-    return;
-     }
+   {
+     const char *msg = tr("Load state error: Saved state ROM doesn't match current ROM");
+     osd_new_message(OSD_BOTTOM_LEFT, msg);
+     alert_message(msg);
+     gzclose(f);
+     return;
+   }
    
    gzread(f, &rdram_register, sizeof(RDRAM_register));
    gzread(f, &MI_register, sizeof(mips_register));
@@ -251,5 +251,6 @@ void savestates_load()
    else
      last_addr = PC->addr;
 
-   osd_new_message(OSD_BOTTOM_LEFT, "Loaded State: %i", slot+1);
+   osd_new_message(OSD_BOTTOM_LEFT, "Loaded State: %i", slot);
 }
+

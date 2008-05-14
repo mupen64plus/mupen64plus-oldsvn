@@ -544,8 +544,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     switch (event->key.keysym.unicode)
                     {
                         case '0':
-                        //  gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotDefaultItem), TRUE );
-                            savestates_select_slot( 0 );
+                            savestates_select_slot( 10 );
                             break;
 
                         case '1':
@@ -557,7 +556,6 @@ static int sdl_event_filter( const SDL_Event *event )
                         case '7':
                         case '8':
                         case '9':
-                            //gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotItem[event->key.keysym.unicode - '1']), TRUE );
                             savestates_select_slot( event->key.keysym.unicode - '0' );
                             break;
                         // Pause
