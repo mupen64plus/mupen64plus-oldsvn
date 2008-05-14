@@ -756,16 +756,16 @@ namespace OGLFT
 
             switch (horizontal_justification_)
             {
-                case LEFT:   dx = -bbox.x_min_; break;
+                case LEFT:   dx = -bbox.x_min_ + 1; break;
                 case CENTER: dx = -(bbox.x_min_ + bbox.x_max_)/ 2.; break;
-                case RIGHT:  dx = -bbox.x_max_; break;
+                case RIGHT:  dx = -bbox.x_max_ - 1; break;
                 default: break;
             }
             switch (vertical_justification_)
             {
-                case BOTTOM: dy = -bbox.y_min_; break;
+                case BOTTOM: dy = -bbox.y_min_ + 1; break;
                 case MIDDLE: dy = -(bbox.y_min_ + bbox.y_max_)/ 2.; break;
-                case TOP: dy = -bbox.y_max_; break;
+                case TOP: dy = -bbox.y_max_ - 1; break;
                 default: break;
             }
 
