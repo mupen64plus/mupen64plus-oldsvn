@@ -39,8 +39,7 @@ static SRomEntry *g_RomEntry;
 static void callback_apply_changes( GtkWidget *widget, gpointer data )
 {
     char crc_code[200];
-    char digeststring[32];
-    
+
     gtk_widget_hide( g_RomPropDialog.dialog );
     gtk_grab_remove( g_RomPropDialog.dialog );
 
@@ -52,8 +51,7 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
     if( !g_RomEntry->iniEntry )
     {
         sprintf( crc_code, "%08X-%08X-C%02X", sl(g_RomEntry->info.iCRC1), sl(g_RomEntry->info.iCRC2), g_RomEntry->info.cCountry );
-        calculateMD5(g_RomEntry->cFilename, &digeststring); 
-        g_RomEntry->iniEntry = ini_search_by_md5( digeststring );
+        g_RomEntry->iniEntry = ini_search_by_CRC( crc_code );
     }
     if( g_RomEntry->iniEntry )
     {

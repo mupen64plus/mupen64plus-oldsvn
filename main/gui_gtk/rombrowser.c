@@ -305,8 +305,6 @@ static void scan_dir( const char *dirname )
     char filename[PATH_MAX];
     char real_path[PATH_MAX];
     char crc_code[200];
-    char digeststring[32];
-    
     const char *p;
     struct dirent *de;
     struct stat sb;
@@ -401,9 +399,9 @@ static void scan_dir( const char *dirname )
             entry->info.cCountry = ROM_HEADER->Country_code;
             entry->info.iCRC1 = ROM_HEADER->CRC1;
             entry->info.iCRC2 = ROM_HEADER->CRC2;
-            calculateMD5(entry->cFilename, &digeststring);
+
             sprintf( crc_code, "%08X-%08X-C%02X", sl(entry->info.iCRC1), sl(entry->info.iCRC2), entry->info.cCountry );
-            entry->iniEntry = ini_search_by_md5( digeststring );
+            entry->iniEntry = ini_search_by_CRC( crc_code );
         
             if( entry->iniEntry )
             {
