@@ -471,8 +471,7 @@ int pauseContinueEmulation(void)
         if(msg)
             osd_delete_message(msg);
 
-        msg = osd_new_message(OSD_BOTTOM_LEFT, tr("Pause"));
-        osd_message_set_corner(msg, OSD_TOP_RIGHT);
+        msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused"));
         osd_message_set_static(msg);
     }
     
@@ -751,7 +750,7 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    osd_new_message(OSD_BOTTOM_LEFT, "Starting Mupen64Plus...");
+    osd_new_message(OSD_MIDDLE_CENTER, "Starting Mupen64Plus...");
     go();   /* core func */
 
 #ifdef WITH_LIRC

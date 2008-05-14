@@ -332,7 +332,11 @@ void osd_render()
         }
 
         // offset y depending on how many other messages are in the same corner
-        float fStartOffset = (float) corner_ctr[msg->corner] + fCornerScroll[msg->corner] + 0.5;
+        float fStartOffset;
+        if (msg->corner >= OSD_MIDDLE_LEFT && msg->corner <= OSD_MIDDLE_RIGHT)  // don't scroll the middle messages
+            fStartOffset = (float) corner_ctr[msg->corner] + 0.5;
+        else
+            fStartOffset = (float) corner_ctr[msg->corner] + fCornerScroll[msg->corner] + 0.5;
         msg->yoffset += get_message_offset(msg, fStartOffset);
 
         draw_message(msg, viewport[2], viewport[3]);
@@ -414,9 +418,18 @@ osd_message_t * osd_new_message(enum osd_corner eCorner, const char *fmt, ...)
     msg->animation[OSD_DISPLAY] = OSD_NONE;
     msg->animation[OSD_DISAPPEAR] = OSD_FADE;
 
-    msg->timeout[OSD_APPEAR] = 20;
-    msg->timeout[OSD_DISPLAY] = 180;
-    msg->timeout[OSD_DISAPPEAR] = 40;
+    if (eCorner >= OSD_MIDDLE_LEFT && eCorner <= OSD_MIDDLE_RIGHT)
+    {
+        msg->timeout[OSD_APPEAR] = 20;
+        msg->timeout[OSD_DISPLAY] = 60;
+        msg->timeout[OSD_DISAPPEAR] = 20;
+    }
+    else
+    {
+        msg->timeout[OSD_APPEAR] = 20;
+        msg->timeout[OSD_DISPLAY] = 180;
+        msg->timeout[OSD_DISAPPEAR] = 40;
+    }
 
     // add to message queue
     list_prepend(&l_messageQueue, msg);
