@@ -345,12 +345,12 @@ FORCE:
 
 # KDE4 build rules
 main/gui_kde4/ui_%.h: main/gui_kde4/%.ui
-	uic-qt4 $< -o $@
+	$(UIC) $< -o $@
 
 main/gui_kde4/mupen64plus.h: main/gui_kde4/mupen64plus.kcfg main/gui_kde4/settings.kcfgc
-	cd main/gui_kde4; kconfig_compiler4 mupen64plus.kcfg settings.kcfgc
+	cd main/gui_kde4; $(KCONFIG_COMPILER) mupen64plus.kcfg settings.kcfgc
 
 $(OBJ_KDE_GUI): $(OBJ_KDE_MOC) $(OBJ_KDE_HEADERS)
 
 main/gui_kde4/%.moc: main/gui_kde4/%.h
-	moc-qt4 $(KDE_FLAGS) -i $< -o $@
+	$(MOC) -i $< -o $@

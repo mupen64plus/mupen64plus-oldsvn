@@ -46,9 +46,14 @@ GTK_LIBS	= `pkg-config gtk+-2.0 --libs`
 GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
 
 # set KDE flags and libraries
-QT_FLAGS    = `pkg-config QtGui --cflags` `pkg-config QtCore --cflags`
-KDE_FLAGS   = -I`kde4-config --path include` -I/usr/include/kde4/KDE $(QT_FLAGS)
-KDE_LIBS    = -lQtCore -lQtGui -lkdecore -lkdeui -lkio -L/usr/lib64/kde4/devel
+KCONFIG_COMPILER = `kde4-config --prefix`/bin/kconfig_compiler
+MOC         = `./main/gui_kde4/qt4-config/qt4-config bin`/moc
+UIC         = `./main/gui_kde4/qt4-config/qt4-config bin`/uic
+QT_FLAGS    = -I`./main/gui_kde4/qt4-config/qt4-config include` -I`./main/gui_kde4/qt4-config/qt4-config include`/QtCore -I`./main/gui_kde4/qt4-config/qt4-config include`/QtGui
+KDE_FLAGS   = -I`kde4-config --path include` -I`kde4-config --path include`/KDE $(QT_FLAGS)
+QT_LIBS     = -lQtCore -lQtGui -L`./main/gui_kde4/qt4-config/qt4-config lib`
+KDE_LIBRARY_PATHS = `kde4-config --path lib | sed s/:/" -L"/ | sed s:^:-L:`
+KDE_LIBS    = -lkdecore -lkdeui -lkio $(KDE_LIBRARY_PATHS)
 
 # set base program pointers and flags
 CC      = gcc

@@ -69,7 +69,9 @@ MainWindow::MainWindow()
     connect(m_mainWidget, SIGNAL(romActivated(KUrl)),
              this, SLOT(romOpen(KUrl)));
 
-    setupGUI();
+    QString prefix = PREFIX;
+    prefix += "/share/mupen64plus/mupen64plusui.rc";
+    setupGUI(KXmlGuiWindow::Default, prefix);
 }
 
 void MainWindow::showInfoMessage(const QString& msg)
