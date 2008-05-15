@@ -41,8 +41,10 @@
 #include "volume.h"
 #include "guifuncs.h"
 #include "translate.h"
+#include "osd.h"
 
 static int g_VolMuted = 0; // volume muted?
+static osd_message_t *g_volMsg = NULL;
 
 /* volSet
  *  Sets volume of left and right PCM channels to given percentage (0-100) value.
@@ -63,8 +65,15 @@ void volSet(int percent)
     else if(percent < 0)
         percent = 0;
 
-    // temporary until we can get a volume bar in the emulation window
-    info_message(tr("Volume set to %d%%"), percent);
+    // if we had a volume message, make sure that it's still in the OSD list, or set it to NULL
+    if (g_volMsg != NULL)
+        g_volMsg = osd_message_valid(g_volMsg);
+
+    // create a new message or update an existing one
+    if (g_volMsg != NULL)
+        osd_update_message(g_volMsg, tr("Volume: %i%%"), percent);
+    else
+        g_volMsg = osd_new_message(OSD_MIDDLE_CENTER, tr("Volume: %i%%"), percent);
 
     vol = (percent << 8) + percent; // set both left/right channels to same vol
     ret = ioctl(mixerfd, MIXER_WRITE(SOUND_MIXER_PCM), &vol);
@@ -106,14 +115,16 @@ void volMute(void)
 {
     static int saveVol = 0;
 
-    if(g_VolMuted)
+    if (volIsMuted())
     {
         volSet(saveVol);
+        osd_update_message(g_volMsg, tr("Mute Off"));
     }
     else
     {
         saveVol = volGet();
         volSet(0);
+        osd_update_message(g_volMsg, tr("Mute On"));
     }
 
     g_VolMuted = !g_VolMuted;
@@ -133,7 +144,7 @@ int volIsMuted(void)
 void volChange(int delta)
 {
     // if we're muted, unmute before changing volume
-    if(g_VolMuted)
+    if (volIsMuted())
         volMute();
 
     volSet(volGet() + delta);

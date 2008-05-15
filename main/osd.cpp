@@ -454,6 +454,14 @@ void osd_update_message(osd_message_t *msg, const char *fmt, ...)
         free(msg->text);
 
     msg->text = strdup(buf);
+
+    // reset display time counter
+    if (msg->state >= OSD_DISPLAY)
+    {
+        msg->state = OSD_DISPLAY;
+        msg->frames = 0;
+    }
+
 }
 
 // remove message from message queue
@@ -486,5 +494,15 @@ void osd_message_set_static(osd_message_t *msg)
         msg->timeout[OSD_DISPLAY] = OSD_INFINITE_TIMEOUT;
         msg->state = OSD_DISPLAY;
         msg->frames = 0;
+}
+
+// return message pointer if valid (in the OSD list), otherwise return NULL
+extern "C"
+osd_message_t * osd_message_valid(osd_message_t *testmsg)
+{
+    if (list_find_node(l_messageQueue, testmsg) == NULL)
+        return NULL;
+    else
+        return testmsg;
 }
 

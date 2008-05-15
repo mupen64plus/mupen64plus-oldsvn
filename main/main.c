@@ -483,6 +483,8 @@ void screenshot(void)
 {
     if(g_EmulationThread || g_EmulatorRunning)
         captureScreen(g_SshotDir);
+
+    osd_new_message(OSD_BOTTOM_LEFT, tr("Captured screenshot."));
 }
 
 /*********************************************************************************************************
@@ -490,6 +492,7 @@ void screenshot(void)
 */
 static int sdl_event_filter( const SDL_Event *event )
 {
+    static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
     char *event_str = NULL;
 
@@ -523,7 +526,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     if (g_SpeedFactor > 10)
                     {
                         g_SpeedFactor -= 5;
-                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), g_SpeedFactor);
                         setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     }
                     break;
@@ -531,7 +534,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     if (g_SpeedFactor < 300)
                     {
                         g_SpeedFactor += 5;
-                        printf("Emulator playback speed: %i%% \n", g_SpeedFactor);
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), g_SpeedFactor);
                         setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     }
                     break;
@@ -582,6 +585,9 @@ static int sdl_event_filter( const SDL_Event *event )
                             SavedSpeedFactor = g_SpeedFactor;
                             g_SpeedFactor = 250;
                             setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                            // set fast-forward indicator
+                            msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
+                            osd_message_set_static(msgFF);
                             break;
                         // frame advance
                         case '/':
@@ -608,6 +614,8 @@ static int sdl_event_filter( const SDL_Event *event )
                     // cancel fast-forward
                     g_SpeedFactor = SavedSpeedFactor;
                     setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                    // remove message
+                    osd_delete_message(msgFF);
                     break;
                 default:
                     keyUp( 0, event->key.keysym.sym );
