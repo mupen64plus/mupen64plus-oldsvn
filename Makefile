@@ -1,5 +1,8 @@
 # Makefile for Mupen64Plus
 
+# set root path
+ROOT=.
+
 # include pre-make file with a bunch of definitions
 include ./pre.mk
 
@@ -131,7 +134,7 @@ OBJ_LIRC = \
 	main/lirc.o
 
 OBJ_GTK_GUI = \
-	main/gui_gtk/main_gtk.o \
+	main/gui_gtk/main_gtk_$(PLAT).o \
 	main/gui_gtk/aboutdialog.o \
 	main/gui_gtk/cheatdialog.o \
 	main/gui_gtk/configdialog.o \

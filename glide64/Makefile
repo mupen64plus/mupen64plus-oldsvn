@@ -1,5 +1,8 @@
 # Makefile for Glide64, in Mupen64Plus
 
+# set root path
+ROOT=..
+
 # include pre-make file with a bunch of definitions
 include ../pre.mk
 

@@ -1,5 +1,8 @@
 # Makefile for Mupen64
 
+# set root path
+ROOT=..
+
 # include pre-make file with a bunch of definitions
 include ../pre.mk
 
