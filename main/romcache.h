@@ -1,5 +1,5 @@
 /**
- * Mupen64 - cheat.c
+ * Mupen64 - romcache.h
  * Copyright (C) 2008 okaygo
  *
  * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
@@ -23,25 +23,19 @@
 **/
 
 typedef struct {
-    char MD5[32];
-    char goodname[256];
-    char path[1024];
-    int os_timestamp;
-} cache_entry;
-
-typedef struct {
-	char MAGIC[4];
-	int entries;
+    char MAGIC[4];
+    int entries;
 } cache_header;
 
+//Hm... dual rcs linked lists and the GUI memoryspace?
 typedef struct {
-	char MD5[33];
-	char goodname[256];
-	char path[PATH_MAX];
-	unsigned int crc1;
+    char MD5[33];
+    char goodname[256];
+    char path[PATH_MAX];
+    unsigned int crc1;
     unsigned int crc2;
     char headername[20];
-} rom_info;
+} rom_info; 
 
 int rebuild_cache_file();
 int load_initial_cache();
