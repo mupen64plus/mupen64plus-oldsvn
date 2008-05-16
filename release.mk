@@ -65,6 +65,7 @@ bin-32: FORCE
 	mkdir ../$(BINNAME_32)
 	mkdir ../$(BINNAME_32)/config
 	mkdir ../$(BINNAME_32)/doc
+	mkdir ../$(BINNAME_32)/fonts
 	mkdir ../$(BINNAME_32)/icons
 	mkdir ../$(BINNAME_32)/lang
 	mkdir ../$(BINNAME_32)/plugins
@@ -76,6 +77,7 @@ bin-32: FORCE
 	cp ./RELEASE ../$(BINNAME_32)/
 	cp ./config/* ../$(BINNAME_32)/config
 	cp ./doc/* ../$(BINNAME_32)/doc
+	cp ./fonts/* ../$(BINNAME_32)/fonts
 	cp ./icons/* ../$(BINNAME_32)/icons
 	cp ./lang/* ../$(BINNAME_32)/lang
 	cp ./plugins/*.so ../$(BINNAME_32)/plugins
@@ -92,6 +94,7 @@ bin-64: FORCE
 	mkdir ../$(BINNAME_64)
 	mkdir ../$(BINNAME_64)/config
 	mkdir ../$(BINNAME_64)/doc
+	mkdir ../$(BINNAME_64)/fonts
 	mkdir ../$(BINNAME_64)/icons
 	mkdir ../$(BINNAME_64)/lang
 	mkdir ../$(BINNAME_64)/plugins
@@ -103,6 +106,7 @@ bin-64: FORCE
 	cp ./RELEASE ../$(BINNAME_64)/
 	cp ./config/* ../$(BINNAME_64)/config
 	cp ./doc/* ../$(BINNAME_64)/doc
+	cp ./fonts/* ../$(BINNAME_64)/fonts
 	cp ./icons/* ../$(BINNAME_64)/icons
 	cp ./lang/* ../$(BINNAME_64)/lang
 	cp ./plugins/*.so ../$(BINNAME_64)/plugins
