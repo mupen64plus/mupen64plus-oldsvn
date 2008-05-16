@@ -7,7 +7,7 @@ include ../pre.mk
 CFLAGS += -fpic -DPIC
 
 # list of object files to generate
-OBJECTS = Config.o Dl.o DefDl.cpp MacroDlg.o
+OBJECTS = ConfigGtk2.o Dl.o DefSDL.cpp MacroDlg.o
 
 # build targets
 all: tasinput.so
