@@ -502,7 +502,7 @@ int calculateMD5(const char *filename, char digeststring[32])
         { sprintf(digeststring+i*2, "%02X", digest[i]); }
 
     free(localrom);
-    return 1;
+    return romsize;
 }
 
 
