@@ -27,16 +27,6 @@ typedef struct {
     int entries;
 } cache_header;
 
-//Hm... dual rcs linked lists and the GUI memoryspace?
-typedef struct {
-    char MD5[33];
-    char goodname[256];
-    char path[PATH_MAX];
-    unsigned int crc1;
-    unsigned int crc2;
-    char headername[20];
-} rom_info; 
-
 int rebuild_cache_file();
 int load_initial_cache();
 void *rom_cache_system(void *_arg);

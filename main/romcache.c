@@ -65,17 +65,25 @@ typedef struct
     char filename[PATH_MAX];
     char MD5[33]; // md5 code
     //OS timestamp... ?Should it be in m_time or something more human friendly..
-    int iniEntry; //.ini entry of this rom, i.e. fast searching.
-    //The mupenEntry* goes into romdata. 
+    mupenEntry* inientry; //Okay since ini database is persistent and global, no romdata. GUI can handle numbering.
+    //comment* something to deal with comments.
 } cacheentry;
 
-//Hm... Comments and custom roms... Where do we put this?
-//Maybe some other files? comments.ini custom.ini
+/* Okay... new paradigm.
+
+romcache - the cache.
+romdatabase - the database, currently linked lists from mupenIniApi.c
+comments - user comments.
+customdatabase - user editable ini for non-Goodnamed ROMS to handle corner cases.
+
+GUI polls romcache, using the database entry pointer to build 
+its GtkTreeView or KDE ListView.
+*/
 
 //Linked list, why is #include <list.h> not needed???
 //Possible better data structure...
-//Possible better name... (This is the global working set of rom data)
-list_t romdata = NULL; 
+//Possible better name... 
+list_t romcache = NULL; 
 
 static void scan_dir2( const char *dirname );
 
@@ -187,9 +195,6 @@ static void scan_dir2( const char *dirname )
         //Maybe probe errno and provide feedback?  ^
         //To be consistent or removed from above   |
 
-        //This needs to be converted to something more useful...
-        printf("Modified %d\n", sb.st_mtime);
-
         //Handle recursive scanning.
         if( config_get_bool( "RomDirsScanRecursive", 0 ) )
             {
@@ -208,7 +213,11 @@ static void scan_dir2( const char *dirname )
         for( i = 0; romextensions[i]; ++i )
             {
             if(!strcasecmp(extension,romextensions[i]))
-                { break; }
+                {
+                //This needs to be converted to something more useful...
+                printf("Modified %d\n", sb.st_mtime);
+                break; 
+                }
             }
         if(!romextensions[i])
             { continue; }
@@ -240,7 +249,7 @@ static void scan_dir2( const char *dirname )
            }
 
         //This needs to go further to the GUI side.
-        //I.e. RCS should always store the whole path.
+        //I.e. rcs should always store the whole path.
         if(config_get_bool( "RomBrowserShowFullPaths", 0 ))
             { line = entry->filename; }
         else
@@ -273,7 +282,6 @@ int load_initial_cache()
     FILE *f = NULL;
     long filesize = 0;
     cache_header header;
-    cacheentry *romdata;
     int num_entrys = 0;
 
     f = fopen(cache_filename,"r");
@@ -301,8 +309,8 @@ int load_initial_cache()
             { printf("[rcs] rom cache header is correct\n", header.MAGIC); }
 
         num_entrys = header.entries;
-        romdata = malloc(num_entrys*sizeof(cacheentry));
-        if (romdata == NULL)
+        romcache = malloc(num_entrys*sizeof(cacheentry));
+        if (romcache == NULL)
             {
             printf("[error] Could not allocate memory for cache_data. (%i bytes)\n",(sizeof(cacheentry)*num_entrys));
             return 0;
@@ -310,7 +318,7 @@ int load_initial_cache()
         }
 
     // Read our data into our array.
-    if(fread(romdata,sizeof(cacheentry),num_entrys,f) != (sizeof(cacheentry)*num_entrys))
+    if(fread(romcache,sizeof(cacheentry),num_entrys,f) != (sizeof(cacheentry)*num_entrys))
         {
         printf("[error] malformed rom cache structure.\n");
         return 0;
@@ -319,8 +327,8 @@ int load_initial_cache()
     // Close our file, it's no longer needed.
     fclose(f);
 
-    // Free up the cache data
-    free(romdata);
+    //NO NO NO!!!
+    //free(romdata);
 
     return 1;
 }
