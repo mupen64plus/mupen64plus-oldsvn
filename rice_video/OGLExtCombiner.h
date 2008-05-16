@@ -19,9 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _OGLEXT_COMBINER_H_
 #define _OGLEXT_COMBINER_H_
 
+#include <GL/gl.h>
+
 #include "OGLCombiner.h"
 #include "GeneralCombiner.h"
-#include "gl/gl.h"
 
 typedef union 
 {

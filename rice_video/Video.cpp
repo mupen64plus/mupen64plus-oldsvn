@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+#include <GL/gl.h>
 #include "stdafx.h"
 #include "_BldNum.h"
 
@@ -26,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 PluginStatus status;
 char generalText[256];
+void (*renderCallback)() = NULL;
 
 GFX_INFO g_GraphicsInfo;
 
@@ -245,7 +247,7 @@ void StartVideo(void)
         ErrorMsg("Error to start video");
         throw 0;
     }
-
+   
     g_CritialSection.Unlock();
 }
 
@@ -666,21 +668,21 @@ void UpdateScreenStep2 (void)
 
 FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void)
 {
-   if(options.bShowFPS)
-     {
-    static unsigned int lastTick=0;
-    static int frames=0;
-    unsigned int nowTick = SDL_GetTicks();
-    frames++;
-    if(lastTick + 5000 <= nowTick)
-      {
-         char caption[200];
-         sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", FILE_VERSION, frames/5.0);
-         SDL_WM_SetCaption(caption, caption);
-         frames = 0;
-         lastTick = nowTick;
-      }
-     }
+    if(options.bShowFPS)
+    {
+        static unsigned int lastTick=0;
+        static int frames=0;
+        unsigned int nowTick = SDL_GetTicks();
+        frames++;
+        if(lastTick + 5000 <= nowTick)
+        {
+            char caption[200];
+            sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", FILE_VERSION, frames/5.0);
+            SDL_WM_SetCaption(caption, caption);
+            frames = 0;
+            lastTick = nowTick;
+        }
+    }
 #ifdef USING_THREAD
     if (videoThread)
     {
@@ -688,8 +690,8 @@ FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void)
         WaitForSingleObject( threadFinished, INFINITE );
     }
 #else
-     UpdateScreenStep2();
-#endif
+    UpdateScreenStep2();
+#endif  
 }
 
 //---------------------------------------------------------------------------------------
@@ -1091,3 +1093,21 @@ FUNC_TYPE(void) NAME_DEFINE(SetConfigDir)(char *configDir)
 {
     strncpy(g_ConfigDir, configDir, PATH_MAX);
 }
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetRenderingCallback
+  Purpose:  Allows emulator to register a callback function that will
+            be called by the graphics plugin just before the the
+            frame buffers are swapped.
+            This was added as a way for the emulator to draw emulator-
+            specific things to the screen, e.g. On-screen display.
+  input:    pointer to a callback function.
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetRenderingCallback(void (*callback)())
+{
+    renderCallback = callback;
+}
+

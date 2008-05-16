@@ -91,6 +91,7 @@ void (*viStatusChanged)() = dummy_void;
 void (*viWidthChanged)() = dummy_void;
 void (*readScreen)(void **dest, int *width, int *height) = 0;
 void (*captureScreen)(char *dirpath) = 0;
+void (*setRenderingCallback)(void (*callback)()) = dummy_void;
 
 void (*aiDacrateChanged)(int SystemType) = dummy_aiDacrateChanged;
 void (*aiLenChanged)() = dummy_void;
@@ -397,6 +398,7 @@ void plugin_load_plugins(const char *gfx_name,
     viWidthChanged = dlsym(handle_gfx, "ViWidthChanged");
     readScreen = dlsym(handle_gfx, "ReadScreen");
     captureScreen = dlsym(handle_gfx, "CaptureScreen");
+    setRenderingCallback = dlsym(handle_gfx, "SetRenderingCallback");
     
     fBRead = dlsym(handle_gfx, "FBRead");
     fBWrite = dlsym(handle_gfx, "FBWrite");
@@ -414,6 +416,7 @@ void plugin_load_plugins(const char *gfx_name,
     if (viStatusChanged == NULL) viStatusChanged = dummy_void;
     if (viWidthChanged == NULL) viWidthChanged = dummy_void;
     if (captureScreen == NULL) captureScreen = dummy_void;
+    if (setRenderingCallback == NULL) setRenderingCallback = dummy_void;
 
     gfx_info.MemoryBswaped = TRUE;
     gfx_info.HEADER = rom;
@@ -461,6 +464,7 @@ void plugin_load_plugins(const char *gfx_name,
     viWidthChanged = dummy_void;
     readScreen = 0;
     captureScreen = dummy_void;
+    setRenderingCallback = dummy_void;
      }
 
    if (handle_audio)

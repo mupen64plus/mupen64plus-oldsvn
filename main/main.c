@@ -65,6 +65,7 @@
 #include "translate.h"
 #include "volume.h"
 #include "cheat.h"
+#include "osd.h"
 
 #ifdef DBG
 #include <glib.h>
@@ -463,13 +464,30 @@ void stopEmulation(void)
 
 int pauseContinueEmulation(void)
 {
+    static osd_message_t *msg = NULL;
+
     if (!g_EmulatorRunning)
         return 1;
 
     if (rompause)
+    {
         info_message(tr("Emulation continued."));
+        if(msg)
+        {
+            osd_delete_message(msg);
+            msg = NULL;
+        }
+    }
     else
+    {
         info_message(tr("Emulation paused."));
+
+        if(msg)
+            osd_delete_message(msg);
+
+        msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused"));
+        osd_message_set_static(msg);
+    }
     
     rompause = !rompause;
     return rompause;
@@ -526,6 +544,8 @@ void screenshot(void)
         // print message -- this allows developers to capture frames and use them in the regression test
         printf("Captured screenshot for frame %i\n", l_CurrentFrame);
     }
+
+    osd_new_message(OSD_BOTTOM_LEFT, tr("Captured screenshot."));
 }
 
 /*********************************************************************************************************
@@ -533,6 +553,7 @@ void screenshot(void)
 */
 static int sdl_event_filter( const SDL_Event *event )
 {
+    static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
     char *event_str = NULL;
 
@@ -566,7 +587,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     if (l_SpeedFactor > 10)
                     {
                         l_SpeedFactor -= 5;
-                        info_message(tr("Emulator playback speed: %i%%"), l_SpeedFactor);
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), l_SpeedFactor);
                         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     }
                     break;
@@ -574,7 +595,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     if (l_SpeedFactor < 300)
                     {
                         l_SpeedFactor += 5;
-                        info_message(tr("Emulator playback speed: %i%%"), l_SpeedFactor);
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), l_SpeedFactor);
                         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                     }
                     break;
@@ -592,8 +613,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     switch (event->key.keysym.unicode)
                     {
                         case '0':
-                        //  gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotDefaultItem), TRUE );
-                            savestates_select_slot( 0 );
+                            savestates_select_slot( 10 );
                             break;
 
                         case '1':
@@ -605,7 +625,6 @@ static int sdl_event_filter( const SDL_Event *event )
                         case '7':
                         case '8':
                         case '9':
-                            //gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotItem[event->key.keysym.unicode - '1']), TRUE );
                             savestates_select_slot( event->key.keysym.unicode - '0' );
                             break;
                         // volume mute/unmute
@@ -627,6 +646,9 @@ static int sdl_event_filter( const SDL_Event *event )
                             SavedSpeedFactor = l_SpeedFactor;
                             l_SpeedFactor = 250;
                             setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                            // set fast-forward indicator
+                            msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
+                            osd_message_set_static(msgFF);
                             break;
                         // frame advance
                         case '/':
@@ -653,6 +675,8 @@ static int sdl_event_filter( const SDL_Event *event )
                     // cancel fast-forward
                     l_SpeedFactor = SavedSpeedFactor;
                     setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                    // remove message
+                    osd_delete_message(msgFF);
                     break;
                 default:
                     keyUp( 0, event->key.keysym.sym );
@@ -778,6 +802,9 @@ static void * emulationThread( void *_arg )
     romOpen_audio();
     romOpen_input();
 
+    // init on-screen display
+    osd_init();
+
     if (l_Fullscreen)
         changeWindow();
 
@@ -792,11 +819,14 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
+    osd_new_message(OSD_MIDDLE_CENTER, "Starting Mupen64Plus...");
     go();   /* core func */
 
 #ifdef WITH_LIRC
     lircStop();
 #endif // WITH_LIRC
+
+    osd_exit();
 
     romClosed_RSP();
     romClosed_input();

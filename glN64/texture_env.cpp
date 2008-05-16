@@ -1,9 +1,10 @@
-#ifndef __LINUX__
-# include <windows.h>
-#else
+
 # include "../main/winlnxdefs.h"
 # include <stdlib.h>
-#endif
+
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include "OpenGL.h"
 #include "Combiner.h"
 #include "texture_env.h"

@@ -56,13 +56,17 @@ typedef struct _list_node {
 
 typedef list_node_t * list_t;
 
+list_node_t *list_prepend(list_t *list, void *data);
 list_node_t *list_append(list_t *list, void *data);
 void list_node_delete(list_t *list, list_node_t *node);
 void list_delete(list_t *list);
 void list_node_move_front(list_t *list, list_node_t *node);
 void list_node_move_back(list_t *list, list_node_t *node);
 void *list_nth_node_data(list_t list, int n);
+list_node_t *list_first_node(list_t list);
+void *list_first_data(list_t list);
 list_node_t *list_last_node(list_t list);
+void *list_last_data(list_t list);
 int inline list_empty(list_t list);
 int list_length(list_t list);
 list_node_t *list_find_node(list_t list, void *data);

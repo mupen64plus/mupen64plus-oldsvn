@@ -17,8 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "stdafx.h"
-#define GLH_EXT_SINGLE_FILE
-#include "glh_genext.h"
+#include <GL/gl.h>
 
 #include "liblinux/BMGLibPNG.h"
 
@@ -186,178 +185,6 @@ void COGLGraphicsContext::InitState(void)
     glDepthRange(-1, 1);
 }
 
-PFNGLGENFRAGMENTSHADERSATIPROC        glGenFragmentShadersATI;
-PFNGLBINDFRAGMENTSHADERATIPROC        glBindFragmentShaderATI;
-PFNGLDELETEFRAGMENTSHADERATIPROC      glDeleteFragmentShaderATI;
-PFNGLBEGINFRAGMENTSHADERATIPROC       glBeginFragmentShaderATI;
-PFNGLENDFRAGMENTSHADERATIPROC         glEndFragmentShaderATI;
-PFNGLPASSTEXCOORDATIPROC              glPassTexCoordATI;
-PFNGLSAMPLEMAPATIPROC                 glSampleMapATI;
-PFNGLCOLORFRAGMENTOP1ATIPROC          glColorFragmentOp1ATI;
-PFNGLCOLORFRAGMENTOP2ATIPROC          glColorFragmentOp2ATI;
-PFNGLCOLORFRAGMENTOP3ATIPROC          glColorFragmentOp3ATI;
-PFNGLALPHAFRAGMENTOP1ATIPROC          glAlphaFragmentOp1ATI;
-PFNGLALPHAFRAGMENTOP2ATIPROC          glAlphaFragmentOp2ATI;
-PFNGLALPHAFRAGMENTOP3ATIPROC          glAlphaFragmentOp3ATI;
-PFNGLSETFRAGMENTSHADERCONSTANTATIPROC glSetFragmentShaderConstantATI;
-
-PFNGLNEWOBJECTBUFFERATIPROC         glNewObjectBufferATI;
-PFNGLISOBJECTBUFFERATIPROC          glIsObjectBufferATI;
-PFNGLUPDATEOBJECTBUFFERATIPROC      glUpdateObjectBufferATI;
-PFNGLGETOBJECTBUFFERFVATIPROC       glGetObjectBufferfvATI;
-PFNGLGETOBJECTBUFFERIVATIPROC       glGetObjectBufferivATI;
-PFNGLFREEOBJECTBUFFERATIPROC        glFreeObjectBufferATI;
-PFNGLARRAYOBJECTATIPROC             glArrayObjectATI;
-PFNGLGETARRAYOBJECTFVATIPROC        glGetArrayObjectfvATI;
-PFNGLGETARRAYOBJECTIVATIPROC        glGetArrayObjectivATI;
-PFNGLVARIANTARRAYOBJECTATIPROC      glVariantArrayObjectATI;
-PFNGLGETVARIANTARRAYOBJECTFVATIPROC glGetVariantArrayObjectfvATI;
-PFNGLGETVARIANTARRAYOBJECTIVATIPROC glGetVariantArrayObjectivATI;
-
-PFNGLPROGRAMSTRINGARBPROC glProgramStringARB = NULL;
-PFNGLBINDPROGRAMARBPROC glBindProgramARB = NULL;
-PFNGLDELETEPROGRAMSARBPROC glDeleteProgramsARB = NULL;
-PFNGLGENPROGRAMSARBPROC glGenProgramsARB = NULL;
-PFNGLPROGRAMENVPARAMETER4DARBPROC glProgramEnvParameter4dARB = NULL;
-PFNGLPROGRAMENVPARAMETER4DVARBPROC glProgramEnvParameter4dvARB = NULL;
-PFNGLPROGRAMENVPARAMETER4FARBPROC glProgramEnvParameter4fARB = NULL;
-PFNGLPROGRAMENVPARAMETER4FVARBPROC glProgramEnvParameter4fvARB = NULL;
-PFNGLPROGRAMLOCALPARAMETER4DARBPROC glProgramLocalParameter4dARB = NULL;
-PFNGLPROGRAMLOCALPARAMETER4DVARBPROC glProgramLocalParameter4dvARB = NULL;
-PFNGLPROGRAMLOCALPARAMETER4FARBPROC glProgramLocalParameter4fARB = NULL;
-PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB = NULL;
-PFNGLGETPROGRAMENVPARAMETERDVARBPROC glGetProgramEnvParameterdvARB = NULL;
-PFNGLGETPROGRAMENVPARAMETERFVARBPROC glGetProgramEnvParameterfvARB = NULL;
-PFNGLGETPROGRAMENVPARAMETERFVARBPROC glGetssProgramEnvParameterfvARB = NULL;
-PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC glGetProgramLocalParameterdvARB = NULL;;
-PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC glGetProgramLocalParameterfvARB = NULL;;
-PFNGLGETPROGRAMIVARBPROC glGetProgramivARB = NULL;;
-PFNGLGETPROGRAMSTRINGARBPROC glGetProgramStringARB = NULL;;
-PFNGLISPROGRAMARBPROC glIsProgramARB = NULL;
-
-void COGLGraphicsContext::InitOGLExtension_ATI(void)
-{
-    #define SAFE_GET_PROC( func, type, fail)   func = (type) SDL_GL_GetProcAddress( #func);   fail &= (func != NULL);
-
-    if (IsExtensionSupported("GL_ATI_fragment_shader"))
-    {
-        glGenFragmentShadersATI        = (PFNGLGENFRAGMENTSHADERSATIPROC) SDL_GL_GetProcAddress("glGenFragmentShadersATI");
-        glBindFragmentShaderATI        = (PFNGLBINDFRAGMENTSHADERATIPROC) SDL_GL_GetProcAddress("glBindFragmentShaderATI");
-        glDeleteFragmentShaderATI      = (PFNGLDELETEFRAGMENTSHADERATIPROC) SDL_GL_GetProcAddress("glDeleteFragmentShaderATI");
-        glBeginFragmentShaderATI       = (PFNGLBEGINFRAGMENTSHADERATIPROC) SDL_GL_GetProcAddress("glBeginFragmentShaderATI");
-        glEndFragmentShaderATI         = (PFNGLENDFRAGMENTSHADERATIPROC) SDL_GL_GetProcAddress("glEndFragmentShaderATI");
-        glPassTexCoordATI              = (PFNGLPASSTEXCOORDATIPROC) SDL_GL_GetProcAddress("glPassTexCoordATI");
-        glSampleMapATI                 = (PFNGLSAMPLEMAPATIPROC) SDL_GL_GetProcAddress("glSampleMapATI");
-        glColorFragmentOp1ATI          = (PFNGLCOLORFRAGMENTOP1ATIPROC) SDL_GL_GetProcAddress("glColorFragmentOp1ATI");
-        glColorFragmentOp2ATI          = (PFNGLCOLORFRAGMENTOP2ATIPROC) SDL_GL_GetProcAddress("glColorFragmentOp2ATI");
-        glColorFragmentOp3ATI          = (PFNGLCOLORFRAGMENTOP3ATIPROC) SDL_GL_GetProcAddress("glColorFragmentOp3ATI");
-        glAlphaFragmentOp1ATI          = (PFNGLALPHAFRAGMENTOP1ATIPROC) SDL_GL_GetProcAddress("glAlphaFragmentOp1ATI");
-        glAlphaFragmentOp2ATI          = (PFNGLALPHAFRAGMENTOP2ATIPROC) SDL_GL_GetProcAddress("glAlphaFragmentOp2ATI");
-        glAlphaFragmentOp3ATI          = (PFNGLALPHAFRAGMENTOP3ATIPROC) SDL_GL_GetProcAddress("glAlphaFragmentOp3ATI");
-        glSetFragmentShaderConstantATI = (PFNGLSETFRAGMENTSHADERCONSTANTATIPROC) SDL_GL_GetProcAddress("glSetFragmentShaderConstantATI");
-
-        if (glGenFragmentShadersATI == NULL)
-        {
-            ErrorMsg("Can't init glGenFragmentShadersATI");
-        }
-
-        if (glBindFragmentShaderATI == NULL)
-        {
-            ErrorMsg ("Can't init glBindFragmentShaderATI");
-        }
-
-        if (glDeleteFragmentShaderATI == NULL)
-        {
-            ErrorMsg ("Can't init glDeleteFragmentShaderATI");
-        }
-
-        if (glBeginFragmentShaderATI == NULL)
-        {
-            ErrorMsg ("Can't init glBeginFragmentShaderATI");
-        }
-
-        if (glEndFragmentShaderATI == NULL)
-        {
-            ErrorMsg ("Can't init glEndFragmentShaderATI");
-        }
-
-        if (glPassTexCoordATI == NULL)
-        {
-            ErrorMsg ("Can't init glPassTexCoordATI");
-        }
-
-        if (glColorFragmentOp1ATI == NULL)
-        {
-            ErrorMsg ("Can't init glColorFragmentOp1ATI");
-        }
-
-        if (glColorFragmentOp2ATI == NULL)
-        {
-            ErrorMsg ("Can't init glColorFragmentOp2ATI");
-        }
-
-        if (glColorFragmentOp3ATI == NULL)
-        {
-            ErrorMsg ("Can't init glColorFragmentOp3ATI");
-        }
-
-        if (glAlphaFragmentOp1ATI == NULL)
-        {
-            ErrorMsg ("Can't init glAlphaFragmentOp1ATI");
-        }
-
-        if (glAlphaFragmentOp2ATI == NULL)
-        {
-            ErrorMsg ("Can't init glAlphaFragmentOp2ATI");
-        }
-
-        if (glAlphaFragmentOp2ATI == NULL)
-        {
-            ErrorMsg ("Can't init glAlphaFragmentOp2ATI");
-        }
-
-        if (glAlphaFragmentOp3ATI == NULL)
-        {
-            ErrorMsg ("Can't init glAlphaFragmentOp3ATI");
-        }
-
-        if (glSetFragmentShaderConstantATI == NULL)
-        {
-            ErrorMsg ("Can't init glSetFragmentShaderConstantATI");
-        }
-    }
-    
-    if (IsExtensionSupported("GL_ARB_fragment_program"))
-    {
-        int ret = TRUE;
-
-        SAFE_GET_PROC( glProgramStringARB, PFNGLPROGRAMSTRINGARBPROC, ret);
-        SAFE_GET_PROC( glBindProgramARB, PFNGLBINDPROGRAMARBPROC, ret);
-        SAFE_GET_PROC( glDeleteProgramsARB, PFNGLDELETEPROGRAMSARBPROC, ret);
-        SAFE_GET_PROC( glGenProgramsARB, PFNGLGENPROGRAMSARBPROC, ret);
-        SAFE_GET_PROC( glProgramEnvParameter4dARB, PFNGLPROGRAMENVPARAMETER4DARBPROC, ret);
-        SAFE_GET_PROC( glProgramEnvParameter4dvARB, PFNGLPROGRAMENVPARAMETER4DVARBPROC, ret);
-        SAFE_GET_PROC( glProgramEnvParameter4fARB, PFNGLPROGRAMENVPARAMETER4FARBPROC, ret);
-        SAFE_GET_PROC( glProgramEnvParameter4fvARB, PFNGLPROGRAMENVPARAMETER4FVARBPROC, ret);
-        SAFE_GET_PROC( glProgramLocalParameter4dARB, PFNGLPROGRAMLOCALPARAMETER4DARBPROC, ret);
-        SAFE_GET_PROC( glProgramLocalParameter4dvARB, PFNGLPROGRAMLOCALPARAMETER4DVARBPROC, ret);
-        SAFE_GET_PROC( glProgramLocalParameter4fARB, PFNGLPROGRAMLOCALPARAMETER4FARBPROC, ret);
-        SAFE_GET_PROC( glProgramLocalParameter4fvARB, PFNGLPROGRAMLOCALPARAMETER4FVARBPROC, ret);
-        SAFE_GET_PROC( glGetProgramEnvParameterdvARB, PFNGLGETPROGRAMENVPARAMETERDVARBPROC, ret);
-        SAFE_GET_PROC( glGetProgramEnvParameterfvARB, PFNGLGETPROGRAMENVPARAMETERFVARBPROC, ret);
-        SAFE_GET_PROC( glGetProgramLocalParameterdvARB, PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC, ret);
-        SAFE_GET_PROC( glGetProgramLocalParameterfvARB, PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC, ret);
-        SAFE_GET_PROC( glGetProgramivARB, PFNGLGETPROGRAMIVARBPROC, ret);
-        SAFE_GET_PROC( glGetProgramStringARB, PFNGLGETPROGRAMSTRINGARBPROC, ret);
-        SAFE_GET_PROC( glIsProgramARB, PFNGLISPROGRAMARBPROC, ret);
-    }
-    else
-    {
-        //ErrorMsg("No fragment shader support!");
-    }
-}
-
-
 void COGLGraphicsContext::InitOGLExtension(void)
 {
     // important extension features, it is very bad not to have these feature
@@ -382,23 +209,6 @@ void COGLGraphicsContext::InitOGLExtension(void)
     m_bSupportBlendSubtract = IsExtensionSupported("GL_EXT_blend_subtract");
     m_bSupportNVTextureEnvCombine4 = IsExtensionSupported("GL_NV_texture_env_combine4");
 
-    glh_init_extension("GL_ARB_multitexture");
-    glh_init_extension("GL_EXT_texture_env_combine");
-    glh_init_extension("GL_EXT_separate_specular_color");
-    glh_init_extension("GL_EXT_secondary_color");
-    glh_init_extension("GL_EXT_fog_coord");
-    glh_init_extension("GL_EXT_texture_object");
-    glh_init_extension("GL_EXT_rescale_normal");
-    glh_init_extension("GL_EXT_texture_lod_bias");
-    glh_init_extension("GL_NV_register_combiners");
-    glh_init_extension("GL_IBM_texture_mirrored_repeat");
-    glh_init_extension("GL_EXT_texture_lod");
-    glh_init_extension("GL_EXT_blend_color");
-    glh_init_extension("GL_EXT_blend_subtract");
-    glh_init_extension("GL_NV_texture_env_combine4");
-    glh_init_extension("GL_EXT_copy_texture");
-
-    InitOGLExtension_ATI();
 }
 
 bool COGLGraphicsContext::IsExtensionSupported(const char* pExtName)
@@ -495,6 +305,11 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
         iShotNum++;
         }
     */
+
+   
+   // if emulator defined a render callback function, call it before buffer swap
+   if(renderCallback)
+       (*renderCallback)();
 
    SDL_GL_SwapBuffers();
    

@@ -36,6 +36,7 @@
 #include "guifuncs.h"
 #include "translate.h"
 #include "rom.h"
+#include "osd.h"
 #include "../memory/memory.h"
 #include "../memory/flashram.h"
 #include "../r4300/r4300.h"
@@ -45,21 +46,22 @@ extern unsigned int interp_addr;
 
 int savestates_job = 0;
 
-static unsigned int slot = 0;
+static unsigned int slot = 1;
 static int autoinc_save_slot = 0;
-static char fname[1024];
+static char fname[1024] = {0};
 
 void savestates_select_slot(unsigned int s)
 {
-    if(s>9)
-        { return; }
+    if (s < 1 || s > 10 || s == slot) return;
     slot = s;
+
     char buffer[1024];
     if(rom)
-        { snprintf(buffer, 1023, "%s %s.", tr("Set save slot to"), savestates_get_filename()); }
+        snprintf(buffer, 1023, "%s: %s", tr("Selected state file"), savestates_get_filename());
     else 
-        { snprintf(buffer, 1023, "%s %d.", tr("Set save slot to"), slot); }
-    info_message(buffer);
+        snprintf(buffer, 1023, "%s: %d", tr("Selected state slot"), slot);
+
+   osd_new_message(OSD_BOTTOM_LEFT, buffer);
 }
 
 // returns the currently selected save slot
@@ -83,16 +85,14 @@ int savestates_get_autoinc_slot(void)
 // increment save slot
 void savestates_inc_slot(void)
 {
-    if(++slot==10)
-        { slot = 0; }
+    if (++slot > 10)
+        slot = 1;
 }
 
 void savestates_select_filename(const char *fn)
 {
-    slot += 10;
-    if(strlen((char *)fn)>=1024)
-        { return; }
-    strcpy(fname, fn);
+   if (strlen((char *) fn) >= 1024) return;
+   strcpy(fname, fn);
 }
 
 char* savestates_get_filename()
@@ -100,7 +100,7 @@ char* savestates_get_filename()
     size_t length;
     length = strlen(ROM_SETTINGS.goodname)+4+1;
     char *filename = (char*)malloc(length);
-    snprintf(filename, length, "%s.st%d", ROM_SETTINGS.goodname, slot);
+    snprintf(filename, length, "%s.st%d", ROM_SETTINGS.goodname, slot - 1);
     return filename;
 } 
 
@@ -111,24 +111,24 @@ void savestates_save()
     size_t length;
     int queuelength, i;
 
-    if(autoinc_save_slot)
-        { savestates_inc_slot(); }
+    if (autoinc_save_slot)
+        savestates_inc_slot();
 
-    if(slot<=9)
-        {
-        filename = savestates_get_filename();
-        length = strlen(get_savespath())+strlen(filename)+1;
-        file = malloc(length);
-        snprintf(file, length, "%s%s", get_savespath(), filename);
-        }
-    else
-        {
+    if (fname[0] != 0)  // a specific filename was given
+    {
         file = malloc(strlen(fname)+1);
         filename = malloc(strlen(fname)+1);
         strcpy(file, fname);
         strcpy(filename, fname);
-        slot -= 10;
-        }
+        fname[0] = 0;
+    }
+    else
+    {
+        filename = savestates_get_filename();
+        length = strlen(get_savespath())+strlen(filename)+1;
+        file = malloc(length);
+        snprintf(file, length, "%s%s", get_savespath(), filename);
+    }
 
     f = gzopen(file, "wb");
     free(file);
@@ -168,9 +168,9 @@ void savestates_save()
     gzwrite(f, &FCR31, 4);
     gzwrite(f, tlb_e, 32*sizeof(tlb));
     if(!dynacore&&interpcore)
-        { gzwrite(f, &interp_addr, 4); }
+        gzwrite(f, &interp_addr, 4);
     else
-        { gzwrite(f, &PC->addr, 4); }
+        gzwrite(f, &PC->addr, 4);
 
     gzwrite(f, &next_interupt, 4);
     gzwrite(f, &next_vi, 4);
@@ -180,8 +180,8 @@ void savestates_save()
     gzwrite(f, buffer, queuelength);
 
     gzclose(f);
-    snprintf(buffer, 1023, "%s %s.", tr("Saved state to"), filename);
-    info_message(buffer);
+    snprintf(buffer, 1023, "%s: %s", tr("Saved state to"), filename);
+    osd_new_message(OSD_BOTTOM_LEFT, buffer);
     free(filename);
 }
 
@@ -192,39 +192,43 @@ void savestates_load()
     size_t length;
     int queuelength, i;
 
-    if(slot<=9)
-        {
-        filename = savestates_get_filename();
-        length = strlen(get_savespath())+strlen(filename)+1;
-        file = malloc(length);
-        snprintf(file, length, "%s%s", get_savespath(), filename);
-        }
-    else
-        {
+    if (fname[0] != 0)  // a specific filename was given
+    {
         file = malloc(strlen(fname)+1);
         filename = malloc(strlen(fname)+1);
         strcpy(file, fname);
         strcpy(filename, fname);
-        slot -= 10;
-        }
+        fname[0] = 0;
+    }
+    else
+    {
+        filename = savestates_get_filename();
+        length = strlen(get_savespath())+strlen(filename)+1;
+        file = malloc(length);
+        snprintf(file, length, "%s%s", get_savespath(), filename);
+    }
 
     f = gzopen(file, "rb");
     free(file);
 
-    if(f==NULL)
-        {
+    if (f == NULL)
+    {
+        osd_new_message(OSD_BOTTOM_LEFT, tr("Error: state file doesn't exist"), filename);
         alert_message(tr("The save state you're trying to load doesn't exist"));
+        free(filename);
         return;
-        }
+    }
 
     gzread(f, buffer, 32);
     if(memcmp(buffer, ROM_SETTINGS.MD5, 32))
-        {
-        alert_message(tr("You're trying to load a save state from either another rom\n"
-                      "or another dump."));
+    {
+        const char *msg = tr("Load state error: Saved state ROM doesn't match current ROM");
+        osd_new_message(OSD_BOTTOM_LEFT, msg);
+        alert_message(msg);
+        free(filename);
         gzclose(f);
         return;
-        }
+    }
 
     gzread(f, &rdram_register, sizeof(RDRAM_register));
     gzread(f, &MI_register, sizeof(mips_register));
@@ -251,10 +255,10 @@ void savestates_load()
     gzread(f, &llbit, 4);
     gzread(f, reg, 32*8);
     for ( i = 0; i < 32; i++ ) 
-        {
+    {
         gzread(f, reg_cop0+i, 4);
         gzread(f, buffer, 4); //for compatibility with older versions.
-        }
+    }
     gzread(f, &lo, 8);
     gzread(f, &hi, 8);
     gzread(f, reg_cop1_fgr_64, 32*8);
@@ -262,15 +266,15 @@ void savestates_load()
     gzread(f, &FCR31, 4);
     gzread(f, tlb_e, 32*sizeof(tlb));
     if(!dynacore&&interpcore)
-        { gzread(f, &interp_addr, 4); }
+        gzread(f, &interp_addr, 4);
     else
-        {
+    {
         int i;
         gzread(f, &queuelength, 4);
         for ( i = 0; i < 0x100000; i++ ) 
-            { invalid_code[i] = 1; }
+            invalid_code[i] = 1;
         jump_to(queuelength);
-        }
+    }
 
     gzread(f, &next_interupt, 4);
     gzread(f, &next_vi, 4);
@@ -278,22 +282,24 @@ void savestates_load()
 
     queuelength = 0;
     while(1)
-        {
+    {
         gzread(f, buffer+queuelength, 4);
         if (*((unsigned int*)&buffer[queuelength]) == 0xFFFFFFFF)
             { break; }
         gzread(f, buffer+queuelength+4, 4);
         queuelength += 8;
-        }
+    }
     load_eventqueue_infos(buffer);
 
     gzclose(f);
     if(!dynacore&&interpcore)
-        { last_addr = interp_addr; }
+        last_addr = interp_addr;
     else
-        { last_addr = PC->addr; }
+        last_addr = PC->addr;
 
-    snprintf(buffer, 1023, "%s %s.", tr("State loaded from"), filename);
-    info_message(buffer);
+    snprintf(buffer, 1023, "%s: %s", tr("State loaded from"), filename);
+    osd_new_message(OSD_BOTTOM_LEFT, buffer);
     free(filename);
+
 }
+

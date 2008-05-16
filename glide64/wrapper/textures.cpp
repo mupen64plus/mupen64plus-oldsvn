@@ -1,10 +1,9 @@
-#ifdef _WIN32
-#include <windows.h>
-//#include <gl/gl.h>
-#else // _WIN32
+
 #include "../winlnxdefs.h"
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include <stdlib.h>
-#endif // _WIN32
 #include "glide.h"
 #include "main.h"
 #include <stdio.h>
@@ -41,8 +40,6 @@ typedef struct _texlist
 static int nbTex = 0;
 static texlist *list = NULL;
 
-extern PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
-extern PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
 void remove_tex(unsigned int idmin, unsigned int idmax)
 {
     unsigned int *t;

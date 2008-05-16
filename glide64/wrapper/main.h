@@ -31,22 +31,6 @@ void set_bw_shader();
 extern float invtex[2];
 extern int buffer_cleared; // mark that the buffer has been cleared, used to check if we need to reload the texture buffer content
 
-#ifdef _WIN32
-#include <windows.h>
-extern "C" {
-#include "gl.h"
-#include "glext.h"
-}
-#ifdef GCC
-#include <stdio.h>
-//#define printf(...)
-#endif
-#else
-#include "gl.h" 
-#include "glext.h" 
-// #include <GL/gl.h>
-// #include <GL/glext.h>
-#endif // _WIN32
 #include "glide.h"
 
 void display_warning(const unsigned char *text, ...);
@@ -59,33 +43,6 @@ void updateCombiner(int i);
 void updateCombinera(int i);
 void remove_tex(unsigned int idmin, unsigned int idmax);
 void add_tex(unsigned int id);
-
-extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-extern PFNGLBLENDFUNCSEPARATEEXTPROC glBlendFuncSeparateEXT;
-extern PFNGLFOGCOORDFPROC glFogCoordfEXT;
-
-extern PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB;
-extern PFNGLSHADERSOURCEARBPROC glShaderSourceARB;
-extern PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
-extern PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
-extern PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
-extern PFNGLLINKPROGRAMARBPROC glLinkProgramARB;
-extern PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
-extern PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
-extern PFNGLUNIFORM1IARBPROC glUniform1iARB;
-extern PFNGLUNIFORM4IARBPROC glUniform4iARB;
-extern PFNGLUNIFORM4FARBPROC glUniform4fARB;
-extern PFNGLUNIFORM1FARBPROC glUniform1fARB;
-extern PFNGLDELETEOBJECTARBPROC glDeleteObjectARB;
-extern PFNGLGETINFOLOGARBPROC glGetInfoLogARB;
-extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
-extern PFNGLSECONDARYCOLOR3FPROC glSecondaryColor3f;
-
-#ifdef _WIN32
-GLvoid KillGLWindow(GLvoid);
-BOOL CreateGLWindow(const char* title, int width, int height);
-#endif
 
 extern int w_buffer_mode;
 extern int nbTextureUnits;
@@ -210,6 +167,10 @@ grTexAlphaCombineExt(GrChipID_t       tmu,
 FX_ENTRY void FX_CALL
 grConstantColorValueExt(GrChipID_t    tmu,
                         GrColor_t     value);
+
+#ifndef GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT
+#define GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT 0x8CD8
+#endif
 
 #define CHECK_FRAMEBUFFER_STATUS() \
 {\

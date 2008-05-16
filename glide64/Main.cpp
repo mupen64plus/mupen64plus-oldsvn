@@ -188,6 +188,9 @@ DWORD   offset_texbuf1 = 0;
 BOOL    capture_screen = 0;
 char    capture_path[256];
 
+void (*renderCallback)() = NULL;
+
+
 void ChangeSize ()
 {
   float res_scl_x = (float)settings.res_x / 320.0f;
@@ -383,7 +386,7 @@ void ReadSpecialSettings (char name[21])
     settings.tonic = TRUE;
   else if (strstr(name, (const char *)"All") && strstr(name, (const char *)"Star") && strstr(name, (const char *)"Baseball"))
     settings.ASB = TRUE;
-  else if (strstr(name, (const char *)"ÄÞ×´ÓÝ2 Ë¶ØÉ¼ÝÃÞÝ"))
+  else if (strstr(name, (const char *)"ï¿½ï¿½×´ï¿½ï¿½2 Ë¶ï¿½É¼ï¿½ï¿½ï¿½ï¿½"))
     settings.doraemon2 = TRUE;
   else if (strstr(name, (const char *)"SPACE INVADERS"))
     settings.invaders = TRUE;
@@ -1587,6 +1590,11 @@ void DrawFrameBuffer ()
     }
 }
 
+EXPORT void CALL SetRenderingCallback(void (*callback)())
+{
+    renderCallback = callback;
+}
+
 /******************************************************************
 Function: UpdateScreen
 Purpose:  This function is called in response to a vsync of the
@@ -1661,7 +1669,9 @@ EXPORT void CALL UpdateScreen (void)
   }
   //*/  
   if (settings.swapmode == 0)
+  {
     newSwapBuffers ();
+  }
 }
 
 DWORD curframe = 0;
@@ -1672,7 +1682,7 @@ void newSwapBuffers()
     rdp.updatescreen = 0;
     
     RDP ("swapped\n");
-    
+ 
     // Allow access to the whole screen
     if (fullscreen)
     {
@@ -1681,7 +1691,7 @@ void newSwapBuffers()
       grDepthMask (FXFALSE);
       
       grCullMode (GR_CULL_DISABLE);
-      
+
       if ((settings.show_fps & 0xF) || settings.clock)
         set_message_combiner ();
 #ifdef FPS
@@ -1994,8 +2004,8 @@ void newSwapBuffers()
 
     if (fullscreen)
     {
-      LOG ("BUFFER SWAPPED\n");
-      grBufferSwap (settings.vsync);
+      LOG ("BUFFER SWAPPED\n"); 
+      grBufferSwap (settings.vsync);    
       fps_count ++;
     }
     

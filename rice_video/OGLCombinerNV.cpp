@@ -16,8 +16,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #include "stdafx.h"
-#include "glh_genext.h"
 
 //========================================================================
 #define MUX_E_F             (MUX_PRIMLODFRAC+1)

@@ -21,8 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "OGLCombiner.h"
 #include "GeneralCombiner.h"
-#include "gl/gl.h"
 
+#include <GL/gl.h>
 
 typedef struct {
     uint32  dwMux0;
