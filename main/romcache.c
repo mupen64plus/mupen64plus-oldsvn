@@ -60,14 +60,15 @@ static const char *romextensions[] =
 };
 
 //When finished, move to header.
-typedef struct
+typedef struct centry
 {
     char filename[PATH_MAX];
     char MD5[33]; // md5 code
-    //OS timestamp... ?Should it be in m_time or something more human friendly..
+    time_t timestamp;//Should it be in m_time or something more human friendly???
     mupenEntry* inientry; //Okay since ini database is persistent and global, no romdata. GUI can handle numbering.
     //comment* something to deal with comments.
-} cacheentry;
+    struct centry* next;
+} cache_entry;
 
 /* Okay... new paradigm.
 
@@ -80,35 +81,54 @@ GUI polls romcache, using the database entry pointer to build
 its GtkTreeView or KDE ListView.
 */
 
-//Linked list, why is #include <list.h> not needed???
-//Possible better data structure...
-//Possible better name... 
-list_t romcache = NULL; 
+//Use custom linked list. 
+typedef struct
+{
+    unsigned int length; 
+    cache_entry *top;
+    cache_entry *last;
+} rom_cache;
+
+rom_cache romcache;
 
 static void scan_dir2( const char *dirname );
 
 void * rom_cache_system( void *_arg )
 {
+int i;
     int caching_done = 0;
     int rebuild_cache = 0;
+    cache_entry *entry;
 
     sprintf(cache_filename, "%s%s", get_configpath(), CACHE_FILE);
 
-    if (load_initial_cache() == 0)
-        {
-        printf("[error] load_initial_cache() returned 0\n");
-        remove(cache_filename);
-        rebuild_cache_file();
-        }
-    else
-        { printf("[rom cache] done loading initial cache\n"); }
+       printf("[error] load_initial_cache() returned 0\n");
+       remove(cache_filename);
+       if(rebuild_cache_file()==1)
+            { printf("[rcs] cache built.\n"); }//DEBUG, please remove...
+ 
+printf("[rom cache] done loading initial cache\n"); 
+
+entry = romcache.top;
+
+if(romcache.length!=0)
+{
+printf("Roms in cache: %d\n", romcache.length);
+for ( i = 0; i < romcache.length; ++i )
+{
+printf("ROM: %s\n", entry->inientry->goodname);
+printf("CRC: %s\n", entry->inientry->CRC);
+entry = entry->next;
+}
+
+}
 }
 
 int rebuild_cache_file()
 {
     char filename[PATH_MAX];
     char real_path[PATH_MAX];
-    char buffer[30];
+    char buffer[32];
     const char *directory; 
     int i;
 
@@ -137,7 +157,6 @@ int rebuild_cache_file()
     fwrite(&dummy_zero,1,sizeof(int),file);
 }
 
-
 //RENAME, this function chops off the file from a path,
 //also better to move to some kind of common GUI function.
 char *sub_string2(const char *string, int start, int end)
@@ -161,14 +180,13 @@ static void scan_dir2( const char *dirname )
     int rom_size, i;
     char filename[PATH_MAX];
     char real_path[PATH_MAX];
-    char *line, *extension; //line just temp buffer for debugging
-    mupenEntry* inientry; //We need better names for types >.<
+    char *extension;
 
     DIR *dir; 
     struct dirent *de;
     struct stat sb; //Give sb and de better names...
 
-    cacheentry *entry;
+    cache_entry *entry;
     int found;
 
     dir = opendir( dirname );
@@ -186,7 +204,7 @@ static void scan_dir2( const char *dirname )
 
         //Use real path (maybe it's a link)
         if(realpath(filename,real_path))
-            { strcpy(real_path, filename); }
+            { strncpy(real_path, filename, PATH_MAX); }
 
         //If we can't get information, move to next file.
         if(stat(real_path,&sb)==-1)
@@ -200,7 +218,7 @@ static void scan_dir2( const char *dirname )
             {
             if( S_ISDIR(sb.st_mode) )
                 {
-                strncat(filename,"/",PATH_MAX);
+                strncat(filename, "/", PATH_MAX);
                 scan_dir2(filename);
                 continue;
                 }
@@ -213,67 +231,63 @@ static void scan_dir2( const char *dirname )
         for( i = 0; romextensions[i]; ++i )
             {
             if(!strcasecmp(extension,romextensions[i]))
-                {
-                //This needs to be converted to something more useful...
-                printf("Modified %d\n", sb.st_mtime);
-                break; 
-                }
+                { break; }
             }
         if(!romextensions[i])
             { continue; }
 
-        entry = (cacheentry*)calloc(1,sizeof(cacheentry));
+        entry = (cache_entry*)calloc(1,sizeof(cache_entry));
         if( !entry )
             {
             fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
             continue;
             }
 
+        //This needs to be converted to something more useful...
+        //printf("Modified %d\n", sb.st_mtime);
+
         //Found controls whether its found in the cache.
         //We need to add this.
         found = 0;
-        if( !found )
-           {
-           strcpy(entry->filename,filename);
-           //Test if we're a valid rom and compute MD5.
-           rom_size = calculateMD5(entry->filename , entry->MD5);
-           /* Something is VERY WRONG here, even with fill_header, 
-          the rcs version of getting the files takes far too long.
-          This may be a pthread issue. */
-
-           if(!rom_size)
-               {
-               free(entry);
-               continue;
-               }
-           }
-
-        //This needs to go further to the GUI side.
-        //I.e. rcs should always store the whole path.
-        if(config_get_bool( "RomBrowserShowFullPaths", 0 ))
-            { line = entry->filename; }
-        else
+        if(!found)
             {
-            int fnlen = strlen(entry->filename);
-            char *newfn= NULL;
-            for(i=fnlen; i > 0; i--)
+            strcpy(entry->filename,filename);
+            //Test if we're a valid rom and compute MD5.
+            rom_size = calculateMD5(entry->filename , entry->MD5);
+            /* Something is VERY WRONG here, even with fill_header, 
+           the rcs version of getting the files takes far too long.
+           This may be a pthread issue. */
+
+            if(!rom_size)
                 {
-                if(entry->filename[i] == '/')
-                    {
-                    newfn = sub_string2(entry->filename, i+1, fnlen);
-                    break;
-                    }
+                free(entry);
+                continue;
                 }
-            line = newfn;
+
+            entry->inientry = ini_search_by_md5(entry->MD5);
+
+            //Something to deal with custom roms.
+            //if(entry.inientry==NULL)
+            //    { custom_search_by_md5(entry->MD5);
+
+            entry->timestamp = sb.st_mtime;
+            //Add code to search comment database.
+
+            //Actually add rom to cache.
+            if(romcache.length==0)
+                {
+                romcache.top = entry; 
+                romcache.last = entry; 
+                romcache.length++;
+                }
+            else
+                {
+                romcache.last->next = entry;
+                romcache.last = entry;
+                romcache.length++;
+                }
             }
-
-      printf("MD5: %s\t ROM: %s\n", entry->MD5, line);
-
-      inientry = ini_search_by_md5(entry->MD5);
-      if(inientry!=NULL)
-          { printf("ROM in ini, GoodName: %s\n", inientry->goodname); }
-
-    }
+        }
     closedir( dir );
 }
 
@@ -307,28 +321,10 @@ int load_initial_cache()
             }
         else
             { printf("[rcs] rom cache header is correct\n", header.MAGIC); }
-
-        num_entrys = header.entries;
-        romcache = malloc(num_entrys*sizeof(cacheentry));
-        if (romcache == NULL)
-            {
-            printf("[error] Could not allocate memory for cache_data. (%i bytes)\n",(sizeof(cacheentry)*num_entrys));
-            return 0;
-            }
-        }
-
-    // Read our data into our array.
-    if(fread(romcache,sizeof(cacheentry),num_entrys,f) != (sizeof(cacheentry)*num_entrys))
-        {
-        printf("[error] malformed rom cache structure.\n");
-        return 0;
         }
 
     // Close our file, it's no longer needed.
     fclose(f);
-
-    //NO NO NO!!!
-    //free(romdata);
 
     return 1;
 }
