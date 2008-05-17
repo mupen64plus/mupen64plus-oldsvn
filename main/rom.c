@@ -176,6 +176,11 @@ unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype
                 localrom=malloc(100000);
                 while((i=gzread(gzromfile, localrom, 100000)))
                     { *romsize += i; }
+                if(!gzeof(gzromfile)) //gzread error.
+                    { 
+                    free(localrom);
+                    return NULL;
+                    }
                 gzseek(gzromfile, 0L, SEEK_SET);
                 free(localrom);
                 localrom = malloc(*loadlength);
