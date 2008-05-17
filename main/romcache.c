@@ -28,6 +28,8 @@
 
 #include <pthread.h>
 
+#include <zlib.h>
+
 #include <limits.h> //PATH_MAX
 #include <dirent.h> //Directory support.
 //Includes for POSIX file status.
@@ -65,7 +67,7 @@ typedef struct centry
     char filename[PATH_MAX];
     char MD5[33]; // md5 code
     time_t timestamp;//Should it be in m_time or something more human friendly???
-    mupenEntry* inientry; //Okay since ini database is persistent and global, no romdata. GUI can handle numbering.
+    mupenEntry* inientry; 
     //comment* something to deal with comments.
     struct centry* next;
 } cache_entry;
@@ -95,38 +97,22 @@ static void scan_dir2( const char *dirname );
 
 void * rom_cache_system( void *_arg )
 {
-int i;
+    int i;
     int caching_done = 0;
     int rebuild_cache = 0;
-    cache_entry *entry;
 
     sprintf(cache_filename, "%s%s", get_configpath(), CACHE_FILE);
 
        printf("[error] load_initial_cache() returned 0\n");
        remove(cache_filename);
-       if(rebuild_cache_file()==1)
-            { printf("[rcs] cache built.\n"); }//DEBUG, please remove...
- 
-printf("[rom cache] done loading initial cache\n"); 
+       rebuild_cache_file();
 
-entry = romcache.top;
+    printf("[rom cache] done loading initial cache\n"); 
 
-if(romcache.length!=0)
-{
-printf("Roms in cache: %d\n", romcache.length);
-for ( i = 0; i < romcache.length; ++i )
-{
-printf("ROM: %s\n", entry->inientry->goodname);
-printf("CRC: %s\n", entry->inientry->CRC);
-entry = entry->next;
-}
-
-}
 }
 
 int rebuild_cache_file()
 {
-    char filename[PATH_MAX];
     char real_path[PATH_MAX];
     char buffer[32];
     const char *directory; 
@@ -142,38 +128,36 @@ int rebuild_cache_file()
         scan_dir2(directory);
         }
 
-    //Write the cache to file.
-    //Right now we don't generate the linked list, so this doesn't work.
-    FILE *file = NULL;
-    unsigned int dummy_zero = 10;
-    file = fopen(cache_filename,"wb");
-    if (!file)
+    gzFile *gzfile;
+
+    if((gzfile = gzopen(cache_filename,"wb"))==NULL)
         {
         printf("[error] could not create %s\n",cache_filename);
         return 0;
         }
 
-    fwrite(MAGIC_HEADER,1,sizeof(MAGIC_HEADER),file);
-    fwrite(&dummy_zero,1,sizeof(int),file);
+    cache_entry *entry;
+
+    gzwrite( gzfile, &romcache.length, sizeof(unsigned int) );
+
+    if(romcache.length!=0)
+       {
+       entry = romcache.top;
+       while (entry->next!=NULL)
+            {
+            printf("Saving ROM: %s to cache.\n", entry->inientry->goodname);
+
+            gzwrite( gzfile, entry->filename, sizeof(char)*PATH_MAX);
+            gzwrite( gzfile, entry->MD5, sizeof(char)*33);
+            gzwrite( gzfile, &entry->timestamp, sizeof(time_t));
+
+            entry = entry->next;
+            }
+        }
+
+    gzclose( gzfile );
+
 }
-
-//RENAME, this function chops off the file from a path,
-//also better to move to some kind of common GUI function.
-char *sub_string2(const char *string, int start, int end)
-{
-    int length = end-start;
-    if(length <= 0)
-        { return NULL; }
-
-    char *alloc = (char*)malloc(length+1);
-    int i;
-    for(i = 0; i < length; i++)
-        { alloc[i] = string[i+start]; }
-    alloc[length] = '\0';
-
-    return alloc;
-}
-
 
 static void scan_dir2( const char *dirname )
 {
@@ -338,5 +322,53 @@ int cache_rom_list()
    return 1;
 }
 
+/*
+void rombrowser_readCache( void )
+{
+    char filename[PATH_MAX];
+    gzFile *f;
+    int i;
+    SRomEntry *entry;
 
+    snprintf( filename, PATH_MAX, "%srombrowser.cache", get_configpath() );
+    f = gzopen( filename, "rb" );
+    if( !f )
+        return;
 
+    // free old list
+    for( i = 0; i < g_list_length( g_RomListCache ); i++ )
+    {
+        entry = (SRomEntry *)g_list_nth_data( g_RomListCache, i );
+        free( entry );
+    }
+    g_list_free( g_RomListCache );
+    g_RomListCache = NULL;
+
+    // number of entries
+    gzread( f, &g_iNumRoms, sizeof( g_iNumRoms ) );
+
+    // entries
+    for( i = 0; i < g_iNumRoms; i++ )
+    {
+        entry = malloc( sizeof( SRomEntry ) );
+        if( !entry )
+        {
+            printf( "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+            continue;
+        }
+        gzread( f, entry->cFilename, sizeof( char ) * PATH_MAX );
+        gzread( f, &entry->info, sizeof( entry->info ) );
+
+        if( access( entry->cFilename, F_OK ) < 0 )
+            continue;
+
+        romentry_fill( entry );
+
+        // append to list
+        g_RomListCache = g_list_append( g_RomListCache, entry );
+    }
+
+    gzclose( f );
+}
+
+*/
