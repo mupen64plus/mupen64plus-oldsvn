@@ -37,13 +37,16 @@
 
 void dyna_jump()
 {
-   if (stop == 1)
-   { return; }
-   
-   if (PC->reg_cache_infos.need_map)
-     *return_address = (unsigned long) (PC->reg_cache_infos.jump_wrapper);
-   else
-     *return_address = (unsigned long) (actual->code + PC->local_addr);
+    if (stop == 1)
+    {
+        dyna_stop();
+        return;
+    }
+
+    if (PC->reg_cache_infos.need_map)
+        *return_address = (unsigned long) (PC->reg_cache_infos.jump_wrapper);
+    else
+        *return_address = (unsigned long) (actual->code + PC->local_addr);
 }
 
 static long save_ebp = 0;
