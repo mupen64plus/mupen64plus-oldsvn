@@ -20,10 +20,18 @@ Email                : blight@Ashitaka
 
 #include "util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void        tr_init(void);                              // init multi-language support
 void        tr_delete_languages(void);                  // free language list
 list_t      tr_language_list(void);         // list of supported language name strings
 int         tr_set_language(const char *name);      // set language to name
 const char *tr(const char *text);           // translate text
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __TRANSLATE_H__

@@ -41,7 +41,7 @@
 #include "volume.h"
 #include "guifuncs.h"
 #include "translate.h"
-#include "osd.h"
+#include "../opengl/osd.h"
 
 static int g_VolMuted = 0; // volume muted?
 static osd_message_t *g_volMsg = NULL;

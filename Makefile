@@ -66,7 +66,6 @@ OBJ_CORE = \
 	main/md5.o \
 	main/mupenIniApi.o \
 	main/plugin.o \
-	main/osd.o \
 	main/rom.o \
 	main/savestates.o \
 	main/unzip.o \
@@ -133,7 +132,9 @@ OBJ_LIRC = \
 	main/lirc.o
 
 OBJ_OPENGL = \
-	opengl/OGLFT.o
+	opengl/OGLFT.o \
+	opengl/osd.o \
+	opengl/screenshot.o
 
 OBJ_GTK_GUI = \
 	main/gui_gtk/main_gtk.o \

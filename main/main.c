@@ -65,7 +65,8 @@
 #include "translate.h"
 #include "volume.h"
 #include "cheat.h"
-#include "osd.h"
+#include "../opengl/osd.h"
+#include "../opengl/screenshot.h"
 
 #ifdef DBG
 #include <glib.h>
@@ -90,7 +91,8 @@ int         g_NoaskParam = 0;           // was --noask passed at the commandline
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
-            
+int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
+
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)
@@ -107,7 +109,6 @@ static char l_InstallDir[PATH_MAX] = {0};
 
 static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
-static char  l_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
 static int   l_CurrentFrame = 0;         // frame counter
 static int  *l_TestShotList = NULL;      // list of screenshots to take for regression test support
 static int   l_TestShotIdx = 0;          // index of next screenshot frame in list
@@ -216,18 +217,23 @@ void new_frame(void)
     if (l_TestShotList != NULL)
     {
         int nextshot = l_TestShotList[l_TestShotIdx];
-        if (l_CurrentFrame == nextshot)
+        if (nextshot == l_CurrentFrame)
         {
-            screenshot();
+            // set global variable so screenshot will be taken just before OSD is drawn at the end of frame rendering
+            g_TakeScreenshot = l_CurrentFrame + 1;
             // advance list index to next screenshot frame number.  If it's 0, then quit
             l_TestShotIdx++;
-            if (l_TestShotList[l_TestShotIdx] == 0) stopEmulation();
+        }
+        else if (nextshot == 0)
+        {
+            stopEmulation();
+            free(l_TestShotList);
+            l_TestShotList = NULL;
         }
     }
 
     // advance the current frame
     l_CurrentFrame++;
-
 }
 
 void new_vi(void)
@@ -493,61 +499,6 @@ int pauseContinueEmulation(void)
     return rompause;
 }
 
-void screenshot(void)
-{
-    unsigned char *pchImage = NULL;
-    int width, height;
-
-    if(g_EmulationThread || g_EmulatorRunning)
-    {
-        // start by getting the base file path
-        char filepath[PATH_MAX], filename[PATH_MAX];
-        char *pch, ch;
-        filepath[0] = 0;
-        filename[0] = 0;
-        strcpy(filepath, l_SshotDir);
-        if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
-            strcat(filepath, "/");
-        
-        // add the game's name to the end, convert to lowercase, convert spaces to underscores
-        pch = filepath + strlen(filepath);
-        strncpy(pch, ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
-        pch[20] = 0;
-        do
-        {
-            ch = *pch;
-            if (ch == ' ')
-                *pch++ = '_';
-            else
-                *pch++ = tolower(ch);
-        } while (ch != 0);
-        
-        // look for a file
-        int i;
-        for (i = 0; i < 100; i++)
-        {
-            sprintf(filename, "%s-%03i.png", filepath, i);
-            FILE *pFile = fopen(filename, "r");
-            if (pFile == NULL)
-                break;
-            fclose(pFile);
-        }
-        if (i == 100) return;
-        // get the screen buffer from the video plugin
-        if (readScreen == NULL) return;
-        readScreen((void **) &pchImage, &width, &height);
-        if (pchImage == NULL) return;
-        // write the image to a PNG
-        SaveRGBBufferToFile(filename, pchImage, width, height, width * 3);
-        // free the memory
-        free(pchImage);
-        // print message -- this allows developers to capture frames and use them in the regression test
-        printf("Captured screenshot for frame %i\n", l_CurrentFrame);
-    }
-
-    osd_new_message(OSD_BOTTOM_LEFT, tr("Captured screenshot."));
-}
-
 /*********************************************************************************************************
 * sdl event filter
 */
@@ -600,7 +551,8 @@ static int sdl_event_filter( const SDL_Event *event )
                     }
                     break;
                 case SDLK_F12:
-                    screenshot();
+                    // set flag so that screenshot will be taken at the end of frame rendering
+                    g_TakeScreenshot = l_CurrentFrame + 1;
                     break;
 
                 // Pause
@@ -708,7 +660,7 @@ static int sdl_event_filter( const SDL_Event *event )
             else if(strcmp(event_str, config_get_string("Joy Mapping Increment Slot", "")) == 0)
                 savestates_inc_slot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Screenshot", "")) == 0)
-                screenshot();
+                g_TakeScreenshot = l_CurrentFrame + 1;
             else if(strcmp(event_str, config_get_string("Joy Mapping Mute", "")) == 0)
                 volMute();
             else if(strcmp(event_str, config_get_string("Joy Mapping Decrease Volume", "")) == 0)
@@ -735,14 +687,18 @@ static void * emulationThread( void *_arg )
            *RSP_plugin = NULL;
     struct sigaction sa;
 
-    // install signal handler
-    memset( &sa, 0, sizeof( struct sigaction ) );
-    sa.sa_sigaction = sighandler;
-    sa.sa_flags = SA_SIGINFO;
-    sigaction( SIGSEGV, &sa, NULL );
-    sigaction( SIGILL, &sa, NULL );
-    sigaction( SIGFPE, &sa, NULL );
-    sigaction( SIGCHLD, &sa, NULL );
+    // install signal handler, but only if we're running in GUI mode
+    // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
+    if (l_GuiEnabled)
+    {
+        memset( &sa, 0, sizeof( struct sigaction ) );
+        sa.sa_sigaction = sighandler;
+        sa.sa_flags = SA_SIGINFO;
+        sigaction( SIGSEGV, &sa, NULL );
+        sigaction( SIGILL, &sa, NULL );
+        sigaction( SIGFPE, &sa, NULL );
+        sigaction( SIGCHLD, &sa, NULL );
+    }
 
     g_EmulatorRunning = 1;
 
@@ -819,7 +775,7 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    osd_new_message(OSD_MIDDLE_CENTER, "Starting Mupen64Plus...");
+    osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
     go();   /* core func */
 
 #ifdef WITH_LIRC
@@ -1061,7 +1017,7 @@ void parseCommandLine(int argc, char **argv)
                 break;
             case OPT_SSHOTDIR:
                 if(isdir(optarg))
-                    strncpy(l_SshotDir, optarg, PATH_MAX);
+                    SetScreenshotDir(optarg);
                 else
                     printf("***Warning: Screen shot directory '%s' is not accessible or not a directory.\n", optarg);
                 break;
@@ -1269,88 +1225,13 @@ static void setPaths(void)
     }
 
     // set screenshot dir if it wasn't specified by the user
-    if(strlen(l_SshotDir) == 0)
+    if (!ValidScreenshotDir())
     {
-        snprintf(l_SshotDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
-        if(!isdir(l_SshotDir))
-        {
-            printf("Warning: Could not find screenshot dir: %s\n", l_SshotDir);
-            l_SshotDir[0] = '\0';
-        }
+        char chDefaultDir[PATH_MAX + 1];
+        snprintf(chDefaultDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
+        SetScreenshotDir(chDefaultDir);
     }
 
-    // make sure screenshots dir has a '/' on the end.
-    if(l_SshotDir[strlen(l_SshotDir)-1] != '/')
-        strncat(l_SshotDir, "/", PATH_MAX - strlen(l_SshotDir));
-}
-
-/*********************************************************************************************************
-* PNG support functions for writing screenshot files
-*/
-
-static void mupen_png_error(png_structp png_write, const char *message)
-{
-    printf("PNG Error: %s\n", message);
-}
-
-static void mupen_png_warn(png_structp png_write, const char *message)
-{
-    printf("PNG Warning: %s\n", message);
-}
-
-static int SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch)
-{
-    int i;
-
-    // allocate PNG structures
-    png_structp png_write = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, mupen_png_error, mupen_png_warn);
-    if (!png_write)
-    {
-        printf("Error creating PNG write struct.\n");
-        return 1;
-    }
-    png_infop png_info = png_create_info_struct(png_write);
-    if (!png_info)
-    {
-        png_destroy_write_struct(&png_write, (png_infopp)NULL);
-        printf("Error creating PNG info struct.\n");
-        return 2;
-    }
-    // Set the jumpback
-    if (setjmp(png_jmpbuf(png_write)))
-    {
-        png_destroy_write_struct(&png_write, &png_info);
-        printf("Error calling setjmp()\n");
-        return 3;
-    }
-    // open the file to write
-    FILE *savefile = fopen(filename, "wb");
-    if (savefile == NULL)
-    {
-        printf("Error opening '%s' to save screenshot.\n", filename);
-        return 4;
-    }
-    // give the file handle to the PNG compressor
-    png_init_io(png_write, savefile);
-    // set the info
-    png_set_IHDR(png_write, png_info, width, height, 8, PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-    // allocate row pointers and scale each row to 24-bit color
-    png_byte **row_pointers;
-    row_pointers = (png_byte **) malloc(height * sizeof(png_bytep));
-    for (i = 0; i < height; i++)
-    {
-        row_pointers[i] = (png_byte *) (buf + (height - 1 - i) * pitch);
-    }
-    // set the row pointers
-    png_set_rows(png_write, png_info, row_pointers);
-    // write the picture to disk
-    png_write_png(png_write, png_info, 0, NULL);
-    // free memory
-    free(row_pointers);
-    png_destroy_write_struct(&png_write, &png_info);
-    // all done
-    return 0;
 }
 
 /*********************************************************************************************************

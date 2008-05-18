@@ -29,13 +29,14 @@
 
 #include <limits.h>
 
-#include "../opengl/OGLFT.h"
+#include "screenshot.h"
+#include "OGLFT.h"
 #include "osd.h"
 
 extern "C" {
-    #include "main.h"
-    #include "plugin.h"
-    #include "util.h"
+    #include "../main/main.h"
+    #include "../main/plugin.h"
+    #include "../main/util.h"
 }
 
 #define FONT_FILENAME "font.ttf"
@@ -248,6 +249,13 @@ void osd_render()
     osd_message_t *msg, *msg_to_delete = NULL;
     // keeps track of how many messages are in each corner
     int corner_ctr[OSD_NUM_CORNERS] = {0};
+
+    // if the flag is set to take a screenshot, then grab it now
+    if (g_TakeScreenshot != 0)
+    {
+        TakeScreenshot(g_TakeScreenshot - 1);  // current frame number +1 is in g_TakeScreenshot
+        g_TakeScreenshot = 0; // reset flag
+    }
 
     // if list is empty, then just skip it all
     if (l_messageQueue == NULL)

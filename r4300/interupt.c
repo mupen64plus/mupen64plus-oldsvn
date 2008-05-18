@@ -47,11 +47,11 @@
 #include "../main/plugin.h"
 #include "../main/savestates.h"
 #include "../main/vcr.h"
-#include "../main/osd.h"
 #include "../main/cheat.h"
 #ifdef WITH_LIRC
 #include "../main/lirc.h"
 #endif //WITH_LIRC
+#include "../opengl/osd.h"
 
 unsigned int next_vi;
 int vi_field=0;

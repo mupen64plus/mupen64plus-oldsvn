@@ -36,6 +36,10 @@
 
 #include <SDL.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** string utilities **/
 char *trim(char *str);
 char *event_to_str(const SDL_Event *event);
@@ -74,5 +78,9 @@ list_node_t *list_find_node(list_t list, void *data);
 // cycles through each listnode in list setting curr_node to current node.
 #define list_foreach(list, curr_node) \
     for((curr_node) = (list); (curr_node) != NULL; (curr_node) = (curr_node)->next)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __UTIL_H__

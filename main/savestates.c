@@ -36,11 +36,11 @@
 #include "guifuncs.h"
 #include "translate.h"
 #include "rom.h"
-#include "osd.h"
 #include "../memory/memory.h"
 #include "../memory/flashram.h"
 #include "../r4300/r4300.h"
 #include "../r4300/interupt.h"
+#include "../opengl/osd.h"
 
 extern unsigned int interp_addr;
 
