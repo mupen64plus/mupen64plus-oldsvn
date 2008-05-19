@@ -20,6 +20,7 @@ Email                : blight@Ashitaka
 
 #include <gtk/gtk.h>
 
+
 #include "../mupenIniApi.h"
 
 int create_romBrowser( void );
@@ -28,6 +29,7 @@ void apply_filter( void );
 void fillrombrowser();
 
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
+void countrycodestring(unsigned short int countrycode, char *string);
 
 extern GList *g_RomList;
 

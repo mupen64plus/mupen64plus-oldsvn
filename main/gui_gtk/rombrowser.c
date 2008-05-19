@@ -59,7 +59,7 @@ static int g_iNumRoms, g_iSortColumn = 0; // sort column
 static GtkSortType g_SortType = GTK_SORT_ASCENDING; // sort type (ascending/descending)
 
 //Assign text based on country code. This should be moved... (i.e. so we can share with rom.c)
-static void countrycodestring(unsigned short int countrycode, char *string)
+void countrycodestring(unsigned short int countrycode, char *string)
 {
     switch(countrycode)
     {

@@ -38,11 +38,11 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "md5.h"
 #include "rom.h"
 #include "../memory/memory.h"
 #include "unzip.h"
 #include "guifuncs.h"
-#include "md5.h"
 #include "mupenIniApi.h"
 #include "guifuncs.h"
 #include "translate.h"
@@ -193,7 +193,10 @@ unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype
 
     //File invalid, or valid rom not found in file.
     if(romread==0)
-        { return NULL; }
+        { 
+        romsize = 0;
+        return NULL;
+        }
 
     //Btyeswap if .v64 image.
     if(localrom[0]==0x37)
@@ -453,61 +456,4 @@ int rom_read(const char *filename)
     ini_closeFile();
     return 0;
 }
-
-int fill_header(const char *filename)
-{
-    int compressiontype, imagetype, romsize;
-    int headerlength = 0x40;
-    char buffer[1024];
-    unsigned char *localrom;
-
-    strncpy(buffer, filename, 1023);
-
-    if((localrom=load_rom(filename, &romsize, &compressiontype, &imagetype, &headerlength))==NULL)
-        { return 0; }
-
-    if((localrom[0]!=0x80)||(localrom[1]!=0x37)||(localrom[2]!=0x12)||(localrom[3]!=0x40))
-        {
-        free(localrom);
-        return 0;
-        }
-
-    if(ROM_HEADER == NULL)
-        { ROM_HEADER = malloc(0x40); }
-    memcpy(ROM_HEADER, localrom, 0x40);
-
-    free(localrom);
-    return romsize;
-}
-
-int calculateMD5(const char *filename, char digeststring[32])
-{
-    int compressiontype, imagetype, romsize, i;
-    char buffer[1024];
-    unsigned char *localrom;
-    md5_state_t state;
-    md5_byte_t digest[16];
-
-    strncpy(buffer, filename, 1023);
-
-    if((localrom=load_rom(filename, &romsize, &compressiontype, &imagetype, &romsize))==NULL)
-        { return 0; }
-
-    if((localrom[0]!=0x80)||(localrom[1]!=0x37)||(localrom[2]!=0x12)||(localrom[3]!=0x40))
-        {
-        free(localrom);
-        return 0;
-        }
-
-    md5_init(&state);
-    md5_append(&state, (const md5_byte_t *)localrom, romsize);
-    md5_finish(&state, digest);
-
-    for ( i = 0; i < 16; ++i ) 
-        { sprintf(digeststring+i*2, "%02X", digest[i]); }
-
-    free(localrom);
-    return romsize;
-}
-
 

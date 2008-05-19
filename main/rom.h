@@ -31,8 +31,8 @@
 #define ROM_H
 
 int rom_read(const char *filename);
-int fill_header(const char *filename);
-int calculateMD5(const char *filename, char digeststring[32]);
+unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype, int *imagetype, int *loadlength);
+
 extern unsigned char *rom;
 extern int taille_rom;
 

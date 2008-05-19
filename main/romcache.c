@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "md5.h"
 #include "main.h"
 #include "util.h"
 #include "romcache.h"
@@ -263,19 +264,34 @@ static void scan_dir( const char *dirname )
         if(found==0)
             {
             strcpy(entry->filename,filename);
-            //Test if we're a valid rom and compute MD5.
-            entry->romsize = calculateMD5(entry->filename , entry->MD5);
 
-            if(!entry->romsize)
-                {
+            unsigned char* localrom;
+            int compressiontype, imagetype;
+
+            //Test if we're a valid rom and compute MD5.
+            if((localrom=load_rom(filename, &entry->romsize, &compressiontype, &imagetype, &entry->romsize))==NULL)
+                { 
                 free(entry);
-                continue;
+                continue;  
                 }
 
-            //HACK 
-            fill_header(entry->filename);
-            entry->countrycode = ROM_HEADER->Country_code;
+            md5_state_t state;
+            md5_byte_t digest[16];
 
+            md5_init(&state);
+            md5_append(&state, (const md5_byte_t *)localrom, entry->romsize);
+            md5_finish(&state, digest);
+
+            for ( i = 0; i < 16; ++i ) 
+                { sprintf(entry->MD5+i*2, "%02X", digest[i]); }
+
+            //Best not to use global, exact best solution depends on 
+            //Which fields from the rom header we want.
+            if(ROM_HEADER)
+                { free(ROM_HEADER); }
+            ROM_HEADER = malloc(sizeof(rom_header));
+            memcpy(ROM_HEADER, localrom, sizeof(rom_header));
+            entry->countrycode = ROM_HEADER->Country_code;
 
             entry->inientry = ini_search_by_md5(entry->MD5);
 
@@ -300,6 +316,8 @@ static void scan_dir( const char *dirname )
                 ++romcache.length;
                 }
             printf("Added ROM: %s\n", entry->inientry->goodname);
+
+            free(localrom);
             }
         }
     closedir(dir);
