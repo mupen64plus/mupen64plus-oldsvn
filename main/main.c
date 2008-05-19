@@ -1396,8 +1396,19 @@ int main(int argc, char *argv[])
    
     // must be called after building gui
     info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
-    
-    if(pthread_create(&g_RomCacheThread, NULL, rom_cache_system, NULL) != 0)
+
+    pthread_attr_t tattr;
+    int ret;
+    int newprio = 80;
+    struct sched_param param;
+    pthread_attr_init (&tattr);
+    pthread_attr_getschedparam (&tattr, &param);
+    printf("DEBUG: old prio: %i\n",param.sched_priority);
+    param.sched_priority = newprio;
+    pthread_attr_setschedparam (&tattr, &param);
+    printf("DEBUG: new prio: %i\n",param.sched_priority);
+
+    if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, NULL) != 0)
     {
         g_RomCacheThread = 0;
         alert_message(tr("Couldn't spawn rom cache thread!"));

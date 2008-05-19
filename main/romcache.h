@@ -23,59 +23,19 @@
 **/
 //These functions need to be moved.
 #include "mupenIniApi.h"
-
-//Should move into config file system.
-#define CACHE_FILE "rombrowser.cache"
-#define DATABASE_FILE "mupen64plus.ini"
-//This must be fixed...
-#define MAGIC_HEADER "RCS}" 
-
-void *rom_cache_system(void *_arg);
-char cache_filename[PATH_MAX];
-
-typedef struct {
-    char MAGIC[4];
-    int entries;
-} cache_header;
-
-
-static const char *romextensions[] = 
-{
- ".v64", ".z64", ".gz", ".zip", ".n64", NULL //".rom" causes to many false positives.
-};
-    // rom info
-typedef struct
-{
-        char          cName[20];                    // rom name
-        int           iSize;                            // size in bytes
-        unsigned char cCountry;                     // country id
-        unsigned int  iCRC1;                            // crc part 1
-        unsigned int  iCRC2;                            // crc part 2
-        char          cMD5[33];                     // md5 code
-        char          cGoodName[256];           // from ini
-} rominfo; // data saved in cache
+#include <limits.h> //PATH_MAX
 //When finished, move to header.
 typedef struct centry
 {
     char filename[PATH_MAX];
     char MD5[33]; // md5 code
     time_t timestamp;//Should it be in m_time or something more human friendly???
-    rominfo info; // lots of information for quick building of rombrowser
-    // mupenEntry* inientry; 
+    mupenEntry* inientry; 
+    unsigned short countrycode;
+    int romsize; //Hm... this should be unsigned everywhere.
     //comment* something to deal with comments.
     struct centry* next;
 } cache_entry;
-
-/* Okay... new paradigm.
-
-romcache - the cache.
-romdatabase - the database, currently linked lists from mupenIniApi.c
-comments - user comments.
-customdatabase - user editable ini for non-Goodnamed ROMS to handle corner cases.
-
-GUI polls romcache, using the database entry pointer to build 
-its GtkTreeView or KDE ListView.
-*/
 
 //Use custom linked list. 
 typedef struct
@@ -85,8 +45,8 @@ typedef struct
     cache_entry *last;
 } rom_cache;
 
-static void scan_dir2( const char *dirname );
+rom_cache romcache;
+
 int rebuild_cache_file();
 int load_initial_cache();
 void *rom_cache_system(void *_arg);
-rom_cache g_RomCache;

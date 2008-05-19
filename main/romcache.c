@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
  * USA.
 **/
-
+ 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -44,22 +44,56 @@
 #include "translate.h"
 #include "../memory/memory.h"    // sl() Where is sl? Its not in memory.c
 
+//This if for updaterombrowser, which needs the same type of abstraction as info_message().
+#include "gui_gtk/rombrowser.h"
+
+//These functions need to be moved.
+#include "mupenIniApi.h"
+
+//Should move into config file system.
+#define CACHE_FILE "rombrowser2.cache"
+#define DATABASE_FILE "mupen64plus.ini"
+//This must be fixed...
+#define MAGIC_HEADER "RCS}" 
+
+void *rom_cache_system(void *_arg);
+char cache_filename[PATH_MAX];
+
+static const char *romextensions[] = 
+{
+ ".v64", ".z64", ".gz", ".zip", ".n64", NULL //".rom" causes to many false positives.
+};
+
+
+/* Okay... new paradigm.
+
+romcache - the cache.
+romdatabase - the database, currently linked lists from mupenIniApi.c
+comments - user comments.
+customdatabase - user editable ini for non-Goodnamed ROMS to handle corner cases.
+
+GUI polls romcache, using the database entry pointer to build 
+its GtkTreeView or KDE ListView.
+*/
+
+static void scan_dir2( const char *dirname );
+
 void clear_cache()
 {
     cache_entry *entry, *entrynext;
 
-    if(g_RomCache.length!=0)
+    if(romcache.length!=0)
         {
-        entry = g_RomCache.top;
+        entry = romcache.top;
         do
             { 
             entrynext = entry->next;
             free(entry);
             entry = entrynext;
-            --g_RomCache.length;
+            --romcache.length;
             }
         while (entry!=NULL);
-        g_RomCache.last = NULL;
+        romcache.last = NULL;
         }
 }
 
@@ -72,17 +106,15 @@ void * rom_cache_system( void *_arg )
     sprintf(cache_filename, "%s%s", get_configpath(), CACHE_FILE);
 
     if(!load_initial_cache())
-    { 
-    printf("[rcs] load_initial_cache() returned 0\n"); 
+        { printf("[rcs] load_initial_cache() returned 0\n"); }
 
-    cache_entry *entry;
+   cache_entry *entry;
 
     remove(cache_filename);
     rebuild_cache_file();
-    }
-   
-    printf("[rom cache] done loading initial cache\n"); 
 
+    printf("[rom cache] done loading initial cache\n"); 
+    updaterombrowser();
 }
 
 int rebuild_cache_file()
@@ -94,7 +126,7 @@ int rebuild_cache_file()
 
     clear_cache();
 
-    printf("[rcs] Rebuilding cache file. %s\n",cache_filename);
+    printf("[rcs] Rebuilding cache file.\n",romcache.length);
 
     for ( i = 0; i < config_get_number("NumRomDirs",0); ++i )
         {
@@ -111,20 +143,20 @@ int rebuild_cache_file()
         printf("[error] could not create %s\n",cache_filename);
         return 0;
         }
-        
-    gzwrite( gzfile, MAGIC_HEADER, 4);
-    gzwrite( gzfile, &g_RomCache.length, sizeof(unsigned int) );
 
-    if(g_RomCache.length!=0)
+    gzwrite( gzfile, &romcache.length, sizeof(unsigned int) );
+
+    if(romcache.length!=0)
        {
        cache_entry *entry;
-       entry = g_RomCache.top;
+       entry = romcache.top;
        do
             {
             gzwrite( gzfile, entry->filename, sizeof(char)*PATH_MAX);
+            gzwrite( gzfile, entry->MD5, sizeof(char)*33);
             gzwrite( gzfile, &entry->timestamp, sizeof(time_t));
-            gzwrite( gzfile, &entry->info, sizeof(rominfo));
-             
+
+            printf("Added ROM: %s\n", entry->inientry->goodname);
             entry = entry->next;
             }
         while (entry!=NULL);
@@ -136,7 +168,7 @@ int rebuild_cache_file()
 
 static void scan_dir2( const char *dirname )
 {
-    int rom_size, i;
+    int i;
     char filename[PATH_MAX];
     char real_path[PATH_MAX];
     char *extension;
@@ -212,19 +244,18 @@ static void scan_dir2( const char *dirname )
             {
             strcpy(entry->filename,filename);
             //Test if we're a valid rom and compute MD5.
-            
-             memcpy(&entry->info,(rominfo *)fill_rominfo(entry->filename),sizeof(rominfo));
-          
-            /* Something is VERY WRONG here, even with fill_header, 
-           the rcs version of getting the files takes far too long.
-           This may be a pthread issue. */
-            // rom_size = entry->info.iSize;
-            if(&entry->info == NULL)
+            entry->romsize = calculateMD5(entry->filename , entry->MD5);
+            //HACK 
+            fill_header(entry->filename);
+            entry->countrycode = ROM_HEADER->Country_code;
+
+            if(!entry->romsize)
                 {
                 free(entry);
                 continue;
                 }
-                     
+            entry->inientry = ini_search_by_md5(entry->MD5);
+
             //Something to deal with custom roms.
             //if(entry.inientry==NULL)
             //    { custom_search_by_md5(entry->MD5);
@@ -233,31 +264,26 @@ static void scan_dir2( const char *dirname )
             //Add code to search comment database.
 
             //Actually add rom to cache.
-            if(g_RomCache.length==0)
+            if(romcache.length==0)
                 {
-                g_RomCache.top = entry; 
-                g_RomCache.last = entry; 
-                ++g_RomCache.length;
+                romcache.top = entry; 
+                romcache.last = entry; 
+                ++romcache.length;
                 }
             else
                 {
-                g_RomCache.last->next = entry;
-                g_RomCache.last = entry;
-                ++g_RomCache.length;
+                romcache.last->next = entry;
+                romcache.last = entry;
+                ++romcache.length;
                 }
             }
-            printf("[rcs] rom cached\n");
-            update_rombrowser(entry);
-            usleep(10);
         }
     closedir(dir);
-
 }
 
 int load_initial_cache()
 {
     int i;
-    char magicheader[8] = "";
     cache_entry *entry, *entrynext;
 
     gzFile *gzfile;
@@ -267,22 +293,10 @@ int load_initial_cache()
         printf("[rcs] Error, could not open %s\n",cache_filename);
         return 0;
         }
-    if(gzread(gzfile, &magicheader, 4))
-    {
-    	printf("[rcs] reading header...\n");
-    	printf("[rcs] header: %s\n",(magicheader));
-        if (strcmp(MAGIC_HEADER,magicheader))
+
+    if(gzread(gzfile, &romcache.length, sizeof(unsigned int)))
         {
-        	printf("[rcs] header mismatch, this is normal for a first time boot.\n");
-            return 0;
-        }
-    } else { printf("[rcs] cant read file...\n"); return 0; }
-    printf("[rcs] reading romcache length\n");
-    
-    if(gzread(gzfile, &g_RomCache.length, sizeof(unsigned int)))
-        {
-        	
-        for ( i = 0; i < g_RomCache.length; ++i )
+        for ( i = 0; i < romcache.length; ++i )
             { 
             entry = (cache_entry*)calloc(1,sizeof(cache_entry));
 
@@ -291,10 +305,10 @@ int load_initial_cache()
                 fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
                 return 0;
                 }
-            
+
             if(!gzread(gzfile, entry->filename, sizeof(char)*PATH_MAX)||
-               !gzread(gzfile, &entry->timestamp, sizeof(time_t))||
-               !gzread(gzfile, &entry->info, sizeof(rominfo)))
+               !gzread(gzfile, entry->MD5, sizeof(char)*33)||
+               !gzread(gzfile, &entry->timestamp, sizeof(time_t)))
                 {
                 if(!gzeof(gzfile)) //gzread error.
                     { 
@@ -303,24 +317,21 @@ int load_initial_cache()
                     return 0;
                     }
                 }
-            
+
             //Actually add rom to cache.
             if(entry->MD5!=NULL)
                 {
-                // entry->inientry = ini_search_by_md5(entry->MD5);
-                update_rombrowser(entry);
-                
+                entry->inientry = ini_search_by_md5(entry->MD5);
                 if(i==0)
                     {
-                    g_RomCache.top = entry; 
-                    g_RomCache.last = entry; 
+                    romcache.top = entry; 
+                    romcache.last = entry; 
                     }
                 else
                     {
-                    g_RomCache.last->next = entry;
-                    g_RomCache.last = entry;
+                    romcache.last->next = entry;
+                    romcache.last = entry;
                     }
-                
                 }
             }
         }

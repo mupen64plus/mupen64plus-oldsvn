@@ -15,6 +15,7 @@ Email                : blight@Ashitaka
  *                                                                         *
  ***************************************************************************/
 
+
 #include "rombrowser.h"
 #include "romproperties.h"
 #include "../main.h"
@@ -50,179 +51,114 @@ static void setup_view (GtkWidget *view);
 /*********************************************************************************************************
 * globals
 */
-GList *g_RomList = NULL;
-static GList *g_RomListCache = NULL; // roms in cache
 static GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart;
 static GtkWidget *playRomItem;
 static GtkWidget *romPropertiesItem;
 static GtkWidget *refreshRomBrowserItem;
-static int g_iNumRoms = 0;
-static int g_iSortColumn = 0; // sort column
+static int g_iNumRoms, g_iSortColumn = 0; // sort column
 static GtkSortType g_SortType = GTK_SORT_ASCENDING; // sort type (ascending/descending)
 
-// function to fill a SRomEntry structure
-static void romentry_fill( SRomEntry *entry )
+//Assign text based on country code. This should be moved... (i.e. so we can share with rom.c)
+static void countrycodestring(unsigned short int countrycode, char *string)
 {
-    // fill in defaults
-    if( strlen( entry->cName ) == 0 )
-    {
-        if( strlen( entry->info.cGoodName ) == 0 )
-            strcpy( entry->cName, entry->info.cName );
-        else
-            strcpy( entry->cName, entry->info.cGoodName );
-    }
-
-    entry->flag = n64cart;
-    sprintf( entry->cSize, "%.1f MBits", (float)(entry->info.iSize / (float)0x20000) );
-    switch( entry->info.cCountry )
+    switch(countrycode)
     {
     case 0:    /* Demo */
-        strcpy( entry->cCountry, tr("Demo") );
+        strcpy(string, tr("Demo"));
         break;
 
     case '7':  /* Beta */
-        strcpy( entry->cCountry, tr("Beta") );
+        strcpy(string, tr("Beta"));
         break;
 
     case 0x41: /* Japan / USA */
-        strcpy( entry->cCountry, tr("USA/Japan") );
-        entry->flag = japanusa; 
+        strcpy(string, tr("USA/Japan"));
         break;
 
     case 0x44: /* Germany */
-        strcpy( entry->cCountry, tr("Germany") );
-        entry->flag = germany;
+        strcpy(string, tr("Germany"));
         break;
 
     case 0x45: /* USA */
-        strcpy( entry->cCountry, tr("USA") );
-        entry->flag = usa;
+        strcpy(string, tr("USA"));
         break;
 
     case 0x46: /* France */
-        strcpy( entry->cCountry, tr("France") );
-        entry->flag = france;
+        strcpy(string, tr("France"));
         break;
 
     case 'I':  /* Italy */
-        strcpy( entry->cCountry, tr("Italy") );
-        entry->flag = italy;
+        strcpy(string, tr("Italy"));
         break;
 
     case 0x4A: /* Japan */
-        strcpy( entry->cCountry, tr("Japan") );
-        entry->flag = japan;
+        strcpy(string, tr("Japan"));
         break;
 
     case 'S':  /* Spain */
-        strcpy( entry->cCountry, tr("Spain") );
-        entry->flag = spain;
+        strcpy(string, tr("Spain"));
         break;
 
     case 0x55: case 0x59:  /* Australia */
-        sprintf( entry->cCountry, tr("Australia (0x%2.2X)"), entry->info.cCountry );
-        entry->flag = australia;
+        sprintf(string, tr("Australia (0x%2.2X)"), countrycode);
         break;
 
     case 0x50: case 0x58: case 0x20:
     case 0x21: case 0x38: case 0x70:
-        sprintf( entry->cCountry, tr("Europe (0x%02X)"), entry->info.cCountry );
-        entry->flag = europe;
+        sprintf(string, tr("Europe (0x%02X)"), countrycode);
         break;
 
     default:
-        sprintf( entry->cCountry, tr("Unknown (0x%02X)"), entry->info.cCountry );
+        sprintf(string, tr("Unknown (0x%02X)"), countrycode);
         break;
     }
 }
 
-/*********************************************************************************************************
-* cache functions
-*/
-void rombrowser_readCache( void )
+static void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
 {
-	return;
-    char filename[PATH_MAX];
-    gzFile *f;
-    int i;
-    SRomEntry *entry;
-
-    snprintf( filename, PATH_MAX, "%srombrowser.cache", get_configpath() );
-    f = gzopen( filename, "rb" );
-    if( !f )
-        return;
-
-    // free old list
-    for( i = 0; i < g_list_length( g_RomListCache ); i++ )
+    switch(countrycode)
     {
-        entry = (SRomEntry *)g_list_nth_data( g_RomListCache, i );
-        free( entry );
+    case 0x41: /* Japan / USA */
+        *flag = japanusa; 
+        break;
+
+    case 0x44: /* Germany */
+        *flag = germany;
+        break;
+
+    case 0x45: /* USA */
+        *flag = usa;
+        break;
+
+    case 0x46: /* France */
+        *flag = france;
+        break;
+
+    case 'I':  /* Italy */
+        *flag = italy;
+        break;
+
+    case 0x4A: /* Japan */
+        *flag = japan;
+        break;
+
+    case 'S':  /* Spain */
+        *flag = spain;
+        break;
+
+    case 0x55: case 0x59:  /* Australia */
+        *flag = australia;
+        break;
+
+    case 0x50: case 0x58: case 0x20:
+    case 0x21: case 0x38: case 0x70:
+        *flag = europe;
+        break;
+
+    default:
+        *flag = n64cart;
+        break;
     }
-    g_list_free( g_RomListCache );
-    g_RomListCache = NULL;
-
-    // number of entries
-    gzread( f, &g_iNumRoms, sizeof( g_iNumRoms ) );
-
-    // entries
-    for( i = 0; i < g_iNumRoms; i++ )
-    {
-        entry = malloc( sizeof( SRomEntry ) );
-        if( !entry )
-        {
-            printf( "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
-            continue;
-        }
-        gzread( f, entry->cFilename, sizeof( char ) * PATH_MAX );
-        gzread( f, &entry->info, sizeof( entry->info ) );
-
-        if( access( entry->cFilename, F_OK ) < 0 )
-            continue;
-
-        romentry_fill( entry );
-
-        // append to list
-        g_RomListCache = g_list_append( g_RomListCache, entry );
-    }
-
-    gzclose( f );
-}
-
-void rombrowser_writeCache( void )
-{
-	return;
-    char filename[PATH_MAX];
-    gzFile *f;
-    SRomEntry *entry = 0;
-    GtkTreeIter iter;
-    int i=0;
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
-
-    snprintf( filename, PATH_MAX, "%srombrowser.cache", get_configpath() );
-    f = gzopen( filename, "wb" );
-    if( !f )
-        return;
-    // number of entries
-    g_iNumRoms = gtk_tree_model_iter_n_children(model, NULL);
-    gzwrite( f, &g_iNumRoms, sizeof( g_iNumRoms ) );
-
-    gtk_tree_model_get_iter_first(model, &iter);
-
-    // entries
-    for(i=0; i< g_iNumRoms; i++)
-    {
-        gtk_tree_model_get (model, &iter, 5, &entry, -1);
-
-        gzwrite( f, entry->cFilename, sizeof( char ) * PATH_MAX );
-        gzwrite( f, &entry->info, sizeof( entry->info ) );
-
-        if(!gtk_tree_model_iter_next (model, &iter)) { break; }
-    }
-
-    gzclose( f );
-
-    // update cache list
-    rombrowser_readCache();
 }
 
 /*********************************************************************************************************
@@ -298,203 +234,73 @@ char *sub_string(const char *string, int start, int end)
     
     return alloc;
 }
-void update_rombrowser(cache_entry centry)
+
+//Add romcache to GUI.
+void fillrombrowser()
 {
-	/*
-	 *    char goodname[100];
-   int eeprom16kb;
-   char MD5[33];
-   char CRC[22];
-   char refMD5[33];
-   char comments[200];
-   */
-    
-    SRomEntry *dentry;
-    GtkTreeIter *iter1 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
-    GtkTreeIter *iter2 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+gboolean fullpaths;
+char *line[5];
 
-    gchar *line[5];
-    dentry->info.cCountry = centry.info.cCountry;
-    dentry->info.iSize = centry.info.iSize;
-    romentry_fill(dentry);
-    line[0] = centry.info.cGoodName;
-    line[1] = dentry->cCountry;
-    line[2] = dentry->cSize;
-    line[3] = "Comments"; //entry->comments;
-            //Add entries to TreeModel
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
+GdkPixbuf *flag;
+line[1] = malloc(32*sizeof(char));
+line[2] = malloc(16*sizeof(char));
 
-    gtk_list_store_append ( GTK_LIST_STORE(model), iter1);
-    gtk_list_store_set ( GTK_LIST_STORE(model), iter1, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, dentry, 6, dentry->flag, -1);
+fullpaths = config_get_bool( "RomBrowserShowFullPaths", FALSE);
 
-    model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
-    gtk_list_store_append ( GTK_LIST_STORE(model), iter2);
-    gtk_list_store_set ( GTK_LIST_STORE(model), iter2, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, dentry, 6, dentry->flag, -1);
-    g_iNumRoms ++;
-    //printf("GoodName: %s\n");
-    //printf("
-}
-// scan dir for roms
-static void scan_dir( const char *dirname )
-{
-	return;
-    DIR *dir;
-    int rom_size, i;
-    char filename[PATH_MAX];
-    char real_path[PATH_MAX];
-    char crc_code[200];
-    const char *p;
-    struct dirent *de;
-    struct stat sb;
-    GtkTreeIter *iter1 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
-    GtkTreeIter *iter2 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
-
-    gchar *line[5];
-    SRomEntry *entry, *cacheEntry;
-    int found;
-
-    dir = opendir( dirname );
-    if( !dir )
-    {
-        printf( "Couldn't open directory '%s': %s\n", dirname, strerror( errno ) );
-        return;
-    }
-
-    while( (de = readdir( dir )) )
-    {
-        if( de->d_name[0] == '.' ) // .., . or hidden file
-            continue;
-        snprintf( filename, PATH_MAX, "%s%s", dirname, de->d_name );
-    
-        if( config_get_bool( "RomDirsScanRecursive", FALSE ) )
-        {
-            // use real path (maybe it's a link)
-            if( !realpath( filename, real_path ) )
-                strcpy( real_path, filename );
-
-            if( stat( real_path, &sb ) == -1 )
+if(romcache.length!=0)
+       {
+       cache_entry *entry;
+       entry = romcache.top;
+       do
             {
-                // Display error?
-                continue;
-            }
-
-            if( S_ISDIR(sb.st_mode) )
-            {
-                strncat( filename, "/", PATH_MAX );
-                scan_dir( filename );
-                continue;
-            }
-        }
-    
-        // check file extension
-        p = strrchr( filename, '.' );
-        if( !p )
-            continue;
-        for( i = 0; g_romFileExtensions[i]; i++ )
-        {
-            if( !strcasecmp( p, g_romFileExtensions[i] ) )
-                break;
-        }
-        if( !g_romFileExtensions[i] )
-            continue;
-    
-        entry = malloc( sizeof( SRomEntry ) );
-        if( !entry )
-        {
-            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
-            continue;
-        }
-    
-        memset( entry, 0, sizeof( SRomEntry ) );
-        strcpy( entry->cFilename, filename );
-    
-        // search cache
-        found = 0;
-        for( i = 0; i < g_list_length( g_RomListCache ); i++ )
-        {
-            cacheEntry = (SRomEntry *)g_list_nth_data( g_RomListCache, i );
-            if( !strcmp( entry->cFilename, cacheEntry->cFilename ) )
-            {
-                memcpy( &entry->info, &cacheEntry->info, sizeof( cacheEntry->info ) );
-                found = 1;
-                break;
-            }
-        }
-    
-        if( !found )
-        {
-            // load rom header
-            rom_size = fill_header( entry->cFilename );
-            if( !rom_size )
-            {
-                free( entry );
-                continue;
-            }
-
-            // fill entry info struct
-            entry->info.iSize = rom_size;
-            entry->info.iManufacturer = ROM_HEADER->Manufacturer_ID;
-            entry->info.sCartID = ROM_HEADER->Cartridge_ID;
-            entry->info.cCountry = ROM_HEADER->Country_code;
-            entry->info.iCRC1 = ROM_HEADER->CRC1;
-            entry->info.iCRC2 = ROM_HEADER->CRC2;
-
-            sprintf( crc_code, "%08X-%08X-C%02X", sl(entry->info.iCRC1), sl(entry->info.iCRC2), entry->info.cCountry );
-            entry->iniEntry = ini_search_by_CRC( crc_code );
-        
-            if( entry->iniEntry )
-            {
-                strcpy( entry->info.cComments, entry->iniEntry->comments );
-                strcpy( entry->info.cGoodName, entry->iniEntry->goodname );
-                strcpy( entry->cName, entry->iniEntry->goodname );
-            }
-        }
-        romentry_fill( entry );
-
-        line[0] = entry->cName;
-        line[1] = entry->cCountry;
-        line[2] = entry->cSize;
-        line[3] = entry->info.cComments;
-        if(config_get_bool( "RomBrowserShowFullPaths", FALSE ))
-        {
-            line[4] = entry->cFilename;
-        }
+            line[0] = entry->inientry->goodname;
+            countrycodestring(entry->countrycode, line[1]);
+            sprintf(line[2], "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
+            line[3] = NULL; //Comments.
+            countrycodeflag(entry->countrycode, &flag);
+        if(fullpaths)
+        { line[4] = entry->filename; }
         else
         {
-            int fnlen = strlen(entry->cFilename);
+            int fnlen = strlen(entry->filename);
             char *newfn= NULL;
             int i;
             for(i=fnlen; i > 0; i--)
             {
-                if(entry->cFilename[i] == '/')
+                if(entry->filename[i] == '/')
                 {
-                    newfn = sub_string(entry->cFilename, i+1, fnlen);
+                    newfn = sub_string(entry->filename, i+1, fnlen);
                     break;
                 }
             }
             line[4] = newfn;
         }
 
+        GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+
         //Add entries to TreeModel
         GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
-
-        gtk_list_store_append ( GTK_LIST_STORE(model), iter1);
-        gtk_list_store_set ( GTK_LIST_STORE(model), iter1, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, entry->flag, -1);
+        gtk_list_store_append ( GTK_LIST_STORE(model), iter);
+        gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
 
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
-        gtk_list_store_append ( GTK_LIST_STORE(model), iter2);
-        gtk_list_store_set ( GTK_LIST_STORE(model), iter2, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, entry->flag, -1);
+        gtk_list_store_append ( GTK_LIST_STORE(model), iter);
+        gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
 
-        g_iNumRoms ++;
-    }
-    closedir( dir );
+            printf("Added ROM to GUI: %s\n", entry->inientry->goodname);
+            entry = entry->next;
+            }
+        while (entry!=NULL);
+        }
+
 }
+
+
+
 
 //Load a fresh TreeView by re-scanning directories.
 void rombrowser_refresh( void )
 {
-    int i;
-
     GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
     gtk_tree_selection_select_all(selection);
     GtkTreeModel *model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
@@ -505,27 +311,8 @@ void rombrowser_refresh( void )
     model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
     gtk_list_store_clear( GTK_LIST_STORE(model) );
 
-    g_iNumRoms = 0;
-    g_list_free( g_RomList );
-    g_RomList = NULL;
-
-    for ( i = 0; i < config_get_number( "NumRomDirs", 0 ); ++i )
-        {
-        char buf[30];
-        const char *dir;
-        sprintf( buf, "RomDirectory[%d]", i );
-        dir = config_get_string( buf, "" );
-        statusbar_message( "status", tr("Scanning directory '%s'..."), dir );
-        scan_dir( dir );
-        }
-
-    statusbar_message( "status", tr("%d Rom Directories scanned, %d Roms found"), i, g_iNumRoms );
-
-    // save cache
-    rombrowser_writeCache();
-
-    // update status bar
-    statusbar_message( "num_roms", tr("Total Roms: %d"), g_iNumRoms );
+   //We'd actually query the rcs system here, insetad of just adding the current cache to the GUI.
+   fillrombrowser();
 
    //Do an initial sort.
    GtkTreeSortable *sortable = GTK_TREE_SORTABLE(model);
@@ -604,13 +391,13 @@ static void callback_columnClicked(GtkTreeViewColumn *treeviewcolumn, gpointer u
 static gboolean callback_rowSelected(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
 {
     GtkTreeModel *model = gtk_tree_view_get_model( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-    SRomEntry *entry;
+    cache_entry *entry;
     GtkTreeIter iter;
 
     gtk_tree_model_get_iter(model, &iter, path);
     gtk_tree_model_get (model, &iter, 5, &entry, -1);
 
-    if(open_rom( entry->cFilename ) == 0)
+    if(open_rom( entry->filename ) == 0)
         { startEmulation(); }
 
     return FALSE;
@@ -671,7 +458,7 @@ void apply_filter( void )
     if(validiter)
         {
         GdkPixbuf *flag;
-        SRomEntry *entry;
+       cache_entry *entry;
         short int counter;
         gchar *line[5];
 
@@ -753,7 +540,7 @@ int create_filter( void )
 static void callback_playRom( GtkWidget *widget, gpointer data )
 {
     GList *list = NULL, *llist = NULL;
-    SRomEntry *entry;
+    cache_entry *entry;
     GtkTreeIter iter;
     GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
     GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
@@ -771,7 +558,7 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
     g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (list);
 
-    if(open_rom( entry->cFilename ) == 0)
+    if(open_rom( entry->filename ) == 0)
         { startEmulation(); }
 }
 
@@ -783,7 +570,7 @@ static void callback_romProperties( GtkWidget *widget, gpointer data )
 
     if (gtk_tree_selection_count_selected_rows (selection) > 0)
         {
-        SRomEntry *entry;
+        cache_entry *entry;
 
         GList *list = NULL, *llist = NULL;
         list = gtk_tree_selection_get_selected_rows (selection, &model);
@@ -812,6 +599,7 @@ static void setup_view (GtkWidget *view)
 {
     gchar *titles[] = 
         {
+        (gchar *)tr("Flag"),
         (gchar *)tr("Good Name"),
         (gchar *)tr("Country"),
         (gchar *)tr("Size"),
@@ -829,7 +617,7 @@ static void setup_view (GtkWidget *view)
     model = GTK_TREE_MODEL (store);
 
     renderer = gtk_cell_renderer_pixbuf_new ();
-    column = gtk_tree_view_column_new_with_attributes ("Flag", renderer, "pixbuf", 6, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[0], renderer, "pixbuf", 6, NULL); 
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 0);
@@ -837,7 +625,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 0);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[0], renderer, "text", 0, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[1], renderer, "text", 0, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 1);
@@ -845,7 +633,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 1);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[1], renderer, "text", 1, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[2], renderer, "text", 1, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 2);
@@ -853,7 +641,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 2);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[2], renderer, "text", 2, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[3], renderer, "text", 2, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 3);
@@ -861,7 +649,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 3);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[3], renderer, "text", 3, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[4], renderer, "text", 3, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 4);
@@ -869,7 +657,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 4);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[4], renderer, "text", 4, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[5], renderer, "text", 4, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 5);
@@ -903,7 +691,7 @@ int create_romBrowser( void )
     spain = gdk_pixbuf_new_from_file( get_iconpath("spain.png"), &err );
     usa = gdk_pixbuf_new_from_file( get_iconpath("usa.png"), &err );
     japanusa = gdk_pixbuf_new_from_file( get_iconpath("japanusa.png"), &err );
-    n64cart = gdk_pixbuf_new_from_file( get_iconpath("n64cart.png"), &err );
+    n64cart = gdk_pixbuf_new_from_file( get_iconpath("n64cart.xpm"), &err );
 
     //Setup right-click menu.
     rightClickMenu = gtk_menu_new();

@@ -120,8 +120,6 @@ void gui_build(void)
     // info_message function can safely be used after we get the gdk lock
     gdk_threads_enter();
 
-    rombrowser_readCache();
-
     create_mainWindow();
     create_configDialog();
 #ifdef VCR_SUPPORT
@@ -145,6 +143,28 @@ void gui_main_loop(void)
 {
     gtk_main();
     gdk_threads_leave();
+}
+
+//External pulic function to update rombrowser.
+void updaterombrowser()
+{
+    pthread_t self = pthread_self();
+
+    if(gui_enabled())
+        {
+        // if we're calling from a thread other than the main gtk thread, take gdk lock
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_enter();
+
+        fillrombrowser();
+
+        GUI_PROCESS_QUEUED_EVENTS();
+
+        if(!pthread_equal(self, g_GuiThread))
+        gdk_threads_leave();
+
+        return;
+        }
 }
 
 // prints informational message to status bar
@@ -455,7 +475,7 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
     if(!rom)
         {
         GList *list = NULL, *llist = NULL;
-        SRomEntry *entry;
+        cache_entry *entry;
         GtkTreeIter iter;
         GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
         GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
@@ -479,7 +499,7 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
             g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
             g_list_free (list);
          
-            if(open_rom( entry->cFilename ) == 0)
+            if(open_rom( entry->filename ) == 0)
                 { startEmulation(); }
             else
                 { return; }

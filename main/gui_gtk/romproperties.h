@@ -21,6 +21,7 @@ Email                : blight@Ashitaka
 #include <gtk/gtk.h>
 
 #include "rombrowser.h"
+#include "../romcache.h"
 
 typedef struct
 {
@@ -38,6 +39,6 @@ typedef struct
 extern SRomPropertiesDialog g_RomPropDialog;
 
 int create_romPropDialog( void );
-void show_romPropDialog( SRomEntry *entry );
+void show_romPropDialog( cache_entry *entry );
 
 #endif // __ROMPROPERTIES_H__

@@ -31,7 +31,7 @@ Email                : blight@Ashitaka
  * globals
  */
 SRomPropertiesDialog g_RomPropDialog;
-static SRomEntry *g_RomEntry;
+static cache_entry *g_RomEntry;
 
 /*********************************************************************************************************
  * callbacks
@@ -44,20 +44,14 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
     gtk_grab_remove( g_RomPropDialog.dialog );
 
     /* save properties */
-    strcpy( g_RomEntry->info.cComments, gtk_entry_get_text( GTK_ENTRY(g_RomPropDialog.commentsEntry) ) );
+    //strcpy( g_RomEntry->comments, gtk_entry_get_text( //GTK_ENTRY(g_RomPropDialog.commentsEntry) ) );
 
-    /* save cache and ini */
-    rombrowser_writeCache();
-    if( !g_RomEntry->iniEntry )
-    {
-        sprintf( crc_code, "%08X-%08X-C%02X", sl(g_RomEntry->info.iCRC1), sl(g_RomEntry->info.iCRC2), g_RomEntry->info.cCountry );
-        g_RomEntry->iniEntry = ini_search_by_CRC( crc_code );
-    }
-    if( g_RomEntry->iniEntry )
-    {
-        strcpy( g_RomEntry->iniEntry->comments, g_RomEntry->info.cComments );
-        ini_updateFile(1);
-    }
+    //WTF! We shouldn't ever be able to modify the INI.
+    //if( g_RomEntry->iniEntry )
+   // {
+     //   strcpy( g_RomEntry->iniEntry->comments, g_RomEntry->info.cComments );
+      //  ini_updateFile(1);
+    //}
 
     // update rombrowser
     rombrowser_refresh();
@@ -73,7 +67,7 @@ static void callback_cancelClicked( GtkWidget *widget, gpointer data )
 static void callback_calculateMd5Clicked( GtkWidget *widget, gpointer data )
 {
     char digeststring[32];
-    if(!calculateMD5(g_RomEntry->cFilename, &digeststring))
+    if(!calculateMD5(g_RomEntry->filename, &digeststring))
         { return; }
 
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), digeststring);
@@ -96,18 +90,18 @@ static gint delete_question_event( GtkWidget *widget, GdkEvent *event, gpointer 
 /*********************************************************************************************************
  * show dialog
  */
-void show_romPropDialog( SRomEntry *entry )
+void show_romPropDialog( cache_entry *entry )
 {
     char ini_code[200];
 
     // fill dialog
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.romNameEntry), entry->cName );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.sizeEntry), entry->cSize );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.countryEntry), entry->cCountry );
-    sprintf( ini_code, "%08X-%08X-C%02X", sl(entry->info.iCRC1), sl(entry->info.iCRC2), entry->info.cCountry );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.iniCodeEntry), ini_code );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), entry->info.cMD5 );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->info.cComments );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.romNameEntry), entry->inientry->goodname );
+    //gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.sizeEntry), entry->romsize );
+    //gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.countryEntry), entry->Country );
+    //sprintf( ini_code, "%08X-%08X-C%02X", sl(entry->info.iCRC1), sl(entry->info.iCRC2), entry->info.cCountry );
+    //gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.iniCodeEntry), ini_code );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), entry->inientry->MD5 );
+    //gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->info.cComments );
     g_RomEntry = entry;
 
     // show dialog
