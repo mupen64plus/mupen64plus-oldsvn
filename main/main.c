@@ -1393,7 +1393,7 @@ int main(int argc, char *argv[])
     // build gui, but do not display
     if(l_GuiEnabled)
         gui_build();
-   
+
     // must be called after building gui
     info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
 
@@ -1460,7 +1460,6 @@ int main(int argc, char *argv[])
     // cleanup and exit
     stopEmulation();
     config_write();
-    ini_updateFile(1);
     cheat_write_config();
     cheat_delete_all();
     ini_closeFile();

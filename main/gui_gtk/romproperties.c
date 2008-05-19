@@ -45,7 +45,7 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
     gtk_grab_remove( g_RomPropDialog.dialog );
 
     /* save properties */
-    //strcpy( g_RomEntry->comments, gtk_entry_get_text( //GTK_ENTRY(g_RomPropDialog.commentsEntry) ) );
+    //strcpy( g_RomEntry->comments, gtk_entry_get_text( GTK_ENTRY(g_RomPropDialog.commentsEntry) ) );
 
     //WTF! We shouldn't ever be able to modify the INI.
     //if( g_RomEntry->iniEntry )
@@ -110,8 +110,7 @@ int create_romPropDialog( void )
     g_RomPropDialog.dialog = gtk_dialog_new();
     gtk_container_set_border_width( GTK_CONTAINER(g_RomPropDialog.dialog), 10 );
     gtk_window_set_title( GTK_WINDOW(g_RomPropDialog.dialog), tr("Rom Properties") );
-    //gtk_signal_connect(GTK_OBJECT(g_RomPropDialog.dialog), "delete_event",
-       //         GTK_SIGNAL_FUNC(delete_question_event), (gpointer)NULL );
+    gtk_widget_set_size_request( g_RomPropDialog.dialog, 450, -1);
 
     // rom info
     frame = gtk_frame_new( tr("Rom Info") );

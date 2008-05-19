@@ -80,9 +80,9 @@ void ini_openFile()
    char buf[256];
    int i=0;
    iniElem *cur = NULL;
-   
+
    if (ini.comment != NULL) return;
-   
+
    memset( &emptyEntry,0,sizeof(emptyEntry));
    char* pathname = get_ini_path();
    f = gzopen(pathname, "rb");
@@ -107,13 +107,13 @@ void ini_openFile()
       }
      }
    while (buf[0] != '[' && !gzeof(f));
-   
+
    for (i=0; i<255; i++)
      {
         ini.CRC_lists[i] = NULL;
      }
    ini.list = NULL;
-   
+
    do
      {
     if (buf[0] == '[')
@@ -141,7 +141,7 @@ void ini_openFile()
          cur->entry.MD5[32] = '\0';
          buf[3] = 0;
          sscanf(buf+1, "%X", &i);
-         
+
          if (ini.MD5_lists[i] == NULL)
            ini.MD5_lists[i] = cur;
          else
@@ -173,7 +173,7 @@ void ini_openFile()
                cur->entry.CRC[21] = '\0';
                buf[i+3] = 0;
                sscanf(buf+i+1, "%X", &i);
-               
+
                if (ini.CRC_lists[i] == NULL)
              ini.CRC_lists[i] = cur;
                else
@@ -206,7 +206,7 @@ void ini_openFile()
     gzgets(f, buf, 255);
      }
    while (!gzeof(f));
-   
+
    gzclose(f);
 }
 
@@ -224,70 +224,14 @@ void ini_closeFile()
      }
 }
 
-void ini_updateFile(int compress)
-{
-   gzFile zf = NULL;
-   FILE *f = NULL;
-   iniElem *aux;
-   
-   if (ini.comment == NULL) return ;
-   char* pathname=get_ini_path();
-   if (compress) 
-     {
-    zf = gzopen(pathname, "wb");
-    gzprintf(zf, "%s", ini.comment);
-     }
-   else
-     {
-    f = fopen(pathname, "wb");
-    fprintf(f, "%s", ini.comment);
-     }
-   free(pathname);
-   aux = ini.list;
-   while (aux != NULL)
-     {
-    if (compress) 
-      {
-         gzprintf(zf, "[%s]\n", aux->entry.MD5);
-         gzprintf(zf, "Good Name=%s\n", aux->entry.goodname);
-         gzprintf(zf, "Header Code=%s\n", aux->entry.CRC);
-         if (strcmp(aux->entry.refMD5, ""))
-           gzprintf(zf, "Reference=%s\n", aux->entry.refMD5);
-         if (aux->entry.eeprom16kb == 1)
-           gzprintf(zf, "Eeprom=16k\n");
-         if (strcmp(aux->entry.comments, ""))
-           gzprintf(zf, "Comments=%s\n", aux->entry.comments);
-         gzprintf(zf, "\n");
-      }
-    else
-      {
-         fprintf(f, "[%s]\n", aux->entry.MD5);
-         fprintf(f, "Good Name=%s\n", aux->entry.goodname);
-         fprintf(f, "Header Code=%s\n", aux->entry.CRC);
-         if (strcmp(aux->entry.refMD5, ""))
-           fprintf(f, "Reference=%s\n", aux->entry.refMD5);
-         if (aux->entry.eeprom16kb == 1)
-           fprintf(f, "Eeprom=16k\n");
-         if (strcmp(aux->entry.comments, ""))
-           fprintf(f, "Comments=%s\n", aux->entry.comments);
-         fprintf(f, "\n");
-      }
-    
-    aux = aux->next_entry;
-     }
-   
-   if (compress) gzclose(zf);
-   else fclose(f);
-}
-
 mupenEntry* ini_search_by_md5(const char *md5)
 {
    char t[3];
    int i;
    iniElem *aux;
-   
+
    if (ini.comment == NULL) return emptyEntry;
-   
+
    t[0] = md5[0];
    t[1] = md5[1];
    t[2] = 0;
@@ -304,9 +248,9 @@ mupenEntry* ini_search_by_CRC(const char *crc)
    char t[3];
    int i;
    iniElem *aux;
-   
+
    if (ini.comment == NULL) return emptyEntry;
-   
+
    t[0] = crc[0];
    t[1] = crc[1];
    t[2] = 0;

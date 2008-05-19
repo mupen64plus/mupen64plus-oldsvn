@@ -37,6 +37,7 @@
 #include <zlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h> 
 
 #include "md5.h"
 #include "rom.h"
@@ -260,14 +261,14 @@ int rom_read(const char *filename)
     md5_state_t state;
     md5_byte_t digest[16];
     mupenEntry *entry;
-    char buffer[1024], *s;
+    char buffer[PATH_MAX], *s;
 
     int compressiontype, imagetype, i;
 
     if(rom)
         { free(rom); }
 
-    strncpy(buffer, filename, 1023);
+    strncpy(buffer, filename, PATH_MAX);
     if ((rom=load_rom(filename, &taille_rom, &compressiontype, &imagetype, &taille_rom))==NULL)
         {
         printf ("File not found or wrong path.\n");
@@ -333,46 +334,11 @@ int rom_read(const char *filename)
     else
         { printf("Manufacturer: %x\n", (unsigned int)(ROM_HEADER->Manufacturer_ID)); }
     printf("Cartridge_ID: %x\n", ROM_HEADER->Cartridge_ID);
-    switch(ROM_HEADER->Country_code)
-        {
-        case 0:
-            printf("Demo\n");
-            break;
-        case '7':
-            printf("Beta\n");
-            break;
-        case 0x41:
-            printf("Country: USA / Japan\n");
-            break;
-        case 0x44: 
-            printf("Country: Germany\n");
-            break;
-        case 0x45:
-            printf("Country: USA\n");
-            break;
-        case 0x46:
-            printf("Country: France\n");
-            break;
-        case 'I':
-            printf("Country: Italy");
-            break;
-        case 0x4A: 
-            printf("Country: Japan\n");
-            break;
-        case 'S':
-            printf("Country: Spain\n");
-            break;
-        case 0x55: case 0x59: 
-            printf("Country: Australia (0x%2.2X)\n", ROM_HEADER->Country_code);
-            break;
-        case 0x50: case 0x58: case 0x20:
-        case 0x21: case 0x38: case 0x70:
-            printf("Country: Europe (0x%02X)\n", ROM_HEADER->Country_code);
-        break;
-        default:
-            printf("Country Code: %x\n", ROM_HEADER->Country_code);
-        }
-    printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
+
+   char country[32];
+   countrycodestring(ROM_HEADER->Country_code, buffer);
+   printf("Country: %s\n", buffer);
+   printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
     //Check the ini via MD5... This needs rework for RCS.
     ini_openFile();

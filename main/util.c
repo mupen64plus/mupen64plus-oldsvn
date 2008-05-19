@@ -35,6 +35,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
@@ -460,5 +461,61 @@ list_node_t *list_find_node(list_t list, void *data)
             break;
 
     return node;
+}
+
+//Assign text based on country code. This should be moved... (i.e. so we can share with rom.c)
+void countrycodestring(unsigned short int countrycode, char *string)
+{
+    switch(countrycode)
+    {
+    case 0:    /* Demo */
+        strcpy(string, tr("Demo"));
+        break;
+
+    case '7':  /* Beta */
+        strcpy(string, tr("Beta"));
+        break;
+
+    case 0x41: /* Japan / USA */
+        strcpy(string, tr("USA/Japan"));
+        break;
+
+    case 0x44: /* Germany */
+        strcpy(string, tr("Germany"));
+        break;
+
+    case 0x45: /* USA */
+        strcpy(string, tr("USA"));
+        break;
+
+    case 0x46: /* France */
+        strcpy(string, tr("France"));
+        break;
+
+    case 'I':  /* Italy */
+        strcpy(string, tr("Italy"));
+        break;
+
+    case 0x4A: /* Japan */
+        strcpy(string, tr("Japan"));
+        break;
+
+    case 'S':  /* Spain */
+        strcpy(string, tr("Spain"));
+        break;
+
+    case 0x55: case 0x59:  /* Australia */
+        sprintf(string, tr("Australia (0x%2.2X)"), countrycode);
+        break;
+
+    case 0x50: case 0x58: case 0x20:
+    case 0x21: case 0x38: case 0x70:
+        sprintf(string, tr("Europe (0x%02X)"), countrycode);
+        break;
+
+    default:
+        sprintf(string, tr("Unknown (0x%02X)"), countrycode);
+        break;
+    }
 }
 

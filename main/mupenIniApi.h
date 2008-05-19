@@ -42,7 +42,6 @@ typedef struct
 
 void ini_openFile();
 void ini_closeFile();
-void ini_updateFile(int compress);
 mupenEntry* ini_search_by_md5(const char *md5);
 mupenEntry* ini_search_by_CRC(const char *CRC);
 

@@ -25,14 +25,12 @@
 #include <string.h>
 
 #include <errno.h>
-
 #include <pthread.h>
-
-#include <zlib.h>
 
 #include <limits.h> //PATH_MAX
 #include <dirent.h> //Directory support.
 //Includes for POSIX file status.
+#include <zlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -43,7 +41,6 @@
 #include "config.h"
 #include "rom.h"
 #include "translate.h"
-#include "../memory/memory.h"    // sl() Where is sl? Its not in memory.c
 
 //This if for updaterombrowser, which needs the same type of abstraction as info_message().
 #include "gui_gtk/rombrowser.h"
@@ -64,18 +61,6 @@ static const char *romextensions[] =
 {
  ".v64", ".z64", ".gz", ".zip", ".n64", NULL //".rom" causes to many false positives.
 };
-
-
-/* Okay... new paradigm.
-
-romcache - the cache.
-romdatabase - the database, currently linked lists from mupenIniApi.c
-comments - user comments.
-customdatabase - user editable ini for non-Goodnamed ROMS to handle corner cases.
-
-GUI polls romcache, using the database entry pointer to build 
-its GtkTreeView or KDE ListView.
-*/
 
 static void scan_dir( const char *dirname );
 

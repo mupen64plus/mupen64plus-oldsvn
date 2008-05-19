@@ -21,20 +21,24 @@
  * USA.
  *
 **/
+
+#define COMMENT_MAXLENGTH 256
+
 //These functions need to be moved.
 #include "mupenIniApi.h"
 #include <limits.h> //PATH_MAX
 //When finished, move to header.
-typedef struct centry
+
+typedef struct _cache_entry
 {
     char filename[PATH_MAX];
-    char MD5[33]; // md5 code
-    time_t timestamp;//Should it be in m_time or something more human friendly???
+    char MD5[33];
+    time_t timestamp; //Should it be in m_time or something more human friendly???
     unsigned short countrycode;
     int romsize; //Hm... this should be unsigned everywhere.
-    //comment* something to deal with comments.
-    mupenEntry* inientry; 
-    struct centry* next;
+    char comment[COMMENT_MAXLENGTH]; 
+    mupenEntry *inientry; 
+    struct _cache_entry *next;
 } cache_entry;
 
 //Use custom linked list. 

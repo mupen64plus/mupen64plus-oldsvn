@@ -57,6 +57,7 @@ typedef struct _list_node {
 typedef list_node_t * list_t;
 
 list_node_t *list_append(list_t *list, void *data);
+void countrycodestring(unsigned short int countrycode, char *string);
 void list_node_delete(list_t *list, list_node_t *node);
 void list_delete(list_t *list);
 void list_node_move_front(list_t *list, list_node_t *node);
