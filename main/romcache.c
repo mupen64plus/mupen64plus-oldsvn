@@ -130,8 +130,6 @@ int rebuild_cache_file()
     const char *directory; 
     int i;
 
-    clear_cache();
-
     printf("[rcs] Rebuilding cache file.\n",romcache.length);
 
     for ( i = 0; i < config_get_number("NumRomDirs",0); ++i )
@@ -164,7 +162,6 @@ int rebuild_cache_file()
             gzwrite(gzfile, &entry->countrycode, sizeof(unsigned short));
             gzwrite(gzfile, &entry->romsize, sizeof(int));
 
-            printf("Added ROM: %s\n", entry->inientry->goodname);
             entry = entry->next;
             }
         while (entry!=NULL);
@@ -186,7 +183,7 @@ static void scan_dir( const char *dirname )
     struct stat filestatus;
 
     cache_entry *entry;
-    int found;
+    int found = 0;
 
     dir = opendir( dirname );
     if(!dir)
@@ -244,13 +241,11 @@ static void scan_dir( const char *dirname )
             entry = romcache.top;
             do
                {
-               printf("%s, %s.\n", entry->filename,filename);
-               //if(strncmp(entry->filename,filename,PATH_MAX)==0)
-                 //  {
-                  // printf("Found rom in cache\n");
-                   //found = 1;
-                   //break;
-                  // }
+               if(strncmp(entry->filename,filename,PATH_MAX)==0)
+                     {
+                     found = 1;
+                     break;
+                     }
                entry = entry->next;
                }
             while (entry!=NULL);
@@ -265,20 +260,23 @@ static void scan_dir( const char *dirname )
             continue;
             }
 
-        if(!found)
+        if(found==0)
             {
             strcpy(entry->filename,filename);
             //Test if we're a valid rom and compute MD5.
             entry->romsize = calculateMD5(entry->filename , entry->MD5);
-            //HACK 
-            fill_header(entry->filename);
-            entry->countrycode = ROM_HEADER->Country_code;
 
             if(!entry->romsize)
                 {
                 free(entry);
                 continue;
                 }
+
+            //HACK 
+            fill_header(entry->filename);
+            entry->countrycode = ROM_HEADER->Country_code;
+
+
             entry->inientry = ini_search_by_md5(entry->MD5);
 
             //Something to deal with custom roms.
@@ -301,6 +299,7 @@ static void scan_dir( const char *dirname )
                 romcache.last = entry;
                 ++romcache.length;
                 }
+            printf("Added ROM: %s\n", entry->inientry->goodname);
             }
         }
     closedir(dir);
