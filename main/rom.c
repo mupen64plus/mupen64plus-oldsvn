@@ -48,6 +48,7 @@
 #include "translate.h"
 #include "main.h"
 #include "util.h"
+#include "romcache.h"
 
 //Supported rom compressiontypes.
 enum 
@@ -452,6 +453,44 @@ int rom_read(const char *filename)
     printf("EEPROM type: %d\n", ROM_SETTINGS.eeprom_16kb);
     ini_closeFile();
     return 0;
+}
+
+rominfo fill_rominfo(const char *filename)
+{
+
+    mupenEntry *entry;
+    rominfo info;
+    char buffer[1024], *s;
+
+    int compressiontype, imagetype, i;
+
+    if(rom)
+        { free(rom); }
+
+    strncpy(buffer, filename, 1023);
+    if ((rom=load_rom(filename, &taille_rom, &compressiontype, &imagetype, &taille_rom))==NULL)
+        {
+        printf ("File not found or wrong path.\n");
+        return info;
+        }
+        
+    info.iSize = taille_rom;
+    // loading rom settings and checking if it's a good dump
+    calculateMD5(filename , info.cMD5);
+
+    if(ROM_HEADER)
+        { free(ROM_HEADER); }
+    ROM_HEADER = malloc(sizeof(rom_header));
+    memcpy(ROM_HEADER, rom, sizeof(rom_header));
+    trim((char *)ROM_HEADER->nom); // remove trailing whitespace from Rom name
+    
+    info.cCountry = ROM_HEADER->Country_code;
+    info.iCRC1 = ROM_HEADER->CRC1;
+    info.iCRC2 = ROM_HEADER->CRC2;
+    entry = ini_search_by_md5(info.cMD5);
+    strcpy(info.cGoodName,entry->goodname);
+    
+    return info;
 }
 
 int fill_header(const char *filename)

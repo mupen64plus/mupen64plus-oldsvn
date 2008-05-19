@@ -141,6 +141,7 @@ static void romentry_fill( SRomEntry *entry )
 */
 void rombrowser_readCache( void )
 {
+	return;
     char filename[PATH_MAX];
     gzFile *f;
     int i;
@@ -189,6 +190,7 @@ void rombrowser_readCache( void )
 
 void rombrowser_writeCache( void )
 {
+	return;
     char filename[PATH_MAX];
     gzFile *f;
     SRomEntry *entry = 0;
@@ -296,10 +298,46 @@ char *sub_string(const char *string, int start, int end)
     
     return alloc;
 }
+void update_rombrowser(cache_entry centry)
+{
+	/*
+	 *    char goodname[100];
+   int eeprom16kb;
+   char MD5[33];
+   char CRC[22];
+   char refMD5[33];
+   char comments[200];
+   */
+    
+    SRomEntry *dentry;
+    GtkTreeIter *iter1 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+    GtkTreeIter *iter2 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
 
+    gchar *line[5];
+    dentry->info.cCountry = centry.info.cCountry;
+    dentry->info.iSize = centry.info.iSize;
+    romentry_fill(dentry);
+    line[0] = centry.info.cGoodName;
+    line[1] = dentry->cCountry;
+    line[2] = dentry->cSize;
+    line[3] = "Comments"; //entry->comments;
+            //Add entries to TreeModel
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
+
+    gtk_list_store_append ( GTK_LIST_STORE(model), iter1);
+    gtk_list_store_set ( GTK_LIST_STORE(model), iter1, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, dentry, 6, dentry->flag, -1);
+
+    model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+    gtk_list_store_append ( GTK_LIST_STORE(model), iter2);
+    gtk_list_store_set ( GTK_LIST_STORE(model), iter2, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, dentry, 6, dentry->flag, -1);
+    g_iNumRoms ++;
+    //printf("GoodName: %s\n");
+    //printf("
+}
 // scan dir for roms
 static void scan_dir( const char *dirname )
 {
+	return;
     DIR *dir;
     int rom_size, i;
     char filename[PATH_MAX];
@@ -310,6 +348,7 @@ static void scan_dir( const char *dirname )
     struct stat sb;
     GtkTreeIter *iter1 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
     GtkTreeIter *iter2 = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+
     gchar *line[5];
     SRomEntry *entry, *cacheEntry;
     int found;
