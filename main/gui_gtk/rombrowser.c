@@ -231,61 +231,70 @@ char *sub_string(const char *string, int start, int end)
         alloc[i] = string[i+start];
     }
     alloc[length] = '\0';
-    
+
     return alloc;
 }
 
 //Add romcache to GUI.
 void fillrombrowser()
 {
-gboolean fullpaths;
-char *line[5];
+    gboolean fullpaths;
+    char *line[5];
 
-GdkPixbuf *flag;
-line[1] = malloc(32*sizeof(char));
-line[2] = malloc(16*sizeof(char));
+    GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+    GdkPixbuf *flag;
+    line[1] = malloc(32*sizeof(char));
+    line[2] = malloc(16*sizeof(char));
 
-fullpaths = config_get_bool( "RomBrowserShowFullPaths", FALSE);
+    fullpaths = config_get_bool( "RomBrowserShowFullPaths", FALSE);
 
-if(romcache.length!=0)
-       {
-       cache_entry *entry;
-       entry = romcache.top;
-       do
+    printf("GUI thinks there are %d roms in cache.\n", romcache.length);
+
+    if(romcache.length!=0)
+        {
+        cache_entry *entry;
+        entry = romcache.top;
+        do
             {
             line[0] = entry->inientry->goodname;
             countrycodestring(entry->countrycode, line[1]);
             sprintf(line[2], "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
             line[3] = NULL; //Comments.
             countrycodeflag(entry->countrycode, &flag);
-        if(fullpaths)
-        { line[4] = entry->filename; }
-        else
-        {
-            int fnlen = strlen(entry->filename);
-            char *newfn= NULL;
-            int i;
-            for(i=fnlen; i > 0; i--)
-            {
-                if(entry->filename[i] == '/')
+            if(fullpaths)
+                { line[4] = entry->filename; }
+            else
                 {
-                    newfn = sub_string(entry->filename, i+1, fnlen);
-                    break;
+                int fnlen = strlen(entry->filename);
+                char *newfn= NULL;
+                int i;
+                for(i=fnlen; i > 0; i--)
+                    {
+                    if(entry->filename[i] == '/')
+                        {
+                        newfn = sub_string(entry->filename, i+1, fnlen);
+                        break;
+                        }
+                    }
+                    line[4] = newfn;
                 }
-            }
-            line[4] = newfn;
-        }
 
-        GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+            /*
+            //DEBUG
+            printf("ROM: %s\n", line[0]);
+            printf("Country: %s\n", line[1]);
+            printf("Size: %s\n", line[2]);
+            printf("File: %s\n", line[4]);
+            */
 
-        //Add entries to TreeModel
-        GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
-        gtk_list_store_append ( GTK_LIST_STORE(model), iter);
-        gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
+            //Add entries to TreeModel
+            GtkTreeModel *model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
+            gtk_list_store_append ( GTK_LIST_STORE(model), iter);
+            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
 
-        model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
-        gtk_list_store_append ( GTK_LIST_STORE(model), iter);
-        gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
+            model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+            gtk_list_store_append ( GTK_LIST_STORE(model), iter);
+            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2,    line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
 
             printf("Added ROM to GUI: %s\n", entry->inientry->goodname);
             entry = entry->next;

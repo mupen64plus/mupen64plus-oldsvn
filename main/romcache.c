@@ -76,7 +76,7 @@ GUI polls romcache, using the database entry pointer to build
 its GtkTreeView or KDE ListView.
 */
 
-static void scan_dir2( const char *dirname );
+static void scan_dir( const char *dirname );
 
 void clear_cache()
 {
@@ -107,14 +107,20 @@ void * rom_cache_system( void *_arg )
 
     if(!load_initial_cache())
         { printf("[rcs] load_initial_cache() returned 0\n"); }
+    else
+        {
+        //Send current cache to rombrowser.
+        updaterombrowser();
+        }
 
-   cache_entry *entry;
+    //TODO - add thread priority lowering code here.
 
     remove(cache_filename);
     rebuild_cache_file();
 
-    printf("[rom cache] done loading initial cache\n"); 
+    //Should be done in rebuild_cache_file() every n roms...
     updaterombrowser();
+    printf("[rcs] Cache file up to date.\n"); 
 }
 
 int rebuild_cache_file()
@@ -133,14 +139,14 @@ int rebuild_cache_file()
         sprintf(buffer,"RomDirectory[%d]",i);
         directory = config_get_string(buffer,"");
         printf("Scanning... %s\n",directory);
-        scan_dir2(directory);
+        scan_dir(directory);
         }
 
     gzFile *gzfile;
 
     if((gzfile = gzopen(cache_filename,"wb"))==NULL)
         {
-        printf("[error] could not create %s\n",cache_filename);
+        printf("[rcs] Could not create cache file %s\n",cache_filename);
         return 0;
         }
 
@@ -152,9 +158,11 @@ int rebuild_cache_file()
        entry = romcache.top;
        do
             {
-            gzwrite( gzfile, entry->filename, sizeof(char)*PATH_MAX);
-            gzwrite( gzfile, entry->MD5, sizeof(char)*33);
-            gzwrite( gzfile, &entry->timestamp, sizeof(time_t));
+            gzwrite(gzfile, entry->filename, sizeof(char)*PATH_MAX);
+            gzwrite(gzfile, entry->MD5, sizeof(char)*33);
+            gzwrite(gzfile, &entry->timestamp, sizeof(time_t));
+            gzwrite(gzfile, &entry->countrycode, sizeof(unsigned short));
+            gzwrite(gzfile, &entry->romsize, sizeof(int));
 
             printf("Added ROM: %s\n", entry->inientry->goodname);
             entry = entry->next;
@@ -166,7 +174,7 @@ int rebuild_cache_file()
 
 }
 
-static void scan_dir2( const char *dirname )
+static void scan_dir( const char *dirname )
 {
     int i;
     char filename[PATH_MAX];
@@ -174,8 +182,8 @@ static void scan_dir2( const char *dirname )
     char *extension;
 
     DIR *dir; 
-    struct dirent *de;
-    struct stat sb; //Give sb and de better names...
+    struct dirent *de; //Give de a better name.
+    struct stat filestatus;
 
     cache_entry *entry;
     int found;
@@ -183,7 +191,7 @@ static void scan_dir2( const char *dirname )
     dir = opendir( dirname );
     if(!dir)
         {
-        printf( "Couldn't open directory '%s': %s\n", dirname, strerror( errno ) );
+        printf( "[rcs] Could not open directory '%s': %s\n", dirname, strerror( errno ) );
         return;
         }
 
@@ -198,7 +206,7 @@ static void scan_dir2( const char *dirname )
             { strncpy(real_path, filename, PATH_MAX); }
 
         //If we can't get information, move to next file.
-        if(stat(real_path,&sb)==-1)
+        if(stat(real_path,&filestatus)==-1)
             { continue; }
 
         //Maybe probe errno and provide feedback?  ^
@@ -207,10 +215,10 @@ static void scan_dir2( const char *dirname )
         //Handle recursive scanning.
         if( config_get_bool( "RomDirsScanRecursive", 0 ) )
             {
-            if( S_ISDIR(sb.st_mode) )
+            if( S_ISDIR(filestatus.st_mode) )
                 {
                 strncat(filename, "/", PATH_MAX);
-                scan_dir2(filename);
+                scan_dir(filename);
                 continue;
                 }
             }
@@ -227,19 +235,36 @@ static void scan_dir2( const char *dirname )
         if(!romextensions[i])
             { continue; }
 
+        //This needs to be converted to something more useful...
+        //printf("Modified %d\n", filestatus.st_mtime);
+
+        //Found controls whether its found in the cache.
+        if(romcache.length!=0)
+            {
+            entry = romcache.top;
+            do
+               {
+               printf("%s, %s.\n", entry->filename,filename);
+               //if(strncmp(entry->filename,filename,PATH_MAX)==0)
+                 //  {
+                  // printf("Found rom in cache\n");
+                   //found = 1;
+                   //break;
+                  // }
+               entry = entry->next;
+               }
+            while (entry!=NULL);
+            }
+        else
+            { found = 0; }
+
         entry = (cache_entry*)calloc(1,sizeof(cache_entry));
-        if( !entry )
+        if(!entry)
             {
             fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
             continue;
             }
 
-        //This needs to be converted to something more useful...
-        //printf("Modified %d\n", sb.st_mtime);
-
-        //Found controls whether its found in the cache.
-        //We need to add this.
-        found = 0;
         if(!found)
             {
             strcpy(entry->filename,filename);
@@ -260,7 +285,7 @@ static void scan_dir2( const char *dirname )
             //if(entry.inientry==NULL)
             //    { custom_search_by_md5(entry->MD5);
 
-            entry->timestamp = sb.st_mtime;
+            entry->timestamp = filestatus.st_mtime;
             //Add code to search comment database.
 
             //Actually add rom to cache.
@@ -285,12 +310,13 @@ int load_initial_cache()
 {
     int i;
     cache_entry *entry, *entrynext;
+    struct stat filestatus;
 
     gzFile *gzfile;
 
     if((gzfile = gzopen(cache_filename,"rb"))==NULL)
         {
-        printf("[rcs] Error, could not open %s\n",cache_filename);
+        printf("[rcs] Could not open %s\n",cache_filename);
         return 0;
         }
 
@@ -308,19 +334,29 @@ int load_initial_cache()
 
             if(!gzread(gzfile, entry->filename, sizeof(char)*PATH_MAX)||
                !gzread(gzfile, entry->MD5, sizeof(char)*33)||
-               !gzread(gzfile, &entry->timestamp, sizeof(time_t)))
+               !gzread(gzfile, &entry->timestamp, sizeof(time_t))||
+               !gzread(gzfile, &entry->countrycode, sizeof(unsigned short))||
+               !gzread(gzfile, &entry->romsize, sizeof(int)))
                 {
                 if(!gzeof(gzfile)) //gzread error.
                     { 
                     clear_cache();
-                    printf("[rcs] Error, cache file corrupt.\n");
+                    printf("[rcs] Cache file corrupt.\n");
                     return 0;
                     }
                 }
 
-            //Actually add rom to cache.
-            if(entry->MD5!=NULL)
+            //Check rom is valid.
+            //If we can't get information, move to next file.
+            if(stat(entry->filename,&filestatus)==-1)
+                { continue; }
+
+            entry->next = NULL;
+
+            //Maybe add size here too?
+            if(entry->MD5!=NULL&&entry->timestamp==filestatus.st_mtime)
                 {
+                //Actually add rom to cache.
                 entry->inientry = ini_search_by_md5(entry->MD5);
                 if(i==0)
                     {
@@ -338,7 +374,8 @@ int load_initial_cache()
 
     gzclose(gzfile);
 
-    printf("[rcs] Cache file read.\n");
+    printf("[rcs] Cache file processed.\n");
+
     return 1;
 }
 

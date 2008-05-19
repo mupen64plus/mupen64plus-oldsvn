@@ -30,10 +30,10 @@ typedef struct centry
     char filename[PATH_MAX];
     char MD5[33]; // md5 code
     time_t timestamp;//Should it be in m_time or something more human friendly???
-    mupenEntry* inientry; 
     unsigned short countrycode;
     int romsize; //Hm... this should be unsigned everywhere.
     //comment* something to deal with comments.
+    mupenEntry* inientry; 
     struct centry* next;
 } cache_entry;
 

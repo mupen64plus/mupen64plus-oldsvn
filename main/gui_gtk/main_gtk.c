@@ -156,7 +156,7 @@ void updaterombrowser()
         if(!pthread_equal(self, g_GuiThread))
             gdk_threads_enter();
 
-        fillrombrowser();
+        rombrowser_refresh();
 
         GUI_PROCESS_QUEUED_EVENTS();
 
