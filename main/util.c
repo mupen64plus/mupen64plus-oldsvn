@@ -43,6 +43,7 @@
 #include <SDL.h>
 
 #include "util.h"
+#include "translate.h"
 
 /** trim
  *    Removes leading and trailing whitespace from str. Function modifies str

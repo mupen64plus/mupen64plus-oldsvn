@@ -1,5 +1,5 @@
 /***************************************************************************
- vcrcomp_dialog.h - Handles VCR mode GUI elements
+rombrowser.h - Handles VCR mode GUI elements
 ----------------------------------------------------------------------------
 Began                : Sat Nov 9 2002
 Copyright            : (C) 2002 by blight

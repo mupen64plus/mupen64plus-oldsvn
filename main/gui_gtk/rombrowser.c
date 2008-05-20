@@ -15,7 +15,6 @@ Email                : blight@Ashitaka
  *                                                                         *
  ***************************************************************************/
 
-
 #include "rombrowser.h"
 #include "romproperties.h"
 #include "main_gtk.h"
@@ -33,7 +32,6 @@ Email                : blight@Ashitaka
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-
 
 // rom file extensions
 static const char *g_romFileExtensions[] = 
@@ -58,7 +56,7 @@ static void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
     switch(countrycode)
     {
     case 0x41: /* Japan / USA */
-        *flag = japanusa; 
+        *flag = japanusa;
         break;
 
     case 0x44: /* Germany */
@@ -156,22 +154,27 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         { return strcasecmp(buffer1, buffer2); }
 }
 
-char *sub_string(const char *string, int start, int end)
+char* filefrompath(const char *string)
 {
-    int length = end-start;
-    if(length <= 0)
-    {
-        return NULL;
-    }
-    char *alloc = (char *)malloc(length+1);
-    int i;
-    for(i = 0; i < length; i++)
-    {
-        alloc[i] = string[i+start];
-    }
-    alloc[length] = '\0';
+    char *buffer1, *buffer2;
+    buffer1=(char*)string;
+    while((buffer2=strstr(buffer1, "/"))!=NULL)
+        { buffer1=buffer2+1; }
 
-    return alloc;
+    if(buffer1==(char*)string)
+        { return buffer1; }
+    else
+        {
+        int size = strlen(buffer1)+1;
+        buffer2 = malloc(size*sizeof(char));
+        if(!buffer2)
+            {
+            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
+            return NULL;
+            }
+        snprintf(buffer2, size, "%s\0", buffer1);
+        return buffer2;
+        }
 }
 
 //Add romcache to GUI.
@@ -184,10 +187,13 @@ void fillrombrowser()
     GdkPixbuf *flag;
     line[1] = malloc(32*sizeof(char));
     line[2] = malloc(16*sizeof(char));
+    if(!iter||!line[1]||!line[2])
+        {
+        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
+        return;
+        }
 
     fullpaths = config_get_bool( "RomBrowserShowFullPaths", FALSE);
-
-    printf("GUI thinks there are %d roms in cache.\n", romcache.length);
 
     if(romcache.length!=0)
         {
@@ -203,28 +209,7 @@ void fillrombrowser()
             if(fullpaths)
                 { line[4] = entry->filename; }
             else
-                {
-                int fnlen = strlen(entry->filename);
-                char *newfn= NULL;
-                int i;
-                for(i=fnlen; i > 0; i--)
-                    {
-                    if(entry->filename[i] == '/')
-                        {
-                        newfn = sub_string(entry->filename, i+1, fnlen);
-                        break;
-                        }
-                    }
-                    line[4] = newfn;
-                }
-
-            /*
-            //DEBUG
-            printf("ROM: %s\n", line[0]);
-            printf("Country: %s\n", line[1]);
-            printf("Size: %s\n", line[2]);
-            printf("File: %s\n", line[4]);
-            */
+                { line[4] = filefrompath(entry->filename); }
 
             //Add entries to TreeModel
             GtkTreeModel *model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
@@ -235,16 +220,17 @@ void fillrombrowser()
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
             gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2,    line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
 
-            printf("Added ROM to GUI: %s\n", entry->inientry->goodname);
             entry = entry->next;
             }
         while (entry!=NULL);
         }
 
+      free(line[1]);
+      free(line[2]);
+      free(iter);
+      if(fullpaths==1)
+         { free(line[4]); }
 }
-
-
-
 
 //Load a fresh TreeView by re-scanning directories.
 void rombrowser_refresh( void )
@@ -272,6 +258,7 @@ void rombrowser_refresh( void )
 //We're going our own filtering, but this is a GtkTreeModelFilter function.
 //We do filtering manually since GtkTreeModelFilter can not implement automatic 
 //sorting and GtkTreeModelSort can't implement automatic filtering.
+//NOTE: we should add contingencies, i.e. secondary sort columns.
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
     const gchar *filter;

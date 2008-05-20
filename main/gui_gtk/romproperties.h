@@ -26,7 +26,6 @@ Email                : blight@Ashitaka
 typedef struct
 {
     GtkWidget *dialog;
-
     // entries
     GtkWidget *romNameEntry;
     GtkWidget *fileNameEntry;

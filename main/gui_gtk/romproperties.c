@@ -83,7 +83,7 @@ void show_romPropDialog( cache_entry *entry )
     sprintf(ini_code, "%s", entry->inientry->CRC);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.iniCodeEntry), ini_code );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), entry->inientry->MD5 );
-    //gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->info.cComments );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->comment );
     g_RomEntry = entry;
 
     // show dialog

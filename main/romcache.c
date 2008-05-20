@@ -42,7 +42,7 @@
 #include "rom.h"
 #include "translate.h"
 
-//This if for updaterombrowser, which needs the same type of abstraction as info_message().
+//This if for updaterombrowser(), which needs the same type of abstraction as info_message().
 #include "gui_gtk/rombrowser.h"
 
 //These functions need to be moved.
@@ -88,16 +88,23 @@ void * rom_cache_system( void *_arg )
     int i;
     int caching_done = 0;
     int rebuild_cache = 0;
+    char *buffer;
 
-    sprintf(cache_filename, "%s%s", get_configpath(), CACHE_FILE);
-
-    if(!load_initial_cache())
-        { printf("[rcs] load_initial_cache() returned 0\n"); }
-    else
+    buffer = (char*)config_get_string("RomCacheFile", NULL);
+    if(!buffer)
         {
-        //Send current cache to rombrowser.
-        updaterombrowser();
+        printf("Cache not in config\n");
+        buffer = (char*)malloc(PATH_MAX*sizeof(char));
+        snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
+        config_put_string("RomCacheFile", buffer);
+        config_write();
         }
+
+    snprintf(cache_filename, PATH_MAX, "%s", buffer);
+    free(buffer);
+
+    if(load_initial_cache())
+        { updaterombrowser(); }
 
     //TODO - add thread priority lowering code here.
 
@@ -147,6 +154,7 @@ int rebuild_cache_file()
             gzwrite(gzfile, &entry->timestamp, sizeof(time_t));
             gzwrite(gzfile, &entry->countrycode, sizeof(unsigned short));
             gzwrite(gzfile, &entry->romsize, sizeof(int));
+            gzwrite(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char));
 
             entry = entry->next;
             }
@@ -338,7 +346,8 @@ int load_initial_cache()
                !gzread(gzfile, entry->MD5, sizeof(char)*33)||
                !gzread(gzfile, &entry->timestamp, sizeof(time_t))||
                !gzread(gzfile, &entry->countrycode, sizeof(unsigned short))||
-               !gzread(gzfile, &entry->romsize, sizeof(int)))
+               !gzread(gzfile, &entry->romsize, sizeof(int))||
+               !gzread(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char)))
                 {
                 if(!gzeof(gzfile)) //gzread error.
                     { 
