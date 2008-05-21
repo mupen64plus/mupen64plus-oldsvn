@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include <errno.h>
-#include <pthread.h>
+#include <pthread.h> //Actually not currently using...
 
 #include <limits.h> //PATH_MAX
 #include <dirent.h> //Directory support.
@@ -48,11 +48,7 @@
 //These functions need to be moved.
 #include "mupenIniApi.h"
 
-//Should move into config file system.
-#define CACHE_FILE "rombrowser2.cache"
 #define DATABASE_FILE "mupen64plus.ini"
-//This must be fixed...
-#define MAGIC_HEADER "RCS}" 
 
 void *rom_cache_system(void *_arg);
 char cache_filename[PATH_MAX];
@@ -98,18 +94,18 @@ void * rom_cache_system( void *_arg )
             case RCS_INIT:
             {
                 rcs_initialized = 1;
-                sprintf(cache_filename, "%s%s", get_configpath(), CACHE_FILE);
                 buffer = (char*)config_get_string("RomCacheFile", NULL);
                 if(!buffer)
-                {
-                    printf("Cache not in config\n");
+                    {
+                    printf("[rcs] Cache not in config.\n");
                     buffer = (char*)malloc(PATH_MAX*sizeof(char));
                     snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
                     config_put_string("RomCacheFile", buffer);
                     config_write();
-                }
+                    }
 
                 snprintf(cache_filename, PATH_MAX, "%s", buffer);
+                //printf("Cache file: %s \n", cache_filename);
                 free(buffer);
                 if(!load_initial_cache())
                 {
