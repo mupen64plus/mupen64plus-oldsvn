@@ -1408,7 +1408,7 @@ static int create_mainWindow( void )
     gtk_signal_connect(GTK_OBJECT(g_MainWindow.window), "delete_event", GTK_SIGNAL_FUNC(callback_mainWindowDeleteEvent), (gpointer)NULL);
 
     // toplevel vbox
-    g_MainWindow.toplevelVBox = gtk_vbox_new( FALSE, 5 );
+    g_MainWindow.toplevelVBox = gtk_vbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER(g_MainWindow.window), g_MainWindow.toplevelVBox );
 
     // menu

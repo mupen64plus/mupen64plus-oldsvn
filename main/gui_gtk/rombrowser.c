@@ -685,10 +685,17 @@ static gboolean callback_filter_grab_unselected( GtkWidget *widget, gpointer dat
 // create GUI filter widgets.
 int create_filter( void )
 {
-    GtkWidget *Hbox;
+    GtkWidget *filter;
+    GtkToolItem *toolitem;
     GtkWidget *label;
+    GtkWidget *Hbox;
 
-    Hbox = gtk_hbox_new ( FALSE, 5 );
+    Hbox = gtk_hbox_new(FALSE, 0);
+    toolitem = gtk_tool_item_new();
+    gtk_tool_item_set_expand(toolitem, TRUE);
+
+    filter = gtk_toolbar_new();
+    gtk_toolbar_set_orientation( GTK_TOOLBAR(filter), GTK_ORIENTATION_HORIZONTAL );
 
     label = gtk_label_new_with_mnemonic ( tr("F_ilter:") );
     g_MainWindow.filter = gtk_entry_new();
@@ -704,10 +711,13 @@ int create_filter( void )
 
     gtk_label_set_mnemonic_widget ( GTK_LABEL(label), g_MainWindow.filter );
 
-    gtk_box_pack_start ( GTK_BOX(Hbox), label, FALSE, FALSE, 5 );
-    gtk_box_pack_start ( GTK_BOX(Hbox), g_MainWindow.filter, TRUE, TRUE, 5 );
+    gtk_box_pack_start ( GTK_BOX(Hbox), label, FALSE, FALSE, 5);
+    gtk_box_pack_start ( GTK_BOX(Hbox), g_MainWindow.filter, TRUE, TRUE, 5);
 
-    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), Hbox, FALSE, FALSE, 0 );
+    gtk_container_add(GTK_CONTAINER(toolitem), Hbox);
+    gtk_toolbar_insert ( GTK_TOOLBAR(filter), toolitem, 0);
+
+    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), filter, FALSE, FALSE, 0 );
 }
 
 // play rom menu item
