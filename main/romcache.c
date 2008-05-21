@@ -138,6 +138,7 @@ void * rom_cache_system( void *_arg )
                     printf("[rcs] Rescanning rom cache!\n");
                     
                 }
+                g_RCSTask = RCS_SLEEP;
             }
             break;
             case RCS_SLEEP:
