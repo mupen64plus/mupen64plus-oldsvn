@@ -95,7 +95,7 @@ void * rom_cache_system( void *_arg )
             {
                 rcs_initialized = 1;
                 buffer = (char*)config_get_string("RomCacheFile", NULL);
-                if(!buffer)
+                if(buffer==NULL)
                     {
                     printf("[rcs] Cache not in config.\n");
                     buffer = (char*)malloc(PATH_MAX*sizeof(char));

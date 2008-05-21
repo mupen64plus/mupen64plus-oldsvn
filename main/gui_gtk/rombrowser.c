@@ -446,10 +446,17 @@ static gboolean callback_filter_grab_unselected( GtkWidget *widget, gpointer dat
 // create GUI filter widgets.
 int create_filter( void )
 {
-    GtkWidget *Hbox;
+    GtkWidget *filter;
+    GtkToolItem *toolitem;
     GtkWidget *label;
+    GtkWidget *Hbox;
 
-    Hbox = gtk_hbox_new ( FALSE, 5 );
+    Hbox = gtk_hbox_new(FALSE, 0);
+    toolitem = gtk_tool_item_new();
+    gtk_tool_item_set_expand(toolitem, TRUE);
+
+    filter = gtk_toolbar_new();
+    gtk_toolbar_set_orientation( GTK_TOOLBAR(filter), GTK_ORIENTATION_HORIZONTAL );
 
     label = gtk_label_new_with_mnemonic ( tr("F_ilter:") );
     g_MainWindow.filter = gtk_entry_new();
@@ -465,10 +472,13 @@ int create_filter( void )
 
     gtk_label_set_mnemonic_widget ( GTK_LABEL(label), g_MainWindow.filter );
 
-    gtk_box_pack_start ( GTK_BOX(Hbox), label, FALSE, FALSE, 5 );
-    gtk_box_pack_start ( GTK_BOX(Hbox), g_MainWindow.filter, TRUE, TRUE, 5 );
+    gtk_box_pack_start ( GTK_BOX(Hbox), label, FALSE, FALSE, 5);
+    gtk_box_pack_start ( GTK_BOX(Hbox), g_MainWindow.filter, TRUE, TRUE, 5);
 
-    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), Hbox, FALSE, FALSE, 0 );
+    gtk_container_add(GTK_CONTAINER(toolitem), Hbox);
+    gtk_toolbar_insert ( GTK_TOOLBAR(filter), toolitem, 0);
+
+    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), filter, FALSE, FALSE, 0 );
 }
 
 // play rom menu item
@@ -528,15 +538,12 @@ static void callback_refreshRomBrowser( GtkWidget *widget, gpointer data )
     rombrowser_refresh();
 }
 
-
-
 static void setup_view (GtkWidget *view)
 {
     gchar *titles[] = 
         {
-        (gchar *)tr("Flag"),
-        (gchar *)tr("Good Name"),
         (gchar *)tr("Country"),
+        (gchar *)tr("Good Name"),
         (gchar *)tr("Size"),
         (gchar *)tr("Comments"),
         (gchar *)tr("File Name")
@@ -552,7 +559,16 @@ static void setup_view (GtkWidget *view)
     model = GTK_TREE_MODEL (store);
 
     renderer = gtk_cell_renderer_pixbuf_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[0], renderer, "pixbuf", 6, NULL); 
+    column = gtk_tree_view_column_new();
+    gtk_tree_view_column_set_title(column, titles[0]); 
+    renderer = gtk_cell_renderer_pixbuf_new();
+    gtk_tree_view_column_pack_start(column, renderer, FALSE);
+    gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 6);
+    g_object_set(renderer, "xpad", 5, NULL);
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute(column, renderer, "text", 1);
+
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 0);
@@ -568,15 +584,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 1);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[2], renderer, "text", 1, NULL);
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 2);
-    g_signal_connect (G_OBJECT (column), "clicked", G_CALLBACK (callback_columnClicked), model);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 2);
-
-    renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[3], renderer, "text", 2, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[2], renderer, "text", 2, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 3);
@@ -584,7 +592,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 3);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[4], renderer, "text", 3, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[3], renderer, "text", 3, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 4);
@@ -592,7 +600,7 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 4);
 
     renderer = gtk_cell_renderer_text_new ();
-    column = gtk_tree_view_column_new_with_attributes (titles[5], renderer, "text", 4, NULL);
+    column = gtk_tree_view_column_new_with_attributes (titles[4], renderer, "text", 4, NULL);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 5);
