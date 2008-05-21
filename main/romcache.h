@@ -27,6 +27,16 @@
 //These functions need to be moved.
 #include "mupenIniApi.h"
 #include <limits.h> //PATH_MAX
+
+enum RCS_TASK
+{
+    RCS_INIT = 1,
+    RCS_RESCAN,
+    RCS_SLEEP,
+    RCS_SHUTDOWN
+};
+
+enum RCS_TASK g_RCSTask;
 //When finished, move to header.
 
 typedef struct _cache_entry

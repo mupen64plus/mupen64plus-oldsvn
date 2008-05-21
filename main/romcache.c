@@ -82,38 +82,73 @@ void clear_cache()
         romcache.last = NULL;
         }
 }
-
 void * rom_cache_system( void *_arg )
 {
     int i;
     int caching_done = 0;
     int rebuild_cache = 0;
+    int rcs_initialized = 0;
     char *buffer;
-
-    buffer = (char*)config_get_string("RomCacheFile", NULL);
-    if(!buffer)
+    
+    // Setup job parser
+    while (g_RCSTask != RCS_SHUTDOWN)
+    {
+        switch(g_RCSTask)
         {
-        printf("Cache not in config\n");
-        buffer = (char*)malloc(PATH_MAX*sizeof(char));
-        snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
-        config_put_string("RomCacheFile", buffer);
-        config_write();
+            case RCS_INIT:
+            {
+                rcs_initialized = 1;
+                sprintf(cache_filename, "%s%s", get_configpath(), CACHE_FILE);
+                buffer = (char*)config_get_string("RomCacheFile", NULL);
+                if(!buffer)
+                {
+                    printf("Cache not in config\n");
+                    buffer = (char*)malloc(PATH_MAX*sizeof(char));
+                    snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
+                    config_put_string("RomCacheFile", buffer);
+                    config_write();
+                }
+
+                snprintf(cache_filename, PATH_MAX, "%s", buffer);
+                free(buffer);
+                if(!load_initial_cache())
+                {
+                    printf("[rcs] load_initial_cache() returned 0\n");
+                }
+                else
+                {
+                    //Send current cache to rombrowser.
+                    updaterombrowser();
+                }
+
+                //TODO - add thread priority lowering code here.
+
+                remove(cache_filename);
+                rebuild_cache_file();
+
+                //Should be done in rebuild_cache_file() every n roms...
+                updaterombrowser();
+                printf("[rcs] Cache file up to date.\n");
+                g_RCSTask = RCS_SLEEP; 
+            }
+            break;
+            case RCS_RESCAN:
+            {
+                if (rcs_initialized)
+                {
+                    // rescan code here
+                }
+            }
+            break;
+            case RCS_SLEEP:
+            {
+                // Sleep to not use any CPU power.
+                usleep(1000);
+            }
+            break;
         }
-
-    snprintf(cache_filename, PATH_MAX, "%s", buffer);
-    free(buffer);
-
-    if(load_initial_cache())
-        { updaterombrowser(); }
-
-    //TODO - add thread priority lowering code here.
-
-    remove(cache_filename);
-    rebuild_cache_file();
-
-    //Should be done in rebuild_cache_file() every n roms...
-    updaterombrowser();
-    printf("[rcs] Cache file up to date.\n"); 
+    }
+    printf("[rcs] RCS Terminated!\n");
 }
 
 int rebuild_cache_file()

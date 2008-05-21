@@ -1407,7 +1407,7 @@ int main(int argc, char *argv[])
     param.sched_priority = newprio;
     pthread_attr_setschedparam (&tattr, &param);
     printf("DEBUG: new prio: %i\n",param.sched_priority);
-
+    g_RCSTask = RCS_INIT;
     if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, NULL) != 0)
     {
         g_RomCacheThread = 0;
