@@ -312,11 +312,9 @@ static void scan_dir( const char *dirname )
 
             //Best not to use global, exact best solution depends on 
             //Which fields from the rom header we want.
-            if(ROM_HEADER)
-                { free(ROM_HEADER); }
-            ROM_HEADER = malloc(sizeof(rom_header));
-            memcpy(ROM_HEADER, localrom, sizeof(rom_header));
-            entry->countrycode = ROM_HEADER->Country_code;
+            rom_header localheader;
+            memcpy(&localheader, localrom, sizeof(rom_header));
+            entry->countrycode = localheader.Country_code;
 
             entry->inientry = ini_search_by_md5(entry->MD5);
 

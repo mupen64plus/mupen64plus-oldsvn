@@ -341,8 +341,6 @@ int rom_read(const char *filename)
    printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
     //Check the ini via MD5... This needs rework for RCS.
-    ini_openFile();
-
     for ( i = 0; i < 16; ++i ) 
         { sprintf(buffer+i*2, "%02X", digest[i]); }
     buffer[32] = '\0';
@@ -360,7 +358,6 @@ int rom_read(const char *filename)
             strcat(ROM_SETTINGS.goodname, " (unknown rom)");
             printf("%s\n", ROM_SETTINGS.goodname);
             ROM_SETTINGS.eeprom_16kb = 0;
-            ini_closeFile();
             return 0;
             }
         else
@@ -371,7 +368,6 @@ int rom_read(const char *filename)
                 rom = NULL;
                 free(ROM_HEADER);
                 ROM_HEADER = NULL;
-                ini_closeFile();
                 return -3;
                 }
             strcpy(ROM_SETTINGS.goodname, entry->goodname);
@@ -379,7 +375,6 @@ int rom_read(const char *filename)
             if(strcmp(entry->refMD5, ""))
                 { entry = ini_search_by_md5(entry->refMD5); }
             ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
-            ini_closeFile();
             return 0;
             }
         }
@@ -396,7 +391,6 @@ int rom_read(const char *filename)
                rom = NULL;
                free(ROM_HEADER);
                ROM_HEADER = NULL;
-               ini_closeFile();
                return -3;
                }
            }
@@ -408,7 +402,6 @@ int rom_read(const char *filename)
                 rom = NULL;
                 free(ROM_HEADER);
                 ROM_HEADER = NULL;
-                ini_closeFile();
                 return -3;
                 }
             }
@@ -419,7 +412,6 @@ int rom_read(const char *filename)
         { entry = ini_search_by_md5(entry->refMD5); }
     ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
     printf("EEPROM type: %d\n", ROM_SETTINGS.eeprom_16kb);
-    ini_closeFile();
     return 0;
 }
 

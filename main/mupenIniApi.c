@@ -64,16 +64,6 @@ static int split_property(char *s)
    return i;
 }
 
-static char* get_ini_path()
-{
-   char *path = malloc(strlen(get_configpath())+1+strlen("mupen64plus.ini"));
-
-   strcpy(path, get_configpath());
-   strcat(path, "mupen64plus.ini");
-
-   return path;
-}
-
 void ini_openFile()
 {
    gzFile f;
@@ -84,7 +74,10 @@ void ini_openFile()
    if (ini.comment != NULL) return;
 
    memset( &emptyEntry,0,sizeof(emptyEntry));
-   char* pathname = get_ini_path();
+   char* pathname = malloc(strlen(get_configpath())+1+strlen("mupen64plus.ini"));
+   strcpy(pathname, get_configpath());
+   strcat(pathname, "mupen64plus.ini");
+
    f = gzopen(pathname, "rb");
    free(pathname);
    if (f==NULL) return;
@@ -193,14 +186,6 @@ void ini_openFile()
                if (!strncmp(buf+i+1, "16k", 3))
              cur->entry.eeprom16kb = 1;
             }
-          else if (!strcmp(buf, "Comments"))
-            {
-               if (buf[i+1+strlen(buf+i+1)-1] == '\n')
-             buf[i+1+strlen(buf+i+1)-1] = '\0';
-               if (buf[i+1+strlen(buf+i+1)-1] == '\r')
-             buf[i+1+strlen(buf+i+1)-1] = '\0';
-               strcpy(cur->entry.comments, buf+i+1);
-            }
            }
       }
     gzgets(f, buf, 255);
@@ -209,6 +194,7 @@ void ini_openFile()
 
    gzclose(f);
 }
+
 
 void ini_closeFile()
 {
@@ -224,49 +210,59 @@ void ini_closeFile()
      }
 }
 
+
 mupenEntry* ini_search_by_md5(const char *md5)
 {
-   char t[3];
-   int i;
-   iniElem *aux;
+    char buffer[3];
+    int i;
+    iniElem *aux;
 
-   if (ini.comment == NULL) return emptyEntry;
+    if(ini.comment==NULL)
+        { return emptyEntry; }
 
-   t[0] = md5[0];
-   t[1] = md5[1];
-   t[2] = 0;
-   sscanf(t, "%X", &i);
-   aux = ini.MD5_lists[i];
-   while (aux != NULL && strncmp(aux->entry.MD5, md5, 32))
-     aux = aux->next_MD5;
-   if (aux == NULL) return NULL;
-   return &(aux->entry);
+    buffer[0] = md5[0];
+    buffer[1] = md5[1];
+    buffer[2] = '\0';
+    sscanf(buffer, "%X", &i);
+
+    aux = ini.MD5_lists[i];
+
+    while (aux != NULL && strncmp(aux->entry.MD5, md5, 32))
+        { aux = aux->next_MD5; }
+
+    if(aux==NULL)
+        { return NULL; }
+    else 
+        { return &(aux->entry); }
 }
 
 mupenEntry* ini_search_by_CRC(const char *crc)
 {
-   char t[3];
-   int i;
-   iniElem *aux;
+    char t[3];
+    int i;
+    iniElem *aux;
 
-   if (ini.comment == NULL) return emptyEntry;
+    //No ini file.
+    if(ini.comment==NULL) 
+        { return emptyEntry; }
 
-   t[0] = crc[0];
-   t[1] = crc[1];
-   t[2] = 0;
-   sscanf(t, "%X", &i);
-   aux = ini.CRC_lists[i];
-   while (aux != NULL && strncmp(aux->entry.CRC, crc, 21))
-     aux = aux->next_crc;
-   if (aux == NULL) return NULL;
-   if (strcmp(aux->entry.refMD5, ""))
-     {
-    mupenEntry* temp = ini_search_by_md5(aux->entry.refMD5);
-    if (strncmp(aux->entry.CRC, temp->CRC, 21))
-      return &(aux->entry);
-    else
-      return temp;
-     }
+    t[0] = crc[0];
+    t[1] = crc[1];
+    t[2] = '\0';
+    sscanf(t, "%X", &i);
+    aux = ini.CRC_lists[i];
+    while (aux != NULL && strncmp(aux->entry.CRC, crc, 21))
+        { aux = aux->next_crc; }
+    if (aux == NULL) 
+        { return NULL; }
+    if (strcmp(aux->entry.refMD5, ""))
+        {
+        mupenEntry* temp = ini_search_by_md5(aux->entry.refMD5);
+        if (strncmp(aux->entry.CRC, temp->CRC, 21))
+            { return &(aux->entry); }
+        else
+            { return temp; }
+        }
    else
-     return &(aux->entry);
+        { return &(aux->entry); }
 }
