@@ -435,12 +435,14 @@ void startEmulation(void)
             alert_message(tr("Couldn't spawn core thread!"));
             return;
         }
+        g_RCSTask = RCS_SLEEP;
         pthread_detach(g_EmulationThread);
         info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
     else if(rompause)
     {
+    	g_RCSTask = RCS_SLEEP;
         pauseContinueEmulation();
     }
 
@@ -461,6 +463,7 @@ void stopEmulation(void)
         g_EmulatorRunning = 0;
 
         info_message(tr("Emulation stopped."));
+        g_RCSTask = RCS_RESCAN;
     }
 }
 
@@ -470,9 +473,15 @@ int pauseContinueEmulation(void)
         return 1;
 
     if (rompause)
+    {
+        g_RCSTask = RCS_SLEEP;
         info_message(tr("Emulation continued."));
+    }
     else
+    {
+        g_RCSTask = RCS_RESCAN;
         info_message(tr("Emulation paused."));
+    }
     
     rompause = !rompause;
     return rompause;

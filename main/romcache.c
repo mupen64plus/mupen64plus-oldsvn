@@ -135,6 +135,8 @@ void * rom_cache_system( void *_arg )
                 if (rcs_initialized)
                 {
                     // rescan code here
+                    printf("[rcs] Rescanning rom cache!\n");
+                    
                 }
             }
             break;
