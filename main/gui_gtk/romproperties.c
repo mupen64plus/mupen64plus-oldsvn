@@ -42,7 +42,6 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
     char crc_code[200];
 
     gtk_widget_hide( g_RomPropDialog.dialog );
-    gtk_grab_remove( g_RomPropDialog.dialog );
 
     /* save properties */
     //strcpy( g_RomEntry->comments, gtk_entry_get_text( GTK_ENTRY(g_RomPropDialog.commentsEntry) ) );
@@ -61,7 +60,6 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
 static void callback_cancelClicked( GtkWidget *widget, gpointer data )
 {
     gtk_widget_hide( g_RomPropDialog.dialog );
-    gtk_grab_remove( g_RomPropDialog.dialog );
 }
 
 /*********************************************************************************************************
@@ -73,7 +71,7 @@ void show_romPropDialog( cache_entry *entry )
     char country[32];
     char size[16];
 
-    countrycodestring(entry->romsize, country);
+    countrycodestring(entry->countrycode, country);
     sprintf(size, "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
 
     // fill dialog
@@ -88,7 +86,6 @@ void show_romPropDialog( cache_entry *entry )
 
     // show dialog
     gtk_widget_show_all( g_RomPropDialog.dialog );
-    gtk_grab_add( g_RomPropDialog.dialog );
 }
 
 /*********************************************************************************************************

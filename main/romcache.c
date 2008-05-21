@@ -85,7 +85,7 @@ void * rom_cache_system( void *_arg )
     int rebuild_cache = 0;
     int rcs_initialized = 0;
     char *buffer;
-    
+
     // Setup job parser
     while (g_RCSTask != RCS_SHUTDOWN)
     {
@@ -132,7 +132,6 @@ void * rom_cache_system( void *_arg )
                 {
                     // rescan code here
                     printf("[rcs] Rescanning rom cache!\n");
-                    
                 }
                 g_RCSTask = RCS_SLEEP;
             }

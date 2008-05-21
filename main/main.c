@@ -1434,7 +1434,7 @@ int main(int argc, char *argv[])
         {
             // cleanup and exit
             cheat_delete_all();
-            ini_closeFile();
+            romdatabase_close();
             plugin_delete_list();
             tr_delete_languages();
             config_delete();
@@ -1451,7 +1451,7 @@ int main(int argc, char *argv[])
 
         // cleanup and exit
         cheat_delete_all();
-        ini_closeFile();
+        romdatabase_close();
         plugin_delete_list();
         tr_delete_languages();
         config_delete();
@@ -1471,7 +1471,7 @@ int main(int argc, char *argv[])
     config_write();
     cheat_write_config();
     cheat_delete_all();
-    ini_closeFile();
+    romdatabase_close();
     plugin_delete_list();
     tr_delete_languages();
     config_delete();
