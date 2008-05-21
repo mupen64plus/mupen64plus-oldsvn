@@ -93,6 +93,7 @@ void * rom_cache_system( void *_arg )
         {
             case RCS_INIT:
             {
+            	g_RCSTask = RCS_BUSY;
                 rcs_initialized = 1;
                 buffer = (char*)config_get_string("RomCacheFile", NULL);
                 if(buffer==NULL)
@@ -123,17 +124,22 @@ void * rom_cache_system( void *_arg )
                 rebuild_cache_file();
 
                 printf("[rcs] Cache file up to date.\n");
-                g_RCSTask = RCS_SLEEP; 
+                if (g_RCSTask == RCS_BUSY)
+                    g_RCSTask = RCS_SLEEP; 
             }
             break;
             case RCS_RESCAN:
             {
+            	g_RCSTask = RCS_BUSY;
+            	
                 if (rcs_initialized)
                 {
                     // rescan code here
                     printf("[rcs] Rescanning rom cache!\n");
                 }
-                g_RCSTask = RCS_SLEEP;
+                
+                if (g_RCSTask == RCS_BUSY)
+                    g_RCSTask = RCS_SLEEP;
             }
             break;
             case RCS_SLEEP:

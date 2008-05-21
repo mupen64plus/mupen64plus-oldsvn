@@ -33,6 +33,7 @@ enum RCS_TASK
     RCS_INIT = 1,
     RCS_RESCAN,
     RCS_SLEEP,
+    RCS_BUSY,
     RCS_SHUTDOWN
 };
 
