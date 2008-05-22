@@ -20,6 +20,7 @@ Email                : blight@Ashitaka
 #include "../main.h"
 #include "main_gtk.h"
 #include "rombrowser.h"
+#include "../romcache.h"
 #include "../config.h"
 #include "../guifuncs.h"
 #include "../translate.h"
@@ -38,8 +39,6 @@ Email                : blight@Ashitaka
 
 /** globals **/
 SConfigDialog g_ConfigDialog;
-static int g_RefreshRomBrowser;     // refresh the rombrowser when ok is clicked?
-                                    // (true if rom directories were changed)
 
 struct input_mapping {
     char *name;                     // human-readable name of emulation special function
@@ -236,9 +235,6 @@ static void addRomDirectory(const gchar *dirname)
     GtkTreeIter newiter;
     gtk_list_store_append (GTK_LIST_STORE(model), &newiter);
     gtk_list_store_set (GTK_LIST_STORE(model), &newiter, 0, dirname,-1);
-
-    // Set the refresh flag to one
-    g_RefreshRomBrowser = 1;
 }
 
 static void callback_romDirectoryAdd( GtkWidget *widget, gpointer data )
@@ -291,7 +287,6 @@ static void callback_romDirectoryRemove( GtkWidget *widget, gpointer data )
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
         g_list_free (list);
     }
-    g_RefreshRomBrowser = 1;
 }
 
 static void callback_romDirectoryRemoveAll( GtkWidget *widget, gpointer data )
@@ -314,8 +309,6 @@ static void callback_romDirectoryRemoveAll( GtkWidget *widget, gpointer data )
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
         g_list_free (list);
     }
-
-    g_RefreshRomBrowser = 1;
 }
 
 // OK/Cancel Button
@@ -352,20 +345,16 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
     }
 
     i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton) );
-    if( i != config_get_bool( "RomDirsScanRecursive", FALSE ) ) g_RefreshRomBrowser = 1;
     config_put_bool( "RomDirsScanRecursive", i );
 
     i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton) );
-    if( i != config_get_bool( "RomBrowserShowFullPaths", FALSE ) ) g_RefreshRomBrowser = 1;
     config_put_bool( "RomBrowserShowFullPaths", i );
 
-   
         i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noAudioDelayCheckButton) );
     config_put_bool( "NoAudioDelay", i );
-   
         i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton) );
     config_put_bool( "NoCompiledJump", i );
-   
+
         savestates_set_autoinc_slot(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton)));
         config_put_bool("AutoIncSaveSlot", savestates_get_autoinc_slot());
 
@@ -403,6 +392,7 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
         keepGoing = gtk_tree_model_iter_next(model, &iter);
     }
     config_put_number( "NumRomDirs", i );
+    g_RCSTask = RCS_RESCAN;
 
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton) ) )
         config_put_number( "Core", CORE_INTERPRETER );
@@ -410,9 +400,6 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
         config_put_number( "Core", CORE_DYNAREC );
     else
         config_put_number( "Core", CORE_PURE_INTERPRETER );
-
-    // refresh rom-browser
-    if( g_RefreshRomBrowser ) rombrowser_refresh();
 
     // hide dialog
     gtk_widget_hide( g_ConfigDialog.dialog );
@@ -668,8 +655,6 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton), !g_Noask );
     // if --noask was specified at the commandline, disable checkbox
     gtk_widget_set_sensitive( g_ConfigDialog.noaskCheckButton, !g_NoaskParam );
-
-    g_RefreshRomBrowser = 0;
 
     struct input_mapping *mapping;
 

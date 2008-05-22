@@ -1435,6 +1435,7 @@ int main(int argc, char *argv[])
             // cleanup and exit
             cheat_delete_all();
             romdatabase_close();
+            g_RCSTask = RCS_SHUTDOWN;
             plugin_delete_list();
             tr_delete_languages();
             config_delete();
@@ -1452,6 +1453,7 @@ int main(int argc, char *argv[])
         // cleanup and exit
         cheat_delete_all();
         romdatabase_close();
+        g_RCSTask = RCS_SHUTDOWN;
         plugin_delete_list();
         tr_delete_languages();
         config_delete();
@@ -1471,6 +1473,7 @@ int main(int argc, char *argv[])
     config_write();
     cheat_write_config();
     cheat_delete_all();
+    g_RCSTask = RCS_SHUTDOWN;
     romdatabase_close();
     plugin_delete_list();
     tr_delete_languages();

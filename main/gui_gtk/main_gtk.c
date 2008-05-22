@@ -972,27 +972,7 @@ static void callback_aboutMupen( GtkWidget *widget, gpointer data )
 // hide on delete
 static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-    int i, w, h;
-
-    // save configuration
-    w = g_MainWindow.window->allocation.width;
-    h = g_MainWindow.window->allocation.height;
-    if (w != 0 && h != 0)
-    {
-        config_put_number( "MainWindow Width", w );
-        config_put_number( "MainWindow Height", h );
-    }
-    for( i = 0; i < 6; i++ )
-    {
-        w = gtk_tree_view_get_column( GTK_TREE_VIEW(g_MainWindow.romDisplay), i )->width;
-        if (w != 0)
-        {
-            char buf[30];
-            sprintf( buf, "RomBrowser ColWidth[%d]", i );
-            config_put_number( buf, w );
-        }
-    }
-
+    //Put new rombrowser config saving code here...
     gtk_main_quit();
 
     return TRUE; // undeleteable

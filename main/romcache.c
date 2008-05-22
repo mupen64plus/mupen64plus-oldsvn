@@ -85,10 +85,12 @@ void * rom_cache_system( void *_arg )
     int rebuild_cache = 0;
     int rcs_initialized = 0;
     char *buffer;
+    int free_buffer = 0;
 
     // Setup job parser
     while (g_RCSTask != RCS_SHUTDOWN)
     {
+    //printf("Task: %d\n", g_RCSTask);  
         switch(g_RCSTask)
         {
             case RCS_INIT:
@@ -102,12 +104,14 @@ void * rom_cache_system( void *_arg )
                     buffer = (char*)malloc(PATH_MAX*sizeof(char));
                     snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
                     config_put_string("RomCacheFile", buffer);
-                    config_write();
+                    free_buffer = 1;
                     }
 
                 snprintf(cache_filename, PATH_MAX, "%s", buffer);
+                if(free_buffer)
+                    { free(buffer); }
                 //printf("Cache file: %s \n", cache_filename);
-                free(buffer);
+
                 if(!load_initial_cache())
                 {
                     printf("[rcs] load_initial_cache() returned 0\n");
@@ -134,7 +138,7 @@ void * rom_cache_system( void *_arg )
             	
                 if (rcs_initialized)
                 {
-                    // rescan code here
+                    rebuild_cache_file();
                     printf("[rcs] Rescanning rom cache!\n");
                 }
                 

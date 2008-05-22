@@ -72,6 +72,7 @@ void ini_openFile()
     char buf[256];
     int i=0;
     romdatabase_search *cur = NULL;
+    int free_buffer = 0;
 
     if(romdatabase.comment!=NULL)
         { return; }
@@ -84,11 +85,13 @@ void ini_openFile()
         pathname = (char*)malloc(PATH_MAX*sizeof(char));
         snprintf(pathname, PATH_MAX, "%s%s", get_configpath(), "mupen64plus.ini");
         config_put_string("RomDatabaseFile", pathname);
-        config_write();
+        free_buffer = 1;
         }
 
+    //printf("Database file: %s \n", pathname);
     gzfile = gzopen(pathname, "rb");
-    free(pathname);
+    if(free_buffer)
+        { free(pathname); }
 
     if(gzfile==NULL)
         {

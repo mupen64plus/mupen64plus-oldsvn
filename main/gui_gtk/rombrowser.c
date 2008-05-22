@@ -232,6 +232,11 @@ void fillrombrowser()
          { free(line[4]); }
 }
 
+void call_rcs(void)
+{
+    g_RCSTask = RCS_RESCAN;
+}
+
 //Load a fresh TreeView by re-scanning directories.
 void rombrowser_refresh( void )
 {
@@ -656,7 +661,7 @@ int create_romBrowser( void )
 
     gtk_signal_connect ( GTK_OBJECT(playRomItem), "activate", GTK_SIGNAL_FUNC(callback_playRom), (gpointer)NULL );
     gtk_signal_connect ( GTK_OBJECT(romPropertiesItem), "activate", GTK_SIGNAL_FUNC(callback_romProperties), (gpointer)NULL );
-    gtk_signal_connect ( GTK_OBJECT(refreshRomBrowserItem), "activate", GTK_SIGNAL_FUNC(callback_refreshRomBrowser), (gpointer)NULL );
+    gtk_signal_connect ( GTK_OBJECT(refreshRomBrowserItem), "activate", GTK_SIGNAL_FUNC(call_rcs), (gpointer)NULL );
 
     g_MainWindow.romFullList = gtk_tree_view_new();
     g_MainWindow.romDisplay = gtk_tree_view_new();
