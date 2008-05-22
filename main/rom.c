@@ -122,6 +122,11 @@ unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype
             *romsize=ftell(romfile);
             fseek(romfile, 0L, SEEK_SET);
             localrom = malloc(*loadlength);
+            if(localrom==NULL)
+                {
+                fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                return NULL;
+                }
             fread(localrom, 1, *loadlength, romfile); 
             fclose(romfile);
             romread = 1;
@@ -149,6 +154,11 @@ unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype
                        *compressiontype = ZIP_COMPRESSION;
                        *romsize = fileinfo.uncompressed_size;
                        localrom = malloc(*loadlength);
+                       if(localrom==NULL)
+                           {
+                           fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                           return NULL;
+                           }
                        unzOpenCurrentFile(zipromfile);
                        unzReadCurrentFile(zipromfile, localrom, *loadlength);
                        unzCloseCurrentFile(zipromfile);
@@ -175,6 +185,11 @@ unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype
                 gzseek(gzromfile, 0L, SEEK_SET);
                 *romsize=0;
                 localrom=malloc(100000);
+                if(localrom==NULL)
+                    {
+                    fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                    return NULL;
+                    }
                 while((i=gzread(gzromfile, localrom, 100000)))
                     { *romsize += i; }
                 if(!gzeof(gzromfile)) //gzread error.
@@ -185,6 +200,11 @@ unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype
                 gzseek(gzromfile, 0L, SEEK_SET);
                 free(localrom);
                 localrom = malloc(*loadlength);
+                if(localrom==NULL)
+                    {
+                    fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                    return NULL;
+                    }
                 gzread(gzromfile, localrom, *loadlength); 
                 gzclose(gzromfile);
                 romread = 1;
@@ -318,6 +338,11 @@ int rom_read(const char *filename)
     if(ROM_HEADER)
         { free(ROM_HEADER); }
     ROM_HEADER = malloc(sizeof(rom_header));
+    if(ROM_HEADER==NULL)
+        {
+        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+        return NULL;
+        }
     memcpy(ROM_HEADER, rom, sizeof(rom_header));
     trim((char *)ROM_HEADER->nom); // remove trailing whitespace from Rom name
 

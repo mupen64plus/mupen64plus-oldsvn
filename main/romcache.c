@@ -78,6 +78,7 @@ void clear_cache()
         romcache.last = NULL;
         }
 }
+
 void * rom_cache_system( void *_arg )
 {
     int i;
@@ -86,6 +87,7 @@ void * rom_cache_system( void *_arg )
     int rcs_initialized = 0;
     char *buffer;
     int free_buffer = 0;
+    struct sched_param param;
 
     // Setup job parser
     while (g_RCSTask != RCS_SHUTDOWN)
@@ -95,7 +97,7 @@ void * rom_cache_system( void *_arg )
         {
             case RCS_INIT:
             {
-            	g_RCSTask = RCS_BUSY;
+                g_RCSTask = RCS_BUSY;
                 rcs_initialized = 1;
                 buffer = (char*)config_get_string("RomCacheFile", NULL);
                 if(buffer==NULL)
@@ -110,7 +112,6 @@ void * rom_cache_system( void *_arg )
                 snprintf(cache_filename, PATH_MAX, "%s", buffer);
                 if(free_buffer)
                     { free(buffer); }
-                //printf("Cache file: %s \n", cache_filename);
 
                 if(!load_initial_cache())
                 {
@@ -122,7 +123,8 @@ void * rom_cache_system( void *_arg )
                     updaterombrowser();
                 }
 
-                //TODO - add thread priority lowering code here.
+                param.sched_priority = 0;
+                //pthread_attr_setschedparam (_arg, &param);
 
                 remove(cache_filename);
                 rebuild_cache_file();
@@ -134,14 +136,14 @@ void * rom_cache_system( void *_arg )
             break;
             case RCS_RESCAN:
             {
-            	g_RCSTask = RCS_BUSY;
-            	
+                g_RCSTask = RCS_BUSY;
+
                 if (rcs_initialized)
                 {
                     rebuild_cache_file();
                     printf("[rcs] Rescanning rom cache!\n");
                 }
-                
+
                 if (g_RCSTask == RCS_BUSY)
                     g_RCSTask = RCS_SLEEP;
             }
@@ -289,7 +291,7 @@ static void scan_dir( const char *dirname )
             { found = 0; }
 
         entry = (cache_entry*)calloc(1,sizeof(cache_entry));
-        if(!entry)
+        if(entry==NULL)
             {
             fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
             continue;

@@ -1412,12 +1412,10 @@ int main(int argc, char *argv[])
     struct sched_param param;
     pthread_attr_init (&tattr);
     pthread_attr_getschedparam (&tattr, &param);
-    printf("DEBUG: old prio: %i\n",param.sched_priority);
     param.sched_priority = newprio;
     pthread_attr_setschedparam (&tattr, &param);
-    printf("DEBUG: new prio: %i\n",param.sched_priority);
     g_RCSTask = RCS_INIT;
-    if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, NULL) != 0)
+    if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr) != 0)
     {
         g_RomCacheThread = 0;
         alert_message(tr("Couldn't spawn rom cache thread!"));

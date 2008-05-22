@@ -43,15 +43,7 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
 
     gtk_widget_hide( g_RomPropDialog.dialog );
 
-    /* save properties */
-    //strcpy( g_RomEntry->comments, gtk_entry_get_text( GTK_ENTRY(g_RomPropDialog.commentsEntry) ) );
-
-    //WTF! We shouldn't ever be able to modify the INI.
-    //if( g_RomEntry->iniEntry )
-   // {
-     //   strcpy( g_RomEntry->iniEntry->comments, g_RomEntry->info.cComments );
-      //  ini_updateFile(1);
-    //}
+    strncpy( g_RomEntry->comment, gtk_entry_get_text( GTK_ENTRY(g_RomPropDialog.commentsEntry) ),255 );
 
     // update rombrowser
     rombrowser_refresh();

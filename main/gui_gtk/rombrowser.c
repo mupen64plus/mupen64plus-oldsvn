@@ -167,19 +167,33 @@ char* filefrompath(const char *string)
         {
         int size = strlen(buffer1)+1;
         buffer2 = malloc(size*sizeof(char));
-        if(!buffer2)
+        if(buffer2==NULL)
             {
             fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
-            return NULL;
+            return buffer1;
             }
         snprintf(buffer2, size, "%s\0", buffer1);
         return buffer2;
         }
 }
 
-//Add romcache to GUI.
-void fillrombrowser()
+void call_rcs(void)
 {
+    g_RCSTask = RCS_RESCAN;
+}
+
+//Load a fresh TreeView by re-scanning directories.
+void rombrowser_refresh( void )
+{
+    GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
+    gtk_tree_selection_select_all(selection);
+    GtkTreeModel *model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
+    gtk_list_store_clear( GTK_LIST_STORE(model) );
+    selection = gtk_tree_view_get_selection (  GTK_TREE_VIEW(g_MainWindow.romDisplay) );
+    gtk_tree_selection_select_all(selection);
+    model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
+    gtk_list_store_clear( GTK_LIST_STORE(model) );
+
     gboolean fullpaths;
     char *line[5];
 
@@ -187,7 +201,7 @@ void fillrombrowser()
     GdkPixbuf *flag;
     line[1] = malloc(32*sizeof(char));
     line[2] = malloc(16*sizeof(char));
-    if(!iter||!line[1]||!line[2])
+    if(iter==NULL||line[1]==NULL||line[2]==NULL)
         {
         fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
         return;
@@ -204,7 +218,7 @@ void fillrombrowser()
             line[0] = entry->inientry->goodname;
             countrycodestring(entry->countrycode, line[1]);
             sprintf(line[2], "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
-            line[3] = NULL; //Comments.
+            line[3] = entry->comment;
             countrycodeflag(entry->countrycode, &flag);
             if(fullpaths)
                 { line[4] = entry->filename; }
@@ -212,7 +226,7 @@ void fillrombrowser()
                 { line[4] = filefrompath(entry->filename); }
 
             //Add entries to TreeModel
-            GtkTreeModel *model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
+            model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
             gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, -1);
 
@@ -230,34 +244,11 @@ void fillrombrowser()
       free(iter);
       if(fullpaths==1)
          { free(line[4]); }
-}
 
-void call_rcs(void)
-{
-    g_RCSTask = RCS_RESCAN;
-}
-
-//Load a fresh TreeView by re-scanning directories.
-void rombrowser_refresh( void )
-{
-    GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
-    gtk_tree_selection_select_all(selection);
-    GtkTreeModel *model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
-    gtk_list_store_clear( GTK_LIST_STORE(model) );
-
-    selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-    gtk_tree_selection_select_all(selection);
-    model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-    gtk_list_store_clear( GTK_LIST_STORE(model) );
-
-   //We'd actually query the rcs system here, insetad of just adding the current cache to the GUI.
-   fillrombrowser();
-
-   //Do an initial sort.
-   GtkTreeSortable *sortable = GTK_TREE_SORTABLE(model);
-   gtk_tree_sortable_set_sort_func ( sortable, g_iSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
-   gtk_tree_sortable_set_sort_column_id ( sortable, g_iSortColumn, g_SortType );
-   gtk_tree_view_set_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay), GTK_TREE_MODEL(sortable) );
+     //Do an initial sort.
+    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_iSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
+    gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(model), g_iSortColumn, g_SortType );
+    gtk_tree_view_set_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay), model );
 }
 
 //We're going our own filtering, but this is a GtkTreeModelFilter function.
@@ -420,9 +411,8 @@ void apply_filter( void )
     destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
     g_iNumRoms = gtk_tree_model_iter_n_children(destination, NULL);
 
-    GtkTreeSortable *sortable = GTK_TREE_SORTABLE(destination);
-    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(sortable), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
-    gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(sortable), g_iSortColumn, g_SortType );
+    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
+    gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_iSortColumn, g_SortType );
 }
 
 static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
