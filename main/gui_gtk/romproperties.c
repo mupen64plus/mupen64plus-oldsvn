@@ -46,6 +46,7 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
     strncpy( g_RomEntry->comment, gtk_entry_get_text( GTK_ENTRY(g_RomPropDialog.commentsEntry) ),255 );
 
     // update rombrowser
+    g_RCSTask = RCS_RESCAN;
     rombrowser_refresh();
 }
 
