@@ -56,7 +56,7 @@ char* get_recompiled_opcode( uint32 address, int index );
 char* get_recompiled_args( uint32 address, int index );
 int get_recompiled_addr( uint32 address, int index );
 int get_num_recompiled( uint32 address );
-
+int get_has_recompiled( uint32 address );
 
 uint32 read_memory_32(uint32);
 void write_memory_32(uint32, uint32);

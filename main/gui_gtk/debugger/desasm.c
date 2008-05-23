@@ -26,18 +26,27 @@
 **/
 
 #include <stdio.h>
+#include <math.h>
 #include "desasm.h"
 #include "ui_disasm_list.h"
 
 //TODO: Lots and lots
 // to differanciate between update (need reload) and scroll (doesn't need reload)
 // to reorganise whole code.
+
+#define DOUBLESCROLL   1
+#define SCROLLRANGE    1.0f
+#define SCROLLSLOW     0.1f
+#define SCROLLSLOWAMT  ((int)(100/SCROLLSLOW))
  
-static uint16 max_row=30;   //i plan to update this value on widget resizing.
+static uint16 max_row=0.1;   //i plan to update this value on widget resizing.
 static uint32 previous_focus;
 
 static GtkWidget *clDesasm, *buRun;
 static DisasmList *cmDesasm;
+static GtkAdjustment *ajDesasm, *ajLinear, *ajLogari;
+
+static void update_log_scroll(void);
 
 static GdkColor color_normal, color_BP, color_PC, color_PC_on_BP;
 
@@ -45,6 +54,14 @@ static GdkColor color_normal, color_BP, color_PC, color_PC_on_BP;
 static void on_click( GtkTreeView *widget, GtkTreePath *path, 
 		      GtkTreeViewColumn *col, gpointer user_data );
 static void on_scroll(GtkAdjustment *adjustment, gpointer user_data);
+
+#ifdef DOUBLESCROLL
+static void on_linear_scroll(GtkAdjustment *adjustment, gpointer user_data);
+#endif //DOUBLESCROLL
+
+static gboolean on_scrollclick(GtkWidget *bar, GdkEventButton*, gpointer user_data);
+static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton*, gpointer user_data);
+
 static void on_step();
 static void on_run();
 static void on_goto();
@@ -86,12 +103,14 @@ void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
 void init_desasm()
 {
     char title[64];
-    GtkWidget *boxH1,
-            *scrollbar1,
-            *boxV1,
-                *buStep,
-                *buGoTo;
-    GtkObject*  adj;
+
+    GtkWidget 
+      *boxH1,
+      *scrollbar1,
+      *boxV1,
+      *buStep,
+      *buGoTo,
+      *swDesasm;
 
     desasm_opened = 1;
     
@@ -102,6 +121,7 @@ void init_desasm()
     gtk_container_set_border_width( GTK_CONTAINER(winDesasm), 2);
 
     boxH1 = gtk_hbox_new( FALSE, 0 );
+
     gtk_container_add( GTK_CONTAINER(winDesasm), boxH1 );
 
     //=== Creation of the Disassembled Code Display ===/
@@ -110,29 +130,56 @@ void init_desasm()
     clDesasm = gtk_tree_view_new_with_model(GTK_TREE_MODEL(cmDesasm));
     g_object_unref(cmDesasm);
 
+    gtk_tree_view_set_fixed_height_mode(clDesasm, TRUE);
+
     GtkCellRenderer    *renderer;
     GtkTreeViewColumn  *col;
     renderer = gtk_cell_renderer_text_new();
+    gtk_cell_renderer_set_fixed_size(renderer, 90, 9);
     col = gtk_tree_view_column_new_with_attributes("Address", renderer, "text", 0, NULL);
     gtk_tree_view_column_set_cell_data_func(col, renderer, disasm_set_color, NULL, NULL);
 
+    gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_fixed_width(col, 100);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
     col = gtk_tree_view_column_new_with_attributes("Opcode", renderer, "text", 1, NULL);
+    gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_fixed_width(col, 82);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
     col = gtk_tree_view_column_new_with_attributes("Args", renderer, "text", 2, NULL);
+    gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_fixed_width(col, 64);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
 
-    adj = gtk_adjustment_new(0, -500, 500, 1, max_row, max_row);
+    ajLogari = gtk_adjustment_new(0, 0, SCROLLRANGE, 0.01, 
+				  0.1,0.0);
 
+    swDesasm = gtk_scrolled_window_new(NULL, ajLogari);
 
-    gtk_box_pack_start( GTK_BOX(boxH1), clDesasm, TRUE, TRUE, 0 );
+    gtk_scrolled_window_set_policy(swDesasm, GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+
+    gtk_container_add(swDesasm, clDesasm);
+    //This replaces clDesasm's adjustments with swDesasm's, so...
+    ajDesasm = gtk_adjustment_new(0, 0, 1, 1, max_row, max_row);
+
+    //we replace it's vertical adjustment, with our own
+    gtk_widget_set_scroll_adjustments(clDesasm, gtk_range_get_adjustment(((GtkScrolledWindow*)swDesasm)->hscrollbar), ajDesasm);
 
     
+    //gtk_container_add(boxH1, swDesasm);
+
+    gtk_box_pack_start( GTK_BOX(boxH1), swDesasm, TRUE, TRUE, 0 );
+
+#ifdef DOUBLESCROLL    
+    ajLinear = gtk_adjustment_new(0,0,((float)0xFFFFFFFF),0xFFFF,0xFFFFFF,0);
+
+    scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(ajLinear));
+    //gtk_container_add(boxH1, scrollbar1);
+    gtk_box_pack_start( GTK_BOX(boxH1), scrollbar1, FALSE, TRUE, 0 );
+#endif //DOUBLESCROLL
+
     // (doubles) value, lower, upper, step_increment, page_increment, page_size.
 
-        scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(adj) );
-    gtk_box_pack_start( GTK_BOX(boxH1), scrollbar1, FALSE, FALSE, 0 );
-    
     //=== Creation of the Buttons =====================/
     boxV1 = gtk_vbox_new( FALSE, 2 );
     gtk_box_pack_end( GTK_BOX(boxH1), boxV1, FALSE, FALSE, 0 );
@@ -149,8 +196,15 @@ void init_desasm()
     //=== Signal Connection ===========================/
     gtk_signal_connect( GTK_OBJECT(clDesasm), "row-activated",
                     GTK_SIGNAL_FUNC(on_click), NULL );
-    gtk_signal_connect( GTK_OBJECT(adj), "value-changed",
+    gtk_signal_connect( GTK_OBJECT(ajLogari), "value-changed",
                     GTK_SIGNAL_FUNC(on_scroll), NULL );
+#ifdef DOUBLESCROLL
+    gtk_signal_connect( GTK_OBJECT(ajLinear), "value-changed",
+			GTK_SIGNAL_FUNC(on_linear_scroll), NULL );
+#endif
+
+    gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar(swDesasm)), "button-press-event", GTK_SIGNAL_FUNC(on_scrollclick), NULL);
+    gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar(swDesasm)), "button-release-event", GTK_SIGNAL_FUNC(on_scrollrelease), NULL);
     gtk_signal_connect( GTK_OBJECT(buRun), "clicked", on_run, NULL );
     gtk_signal_connect( GTK_OBJECT(buStep), "clicked", on_step, NULL );
     gtk_signal_connect( GTK_OBJECT(buGoTo), "clicked", on_goto, NULL );
@@ -179,20 +233,82 @@ void init_desasm()
 
 
 //]=-=-=-=-=-=-=-=-=-=-=[ Mise-a-jour Desassembleur ]=-=-=-=-=-=-=-=-=-=-=[
+unsigned int addtest=0x00;
+unsigned int prevadd=0x00;
+unsigned int mousedown=0x00;
+float prev=0.0f;
+
 
 void update_desasm( uint32 focused_address )
 //Display disassembled instructions around a 'focused_address'
 //  (8 instructions before 'focused_address', the rest after).
 {
+  addtest=focused_address;
     disasm_list_update(cmDesasm, focused_address);
-    gtk_widget_queue_draw( clDesasm );
+    
+    gtk_adjustment_set_value(ajLinear, ((float)addtest));
+    
+    if(mousedown==0)
+      update_log_scroll();
+    
+    refresh_desasm();
     previous_focus = focused_address;
 }
 
 
 void refresh_desasm()
 {
-  gtk_widget_queue_draw( clDesasm );
+  GtkTreePath *path,*path2;
+    GtkTreeIter iter;
+
+    int i;
+    i=(((int)(addtest/4))-((int)(previous_focus/4)));
+    
+    path = gtk_tree_path_new_from_string("0");
+    path2 = gtk_tree_path_new_from_string("26");
+    if(i>0)
+      {
+	printf("%d\n",i);
+	if (i<400)
+	  for(;i>0; i--)
+	    {
+	      gtk_tree_model_get_iter(cmDesasm, &iter, path2);
+	
+	      gtk_tree_model_row_inserted(cmDesasm, path2, &iter);
+	      gtk_tree_model_row_deleted(cmDesasm, path);
+	      //	      gtk_tree_path_next(path2);
+
+	    }
+      }
+    else if(i<0)
+      {
+	printf("%d\n",i);
+	if(i>-400)
+	  for(;i<0; i++)
+	    {
+	      gtk_tree_model_get_iter(cmDesasm, &iter, path);
+	
+	      gtk_tree_model_row_inserted(cmDesasm, path, &iter);
+	      gtk_tree_model_row_deleted(cmDesasm, path2);
+	      //	      gtk_tree_path_next(path2);
+
+	    }
+	  
+      }
+    
+    for(i=0; i<32; i++)
+      {
+	gtk_tree_model_get_iter(cmDesasm, &iter, path);
+	
+	//gtk_tree_model_row_deleted(cmDesasm, path);
+	//gtk_tree_model_row_inserted(cmDesasm, path, &iter);
+	gtk_tree_model_row_has_child_toggled(cmDesasm, path, &iter);
+	gtk_tree_path_next(path);
+      }
+
+    gtk_tree_path_free(path);
+    gtk_tree_path_free(path2);
+    gtk_widget_queue_draw( clDesasm );
 }
 
 
@@ -233,17 +349,102 @@ static void on_goto()
     update_desasm( 0x0A4000040 );
 }
 
+static void update_log_scroll()
+{
+  if(mousedown==0) {
+    if(addtest<SCROLLSLOWAMT*0.5f)
+      gtk_adjustment_set_value(ajLogari, (addtest/((float)SCROLLSLOWAMT)));
+
+    else if(addtest>0xFFFFFFFF-(SCROLLSLOWAMT*0.5f))
+      gtk_adjustment_set_value(ajLogari, 1.0f - ((0xFFFFFFFF-addtest)/((float)SCROLLSLOWAMT)));
+    else
+      gtk_adjustment_set_value(ajLogari, 0.5f);
+  }
+}
+
+#ifdef DOUBLESCROLL
+static void on_linear_scroll(GtkAdjustment *adjustment, gpointer usr)
+{
+  if(mousedown==0) {
+    addtest=adjustment->value;
+    if(adjustment->value - ((double)addtest) > 0x80000000)
+      addtest=0xFFFFFFFC;
+    addtest=addtest&0xFFFFFFFC;
+  }
+
+  update_desasm( (uint32) addtest );
+}
+#endif
 
 static void on_scroll(GtkAdjustment *adjustment, gpointer user_data)
 {
-    sint32 delta= 4 *((sint32) adjustment->value);
-    if(delta==0) return;
+  if(mousedown==0)
+    {
+      update_log_scroll();
+      return;
+    }
+  float delta = adjustment->value - prev;
 
-    gtk_adjustment_set_value(adjustment, 0);
-    update_desasm( (uint32) previous_focus+delta );
+  int ex;
+  float base, scale;
+  double flttest;
+
+  if(delta>0.0f)
+    {
+      base = frexp((float)((0xffffffff)-prevadd-((1.0-prev)*SCROLLSLOWAMT))+2.0f,&ex);
+      scale = 1.0f/(1.0f-prev-SCROLLSLOW);
+      if(scale<0.0f)
+	scale=0.0f;
+      flttest=((double)prevadd) + ((double)SCROLLSLOWAMT) * delta + (base * pow(2.0f, ex*(delta-SCROLLSLOW)*scale));
+      addtest=flttest;
+    }
+  else
+    {
+      base = frexp((float)(prevadd-(prev*SCROLLSLOWAMT))+2.0f,&ex);
+      scale = 1.0f/(prev-SCROLLSLOW);
+      if(scale<0.0f)
+	scale=0.0f;
+      flttest=((double)prevadd) + ((double)SCROLLSLOWAMT) * delta - (base * pow(2.0f, ex*(-delta-SCROLLSLOW)*scale));
+      if(flttest>0.0f)
+	addtest=flttest;
+      else
+	addtest=0;
+    }
+
+  if((adjustment->value)==1.0f)
+    {
+      printf("%f\n",adjustment->value);
+      addtest=0xFFFFFFFC;
+    }
+  addtest=addtest&0xFFFFFFFC;
+
+  update_desasm( (uint32) addtest);
+
+  printf("scroll %08x %f %f %f %f %d\n", addtest, delta, flttest, base, scale, ex);
+    
+
+  //if(delta==0) return;
+
+  //gtk_adjustment_set_value(ajDesasm, adjustment->value);
+
+
 }
 
+static gboolean on_scrollclick(GtkWidget *bar, GdkEventButton* evt, gpointer user_data)
+{
+  prev=(gtk_range_get_adjustment(bar)->value);
+  prevadd=addtest;
+  mousedown=1;
+  return FALSE;
+}
 
+static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton* evt, gpointer user_data)
+{
+  printf("prevadd %08x  prev %f\n", prevadd,prev);
+  mousedown=0;
+  gtk_adjustment_set_value(gtk_range_get_adjustment(bar), 0.5f);
+  return FALSE;
+}
 
 static void on_click( GtkTreeView *widget, GtkTreePath *path, 
 		       GtkTreeViewColumn *col, gpointer user_data )

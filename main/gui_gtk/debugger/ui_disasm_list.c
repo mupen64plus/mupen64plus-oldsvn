@@ -272,7 +272,7 @@ disasm_list_get_iter (GtkTreeModel *tree_model,
 
   //g_assert(record->pos == n);
 
-  // We simply store a pointer to our Disasm record in the iter
+  // We store a pointer to our Disasm record in the iter
   iter->stamp      = disasm_list->stamp;
   iter->user_data  = (uint32*) ((indices[0]-PRELINES)*4 + (DISASM_LIST(tree_model)->startAddr));
 
@@ -408,8 +408,11 @@ disasm_list_iter_next (GtkTreeModel  *tree_model,
   // Is this a disassembly line, or recompiler disassemby line?
   if(((uint32)iter->user_data2) == -1)
   {
-    if(((uint32)iter->user_data) >= disasm_list->startAddr+(POSTLINES*4))
+    if((((uint32)iter->user_data) >= disasm_list->startAddr+(POSTLINES*4)) || (((uint32)iter->user_data) >= 0xFFFFFFFC))
+      {
+	printf("addr: %016x\n", iter->user_data);
         return FALSE;
+      }
     iter->stamp    = disasm_list->stamp;
     iter->user_data+= 4;
   }
@@ -481,8 +484,8 @@ static gboolean
 disasm_list_iter_has_child (GtkTreeModel *tree_model,
                             GtkTreeIter  *iter)
 {
-  if(((uint32)iter->user_data2) == -1)// && get_num_recompiled( iter->user_data ) > 0)
-      return TRUE;
+  if(((uint32)iter->user_data2) == -1)
+    return get_has_recompiled(iter->user_data);
   return FALSE;
 }
 
@@ -504,7 +507,7 @@ disasm_list_iter_n_children (GtkTreeModel *tree_model,
                              GtkTreeIter  *iter)
 {
   DisasmList  *disasm_list;
-
+  printf("DEBUG: list_iter_n_children called\n");
   g_return_val_if_fail (DISASM_IS_LIST (tree_model), -1);
   g_return_val_if_fail (iter == NULL || iter->user_data != NULL, FALSE);
 
@@ -516,7 +519,7 @@ disasm_list_iter_n_children (GtkTreeModel *tree_model,
   else if (((uint32)iter->user_data2) == -1)
       return get_num_recompiled( iter->user_data );
 
-  return 0; /* otherwise, this is easy again for a list */
+  return 0;
 }
 
 
@@ -620,6 +623,11 @@ void disasm_list_update (GtkTreeModel *tree_model, guint address)
     return;
 
   disasm_list = DISASM_LIST(tree_model);
-  
+  if(address<PRELINES*4)
+    address=PRELINES*4;
+
+  if(address>(0xFFFFFFFC-(POSTLINES*4)))
+
+    address=0xFFFFFFFC-(POSTLINES*4);
   disasm_list->startAddr = address;
 }
