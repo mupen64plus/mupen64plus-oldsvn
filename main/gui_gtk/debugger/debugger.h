@@ -43,6 +43,7 @@
 #include "registers.h"
 #include "regTLB.h"
 #include "memedit.h"
+#include "varlist.h"
 
 #define DEBUGGER_VERSION "0.0.2 - WIP2"
 

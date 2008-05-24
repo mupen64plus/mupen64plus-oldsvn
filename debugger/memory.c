@@ -223,6 +223,34 @@ void update_memory(void){
     get_memory_flags(i*0x10000);
 }
 
+uint64 read_memory_64(uint32 addr)
+{
+	return ((uint64)read_memory_32(addr) << 32) | (uint64)read_memory_32(addr + 4);
+}
+
+uint64 read_memory_64_unaligned(uint32 addr)
+{
+	uint64 w[2];
+	
+	w[0] = read_memory_32_unaligned(addr);
+	w[1] = read_memory_32_unaligned(addr + 4);
+	return (w[0] << 32) | w[1];
+}
+
+void write_memory_64(uint32 addr, uint64 value)
+{
+	write_memory_32(addr, value >> 32);
+	write_memory_32(addr + 4, value & 0xFFFFFFFF);
+}
+
+void write_memory_64_unaligned(uint32 addr, uint64 value)
+{
+	write_memory_32_unaligned(addr, value >> 32);
+	write_memory_32_unaligned(addr + 4, value & 0xFFFFFFFF);
+}
+
+
+
 uint32 read_memory_32(uint32 addr){
   switch(get_memory_type(addr))
     {
@@ -246,6 +274,14 @@ uint32 read_memory_32(uint32 addr){
     }
 }
 
+uint32 read_memory_32_unaligned(uint32 addr)
+{
+	uint8 i, b[4];
+	
+	for(i=0; i<4; i++) b[i] = read_memory_32(addr + i);
+	return (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0];
+}
+
 void write_memory_32(uint32 addr, uint32 value){
   switch(get_memory_type(addr))
     {
@@ -253,6 +289,29 @@ void write_memory_32(uint32 addr, uint32 value){
       *((uint32 *)(rdramb + (addr & 0xFFFFFF))) = value;
       break;
     }
+}
+
+void write_memory_32_unaligned(uint32 addr, uint32 value)
+{
+	write_memory_8(addr + 3, value >> 24);
+	write_memory_8(addr + 2, (value >> 16) & 0xFF);
+	write_memory_8(addr + 1, (value >> 8) & 0xFF);
+	write_memory_8(addr + 0, value & 0xFF);
+}
+
+
+
+//read_memory_16_unaligned and write_memory_16_unaligned don't exist because
+//read_memory_16 and write_memory_16 work unaligned already.
+uint16 read_memory_16(uint32 addr)
+{
+	return ((uint16)read_memory_8(addr) << 8) | (uint16)read_memory_8(addr+1); //cough cough hack hack
+}
+
+void write_memory_16(uint32 addr, uint16 value)
+{
+	write_memory_8(addr, value >> 8); //this isn't much better
+	write_memory_8(addr + 1, value & 0xFF); //then again, it works unaligned
 }
 
 uint8 read_memory_8(uint32 addr)

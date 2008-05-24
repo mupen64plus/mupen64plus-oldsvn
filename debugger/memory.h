@@ -58,8 +58,16 @@ int get_recompiled_addr( uint32 address, int index );
 int get_num_recompiled( uint32 address );
 int get_has_recompiled( uint32 address );
 
+uint64 read_memory_64(uint32 addr);
+uint64 read_memory_64_unaligned(uint32 addr);
+void write_memory_64(uint32 addr, uint64 value);
+void write_memory_64_unaligned(uint32 addr, uint64 value);
 uint32 read_memory_32(uint32);
+uint32 read_memory_32_unaligned(uint32 addr);
 void write_memory_32(uint32, uint32);
+void write_memory_32_unaligned(uint32 addr, uint32 value);
+uint16 read_memory_16(uint32 addr);
+void write_memory_16(uint32 addr, uint16 value);
 uint8 read_memory_8(uint32 addr);
 void write_memory_8(uint32 addr, uint8 value);
 uint32 get_memory_flags(uint32);

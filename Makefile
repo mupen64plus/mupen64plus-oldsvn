@@ -157,6 +157,7 @@ OBJ_GTK_DBG_GUI = \
 	main/gui_gtk/debugger/breakpoints.o \
 	main/gui_gtk/debugger/desasm.o \
 	main/gui_gtk/debugger/memedit.o \
+	main/gui_gtk/debugger/varlist.o \
 	main/gui_gtk/debugger/registers.o \
 	main/gui_gtk/debugger/regGPR.o \
 	main/gui_gtk/debugger/regCop0.o \

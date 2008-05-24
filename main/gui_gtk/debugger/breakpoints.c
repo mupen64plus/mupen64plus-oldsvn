@@ -72,7 +72,7 @@ void init_breakpoints()
     //=== Creation of Breakpoints Management ===========/
     winBreakpoints = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_set_title( GTK_WINDOW(winBreakpoints), "Breakpoints");
-    gtk_window_set_default_size( GTK_WINDOW(winBreakpoints), 100, 150);
+    gtk_window_set_default_size( GTK_WINDOW(winBreakpoints), 100, 160);
     gtk_container_set_border_width( GTK_CONTAINER(winBreakpoints), 2);
 
     boxH1 = gtk_hbox_new( FALSE, 0 );
@@ -90,7 +90,7 @@ void init_breakpoints()
     clBreakpoints = gtk_clist_new( 1 );
     gtk_container_add( GTK_CONTAINER(scrolledwindow1), clBreakpoints );
     gtk_clist_set_selection_mode( GTK_CLIST(clBreakpoints), GTK_SELECTION_EXTENDED );
-    gtk_clist_set_column_width( GTK_CLIST(clBreakpoints), 0, 160 );
+    gtk_clist_set_column_width( GTK_CLIST(clBreakpoints), 0, 170 );
     gtk_clist_set_auto_sort( GTK_CLIST(clBreakpoints), TRUE );
     
     //=== Creation of the Buttons ======================/
@@ -155,7 +155,7 @@ void get_breakpoint_display_string(char* buf, breakpoint* bpt)
 	}
 	else
 	{
-		sprintf(buf, "%c%c%c$c 0x%08X - 0x%08X",
+		sprintf(buf, "%c%c%c%c 0x%08X - 0x%08X",
     		(bpt->flags & BPT_FLAG_READ) ? 'R' : '-',
         	(bpt->flags & BPT_FLAG_WRITE) ? 'W' : '-',
         	(bpt->flags & BPT_FLAG_EXEC) ? 'X' : '-',
@@ -277,8 +277,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
 	i = sscanf(&line[i], "%lX %lx", &newbp.address, &newbp.endaddr);
 	if(!i)
 	{
-		//fixme: better way to display error message
-		printf("Invalid address\n");
+		alert_message(tr("Invalid address."));
 		return FALSE;
 	}
 	else if(i == 1) newbp.endaddr = newbp.address;
@@ -293,7 +292,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
 		printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
 		if(add_breakpoint_struct(&newbp) == -1)
 		{
-			//fixme: warning message
+			alert_message(tr("Cannot add any more breakpoints."));
 			return FALSE;
 		}
 	}

@@ -184,7 +184,8 @@ void init_desasm()
     boxV1 = gtk_vbox_new( FALSE, 2 );
     gtk_box_pack_end( GTK_BOX(boxH1), boxV1, FALSE, FALSE, 0 );
     
-    buRun = gtk_button_new_with_label( "Run" );
+    //buRun = gtk_button_new_with_label( "Run" );
+    buRun = gtk_button_new_with_label( "> \\ ||" );
     gtk_box_pack_start( GTK_BOX(boxV1), buRun, FALSE, FALSE, 5 );
     buStep = gtk_button_new_with_label( "Next" );
     gtk_box_pack_start( GTK_BOX(boxV1), buStep, FALSE, FALSE, 0 );
@@ -314,7 +315,10 @@ void refresh_desasm()
 
 void switch_button_to_run()
 { //Is called from debugger.c, when a breakpoint is reached.
-    gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run");
+    //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run");
+    //todo: this causes a deadlock or something the second time a
+    //breakpoint hits, breaking the interface. The other lines changing
+    //this label have been commented with the note "avoid deadlock".
 }
 
 
@@ -324,10 +328,10 @@ static void on_run()
 {
     if(run == 2) {
         run = 0;
-        gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run");
+        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
     } else {
         run = 2;
-        gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child),"Pause");
+        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child),"Pause"); //avoid deadlock
         pthread_cond_signal(&debugger_done_cond);
     }
 }
@@ -336,7 +340,7 @@ static void on_run()
 static void on_step()
 {
     if(run == 2) {
-        gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run");
+        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
     } else {
         pthread_cond_signal(&debugger_done_cond);
     }

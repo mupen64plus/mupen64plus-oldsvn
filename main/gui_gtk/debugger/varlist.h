@@ -1,5 +1,5 @@
 /**
- * Mupen64 - memedit.h
+ * Mupen64 - varlist.h
  * Copyright (C) 2008 HyperHacker (at gmail, dot com)
  *
  * If you want to contribute to this part of the project please
@@ -26,8 +26,8 @@
  *
 **/
 
-#ifndef GUIGTK_MEMEDIT_H
-#define GUIGTK_MEMEDIT_H
+#ifndef GUIGTK_VARLIST_H
+#define GUIGTK_VARLIST_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -38,12 +38,11 @@
 #include "debugger.h"
 #include "ui_clist_edit.h"
 
-int memedit_opened, memedit_auto_update;
+int varlist_opened, varlist_auto_update;
 
-GtkWidget *winMemEdit;
+GtkWidget *winVarList;
 
-void update_memory_editor();
-void init_memedit();
-int GetMemEditSelectionRange(uint32* StartAddr, int AllowEmpty);
+void update_varlist();
+void init_varlist();
 
-#endif  // MEMEDIT_H
+#endif  // VARLIST_H

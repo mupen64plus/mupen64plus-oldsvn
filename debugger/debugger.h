@@ -58,6 +58,7 @@ void update_debugger();
 
 extern void init_debugger_frontend();
 extern void update_debugger_frontend();
+extern void debugger_frontend_vi();
 
 extern pthread_cond_t  debugger_done_cond;
 extern pthread_mutex_t mutex;

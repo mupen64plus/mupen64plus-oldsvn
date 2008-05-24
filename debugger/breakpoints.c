@@ -96,8 +96,8 @@ int lookup_breakpoint( uint32 address, uint32 flags)
     {
         if((address >= g_Breakpoints[i].address) && (address <= g_Breakpoints[i].endaddr) && (!flags || ((g_Breakpoints[i].flags & flags) == flags)))
         {
-        	printf("Bpt %d (0x%08X - 0x%08X) matches 0x%08X\n", i, g_Breakpoints[i].address,
-        		g_Breakpoints[i].endaddr, address);
+        	//printf("Bpt %d (0x%08X - 0x%08X) matches 0x%08X\n", i, g_Breakpoints[i].address,
+        	//	g_Breakpoints[i].endaddr, address);
             return i;
 		}
         else

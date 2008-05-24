@@ -226,6 +226,10 @@ void new_vi(void)
 
     start_section(IDLE_SECTION);
     VI_Counter++;
+    
+#ifdef DBG
+    if(debugger_mode) debugger_frontend_vi();
+#endif
 
     if(LastFPSTime == 0)
     {
