@@ -42,6 +42,7 @@
 #include <sys/stat.h>
 #include <SDL.h>
 
+#include "rom.h"
 #include "util.h"
 #include "translate.h"
 
@@ -464,8 +465,7 @@ list_node_t *list_find_node(list_t list, void *data)
     return node;
 }
 
-//Assign text based on country code. This should be moved... (i.e. so we can share with rom.c)
-void countrycodestring(unsigned short int countrycode, char *string)
+void countrycodestring(unsigned short countrycode, char *string)
 {
     switch(countrycode)
     {
@@ -517,6 +517,42 @@ void countrycodestring(unsigned short int countrycode, char *string)
     default:
         sprintf(string, tr("Unknown (0x%02X)"), countrycode);
         break;
+    }
+}
+
+void compressionstring(unsigned short compressiontype, char *string)
+{
+    switch(compressiontype)
+    {
+    case UNCOMPRESSED:
+        strcpy(string, tr("Uncompressed"));
+        break;
+    case ZIP_COMPRESSION:
+        strcpy(string, tr("Zip"));
+        break;
+    case GZIP_COMPRESSION:
+        strcpy(string, tr("Gzip"));
+        break;
+    default:
+        string = NULL;
+    }
+}
+
+void imagestring(unsigned short imagetype, char *string)
+{
+    switch(imagetype)
+    {
+    case Z64IMAGE:
+        strcpy(string, tr(".z64 (native)"));
+        break;
+    case V64IMAGE:
+        strcpy(string, tr(".v64 (byteswapped)"));
+        break;
+    case N64IMAGE:
+        strcpy(string, tr(".n64 (wordswapped)"));
+        break;
+    default:
+        string = NULL;
     }
 }
 

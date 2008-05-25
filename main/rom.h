@@ -65,4 +65,23 @@ typedef struct _rom_settings
 } rom_settings;
 extern rom_settings ROM_SETTINGS;
 
+//Supported rom compressiontypes.
+enum 
+{
+    UNCOMPRESSED,
+    ZIP_COMPRESSION,
+    GZIP_COMPRESSION,
+    //7ZIP_COMPRESSION,
+    //BZIP_COMPRESSION
+};
+
+//Supported rom image types.
+enum 
+{
+    Z64IMAGE,
+    V64IMAGE,
+    N64IMAGE
+};
+
 #endif
+

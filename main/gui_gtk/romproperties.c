@@ -71,9 +71,9 @@ void show_romPropDialog( cache_entry *entry )
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.romNameEntry), entry->inientry->goodname );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.sizeEntry), size );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.countryEntry), country );
-    sprintf(ini_code, "%s", entry->inientry->CRC);
+    sprintf(ini_code, "%s", entry->inientry->crc);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.iniCodeEntry), ini_code );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), entry->inientry->MD5 );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), entry->inientry->md5 );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->comment );
     g_RomEntry = entry;
 
@@ -100,7 +100,7 @@ int create_romPropDialog( void )
     g_RomPropDialog.dialog = gtk_dialog_new();
     gtk_container_set_border_width( GTK_CONTAINER(g_RomPropDialog.dialog), 10 );
     gtk_window_set_title( GTK_WINDOW(g_RomPropDialog.dialog), tr("Rom Properties") );
-    gtk_widget_set_size_request( g_RomPropDialog.dialog, 450, -1);
+    gtk_widget_set_size_request( g_RomPropDialog.dialog, 420, -1);
 
     // rom info
     frame = gtk_frame_new( tr("Rom Info") );

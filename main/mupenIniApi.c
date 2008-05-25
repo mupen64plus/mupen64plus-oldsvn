@@ -40,14 +40,14 @@ typedef struct _romdatabase_search
     mupenEntry entry;
     struct _romdatabase_search* next_entry;
     struct _romdatabase_search* next_crc;
-    struct _romdatabase_search* next_MD5;
+    struct _romdatabase_search* next_md5;
 } romdatabase_search;
 
 typedef struct
 {
     char *comment;
-    romdatabase_search* CRC_lists[256];
-    romdatabase_search* MD5_lists[256];
+    romdatabase_search* crc_lists[256];
+    romdatabase_search* md5_lists[256];
     romdatabase_search* list;
 } _romdatabase;
 
@@ -123,9 +123,9 @@ void ini_openFile()
 
     //Clear premade indices.
     for ( i = 0; i < 255; ++i )
-        { romdatabase.CRC_lists[i] = NULL; }
+        { romdatabase.crc_lists[i] = NULL; }
     for ( i = 0; i < 255; ++i )
-        { romdatabase.MD5_lists[i] = NULL; }
+        { romdatabase.md5_lists[i] = NULL; }
     romdatabase.list = NULL;
 
     do
@@ -137,7 +137,7 @@ void ini_openFile()
                 romdatabase.list = (romdatabase_search*)malloc(sizeof(romdatabase_search));
                 romdatabase.list->next_entry = NULL;
                 romdatabase.list->next_crc = NULL;
-                romdatabase.list->next_MD5 = NULL;
+                romdatabase.list->next_md5 = NULL;
                 cur = romdatabase.list;
                 }
             else
@@ -146,26 +146,26 @@ void ini_openFile()
                 cur = cur->next_entry;
                 cur->next_entry = NULL;
                 cur->next_crc = NULL;
-                cur->next_MD5 = NULL;
+                cur->next_md5 = NULL;
                 }
             i = strlen(buf);
             while(buf[i] != ']') i--;
             buf[i] = 0;
-            strncpy(cur->entry.MD5, buf+1, 32);
-            cur->entry.MD5[32] = '\0';
+            strncpy(cur->entry.md5, buf+1, 32);
+            cur->entry.md5[32] = '\0';
             buf[3] = 0;
             sscanf(buf+1, "%X", &i);
 
-            if(romdatabase.MD5_lists[i]==NULL)
-                { romdatabase.MD5_lists[i] = cur; }
+            if(romdatabase.md5_lists[i]==NULL)
+                { romdatabase.md5_lists[i] = cur; }
             else
                 {
-                romdatabase_search *aux = romdatabase.MD5_lists[i];
-                cur->next_MD5 = aux;
-                romdatabase.MD5_lists[i] = cur;
+                romdatabase_search *aux = romdatabase.md5_lists[i];
+                cur->next_md5 = aux;
+                romdatabase.md5_lists[i] = cur;
                 }
-            cur->entry.eeprom16kb = 0;
-            strcpy(cur->entry.refMD5, "");
+            //cur->entry.eeprom16kb = 0;
+            strcpy(cur->entry.refmd5, "");
             strcpy(cur->entry.comments, "");
             }
         else
@@ -183,29 +183,30 @@ void ini_openFile()
                     }
                 else if(!strcmp(buf, "Header Code"))
                     {
-                    strncpy(cur->entry.CRC, buf+i+1, 21);
-                    cur->entry.CRC[21] = '\0';
+                    strncpy(cur->entry.crc, buf+i+1, 21);
+                    cur->entry.crc[21] = '\0';
                     buf[i+3] = 0;
                     sscanf(buf+i+1, "%X", &i);
 
-                    if(romdatabase.CRC_lists[i]==NULL)
-                        { romdatabase.CRC_lists[i] = cur; }
+                    if(romdatabase.crc_lists[i]==NULL)
+                        { romdatabase.crc_lists[i] = cur; }
                     else
                         {
-                        romdatabase_search *aux = romdatabase.CRC_lists[i];
+                        romdatabase_search *aux = romdatabase.crc_lists[i];
                         cur->next_crc = aux;
-                        romdatabase.CRC_lists[i] = cur;
+                        romdatabase.crc_lists[i] = cur;
                         }
                     }
                 else if(!strcmp(buf, "Reference"))
                     {
-                    strncpy(cur->entry.refMD5, buf+i+1, 32);
-                    cur->entry.refMD5[32] = '\0';
+                    strncpy(cur->entry.refmd5, buf+i+1, 32);
+                    cur->entry.refmd5[32] = '\0';
                     }
                 else if(!strcmp(buf, "Eeprom"))
                     {
                     if(!strncmp(buf+i+1, "16k", 3))
-                        { cur->entry.eeprom16kb = 1; }
+                        {// cur->entry.eeprom16kb = 1;
+ }
                     }
                 }
             }
@@ -247,10 +248,10 @@ mupenEntry* ini_search_by_md5(const char *md5)
     buffer[1] = md5[1];
     buffer[2] = '\0';
     sscanf(buffer, "%X", &i);
-    search = romdatabase.MD5_lists[i];
+    search = romdatabase.md5_lists[i];
 
-    while (search != NULL && strncmp(search->entry.MD5, md5, 32))
-        { search = search->next_MD5; }
+    while (search != NULL && strncmp(search->entry.md5, md5, 32))
+        { search = search->next_md5; }
 
     //If found return pointer, if not return empty.
     if(search==NULL)
@@ -259,7 +260,7 @@ mupenEntry* ini_search_by_md5(const char *md5)
         { return &(search->entry); }
 }
 
-mupenEntry* ini_search_by_CRC(const char *crc)
+mupenEntry* ini_search_by_crc(const char *crc)
 {
     char buffer[3];
     int i;
@@ -274,19 +275,19 @@ mupenEntry* ini_search_by_CRC(const char *crc)
     buffer[1] = crc[1];
     buffer[2] = '\0';
     sscanf(buffer, "%X", &i);
-    search = romdatabase.CRC_lists[i];
+    search = romdatabase.crc_lists[i];
 
-    while (search != NULL && strncmp(search->entry.CRC, crc, 21))
+    while (search != NULL && strncmp(search->entry.crc, crc, 21))
         { search = search->next_crc; }
 
     if(search == NULL) 
         { return &emptyEntry; }
 
-    //Return CRC of reference rom if different.
-    if(strcmp(search->entry.refMD5, ""))
+    //Return crc of reference rom if different.
+    if(strcmp(search->entry.refmd5, ""))
         {
-        mupenEntry* temp = ini_search_by_md5(search->entry.refMD5);
-        if(strncmp(search->entry.CRC, temp->CRC, 21))
+        mupenEntry* temp = ini_search_by_md5(search->entry.refmd5);
+        if(strncmp(search->entry.crc, temp->crc, 21))
             { return &(search->entry); }
         else
             { return temp; }

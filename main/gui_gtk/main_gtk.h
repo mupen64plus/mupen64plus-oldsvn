@@ -22,19 +22,21 @@ Email                : blight@Ashitaka
 
 typedef struct
 {
-    GtkWidget   *window;
-    GtkWidget   *toplevelVBox;  // vbox containing menubar, toolbar, rombrowser, statusbar
-    GtkWidget   *menuBar;
-    GtkWidget   *toolBar;
-    GtkWidget   *filter;
-    GtkWidget   *romScrolledWindow;
-//Make two TreeViews, a visable manually filtered one for the Display, and a
-//Non-visable FullList from which we can filter.
-    GtkWidget   *romDisplay, *romFullList;
-    GtkWidget   *statusBarHBox;
+    GtkWidget *window;
+    GtkWidget *toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
+    GtkWidget *menuBar;
+    GtkWidget *toolBar;
+    GtkWidget *filter;
+    GtkWidget *romScrolledWindow;
+    //Make two TreeViews, a visable manually filtered one for the Display, and a
+    //Non-visable FullList from which we can filter.
+    GtkWidget *romDisplay, *romFullList;
+    GtkTreeViewColumn *column[12]; //columns in rombrowser.
+    GtkWidget *statusBarHBox;
     GtkAccelGroup *accelGroup;
     GtkAccelGroup *accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
     gboolean accelUnsafeActive; //From getting keypresses, so must be deactivated.
+    GtkWidget *romHeaderMenu; //Context menu for rombrowser header to control visible columns.
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;

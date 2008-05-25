@@ -193,11 +193,13 @@ int rebuild_cache_file()
        do
             {
             gzwrite(gzfile, entry->filename, sizeof(char)*PATH_MAX);
-            gzwrite(gzfile, entry->MD5, sizeof(char)*33);
+            gzwrite(gzfile, entry->md5, sizeof(char)*33);
             gzwrite(gzfile, &entry->timestamp, sizeof(time_t));
             gzwrite(gzfile, &entry->countrycode, sizeof(unsigned short));
             gzwrite(gzfile, &entry->romsize, sizeof(int));
             gzwrite(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char));
+            gzwrite(gzfile, &entry->compressiontype, sizeof(unsigned short));
+            gzwrite(gzfile, &entry->imagetype, sizeof(unsigned short));
 
             entry = entry->next;
             }
@@ -302,10 +304,9 @@ static void scan_dir( const char *dirname )
             strcpy(entry->filename,filename);
 
             unsigned char* localrom;
-            int compressiontype, imagetype;
 
-            //Test if we're a valid rom and compute MD5.
-            if((localrom=load_rom(filename, &entry->romsize, &compressiontype, &imagetype, &entry->romsize))==NULL)
+            //Test if we're a valid rom and compute md5.
+            if((localrom=load_rom(filename, &entry->romsize, &entry->compressiontype, &entry->imagetype, &entry->romsize))==NULL)
                 { 
                 free(entry);
                 continue;  
@@ -319,7 +320,7 @@ static void scan_dir( const char *dirname )
             md5_finish(&state, digest);
 
             for ( i = 0; i < 16; ++i ) 
-                { sprintf(entry->MD5+i*2, "%02X", digest[i]); }
+                { sprintf(entry->md5+i*2, "%02X", digest[i]); }
 
             //Best not to use global, exact best solution depends on 
             //Which fields from the rom header we want.
@@ -327,11 +328,11 @@ static void scan_dir( const char *dirname )
             memcpy(&localheader, localrom, sizeof(rom_header));
             entry->countrycode = localheader.Country_code;
 
-            entry->inientry = ini_search_by_md5(entry->MD5);
+            entry->inientry = ini_search_by_md5(entry->md5);
 
             //Something to deal with custom roms.
             //if(entry.inientry==NULL)
-            //    { custom_search_by_md5(entry->MD5);
+            //    { custom_search_by_md5(entry->md5);
 
             entry->timestamp = filestatus.st_mtime;
             //Add code to search comment database.
@@ -385,11 +386,13 @@ int load_initial_cache()
                 }
 
             if(!gzread(gzfile, entry->filename, sizeof(char)*PATH_MAX)||
-               !gzread(gzfile, entry->MD5, sizeof(char)*33)||
+               !gzread(gzfile, entry->md5, sizeof(char)*33)||
                !gzread(gzfile, &entry->timestamp, sizeof(time_t))||
                !gzread(gzfile, &entry->countrycode, sizeof(unsigned short))||
                !gzread(gzfile, &entry->romsize, sizeof(int))||
-               !gzread(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char)))
+               !gzread(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char))||
+               !gzread(gzfile, &entry->compressiontype, sizeof(unsigned short))||
+               !gzread(gzfile, &entry->imagetype, sizeof(unsigned short)))
                 {
                 if(!gzeof(gzfile)) //gzread error.
                     { 
@@ -407,10 +410,10 @@ int load_initial_cache()
             entry->next = NULL;
 
             //Maybe add size here too?
-            if(entry->MD5!=NULL&&entry->timestamp==filestatus.st_mtime)
+            if(entry->md5!=NULL&&entry->timestamp==filestatus.st_mtime)
                 {
                 //Actually add rom to cache.
-                entry->inientry = ini_search_by_md5(entry->MD5);
+                entry->inientry = ini_search_by_md5(entry->md5);
                 if(i==0)
                     {
                     romcache.top = entry; 

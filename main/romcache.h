@@ -43,9 +43,11 @@ enum RCS_TASK g_RCSTask;
 typedef struct _cache_entry
 {
     char filename[PATH_MAX];
-    char MD5[33];
+    char md5[33];
     time_t timestamp; //Should it be in m_time or something more human friendly???
     unsigned short countrycode;
+    unsigned short compressiontype;
+    unsigned short imagetype;
     int romsize; //Hm... this should be unsigned everywhere.
     char comment[COMMENT_MAXLENGTH]; 
     mupenEntry *inientry; 

@@ -32,7 +32,7 @@
  * subdirectory or in the path specified in the path.cfg file.
  */
 
-#include <stdio.h>
+#include <stdio.h> 
 #include <stdlib.h>
 #include <zlib.h>
 #include <string.h>
@@ -49,24 +49,6 @@
 #include "translate.h"
 #include "main.h"
 #include "util.h"
-
-//Supported rom compressiontypes.
-enum 
-{
-    UNCOMPRESSED,
-    ZIP_COMPRESSION,
-    GZIP_COMPRESSION,
-    //7ZIP_COMPRESSION,
-    //BZIP_COMPRESSION
-};
-
-//Supported rom image types.
-enum 
-{
-    Z64IMAGE,
-    V64IMAGE,
-    N64IMAGE
-};
 
 //Global loaded rom memory space.
 unsigned char *rom;
@@ -282,8 +264,10 @@ int rom_read(const char *filename)
     md5_byte_t digest[16];
     mupenEntry *entry;
     char buffer[PATH_MAX], *s;
+    char image[16], compression[16];
+    unsigned short compressiontype, imagetype;
 
-    int compressiontype, imagetype, i;
+    int i;
 
     if(rom)
         { free(rom); }
@@ -295,33 +279,11 @@ int rom_read(const char *filename)
         return -1;
         }
 
-    printf("Compression: ");
-    switch(compressiontype)
-        {
-        case UNCOMPRESSED:
-            printf("Uncompressed\n");
-            break;
-        case ZIP_COMPRESSION:
-            printf(".zip\n");
-            break;
-        case GZIP_COMPRESSION:
-            printf("gzip\n");
-            break;
-        }
+    compressionstring(compressiontype, compression);
+    printf("Compression: %s\n", compression);
 
-    printf("Imagetype: ");
-    switch(imagetype)
-        {
-        case Z64IMAGE:
-            printf(".z64 (native)\n");
-            break;
-        case V64IMAGE:
-            printf(".v64 (byteswapped)\n");
-            break;
-        case N64IMAGE:
-            printf(".n64 (wordswapped)\n");
-            break;
-        }
+    imagestring(imagetype, image);
+    printf("Imagetype: %s\n", image);
 
     printf("Rom size: %d bytes (or %d Mb or %d Megabits)\n",
     taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
@@ -341,10 +303,50 @@ int rom_read(const char *filename)
     if(ROM_HEADER==NULL)
         {
         fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
-        return NULL;
+        return 0;
         }
     memcpy(ROM_HEADER, rom, sizeof(rom_header));
     trim((char *)ROM_HEADER->nom); // remove trailing whitespace from Rom name
+
+long long CRC = 0;
+char temp;
+/*
+ for ( i = 0; i < taille_rom/4; ++i )
+            {
+            temp=rom[i*4];
+            rom[i*4]=rom[i*4+3];
+            rom[i*4+3]=temp;
+            temp=rom[i*4+1];
+            rom[i*4+1]=rom[i*4+2];
+            rom[i*4+2]=temp;
+            }
+*/
+printf("%X %X %X %X\n", rom[0], rom[1], rom[2], rom[3]);
+
+unsigned int dumb[0x1000/4*2];
+    for ( i = 0x40/4; i < 0x1000/4; ++i ) dumb[i] = 0;
+
+ memcpy((char *)dumb+0x40, rom+0x40, 0xFBC);
+
+    printf("Boot code: ");
+    for ( i = 0x40/4; i < 0x1000/4; ++i )
+{ CRC += dumb[i]; }
+
+if(CRC==0x000000D057C85244LL) printf("We have a 6102!!!\n");
+/*
+for ( i = 0; i < taille_rom/4; ++i )
+            {
+            temp=rom[i*4];
+            rom[i*4]=rom[i*4+3];
+            rom[i*4+3]=temp;
+            temp=rom[i*4+1];
+            rom[i*4+1]=rom[i*4+2];
+            rom[i*4+2]=temp;
+            }
+*/
+printf("%.16llX\n", CRC);
+
+//0x000000A316ADC55A - 6102 CIC chip z64 checksum.
 
     printf("%x %x %x %x\n", ROM_HEADER->init_PI_BSB_DOM1_LAT_REG,
                             ROM_HEADER->init_PI_BSB_DOM1_PGS_REG,
@@ -365,7 +367,7 @@ int rom_read(const char *filename)
    printf("Country: %s\n", buffer);
    printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
-    //Check the ini via MD5... This needs rework for RCS.
+    //Check the ini via md5... This needs rework for RCS.
     for ( i = 0; i < 16; ++i ) 
         { sprintf(buffer+i*2, "%02X", digest[i]); }
     buffer[32] = '\0';
@@ -377,7 +379,7 @@ int rom_read(const char *filename)
         sprintf(mycrc, "%08X-%08X-C%02X",
                (int)sl(ROM_HEADER->CRC1), (int)sl(ROM_HEADER->CRC2),
                ROM_HEADER->Country_code);
-        if((entry=ini_search_by_CRC(mycrc))==NULL)
+        if((entry=ini_search_by_crc(mycrc))==NULL)
             {
             strcpy(ROM_SETTINGS.goodname, (char *) ROM_HEADER->nom);
             strcat(ROM_SETTINGS.goodname, " (unknown rom)");
@@ -397,9 +399,9 @@ int rom_read(const char *filename)
                 }
             strcpy(ROM_SETTINGS.goodname, entry->goodname);
             strcat(ROM_SETTINGS.goodname, " (bad dump)");
-            if(strcmp(entry->refMD5, ""))
-                { entry = ini_search_by_md5(entry->refMD5); }
-            ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
+            if(strcmp(entry->refmd5, ""))
+                { entry = ini_search_by_md5(entry->refmd5); }
+            //ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
             return 0;
             }
         }
@@ -433,9 +435,9 @@ int rom_read(const char *filename)
         }
     strcpy(ROM_SETTINGS.goodname, entry->goodname);
 
-    if(strcmp(entry->refMD5, ""))
-        { entry = ini_search_by_md5(entry->refMD5); }
-    ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
+    if(strcmp(entry->refmd5, ""))
+        { entry = ini_search_by_md5(entry->refmd5); }
+    //ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
     printf("EEPROM type: %d\n", ROM_SETTINGS.eeprom_16kb);
     return 0;
 }
