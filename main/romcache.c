@@ -128,6 +128,8 @@ void * rom_cache_system( void *_arg )
 
                 remove(cache_filename);
                 rebuild_cache_file();
+                // Should be done every n roms, but this should work for now.
+                //updaterombrowser();
 
                 printf("[rcs] Cache file up to date.\n");
                 if (g_RCSTask == RCS_BUSY)
@@ -351,8 +353,7 @@ static void scan_dir( const char *dirname )
                 ++romcache.length;
                 }
             printf("Added ROM: %s\n", entry->inientry->goodname);
-            // Should be done every n roms, but this should work for now.
-            updaterombrowser();
+
             free(localrom);
             }
         }
