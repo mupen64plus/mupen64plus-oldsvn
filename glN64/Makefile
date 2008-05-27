@@ -1,14 +1,15 @@
 # Makefile for Mupen64
 
 # include pre-make file with a bunch of definitions
+USES_KDE4 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -Wall 
 
 ifeq ($(GUI), KDE4)
-  LDFLAGS += $(KDE_LIBS)
-  OBJECTS = Config_kde4.o
+  LDFLAGS += $(KDE_LIBS) $(GTHREAD_LIBS)
+  OBJECTS = Config_kde4.o gln64settings.o
 else
   LDFLAGS += $(GTK_LIBS) $(GTHREAD_LIBS)
   OBJECTS = Config_gtk2.o
@@ -55,11 +56,15 @@ clean:
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
+gln64settings.o: gln64settings.cpp
+	$(CXX) -o $@ $(CFLAGS) ${KDE_FLAGS} $(SDL_FLAGS) -c $<
+
+
 ui_gln64config.h: gln64config.ui
-	uic-qt4 $< -o $@
+	$(UIC) $< -o $@
 
 gln64settings.h: gln64.kcfg gln64settings.kcfgc
-	kconfig_compiler4 gln64.kcfg gln64settings.kcfgc
+	$(KCONFIG_COMPILER) gln64.kcfg gln64settings.kcfgc
 
 glN64.so: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -o $@

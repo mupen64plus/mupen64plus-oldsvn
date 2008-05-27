@@ -1,6 +1,7 @@
 # Makefile for Mupen64Plus
 
 # include pre-make file with a bunch of definitions
+USES_KDE4 = true
 include ./pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
@@ -293,12 +294,16 @@ clean:
 	$(RM) -f mupen64plus mupen64plus_dbg 
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
-	$(RM) -f main/gui_kde4/settings.cpp main/gui_kde4/settings.h main/gui_kde4/*.moc main/gui_kde4/ui_*.h
+	$(RM) -f main/gui_kde4/settings.cpp main/gui_kde4/settings.h main/gui_kde4/*.moc main/gui_kde4/ui_*.h main/gui_kde4/*.o
 
 rebuild: clean all
 
 # build rules
 .cpp.o:
+	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
+
+# I have no idea why this is needed, but apparently it is.
+main/gui_kde4/settings.o: main/gui_kde4/settings.cpp
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 .c.o:

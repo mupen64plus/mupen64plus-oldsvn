@@ -25,15 +25,15 @@ endif
 
 
 # test for presence of SDL
-ifeq ("$(shell which sdl-config 2>&1 | head -c 9)", "which: no")
+ifeq ($(shell which sdl-config 2>/dev/null),)
   # throw error
   $(error No SDL development libraries found!)
 endif
 
 # test for presence of GTK 2.0
-ifeq ("$(shell which pkg-config 2>&1 | head -c 9)", "which: no")
+ifeq ($(shell which pkg-config 2>/dev/null),)
   # throw error
-  $(error No GTK 2.x development libraries found!)
+  $(error pkg-config not installed!)
 endif
 ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
   # throw error
@@ -41,19 +41,37 @@ ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
 endif
 
 # set GTK flags and libraries
-GTK_FLAGS	= `pkg-config gtk+-2.0 --cflags` -D_GTK2
-GTK_LIBS	= `pkg-config gtk+-2.0 --libs`
-GTHREAD_LIBS	= `pkg-config gthread-2.0 --libs`
+GTK_FLAGS	= $(shell pkg-config gtk+-2.0 --cflags) -D_GTK2
+GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
+GTHREAD_LIBS	= $(shell pkg-config gthread-2.0 --libs)
 
 # set KDE flags and libraries
-KCONFIG_COMPILER = `kde4-config --prefix`/bin/kconfig_compiler
-MOC         = `./main/gui_kde4/qt4-config/qt4-config bin`/moc
-UIC         = `./main/gui_kde4/qt4-config/qt4-config bin`/uic
-QT_FLAGS    = -I`./main/gui_kde4/qt4-config/qt4-config include` -I`./main/gui_kde4/qt4-config/qt4-config include`/QtCore -I`./main/gui_kde4/qt4-config/qt4-config include`/QtGui
-KDE_FLAGS   = -I`kde4-config --path include` -I`kde4-config --path include`/KDE $(QT_FLAGS)
-QT_LIBS     = -lQtCore -lQtGui -L`./main/gui_kde4/qt4-config/qt4-config lib`
-KDE_LIBRARY_PATHS = `kde4-config --path lib | sed s/:/" -L"/ | sed s:^:-L:`
-KDE_LIBS    = -lkdecore -lkdeui -lkio $(KDE_LIBRARY_PATHS)
+ifeq ($(GUI), KDE4)
+  ifneq ($(USES_KDE4),)
+    KDE_CONFIG=$(shell which kde4-config 2>/dev/null)
+    ifeq ($(KDE_CONFIG),)
+      $(error kde4-config not found, try the GTK2 GUI!)
+    endif
+
+    KCONFIG_COMPILER = $(shell $(KDE_CONFIG) --prefix)/bin/kconfig_compiler
+    MOC         = $(shell which moc 2>/dev/null)
+    UIC         = $(shell which uic 2>/dev/null)
+    ifeq ($(MOC),)
+      $(error moc from Qt not found, make sure the Qt binaries are in your PATH)
+    endif
+    ifeq ($(UIC),)
+      $(error uic from Qt not found, make sure the Qt binaries are in your PATH)
+    endif
+    QT_FLAGS    = $(shell pkg-config QtCore QtGui --cflags)
+    KDE_FLAGS   = -I$(shell $(KDE_CONFIG) --path include) -I$(shell $(KDE_CONFIG) --path include)/KDE $(QT_FLAGS)
+    QT_LIBS     = $(shell pkg-config QtCore QtGui --libs)
+    KDE_LIBRARY_PATHS = $(shell kde4-config --path lib | sed s/:/" -L"/g | sed s:^:-L:)
+    KDE_LIBS    = -lkdecore -lkdeui -lkio $(KDE_LIBRARY_PATHS)
+  endif
+endif # end KDE4 GUI
+
+
+
 
 # set base program pointers and flags
 CC      = gcc
@@ -122,8 +140,8 @@ endif
 
 # set CFLAGS, LIBS, and LDFLAGS for external dependencies
 
-SDL_FLAGS	= `sdl-config --cflags`
-SDL_LIBS	= `sdl-config --libs`
+SDL_FLAGS	= $(shell sdl-config --cflags)
+SDL_LIBS	= $(shell sdl-config --libs)
 
 ifeq ($(VCR), 1)
   # test for presence of avifile
@@ -131,13 +149,13 @@ ifeq ($(VCR), 1)
     # throw error
     $(error VCR support requires avifile library)
   else
-    AVIFILE_FLAGS	= `avifile-config --cflags`
-    AVIFILE_LIBS	= `avifile-config --libs`
+    AVIFILE_FLAGS	= $(shell avifile-config --cflags)
+    AVIFILE_LIBS	= $(shell avifile-config --libs)
   endif
 endif
 
-FREETYPE_LIBS	= `freetype-config --libs`
-FREETYPE_FLAGS	= `freetype-config --cflags`
+FREETYPE_LIBS	= $(shell freetype-config --libs)
+FREETYPE_FLAGS	= $(shell freetype-config --cflags)
 
 PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
 
