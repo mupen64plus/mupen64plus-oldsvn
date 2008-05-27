@@ -19,7 +19,7 @@ Email                : blight@Ashitaka
 #include "romproperties.h"
 #include "main_gtk.h"
 
-#include "../main.h"
+#include "../main.h" 
 #include "../util.h"
 #include "../config.h"
 #include "../translate.h"
@@ -48,7 +48,7 @@ static GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain,
 static GtkWidget *playRomItem;
 static GtkWidget *romPropertiesItem;
 static GtkWidget *refreshRomBrowserItem;
-static int g_iNumRoms, g_iSortColumn = 0; // sort column
+static int g_iNumRoms, g_iSortColumn = 5; // sort column
 static GtkSortType g_SortType = GTK_SORT_ASCENDING; // sort type (ascending/descending)
 
 static void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
@@ -104,13 +104,9 @@ static void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
 // compare function
 gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *ptr2, gpointer user_data )
 {
-//static unsigned int times;
-//if(times%5000==0)
-//{ printf("Calling sort function! %d\n", times); }
-//++times;
-
     GtkSortType SortType;
     short int returnvalue, column;
+    float size1, size2, difference;
     gchar *buffer1, *buffer2;
 
     switch( g_iSortColumn )
@@ -139,6 +135,12 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         case 8: //Filename
             column = 8;
             break;
+        case 9: //Filename
+            column = 9;
+            break;
+        case 10: //Md5
+            column = 10;
+            break;
         default:
             return 0;
         };
@@ -146,7 +148,22 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
     gtk_tree_model_get ( model, ptr1, column, &buffer1, -1 );
     gtk_tree_model_get ( model, ptr2, column, &buffer2, -1 );
 
-    returnvalue = strcasecmp(buffer1, buffer2); 
+ if(column==2)
+        {
+        sscanf ( buffer1, "%f", &size1 );
+        sscanf ( buffer2, "%f", &size2 );
+
+        difference = size2 - size1;
+
+        if( difference < 0 )
+            { return 1; }
+        else if( difference > 0 )
+            { return -1; }
+        else
+            { return  0; }
+        }
+    else
+        { return strcasecmp(buffer1, buffer2); }
     g_free(buffer1);
     g_free(buffer2);
 
@@ -194,7 +211,7 @@ void rombrowser_refresh( void )
     gtk_list_store_clear( GTK_LIST_STORE(model) );
 
     gboolean fullpaths;
-    char *line[7];
+    char *line[9];
 
     GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
     GdkPixbuf *flag;
@@ -202,6 +219,7 @@ void rombrowser_refresh( void )
     line[2] = malloc(16*sizeof(char));
     line[5] = malloc(16*sizeof(char));
     line[6] = malloc(16*sizeof(char));
+    line[7] = malloc(16*sizeof(char));
     if(iter==NULL||line[1]==NULL||line[2]==NULL)
         {
         fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
@@ -227,15 +245,17 @@ void rombrowser_refresh( void )
                 { line[4] = filefrompath(entry->filename); }
             compressionstring(entry->compressiontype, line[5]);
             imagestring(entry->imagetype, line[6]);
+            cicstring(entry->cic, line[7]);
+            line[8]=entry->md5;
 
             //Add entries to TreeModel
             model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
-            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], -1);
+            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], 9, line[7], 10, line[8], -1);
 
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
-            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2,    line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], -1);
+            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2,    line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], 9, line[7], 10, line[8], -1);
 
             entry = entry->next;
             }
@@ -246,13 +266,12 @@ void rombrowser_refresh( void )
       free(line[2]);
       free(line[5]);
       free(line[6]);
+      free(line[7]);
       free(iter);
       if(fullpaths==1)
          { free(line[4]); }
 
-    printf("DOING INITIAL SORT!!!\n");
-
-     //Do an initial sort.
+    //Do an initial sort.
     gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_iSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
     gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(model), g_iSortColumn, g_SortType );
     gtk_tree_view_set_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay), model );
@@ -264,10 +283,6 @@ void rombrowser_refresh( void )
 //NOTE: we should add contingencies, i.e. secondary sort columns.
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-//static unsigned int times;
-//printf("Calling filter function! %d\n", times);
-//++times;
-
     const gchar *filter;
     char *buffer1, *buffer2;
     short int column;
@@ -302,6 +317,12 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
         case 8: //Filename
             column = 8;
             break;
+        case 9: //Filename
+            column = 9;
+            break;
+        case 10: //Md5
+            column = 10;
+            break;
         };
 
     gtk_tree_model_get (model, iter, column, &buffer1, -1);
@@ -328,6 +349,7 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 // column clicked (title) -> sort
 static void callback_column_sort(GtkTreeViewColumn *treeviewcolumn, gpointer data)
 {
+
     if( g_iSortColumn == gtk_tree_view_column_get_sort_column_id(treeviewcolumn) )
         { g_SortType = ( g_SortType == GTK_SORT_ASCENDING ) ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING; }
     else
@@ -398,7 +420,7 @@ void apply_filter( void )
     GdkPixbuf *flag;
     cache_entry *entry;
     short int counter;
-    gchar *line[7];
+    gchar *line[9];
 
     //Clear the Display Tree View.
     GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
@@ -418,28 +440,21 @@ void apply_filter( void )
             {
             if ( filter_function( source, &sourceiter, (gpointer)NULL) )
                  {
-                 gtk_tree_model_get ( GTK_TREE_MODEL(source), &sourceiter, 0, &line[0], 1, &line[1], 2, &line[2], 3, &line[3], 4, &line[4], 5, &entry, 6, &flag, 7, &line[5], 8, &line[6], -1 );
+                 gtk_tree_model_get ( GTK_TREE_MODEL(source), &sourceiter, 0, &line[0], 1, &line[1], 2, &line[2], 3, &line[3], 4, &line[4], 5, &entry, 6, &flag, 7, &line[5], 8, &line[6], 9, &line[7], 10, &line[8], -1 );
 
                  gtk_list_store_append ( GTK_LIST_STORE(destination), &destinationiter );
-                 gtk_list_store_set ( GTK_LIST_STORE(model), &destinationiter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], -1 );
+                 gtk_list_store_set ( GTK_LIST_STORE(model), &destinationiter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], 9, line[7], 10, line[8], -1 );
                  }
             if(!gtk_tree_model_iter_next(source, &sourceiter))
                  { break; }
             }
         }
 
-    for ( counter = 0; counter < 7; ++counter )
-        {
-        if(line[counter]!=NULL)
-            { free(line[counter]); }
-        }
-
-    destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-    g_iNumRoms = gtk_tree_model_iter_n_children(destination, NULL);
-
     gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
     gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_iSortColumn, g_SortType );
 
+    destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
+    g_iNumRoms = gtk_tree_model_iter_n_children(destination, NULL);
 }
 
 static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
@@ -601,7 +616,7 @@ static void callback_refreshRomBrowser( GtkWidget *widget, gpointer data )
 
 static void setup_view (GtkWidget *view)
 {
-    gchar *titles[7] = 
+    gchar *titles[10] = 
         {
         (gchar*)tr("Country"),
         (gchar*)tr("Good Name"),
@@ -610,9 +625,12 @@ static void setup_view (GtkWidget *view)
         (gchar*)tr("File Name"),
         (gchar*)tr("Compression"),
         (gchar*)tr("Image Type"),
+        (gchar*)tr("CIC Chip"),
+        (gchar*)tr("MD5 Hash"),
+        (gchar*)tr("Internal Name"),
         };
 
-    GtkListStore *store = gtk_list_store_new (9, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, -1);
+    GtkListStore *store = gtk_list_store_new (11, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, -1);
 
     GtkCellRenderer     *renderer;
     GtkTreeModel        *model;
@@ -695,6 +713,27 @@ static void setup_view (GtkWidget *view)
     gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
 
     renderer = gtk_cell_renderer_text_new ();
+    g_MainWindow.column[7] = gtk_tree_view_column_new_with_attributes (titles[7], renderer, "text", 9, NULL);
+    column = g_MainWindow.column[7];
+    gtk_tree_view_column_set_resizable (column, TRUE);
+    gtk_tree_view_column_set_reorderable (column, TRUE);
+    gtk_tree_view_column_set_sort_column_id(column, 9);
+    gtk_tree_view_column_set_visible(column, FALSE);
+    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 9);
+    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
+
+    renderer = gtk_cell_renderer_text_new ();
+    g_MainWindow.column[8] = gtk_tree_view_column_new_with_attributes (titles[8], renderer, "text", 10, NULL);
+    column = g_MainWindow.column[8];
+    gtk_tree_view_column_set_resizable (column, TRUE);
+    gtk_tree_view_column_set_reorderable (column, TRUE);
+    gtk_tree_view_column_set_sort_column_id(column, 10);
+    gtk_tree_view_column_set_visible(column, FALSE);
+    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 10);
+    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
+
+
+    renderer = gtk_cell_renderer_text_new ();
     g_MainWindow.column[11] = gtk_tree_view_column_new();
     column = g_MainWindow.column[11];
     gtk_tree_view_column_set_visible(column, FALSE);
@@ -708,7 +747,7 @@ static void setup_view (GtkWidget *view)
 
     int i;
     GtkWidget *item;
-    for (i = 0; i < 7; ++i)
+    for (i = 0; i < 9; ++i)
         {
         item = gtk_check_menu_item_new_with_label(titles[i]); 
         //This needs to be integrated with config system.
@@ -729,9 +768,6 @@ int create_romBrowser( void )
 {
     GtkWidget *rightClickMenu;
     GtkWidget *separatorItem;
-
-    g_iSortColumn = 5;
-    g_SortType = GTK_SORT_ASCENDING;
 
     GError* err = NULL;
     //Load flags.
@@ -794,7 +830,7 @@ int create_romBrowser( void )
 
     gtk_tree_view_set_headers_clickable ( GTK_TREE_VIEW(g_MainWindow.romDisplay), TRUE );
     gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(g_MainWindow.romDisplay), TRUE );
-    gtk_tree_view_set_reorderable   (GTK_TREE_VIEW(g_MainWindow.romDisplay), TRUE );
+    gtk_tree_view_set_reorderable   (GTK_TREE_VIEW(g_MainWindow.romDisplay), FALSE );
  
     gtk_signal_connect( GTK_OBJECT(g_MainWindow.romDisplay), "row-activated", GTK_SIGNAL_FUNC(callback_rowSelected), (gpointer)NULL );
     gtk_signal_connect( GTK_OBJECT(g_MainWindow.romDisplay), "button-press-event", GTK_SIGNAL_FUNC(callback_rombrowser_context), (gpointer)rightClickMenu);

@@ -48,8 +48,10 @@ typedef struct _cache_entry
     unsigned short countrycode;
     unsigned short compressiontype;
     unsigned short imagetype;
+    unsigned short cic;
     int romsize; //Hm... this should be unsigned everywhere.
     char comment[COMMENT_MAXLENGTH]; 
+    char internalname[21];
     mupenEntry *inientry; 
     struct _cache_entry *next;
 } cache_entry;

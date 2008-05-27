@@ -129,7 +129,7 @@ void * rom_cache_system( void *_arg )
                 remove(cache_filename);
                 rebuild_cache_file();
                 // Should be done every n roms, but this should work for now.
-                //updaterombrowser();
+                updaterombrowser();
 
                 printf("[rcs] Cache file up to date.\n");
                 if (g_RCSTask == RCS_BUSY)
@@ -142,8 +142,10 @@ void * rom_cache_system( void *_arg )
 
                 if (rcs_initialized)
                 {
-                    rebuild_cache_file();
                     printf("[rcs] Rescanning rom cache!\n");
+                    rebuild_cache_file();
+                     // Should be done every n roms, but this should work for now.
+                    updaterombrowser();
                 }
 
                 if (g_RCSTask == RCS_BUSY)
@@ -331,6 +333,21 @@ static void scan_dir( const char *dirname )
             entry->countrycode = localheader.Country_code;
 
             entry->inientry = ini_search_by_md5(entry->md5);
+
+unsigned int dumb[0x1000/4*2];
+    for ( i = 0x40/4; i < 0x1000/4; ++i ) dumb[i] = 0;
+
+ memcpy((char *)dumb+0x40, localrom+0x40, 0xFBC);
+long long CRC = 0;
+char temp;
+
+    for ( i = 0x40/4; i < 0x1000/4; ++i )
+{ CRC += dumb[i]; }
+if(CRC==0x000000A0F26F62FE) { entry->cic = CIC_NUS_6101; }
+if(CRC==0x000000A316ADC55A) { entry->cic = CIC_NUS_6102; }// 000000A316ADC55A
+if(CRC==0x000000A9229D7C45) { entry->cic = CIC_NUS_6103; }
+if(CRC==0x000000F8B860ED00) { entry->cic = CIC_NUS_6105; }
+if(CRC==0x000000BA5BA4B8CD) { entry->cic = CIC_NUS_6106; }
 
             //Something to deal with custom roms.
             //if(entry.inientry==NULL)

@@ -79,7 +79,7 @@ int is_valid_rom(unsigned char buffer[4])
  * Loads loadlength of the rom into rom. //
  * and byteswaps if necessary.
  */
-unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype, int *imagetype, int *loadlength)
+unsigned char* load_rom(const char *filename, int *romsize, unsigned short *compressiontype, unsigned short *imagetype, int *loadlength)
 {
     int i, romread = 0;
     char temp;
@@ -331,8 +331,11 @@ unsigned int dumb[0x1000/4*2];
     printf("Boot code: ");
     for ( i = 0x40/4; i < 0x1000/4; ++i )
 { CRC += dumb[i]; }
-
-if(CRC==0x000000D057C85244LL) printf("We have a 6102!!!\n");
+if(CRC==0x000000A0F26F62FE) printf("We have a 6101!!!\n");
+if(CRC==0x000000A316ADC55A) printf("We have a 6102!!!\n"); // 000000A316ADC55A
+if(CRC==0x000000A9229D7C45) printf("We have a 6103!!!\n");
+if(CRC==0x000000F8B860ED00) printf("We have a 6105!!!\n");
+if(CRC==0x000000BA5BA4B8CD) printf("We have a 6106!!!\n");
 /*
 for ( i = 0; i < taille_rom/4; ++i )
             {

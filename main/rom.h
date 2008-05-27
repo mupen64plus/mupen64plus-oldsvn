@@ -31,7 +31,7 @@
 #define ROM_H
 
 int rom_read(const char *filename);
-unsigned char* load_rom(const char *filename, int *romsize, int *compressiontype, int *imagetype, int *loadlength);
+unsigned char* load_rom(const char *filename, int *romsize, unsigned short *compressiontype, unsigned short *imagetype, int *loadlength);
 
 extern unsigned char *rom;
 extern int taille_rom;
@@ -51,7 +51,7 @@ typedef struct _rom_header
    unsigned char nom[20];
    unsigned int unknown;
    unsigned int Manufacturer_ID;
-   unsigned short Cartridge_ID;
+   unsigned short Cartridge_ID; //Game serial number
    unsigned short Country_code;
    unsigned int Boot_Code[1008];
 } rom_header;
@@ -72,7 +72,8 @@ enum
     ZIP_COMPRESSION,
     GZIP_COMPRESSION,
     //7ZIP_COMPRESSION,
-    //BZIP_COMPRESSION
+    //BZIP_COMPRESSION,
+    //LZMA_COMPRESSION
 };
 
 //Supported rom image types.
@@ -82,6 +83,16 @@ enum
     V64IMAGE,
     N64IMAGE
 };
+
+enum
+{
+    CIC_NUS_6101,
+    CIC_NUS_6102,
+    CIC_NUS_6103,
+    CIC_NUS_6105,
+    CIC_NUS_6106
+};
+
 
 #endif
 

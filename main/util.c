@@ -556,3 +556,26 @@ void imagestring(unsigned short imagetype, char *string)
     }
 }
 
+void cicstring(unsigned short cic, char *string)
+{
+    switch(cic)
+    {
+    case CIC_NUS_6101:
+        strcpy(string, tr("CIC_NUS_6101"));
+        break;
+    case CIC_NUS_6102:
+        strcpy(string, tr("CIC_NUS_6102"));
+        break;
+    case CIC_NUS_6103:
+        strcpy(string, tr("CIC_NUS_6103"));
+        break;
+    case CIC_NUS_6105:
+        strcpy(string, tr("CIC_NUS_6104"));
+        break;
+    case CIC_NUS_6106:
+        strcpy(string, tr("CIC_NUS_6105"));
+        break;
+    default:
+        string = NULL;
+    }
+}

@@ -1455,7 +1455,5 @@ static int create_mainWindow( void )
     // statusbar
     create_statusBar();
 
-    // fill rom browser
-    rombrowser_refresh();
     return 0;
 }
