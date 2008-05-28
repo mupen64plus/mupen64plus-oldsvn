@@ -193,12 +193,12 @@ static float get_message_offset(osd_message_t *msg, float fLinePos)
 
 // public functions
 extern "C"
-void osd_init(void)
+void osd_init(int width, int height)
 {
     char fontpath[PATH_MAX];
 
     snprintf(fontpath, PATH_MAX, "%sfonts/%s", get_installpath(), FONT_FILENAME);
-    l_font = new OGLFT::Monochrome(fontpath, 16);
+    l_font = new OGLFT::Monochrome(fontpath, height / 35);  // make font size proportional to screen height
 
     // clear statics
     for (int i = 0; i < OSD_NUM_CORNERS; i++)
@@ -247,8 +247,7 @@ void osd_render()
 {
     list_node_t *node;
     osd_message_t *msg, *msg_to_delete = NULL;
-    // keeps track of how many messages are in each corner
-    int corner_ctr[OSD_NUM_CORNERS] = {0};
+    int i;
 
     // if the flag is set to take a screenshot, then grab it now
     if (g_TakeScreenshot != 0)
@@ -276,7 +275,7 @@ void osd_render()
     int  iActiveTex;
     bool bTexture2D[8];
     glGetIntegerv(GL_ACTIVE_TEXTURE_ARB, &iActiveTex);
-    for (int i = 0; i < 8; i++)
+    for (i = 0; i < 8; i++)
     {
         glActiveTexture(GL_TEXTURE0_ARB + i);
         bTexture2D[i] = glIsEnabled(GL_TEXTURE_2D);
@@ -312,6 +311,15 @@ void osd_render()
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
     glShadeModel(GL_FLAT);
 
+    // get height of line
+    OGLFT::BBox bbox = l_font->measure("01abjZpqRGB");
+    float fLineHeight = (bbox.y_max_ - bbox.y_min_) / 30.0;
+
+    // keeps track of next message position for each corner
+    float fCornerPos[OSD_NUM_CORNERS];
+    for (i = 0; i < OSD_NUM_CORNERS; i++)
+        fCornerPos[i] = 0.5 * fLineHeight;
+
     list_foreach(l_messageQueue, node)
     {
         msg = (osd_message_t *)node->data;
@@ -342,15 +350,15 @@ void osd_render()
         // offset y depending on how many other messages are in the same corner
         float fStartOffset;
         if (msg->corner >= OSD_MIDDLE_LEFT && msg->corner <= OSD_MIDDLE_RIGHT)  // don't scroll the middle messages
-            fStartOffset = (float) corner_ctr[msg->corner] + 0.5;
+            fStartOffset = fCornerPos[msg->corner];
         else
-            fStartOffset = (float) corner_ctr[msg->corner] + fCornerScroll[msg->corner] + 0.5;
+            fStartOffset = fCornerPos[msg->corner] + (fCornerScroll[msg->corner] * fLineHeight);
         msg->yoffset += get_message_offset(msg, fStartOffset);
 
         draw_message(msg, viewport[2], viewport[3]);
 
         msg->yoffset -= get_message_offset(msg, fStartOffset);
-        corner_ctr[msg->corner]++;
+        fCornerPos[msg->corner] += fLineHeight;
     }
 
     // do the scrolling

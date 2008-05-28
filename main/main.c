@@ -107,6 +107,7 @@ static int  l_GuiEnabled = 1;           // GUI enabled?
 static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
 
+static int   l_OsdEnabled = 1;           // On Screen Display enabled?
 static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter
@@ -758,11 +759,23 @@ static void * emulationThread( void *_arg )
     romOpen_audio();
     romOpen_input();
 
-    // init on-screen display
-    osd_init();
-
+    // switch to fullscreen if enabled
     if (l_Fullscreen)
         changeWindow();
+
+    // init on-screen display
+    if (l_OsdEnabled)
+    {
+        void *pvPixels = NULL;
+        int width = 640, height = 480;
+        readScreen(&pvPixels, &width, &height); // read screen to get width and height
+        if (pvPixels != NULL)
+        {
+            free(pvPixels);
+            pvPixels = NULL;
+        }
+        osd_init(width, height);
+    }
 
 #ifdef WITH_LIRC
     lircStart();
@@ -938,6 +951,7 @@ void parseCommandLine(int argc, char **argv)
     struct option long_options[] =
     {
         {"nogui", no_argument, &l_GuiEnabled, FALSE},
+        {"noosd", no_argument, &l_OsdEnabled, FALSE},
         {"fullscreen", no_argument, &l_Fullscreen, TRUE},
         {"gfx", required_argument, NULL, OPT_GFX},
         {"audio", required_argument, NULL, OPT_AUDIO},

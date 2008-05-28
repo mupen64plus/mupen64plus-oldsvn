@@ -89,7 +89,7 @@ enum { R, G, B }; // for referencing color array
 extern "C" {
 #endif
 
-void osd_init(void);
+void osd_init(int width, int height);
 void osd_exit(void);
 void osd_render();
 osd_message_t * osd_new_message(enum osd_corner, const char *, ...);
