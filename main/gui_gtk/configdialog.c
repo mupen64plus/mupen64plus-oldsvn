@@ -200,7 +200,8 @@ static void callback_aboutRSP( GtkWidget *widget, gpointer data )
 
 gboolean callback_deleteForEach (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer userdata)
 {
-    gtk_list_store_remove(GTK_LIST_STORE(model), iter);
+    if(gtk_tree_model_get_iter_first(model, iter))
+        { gtk_list_store_remove(GTK_LIST_STORE(model), iter); }
     return 0;
 }
 gboolean Match = 0;
@@ -281,8 +282,8 @@ static void callback_romDirectoryRemove( GtkWidget *widget, gpointer data )
         llist = g_list_first (list);
         do{
             GtkTreeIter iter;
-            gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-            gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+            if(gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data))
+                { gtk_list_store_remove(GTK_LIST_STORE(model), &iter); }
         } while ((llist = g_list_next (llist)));
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
         g_list_free (list);
@@ -303,8 +304,8 @@ static void callback_romDirectoryRemoveAll( GtkWidget *widget, gpointer data )
         do
         {
             GtkTreeIter iter;
-            gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-            gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+            if(gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data))
+                { gtk_list_store_remove(GTK_LIST_STORE(model), &iter); }
         } while ((llist = g_list_next (llist)));
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
         g_list_free (list);
@@ -406,22 +407,29 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
 
     switch(gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo)))
     {
+        case 2:
+            if(config_get_number("ToolbarSize",0)!=32)
+            {
+                config_put_number("ToolbarSize",32);
+                gtk_toolbar_set_icon_size( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ICON_SIZE_SMALL_TOOLBAR);
+                reload();
+            }
+        break;
         case 0:
-            if(config_get_number( "ToolbarSize", 1 ) != 0)
+            if(config_get_number("ToolbarSize",0)!=16)
             {
-                config_put_number( "ToolbarSize", 0 );
+                config_put_number("ToolbarSize",16);
                 gtk_toolbar_set_icon_size( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ICON_SIZE_SMALL_TOOLBAR);
                 reload();
             }
         break;
-        case 1:
-            if(config_get_number( "ToolbarSize", 1 ) != 1)
+        default:
+            if(config_get_number("ToolbarSize",0)!=22)
             {
-                config_put_number( "ToolbarSize", 1 );
+                config_put_number("ToolbarSize",22);
                 gtk_toolbar_set_icon_size( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ICON_SIZE_SMALL_TOOLBAR);
                 reload();
             }
-        break;
     }
 
     switch(gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo)))
@@ -634,16 +642,16 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
         break;
     }
 
-    switch(config_get_number( "ToolbarSize", 1 ))
+    switch(config_get_number( "ToolbarSize", 22))
     {
-        case 0:
-            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 0);
+        case 32:
+            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 2);
         break;
-        case 1:
-            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 1);
+        case 16:
+            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 0);
         break;
         default:
-            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 0);
+            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 1);
         break;
     }
 
@@ -835,12 +843,15 @@ int create_configDialog( void )
     GtkWidget *label;
     GtkWidget *frame;
     GtkWidget *button, *button_config, *button_test, *button_about;
+    GdkPixbuf *pixbuf;
     GtkWidget *icon = NULL;
     GtkWidget *vbox;
     GtkWidget *hbox1, *hbox2;
 
     list_node_t *node;
     plugin *p;
+    gboolean icontheme = check_icon_theme(); //Do we use theme icons or our own?
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
 
     // Nullify the plugin lists (so we can fill them :) )
     g_ConfigDialog.gfxPluginGList = NULL;
@@ -964,6 +975,7 @@ int create_configDialog( void )
             
             g_ConfigDialog.toolbarSizeCombo = gtk_combo_box_new_text();
             gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Small") );
+            gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Medium") );
             gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Large") );
     
             gtk_box_pack_start( GTK_BOX(hbox1), gtk_label_new(tr("Toolbar Size:")), 1, 1, 0 );
@@ -1007,7 +1019,13 @@ int create_configDialog( void )
             gtk_box_pack_start( GTK_BOX(vbox), hbox1, FALSE, FALSE, 0 );
             gtk_box_pack_start( GTK_BOX(vbox), hbox2, FALSE, FALSE, 0 );
         
-            icon = gtk_image_new_from_file( get_iconpath("graphics.png") );
+            if(icontheme)
+                {
+                pixbuf = gtk_icon_theme_load_icon(theme, "video-display", 32,  0, NULL);
+                icon = gtk_image_new_from_pixbuf(pixbuf); 
+                }
+            else
+                { icon = gtk_image_new_from_file( get_iconpath("32x32/video-diiplay.png") ); }
         
             g_ConfigDialog.gfxCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.gfxPluginGList )
@@ -1051,8 +1069,14 @@ int create_configDialog( void )
             gtk_container_add( GTK_CONTAINER(frame), vbox );
             gtk_box_pack_start( GTK_BOX(vbox), hbox1, FALSE, FALSE, 0 );
             gtk_box_pack_start( GTK_BOX(vbox), hbox2, FALSE, FALSE, 0 );
-        
-            icon = gtk_image_new_from_file( get_iconpath("sound.png") );
+
+            if(icontheme)
+                {
+                pixbuf = gtk_icon_theme_load_icon(theme, "audio-card", 32,  0, NULL);
+                icon = gtk_image_new_from_pixbuf(pixbuf); 
+                }
+            else
+                { icon = gtk_image_new_from_file( get_iconpath("32x32/audio-card.png") ); }
         
             g_ConfigDialog.audioCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.audioPluginGList )
@@ -1097,7 +1121,13 @@ int create_configDialog( void )
             gtk_box_pack_start( GTK_BOX(vbox), hbox1, FALSE, FALSE, 0 );
             gtk_box_pack_start( GTK_BOX(vbox), hbox2, FALSE, FALSE, 0 );
         
-            icon = gtk_image_new_from_file( get_iconpath("input.png") );
+            if(icontheme)
+                {
+                pixbuf = gtk_icon_theme_load_icon(theme, "input-gaming", 32,  0, NULL);
+                icon = gtk_image_new_from_pixbuf(pixbuf); 
+                }
+            else
+                { icon = gtk_image_new_from_file( get_iconpath("32x32/input-gaming.png") ); }
         
             g_ConfigDialog.inputCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.inputPluginGList )
@@ -1142,7 +1172,7 @@ int create_configDialog( void )
             gtk_box_pack_start( GTK_BOX(vbox), hbox1, FALSE, FALSE, 0 );
             gtk_box_pack_start( GTK_BOX(vbox), hbox2, FALSE, FALSE, 0 );
         
-            icon = gtk_image_new_from_file( get_iconpath("rsp.png") );
+            icon = gtk_image_new_from_file( get_iconpath("32x32/cpu.png") );
 
             g_ConfigDialog.RSPCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.RSPPluginGList )

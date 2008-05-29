@@ -44,6 +44,7 @@ extern SMainWindow g_MainWindow;
 void reload();
 void statusbar_message( const char *section, const char *fmt, ... );
 void updaterombrowser();
+gboolean check_icon_theme();
 
 // helper macro
 #define GUI_PROCESS_QUEUED_EVENTS() \

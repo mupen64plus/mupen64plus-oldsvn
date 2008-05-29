@@ -1339,50 +1339,52 @@ static int create_toolBar( void )
     gtk_toolbar_set_tooltips( GTK_TOOLBAR(g_MainWindow.toolBar), TRUE );
     gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.toolBar, FALSE, FALSE, 0 );
 
-    GtkIconTheme *theme = gtk_icon_theme_get_default();
-
     // load icons from memory
-    if(config_get_number( "ToolbarSize", 1 ) == 1)
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+    GdkPixbuf *pixbuf;
+    short size = config_get_number( "ToolbarSize", 22 );
+
+    if(check_icon_theme())
         {
-        openImage = gtk_image_new_from_stock(GTK_STOCK_OPEN, GTK_ICON_SIZE_DIALOG);
-        if(openImage==NULL)
-            { openImage = gtk_image_new_from_file(get_iconpath("open.png")); }
-        playImage = gtk_image_new_from_stock(GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_DIALOG);
-        if(playImage==NULL)
-            { playImage = gtk_image_new_from_file(get_iconpath("play.png")); }
-        pauseImage = gtk_image_new_from_stock(GTK_STOCK_MEDIA_PAUSE, GTK_ICON_SIZE_DIALOG);
-        if(pauseImage==NULL)
-            { pauseImage = gtk_image_new_from_file(get_iconpath("pause.png")); }
-        stopImage = gtk_image_new_from_stock(GTK_STOCK_MEDIA_STOP, GTK_ICON_SIZE_DIALOG);
-        if(stopImage==NULL)
-            { stopImage = gtk_image_new_from_file(get_iconpath("stop.png")); }
-        fullscreenImage = gtk_image_new_from_stock(GTK_STOCK_FULLSCREEN, GTK_ICON_SIZE_DIALOG);
-        if(fullscreenImage==NULL)
-            { fullscreenImage = gtk_image_new_from_file(get_iconpath("fullscreen.png")); }
-        configureImage = gtk_image_new_from_stock(GTK_STOCK_PREFERENCES, GTK_ICON_SIZE_DIALOG);
-        if(configureImage==NULL)
-            { configureImage = gtk_image_new_from_file(get_iconpath("configure.png")); }
+        pixbuf = gtk_icon_theme_load_icon(theme, "document-open", size,  0, NULL);
+        openImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "media-playback-start", size,  0, NULL);
+        playImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "media-playback-pause", size,  0, NULL);
+        pauseImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "media-playback-stop", size,  0, NULL);
+        stopImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "view-fullscreen", size,  0, NULL);
+        fullscreenImage = gtk_image_new_from_pixbuf(pixbuf);
+        pixbuf = gtk_icon_theme_load_icon(theme, "preferences-system", size,  0, NULL);
+        configureImage = gtk_image_new_from_pixbuf(pixbuf);
+        }
+    else if(size==32)
+        {
+        openImage = gtk_image_new_from_file(get_iconpath("32x32/document-open.png")); 
+        playImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-start.png")); 
+        pauseImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-pause.png")); 
+        stopImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-pause.png"));
+        fullscreenImage = gtk_image_new_from_file(get_iconpath("32x32/view-fullscreen.png")); 
+        configureImage = gtk_image_new_from_file(get_iconpath("32x32/preferences-system.png"));
+        }
+    else if(size==16)
+        {
+        openImage = gtk_image_new_from_file(get_iconpath("16x16/document-open.png")); 
+        playImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-start.png")); 
+        pauseImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-pause.png")); 
+        stopImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-pause.png"));
+        fullscreenImage = gtk_image_new_from_file(get_iconpath("16x16/view-fullscreen.png")); 
+        configureImage = gtk_image_new_from_file(get_iconpath("16x16/preferences-system.png"));
         }
     else
         {
-        openImage = gtk_image_new_from_stock(GTK_STOCK_OPEN, GTK_ICON_SIZE_LARGE_TOOLBAR);
-        if(openImage==NULL)
-            { openImage = gtk_image_new_from_file(get_iconpath("open-small.png")); }
-        playImage = gtk_image_new_from_stock(GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_LARGE_TOOLBAR);
-        if(playImage==NULL)
-            { playImage = gtk_image_new_from_file(get_iconpath("play-small.png")); }
-        pauseImage = gtk_image_new_from_stock(GTK_STOCK_MEDIA_PAUSE, GTK_ICON_SIZE_LARGE_TOOLBAR);
-        if(pauseImage==NULL)
-            { pauseImage = gtk_image_new_from_file(get_iconpath("pause-small.png")); }
-        stopImage = gtk_image_new_from_stock(GTK_STOCK_MEDIA_STOP, GTK_ICON_SIZE_LARGE_TOOLBAR);
-        if(stopImage==NULL)
-            { stopImage = gtk_image_new_from_file(get_iconpath("stop-small.png")); }
-        fullscreenImage = gtk_image_new_from_stock(GTK_STOCK_FULLSCREEN, GTK_ICON_SIZE_LARGE_TOOLBAR);
-        if(fullscreenImage==NULL)
-        { fullscreenImage = gtk_image_new_from_file(get_iconpath("fullscreen-small.png")); }
-        configureImage = gtk_image_new_from_stock(GTK_STOCK_PREFERENCES, GTK_ICON_SIZE_LARGE_TOOLBAR);
-        if(configureImage==NULL)
-            { configureImage = gtk_image_new_from_file(get_iconpath("configure-small.png")); }
+        openImage = gtk_image_new_from_file(get_iconpath("22x22/document-open.png")); 
+        playImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-start.png")); 
+        pauseImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-pause.png")); 
+        stopImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-pause.png"));
+        fullscreenImage = gtk_image_new_from_file(get_iconpath("22x22/view-fullscreen.png")); 
+        configureImage = gtk_image_new_from_file(get_iconpath("22x22/preferences-system.png"));
         }
 
     // add icons to toolbar
@@ -1392,9 +1394,8 @@ static int create_toolBar( void )
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Pause"),tr("Pause/ Continue Emulation"),"",pauseImage,GTK_SIGNAL_FUNC(callback_pauseContinueEmulation),NULL );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Stop"),tr("Stop Emulation"),"",stopImage,GTK_SIGNAL_FUNC(callback_stopEmulation),NULL );
     gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
-    gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Fullscreen"),tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );
-    gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Configure"),tr("Configure"),"",configureImage,GTK_SIGNAL_FUNC(callback_configure),NULL );
+    gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Fullscreen"),tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );
 
     return 0;
 }
@@ -1457,3 +1458,23 @@ static int create_mainWindow( void )
 
     return 0;
 }
+
+//Add a check for all Gtk icons here.
+gboolean check_icon_theme()
+{
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+
+    if(gtk_icon_theme_has_icon(theme, "document-open")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-start")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-pause")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-stop")&&
+       gtk_icon_theme_has_icon(theme, "view-fullscreen")&&
+       gtk_icon_theme_has_icon(theme, "preferences-system")&& 
+       gtk_icon_theme_has_icon(theme, "video-display")&& 
+       gtk_icon_theme_has_icon(theme, "audio-card")&& 
+       gtk_icon_theme_has_icon(theme, "input-gaming"))
+        { return TRUE; }
+    else
+        { return FALSE; }
+}
+
