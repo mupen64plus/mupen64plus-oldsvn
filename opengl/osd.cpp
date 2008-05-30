@@ -29,7 +29,6 @@
 
 #include <limits.h>
 
-#include "screenshot.h"
 #include "OGLFT.h"
 #include "osd.h"
 
@@ -41,7 +40,9 @@ extern "C" {
 
 #define FONT_FILENAME "font.ttf"
 
-// globals
+// static variables for OSD
+static int l_OsdInitialized = 0;
+
 static list_t l_messageQueue = NULL;
 static OGLFT::Monochrome *l_font;
 
@@ -215,8 +216,8 @@ void osd_init(int width, int height)
     glEnable(GL_RASTER_POSITION_UNCLIPPED_IBM);
 #endif
 
-    // setup gfx plugin rendering callback
-    setRenderingCallback(osd_render);
+    // set initialized flag
+    l_OsdInitialized = 1;
 }
 
 extern "C"
@@ -249,15 +250,8 @@ void osd_render()
     osd_message_t *msg, *msg_to_delete = NULL;
     int i;
 
-    // if the flag is set to take a screenshot, then grab it now
-    if (g_TakeScreenshot != 0)
-    {
-        TakeScreenshot(g_TakeScreenshot - 1);  // current frame number +1 is in g_TakeScreenshot
-        g_TakeScreenshot = 0; // reset flag
-    }
-
-    // if list is empty, then just skip it all
-    if (l_messageQueue == NULL)
+    // if we're not initialized or list is empty, then just skip it all
+    if (!l_OsdInitialized || l_messageQueue == NULL)
         return;
 
     // get the viewport dimensions
@@ -410,9 +404,12 @@ osd_message_t * osd_new_message(enum osd_corner eCorner, const char *fmt, ...)
 {
     va_list ap;
     char buf[PATH_MAX];
+
+    if (!l_OsdInitialized) return NULL;
+
     osd_message_t *msg = (osd_message_t *)malloc(sizeof(osd_message_t));
 
-    if(!msg) return NULL;
+    if (!msg) return NULL;
 
     va_start(ap, fmt);
     vsnprintf(buf, PATH_MAX, fmt, ap);
@@ -460,7 +457,7 @@ void osd_update_message(osd_message_t *msg, const char *fmt, ...)
     va_list ap;
     char buf[PATH_MAX];
 
-    if(!msg) return;
+    if (!l_OsdInitialized || !msg) return;
 
     va_start(ap, fmt);
     vsnprintf(buf, PATH_MAX, fmt, ap);
@@ -486,9 +483,9 @@ void osd_delete_message(osd_message_t *msg)
 {
     list_node_t *node;
 
-    if(!msg) return;
+    if (!l_OsdInitialized || !msg) return;
 
-    if(msg->text)
+    if (msg->text)
         free(msg->text);
 
     node = list_find_node(l_messageQueue, msg);
@@ -500,22 +497,28 @@ void osd_delete_message(osd_message_t *msg)
 extern "C"
 void osd_message_set_corner(osd_message_t *msg, enum osd_corner corner)
 {
-        msg->corner = corner;
+    if (!l_OsdInitialized || !msg) return;
+
+    msg->corner = corner;
 }
 
 // set message so it doesn't automatically expire in a certain number of frames.
 extern "C"
 void osd_message_set_static(osd_message_t *msg)
 {
-        msg->timeout[OSD_DISPLAY] = OSD_INFINITE_TIMEOUT;
-        msg->state = OSD_DISPLAY;
-        msg->frames = 0;
+    if (!l_OsdInitialized || !msg) return;
+
+    msg->timeout[OSD_DISPLAY] = OSD_INFINITE_TIMEOUT;
+    msg->state = OSD_DISPLAY;
+    msg->frames = 0;
 }
 
 // return message pointer if valid (in the OSD list), otherwise return NULL
 extern "C"
 osd_message_t * osd_message_valid(osd_message_t *testmsg)
 {
+    if (!l_OsdInitialized || !testmsg) return NULL;
+
     if (list_find_node(l_messageQueue, testmsg) == NULL)
         return NULL;
     else

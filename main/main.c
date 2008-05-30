@@ -212,6 +212,22 @@ static unsigned int gettimeofday_msec(void)
     return foo;
 }
 
+void video_plugin_render_callback(void)
+{
+    // if the flag is set to take a screenshot, then grab it now
+    if (g_TakeScreenshot != 0)
+    {
+        TakeScreenshot(g_TakeScreenshot - 1);  // current frame number +1 is in g_TakeScreenshot
+        g_TakeScreenshot = 0; // reset flag
+    }
+
+    // if the OSD is enabled, then draw it now
+    if (l_OsdEnabled)
+    {
+        osd_render();
+    }
+}
+
 void new_frame(void)
 {
     // take a screenshot if we need to
@@ -776,6 +792,9 @@ static void * emulationThread( void *_arg )
         }
         osd_init(width, height);
     }
+
+    // setup rendering callback from video plugin to the core, for screenshots and On-Screen-Display
+    setRenderingCallback(video_plugin_render_callback);
 
 #ifdef WITH_LIRC
     lircStart();
