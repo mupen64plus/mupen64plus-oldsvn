@@ -164,7 +164,8 @@ void ini_openFile()
                 cur->next_md5 = aux;
                 romdatabase.md5_lists[i] = cur;
                 }
-            //cur->entry.eeprom16kb = 0;
+            cur->entry.status=3;
+            cur->entry.eeprom16kb = 0;
             strcpy(cur->entry.refmd5, "");
             strcpy(cur->entry.comments, "");
             }
@@ -205,7 +206,7 @@ void ini_openFile()
                 else if(!strcmp(buf, "Eeprom"))
                     {
                     if(!strncmp(buf+i+1, "16k", 3))
-                        {// cur->entry.eeprom16kb = 1;
+                        { cur->entry.eeprom16kb = 1;
  }
                     }
                 }

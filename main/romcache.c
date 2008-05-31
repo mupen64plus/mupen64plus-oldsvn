@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <iconv.h>
 
 #include <errno.h>
 #include <pthread.h> //Actually not currently using...
@@ -59,7 +60,17 @@ static const char *romextensions[] =
 };
 
 static void scan_dir( const char *dirname );
-
+void showhex (const char *a, int len)
+{
+  int i;
+  for (i = 0; i < len; i++)
+    {
+      printf ("%X", (unsigned char) a[i]);
+      if (i < len - 1)
+        printf ("/");
+    }
+  printf ("\n");
+}
 void clear_cache()
 {
     cache_entry *entry, *entrynext;
@@ -204,6 +215,7 @@ int rebuild_cache_file()
             gzwrite(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char));
             gzwrite(gzfile, &entry->compressiontype, sizeof(unsigned short));
             gzwrite(gzfile, &entry->imagetype, sizeof(unsigned short));
+            gzwrite(gzfile, &entry->internalname, 80*sizeof(char));
 
             entry = entry->next;
             }
@@ -216,6 +228,7 @@ int rebuild_cache_file()
 
 static void scan_dir( const char *dirname )
 {
+    static short failures = 0;
     int i;
     char filename[PATH_MAX];
     char real_path[PATH_MAX];
@@ -326,30 +339,96 @@ static void scan_dir( const char *dirname )
             for ( i = 0; i < 16; ++i ) 
                 { sprintf(entry->md5+i*2, "%02X", digest[i]); }
 
-            //Best not to use global, exact best solution depends on 
-            //Which fields from the rom header we want.
-            rom_header localheader;
-            memcpy(&localheader, localrom, sizeof(rom_header));
-            entry->countrycode = localheader.Country_code;
-
             entry->inientry = ini_search_by_md5(entry->md5);
 
-unsigned int dumb[0x1000/4*2];
-    for ( i = 0x40/4; i < 0x1000/4; ++i ) dumb[i] = 0;
+            //See rom.h for header layout.
+            entry->countrycode = (unsigned short)*(localrom+0x3E);
 
- memcpy((char *)dumb+0x40, localrom+0x40, 0xFBC);
-long long CRC = 0;
-char temp;
+            char *buffer1 = calloc(21,sizeof(char));
+                strncpy(buffer1, (char*)localrom+0x20, 20);
+        
 
-    for ( i = 0x40/4; i < 0x1000/4; ++i )
-{ CRC += dumb[i]; }
-if(CRC==0x000000A0F26F62FE) { entry->cic = CIC_NUS_6101; }
-if(CRC==0x000000A316ADC55A) { entry->cic = CIC_NUS_6102; }// 000000A316ADC55A
-if(CRC==0x000000A9229D7C45) { entry->cic = CIC_NUS_6103; }
-if(CRC==0x000000F8B860ED00) { entry->cic = CIC_NUS_6105; }
-if(CRC==0x000000BA5BA4B8CD) { entry->cic = CIC_NUS_6106; }
 
-            //Something to deal with custom roms.
+char* euc = buffer1;
+  iconv_t euc2utf8t;
+  size_t iconv_value;
+  char *euc_start, *utf8, *utf8start;
+  size_t len, utf8len, utf8lenstart, start_len;
+
+  euc_start = euc;
+
+  euc2utf8t = iconv_open ("UTF-8", "SHIFT-JIS");
+  if (euc2utf8t == (iconv_t) -1)
+     { printf("Error\n"); }
+
+  start_len = len = strlen (euc);
+  utf8lenstart = utf8len = 80;
+  utf8start =   utf8 = (char*) calloc (utf8len, 1);
+  //printf ("before: in string '%s', length %d, out string '%s', length %d\n",
+          //euc, len, utf8, utf8len);
+  //showhex (euc, start_len);
+  //showhex (utf8start, utf8lenstart);
+  iconv_value = iconv (euc2utf8t, & euc, & len, & utf8, & utf8len);
+  //printf ("after: in string '%s', length %d, out string '%s', length %d\n",
+    //      euc, len, utf8start, utf8lenstart);
+  //showhex (euc_start, start_len);
+  //showhex (utf8start, utf8lenstart);
+  if (iconv_value == (size_t) -1)
+    {
+      printf ("failed: in string '%s', length %d, "
+              "out string '%s', length %d\n",
+              euc, len, utf8start, utf8len);
+      switch (errno)
+        {
+        case EILSEQ:
+          printf ("Invalid character sequence\n");
+          break;
+        case EINVAL:
+          printf ("EINVAL\n");
+          break;
+        case E2BIG:
+          printf ("E2BIG\n");
+          break;
+        default:
+          printf ("unknown error");
+        }
+    ++failures;
+    printf("Failures: %d\n", failures);
+    }
+  iconv_close (euc2utf8t);
+  
+  //char * instring = "金文体"; // Save this file as Japanese EUC in emacs
+  //char * instring = "Test"; // Save this file as Japanese EUC in emacs
+  printf ("%s\n", utf8start);
+  strncpy(entry->internalname , utf8start, 80);
+
+            long long CRC = 0;
+
+            for ( i = 0x40/4; i < 0x1000/4; ++i )
+                { CRC += ((unsigned int*)localrom)[i]; }
+
+            switch(CRC)
+                {
+                case 0x000000A0F26F62FELL:
+                    entry->cic = CIC_NUS_6101;
+                    break;
+                case 0x000000A316ADC55ALL:
+                    entry->cic = CIC_NUS_6102;
+                    break;
+                case 0x000000A9229D7C45LL:
+                    entry->cic = CIC_NUS_6103;
+                    break;
+                case 0x000000F8B860ED00LL:
+                    entry->cic = CIC_NUS_6105;
+                    break;
+                case 0x000000BA5BA4B8CDLL:
+                    entry->cic = CIC_NUS_6106;
+                    break;
+                default:
+                    entry->cic = CIC_NUS_6102;
+                }
+
+           //Something to deal with custom roms.
             //if(entry.inientry==NULL)
             //    { custom_search_by_md5(entry->md5);
 
@@ -410,7 +489,8 @@ int load_initial_cache()
                !gzread(gzfile, &entry->romsize, sizeof(int))||
                !gzread(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char))||
                !gzread(gzfile, &entry->compressiontype, sizeof(unsigned short))||
-               !gzread(gzfile, &entry->imagetype, sizeof(unsigned short)))
+               !gzread(gzfile, &entry->imagetype, sizeof(unsigned short))||
+               !gzread(gzfile, &entry->internalname, 80*sizeof(char)))
                 {
                 if(!gzeof(gzfile)) //gzread error.
                     { 

@@ -32,10 +32,11 @@
 
 typedef struct
 {
-   //int eeprom16kb;
+   int eeprom16kb;
    char goodname[128];
    char md5[33];
    char crc[22];
+   unsigned short status;
    char refmd5[33];
    char comments[256];
 } mupenEntry;

@@ -308,49 +308,6 @@ int rom_read(const char *filename)
     memcpy(ROM_HEADER, rom, sizeof(rom_header));
     trim((char *)ROM_HEADER->nom); // remove trailing whitespace from Rom name
 
-long long CRC = 0;
-char temp;
-/*
- for ( i = 0; i < taille_rom/4; ++i )
-            {
-            temp=rom[i*4];
-            rom[i*4]=rom[i*4+3];
-            rom[i*4+3]=temp;
-            temp=rom[i*4+1];
-            rom[i*4+1]=rom[i*4+2];
-            rom[i*4+2]=temp;
-            }
-*/
-printf("%X %X %X %X\n", rom[0], rom[1], rom[2], rom[3]);
-
-unsigned int dumb[0x1000/4*2];
-    for ( i = 0x40/4; i < 0x1000/4; ++i ) dumb[i] = 0;
-
- memcpy((char *)dumb+0x40, rom+0x40, 0xFBC);
-
-    printf("Boot code: ");
-    for ( i = 0x40/4; i < 0x1000/4; ++i )
-{ CRC += dumb[i]; }
-if(CRC==0x000000A0F26F62FE) printf("We have a 6101!!!\n");
-if(CRC==0x000000A316ADC55A) printf("We have a 6102!!!\n"); // 000000A316ADC55A
-if(CRC==0x000000A9229D7C45) printf("We have a 6103!!!\n");
-if(CRC==0x000000F8B860ED00) printf("We have a 6105!!!\n");
-if(CRC==0x000000BA5BA4B8CD) printf("We have a 6106!!!\n");
-/*
-for ( i = 0; i < taille_rom/4; ++i )
-            {
-            temp=rom[i*4];
-            rom[i*4]=rom[i*4+3];
-            rom[i*4+3]=temp;
-            temp=rom[i*4+1];
-            rom[i*4+1]=rom[i*4+2];
-            rom[i*4+2]=temp;
-            }
-*/
-printf("%.16llX\n", CRC);
-
-//0x000000A316ADC55A - 6102 CIC chip z64 checksum.
-
     printf("%x %x %x %x\n", ROM_HEADER->init_PI_BSB_DOM1_LAT_REG,
                             ROM_HEADER->init_PI_BSB_DOM1_PGS_REG,
                             ROM_HEADER->init_PI_BSB_DOM1_PWD_REG,

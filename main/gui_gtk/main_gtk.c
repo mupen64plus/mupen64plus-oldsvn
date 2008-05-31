@@ -1319,6 +1319,9 @@ static int create_toolBar( void )
     GtkWidget   *stopImage = NULL;
     GtkWidget   *fullscreenImage = NULL;
     GtkWidget   *configureImage = NULL;
+    GtkWidget   *Handle;
+
+    Handle = gtk_handle_box_new();
 
     g_MainWindow.toolBar = gtk_toolbar_new();
     gtk_toolbar_set_orientation( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ORIENTATION_HORIZONTAL );
@@ -1337,7 +1340,9 @@ static int create_toolBar( void )
             gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
     }
     gtk_toolbar_set_tooltips( GTK_TOOLBAR(g_MainWindow.toolBar), TRUE );
-    gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.toolBar, FALSE, FALSE, 0 );
+
+
+  
 
     // load icons from memory
     GtkIconTheme *theme = gtk_icon_theme_get_default();
@@ -1396,6 +1401,10 @@ static int create_toolBar( void )
     gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Configure"),tr("Configure"),"",configureImage,GTK_SIGNAL_FUNC(callback_configure),NULL );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Fullscreen"),tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );
+
+    gtk_container_add(GTK_CONTAINER(Handle), g_MainWindow.toolBar);
+
+    gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), Handle, FALSE, FALSE, 0 );
 
     return 0;
 }

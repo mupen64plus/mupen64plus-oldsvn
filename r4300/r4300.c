@@ -1591,22 +1591,17 @@ void go()
     case 0x000000D0027FDF31LL:
     case 0x000000CFFB631223LL:
       CIC_Chip = 1;
-      printf("We have a 6101!!!\n");
       break;
     case 0x000000D057C85244LL:
       CIC_Chip = 2;
-      printf("We have a 6102!!!\n");
       break;
     case 0x000000D6497E414BLL:
-      printf("We have a 6103!!!\n");
       CIC_Chip = 3;
       break;
     case 0x0000011A49F60E96LL:
-      printf("We have a 6105!!!\n");
       CIC_Chip = 5;
       break;
     case 0x000000D6D5BE5580LL:
-      printf("We have a 6106!!!\n");
       CIC_Chip = 6;
       break;
     default:
