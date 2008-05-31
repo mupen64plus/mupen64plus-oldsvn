@@ -157,6 +157,7 @@ void * rom_cache_system( void *_arg )
                     rebuild_cache_file();
                      // Should be done every n roms, but this should work for now.
                     updaterombrowser();
+                    printf("[rcs] Cache file up to date.\n");
                 }
 
                 if (g_RCSTask == RCS_BUSY)
@@ -174,23 +175,8 @@ void * rom_cache_system( void *_arg )
     printf("[rcs] RCS Terminated!\n");
 }
 
-int rebuild_cache_file()
+int write_cache_file()
 {
-    char real_path[PATH_MAX];
-    char buffer[32];
-    const char *directory; 
-    int i;
-
-    printf("[rcs] Rebuilding cache file.\n",romcache.length);
-
-    for ( i = 0; i < config_get_number("NumRomDirs",0); ++i )
-        {
-        sprintf(buffer,"RomDirectory[%d]",i);
-        directory = config_get_string(buffer,"");
-        printf("Scanning... %s\n",directory);
-        scan_dir(directory);
-        }
-
     gzFile *gzfile;
 
     if((gzfile = gzopen(cache_filename,"wb"))==NULL)
@@ -199,7 +185,8 @@ int rebuild_cache_file()
         return 0;
         }
 
-    gzwrite( gzfile, &romcache.length, sizeof(unsigned int) );
+    //We probably do need a version header...
+    gzwrite(gzfile, &romcache.length, sizeof(unsigned int));
 
     if(romcache.length!=0)
        {
@@ -223,47 +210,67 @@ int rebuild_cache_file()
         }
 
     gzclose(gzfile);
-
+    return 1;
 }
 
-static void scan_dir( const char *dirname )
+int rebuild_cache_file()
+{
+    char real_path[PATH_MAX];
+    char buffer[32];
+    const char *directory; 
+    int i;
+
+    printf("[rcs] Rebuilding cache file.\n",romcache.length);
+
+    for ( i = 0; i < config_get_number("NumRomDirs",0); ++i )
+        {
+        sprintf(buffer,"RomDirectory[%d]",i);
+        directory = config_get_string(buffer,"");
+        printf("Scanning... %s\n",directory);
+        scan_dir(directory);
+        }
+
+    write_cache_file();
+}
+
+static void scan_dir( const char *directoryname )
 {
     static short failures = 0;
     int i;
     char filename[PATH_MAX];
-    char real_path[PATH_MAX];
+    char fullpath[PATH_MAX];
     char *extension;
 
-    DIR *dir; 
-    struct dirent *de; //Give de a better name.
+    DIR *directory; 
+    struct dirent *directoryentry;
     struct stat filestatus;
 
     cache_entry *entry;
     int found = 0;
 
-    dir = opendir( dirname );
-    if(!dir)
+    directory = opendir(directoryname);
+    if(!directory)
         {
-        printf( "[rcs] Could not open directory '%s': %s\n", dirname, strerror( errno ) );
+        printf( "[rcs] Could not open directory '%s': %s\n", directoryname, strerror(errno) );
         return;
         }
 
-    while( (de = readdir( dir )) )
+    while((directoryentry=readdir(directory)))
         {
-        if( de->d_name[0] == '.' ) // .., . or hidden file
+        if( directoryentry->d_name[0] == '.' ) // .., . or hidden file
             { continue; }
-        snprintf( filename, PATH_MAX, "%s%s", dirname, de->d_name );
+        snprintf(filename, PATH_MAX, "%s%s", directoryname, directoryentry->d_name);
 
         //Use real path (maybe it's a link)
-        if(realpath(filename,real_path))
-            { strncpy(real_path, filename, PATH_MAX); }
+        if(realpath(filename,fullpath))
+            { strncpy(fullpath,filename,PATH_MAX); }
 
         //If we can't get information, move to next file.
-        if(stat(real_path,&filestatus)==-1)
-            { continue; }
-
-        //Maybe probe errno and provide feedback?  ^
-        //To be consistent or removed from above   |
+        if(stat(fullpath,&filestatus)==-1)
+            {
+            printf( "[rcs] Could not open file '%s': %s\n", fullpath, strerror(errno) );
+            continue; 
+            }
 
         //Handle recursive scanning.
         if( config_get_bool( "RomDirsScanRecursive", 0 ) )
@@ -287,9 +294,6 @@ static void scan_dir( const char *dirname )
             }
         if(!romextensions[i])
             { continue; }
-
-        //This needs to be converted to something more useful...
-        //printf("Modified %d\n", filestatus.st_mtime);
 
         //Found controls whether its found in the cache.
         if(romcache.length!=0)
@@ -344,64 +348,31 @@ static void scan_dir( const char *dirname )
             //See rom.h for header layout.
             entry->countrycode = (unsigned short)*(localrom+0x3E);
 
-            char *buffer1 = calloc(21,sizeof(char));
-                strncpy(buffer1, (char*)localrom+0x20, 20);
-        
+            //Internal name is encoded in SHIFT-JIS. Attempt to convert to UTF-8 so that
+            //GUIs and Rice can use this for Japanese titles in a moderm *NIX environment.
+            iconv_t conversion = iconv_open ("UTF-8", "SHIFT-JIS");
+            if(conversion==(iconv_t)-1)
+                { strncpy(entry->internalname,(char*)localrom+0x20,20); }
+            else
+                {
+                char *shiftjis, *shiftjisstart, *utf8, *utf8start;
+                size_t shiftjislength = 20;
+                size_t utf8length = 80; 
+                shiftjisstart = shiftjis = (char*)calloc(20,sizeof(char));
+                utf8start = utf8 = (char*)calloc(80,sizeof(char));
 
+                strncpy(shiftjis, (char*)localrom+0x20, 20);
 
-char* euc = buffer1;
-  iconv_t euc2utf8t;
-  size_t iconv_value;
-  char *euc_start, *utf8, *utf8start;
-  size_t len, utf8len, utf8lenstart, start_len;
+                iconv(conversion, &shiftjis, &shiftjislength, &utf8, &utf8length);
+                iconv_close(conversion);
 
-  euc_start = euc;
+                strncpy(entry->internalname , utf8start, 80);
 
-  euc2utf8t = iconv_open ("UTF-8", "SHIFT-JIS");
-  if (euc2utf8t == (iconv_t) -1)
-     { printf("Error\n"); }
+                free(shiftjisstart);
+                free(utf8start);
+                }
 
-  start_len = len = strlen (euc);
-  utf8lenstart = utf8len = 80;
-  utf8start =   utf8 = (char*) calloc (utf8len, 1);
-  //printf ("before: in string '%s', length %d, out string '%s', length %d\n",
-          //euc, len, utf8, utf8len);
-  //showhex (euc, start_len);
-  //showhex (utf8start, utf8lenstart);
-  iconv_value = iconv (euc2utf8t, & euc, & len, & utf8, & utf8len);
-  //printf ("after: in string '%s', length %d, out string '%s', length %d\n",
-    //      euc, len, utf8start, utf8lenstart);
-  //showhex (euc_start, start_len);
-  //showhex (utf8start, utf8lenstart);
-  if (iconv_value == (size_t) -1)
-    {
-      printf ("failed: in string '%s', length %d, "
-              "out string '%s', length %d\n",
-              euc, len, utf8start, utf8len);
-      switch (errno)
-        {
-        case EILSEQ:
-          printf ("Invalid character sequence\n");
-          break;
-        case EINVAL:
-          printf ("EINVAL\n");
-          break;
-        case E2BIG:
-          printf ("E2BIG\n");
-          break;
-        default:
-          printf ("unknown error");
-        }
-    ++failures;
-    printf("Failures: %d\n", failures);
-    }
-  iconv_close (euc2utf8t);
-  
-  //char * instring = "金文体"; // Save this file as Japanese EUC in emacs
-  //char * instring = "Test"; // Save this file as Japanese EUC in emacs
-  printf ("%s\n", utf8start);
-  strncpy(entry->internalname , utf8start, 80);
-
+            //Detect CIC copy protection boot chip by CRCing the boot code.
             long long CRC = 0;
 
             for ( i = 0x40/4; i < 0x1000/4; ++i )
@@ -428,12 +399,7 @@ char* euc = buffer1;
                     entry->cic = CIC_NUS_6102;
                 }
 
-           //Something to deal with custom roms.
-            //if(entry.inientry==NULL)
-            //    { custom_search_by_md5(entry->md5);
-
             entry->timestamp = filestatus.st_mtime;
-            //Add code to search comment database.
 
             //Actually add rom to cache.
             if(romcache.length==0)
@@ -453,7 +419,7 @@ char* euc = buffer1;
             free(localrom);
             }
         }
-    closedir(dir);
+    closedir(directory);
 }
 
 int load_initial_cache()
