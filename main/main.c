@@ -723,7 +723,6 @@ static void * emulationThread( void *_arg )
     if(!l_EmuMode)
         dynacore = config_get_number( "Core", CORE_DYNAREC );
 
-    no_audio_delay = config_get_bool("NoAudioDelay", FALSE);
     no_compiled_jump = config_get_bool("NoCompiledJump", FALSE);
 
     // init sdl

@@ -52,7 +52,6 @@ typedef struct
     GtkWidget   *romDirectoryList;
     GtkWidget   *romDirsScanRecCheckButton;
     GtkWidget   *romShowFullPathsCheckButton;
-    GtkWidget       *noAudioDelayCheckButton;
     GtkWidget       *noCompiledJumpCheckButton;
     GtkWidget       *noMemoryExpansion;
 } SConfigDialog;

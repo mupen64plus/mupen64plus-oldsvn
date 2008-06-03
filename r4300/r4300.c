@@ -44,7 +44,6 @@ extern void update_debugger();
 #endif
 
 unsigned int i, dynacore = 0, interpcore = 0;
-int no_audio_delay = 0;
 int no_compiled_jump = 0;
 int stop, llbit, rompause;
 long long int reg[32], hi, lo;
