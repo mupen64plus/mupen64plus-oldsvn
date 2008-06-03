@@ -120,6 +120,8 @@ void init_desasm()
     gtk_window_set_default_size( GTK_WINDOW(winDesasm), 380, 500);
     gtk_container_set_border_width( GTK_CONTAINER(winDesasm), 2);
 
+    gtk_window_set_deletable( GTK_WINDOW(winDesasm), FALSE);
+
     boxH1 = gtk_hbox_new( FALSE, 0 );
 
     gtk_container_add( GTK_CONTAINER(winDesasm), boxH1 );
@@ -168,8 +170,6 @@ void init_desasm()
     
     //gtk_container_add(boxH1, swDesasm);
 
-    gtk_box_pack_start( GTK_BOX(boxH1), swDesasm, TRUE, TRUE, 0 );
-
 #ifdef DOUBLESCROLL    
     ajLinear = gtk_adjustment_new(0,0,((float)0xFFFFFFFF),0xFFFF,0xFFFFFF,0);
 
@@ -177,6 +177,8 @@ void init_desasm()
     //gtk_container_add(boxH1, scrollbar1);
     gtk_box_pack_start( GTK_BOX(boxH1), scrollbar1, FALSE, TRUE, 0 );
 #endif //DOUBLESCROLL
+
+    gtk_box_pack_start( GTK_BOX(boxH1), swDesasm, TRUE, TRUE, 0 );
 
     // (doubles) value, lower, upper, step_increment, page_increment, page_size.
 
@@ -269,7 +271,6 @@ void refresh_desasm()
     path2 = gtk_tree_path_new_from_string("26");
     if(i>0)
       {
-	printf("%d\n",i);
 	if (i<400)
 	  for(;i>0; i--)
 	    {
@@ -283,7 +284,6 @@ void refresh_desasm()
       }
     else if(i<0)
       {
-	printf("%d\n",i);
 	if(i>-400)
 	  for(;i<0; i++)
 	    {
@@ -416,21 +416,14 @@ static void on_scroll(GtkAdjustment *adjustment, gpointer user_data)
     }
 
   if((adjustment->value)==1.0f)
-    {
-      printf("%f\n",adjustment->value);
-      addtest=0xFFFFFFFC;
-    }
+    addtest=0xFFFFFFFC;
+
   addtest=addtest&0xFFFFFFFC;
 
   update_desasm( (uint32) addtest);
 
-  printf("scroll %08x %f %f %f %f %d\n", addtest, delta, flttest, base, scale, ex);
+  //printf("scroll %08x %f %f %f %f %d\n", addtest, delta, flttest, base, scale, ex);
     
-
-  //if(delta==0) return;
-
-  //gtk_adjustment_set_value(ajDesasm, adjustment->value);
-
 
 }
 
@@ -444,7 +437,7 @@ static gboolean on_scrollclick(GtkWidget *bar, GdkEventButton* evt, gpointer use
 
 static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton* evt, gpointer user_data)
 {
-  printf("prevadd %08x  prev %f\n", prevadd,prev);
+  //printf("prevadd %08x  prev %f\n", prevadd,prev);
   mousedown=0;
   gtk_adjustment_set_value(gtk_range_get_adjustment(bar), 0.5f);
   return FALSE;
@@ -484,8 +477,11 @@ static void on_click( GtkTreeView *widget, GtkTreePath *path,
 
 static void on_close()
 {
-    desasm_opened = 0;
+  //    desasm_opened = 0;
 
 //  What should be happening then? Currently, thread is killed.
-    run = 0;            // 0(stop) ou 2(run)
+//    run = 0;            // 0(stop) ou 2(run)
+
+  //For now, lets get rid of the close button, and keep this window always open
+  //for the execution controls to be accessible
 }

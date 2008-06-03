@@ -47,10 +47,15 @@ void init_registers()
             *lab_AI1, *lab_AI2, *lab_PI1, *lab_PI2,  
             *lab_SI1, *lab_SI2, *lab_VI1, *lab_VI2;
     
-    char **txt;
+    /*    char **txt;
     txt=malloc( 2*sizeof(char*) );
     txt[0]=malloc( 64*sizeof(char) );
-    txt[1]=malloc( 64*sizeof(char) );
+    txt[1]=malloc( 64*sizeof(char) );*/
+    char *txt[2];
+    char txta[64];
+    char txtb[64];
+    txt[0]=txta;
+    txt[1]=txtb;
 
 
     registers_opened = 1;

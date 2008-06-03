@@ -410,7 +410,7 @@ disasm_list_iter_next (GtkTreeModel  *tree_model,
   {
     if((((uint32)iter->user_data) >= disasm_list->startAddr+(POSTLINES*4)) || (((uint32)iter->user_data) >= 0xFFFFFFFC))
       {
-	printf("addr: %016x\n", iter->user_data);
+	//printf("Disasm end addr: %016x\n", iter->user_data);
         return FALSE;
       }
     iter->stamp    = disasm_list->stamp;

@@ -47,8 +47,7 @@ void init_debugger_frontend()
     color_ident.blue = 0xFFFF;
 
     debugger_font_desc = pango_font_description_from_string("Monospace 9");
-    
-    
+
     gdk_threads_enter();
     init_registers();
     gdk_threads_leave();
@@ -56,7 +55,7 @@ void init_debugger_frontend()
     gdk_threads_enter();
     init_desasm();
     gdk_threads_leave();
-
+    /*
     gdk_threads_enter();
     init_breakpoints();
     gdk_threads_leave();
@@ -72,6 +71,11 @@ void init_debugger_frontend()
     gdk_threads_enter();
     init_TLBwindow();
     gdk_threads_leave();
+    */
+
+    if(dynacore!=0)
+      alert_message("You are trying to use the debugger with the dynamic-recompiler.  This is unfinished, and many features of the debugger WILL NOT WORK PROPERLY.  If you have a bug you'd like to report, try it first using the debugger with either of the interpreted cores.");
+
 }
 
 
