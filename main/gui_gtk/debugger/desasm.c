@@ -1,12 +1,10 @@
 /*
- * debugger/desasm.c
+ * Mupen64Plus main/gui_gtk/debugger/desasm.c
  * 
- * Debugger for Mupen64 - davFr
  * Copyright (C) 2002 davFr - robind@esiee.fr
+ * Copyright (C) 2008 DarkJezter
  *
- * Mupen64 is copyrighted (C) 2002 Hacktarux
- * Mupen64 homepage: http://mupen64.emulation64.com
- *         email address: hacktarux@yahoo.fr
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
  * 
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -115,7 +113,7 @@ void init_desasm()
     desasm_opened = 1;
     
     winDesasm = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-    sprintf( title, "%s - %s", "Desassembler", DEBUGGER_VERSION );
+    sprintf( title, "%s - %s", "Debugger", DEBUGGER_VERSION );
     gtk_window_set_title( GTK_WINDOW(winDesasm), title );
     gtk_window_set_default_size( GTK_WINDOW(winDesasm), 380, 500);
     gtk_container_set_border_width( GTK_CONTAINER(winDesasm), 2);

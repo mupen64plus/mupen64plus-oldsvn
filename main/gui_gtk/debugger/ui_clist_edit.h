@@ -1,9 +1,13 @@
 /*
+ * Mupen64Plus main/gui_gtk/debugger/ui_clist_edit.c
+ * 
  * (SLIK) SimpLIstic sKin functions
  * (C) 2002 John Ellis
  *
  * Author: John Ellis
  *
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
+ * 
  * This software is released under the GNU General Public License (GNU GPL).
  * Please read the included file COPYING for more information.
  * This software comes with no warranty of any kind, use at your own risk!

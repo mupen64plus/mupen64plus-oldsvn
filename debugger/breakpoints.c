@@ -1,13 +1,10 @@
 /**
- * Mupen64 - breakpoints.c
- * Copyright (C) 2002 DavFr - robind@esiee.fr
+ * Mupen64Plus - debugger/breakpoints.c
  *
- * If you want to contribute to this part of the project please
- * contact me (or Hacktarux) first.
- * 
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
+ * Copyright (C) 2008 DarkJezter
+ * Copyright (C) 2008 HyperHacker (at gmail dot com)
+ *
+ * Mupen64 homepage: http://code.google.com/p/mupen64plus/
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-

@@ -1,13 +1,9 @@
 /**
- * Mupen64 - breakpoints.h
- * Copyright (C) 2002 DavFr - robind@esiee.fr
+ * Mupen64Plus - main/gui_gtk/debugger/breakpoints.h
  *
- * If you want to contribute to this part of the project please
- * contact me (or Hacktarux) first.
+ * Copyright (C) 2002 DavFr - robind@esiee.fr
  * 
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -49,7 +45,6 @@ GtkWidget *winBreakpoints;
 void init_breakpoints();
 void get_breakpoint_display_string(char* buf, breakpoint* bpt);
 int add_breakpoint( uint32 address );
-//int check_breakpoints( uint32 address );
 void update_breakpoints();
 
 #endif  // BREAKPOINTS_H

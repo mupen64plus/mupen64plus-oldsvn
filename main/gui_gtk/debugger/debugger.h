@@ -1,14 +1,9 @@
 /**
- * Mupen64 - debugger.h
+ * Mupen64Plus main/gui_gtk/debugger/debugger.h
+ *
  * Copyright (C) 2002 DavFr - robind@esiee.fr
  *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -45,7 +40,7 @@
 #include "memedit.h"
 #include "varlist.h"
 
-#define DEBUGGER_VERSION "0.0.2 - WIP2"
+#define DEBUGGER_VERSION "0.0.3"
 
 
 extern GdkColor    color_modif,    // Color of modified register.

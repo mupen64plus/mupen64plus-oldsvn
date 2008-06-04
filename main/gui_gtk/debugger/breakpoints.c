@@ -1,13 +1,9 @@
 /**
- * Mupen64 - breakpoints.c
+ * Mupen64Plus - main/gui_gtk/debugger/breakpoints.c
  * Copyright (C) 2002 DavFr - robind@esiee.fr
- *
- * If you want to contribute to this part of the project please
- * contact me (or Hacktarux) first.
+ * Copyright (C) 2008 HyperHacker
  * 
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -26,12 +22,6 @@
  *
 **/
 
-
-// TODO: check_breakpoints() being a critic bottleneck when run=1,
-// it should be optimised to maximum.
-// First solution: to sort bp_addresses[] to shorten while loop.
-// Second solution: to use a hash function, but efficiency have
-// to be verified (eg in "2 breakpoints defined" case).
 
 #include "breakpoints.h"
 
