@@ -1025,7 +1025,7 @@ int create_configDialog( void )
                 icon = gtk_image_new_from_pixbuf(pixbuf); 
                 }
             else
-                { icon = gtk_image_new_from_file( get_iconpath("32x32/video-diiplay.png") ); }
+                { icon = gtk_image_new_from_file( get_iconpath("32x32/video-display.png") ); }
         
             g_ConfigDialog.gfxCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.gfxPluginGList )

@@ -60,9 +60,11 @@ static void callback_cancelClicked( GtkWidget *widget, gpointer data )
  */
 void show_romPropDialog( cache_entry *entry )
 {
-    char ini_code[200];
+    char ini_code[17];
     char country[32];
     char size[16];
+    char md5[32];
+    int i;
 
     countrycodestring(entry->countrycode, country);
     sprintf(size, "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
@@ -71,9 +73,11 @@ void show_romPropDialog( cache_entry *entry )
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.romNameEntry), entry->inientry->goodname );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.sizeEntry), size );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.countryEntry), country );
-    sprintf(ini_code, "%s", entry->inientry->crc);
+    sprintf(ini_code, "%X %X", entry->inientry->crc1, entry->inientry->crc2);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.iniCodeEntry), ini_code );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), entry->inientry->md5 );
+    for ( i = 0; i < 16; ++i ) 
+        { sprintf(md5+i*2, "%02X", entry->md5[i]); }
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), md5);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->comment );
     g_RomEntry = entry;
 
@@ -100,7 +104,7 @@ int create_romPropDialog( void )
     g_RomPropDialog.dialog = gtk_dialog_new();
     gtk_container_set_border_width( GTK_CONTAINER(g_RomPropDialog.dialog), 10 );
     gtk_window_set_title( GTK_WINDOW(g_RomPropDialog.dialog), tr("Rom Properties") );
-    gtk_widget_set_size_request( g_RomPropDialog.dialog, 420, -1);
+    gtk_widget_set_size_request( g_RomPropDialog.dialog, 450, -1);
 
     // rom info
     frame = gtk_frame_new( tr("Rom Info") );
@@ -135,7 +139,7 @@ int create_romPropDialog( void )
     gtk_table_attach( GTK_TABLE(table), label, 0, 1, 2, 3, GTK_FILL, GTK_EXPAND, 0, 0 );
     gtk_table_attach_defaults( GTK_TABLE(table), g_RomPropDialog.countryEntry, 1, 2, 2, 3 );
 
-    label = gtk_label_new( tr("Ini Code:") );
+    label = gtk_label_new( tr("CRC:") );
     gtk_misc_set_alignment( GTK_MISC(label), 1, 0 );
     gtk_label_set_attributes( GTK_LABEL(label), Bold );
     g_RomPropDialog.iniCodeEntry = gtk_entry_new();
@@ -143,7 +147,7 @@ int create_romPropDialog( void )
     gtk_table_attach( GTK_TABLE(table), label, 0, 1, 3, 4, GTK_FILL, GTK_EXPAND, 0, 0 );
     gtk_table_attach_defaults( GTK_TABLE(table), g_RomPropDialog.iniCodeEntry, 1, 2, 3, 4 );
 
-    label = gtk_label_new( tr("MD5 Checksum:") );
+    label = gtk_label_new( tr("MD5 Hash:") );
     gtk_misc_set_alignment( GTK_MISC(label), 1, 0 );
     gtk_label_set_attributes( GTK_LABEL(label), Bold );
     g_RomPropDialog.md5Entry = gtk_entry_new();
@@ -151,7 +155,7 @@ int create_romPropDialog( void )
     gtk_table_attach( GTK_TABLE(table), label, 0, 1, 4, 5, GTK_FILL, GTK_EXPAND, 0, 0 );
     gtk_table_attach_defaults( GTK_TABLE(table), g_RomPropDialog.md5Entry, 1, 2, 4, 5 );
 
-    frame = gtk_frame_new( tr("Comments") );
+    frame = gtk_frame_new( tr("User Comments") );
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->vbox), frame, TRUE, TRUE, 0 );
 
     table = gtk_table_new( 1, 1, FALSE );

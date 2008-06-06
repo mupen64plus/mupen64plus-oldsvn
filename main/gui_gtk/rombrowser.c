@@ -24,7 +24,6 @@ Email                : blight@Ashitaka
 #include "../config.h"
 #include "../translate.h"
 #include "../rom.h"
-#include "../mupenIniApi.h"
 
 #include <gtk/gtk.h>
 
@@ -234,12 +233,14 @@ void rombrowser_refresh( void )
     status[2] = star;
     status[3] = star;
     status[4] = star;
+    int i;
 
     line[1] = malloc(32*sizeof(char));
     line[2] = malloc(16*sizeof(char));
     line[5] = malloc(16*sizeof(char));
     line[6] = malloc(16*sizeof(char));
     line[7] = malloc(16*sizeof(char));
+    line[8] = malloc(32*sizeof(char));
     if(iter==NULL||line[1]==NULL||line[2]==NULL)
         {
         fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
@@ -266,7 +267,8 @@ void rombrowser_refresh( void )
             compressionstring(entry->compressiontype, line[5]);
             imagestring(entry->imagetype, line[6]);
             cicstring(entry->cic, line[7]);
-            line[8]=entry->md5;
+            for ( i = 0; i < 16; ++i ) 
+                { sprintf(line[8]+i*2, "%02X", entry->md5[i]); }
             line[9]=entry->internalname;
 
 
@@ -289,6 +291,7 @@ void rombrowser_refresh( void )
       free(line[5]);
       free(line[6]);
       free(line[7]);
+      free(line[8]);
       free(iter);
       if(fullpaths==1)
          { free(line[4]); }
@@ -866,25 +869,23 @@ int create_romBrowser( void )
     GtkWidget *rightClickMenu;
     GtkWidget *separatorItem;
 
-    GError* err = NULL;
-    //Load flags.
     GtkIconTheme *theme = gtk_icon_theme_get_default();
 
     if(gtk_icon_theme_has_icon(theme, "emblem-new"))
-        { star = gtk_icon_theme_load_icon(theme, "emblem-new", 16,  0, NULL); }
+        { star = gtk_icon_theme_load_icon(theme, "emblem-new", 16, 0, NULL); }
     else
-        { star = gdk_pixbuf_new_from_file( get_iconpath("16x16/star.png"), &err); }
+        { star = gdk_pixbuf_new_from_file( get_iconpath("16x16/star.png"), NULL); }
 
-    australia = gdk_pixbuf_new_from_file( get_iconpath("australia.png"), &err);
-    europe = gdk_pixbuf_new_from_file( get_iconpath("europe.png"), &err );
-    france = gdk_pixbuf_new_from_file( get_iconpath("france.png"), &err );
-    germany = gdk_pixbuf_new_from_file( get_iconpath("germany.png"), &err );
-    italy = gdk_pixbuf_new_from_file( get_iconpath("italy.png"), &err );
-    japan = gdk_pixbuf_new_from_file( get_iconpath("japan.png"), &err );
-    spain = gdk_pixbuf_new_from_file( get_iconpath("spain.png"), &err );
-    usa = gdk_pixbuf_new_from_file( get_iconpath("usa.png"), &err );
-    japanusa = gdk_pixbuf_new_from_file( get_iconpath("japanusa.png"), &err );
-    n64cart = gdk_pixbuf_new_from_file( get_iconpath("n64cart.xpm"), &err );
+    australia = gdk_pixbuf_new_from_file( get_iconpath("australia.png"), NULL);
+    europe = gdk_pixbuf_new_from_file( get_iconpath("europe.png"), NULL);
+    france = gdk_pixbuf_new_from_file( get_iconpath("france.png"), NULL);
+    germany = gdk_pixbuf_new_from_file( get_iconpath("germany.png"), NULL);
+    italy = gdk_pixbuf_new_from_file( get_iconpath("italy.png"), NULL);
+    japan = gdk_pixbuf_new_from_file( get_iconpath("japan.png"), NULL);
+    spain = gdk_pixbuf_new_from_file( get_iconpath("spain.png"), NULL);
+    usa = gdk_pixbuf_new_from_file( get_iconpath("usa.png"), NULL);
+    japanusa = gdk_pixbuf_new_from_file( get_iconpath("japanusa.png"), NULL);
+    n64cart = gdk_pixbuf_new_from_file( get_iconpath("n64cart.xpm"), NULL);
 
     //Setup right-click menu.
     rightClickMenu = gtk_menu_new();

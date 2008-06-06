@@ -1341,9 +1341,6 @@ static int create_toolBar( void )
     }
     gtk_toolbar_set_tooltips( GTK_TOOLBAR(g_MainWindow.toolBar), TRUE );
 
-
-  
-
     // load icons from memory
     GtkIconTheme *theme = gtk_icon_theme_get_default();
     GdkPixbuf *pixbuf;
@@ -1369,7 +1366,7 @@ static int create_toolBar( void )
         openImage = gtk_image_new_from_file(get_iconpath("32x32/document-open.png")); 
         playImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-start.png")); 
         pauseImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-pause.png")); 
-        stopImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-pause.png"));
+        stopImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-stop.png"));
         fullscreenImage = gtk_image_new_from_file(get_iconpath("32x32/view-fullscreen.png")); 
         configureImage = gtk_image_new_from_file(get_iconpath("32x32/preferences-system.png"));
         }
@@ -1378,7 +1375,7 @@ static int create_toolBar( void )
         openImage = gtk_image_new_from_file(get_iconpath("16x16/document-open.png")); 
         playImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-start.png")); 
         pauseImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-pause.png")); 
-        stopImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-pause.png"));
+        stopImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-stop.png"));
         fullscreenImage = gtk_image_new_from_file(get_iconpath("16x16/view-fullscreen.png")); 
         configureImage = gtk_image_new_from_file(get_iconpath("16x16/preferences-system.png"));
         }
@@ -1387,7 +1384,7 @@ static int create_toolBar( void )
         openImage = gtk_image_new_from_file(get_iconpath("22x22/document-open.png")); 
         playImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-start.png")); 
         pauseImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-pause.png")); 
-        stopImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-pause.png"));
+        stopImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-stop.png"));
         fullscreenImage = gtk_image_new_from_file(get_iconpath("22x22/view-fullscreen.png")); 
         configureImage = gtk_image_new_from_file(get_iconpath("22x22/preferences-system.png"));
         }

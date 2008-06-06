@@ -44,7 +44,7 @@
 #include "../memory/memory.h"
 #include "unzip.h"
 #include "guifuncs.h"
-#include "mupenIniApi.h"
+#include "romcache.h"
 #include "guifuncs.h"
 #include "translate.h"
 #include "main.h"
@@ -292,10 +292,11 @@ int rom_read(const char *filename)
     md5_init(&state);
     md5_append(&state, (const md5_byte_t *)rom, taille_rom);
     md5_finish(&state, digest);
-    printf("MD5: ");
     for ( i = 0; i < 16; ++i ) 
-        { printf("%02X", digest[i]); }
-    printf("\n");
+        { sprintf(buffer+i*2, "%02X", digest[i]); }
+    buffer[32] = '\0';
+    strcpy(ROM_SETTINGS.MD5, buffer);
+    printf("MD5: %s", buffer);
 
     if(ROM_HEADER)
         { free(ROM_HEADER); }
@@ -328,18 +329,11 @@ int rom_read(const char *filename)
    printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
     //Check the ini via md5... This needs rework for RCS.
-    for ( i = 0; i < 16; ++i ) 
-        { sprintf(buffer+i*2, "%02X", digest[i]); }
-    buffer[32] = '\0';
-    strcpy(ROM_SETTINGS.MD5, buffer);
-    if((entry=ini_search_by_md5(buffer))==NULL)
+    if((entry=ini_search_by_md5(digest))==NULL)
         {
         char mycrc[1024];
         printf("%lx\n", (long)entry);
-        sprintf(mycrc, "%08X-%08X-C%02X",
-               (int)sl(ROM_HEADER->CRC1), (int)sl(ROM_HEADER->CRC2),
-               ROM_HEADER->Country_code);
-        if((entry=ini_search_by_crc(mycrc))==NULL)
+        if((entry=ini_search_by_crc(sl(ROM_HEADER->CRC1),sl(ROM_HEADER->CRC2)))==NULL)
             {
             strcpy(ROM_SETTINGS.goodname, (char *) ROM_HEADER->nom);
             strcat(ROM_SETTINGS.goodname, " (unknown rom)");
@@ -359,8 +353,7 @@ int rom_read(const char *filename)
                 }
             strcpy(ROM_SETTINGS.goodname, entry->goodname);
             strcat(ROM_SETTINGS.goodname, " (bad dump)");
-            if(strcmp(entry->refmd5, ""))
-                { entry = ini_search_by_md5(entry->refmd5); }
+            //This needs updating for rcs...
             //ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
             return 0;
             }

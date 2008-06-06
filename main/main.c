@@ -54,7 +54,6 @@
 #include "plugin.h"
 #include "rom.h"
 #include "romcache.h"
-#include "mupenIniApi.h"
 #include "../r4300/r4300.h"
 #include "../r4300/recomph.h"
 #include "../memory/memory.h"
@@ -1394,9 +1393,6 @@ int main(int argc, char *argv[])
     if(!g_NoaskParam)
         g_Noask = config_get_bool("No Ask", FALSE);
 
-    /* TODO: nogui version does not use ini file */
-    ini_openFile();
-
     cheat_read_config();
 
     // build gui, but do not display
@@ -1432,7 +1428,6 @@ int main(int argc, char *argv[])
         {
             // cleanup and exit
             cheat_delete_all();
-            romdatabase_close();
             g_RCSTask = RCS_SHUTDOWN;
             plugin_delete_list();
             tr_delete_languages();
@@ -1450,7 +1445,6 @@ int main(int argc, char *argv[])
 
         // cleanup and exit
         cheat_delete_all();
-        romdatabase_close();
         g_RCSTask = RCS_SHUTDOWN;
         plugin_delete_list();
         tr_delete_languages();
@@ -1472,7 +1466,6 @@ int main(int argc, char *argv[])
     cheat_write_config();
     cheat_delete_all();
     g_RCSTask = RCS_SHUTDOWN;
-    romdatabase_close();
     plugin_delete_list();
     tr_delete_languages();
     config_delete();

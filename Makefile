@@ -64,7 +64,6 @@ OBJ_CORE = \
 	main/adler32.o \
 	main/ioapi.o \
 	main/md5.o \
-	main/mupenIniApi.o \
 	main/plugin.o \
 	main/rom.o \
 	main/savestates.o \

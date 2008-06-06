@@ -20,9 +20,6 @@ Email                : blight@Ashitaka
 
 #include <gtk/gtk.h>
 
-
-#include "../mupenIniApi.h"
-
 int create_romBrowser( void );
 void rombrowser_refresh( void );
 void apply_filter( void );

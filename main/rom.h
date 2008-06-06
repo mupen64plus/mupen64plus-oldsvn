@@ -38,22 +38,22 @@ extern int taille_rom;
 
 typedef struct _rom_header
 {
-   unsigned char init_PI_BSB_DOM1_LAT_REG;
-   unsigned char init_PI_BSB_DOM1_PGS_REG;
-   unsigned char init_PI_BSB_DOM1_PWD_REG;
-   unsigned char init_PI_BSB_DOM1_PGS_REG2;
-   unsigned int ClockRate;
-   unsigned int PC;
-   unsigned int Release;
-   unsigned int CRC1;
-   unsigned int CRC2;
-   unsigned int Unknown[2];
-   unsigned char nom[20];
-   unsigned int unknown;
-   unsigned int Manufacturer_ID;
-   unsigned short Cartridge_ID; //Game serial number
-   unsigned short Country_code;
-   unsigned int Boot_Code[1008];
+   unsigned char init_PI_BSB_DOM1_LAT_REG; //0x00
+   unsigned char init_PI_BSB_DOM1_PGS_REG; //0x01
+   unsigned char init_PI_BSB_DOM1_PWD_REG; //0x02
+   unsigned char init_PI_BSB_DOM1_PGS_REG2; //0x03
+   unsigned int ClockRate; //0x04
+   unsigned int PC; //0x08
+   unsigned int Release; //0x0C
+   unsigned int CRC1; //0x10
+   unsigned int CRC2; //0x14
+   unsigned int Unknown[2]; //0x18
+   unsigned char nom[20]; //0x20
+   unsigned int unknown;  //0x35
+   unsigned int Manufacturer_ID; //0x39
+   unsigned short Cartridge_ID;  //0x3D //Game serial number
+   unsigned short Country_code;  //0x3E //Possible byte alignment padding here???
+   unsigned int Boot_Code[1008]; //0x40
 } rom_header;
 extern rom_header *ROM_HEADER;
 

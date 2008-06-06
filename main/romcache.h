@@ -21,12 +21,26 @@
  * USA.
  *
 **/
-
+#include <limits.h> //PATH_MAX
 #define COMMENT_MAXLENGTH 256
 
-//These functions need to be moved.
-#include "mupenIniApi.h"
-#include <limits.h> //PATH_MAX
+#include "md5.h"
+
+typedef struct
+{
+   char goodname[128];
+   md5_byte_t md5[16];
+   md5_byte_t refmd5[16];
+   unsigned int crc1;
+   unsigned int crc2;
+   unsigned short status;
+   unsigned short savetype;
+} mupenEntry;
+
+void ini_openFile();
+void romdatabase_close();
+mupenEntry* ini_search_by_md5(md5_byte_t* md5);
+mupenEntry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);
 
 enum RCS_TASK
 {
@@ -34,24 +48,29 @@ enum RCS_TASK
     RCS_RESCAN,
     RCS_SLEEP,
     RCS_BUSY,
-    RCS_SHUTDOWN
+    RCS_SHUTDOWN,
+    RCS_WRITE_CACHE //For user comments.
 };
 
 enum RCS_TASK g_RCSTask;
 //When finished, move to header.
 
+//Needs to be rearranged.
 typedef struct _cache_entry
 {
     char filename[PATH_MAX];
-    char md5[33];
-    time_t timestamp; //Should it be in m_time or something more human friendly???
+    md5_byte_t md5[16];
+    time_t timestamp;
     unsigned short countrycode;
     unsigned short compressiontype;
     unsigned short imagetype;
     unsigned short cic;
-    int romsize; //Hm... this should be unsigned everywhere.
+    unsigned int archivefile; //Not currently used, for locating file inside zip or 7zip archives.
+    int romsize;
     char comment[COMMENT_MAXLENGTH]; 
     char internalname[80]; //Needs to be 4 times the stored value for UTF8 conversion. 
+    unsigned int crc1;
+    unsigned int crc2;
     mupenEntry *inientry;
     struct _cache_entry *next;
 } cache_entry;
