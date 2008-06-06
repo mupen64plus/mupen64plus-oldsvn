@@ -48,6 +48,10 @@
 #include "../main/plugin.h"
 #include "../main/vcr.h"
 
+#ifdef DBG
+#include "../debugger/breakpoints.h"
+#endif
+
 /* definitions of the rcp's structures and memory area */
 RDRAM_register rdram_register;
 mips_register MI_register;
@@ -1421,22 +1425,34 @@ void write_nomemd()
 }
 
 void read_rdram()
-{;
+{
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned int *)(rdramb + (address & 0xFFFFFF)));
 }
 
 void read_rdramb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(rdramb + ((address & 0xFFFFFF)^S8));
 }
 
 void read_rdramh()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short *)(rdramb + ((address & 0xFFFFFF)^S16)));
 }
 
 void read_rdramd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*(unsigned int *)(rdramb + (address & 0xFFFFFF))) << 32) |
      ((*(unsigned int *)(rdramb + (address & 0xFFFFFF) + 4)));
 }
@@ -1531,21 +1547,33 @@ void read_rdramFBd()
 
 void write_rdram()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned int *)(rdramb + (address & 0xFFFFFF))) = word;
 }
 
 void write_rdramb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((rdramb + ((address & 0xFFFFFF)^S8))) = byte;
 }
 
 void write_rdramh()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16))) = hword;
 }
 
 void write_rdramd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned int *)(rdramb + (address & 0xFFFFFF))) = dword >> 32;
    *((unsigned int *)(rdramb + (address & 0xFFFFFF) + 4 )) = dword & 0xFFFFFFFF;
 }
@@ -1945,75 +1973,114 @@ void write_rsp_regd()
 
 void read_rsp()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ); //FIXME: access breakpoints not tested in these functions; possibly should be using address_low here
+    #endif
    *rdword = *(readrsp[*address_low]);
 }
 
 void read_rspb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned char*)readrsp[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_rsph()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short*)((unsigned char*)readrsp[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_rspd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*readrsp[*address_low])<<32) |
      *readrsp[*address_low+4];
 }
 
 void write_rsp()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *readrsp[*address_low] = word;
 }
 
 void write_rspb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned char*)readrsp[*address_low & 0xfffc]
      + ((*address_low&3)^S8) ) = byte;
 }
 
 void write_rsph()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned short*)((unsigned char*)readrsp[*address_low & 0xfffc]
                + ((*address_low&3)^S16) )) = hword;
 }
 
 void write_rspd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *readrsp[*address_low] = dword >> 32;
    *readrsp[*address_low+4] = dword & 0xFFFFFFFF;
 }
 
 void read_dp()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(readdp[*address_low]);
 }
 
 void read_dpb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned char*)readdp[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_dph()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short*)((unsigned char*)readdp[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_dpd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*readdp[*address_low])<<32) |
      *readdp[*address_low+4];
 }
 
 void write_dp()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0xc:
@@ -2043,6 +2110,9 @@ void write_dp()
 
 void write_dpb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0xc:
@@ -2098,6 +2168,9 @@ void write_dpb()
 
 void write_dph()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0xc:
@@ -2137,6 +2210,9 @@ void write_dph()
 
 void write_dpd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -2164,75 +2240,114 @@ void write_dpd()
 
 void read_dps()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(readdps[*address_low]);
 }
 
 void read_dpsb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned char*)readdps[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_dpsh()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short*)((unsigned char*)readdps[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_dpsd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*readdps[*address_low])<<32) |
      *readdps[*address_low+4];
 }
 
 void write_dps()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *readdps[*address_low] = word;
 }
 
 void write_dpsb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned char*)readdps[*address_low & 0xfffc]
      + ((*address_low&3)^S8) ) = byte;
 }
 
 void write_dpsh()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned short*)((unsigned char*)readdps[*address_low & 0xfffc]
                + ((*address_low&3)^S16) )) = hword;
 }
 
 void write_dpsd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *readdps[*address_low] = dword >> 32;
    *readdps[*address_low+4] = dword & 0xFFFFFFFF;
 }
 
 void read_mi()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(readmi[*address_low]);
 }
 
 void read_mib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned char*)readmi[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_mih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short*)((unsigned char*)readmi[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_mid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*readmi[*address_low])<<32) |
      *readmi[*address_low+4];
 }
 
 void write_mi()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2252,6 +2367,9 @@ void write_mi()
 
 void write_mib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2279,6 +2397,9 @@ void write_mib()
 
 void write_mih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2302,6 +2423,9 @@ void write_mih()
 
 void write_mid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2321,6 +2445,9 @@ void write_mid()
 
 void read_vi()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2334,6 +2461,9 @@ void read_vi()
 
 void read_vib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2351,6 +2481,9 @@ void read_vib()
 
 void read_vih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2366,6 +2499,9 @@ void read_vih()
 
 void read_vid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2380,6 +2516,9 @@ void read_vid()
 
 void write_vi()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2409,6 +2548,9 @@ void write_vi()
 
 void write_vib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    int temp;
    switch(*address_low)
      {
@@ -2455,6 +2597,9 @@ void write_vib()
 
 void write_vih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    int temp;
    switch(*address_low)
      {
@@ -2495,6 +2640,9 @@ void write_vih()
 
 void write_vid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2528,6 +2676,9 @@ void write_vid()
 
 void read_ai()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    switch(*address_low)
      {
       case 0x4:
@@ -2545,6 +2696,9 @@ void read_ai()
 
 void read_aib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    unsigned int len;
    switch(*address_low)
      {
@@ -2568,6 +2722,9 @@ void read_aib()
 
 void read_aih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    unsigned int len;
    switch(*address_low)
      {
@@ -2590,6 +2747,9 @@ void read_aih()
 
 void read_aid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2609,6 +2769,9 @@ void read_aid()
 
 void write_ai()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    unsigned int delay=0;
    switch(*address_low)
      {
@@ -2709,6 +2872,9 @@ void write_ai()
 
 void write_aib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    int temp;
    unsigned int delay=0;
    switch(*address_low)
@@ -2819,6 +2985,9 @@ void write_aib()
 
 void write_aih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    int temp;
    unsigned int delay=0;
    switch(*address_low)
@@ -2922,6 +3091,9 @@ void write_aih()
 
 void write_aid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    unsigned int delay=0;
    switch(*address_low)
      {
@@ -3018,29 +3190,44 @@ void write_aid()
 
 void read_pi()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(readpi[*address_low]);
 }
 
 void read_pib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned char*)readpi[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_pih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short*)((unsigned char*)readpi[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_pid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*readpi[*address_low])<<32) |
      *readpi[*address_low+4];
 }
 
 void write_pi()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3075,6 +3262,9 @@ void write_pi()
 
 void write_pib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3136,6 +3326,9 @@ void write_pib()
 
 void write_pih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3187,6 +3380,9 @@ void write_pih()
 
 void write_pid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3217,75 +3413,114 @@ void write_pid()
 
 void read_ri()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(readri[*address_low]);
 }
 
 void read_rib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned char*)readri[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_rih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short*)((unsigned char*)readri[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_rid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*readri[*address_low])<<32) |
      *readri[*address_low+4];
 }
 
 void write_ri()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *readri[*address_low] = word;
 }
 
 void write_rib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned char*)readri[*address_low & 0xfffc]
      + ((*address_low&3)^S8) ) = byte;
 }
 
 void write_rih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *((unsigned short*)((unsigned char*)readri[*address_low & 0xfffc]
                + ((*address_low&3)^S16) )) = hword;
 }
 
 void write_rid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    *readri[*address_low] = dword >> 32;
    *readri[*address_low+4] = dword & 0xFFFFFFFF;
 }
 
 void read_si()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(readsi[*address_low]);
 }
 
 void read_sib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned char*)readsi[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_sih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short*)((unsigned char*)readsi[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_sid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long int)(*readsi[*address_low])<<32) |
      *readsi[*address_low+4];
 }
 
 void write_si()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3313,6 +3548,9 @@ void write_si()
 
 void write_sib()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3355,6 +3593,9 @@ void write_sib()
 
 void write_sih()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3389,6 +3630,9 @@ void write_sih()
 
 void write_sid()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3483,6 +3727,9 @@ static unsigned int lastwrite = 0;
 
 void read_rom()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    if (lastwrite)
      {
     *rdword = lastwrite;
@@ -3494,27 +3741,42 @@ void read_rom()
 
 void read_romb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *(rom + ((address^S8) & 0x03FFFFFF));
 }
 
 void read_romh()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = *((unsigned short *)(rom + ((address^S16) & 0x03FFFFFF)));
 }
 
 void read_romd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
    *rdword = ((unsigned long long)(*((unsigned int *)(rom+(address&0x03FFFFFF))))<<32)|
      *((unsigned int *)(rom + ((address+4)&0x03FFFFFF)));
 }
 
 void write_rom()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
    lastwrite = word;
 }
 
 void read_pif()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3528,6 +3790,9 @@ void read_pif()
 
 void read_pifb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3541,6 +3806,9 @@ void read_pifb()
 
 void read_pifh()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3555,6 +3823,9 @@ void read_pifh()
 
 void read_pifd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3569,6 +3840,9 @@ void read_pifd()
 
 void write_pif()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3592,6 +3866,9 @@ void write_pif()
 
 void write_pifb()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3615,6 +3892,9 @@ void write_pifb()
 
 void write_pifh()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3639,6 +3919,9 @@ void write_pifh()
 
 void write_pifd()
 {
+    #ifdef DBG
+    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
+    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {

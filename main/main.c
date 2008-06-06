@@ -267,6 +267,10 @@ void new_vi(void)
 
     start_section(IDLE_SECTION);
     VI_Counter++;
+    
+#ifdef DBG
+    if(debugger_mode) debugger_frontend_vi();
+#endif
 
     if(LastFPSTime == 0)
     {
@@ -935,6 +939,9 @@ static void printUsage(const char *progname)
            "    --installdir (dir)  : force install dir (place to look for plugins, icons, lang, etc)\n"
            "    --noask             : don't ask to force load on bad dumps\n"
            "    --testshots (list)  : take screenshots at frames given in comma-separated list, then quit\n"
+#ifdef DBG
+           "    --debugger          : start with debugger enabled\n"
+#endif 
            "    -h, --help          : see this help message\n"
            "\n", basename(str));
 
@@ -963,6 +970,9 @@ void parseCommandLine(int argc, char **argv)
         OPT_SSHOTDIR,
         OPT_CONFIGDIR,
         OPT_INSTALLDIR,
+#ifdef DBG
+    OPT_DEBUGGER,
+#endif
         OPT_NOASK,
         OPT_TESTSHOTS
     };
@@ -979,6 +989,9 @@ void parseCommandLine(int argc, char **argv)
         {"sshotdir", required_argument, NULL, OPT_SSHOTDIR},
         {"configdir", required_argument, NULL, OPT_CONFIGDIR},
         {"installdir", required_argument, NULL, OPT_INSTALLDIR},
+#ifdef DBG
+        {"debugger", no_argument, NULL, OPT_DEBUGGER},
+#endif
         {"noask", no_argument, NULL, OPT_NOASK},
         {"testshots", required_argument, NULL, OPT_TESTSHOTS},
         {"help", no_argument, NULL, 'h'},
@@ -1091,6 +1104,11 @@ void parseCommandLine(int argc, char **argv)
                     l_TestShotList[idx] = 0;
                 }
                 break;
+#ifdef DBG
+            case OPT_DEBUGGER:
+                g_DebuggerEnabled = TRUE;
+                break;
+#endif
             // print help
             case 'h':
             case '?':

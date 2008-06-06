@@ -1,14 +1,10 @@
 /**
- * Mupen64 - debugger.h
- * Copyright (C) 2002 DavFr - robind@esiee.fr
+ * Mupen64Plus - debugger/debugger.h
  *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
+ * Copyright (C) 2002 davFr - robind@esiee.fr
+ * Copyright (C) 2008 DarkJezter
  *
+ * Mupen64 homepage: http://code.google.com/p/mupen64plus/
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -33,45 +29,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <gtk/gtk.h>
-#include <glib.h>
 
 #include "types.h"
 #include "../r4300/r4300.h"
 #include "../memory/memory.h"
 
 #include "breakpoints.h"
-#include "desasm.h"
-#include "decoder.h"
-#include "registers.h"
-#include "regTLB.h"
-
-#define DEBUGGER_VERSION "0.0.2 - WIP2"
-
-
+#include "memory.h"
 
 extern int debugger_mode;  // Debugger option enabled.
 
-extern int g_DebuggerEnabled;
-
+extern int g_DebuggerEnabled;      // wether the debugger is enabled or not
 
 
 // State of the Emulation Thread:
 //  0 -> pause, 1 -> step, 2 -> run.
-int run;
+extern int run;
 
-uint32 previousPC;
+extern uint32 previousPC;
 
 void init_debugger();
 void update_debugger();
 
+extern void init_debugger_frontend();
+extern void update_debugger_frontend();
+extern void debugger_frontend_vi();
 
-pthread_cond_t  debugger_done_cond;
-pthread_mutex_t mutex;
-
-GdkColor    color_modif,    // Color of modified register.
-        color_ident;    // Unchanged register.
-
-GtkWidget   *winRegisters;
+extern pthread_cond_t  debugger_done_cond;
+extern pthread_mutex_t mutex;
 
 #endif //DEBUGGER_H

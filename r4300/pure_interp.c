@@ -37,8 +37,7 @@
 #include "interupt.h"
 
 #ifdef DBG
-extern int debugger_mode;
-extern void update_debugger();
+#include "../debugger/debugger.h"
 #endif
 
 unsigned int interp_addr;
@@ -3096,7 +3095,13 @@ void pure_interpreter()
    interp_addr = 0xa4000040;
    stop=0;
    PC = malloc(sizeof(precomp_instr));
-   last_addr = interp_addr;
+   PC->addr = last_addr = interp_addr;
+
+#ifdef DBG
+         if (debugger_mode)
+           update_debugger();
+#endif
+
    while (!stop)
      {
     //if (interp_addr == 0x10022d08) stop = 1;

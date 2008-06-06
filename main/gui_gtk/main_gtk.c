@@ -41,6 +41,12 @@ Email                : blight@Ashitaka
 
 #ifdef DBG
 #include "../../debugger/debugger.h"
+
+#include "debugger/registers.h"     //temporary includes for the debugger menu
+#include "debugger/breakpoints.h"   //these can be removed when the main gui
+#include "debugger/regTLB.h"        //window no longer needs to know if each
+#include "debugger/memedit.h"       //debugger window is open
+#include "debugger/varlist.h"       //
 #endif
 
 #include <glib.h>
@@ -922,23 +928,79 @@ static void callback_vcrSetup( GtkWidget *widget, gpointer data )
 #endif // VCR_SUPPORT
 
 /** debugger **/
+
 #ifdef DBG
+static GtkWidget   *debuggerRegistersShow;
+static GtkWidget   *debuggerBreakpointsShow;
+static GtkWidget   *debuggerTLBShow;
+static GtkWidget   *debuggerMemoryShow;
+static GtkWidget   *debuggerVariablesShow;
+
 // show
 static void callback_debuggerEnableToggled( GtkWidget *widget, gpointer data )
 {
+    int emuRestart=0;
+
     if( g_EmulationThread )
     {
         if(confirm_message(tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
         {
             callback_stopEmulation( NULL, NULL );
-            g_DebuggerEnabled = GTK_CHECK_MENU_ITEM(widget)->active;
-            callback_startEmulation( NULL, NULL );
+        emuRestart=1;
         }
-        return;
     }
 
-    g_DebuggerEnabled = gtk_check_menu_item_get_active(widget);
+  g_DebuggerEnabled = gtk_check_menu_item_get_active(widget);
+  if (g_DebuggerEnabled == TRUE)
+    {
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerRegistersShow), TRUE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerBreakpointsShow), TRUE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerTLBShow), TRUE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerMemoryShow), TRUE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerVariablesShow), TRUE);
+    }
+  else
+    {
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerRegistersShow), FALSE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerBreakpointsShow), FALSE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerTLBShow), FALSE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerMemoryShow), FALSE);
+      gtk_widget_set_sensitive( GTK_WIDGET(debuggerVariablesShow), FALSE);
+    }
+
+  if (emuRestart==1)
+    callback_startEmulation(NULL,NULL);
 }
+
+static void callback_debuggerWindowShow( GtkWidget *widget, gpointer window )
+{
+  switch((int)window)
+    {
+    case 1:
+      if(registers_opened==0)
+    init_registers();
+      break;
+    case 2:
+      if(breakpoints_opened==0)
+    init_breakpoints();
+      break;
+    case 3:
+      if(regTLB_opened==0)
+    init_TLBwindow();
+      break;
+    case 4:
+      if(memedit_opened==0)
+    init_memedit();
+      break;
+    case 5:
+      if(varlist_opened==0)
+    init_varlist();
+      break;
+    default:
+      break;
+    }
+}
+
 #endif // DBG
 
 /** help **/
@@ -1001,6 +1063,8 @@ static int create_menuBar( void )
 #ifdef DBG
     GtkWidget   *debuggerMenu;
     GtkWidget   *debuggerMenuItem;
+    GtkWidget   *debuggerEnableItem;
+    GtkWidget   *debuggerSeparator;
 #endif
     GtkWidget   *helpMenu;
     GtkWidget   *helpMenuItem;
@@ -1046,10 +1110,6 @@ static int create_menuBar( void )
     GtkWidget   *vcrStopCaptureItem;
     GtkWidget   *vcrSeparator3;
     GtkWidget   *vcrSetupItem;
-#endif
-
-#ifdef DBG
-    GtkWidget   *debuggerEnableItem;
 #endif
 
     GtkWidget   *helpAboutItem;
@@ -1281,9 +1341,38 @@ static int create_menuBar( void )
     debuggerMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Debugger"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(debuggerMenuItem), debuggerMenu );
     debuggerEnableItem = gtk_check_menu_item_new_with_mnemonic(tr("_Enable"));
+    debuggerSeparator = gtk_menu_item_new();
+    debuggerRegistersShow = gtk_menu_item_new_with_mnemonic(tr("_Registers"));
+    debuggerBreakpointsShow = gtk_menu_item_new_with_mnemonic(tr("_Breakpoints"));
+    debuggerTLBShow = gtk_menu_item_new_with_mnemonic(tr("_TLB"));
+    debuggerMemoryShow = gtk_menu_item_new_with_mnemonic(tr("_Memory"));
+    debuggerVariablesShow = gtk_menu_item_new_with_mnemonic(tr("_Variables"));
+
     gtk_menu_append( GTK_MENU(debuggerMenu), debuggerEnableItem );
+    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerSeparator );
+    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerRegistersShow );
+    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerBreakpointsShow );
+    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerTLBShow );
+    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerMemoryShow );
+    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerVariablesShow );
+
+    if(g_DebuggerEnabled)
+      gtk_check_menu_item_set_active( GTK_MENU(debuggerEnableItem), TRUE );
+    else 
+      {
+    gtk_widget_set_sensitive( GTK_WIDGET(debuggerRegistersShow), FALSE);
+    gtk_widget_set_sensitive( GTK_WIDGET(debuggerBreakpointsShow), FALSE);
+    gtk_widget_set_sensitive( GTK_WIDGET(debuggerTLBShow), FALSE);
+    gtk_widget_set_sensitive( GTK_WIDGET(debuggerMemoryShow), FALSE);
+    gtk_widget_set_sensitive( GTK_WIDGET(debuggerVariablesShow), FALSE);
+      }
 
     gtk_signal_connect( GTK_OBJECT(debuggerEnableItem), "toggled", GTK_SIGNAL_FUNC(callback_debuggerEnableToggled), (gpointer)NULL );
+    gtk_signal_connect( GTK_OBJECT(debuggerRegistersShow), "activate", GTK_SIGNAL_FUNC(callback_debuggerWindowShow), (gpointer)1 );
+    gtk_signal_connect( GTK_OBJECT(debuggerBreakpointsShow), "activate", GTK_SIGNAL_FUNC(callback_debuggerWindowShow), (gpointer)2 );
+    gtk_signal_connect( GTK_OBJECT(debuggerTLBShow), "activate", GTK_SIGNAL_FUNC(callback_debuggerWindowShow), (gpointer)3 );
+    gtk_signal_connect( GTK_OBJECT(debuggerMemoryShow), "activate", GTK_SIGNAL_FUNC(callback_debuggerWindowShow), (gpointer)4 );
+    gtk_signal_connect( GTK_OBJECT(debuggerVariablesShow), "activate", GTK_SIGNAL_FUNC(callback_debuggerWindowShow), (gpointer)5 );
 #endif // DBG
 
     // help menu

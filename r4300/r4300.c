@@ -39,8 +39,7 @@
 #include <malloc.h>
 
 #ifdef DBG
-extern int debugger_mode;
-extern void update_debugger();
+#include "../debugger/debugger.h"
 #endif
 
 unsigned int i, dynacore = 0, interpcore = 0;

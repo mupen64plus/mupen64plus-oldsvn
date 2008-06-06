@@ -172,21 +172,29 @@ OBJ_KDE_HEADERS = \
 
 OBJ_DBG = \
         debugger/debugger.o \
-		debugger/breakpoints.o \
-		debugger/desasm.o \
-		debugger/decoder.o \
-		debugger/registers.o \
-		debugger/regGPR.o \
-		debugger/regCop0.o \
-		debugger/regSpecial.o \
-		debugger/regCop1.o \
-		debugger/regAI.o \
-		debugger/regPI.o \
-		debugger/regRI.o \
-		debugger/regSI.o \
-		debugger/regVI.o \
-		debugger/regTLB.o \
-		debugger/ui_clist_edit.o
+	debugger/decoder.o \
+	debugger/memory.o \
+	debugger/breakpoints.o
+
+OBJ_GTK_DBG_GUI = \
+	main/gui_gtk/debugger/debugger.o \
+	main/gui_gtk/debugger/breakpoints.o \
+	main/gui_gtk/debugger/desasm.o \
+	main/gui_gtk/debugger/memedit.o \
+	main/gui_gtk/debugger/varlist.o \
+	main/gui_gtk/debugger/registers.o \
+	main/gui_gtk/debugger/regGPR.o \
+	main/gui_gtk/debugger/regCop0.o \
+	main/gui_gtk/debugger/regSpecial.o \
+	main/gui_gtk/debugger/regCop1.o \
+	main/gui_gtk/debugger/regAI.o \
+	main/gui_gtk/debugger/regPI.o \
+	main/gui_gtk/debugger/regRI.o \
+	main/gui_gtk/debugger/regSI.o \
+	main/gui_gtk/debugger/regVI.o \
+	main/gui_gtk/debugger/regTLB.o \
+	main/gui_gtk/debugger/ui_clist_edit.o \
+        main/gui_gtk/debugger/ui_disasm_list.o
 
 PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
@@ -202,14 +210,18 @@ PLUGINS	= plugins/blight_input.so \
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
-ALL = mupen64plus $(PLUGINS)
-OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
+ifeq ($(DBG), 1)
+  ALL = mupen64plus_dbg $(PLUGINS)
+  OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL) $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
+else
+  ALL = mupen64plus $(PLUGINS)
+  OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
+endif
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
 ifeq ($(DBG), 1)
-  ALL += mupen64plus_dbg
-  OBJECTS += $(OBJ_DBG)
+  LIBS += -lopcodes -lbfd
 endif
 ifeq ($(VCR), 1)
   OBJECTS += $(OBJ_VCR)
@@ -270,7 +282,7 @@ mupen64plus: $(OBJECTS)
 	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 	$(STRIP) $@
 
-mupen64plus_dbg: $(OBJECTS) main/main_gtk.o
+mupen64plus_dbg: $(OBJECTS)
 	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 
 install:
@@ -290,7 +302,7 @@ clean:
 	$(MAKE) -C mupen64_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
-	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o ./opengl/*.o
+	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o ./main/gui_gtk/debugger/*.o ./opengl/*.o
 	$(RM) -f mupen64plus mupen64plus_dbg 
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so

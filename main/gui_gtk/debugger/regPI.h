@@ -1,10 +1,10 @@
 /*
- * Mupen64Plus - debugger/decoder.h
- *
+ * Mupen64Plus main/gui_gtk/debugger/regPI.h
+ * 
  * Copyright (C) 2002 davFr - robind@esiee.fr
  *
- * Mupen64 homepage: http://code.google.com/p/mupen64plus/
- *
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
+ * 
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
  * cence as published by the Free Software Foundation; either
@@ -22,13 +22,24 @@
  *
 **/
 
- 
-#ifndef DECODER_H
-#define DECODER_H
+#ifndef GUIGTK_REGPI_H
+#define GUIGTK_REGPI_H
 
-#include <stdio.h>
-#include "types.h"
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <gtk/gtk.h>
+#include <glib.h>
 
-void r4300_decode_op(uint32 instr, char *op, char *args );
+#include "debugger.h"
 
-#endif //DECODER_H
+
+
+GtkWidget *frRegPI;
+
+int regPI_opened;
+
+void init_regPI();
+void update_regPI();
+
+#endif //GUIGTK_REGPI_H

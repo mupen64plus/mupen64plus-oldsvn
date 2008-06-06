@@ -1,9 +1,9 @@
-/*
- * Mupen64Plus - debugger/decoder.h
+/**
+ * Mupen64Plus - main/gui_gtk/debugger/breakpoints.h
  *
- * Copyright (C) 2002 davFr - robind@esiee.fr
- *
- * Mupen64 homepage: http://code.google.com/p/mupen64plus/
+ * Copyright (C) 2002 DavFr - robind@esiee.fr
+ * 
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -22,13 +22,29 @@
  *
 **/
 
- 
-#ifndef DECODER_H
-#define DECODER_H
+#ifndef GUIGTK_BREAKPOINTS_H
+#define GUIGTK_BREAKPOINTS_H
 
-#include <stdio.h>
-#include "types.h"
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <gtk/gtk.h>
+#include <glib.h>
 
-void r4300_decode_op(uint32 instr, char *op, char *args );
+#include "debugger.h"
 
-#endif //DECODER_H
+#include "ui_clist_edit.h"
+
+
+int breakpoints_opened;
+int breakpoints_editing; //1 when editing a breakpoint, 0 when adding
+
+
+GtkWidget *winBreakpoints;
+
+void init_breakpoints();
+void get_breakpoint_display_string(char* buf, breakpoint* bpt);
+int add_breakpoint( uint32 address );
+void update_breakpoints();
+
+#endif  // BREAKPOINTS_H

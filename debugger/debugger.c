@@ -1,14 +1,11 @@
 /*
- * debugger/debugger.c
- * 
- * 
- * Debugger for Mupen64 - davFr
- * Copyright (C) 2002 davFr - robind@esiee.fr
+ * Mupen64Plus - debugger/debugger.c
  *
- * Mupen64 is copyrighted (C) 2002 Hacktarux
- * Mupen64 homepage: http://mupen64.emulation64.com
- *         email address: hacktarux@yahoo.fr
- * 
+ * Copyright (C) 2002 davFr - robind@esiee.fr
+ * Copyright (C) 2008 DarkJezter
+ *
+ * Mupen64 homepage: http://code.google.com/p/mupen64plus/
+ *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
  * cence as published by the Free Software Foundation; either
@@ -26,7 +23,7 @@
  *
 **/
 
-#include <glib.h>
+//#include <glib.h>
 #include "debugger.h"
 
 // State of the Emulation Thread:
@@ -36,6 +33,10 @@ int  g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
 int debugger_mode;
 int run;
 
+pthread_cond_t  debugger_done_cond;
+pthread_mutex_t mutex;
+
+uint32 previousPC;
 
 //]=-=-=-=-=-=-=-=-=-=-=[ Initialisation du Debugger ]=-=-=-=-=-=-=-=-=-=-=-=[
 
@@ -44,28 +45,9 @@ void init_debugger()
     debugger_mode = 1;
     run = 0;
 
-//]=-=-=[ Initialisation des Couleurs ]=-=-=[
-    color_modif.red = 0x0000;
-    color_modif.green = 0xA000;
-    color_modif.blue = 0xFFFF;
+    init_debugger_frontend();
 
-    color_ident.red = 0xFFFF;
-    color_ident.green = 0xFFFF;
-    color_ident.blue = 0xFFFF;
-
-    gdk_threads_enter();
-    init_registers();
-    gdk_threads_leave();
-
-    gdk_threads_enter();
-    init_desasm();
-    gdk_threads_leave();
-
-    gdk_threads_enter();
-    init_breakpoints();
-    gdk_threads_leave();
-
-    //init_TLBwindow();
+    init_host_disassembler();
 
     pthread_mutex_init( &mutex, NULL);
     pthread_cond_init( &debugger_done_cond, NULL);
@@ -78,33 +60,28 @@ void update_debugger()
 // Update debugger state and display.
 // Should be called after each R4300 instruction.
 {
+    int bpt;
+    
     if(run==2) {
-        if( check_breakpoints(PC->addr)==-1 ) {
+        bpt = check_breakpoints(PC->addr);
+        if( bpt==-1 ) {
             previousPC = PC->addr;
             return;
         }
         else {
             run = 0;
             switch_button_to_run();
-            gdk_beep();
+            
+            if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_LOG))
+                log_breakpoint(PC->addr, BPT_FLAG_EXEC, 0);
         }
     }
-
-    if(registers_opened) {
-        gdk_threads_enter();
-        update_registers();
-        gdk_threads_leave();
-    }   
-    if(desasm_opened) {
-        gdk_threads_enter();
-        update_desasm( PC->addr );
-        gdk_threads_leave();
+    else if ( previousPC == PC->addr )
+    {
+        return;
     }
-    /*if(regTLB_opened) {
-        gdk_threads_enter();
-        update_TLBwindow();
-        gdk_threads_leave();
-    }*/
+    update_debugger_frontend();
+
     previousPC = PC->addr;
     // Emulation thread is blocked until a button is clicked.
     pthread_cond_wait(&debugger_done_cond, &mutex);
