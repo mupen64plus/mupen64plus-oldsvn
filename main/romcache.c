@@ -193,6 +193,7 @@ int write_cache_file()
             gzwrite(gzfile, &entry->crc1, sizeof(unsigned int));
             gzwrite(gzfile, &entry->crc2, sizeof(unsigned int));
             gzwrite(gzfile, &entry->archivefile, sizeof(unsigned int));
+            gzwrite(gzfile, &entry->cic, sizeof(unsigned int));
 
             entry = entry->next;
             }
@@ -445,7 +446,7 @@ int load_initial_cache()
             fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
             return 0;
             }
-
+//Add CIC chip!!!
         gzread(gzfile, entry->filename, PATH_MAX*sizeof(char));
         gzread(gzfile, entry->md5, 16*sizeof(md5_byte_t));
         gzread(gzfile, &entry->timestamp, sizeof(time_t));
@@ -458,6 +459,7 @@ int load_initial_cache()
         gzread(gzfile, &entry->crc1, sizeof(unsigned int));
         gzread(gzfile, &entry->crc2, sizeof(unsigned int));
         gzread(gzfile, &entry->archivefile, sizeof(unsigned int));
+        gzread(gzfile, &entry->cic, sizeof(unsigned int));
 
         //Check rom is valid.
         //If we can't get information, move to next file.
@@ -533,6 +535,7 @@ void ini_openFile()
     romdatabase_search *cur = NULL;
     int free_buffer = 0;
 
+    int length;
     int counter;
     char temp[3];
     temp[2] = '\0';
@@ -637,6 +640,7 @@ void ini_openFile()
                 }
             cur->entry.status=3;
             cur->entry.savetype = 0;
+//This should be dynamically allocated...
             for (counter=0; counter < 16; ++counter)
                 { cur->entry.refmd5[counter] = 0; }
             }
@@ -645,15 +649,16 @@ void ini_openFile()
             i = split_property(buf);
             if(i!=-1)
                 {
-                if(!strcmp(buf, "Good Name"))
+                if(!strcmp(buf, "GoodName"))
                     {
-                    if(buf[i+1+strlen(buf+i+1)-1]=='\n')
-                        { buf[i+1+strlen(buf+i+1)-1] = '\0'; }
-                    if (buf[i+1+strlen(buf+i+1)-1]=='\r')
-                        { buf[i+1+strlen(buf+i+1)-1] = '\0'; }
-                    strncpy(cur->entry.goodname, buf+i+1, 99);
+                    length = strlen(buf+i+1);
+                    if(buf[i+length]=='\n'||buf[i+length]=='\r')
+                        { buf[i+length] = '\0'; }
+                    cur->entry.goodname = (char*)malloc(length*sizeof(char));
+                    strncpy(cur->entry.goodname, buf+i+1, length);
+                    //printf("Name: %s, Length: %d\n", cur->entry.goodname, length);
                     }
-                else if(!strcmp(buf, "Header Code"))
+                else if(!strcmp(buf, "CRC"))
                     {
                     buf[i+19] = 0;
                     sscanf(buf+i+10, "%X", &cur->entry.crc2);

@@ -28,7 +28,7 @@
 
 typedef struct
 {
-   char goodname[128];
+   char* goodname;
    md5_byte_t md5[16];
    md5_byte_t refmd5[16];
    unsigned int crc1;
