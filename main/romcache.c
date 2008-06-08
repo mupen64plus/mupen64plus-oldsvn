@@ -186,7 +186,7 @@ int write_cache_file()
             gzwrite(gzfile, &entry->timestamp, sizeof(time_t));
             gzwrite(gzfile, &entry->countrycode, sizeof(unsigned short));
             gzwrite(gzfile, &entry->romsize, sizeof(int));
-            gzwrite(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char));
+            gzwrite(gzfile, entry->usercomments, COMMENT_MAXLENGTH*sizeof(char));
             gzwrite(gzfile, &entry->compressiontype, sizeof(unsigned short));
             gzwrite(gzfile, &entry->imagetype, sizeof(unsigned short));
             gzwrite(gzfile, &entry->internalname, 80*sizeof(char));
@@ -452,7 +452,7 @@ int load_initial_cache()
         gzread(gzfile, &entry->timestamp, sizeof(time_t));
         gzread(gzfile, &entry->countrycode, sizeof(unsigned short));
         gzread(gzfile, &entry->romsize, sizeof(int));
-        gzread(gzfile, entry->comment, COMMENT_MAXLENGTH*sizeof(char));
+        gzread(gzfile, entry->usercomments, COMMENT_MAXLENGTH*sizeof(char));
         gzread(gzfile, &entry->compressiontype, sizeof(unsigned short));
         gzread(gzfile, &entry->imagetype, sizeof(unsigned short));
         gzread(gzfile, entry->internalname, 80*sizeof(char));
@@ -464,7 +464,10 @@ int load_initial_cache()
         //Check rom is valid.
         //If we can't get information, move to next file.
         if(stat(entry->filename,&filestatus)==-1)
-            { continue; }
+            {
+            free(entry);
+            continue; 
+            }
 
         entry->next = NULL;
 
@@ -625,9 +628,6 @@ void ini_openFile()
               temp[1] = buf[counter*2+2];
               sscanf(temp, "%X", cur->entry.md5+counter); 
               }
-
-            //strncpy(cur->entry.md5, buf+1, 32);
-
             i = cur->entry.md5[0];
 
             if(romdatabase.md5_lists[i]==NULL)
@@ -638,9 +638,11 @@ void ini_openFile()
                 cur->next_md5 = aux;
                 romdatabase.md5_lists[i] = cur;
                 }
-            cur->entry.status=3;
-            cur->entry.savetype = 0;
-//This should be dynamically allocated...
+            cur->entry.status=0; //Set default to 0 stars.
+            cur->entry.savetype=16; //Set default to NULL
+            cur->entry.rumble=2; //Set default to NULL
+            cur->entry.players=16; //Set default to NULL
+            //This should be dynamically allocated...
             for (counter=0; counter < 16; ++counter)
                 { cur->entry.refmd5[counter] = 0; }
             }
@@ -664,7 +666,6 @@ void ini_openFile()
                     sscanf(buf+i+10, "%X", &cur->entry.crc2);
                     buf[i+9] = 0;
                     sscanf(buf+i+1, "%X", &cur->entry.crc1);
-
                     buf[i+3] = 0;
                     sscanf(buf+i+1, "%X", &i);
 
@@ -677,6 +678,7 @@ void ini_openFile()
                         romdatabase.crc_lists[i] = cur;
                         }
                     }
+                //Reference MD5 does not currently work...
                 else if(!strcmp(buf, "Reference"))
                     {
                     for (counter=0; counter < 16; ++counter)
@@ -685,15 +687,42 @@ void ini_openFile()
                         temp[1] = buf[i+counter*2+2];
                         sscanf(temp, "%X", cur->entry.refmd5+counter); 
                         }
-
-                    //strncpy(cur->entry.refmd5, buf+i+1, 32);
-                    //cur->entry.refmd5[32] = '\0';
                     }
-                else if(!strcmp(buf, "Eeprom"))
+                else if(!strcmp(buf, "SaveType"))
                     {
-                    if(!strncmp(buf+i+1, "16k", 3))
-                        { cur->entry.savetype = 1;
- }
+                    if(!strncmp(buf+i+1, "Eeprom 4KB", 10))
+                        { cur->entry.savetype = EEPROM_4KB; }
+                    else if(!strncmp(buf+i+1, "Eeprom 16KB", 10))
+                        { cur->entry.savetype = EEPROM_16KB; }
+                    else if(!strncmp(buf+i+1, "SRAM", 4))
+                        { cur->entry.savetype = SRAM; }
+                    else if(!strncmp(buf+i+1, "Flash RAM", 9))
+                        { cur->entry.savetype = FLASH_RAM; }
+                    else if(!strncmp(buf+i+1, "Controller Pack", 15))
+                        { cur->entry.savetype = CONTROLLER_PACK; }
+                    else if(!strncmp(buf+i+1, "None", 4))
+                        { cur->entry.savetype = NONE; }
+                    }
+                else if(!strcmp(buf, "Status"))
+                    {
+                    length=strlen(buf);
+                    i = atoi(buf+length+1);
+                    if(i>-1&&i<6)
+                        { cur->entry.status = i; }
+                    }
+                else if(!strcmp(buf, "Players"))
+                    {
+                    length=strlen(buf);
+                    i = atoi(buf+length+1);
+                    if(i>0&&i<8)
+                        { cur->entry.players = i; }
+                    }
+                else if(!strcmp(buf, "Rumble"))
+                    {
+                    if(!strncmp(buf+i+1, "Yes", 3))
+                        { cur->entry.rumble = 1; }
+                    if(!strncmp(buf+i+1, "No", 2))
+                        { cur->entry.rumble = 0; }
                     }
                 }
             }

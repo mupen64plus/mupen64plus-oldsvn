@@ -43,7 +43,7 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
 
     gtk_widget_hide( g_RomPropDialog.dialog );
 
-    strncpy( g_RomEntry->comment, gtk_entry_get_text( GTK_ENTRY(g_RomPropDialog.commentsEntry) ),255 );
+    strncpy(g_RomEntry->usercomments, gtk_entry_get_text(GTK_ENTRY(g_RomPropDialog.commentsEntry)),255);
 
     // update rombrowser
     g_RCSTask = RCS_RESCAN;
@@ -78,7 +78,7 @@ void show_romPropDialog( cache_entry *entry )
     for ( i = 0; i < 16; ++i ) 
         { sprintf(md5+i*2, "%02X", entry->md5[i]); }
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), md5);
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->comment );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->usercomments);
     g_RomEntry = entry;
 
     // show dialog

@@ -534,7 +534,7 @@ void compressionstring(unsigned short compressiontype, char *string)
         strcpy(string, tr("Gzip"));
         break;
     default:
-        string = NULL;
+        string[0] = '\0';
     }
 }
 
@@ -552,7 +552,7 @@ void imagestring(unsigned short imagetype, char *string)
         strcpy(string, tr(".n64 (wordswapped)"));
         break;
     default:
-        string = NULL;
+        string[0] = '\0';
     }
 }
 
@@ -561,21 +561,81 @@ void cicstring(unsigned short cic, char *string)
     switch(cic)
     {
     case CIC_NUS_6101:
-        strcpy(string, tr("CIC_NUS_6101"));
+        strcpy(string, tr("CIC-NUS-6101"));
         break;
     case CIC_NUS_6102:
-        strcpy(string, tr("CIC_NUS_6102"));
+        strcpy(string, tr("CIC-NUS-6102"));
         break;
     case CIC_NUS_6103:
-        strcpy(string, tr("CIC_NUS_6103"));
+        strcpy(string, tr("CIC-NUS-6103"));
         break;
     case CIC_NUS_6105:
-        strcpy(string, tr("CIC_NUS_6104"));
+        strcpy(string, tr("CIC-NUS-6104"));
         break;
     case CIC_NUS_6106:
-        strcpy(string, tr("CIC_NUS_6105"));
+        strcpy(string, tr("CIC-NUS-6105"));
         break;
     default:
-        string = NULL;
+        string[0] = '\0';
     }
+}
+
+void rumblestring(unsigned short rumble, char *string)
+{
+    switch(rumble)
+    {
+    case 1:
+        strcpy(string, tr("Yes"));
+        break;
+    case 0:
+        strcpy(string, tr("No"));
+        break;
+    default:
+        string[0] = '\0';
+    }
+}
+
+void savestring(unsigned short savetype, char *string)
+{
+    switch(savetype)
+    {
+    case EEPROM_4KB:
+        strcpy(string, tr("Eeprom 4KB"));
+        break;
+    case EEPROM_16KB:
+        strcpy(string, tr("Eeprom 16KB"));
+        break;
+    case SRAM:
+        strcpy(string, tr("SRAM"));
+        break;
+    case FLASH_RAM:
+        strcpy(string, tr("Flash RAM"));
+        break;
+    case CONTROLLER_PACK:
+        strcpy(string, tr("Controller Pack"));
+        break;
+    case NONE:
+        strcpy(string, tr("None"));
+        break;
+    default:
+        string[0] = '\0';
+    }
+}
+
+void playersstring(unsigned short players, char *string)
+{
+    if(players>7)
+        {
+        string[0] = '\0';
+        return;
+        }
+
+    unsigned short netplay=0;
+    if(players>4)
+        {
+        players-=3;
+        netplay=1;
+        }
+
+    sprintf(string, "%d %s", players, (netplay) ? "Netplay" : "");
 }

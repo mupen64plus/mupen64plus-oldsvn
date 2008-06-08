@@ -35,6 +35,8 @@ typedef struct
    unsigned int crc2;
    unsigned short status;
    unsigned short savetype;
+   unsigned short players;
+   unsigned short rumble;
 } mupenEntry;
 
 void ini_openFile();
@@ -67,7 +69,7 @@ typedef struct _cache_entry
     unsigned short cic;
     unsigned int archivefile; //Not currently used, for locating file inside zip or 7zip archives.
     int romsize;
-    char comment[COMMENT_MAXLENGTH]; 
+    char usercomments[COMMENT_MAXLENGTH]; 
     char internalname[80]; //Needs to be 4 times the stored value for UTF8 conversion. 
     unsigned int crc1;
     unsigned int crc2;

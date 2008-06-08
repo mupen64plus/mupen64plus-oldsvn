@@ -31,7 +31,7 @@ typedef struct
     //Make two TreeViews, a visable manually filtered one for the Display, and a
     //Non-visable FullList from which we can filter.
     GtkWidget *romDisplay, *romFullList;
-    GtkTreeViewColumn *column[12]; //columns in rombrowser.
+    GtkTreeViewColumn *column[17]; //columns in rombrowser.
     GtkWidget *statusBarHBox;
     GtkAccelGroup *accelGroup;
     GtkAccelGroup *accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.

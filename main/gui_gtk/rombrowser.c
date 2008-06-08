@@ -109,71 +109,79 @@ gint return_zero( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *ptr2, gpo
 // compare function
 gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *ptr2, gpointer user_data )
 {
-    GtkSortType SortType;
-    short int returnvalue, column;
-    float size1, size2, difference;
-    gchar *buffer1, *buffer2;
+    short returnvalue;
 
-    switch( g_iSortColumn )
+    if(g_iSortColumn==2||g_iSortColumn==11||g_iSortColumn==14)
         {
-        case 0: //Flag, so sort by country name.
-           column = 1;
-            break;
-        case 1: //ROM Name
-            column = 0;
-            break;
-        case 2: //Country
-            column = 1;
-            break;
-        case 3: //Size
-            column = 2;
-            break;
-        case 4: //Comments
-            column = 3;
-            break;
-        case 5: //Filename
-            column = 4;
-            break;
-        case 7: //Filename
-            column = 7;
-            break;
-        case 8: //Filename
-            column = 8;
-            break;
-        case 9: //Filename
-            column = 9;
-            break;
-        case 10: //Md5
-            column = 10;
-            break;
-        case 11: //Md5
-            column = 11;
-            break;
-        default:
-            return 0;
-        };
+        cache_entry *entry1;
+        cache_entry *entry2;
+        int item1, item2;
 
-    gtk_tree_model_get ( model, ptr1, column, &buffer1, -1 );
-    gtk_tree_model_get ( model, ptr2, column, &buffer2, -1 );
+        gtk_tree_model_get ( model, ptr1, 22, &entry1, -1 );
+        gtk_tree_model_get ( model, ptr2, 22, &entry2, -1 );
 
- if(column==2)
-        {
-        sscanf ( buffer1, "%f", &size1 );
-        sscanf ( buffer2, "%f", &size2 );
+        if(g_iSortColumn==2)
+            {
+            item1 = entry1->inientry->status;
+            item2 = entry2->inientry->status;
+            }
+        else if(g_iSortColumn==11)
+            {
+            item1 = entry1->romsize;
+            item2 = entry2->romsize;
+            }
+        else if(g_iSortColumn==14)
+            {
+            item1 = entry1->cic;
+            item2 = entry2->cic;
+            }
 
-        difference = size2 - size1;
-
-        if( difference < 0 )
-            { return 1; }
-        else if( difference > 0 )
-            { return -1; }
+        if(item1==item2)
+            { returnvalue = 0; }
+        else if(item1>item2)
+            { returnvalue = -1; }
         else
-            { return  0; }
+            { returnvalue = 1; }
         }
     else
-        { return strcasecmp(buffer1, buffer2); }
-    g_free(buffer1);
-    g_free(buffer2);
+        {
+        gchar *buffer1, *buffer2;
+
+        gtk_tree_model_get ( model, ptr1, g_iSortColumn, &buffer1, -1 );
+        gtk_tree_model_get ( model, ptr2, g_iSortColumn, &buffer2, -1 );
+
+        returnvalue = strcasecmp(buffer1, buffer2);
+
+        g_free(buffer1);
+        g_free(buffer2);
+        }
+
+    //If items are equal, fallback on Good Name and then File Name.
+    if(returnvalue==0&&g_iSortColumn!=1)
+        {
+        gchar *buffer1, *buffer2;
+
+        gtk_tree_model_get ( model, ptr1, 1, &buffer1, -1 );
+        gtk_tree_model_get ( model, ptr2, 1, &buffer2, -1 );
+
+        returnvalue = strcasecmp(buffer1, buffer2);
+
+        g_free(buffer1);
+        g_free(buffer2);
+        }
+
+    if(returnvalue==0&&g_iSortColumn!=4)
+        {
+        gchar *buffer1, *buffer2;
+
+        gtk_tree_model_get ( model, ptr1, 1, &buffer1, -1 );
+        gtk_tree_model_get ( model, ptr2, 1, &buffer2, -1 );
+
+        returnvalue = strcasecmp(buffer1, buffer2);
+
+        g_free(buffer1);
+        g_free(buffer2);
+        }
 
     return returnvalue;
 }
@@ -221,27 +229,26 @@ void rombrowser_refresh( void )
     gtk_list_store_clear( GTK_LIST_STORE(model) );
 
     gboolean fullpaths;
-    char *line[10];
 
     GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+    char *country, *goodname, *usercomments, *filename, *md5hash, *crc1, *crc2, *internalname, *savetype, *players, *size, *compressiontype, *imagetype, *cicchip, *rumble;
     GdkPixbuf *flag;
-
     GdkPixbuf *status[5];
-
-    status[0] = star;
-    status[1] = star;
-    status[2] = star;
-    status[3] = star;
-    status[4] = star;
     int i;
 
-    line[1] = malloc(32*sizeof(char));
-    line[2] = malloc(16*sizeof(char));
-    line[5] = malloc(16*sizeof(char));
-    line[6] = malloc(16*sizeof(char));
-    line[7] = malloc(16*sizeof(char));
-    line[8] = malloc(32*sizeof(char));
-    if(iter==NULL||line[1]==NULL||line[2]==NULL)
+    country = (char*)calloc(32,sizeof(char));
+    md5hash = (char*)calloc(32,sizeof(char));
+    crc1 = (char*)calloc(8,sizeof(char));
+    crc2 = (char*)calloc(8,sizeof(char));
+    savetype = (char*)calloc(16,sizeof(char));    
+    players = (char*)calloc(16,sizeof(char));
+    size = (char*)calloc(16,sizeof(char));
+    compressiontype = (char*)calloc(16,sizeof(char));
+    imagetype = (char*)calloc(32,sizeof(char));
+    cicchip = (char*)calloc(16,sizeof(char));
+    rumble = (char*)calloc(8,sizeof(char));
+
+    if(iter==NULL||country==NULL||md5hash==NULL||crc1==NULL||crc2==NULL||size==NULL||compressiontype==NULL||imagetype==NULL||cicchip==NULL)
         {
         fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
         return;
@@ -255,106 +262,98 @@ void rombrowser_refresh( void )
         entry = romcache.top;
         do
             {
-            line[0] = entry->inientry->goodname;
-            countrycodestring(entry->countrycode, line[1]);
-            sprintf(line[2], "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
-            line[3] = entry->comment;
+            countrycodestring(entry->countrycode, country);
             countrycodeflag(entry->countrycode, &flag);
+            goodname = entry->inientry->goodname;
+            for ( i = 0; i < 5; ++i )
+                {
+                if(entry->inientry->status>i)
+                    { status[i] = star; }
+                else
+                    { status[i] = NULL; }
+                }
+            usercomments = entry->usercomments;
             if(fullpaths)
-                { line[4] = entry->filename; }
+                { filename = entry->filename; }
             else
-                { line[4] = filefrompath(entry->filename); }
-            compressionstring(entry->compressiontype, line[5]);
-            imagestring(entry->imagetype, line[6]);
-            cicstring(entry->cic, line[7]);
-            for ( i = 0; i < 16; ++i ) 
-                { sprintf(line[8]+i*2, "%02X", entry->md5[i]); }
-            line[9]=entry->internalname;
+                { filename = filefrompath(entry->filename); }
 
+            for ( i = 0; i < 16; ++i ) 
+                { sprintf(md5hash+i*2, "%02X", entry->md5[i]); }
+            sprintf(crc1, "%08X", entry->crc1);
+            sprintf(crc2, "%08X", entry->crc2);
+            internalname=entry->internalname;
+            sprintf(size, "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
+            compressionstring(entry->compressiontype, compressiontype);
+            imagestring(entry->imagetype, imagetype);
+            cicstring(entry->cic, cicchip);
+            rumblestring(entry->inientry->rumble, rumble);
+            playersstring(entry->inientry->players, players);
+            savestring(entry->inientry->savetype, savetype);
 
             //Add entries to TreeModel
             model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
-            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], 9, line[7], 10, line[8], 11, line[9], 12, status[0], 13, status[1], 14, status[2], 15, status[3], 16, status[4], -1);
+
+            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, country, 1, goodname, 2, NULL, 3, usercomments, 4, filename, 5, md5hash, 6, crc1, 7, crc2, 8, internalname, 9, savetype, 10, players, 11, size, 12, compressiontype, 13, imagetype, 14, cicchip, 15, rumble, 16, status[0], 17, status[1], 18, status[2], 19, status[3], 20, status[4], 21, flag, 22, entry, -1);
 
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
-            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, line[0], 1, line[1], 2,    line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], 9, line[7], 10, line[8], 11, line[9], 12, status[0], 13, status[1], 14, status[2], 15, status[3], 16, status[4], -1);
+            gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, country, 1, goodname, 2, NULL, 3, usercomments, 4, filename, 5, md5hash, 6, crc1, 7, crc2, 8, internalname, 9, savetype, 10, players, 11, size, 12, compressiontype, 13, imagetype, 14, cicchip, 15, rumble, 16, status[0], 17, status[1], 18, status[2], 19, status[3], 20, status[4], 21, flag, 22, entry, -1);
 
             entry = entry->next;
             }
         while (entry!=NULL);
         }
 
-      free(line[1]);
-      free(line[2]);
-      free(line[5]);
-      free(line[6]);
-      free(line[7]);
-      free(line[8]);
-      free(iter);
-      if(fullpaths==1)
-         { free(line[4]); }
-
+    free(country);
+    free(md5hash);
+    free(crc1);
+    free(crc2);
+    free(savetype);
+    free(players);
+    free(size);
+    free(compressiontype);
+    free(imagetype);
+    free(cicchip);
+    free(rumble);
+    if(fullpaths==1)
+       { free(filename); }
+    free(iter);
     //Do an initial sort.
     gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_iSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
     gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(model), g_iSortColumn, g_SortType );
     gtk_tree_view_set_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay), model );
+
 }
 
 //We're going our own filtering, but this is a GtkTreeModelFilter function.
 //We do filtering manually since GtkTreeModelFilter can not implement automatic 
 //sorting and GtkTreeModelSort can't implement automatic filtering.
-//NOTE: we should add contingencies, i.e. secondary sort columns.
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
     const gchar *filter;
-    char *buffer1, *buffer2;
-    short int column;
-    gboolean returnvalue;
-
     filter = gtk_entry_get_text ( GTK_ENTRY(g_MainWindow.filter) );
     //printf("Filter: %s\n", filter);
 
-
-    switch( g_iSortColumn )
+    if(g_iSortColumn==2)
         {
-        case 0: //Flag, so sort by country name.
-            column = 1;
-            break;
-        case 1: //ROM Name
-            column = 0;
-            break;
-        case 2: //Country
-            column = 1;
-            break;
-        case 3: //Size
-            column = 2;
-            break;
-        case 4: //Comments
-            column = 3;
-            break;
-        case 5: //Filename
-            column = 4;
-            break;
-        case 7: //Filename
-            column = 7;
-            break;
-        case 8: //Filename
-            column = 8;
-            break;
-        case 9: //Filename
-            column = 9;
-            break;
-        case 10: //Md5
-            column = 10;
-            break;
-        case 11: //Internal Name.
-            column = 11;
-            break;
-        };
+        cache_entry *entry;
+        gtk_tree_model_get ( model, iter, 22, &entry, -1 );
 
-    gtk_tree_model_get (model, iter, column, &buffer1, -1);
+        if(filter[0]=='\0')
+            { return TRUE; }
+
+        if(atoi(filter)==entry->inientry->status)
+            { return TRUE; }
+        else
+            { return FALSE; }
+        }
+
+    char *buffer1, *buffer2;
+    gboolean returnvalue;
+
+    gtk_tree_model_get (model, iter, g_iSortColumn, &buffer1, -1);
     //printf("Value %s\n", buffer1);
     if(buffer1==NULL||filter==NULL)
         { returnvalue = TRUE; }
@@ -387,7 +386,7 @@ static void callback_column_sort(GtkTreeViewColumn *treeviewcolumn, gpointer dat
         g_SortType = GTK_SORT_ASCENDING;
         }
 
-    apply_filter();
+  apply_filter();
 }
 
 // row double clicked -> play rom
@@ -398,7 +397,7 @@ static gboolean callback_rowSelected(GtkTreeView *tree_view, GtkTreePath *path, 
     GtkTreeIter iter;
 
     gtk_tree_model_get_iter(model, &iter, path);
-    gtk_tree_model_get (model, &iter, 5, &entry, -1);
+    gtk_tree_model_get (model, &iter, 22, &entry, -1);
 
     if(open_rom( entry->filename ) == 0)
         { startEmulation(); }
@@ -443,63 +442,54 @@ static void callback_apply_filter( GtkWidget *widget, gpointer data )
 
 void apply_filter( void )
 {
-    GtkTreeModel *destination;
+    GtkTreeModel *destination, *source;
     const gchar *filter;
 
     filter = gtk_entry_get_text ( GTK_ENTRY(g_MainWindow.filter) );
 
-    if(filter[0]!='\0')
-        {
-        GtkTreeModel *model, *source;
-        GtkTreeIter sourceiter, destinationiter;
-        gboolean validiter;
-        GdkPixbuf *flag;
-        cache_entry *entry;
-        GdkPixbuf *status[5];
-        gchar *line[10];
-        short int counter;
+    GtkTreeModel *model;
+    GtkTreeIter sourceiter, destinationiter;
+    gboolean validiter;
 
-        //Clear the Display Tree View.
-        GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-        gtk_tree_selection_select_all(selection);
-        model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-        gtk_list_store_clear( GTK_LIST_STORE(model) );
+    char *country, *goodname, *usercomments, *filename, *md5hash, *crc1, *crc2, *internalname, *savetype, *players, *size, *compressiontype, *imagetype, *cicchip, *rumble;
+    GdkPixbuf *status[5];
+    GdkPixbuf *flag;
+    cache_entry *entry; 
+    short int counter;
 
-        source = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList) );
-        g_iNumRoms = gtk_tree_model_iter_n_children(source, NULL);
-        validiter = gtk_tree_model_get_iter_first(source, &sourceiter);
+    //Clear the Display Tree View.
+    GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
+    gtk_tree_selection_select_all(selection);
+    model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
+    gtk_list_store_clear( GTK_LIST_STORE(model) );
 
-        destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
-
-        if(validiter)
-            {
-            for ( counter = 0; counter < g_iNumRoms; ++counter )
-                 {
-                 if ( filter_function( source, &sourceiter, (gpointer)NULL) )
-                     {
-                     gtk_tree_model_get ( GTK_TREE_MODEL(source), &sourceiter, 0, &line[0], 1, &line[1], 2, &line[2], 3, &line[3], 4, &line[4], 5, &entry, 6, &flag, 7, &line[5], 8, &line[6], 9, &line[7], 10, &line[8], 11, &line[9], 12, &status[0], 13, &status[1], 14, &status[2], 15, &status[3], 16, &status[4], -1 );
-
-                     gtk_list_store_append ( GTK_LIST_STORE(destination), &destinationiter );
-                     gtk_list_store_set ( GTK_LIST_STORE(model), &destinationiter, 0, line[0], 1, line[1], 2, line[2], 3, line[3], 4, line[4], 5, entry, 6, flag, 7, line[5], 8, line[6], 9, line[7], 10, line[8], 11, line[9], 12, status[0], 13, status[1], 14, status[2], 15, status[3], 16, status[4], -1 );
-                     }
-                if(!gtk_tree_model_iter_next(source, &sourceiter))
-                     { break; }
-                }
-           }
-
-        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
-        gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_iSortColumn, g_SortType );
-        }
-    else
-        {
-        destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
-        gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_iSortColumn, g_SortType );
-        }
+    source = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList) );
+    g_iNumRoms = gtk_tree_model_iter_n_children(source, NULL);
+    validiter = gtk_tree_model_get_iter_first(source, &sourceiter);
 
     destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-    g_iNumRoms = gtk_tree_model_iter_n_children(destination, NULL);
+    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
+
+    if(validiter)
+        {
+        for ( counter = 0; counter < g_iNumRoms; ++counter )
+            {
+            if ( filter_function( source, &sourceiter, (gpointer)NULL) )
+                {
+                gtk_tree_model_get ( GTK_TREE_MODEL(source), &sourceiter, 0, &country, 1, &goodname, 3, &usercomments, 4, &filename, 5, &md5hash, 6, &crc1, 7, &crc2, 8, &internalname, 9, &savetype, 10, &players, 11, &size, 12, &compressiontype, 13, &imagetype, 14, &cicchip, 15, &rumble, 16, &status[0], 17, &status[1], 18, &status[2], 19, &status[3], 20, &status[4], 21, &flag, 22, &entry, -1);
+
+                gtk_list_store_append ( GTK_LIST_STORE(destination), &destinationiter);
+                gtk_list_store_set ( GTK_LIST_STORE(destination), &destinationiter, 0, country, 1, goodname, 2, NULL, 3, usercomments, 4, filename, 5, md5hash, 6, crc1, 7, crc2, 8, internalname, 9, savetype, 10, players, 11, size, 12, compressiontype, 13, imagetype, 14, cicchip, 15, rumble, 16, status[0], 17, status[1], 18, status[2], 19, status[3], 20, status[4], 21, flag, 22, entry, -1);
+                }
+            if(!gtk_tree_model_iter_next(source, &sourceiter))
+                 { break; }
+            }
+       }
+
+    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
+    gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_iSortColumn, g_SortType );
+
+    g_iNumRoms = gtk_tree_model_iter_n_children(destination, NULL); 
 }
 
 static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
@@ -532,9 +522,7 @@ int create_filter( void )
     GtkToolItem *toolitem;
     GtkWidget *label;
     GtkWidget *Hbox;
-    GtkWidget *Handle;
 
-    Handle = gtk_handle_box_new();
     Hbox = gtk_hbox_new(FALSE, 0);
     toolitem = gtk_tool_item_new();
     gtk_tool_item_set_expand(toolitem, TRUE);
@@ -562,9 +550,7 @@ int create_filter( void )
     gtk_container_add(GTK_CONTAINER(toolitem), Hbox);
     gtk_toolbar_insert ( GTK_TOOLBAR(filter), toolitem, 0);
 
-    gtk_container_add(GTK_CONTAINER(Handle), filter);
-
-    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), Handle, FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), filter, FALSE, FALSE, 0 );
 }
 
 // play rom menu item
@@ -584,7 +570,7 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
     llist = g_list_first (list);
 
     gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-    gtk_tree_model_get(model, &iter, 5, &entry, -1);
+    gtk_tree_model_get(model, &iter, 22, &entry, -1);
 
     g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (list);
@@ -609,13 +595,13 @@ static void  callback_column_visible(GtkWidget *widget, int column)
     gtk_tree_view_column_set_visible(g_MainWindow.column[column], !visible);
 
     //Control if emptry header column is visibile.
-    gtk_tree_view_column_set_visible(g_MainWindow.column[11], FALSE);
-    for ( i = 0; i < 11; ++i )
+    gtk_tree_view_column_set_visible(g_MainWindow.column[16], FALSE);
+    for ( i = 0; i < 16; ++i )
         {
         if(gtk_tree_view_column_get_visible(GTK_TREE_VIEW_COLUMN(g_MainWindow.column[i])))
             { return; }
         }
-    gtk_tree_view_column_set_visible(g_MainWindow.column[11], TRUE);
+    gtk_tree_view_column_set_visible(g_MainWindow.column[16], TRUE);
 }
 
 static void  callback_header_clicked(GtkWidget *widget, GdkEventButton *event, gpointer column)
@@ -648,10 +634,10 @@ static void callback_romProperties( GtkWidget *widget, gpointer data )
 
         GtkTreeIter iter;
         gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-        gtk_tree_model_get (model, &iter, 5, &entry, -1);
+        gtk_tree_model_get (model, &iter, 22, &entry, -1);
 
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
-        g_list_free (list);
+        //g_list_free (list);
 
         show_romPropDialog( entry );
         }
@@ -665,41 +651,51 @@ static void callback_refreshRomBrowser( GtkWidget *widget, gpointer data )
 
 static void setup_view (GtkWidget *view)
 {
-    gchar *titles[11] = 
+    gchar *titles[16] = 
         {
-        (gchar*)tr("Country"),
+        (gchar*)tr("Country"), 
         (gchar*)tr("Good Name"),
-        (gchar*)tr("Size"),
+        (gchar*)tr("Status"),
         (gchar*)tr("User Comments"),
         (gchar*)tr("File Name"),
+        (gchar*)tr("MD5 Hash"),
+        (gchar*)tr("CRC1"),
+        (gchar*)tr("CRC2"),
+        (gchar*)tr("Internal Name"),
+        (gchar*)tr("Save Type"),
+        (gchar*)tr("Players"),
+        (gchar*)tr("Size"),
         (gchar*)tr("Compression"),
         (gchar*)tr("Image Type"),
         (gchar*)tr("CIC Chip"),
-        (gchar*)tr("MD5 Hash"),
-        (gchar*)tr("Internal Name"),
-        (gchar*)tr("Status"),
+        (gchar*)tr("Rumble"),
         };
 
-    //This needs some major re-oprdering...
-    GtkListStore *store = gtk_list_store_new (18, 
-    G_TYPE_STRING, //Good Name 0
-    G_TYPE_STRING, //Country 1
-    G_TYPE_STRING, //Size 2
+    GtkListStore *store = gtk_list_store_new (23, 
+    G_TYPE_STRING, //Country 0
+    G_TYPE_STRING, //Good Name 1
+    GDK_TYPE_PIXBUF, //NULL for padding... 2
     G_TYPE_STRING, //User Comments 3
     G_TYPE_STRING, //File Name 4
-    G_TYPE_POINTER, //Entry 5
-    GDK_TYPE_PIXBUF, //Flag 6
-    G_TYPE_STRING, //Compression Type 7
-    G_TYPE_STRING, //Image Type 8
-    G_TYPE_STRING, //CIC Chip 9
-    G_TYPE_STRING, //MD5 Hash 10
-    G_TYPE_STRING, //Internal Name 11
-    GDK_TYPE_PIXBUF, //Fix pixbufs for Status stars. 12,13,14,15,16
+    G_TYPE_STRING, //MD5 Hash 5
+    G_TYPE_STRING, //CRC1 6
+    G_TYPE_STRING, //CRC2 7
+    G_TYPE_STRING, //Internal Name 8
+    G_TYPE_STRING, //Save Type 9
+    G_TYPE_STRING, //Players 10
+    G_TYPE_STRING, //Size 11
+    G_TYPE_STRING, //Compression 12
+    G_TYPE_STRING, //Image Type 13
+    G_TYPE_STRING, //CIC Chip 14
+    G_TYPE_STRING, //Rumble 15
+    GDK_TYPE_PIXBUF, //Pixbufs for Status stars. 16,17,18,19,20
     GDK_TYPE_PIXBUF, 
     GDK_TYPE_PIXBUF, 
-    GDK_TYPE_PIXBUF,
     GDK_TYPE_PIXBUF, 
-    GDK_TYPE_PIXBUF, -1); //NULL for padding...
+    GDK_TYPE_PIXBUF,  
+    GDK_TYPE_PIXBUF, //Flag 21
+    G_TYPE_POINTER, //Entry 22
+    -1); 
 
     GtkCellRenderer     *renderer;
     GtkTreeModel        *model;
@@ -712,12 +708,11 @@ static void setup_view (GtkWidget *view)
     column = g_MainWindow.column[0];
     gtk_tree_view_column_set_title(column, titles[0]); 
     gtk_tree_view_column_pack_start(column, renderer, FALSE);
-    gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 6);
+    gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 21);
     g_object_set(renderer, "xpad", 5, NULL);
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(column, renderer, TRUE);
-    gtk_tree_view_column_add_attribute(column, renderer, "text", 1);
-
+    gtk_tree_view_column_add_attribute(column, renderer, "text", 0);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
     gtk_tree_view_column_set_sort_column_id(column, 0);
@@ -725,7 +720,7 @@ static void setup_view (GtkWidget *view)
     gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
 
     renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[1] = gtk_tree_view_column_new_with_attributes (titles[1], renderer, "text", 0, NULL);
+    g_MainWindow.column[1] = gtk_tree_view_column_new_with_attributes (titles[1], renderer, "text", 1, NULL);
     column = g_MainWindow.column[1];
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
@@ -733,112 +728,46 @@ static void setup_view (GtkWidget *view)
     gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 1);
     gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
 
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[2] = gtk_tree_view_column_new_with_attributes (titles[2], renderer, "text", 2, NULL);
+    g_MainWindow.column[2] = gtk_tree_view_column_new();
     column = g_MainWindow.column[2];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 3);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 3);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[3] = gtk_tree_view_column_new_with_attributes (titles[3], renderer, "text", 3, NULL);
-    column = g_MainWindow.column[3];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 4);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 4);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[4] = gtk_tree_view_column_new_with_attributes (titles[4], renderer, "text", 4, NULL);
-    column = g_MainWindow.column[4];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 5);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 5);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[5] = gtk_tree_view_column_new_with_attributes(titles[5], renderer, "text", 7, NULL);
-    column = g_MainWindow.column[5];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 7);
-    gtk_tree_view_column_set_visible(column, FALSE);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 7);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[6] = gtk_tree_view_column_new_with_attributes (titles[6], renderer, "text", 8, NULL);
-    column = g_MainWindow.column[6];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 8);
-    gtk_tree_view_column_set_visible(column, FALSE);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 8);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[7] = gtk_tree_view_column_new_with_attributes (titles[7], renderer, "text", 9, NULL);
-    column = g_MainWindow.column[7];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 9);
-    gtk_tree_view_column_set_visible(column, FALSE);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 9);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[8] = gtk_tree_view_column_new_with_attributes (titles[8], renderer, "text", 10, NULL);
-    column = g_MainWindow.column[8];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 10);
-    gtk_tree_view_column_set_visible(column, FALSE);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 10);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[9] = gtk_tree_view_column_new_with_attributes (titles[9], renderer, "text", 11, NULL);
-    column = g_MainWindow.column[9];
-    gtk_tree_view_column_set_resizable (column, TRUE);
-    gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 11);
-    gtk_tree_view_column_set_visible(column, FALSE);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 11);
-    gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
-
-    g_MainWindow.column[10] = gtk_tree_view_column_new();
-    column = g_MainWindow.column[10];
-    gtk_tree_view_column_set_title(column, titles[10]); 
+    gtk_tree_view_column_set_title(column, titles[2]); 
     renderer = gtk_cell_renderer_pixbuf_new ();
     g_object_set(renderer, "xpad", 2, NULL);
     gtk_tree_view_column_pack_start(column, renderer, FALSE);
-    gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 17);
-    for ( i=0; i<5; ++i )
+    gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 2);
+    for ( i = 0; i < 5; ++i )
         {
         renderer = gtk_cell_renderer_pixbuf_new ();
         gtk_tree_view_column_pack_start(column, renderer, FALSE);
-        gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 12+i);
+        gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 16+i);
         }
     renderer = gtk_cell_renderer_pixbuf_new ();
     g_object_set(renderer, "xpad", 2, NULL);
     gtk_tree_view_column_pack_start(column, renderer, FALSE);
-    gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 17);
+    gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 2);
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
-    gtk_tree_view_column_set_sort_column_id(column, 1);
-    gtk_tree_view_column_set_visible(column, FALSE);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 12);
+    gtk_tree_view_column_set_sort_column_id(column, 2);
+    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 2);
     gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
 
+    for ( i = 3; i < 16; ++i )
+        {
+        renderer = gtk_cell_renderer_text_new ();
+        g_MainWindow.column[i] = gtk_tree_view_column_new_with_attributes (titles[i], renderer, "text", i, NULL);
+        column = g_MainWindow.column[i];
+        gtk_tree_view_column_set_resizable (column, TRUE);
+        gtk_tree_view_column_set_reorderable (column, TRUE);
+        gtk_tree_view_column_set_sort_column_id(column, i);
+        gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, i);
+        gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
+        }
+
     renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[11] = gtk_tree_view_column_new();
-    column = g_MainWindow.column[11];
+    g_MainWindow.column[16] = gtk_tree_view_column_new();
+    column = g_MainWindow.column[16];
     gtk_tree_view_column_set_visible(column, FALSE);
-    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 13);
+    gtk_tree_view_insert_column(GTK_TREE_VIEW (view), column, 2);
     gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
 
     gtk_tree_view_set_model (GTK_TREE_VIEW (view), model );
@@ -847,12 +776,17 @@ static void setup_view (GtkWidget *view)
     g_MainWindow.romHeaderMenu = gtk_menu_new();
 
     GtkWidget *item;
-    for (i = 0; i < 11; ++i)
+    for (i = 0; i < 16; ++i)
         {
         item = gtk_check_menu_item_new_with_label(titles[i]); 
         //This needs to be integrated with config system.
         if(i<5) 
-             { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), TRUE); }
+             {
+             gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), TRUE); 
+             gtk_tree_view_column_set_visible(g_MainWindow.column[i], TRUE);
+             }
+        else
+             { gtk_tree_view_column_set_visible(g_MainWindow.column[i], FALSE); }
         gtk_menu_append(GTK_MENU(g_MainWindow.romHeaderMenu), item);
         gtk_widget_show(item);
         g_signal_connect(item, "activate", G_CALLBACK(callback_column_visible), GUINT_TO_POINTER(i));

@@ -93,6 +93,16 @@ enum
     CIC_NUS_6106
 };
 
+enum
+{
+    EEPROM_4KB,
+    EEPROM_16KB,
+    SRAM,
+    FLASH_RAM,
+    CONTROLLER_PACK,
+    NONE
+};
+
 
 #endif
 
