@@ -27,6 +27,8 @@ void fillrombrowser();
 
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 void countrycodestring(unsigned short int countrycode, char *string);
+void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag);
+char* filefrompath(const char *string);
 
 extern GList *g_RomList;
 

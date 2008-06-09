@@ -1424,6 +1424,28 @@ static int create_statusBar( void )
 // main window
 static int create_mainWindow( void )
 {
+
+ gchar *titles[16] = 
+    {
+    (gchar*)tr("Country"), 
+    (gchar*)tr("Good Name"),
+    (gchar*)tr("Status"),
+    (gchar*)tr("User Comments"),
+    (gchar*)tr("File Name"),
+    (gchar*)tr("MD5 Hash"),
+    (gchar*)tr("CRC1"),
+    (gchar*)tr("CRC2"),
+    (gchar*)tr("Internal Name"),
+    (gchar*)tr("Save Type"),
+    (gchar*)tr("Players"),
+    (gchar*)tr("Size"),
+    (gchar*)tr("Compression"),
+    (gchar*)tr("Image Type"),
+    (gchar*)tr("CIC Chip"),
+    (gchar*)tr("Rumble"),
+    };
+
+
     int width, height;
 
     width = config_get_number( "MainWindow Width", 600 );

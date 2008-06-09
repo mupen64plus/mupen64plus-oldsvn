@@ -43,14 +43,13 @@ static void setup_view (GtkWidget *view);
 /*********************************************************************************************************
 * globals
 */
-static GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 static GtkWidget *playRomItem;
 static GtkWidget *romPropertiesItem;
 static GtkWidget *refreshRomBrowserItem;
-static int g_iNumRoms, g_iSortColumn = 5; // sort column
+static int g_iNumRoms, g_iSortColumn = 1; // sort column
 static GtkSortType g_SortType = GTK_SORT_ASCENDING; // sort type (ascending/descending)
 
-static void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
+void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
 {
     switch(countrycode)
     {
@@ -237,10 +236,10 @@ void rombrowser_refresh( void )
     int i;
 
     country = (char*)calloc(32,sizeof(char));
-    md5hash = (char*)calloc(32,sizeof(char));
-    crc1 = (char*)calloc(8,sizeof(char));
-    crc2 = (char*)calloc(8,sizeof(char));
-    savetype = (char*)calloc(16,sizeof(char));    
+    md5hash = (char*)calloc(33,sizeof(char));
+    crc1 = (char*)calloc(9,sizeof(char));
+    crc2 = (char*)calloc(9,sizeof(char));
+    savetype = (char*)calloc(16,sizeof(char));
     players = (char*)calloc(16,sizeof(char));
     size = (char*)calloc(16,sizeof(char));
     compressiontype = (char*)calloc(16,sizeof(char));
@@ -283,13 +282,13 @@ void rombrowser_refresh( void )
             sprintf(crc1, "%08X", entry->crc1);
             sprintf(crc2, "%08X", entry->crc2);
             internalname=entry->internalname;
+            savestring(entry->inientry->savetype, savetype);
+            playersstring(entry->inientry->players, players); 
             sprintf(size, "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
             compressionstring(entry->compressiontype, compressiontype);
             imagestring(entry->imagetype, imagetype);
             cicstring(entry->cic, cicchip);
             rumblestring(entry->inientry->rumble, rumble);
-            playersstring(entry->inientry->players, players);
-            savestring(entry->inientry->savetype, savetype);
 
             //Add entries to TreeModel
             model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
@@ -804,7 +803,6 @@ int create_romBrowser( void )
     GtkWidget *separatorItem;
 
     GtkIconTheme *theme = gtk_icon_theme_get_default();
-
     if(gtk_icon_theme_has_icon(theme, "emblem-new"))
         { star = gtk_icon_theme_load_icon(theme, "emblem-new", 16, 0, NULL); }
     else
