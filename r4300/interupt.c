@@ -396,6 +396,7 @@ void gen_interupt()
                 SDL_GL_SwapBuffers();
                 while(rompause)
                 {
+		    if (netClientIsConnected()) netClientProcessMessages();
                     struct timespec ts;
                     ts.tv_sec = 0;
                     ts.tv_nsec = 10000000;

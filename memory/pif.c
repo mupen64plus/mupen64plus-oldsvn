@@ -44,6 +44,8 @@
 #include "../main/plugin.h"
 #include "../main/guifuncs.h"
 #include "../main/vcr.h"
+#include "../main/network.h"
+#include "../opengl/osd.h"
 
 static unsigned char eeprom[0x800];
 static unsigned char mempack[4][0x8000];
@@ -196,6 +198,7 @@ unsigned char mempack_crc(unsigned char *data)
 
 void internal_ReadController(int Control, BYTE *Command)
 {
+   static BUTTONS KeyCache[4];
    switch (Command[2])
      {
       case 1:
@@ -207,12 +210,24 @@ void internal_ReadController(int Control, BYTE *Command)
 #else
          getKeys(Control, &Keys);
 #endif
-         *((unsigned int *)(Command + 3)) = Keys.Value;
+	 // Update the server if we're connected to one and if the button state has actually changed
+	if (netClientIsConnected()) {
+		if (Keys.Value != KeyCache[Control].Value) {
+			netSendButtonState(Control, Keys.Value);
+			KeyCache[Control].Value = Keys.Value;
+		}
+		*((unsigned int *)(Command + 3)) = netGetKeys(Control);
+	}
+	else {
+		*((unsigned int *)(Command + 3)) = Keys.Value;
+	}
+
 #ifdef COMPARE_CORE
          check_input_sync(Command+3);
 #endif
       }
     break;
+	// TODO: IMPORTANT! Make sure save packs are syncrhonized over network!
       case 2: // read controller pack
     if (Controls[Control].Present)
       {

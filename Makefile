@@ -71,6 +71,7 @@ OBJ_CORE = \
 	main/savestates.o \
 	main/unzip.o \
 	main/volume.o \
+	main/network.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
@@ -279,7 +280,7 @@ targets:
 all: $(ALL)
 
 mupen64plus: $(OBJECTS)
-	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
+	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -lSDL_net -o $@
 	$(STRIP) $@
 
 mupen64plus_dbg: $(OBJECTS)

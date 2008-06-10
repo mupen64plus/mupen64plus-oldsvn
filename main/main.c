@@ -67,6 +67,7 @@
 #include "cheat.h"
 #include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
+#include "network.h"
 
 #ifdef DBG
 #include <glib.h>
@@ -267,7 +268,9 @@ void new_vi(void)
 
     start_section(IDLE_SECTION);
     VI_Counter++;
-    
+
+    netMain();
+
 #ifdef DBG
     if(debugger_mode) debugger_frontend_vi();
 #endif
@@ -445,15 +448,17 @@ void startEmulation(void)
         alert_message(tr("No RSP plugin specified."));
         return;
     }
-
+    
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
     {
+	netSetSyncCounter(0); // Reset network synchro counter
         emulationThread(NULL);
     }
     else if(!g_EmulationThread)
     {
         // spawn emulation thread
+	netSetSyncCounter(0); // Reset network synchro counter
         if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
         {
             g_EmulationThread = 0;
@@ -515,7 +520,7 @@ int pauseContinueEmulation(void)
         msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused"));
         osd_message_set_static(msg);
     }
-    
+
     rompause = !rompause;
     return rompause;
 }
@@ -544,6 +549,14 @@ static int sdl_event_filter( const SDL_Event *event )
 
                 case SDLK_F7:
                     savestates_job |= LOADSTATE;
+                    break;
+
+                case SDLK_F9:
+			if (netServerIsActive()) {
+				NetMessage startmsg;
+				startmsg.type = NETMSG_STARTEMU;
+				serverBroadcastMessage(&startmsg);
+			}
                     break;
 
                 case SDLK_ESCAPE:
@@ -809,9 +822,16 @@ static void * emulationThread( void *_arg )
 #endif
     // load cheats for the current rom
     cheat_load_current_rom();
-
-    osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
+    if (netClientIsConnected()) {
+	osd_new_message(OSD_MIDDLE_CENTER, "Press F9 on server to begin...");
+	rompause = 1;
+    }
+    else {
+	osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
+	rompause = 0;
+    }
     go();   /* core func */
+
 
 #ifdef WITH_LIRC
     lircStop();
@@ -1332,6 +1352,9 @@ int main(int argc, char *argv[])
 
     // init multi-language support
     tr_init();
+
+    // initialize network support
+    netInitialize();
 
     // look for plugins in the install dir and set plugin config dir
     plugin_scan_installdir();
