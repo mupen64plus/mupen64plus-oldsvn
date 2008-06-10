@@ -825,7 +825,8 @@ static void * emulationThread( void *_arg )
     netInitialize();
 
     if (netClientIsConnected()) {
-	osd_new_message(OSD_MIDDLE_CENTER, "Press F9 on server to begin...");
+	if (netServerIsActive()) osd_new_message(OSD_MIDDLE_CENTER, "Press F9 to begin");
+	else osd_new_message(OSD_MIDDLE_CENTER, "Waiting on server to begin");
 	rompause = 1;
     }
     else {
