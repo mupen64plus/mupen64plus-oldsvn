@@ -28,6 +28,12 @@
 
 	Bob
 
+	KNOWN BUGS THAT NEED FIXING:
+
+	When playing multiplayer, all of the controllers must be enabled in the plugin
+	if input is being received over the net.  Haven't found an easy way of fixing
+	this yet.
+
    =======================================================================================
 */ 
 
@@ -60,12 +66,12 @@ static pthread_t        serverThread;
 static unsigned char	bServerIsActive = 0;	// Is the server active?
 static TCPsocket	serverSocket;		// Socket descriptor for server (if this is one)
 static SDLNet_SocketSet	serverSocketSet;	// Set of all connected clients, along with the server socket descriptor
-static CONTROL		ControlCache[4];
+
 
 
 
 static TCPsocket	Client[MAX_CLIENTS];
-
+static char PlayerName[20][MAX_CLIENTS] = {"Player 1", "Player 2", "Player 3", "Player 4"};
 
 
 
@@ -94,9 +100,15 @@ void netInitialize() {
   if (SDLNet_Init() < 0) fprintf(netLog, "Failure to initialize SDLNet!\n");
 
   // If server started locally, always connect!
-
   if (start_server) serverStart(SERVER_PORT);
   clientConnect(hostname, hostport);
+  netVISyncCounter = 0;
+}
+
+void netShutdown() {
+  fclose(netLog);
+  clientDisconnect();
+  serverStop();
 }
 
 /* =======================================================================================
@@ -200,9 +212,16 @@ int serverBroadcastMessage(NetMessage *msg) {
 }
 
 void serverKillClient(int n) {
+	NetMessage msg;
 	SDLNet_TCP_Close(Client[n]);
 	SDLNet_TCP_DelSocket(serverSocketSet, Client[n]);
+	Client[n] = 0;
 	fprintf(netLog, "Client %d disconnected.\n", n);
+
+	msg.type = NETMSG_PLAYERQUIT;
+	msg.data.joinRequest.controller = n;
+	serverBroadcastMessage(&msg);
+	fprintf(netLog, "Broadcast player quit.\n");
 }
 
 void serverAcceptConnection() {
@@ -211,7 +230,6 @@ void serverAcceptConnection() {
 
 	SDLNet_CheckSockets(serverSocketSet, 0);
 	if (SDLNet_SocketReady(serverSocket)) {
-	  fprintf(netLog, "Attempting to accept new connection.\n");
 	  if (newClient = SDLNet_TCP_Accept(serverSocket)) {
 	    for (n = 0; n < MAX_CLIENTS; n++)
 	      if (!Client[n]) {
@@ -240,6 +258,10 @@ void serverProcessMessages() {
 								msg.data.buttonEvent.controller = n;
 								serverBroadcastMessage(&msg);
 							}
+						break;
+						case NETMSG_SETNAME:
+							msg.data.joinRequest.controller = n;
+							serverBroadcastMessage(&msg);
 						break;
 					}
 				} else {
@@ -272,7 +294,7 @@ int clientConnect(char *server, int port) {
 	return bClientIsConnected;
 }
 
-void netClientDisconnect() {
+void clientDisconnect() {
 	fprintf(netLog, "netClientDisconnect() called.\n");
 	SDLNet_FreeSocketSet(clientSocketSet);
 	SDLNet_TCP_Close(clientSocket);
@@ -291,14 +313,15 @@ int netClientSendMessage(NetMessage *msg) {
   if (msg) {
     if (netClientIsConnected()) {
 	if (SDLNet_TCP_Send(clientSocket, msg, sizeof(NetMessage)) != sizeof(NetMessage))
-	  netClientDisconnect();
+	  clientDisconnect();
     }
   }
 }
 
 void netClientProcessMessages() {
 	NetMessage incomingMessage;
-	int n;
+	char announceString[64];
+	int n, pn;
 
 	if ((n = netClientRecvMessage(&incomingMessage)) == sizeof(NetMessage)) {
 		switch (incomingMessage.type) {
@@ -313,6 +336,18 @@ void netClientProcessMessages() {
 			case NETMSG_STARTEMU:
 				rompause = 0;
 				fprintf(netLog, "Client STARTEMU message received.  Lets go!\n");
+			break;
+			case NETMSG_PLAYERQUIT:
+				pn = incomingMessage.data.joinRequest.controller;
+				fprintf(netLog, "Player quit announcement %d\n", pn);
+				sprintf(announceString, "%s has disconnected.", PlayerName[pn]);
+				osd_new_message(OSD_BOTTOM_LEFT, tr(announceString));
+			break;
+			case NETMSG_SETNAME:
+				pn = incomingMessage.data.joinRequest.controller;
+				sprintf(announceString, "%s has changed their name to %s.", PlayerName[pn], 						incomingMessage.data.joinRequest.nickname);
+				strcpy(PlayerName[pn], incomingMessage.data.joinRequest.nickname);
+				osd_new_message(OSD_BOTTOM_LEFT, tr(announceString));
 			break;
 			default:
 				fprintf(netLog, "Client message type error.  Dropping packet.\n");

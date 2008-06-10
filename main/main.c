@@ -822,15 +822,16 @@ static void * emulationThread( void *_arg )
 #endif
     // load cheats for the current rom
     cheat_load_current_rom();
+    netInitialize();
     if (netClientIsConnected()) {
 	osd_new_message(OSD_MIDDLE_CENTER, "Press F9 on server to begin...");
 	rompause = 1;
     }
     else {
-	osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
+	osd_new_message(OSD_MIDDLE_CENTER, "Failed to connect to server. Check netlog.");
 	rompause = 0;
     }
-    go();   /* core func */
+    go();
 
 
 #ifdef WITH_LIRC

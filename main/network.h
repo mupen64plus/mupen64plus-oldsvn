@@ -13,6 +13,10 @@
 #define		NETMSG_ALLOW		202	// Accept request to join a game
 #define		NETMSG_DENY		203	// Reject request to join a game
 
+#define		NETMSG_NEWPLAYER	204	// New player announcement
+#define		NETMSG_PLAYERQUIT	205	// Player disconnect
+#define		NETMSG_SETNAME		206
+
 typedef struct TNetButtonEvent {
 	unsigned char		controller;	// applicable controller
 	DWORD			value;		// new key state value to assign (BUTTONS.Value)
@@ -34,6 +38,7 @@ typedef struct TNetMessage {
 	unsigned short	id;
 	unsigned char	type;
 	union {
+		char rawData[32];
 		NetButtonEvent buttonEvent;
 		NetJoinRequest joinRequest;
 		NetServerInfo  serverInfo;
@@ -53,7 +58,9 @@ void netSendButtonState(int control, DWORD value);
 int netClientRecvMessage(NetMessage *msg);
 int netClientSendMessage(NetMessage *msg);
 void netClientProcessMessages();
+
 int clientConnect(char *server, int port);
+void clientDisconnect();
 void netProcessMessages();
 
 int serverStart(unsigned short port);
