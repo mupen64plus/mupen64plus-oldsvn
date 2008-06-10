@@ -328,8 +328,8 @@ int rom_read(const char *filename)
    printf("Country: %s\n", buffer);
    printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
-    //Check the ini via md5... This needs rework for RCS.
-    if((entry=ini_search_by_md5(digest))==NULL)
+
+    if((entry=ini_search_by_md5(digest))==&empty_entry)
         {
         char mycrc[1024];
         printf("%lx\n", (long)entry);
@@ -353,8 +353,8 @@ int rom_read(const char *filename)
                 }
             strcpy(ROM_SETTINGS.goodname, entry->goodname);
             strcat(ROM_SETTINGS.goodname, " (bad dump)");
-            //This needs updating for rcs...
-            //ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
+            if(entry->savetype==EEPROM_16KB)
+                { ROM_SETTINGS.eeprom_16kb = 1; }
             return 0;
             }
         }
@@ -388,9 +388,8 @@ int rom_read(const char *filename)
         }
     strcpy(ROM_SETTINGS.goodname, entry->goodname);
 
-    if(strcmp(entry->refmd5, ""))
-        { entry = ini_search_by_md5(entry->refmd5); }
-    //ROM_SETTINGS.eeprom_16kb = entry->eeprom16kb;
+    if(entry->savetype==EEPROM_16KB)
+        { ROM_SETTINGS.eeprom_16kb = 1; }
     printf("EEPROM type: %d\n", ROM_SETTINGS.eeprom_16kb);
     return 0;
 }

@@ -521,8 +521,6 @@ typedef struct
 
 _romdatabase g_romdatabase;
 
-romdatabase_entry empty_entry;
-
 static int split_property(char *string)
 {
     int counter = 0;

@@ -592,15 +592,6 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
         { startEmulation(); }
 }
 
-
-
-
-
-
-
-
-
-
 static void  callback_column_visible(GtkWidget *widget, int column)
 {
     int i;

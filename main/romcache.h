@@ -39,6 +39,8 @@ typedef struct
    unsigned short rumble;
 } romdatabase_entry;
 
+romdatabase_entry empty_entry;
+
 //Needs to be rearranged.
 typedef struct _cache_entry
 {
