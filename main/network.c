@@ -182,12 +182,21 @@ int serverRecvMessage(TCPsocket client, NetMessage *msg) {
 
 
 int serverSendMessage(TCPsocket client, NetMessage *msg) {
-  SDLNet_TCP_Send(client, msg, sizeof(NetMessage));
+  return SDLNet_TCP_Send(client, msg, sizeof(NetMessage));
 }
 
 int serverBroadcastMessage(NetMessage *msg) {
   int n;
-  for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) serverSendMessage(Client[n], msg);
+  for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) {
+	if (serverSendMessage(Client[n], msg) != sizeof(NetMessage)) {
+		serverKillClient(n);
+	}
+}
+
+void serverKillClient(int n) {
+	SDLNet_TCP_Disconnect(Client[n]);
+	SDLNet_TCP_RemoveSocket(serverSocketSet, Client[n]);
+	fprintf(netLog, "Client %d disconnected.\n", n);
 }
 
 void serverAcceptConnection() {

@@ -66,6 +66,7 @@ int serverStart(unsigned short port);
 void serverStop();
 void serverProcessMessages();
 void serverAcceptConnection();
+void serverKillClient(int n);
 
 void netAddButtonEvent(int controller, DWORD value, unsigned short timer);
 int netGetNextButtonEvent(int *controller, DWORD *value, unsigned short *timer);
