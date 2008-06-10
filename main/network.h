@@ -59,11 +59,11 @@ void netSendButtonState(int control, DWORD value);
 int netClientRecvMessage(NetMessage *msg);
 int netClientSendMessage(NetMessage *msg);
 void netClientProcessMessages();
-int netIniClient(char *server, int port);
+int clientConnect(char *server, int port);
 void netProcessMessages();
 
-int serverInitialize(unsigned short port);
-void serverShutdown();
+int serverStart(unsigned short port);
+void serverStop();
 void serverProcessMessages();
 void serverAcceptConnection();
 

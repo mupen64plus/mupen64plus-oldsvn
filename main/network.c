@@ -90,8 +90,8 @@ void netInitialize() {
 
   // If server started locally, always connect!
 
-  if (start_server) serverInitialize(SERVER_PORT);
-  clientInitialize(hostname, hostport);
+  if (start_server) serverStart(SERVER_PORT);
+  clientConnect(hostname, hostport);
 }
 
 /* =======================================================================================
@@ -143,9 +143,9 @@ static void *serverLoop(void *_arg) {
   fprintf(netLog, "Exiting serverLoop() thread.\n");
 }
 
-void serverShutdown() {
+void serverStop() {
 	int n;
-	fprintf(netLog, "serverShutdown() called.\n");
+	fprintf(netLog, "serverStop() called.\n");
 	pthread_kill(serverThread);
 	SDLNet_FreeSocketSet(serverSocketSet);
 	for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) SDLNet_TCP_Close(Client[n]);
@@ -153,11 +153,11 @@ void serverShutdown() {
 	bServerIsActive = 0;
 }
 
-int serverInitialize(unsigned short port) {
+int serverStart(unsigned short port) {
         IPaddress serverAddr;
 
-	fprintf(netLog, "serverInitialize() called.\n");
-	if (netServerIsActive()) serverShutdown();
+	fprintf(netLog, "serverStart() called.\n");
+	if (netServerIsActive()) serverStop();
 
 	serverSocketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
 	SDLNet_ResolveHost(&serverAddr, NULL, port);
@@ -240,10 +240,10 @@ void serverProcessMessages() {
    =======================================================================================
 */ 
 
-int clientInitialize(char *server, int port) {
+int clientConnect(char *server, int port) {
 	IPaddress serverAddr;
 	
-	fprintf(netLog, "clientInitialize() called.\n");
+	fprintf(netLog, "clientConnect() called.\n");
 	SDLNet_ResolveHost(&serverAddr, server, port);
 	if (clientSocket = SDLNet_TCP_Open(&serverAddr)) {
 		clientSocketSet = SDLNet_AllocSocketSet(1);
@@ -284,9 +284,12 @@ void netClientProcessMessages() {
 	if (netClientRecvMessage(&incomingMessage) == sizeof(NetMessage)) {
 		switch (incomingMessage.type) {
 			case NETMSG_BUTTON:
-				netAddButtonEvent(incomingMessage.data.buttonEvent.controller,
+				if (incomingMessage.data.buttonEvent.timer > netGetSyncCounter()) {
+					netAddButtonEvent(incomingMessage.data.buttonEvent.controller,
 						  incomingMessage.data.buttonEvent.value,
 						  incomingMessage.data.buttonEvent.timer);
+				}
+				else fprintf(netLog, "Desync Warning!: button event received for %d, current %d\n", 						incomingMessage.data.buttonEvent.timer, netGetSyncCounter());
 			break;
 			case NETMSG_STARTEMU:
 				rompause = 0;
@@ -363,7 +366,14 @@ void netPopButtonEvent() {
 // netGetNextButtonEvent() : Retrieve information about the button event in the front of the queue.
 int netGetNextButtonEvent(int *controller, DWORD *value, unsigned short *timer) {
   int retValue = 1;
+  NetButtonEvent *currButtonEvent = netButtonEventQueue;
+
   if (netButtonEventQueue) {
+	while (currButtonEvent->timer < netGetSyncCounter()) {
+		netPopButtonEvent();
+		fprintf(netLog, "Desync Warning!: Button queue out of date (%d curr %d)! Popping next.\n",
+			currButtonEvent->timer, netGetSyncCounter());
+	}
 	*controller = netButtonEventQueue->controller;
 	*value = netButtonEventQueue->value;
 	*timer = netButtonEventQueue->timer;
