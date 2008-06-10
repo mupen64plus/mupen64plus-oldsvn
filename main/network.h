@@ -1,9 +1,3 @@
-#include "main.h"
-#include "../r4300/r4300.h"
-#include "plugin.h"
-#include "SDL_net.h"
-#include "../opengl/osd.h"
-
 #define netDelay		7  // More than enough to compensate for latency in connections with sub 100ms ping
 
 #define SERVER_PORT		7000

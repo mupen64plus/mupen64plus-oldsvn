@@ -202,7 +202,7 @@ void internal_ReadController(int Control, BYTE *Command)
    switch (Command[2])
      {
       case 1:
-    if (Controls[Control].Present)
+    if ((Controls[Control].Present) || (netClientIsConnected()))
       {
          BUTTONS Keys;
 #ifdef VCR_SUPPORT

@@ -267,8 +267,6 @@ int clientConnect(char *server, int port) {
 		clientSocketSet = SDLNet_AllocSocketSet(1);
 		SDLNet_TCP_AddSocket(clientSocketSet, clientSocket);
 		bClientIsConnected = 1;
-		memcpy(&ControlCache, &Controls, sizeof(Controls)); // Restore when netplay is over
-                for (n = 0; n < 4; n++) Controls[n].Present = TRUE; // Enable all controllers
 		fprintf(netLog, "Client successfully connected to %s:%d.\n", server, port);
 	} else fprintf(netLog, "Client failed to connected to %s:%d.\n", server, port);
 	return bClientIsConnected;
@@ -278,7 +276,6 @@ void netClientDisconnect() {
 	fprintf(netLog, "netClientDisconnect() called.\n");
 	SDLNet_FreeSocketSet(clientSocketSet);
 	SDLNet_TCP_Close(clientSocket);
-	memcpy(&Controls, &ControlCache, sizeof(Controls)); // Restore previous controller states
 	bClientIsConnected = 0;
 }
 
