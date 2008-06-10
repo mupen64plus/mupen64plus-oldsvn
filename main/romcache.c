@@ -48,8 +48,11 @@
 //This if for updaterombrowser(), which needs the same type of abstraction as info_message().
 #include "gui_gtk/rombrowser.h"
 
+#define DEFAULT 16
 #define RCS_VERSION "RCS1.0"
 
+void romdatabase_open();
+void romdatabase_close();
 void *rom_cache_system(void *_arg);
 char cache_filename[PATH_MAX];
 
@@ -86,7 +89,6 @@ void * rom_cache_system( void *_arg )
     int rebuild_cache = 0;
     int rcs_initialized = 0;
     char *buffer;
-    int free_buffer = 0;
     struct sched_param param;
 
     // Setup job parser
@@ -99,7 +101,7 @@ void * rom_cache_system( void *_arg )
             {
                 g_RCSTask = RCS_BUSY;
                 rcs_initialized = 1;
-                ini_openFile();
+                romdatabase_open();
                 buffer = (char*)config_get_string("RomCacheFile", NULL);
                 if(buffer==NULL)
                     {
@@ -107,12 +109,9 @@ void * rom_cache_system( void *_arg )
                     buffer = (char*)malloc(PATH_MAX*sizeof(char));
                     snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
                     config_put_string("RomCacheFile", buffer);
-                    free_buffer = 1;
                     }
 
                 snprintf(cache_filename, PATH_MAX, "%s", buffer);
-                if(free_buffer)
-                    { free(buffer); }
 
                 if(load_initial_cache())
                 {
@@ -133,6 +132,13 @@ void * rom_cache_system( void *_arg )
                     g_RCSTask = RCS_SLEEP; 
             }
             break;
+            case RCS_WRITE_CACHE:
+                g_RCSTask = RCS_BUSY;
+                remove(cache_filename);
+                write_cache_file();
+                if (g_RCSTask == RCS_BUSY)
+                    { g_RCSTask = RCS_SLEEP; }
+                break;
             case RCS_RESCAN:
             {
                 g_RCSTask = RCS_BUSY;
@@ -226,7 +232,6 @@ int rebuild_cache_file()
 
 static void scan_dir( const char *directoryname )
 {
-    static short failures = 0;
     int i;
     char filename[PATH_MAX];
     char fullpath[PATH_MAX];
@@ -237,7 +242,7 @@ static void scan_dir( const char *directoryname )
     struct stat filestatus;
 
     cache_entry *entry;
-    int found = 0;
+    int found;
 
     directory = opendir(directoryname);
     if(!directory)
@@ -254,7 +259,7 @@ static void scan_dir( const char *directoryname )
 
         //Use real path (maybe it's a link)
         if(realpath(filename,fullpath))
-            { strncpy(fullpath,filename,PATH_MAX); }
+            { strncpy(filename,fullpath,PATH_MAX); }
 
         //If we can't get information, move to next file.
         if(stat(fullpath,&filestatus)==-1)
@@ -286,6 +291,7 @@ static void scan_dir( const char *directoryname )
         if(!romextensions[i])
             { continue; }
 
+        found = 0;
         //Found controls whether its found in the cache.
         if(romcache.length!=0)
             {
@@ -301,8 +307,6 @@ static void scan_dir( const char *directoryname )
                }
             while (entry!=NULL);
             }
-        else
-            { found = 0; }
 
         entry = (cache_entry*)calloc(1,sizeof(cache_entry));
         if(entry==NULL)
@@ -313,7 +317,7 @@ static void scan_dir( const char *directoryname )
 
         if(found==0)
             {
-            strcpy(entry->filename,filename);
+            strncpy(entry->filename,filename,PATH_MAX);
 
             unsigned char* localrom;
 
@@ -417,7 +421,7 @@ static void scan_dir( const char *directoryname )
 
 int load_initial_cache()
 {
-    int i, j;
+    int counter;
     char header[6];
     cache_entry *entry, *entrynext;
     struct stat filestatus;
@@ -437,7 +441,7 @@ int load_initial_cache()
         }
 
     gzread(gzfile, &romcache.length, sizeof(unsigned int));
-    for ( i = 0; i < romcache.length; ++i )
+    for ( counter = 0; counter < romcache.length; ++counter )
         { 
         entry = (cache_entry*)calloc(1,sizeof(cache_entry));
 
@@ -446,7 +450,7 @@ int load_initial_cache()
             fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
             return 0;
             }
-//Add CIC chip!!!
+
         gzread(gzfile, entry->filename, PATH_MAX*sizeof(char));
         gzread(gzfile, entry->md5, 16*sizeof(md5_byte_t));
         gzread(gzfile, &entry->timestamp, sizeof(time_t));
@@ -466,6 +470,8 @@ int load_initial_cache()
         if(stat(entry->filename,&filestatus)==-1)
             {
             free(entry);
+            --counter;
+            --romcache.length;
             continue; 
             }
 
@@ -476,7 +482,7 @@ int load_initial_cache()
             //Actually add rom to cache.
             entry->inientry = ini_search_by_md5(entry->md5);
 
-            if(i==0)
+            if(counter==0)
                 {
                 romcache.top = entry; 
                 romcache.last = entry; 
@@ -497,10 +503,9 @@ int load_initial_cache()
     return 1;
 }
 
-
 typedef struct _romdatabase_search
 {
-    mupenEntry entry;
+    romdatabase_entry entry;
     struct _romdatabase_search* next_entry;
     struct _romdatabase_search* next_crc;
     struct _romdatabase_search* next_md5;
@@ -514,37 +519,33 @@ typedef struct
     romdatabase_search* list;
 } _romdatabase;
 
-static _romdatabase romdatabase;
+_romdatabase g_romdatabase;
 
-typedef mupenEntry romdatabase_entry;
+romdatabase_entry empty_entry;
 
-romdatabase_entry emptyEntry;
-
-static int split_property(char *s)
+static int split_property(char *string)
 {
-    int i = 0;
-    while(s[i] != '=' && s[i] != 0) i++;
-    if (s[i] == 0) return -1;
-    s[i] = 0;
-    return i;
+    int counter = 0;
+    while(string[counter] != '=' && string[counter] != '\0')
+        { ++counter; }
+    if(string[counter]=='\0')
+        { return -1; }
+    string[counter] = '\0';
+    return counter;
 }
 
-void ini_openFile()
+void romdatabase_open()
 {
-    static short first = 0;
     gzFile gzfile;
-    char buf[256];
-    int j,i=0;
-    romdatabase_search *cur = NULL;
-    int free_buffer = 0;
+    char buffer[256];
+    romdatabase_search *search = NULL;
+    romdatabase_entry *entry = NULL;
 
-    int length;
-    int counter;
-    char temp[3];
-    temp[2] = '\0';
+    int stringlength, namelength, index, counter, value;
+    char hashtemp[3];
+    hashtemp[2] = '\0';
 
-
-    if(romdatabase.comment!=NULL)
+    if(g_romdatabase.comment!=NULL)
         { return; }
 
     //Query config system and open romdatabase.
@@ -555,13 +556,10 @@ void ini_openFile()
         pathname = (char*)malloc(PATH_MAX*sizeof(char));
         snprintf(pathname, PATH_MAX, "%s%s", get_configpath(), "mupen64plus.ini");
         config_put_string("RomDatabaseFile", pathname);
-        free_buffer = 1;
         }
 
     //printf("Database file: %s \n", pathname);
     gzfile = gzopen(pathname, "rb");
-    if(free_buffer)
-        { free(pathname); }
 
     if(gzfile==NULL)
         {
@@ -573,161 +571,169 @@ void ini_openFile()
     //to signal we have a database.
     do
         {
-        gzgets(gzfile, buf, 255);
-        if(buf[0]!='[')
+        gzgets(gzfile, buffer, 255);
+        if(buffer[0]!='[')
             {
-            i+= strlen(buf);
-            if(romdatabase.comment==NULL) 
+            stringlength+= strlen(buffer);
+            if(g_romdatabase.comment==NULL) 
                 {
-                romdatabase.comment = (char*)malloc(i+1);
-                strcpy(romdatabase.comment, buf);
+                g_romdatabase.comment = (char*)malloc(stringlength+1);
+                strcpy(g_romdatabase.comment, buffer);
                 }
             else
                 {
-                romdatabase.comment = (char*)realloc(romdatabase.comment, i+1);
-                strcat(romdatabase.comment, buf);
+                g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, stringlength+1);
+                strcat(g_romdatabase.comment, buffer);
                 }
             }
         }
-    while (buf[0] != '[' && !gzeof(gzfile));
+    while (buffer[0] != '[' && !gzeof(gzfile));
 
     //Clear premade indices.
-    for ( i = 0; i < 255; ++i )
-        { romdatabase.crc_lists[i] = NULL; }
-    for ( i = 0; i < 255; ++i )
-        { romdatabase.md5_lists[i] = NULL; }
-    romdatabase.list = NULL;
+    for ( counter = 0; counter < 255; ++counter )
+        { g_romdatabase.crc_lists[counter] = NULL; }
+    for ( counter = 0; counter < 255; ++counter )
+        { g_romdatabase.md5_lists[counter] = NULL; }
+    g_romdatabase.list = NULL;
 
     do
         {
-        if(buf[0]=='[')
+        if(buffer[0]=='[')
             {
-            if(romdatabase.list==NULL)
+            if(g_romdatabase.list==NULL)
                 {
-                romdatabase.list = (romdatabase_search*)malloc(sizeof(romdatabase_search));
-                romdatabase.list->next_entry = NULL;
-                romdatabase.list->next_crc = NULL;
-                romdatabase.list->next_md5 = NULL;
-                cur = romdatabase.list;
+                g_romdatabase.list = (romdatabase_search*)malloc(sizeof(romdatabase_search));
+                g_romdatabase.list->next_entry = NULL;
+                g_romdatabase.list->next_crc = NULL;
+                g_romdatabase.list->next_md5 = NULL;
+                search = g_romdatabase.list;
                 }
             else
                 {
-                cur->next_entry = (romdatabase_search*)malloc(sizeof(romdatabase_search));
-                cur = cur->next_entry;
-                cur->next_entry = NULL;
-                cur->next_crc = NULL;
-                cur->next_md5 = NULL;
+                search->next_entry = (romdatabase_search*)malloc(sizeof(romdatabase_search));
+                search = search->next_entry;
+                search->next_entry = NULL;
+                search->next_crc = NULL;
+                search->next_md5 = NULL;
                 }
-            i = strlen(buf);
-            while(buf[i] != ']') i--;
-            buf[i] = 0;
 
             for (counter=0; counter < 16; ++counter)
               {
-              temp[0] = buf[counter*2+1];
-              temp[1] = buf[counter*2+2];
-              sscanf(temp, "%X", cur->entry.md5+counter); 
+              hashtemp[0] = buffer[counter*2+1];
+              hashtemp[1] = buffer[counter*2+2];
+              sscanf(hashtemp, "%X", search->entry.md5+counter); 
               }
-            i = cur->entry.md5[0];
-
-            if(romdatabase.md5_lists[i]==NULL)
-                { romdatabase.md5_lists[i] = cur; }
+            //Index MD5s by first 8 bits.
+            index = search->entry.md5[0];
+            if(g_romdatabase.md5_lists[index]==NULL)
+                { g_romdatabase.md5_lists[index] = search; }
             else
                 {
-                romdatabase_search *aux = romdatabase.md5_lists[i];
-                cur->next_md5 = aux;
-                romdatabase.md5_lists[i] = cur;
+                romdatabase_search *aux = g_romdatabase.md5_lists[index];
+                search->next_md5 = aux;
+                g_romdatabase.md5_lists[index] = search;
                 }
-            cur->entry.status=0; //Set default to 0 stars.
-            cur->entry.savetype=16; //Set default to NULL
-            cur->entry.rumble=2; //Set default to NULL
-            cur->entry.players=16; //Set default to NULL
-            //This should be dynamically allocated...
-            for (counter=0; counter < 16; ++counter)
-                { cur->entry.refmd5[counter] = 0; }
+            search->entry.status=0; //Set default to 0 stars.
+            search->entry.savetype=DEFAULT; //Set default to NULL 
+            search->entry.rumble=DEFAULT; 
+            search->entry.players=DEFAULT; 
             }
         else
             {
-            i = split_property(buf);
-            if(i!=-1)
+            stringlength = split_property(buffer);
+            if(stringlength!=-1)
                 {
-                if(!strcmp(buf, "GoodName"))
+                if(!strcmp(buffer, "GoodName"))
                     {
-                    length = strlen(buf+i+1);
-                    if(buf[i+length]=='\n'||buf[i+length]=='\r')
-                        { buf[i+length] = '\0'; }
-                    cur->entry.goodname = (char*)malloc(length*sizeof(char));
-                    strncpy(cur->entry.goodname, buf+i+1, length);
-                    //printf("Name: %s, Length: %d\n", cur->entry.goodname, length);
+                    //Get length of GoodName since we dynamically allocate.
+                    namelength = strlen(buffer+stringlength+1);
+                    search->entry.goodname = (char*)malloc(namelength*sizeof(char));
+                    //Make sure we're null terminated.
+                    if(buffer[stringlength+namelength]=='\n'||buffer[stringlength+namelength]=='\r')
+                        { buffer[stringlength+namelength] = '\0'; }
+                    strncpy(search->entry.goodname, buffer+stringlength+1, namelength);
+                    //printf("Name: %s, Length: %d\n", cur->entry.goodname, namelength);
                     }
-                else if(!strcmp(buf, "CRC"))
+                else if(!strcmp(buffer, "CRC"))
                     {
-                    buf[i+19] = 0;
-                    sscanf(buf+i+10, "%X", &cur->entry.crc2);
-                    buf[i+9] = 0;
-                    sscanf(buf+i+1, "%X", &cur->entry.crc1);
-                    buf[i+3] = 0;
-                    sscanf(buf+i+1, "%X", &i);
-
-                    if(romdatabase.crc_lists[i]==NULL)
-                        { romdatabase.crc_lists[i] = cur; }
+                    buffer[stringlength+19] = '\0';
+                    sscanf(buffer+stringlength+10, "%X", &search->entry.crc2);
+                    buffer[stringlength+9] = '\0';
+                    sscanf(buffer+stringlength+1, "%X", &search->entry.crc1);
+                    buffer[stringlength+3] = '\0';
+                    sscanf(buffer+stringlength+1, "%X", &index);
+                    //Index CRCs by first 8 bits.
+                    if(g_romdatabase.crc_lists[index]==NULL)
+                        { g_romdatabase.crc_lists[index] = search; }
                     else
                         {
-                        romdatabase_search *aux = romdatabase.crc_lists[i];
-                        cur->next_crc = aux;
-                        romdatabase.crc_lists[i] = cur;
+                        romdatabase_search *aux = g_romdatabase.crc_lists[index];
+                        search->next_crc = aux;
+                        g_romdatabase.crc_lists[index] = search;
                         }
                     }
-                //Reference MD5 does not currently work...
-                else if(!strcmp(buf, "Reference"))
+                else if(!strcmp(buffer, "RefMD5"))
                     {
+                    //If we have a refernce MD5, dynamically allocate.
+                    search->entry.refmd5 = (md5_byte_t*)malloc(16*sizeof(md5_byte_t));
                     for (counter=0; counter < 16; ++counter)
                         {
-                        temp[0] = buf[i+counter*2+1];
-                        temp[1] = buf[i+counter*2+2];
-                        sscanf(temp, "%X", cur->entry.refmd5+counter); 
+                        hashtemp[0] = buffer[stringlength+1+counter*2];
+                        hashtemp[1] = buffer[stringlength+2+counter*2];
+                        sscanf(hashtemp, "%X", search->entry.refmd5+counter); 
+                        }
+                    //Lookup reference MD5 and replace non-default entries.
+                    if((entry = ini_search_by_md5(search->entry.refmd5))!=&empty_entry)
+                        {
+                        //printf("RefMD5: %s\n", aux->goodname);
+                        if(entry->savetype!=DEFAULT)
+                            { search->entry.savetype = entry->savetype; }
+                        if(entry->status!=0)
+                            { search->entry.status = entry->status; }
+                        if(entry->players!=DEFAULT)
+                            { search->entry.players = entry->players; }
+                        if(entry->rumble!=DEFAULT)
+                            { search->entry.rumble = entry->rumble; }
                         }
                     }
-                else if(!strcmp(buf, "SaveType"))
+                else if(!strcmp(buffer, "SaveType"))
                     {
-                    if(!strncmp(buf+i+1, "Eeprom 4KB", 10))
-                        { cur->entry.savetype = EEPROM_4KB; }
-                    else if(!strncmp(buf+i+1, "Eeprom 16KB", 10))
-                        { cur->entry.savetype = EEPROM_16KB; }
-                    else if(!strncmp(buf+i+1, "SRAM", 4))
-                        { cur->entry.savetype = SRAM; }
-                    else if(!strncmp(buf+i+1, "Flash RAM", 9))
-                        { cur->entry.savetype = FLASH_RAM; }
-                    else if(!strncmp(buf+i+1, "Controller Pack", 15))
-                        { cur->entry.savetype = CONTROLLER_PACK; }
-                    else if(!strncmp(buf+i+1, "None", 4))
-                        { cur->entry.savetype = NONE; }
+                    if(!strncmp(buffer+stringlength+1, "Eeprom 4KB", 10))
+                        { search->entry.savetype = EEPROM_4KB; }
+                    else if(!strncmp(buffer+stringlength+1, "Eeprom 16KB", 10))
+                        { search->entry.savetype = EEPROM_16KB; }
+                    else if(!strncmp(buffer+stringlength+1, "SRAM", 4))
+                        { search->entry.savetype = SRAM; }
+                    else if(!strncmp(buffer+stringlength+1, "Flash RAM", 9))
+                        { search->entry.savetype = FLASH_RAM; }
+                    else if(!strncmp(buffer+stringlength+1, "Controller Pack", 15))
+                        { search->entry.savetype = CONTROLLER_PACK; }
+                    else if(!strncmp(buffer+stringlength+1, "None", 4))
+                        { search->entry.savetype = NONE; }
                     }
-                else if(!strcmp(buf, "Status"))
+                else if(!strcmp(buffer, "Status"))
                     {
-                    length=strlen(buf);
-                    i = atoi(buf+length+1);
-                    if(i>-1&&i<6)
-                        { cur->entry.status = i; }
+                    value = atoi(buffer+stringlength+1);
+                    if(value>-1&&value<6)
+                        { search->entry.status = value; }
                     }
-                else if(!strcmp(buf, "Players"))
+                else if(!strcmp(buffer, "Players"))
                     {
-                    length=strlen(buf);
-                    i = atoi(buf+length+1);
-                    if(i>0&&i<8)
-                        { cur->entry.players = i; }
+                    value = atoi(buffer+stringlength+1);
+                    if(value>0&&value<8)
+                        { search->entry.players = value; }
                     }
-                else if(!strcmp(buf, "Rumble"))
+                else if(!strcmp(buffer, "Rumble"))
                     {
-                    if(!strncmp(buf+i+1, "Yes", 3))
-                        { cur->entry.rumble = 1; }
-                    if(!strncmp(buf+i+1, "No", 2))
-                        { cur->entry.rumble = 0; }
+                    if(!strncmp(buffer+stringlength+1, "Yes", 3))
+                        { search->entry.rumble = 1; }
+                    if(!strncmp(buffer+stringlength+1, "No", 2))
+                        { search->entry.rumble = 0; }
                     }
                 }
             }
 
-        gzgets(gzfile, buf, 255);
+        gzgets(gzfile, buffer, 255);
         }
    while (!gzeof(gzfile));
 
@@ -736,47 +742,47 @@ void ini_openFile()
 
 void romdatabase_close()
 {
-    if (romdatabase.comment == NULL)
+    if (g_romdatabase.comment == NULL)
         { return; }
 
-    free(romdatabase.comment);
+    free(g_romdatabase.comment);
 
-    while(romdatabase.list != NULL)
+    while(g_romdatabase.list != NULL)
         {
-        romdatabase_search *search = romdatabase.list->next_entry;
-        free(romdatabase.list);
-        romdatabase.list = search;
+        romdatabase_search *search = g_romdatabase.list->next_entry;
+        free(g_romdatabase.list);
+        g_romdatabase.list = search;
         }
 }
 
-mupenEntry* ini_search_by_md5(md5_byte_t* md5)
+romdatabase_entry* ini_search_by_md5(md5_byte_t* md5)
 {
-    if(romdatabase.comment==NULL)
-        { return &emptyEntry; }
+    if(g_romdatabase.comment==NULL)
+        { return &empty_entry; }
     romdatabase_search *search;
-    search = romdatabase.md5_lists[md5[0]];
+    search = g_romdatabase.md5_lists[md5[0]];
 
     while (search!=NULL&&memcmp(search->entry.md5, md5, 16)!=0)
         { search = search->next_md5; }
 
     if(search==NULL)
-        { return &emptyEntry; }
+        { return &empty_entry; }
     else
         { return &(search->entry); }
 }
 
-mupenEntry* ini_search_by_crc(unsigned int crc1, unsigned int crc2)
+romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2)
 {
-    if(romdatabase.comment==NULL) 
-        { return &emptyEntry; }
+    if(g_romdatabase.comment==NULL) 
+        { return &empty_entry; }
     romdatabase_search *search;
-    search = romdatabase.crc_lists[(unsigned short)crc1];
+    search = g_romdatabase.crc_lists[(unsigned short)crc1];
 
     while (search!=NULL&&search->entry.crc1!=crc1&search->entry.crc2!=crc2)
         { search = search->next_crc; }
 
     if(search == NULL) 
-        { return &emptyEntry; }
+        { return &empty_entry; }
     else
         { return &(search->entry); }
 }

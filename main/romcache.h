@@ -30,32 +30,14 @@ typedef struct
 {
    char* goodname;
    md5_byte_t md5[16];
-   md5_byte_t refmd5[16];
+   md5_byte_t* refmd5;
    unsigned int crc1;
    unsigned int crc2;
    unsigned short status;
    unsigned short savetype;
    unsigned short players;
    unsigned short rumble;
-} mupenEntry;
-
-void ini_openFile();
-void romdatabase_close();
-mupenEntry* ini_search_by_md5(md5_byte_t* md5);
-mupenEntry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);
-
-enum RCS_TASK
-{
-    RCS_INIT = 1,
-    RCS_RESCAN,
-    RCS_SLEEP,
-    RCS_BUSY,
-    RCS_SHUTDOWN,
-    RCS_WRITE_CACHE //For user comments.
-};
-
-enum RCS_TASK g_RCSTask;
-//When finished, move to header.
+} romdatabase_entry;
 
 //Needs to be rearranged.
 typedef struct _cache_entry
@@ -73,8 +55,8 @@ typedef struct _cache_entry
     char internalname[80]; //Needs to be 4 times the stored value for UTF8 conversion. 
     unsigned int crc1;
     unsigned int crc2;
-    mupenEntry *inientry;
-    struct _cache_entry *next;
+     romdatabase_entry* inientry;
+    struct _cache_entry* next;
 } cache_entry;
 
 //Use custom linked list. 
@@ -87,6 +69,19 @@ typedef struct
 
 rom_cache romcache;
 
-int rebuild_cache_file();
-int load_initial_cache();
+enum RCS_TASK
+{
+    RCS_INIT = 1,
+    RCS_RESCAN,
+    RCS_SLEEP,
+    RCS_BUSY,
+    RCS_SHUTDOWN,
+    RCS_WRITE_CACHE //For user comments.
+};
+
+enum RCS_TASK g_RCSTask;
+//When finished, move to header.
+
 void *rom_cache_system(void *_arg);
+romdatabase_entry* ini_search_by_md5(md5_byte_t* md5);
+romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);

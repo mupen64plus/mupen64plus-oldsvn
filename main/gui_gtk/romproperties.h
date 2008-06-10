@@ -44,10 +44,12 @@ typedef struct
     GtkWidget *cicchipEntry;
     GtkWidget *rumbleEntry;
     GtkWidget *commentsEntry;
+    GtkTreeIter iter;
+    cache_entry *entry;
 } SRomPropertiesDialog;
 extern SRomPropertiesDialog g_RomPropDialog;
 
-int create_romPropDialog( void );
-void show_romPropDialog( cache_entry *entry );
+int create_romPropDialog();
+void show_romPropDialog();
 
 #endif // __ROMPROPERTIES_H__

@@ -17,9 +17,8 @@ Email                : blight@Ashitaka
 
 #include "romproperties.h"
 #include "rombrowser.h"
-
 #include "main_gtk.h"
-#include "rombrowser.h"
+
 #include "../translate.h"
 #include "../main.h"
 
@@ -33,22 +32,19 @@ Email                : blight@Ashitaka
  * globals
  */
 SRomPropertiesDialog g_RomPropDialog;
-static cache_entry *g_RomEntry;
 
 /*********************************************************************************************************
  * callbacks
  */
 static void callback_apply_changes( GtkWidget *widget, gpointer data )
 {
-    char crc_code[200];
-
     gtk_widget_hide( g_RomPropDialog.dialog );
 
-    strncpy(g_RomEntry->usercomments, gtk_entry_get_text(GTK_ENTRY(g_RomPropDialog.commentsEntry)),255);
+    strncpy(g_RomPropDialog.entry->usercomments, gtk_entry_get_text(GTK_ENTRY(g_RomPropDialog.commentsEntry)),255);
 
     // update rombrowser
-    g_RCSTask = RCS_RESCAN;
-    rombrowser_refresh();
+    g_RCSTask = RCS_WRITE_CACHE;
+    gtk_list_store_set ( GTK_LIST_STORE(gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay))),&g_RomPropDialog.iter,3,g_RomPropDialog.entry->usercomments,-1);
 }
 
 static void callback_cancelClicked( GtkWidget *widget, gpointer data )
@@ -68,7 +64,7 @@ static gint delete_question_event( GtkWidget *widget, GdkEvent *event, gpointer 
 /*********************************************************************************************************
  * show dialog
  */
-void show_romPropDialog( cache_entry *entry )
+void show_romPropDialog()
 {
     char *filename;
     char country[32];
@@ -85,20 +81,20 @@ void show_romPropDialog( cache_entry *entry )
     int i;
     GdkPixbuf *flag;
 
-    filename = filefrompath(entry->filename); 
-    countrycodeflag(entry->countrycode, &flag);
-    countrycodestring(entry->countrycode, country);
+    filename = filefrompath(g_RomPropDialog.entry->filename); 
+    countrycodeflag(g_RomPropDialog.entry->countrycode, &flag);
+    countrycodestring(g_RomPropDialog.entry->countrycode, country);
     for ( i = 0; i < 16; ++i ) 
-        { sprintf(md5hash+i*2, "%02X", entry->md5[i]); }
-    sprintf(crc1, "%X", entry->inientry->crc1);
-    sprintf(crc2, "%X", entry->inientry->crc2);
-    savestring(entry->inientry->savetype, savetype);
-    playersstring(entry->inientry->players, players);
-    sprintf(size, "%.1f MBits", (float)(entry->romsize / (float)0x20000) );
-    compressionstring(entry->compressiontype, compressiontype);
-    imagestring(entry->imagetype, imagetype);
-    cicstring(entry->cic, cicchip);
-    rumblestring(entry->inientry->rumble, rumble);
+        { sprintf(md5hash+i*2, "%02X", g_RomPropDialog.entry->md5[i]); }
+    sprintf(crc1, "%X", g_RomPropDialog.entry->inientry->crc1);
+    sprintf(crc2, "%X", g_RomPropDialog.entry->inientry->crc2);
+    savestring(g_RomPropDialog.entry->inientry->savetype, savetype);
+    playersstring(g_RomPropDialog.entry->inientry->players, players);
+    sprintf(size, "%.1f MBits", (float)(g_RomPropDialog.entry->romsize / (float)0x20000) );
+    compressionstring(g_RomPropDialog.entry->compressiontype, compressiontype);
+    imagestring(g_RomPropDialog.entry->imagetype, imagetype);
+    cicstring(g_RomPropDialog.entry->cic, cicchip);
+    rumblestring(g_RomPropDialog.entry->inientry->rumble, rumble);
 
     GtkIconTheme *theme = gtk_icon_theme_get_default();
     if(gtk_icon_theme_has_icon(theme, "emblem-new"))
@@ -108,19 +104,21 @@ void show_romPropDialog( cache_entry *entry )
 
     // fill dialog
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.filenameEntry), filename );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.goodnameEntry), entry->inientry->goodname );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.goodnameEntry), g_RomPropDialog.entry->inientry->goodname );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.countryEntry), country );
     gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.flag), flag); 
     for( i = 0; i < 5; ++i)
         {
-        if(entry->inientry->status>i)
+        if(g_RomPropDialog.entry->inientry->status>i)
             { gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[i]), star);  }
+        else 
+            { gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[i]), NULL);  }
         }
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.fullpathEntry), entry->filename);
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.fullpathEntry), g_RomPropDialog.entry->filename);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), md5hash);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.crc1Entry), crc1 );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.crc2Entry), crc2 );
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.internalnameEntry), entry->internalname );
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.internalnameEntry), g_RomPropDialog.entry->internalname );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.savetypeEntry), savetype );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.playersEntry), players );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.sizeEntry), size );
@@ -129,8 +127,7 @@ void show_romPropDialog( cache_entry *entry )
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.cicchipEntry), cicchip );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.rumbleEntry), rumble );
 
-    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), entry->usercomments);
-    g_RomEntry = entry;
+    gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.commentsEntry), g_RomPropDialog.entry->usercomments);
 
     // show dialog
     gtk_widget_show_all( g_RomPropDialog.dialog );

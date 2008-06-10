@@ -262,7 +262,7 @@ int rom_read(const char *filename)
 {
     md5_state_t state;
     md5_byte_t digest[16];
-    mupenEntry *entry;
+    romdatabase_entry *entry;
     char buffer[PATH_MAX], *s;
     char image[16], compression[16];
     unsigned short compressiontype, imagetype;
