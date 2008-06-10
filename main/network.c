@@ -67,6 +67,8 @@ static unsigned char	bServerIsActive = 0;	// Is the server active?
 static TCPsocket	serverSocket;		// Socket descriptor for server (if this is one)
 static SDLNet_SocketSet	serverSocketSet;	// Set of all connected clients, along with the server socket descriptor
 
+static unsigned char    bEmulatorIsRunning = 0;
+
 
 
 
@@ -155,7 +157,7 @@ static void *serverLoop(void *_arg) {
   int n;
   fprintf(netLog, "serverLoop() thread started.\n");
   while (netServerIsActive()) {
-	serverAcceptConnection();
+	if (!bEmulatorIsRunning) serverAcceptConnection();
 	serverProcessMessages();
   }
   SDLNet_TCP_Close(serverSocket);
@@ -224,24 +226,20 @@ void serverKillClient(int n) {
 }
 
 void serverAcceptConnection() {
-	TCPsocket newClient;
-	int n;
-
-	SDLNet_CheckSockets(serverSocketSet, 0);
-	if (SDLNet_SocketReady(serverSocket)) {
-	  if (newClient = SDLNet_TCP_Accept(serverSocket)) {
-            if (!g_EmulatorRunning) {
-    	      for (n = 0; n < MAX_CLIENTS; n++)
-	        if (!Client[n]) {
-	  	  SDLNet_TCP_AddSocket(serverSocketSet, (Client[n] = newClient));
-		  fprintf(netLog, "New connection accepted; Client %d\n", n);
-		  break;
-                }
-	        if (n == MAX_CLIENTS) SDLNet_TCP_Close(newClient); // No open slots
-	      }
-	    } else SDLNet_TCP_Close(newClient);
-	  }
-	}
+  TCPsocket newClient;
+  int n;
+  SDLNet_CheckSockets(serverSocketSet, 0);
+  if (SDLNet_SocketReady(serverSocket)) {
+    if (newClient = SDLNet_TCP_Accept(serverSocket)) {
+        for (n = 0; n < MAX_CLIENTS; n++)
+          if (!Client[n]) {
+            SDLNet_TCP_AddSocket(serverSocketSet, (Client[n] = newClient));
+            fprintf(netLog, "New connection accepted; Client %d\n", n);
+            break;
+          }
+        if (n == MAX_CLIENTS) SDLNet_TCP_Close(newClient); // No open slots
+    }
+  }
 }
 
 void serverProcessMessages() {
@@ -338,6 +336,7 @@ void netClientProcessMessages() {
 			case NETMSG_STARTEMU:
 				rompause = 0;
 				fprintf(netLog, "Client STARTEMU message received.  Lets go!\n");
+				bEmulatorIsRunning = 1;
 			break;
 			case NETMSG_PLAYERQUIT:
 				pn = incomingMessage.data.joinRequest.controller;
@@ -356,7 +355,7 @@ void netClientProcessMessages() {
 			break;
 
 		}
-	} else if (n != 0) fprintf(netLog, "Client message size error.  Dropping packet.\n");
+	} else if (n != 0) fprintf(netLog, "Client message size error.  Dropping packet.\n"); // Check for server disconnects!
 }
 
 void netSendButtonState(int control, DWORD value) {
