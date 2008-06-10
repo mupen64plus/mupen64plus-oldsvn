@@ -259,7 +259,8 @@ void serverProcessMessages() {
 
 int clientConnect(char *server, int port) {
 	IPaddress serverAddr;
-	
+	int n;
+
 	fprintf(netLog, "clientConnect() called.\n");
 	SDLNet_ResolveHost(&serverAddr, server, port);
 	if (clientSocket = SDLNet_TCP_Open(&serverAddr)) {
@@ -267,7 +268,7 @@ int clientConnect(char *server, int port) {
 		SDLNet_TCP_AddSocket(clientSocketSet, clientSocket);
 		bClientIsConnected = 1;
 		memcpy(&ControlCache, &Controls, sizeof(Controls)); // Restore when netplay is over
-                for (n = 0; n < 4; n++) Control[n].Present = TRUE; // Enable all controllers
+                for (n = 0; n < 4; n++) Controls[n].Present = TRUE; // Enable all controllers
 		fprintf(netLog, "Client successfully connected to %s:%d.\n", server, port);
 	} else fprintf(netLog, "Client failed to connected to %s:%d.\n", server, port);
 	return bClientIsConnected;
