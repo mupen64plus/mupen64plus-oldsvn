@@ -98,19 +98,24 @@ void netInitialize() {
 
   fprintf(netLog, "Begining net log...\n");
 
+  fprintf(netLog, "Start_server %d\nHostname %s\nHostport %d\n", start_server, hostname, hostport);
   for (n = 0; n < 4; n++) netKeys[n].Value = 0;
   for (n = 0; n < MAX_CLIENTS; n++) Client[n] = 0;
   if (SDLNet_Init() < 0) fprintf(netLog, "Failure to initialize SDLNet!\n");
 
   // If server started locally, always connect!
-  if (start_server) serverStart(SERVER_PORT);
-  if (clientConnect(hostname, hostport)) {
-    netInitButtonQueue();
+  if (start_server) {
+    serverStart(SERVER_PORT);
+    n = clientConnect("localhost", 7000);
   }
+  else n = clientConnect(hostname, hostport);
+
+  if (n) netInitButtonQueue();
   else {
     fprintf(netLog, "Client failed to connect to a server, playing offline.\n");
     netShutdown();
   }
+
 }
 
 void netShutdown() {
@@ -452,10 +457,12 @@ int netGetNextButtonEvent(int *controller, DWORD *value, unsigned short *timer) 
 void netInitButtonQueue() {
   netVISyncCounter = 0;
   while (netButtonEventQueue) netPopButtonEvent();
+  fprintf(netLog, "Button event queue initialized.\n");
 }
 
 void netKillButtonQueue() {
   while (netButtonEventQueue) netPopButtonEvent();
+  fprintf(netLog, "Button event queue killed.\n");
 }
   
 

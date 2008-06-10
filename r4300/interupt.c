@@ -397,7 +397,7 @@ void gen_interupt()
                     osd_render();  // draw Paused message in case updateScreen didn't do it
                     SDL_GL_SwapBuffers();
 
-		    serverAcceptConnection();
+		    if (netServerIsActive()) serverAcceptConnection();
 		    netClientProcessMessages();
                     struct timespec ts;
                     ts.tv_sec = 0;
