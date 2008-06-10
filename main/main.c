@@ -554,6 +554,7 @@ static int sdl_event_filter( const SDL_Event *event )
 				NetMessage startmsg;
 				startmsg.type = NETMSG_STARTEMU;
 				serverBroadcastMessage(&startmsg);
+				serverStopListening();
 			}
                     break;
 
@@ -852,7 +853,6 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    fprintf(netGetLog(), "Calling netShutdown()\n");
     netShutdown();
 
     if (l_Filename != 0)

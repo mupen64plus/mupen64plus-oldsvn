@@ -63,10 +63,11 @@ static NetButtonEvent	*netButtonEventQueue = NULL;	// Pointer to queue of upcomi
 static FILE		*netLog = NULL;
 
 static pthread_t        serverThread;
-static unsigned char	bServerIsActive = 0;	// Is the server active?
 static TCPsocket	serverSocket;		// Socket descriptor for server (if this is one)
 static SDLNet_SocketSet	serverSocketSet;	// Set of all connected clients, along with the server socket descriptor
 
+static unsigned char	bServerIsActive = 0;	// Is the server active?
+static unsigned char    bServerStop = 0;	// Do we need the server to stop?
 static unsigned char    bEmulatorIsRunning = 0;
 
 
@@ -103,13 +104,21 @@ void netInitialize() {
 
   // If server started locally, always connect!
   if (start_server) serverStart(SERVER_PORT);
-  clientConnect(hostname, hostport);
-  netVISyncCounter = 0;
+  if (clientConnect(hostname, hostport)) {
+    netInitButtonQueue();
+  }
+  else {
+    fprintf(netLog, "Client failed to connect to a server, playing offline.\n");
+    netShutdown();
+  }
 }
 
 void netShutdown() {
-  serverStop();
   clientDisconnect();
+  serverStop();
+  netKillButtonQueue();
+  bEmulatorIsRunning = 0;
+  fprintf(netLog, "Goodbye.\n");
   fclose(netLog);
 }
 
@@ -139,6 +148,8 @@ unsigned short	netServerIsActive() {return bServerIsActive;}
 
 // netMain() : Handle everything!
 void netMain() {
+//  if (!bEmulatorIsRunning) serverAcceptConnection();
+  serverProcessMessages();
   if (netClientIsConnected()) {
 	netProcessButtonQueue();
 	netClientProcessMessages();
@@ -153,22 +164,18 @@ void netMain() {
    =======================================================================================
 */ 
 
-static void *serverLoop(void *_arg) {
+void serverStop() {
   int n;
-  fprintf(netLog, "serverLoop() thread started.\n");
-  while (netServerIsActive()) {
-	if (!bEmulatorIsRunning) serverAcceptConnection();
-	serverProcessMessages();
-  }
+  fprintf(netLog, "serverStop() called.\n");
   for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) serverKillClient(n);
   SDLNet_TCP_Close(serverSocket);
   SDLNet_FreeSocketSet(serverSocketSet);
-  fprintf(netLog, "Exiting serverLoop() thread.\n");
+  bServerIsActive = 0;
 }
 
-void serverStop() {
-	fprintf(netLog, "serverStop() called.\n");
-	bServerIsActive = 0;
+void serverStopListening() {
+	SDLNet_TCP_Close(serverSocket);
+	SDLNet_TCP_DelSocket(serverSocketSet, serverSocket);
 }
 
 int serverStart(unsigned short port) {
@@ -182,9 +189,9 @@ int serverStart(unsigned short port) {
 	
 	if (serverSocket = SDLNet_TCP_Open(&serverAddr)) {
 		SDLNet_TCP_AddSocket(serverSocketSet, serverSocket);
-		bServerIsActive = 1; // before serverLoop thread creation !!
-		serverThread = pthread_create(&serverThread, NULL, serverLoop, NULL);
+		//serverThread = pthread_create(&serverThread, NULL, serverLoop, NULL);
 		fprintf(netLog, "Server successfully initialized on port %d.\n", port);
+                bServerIsActive = 1;
 	}
 	else fprintf(netLog, "Failed to initialize server on port %d.\n", port);
 	return bServerIsActive;
@@ -442,4 +449,14 @@ int netGetNextButtonEvent(int *controller, DWORD *value, unsigned short *timer) 
   }
   return retValue;
 }
+
+void netInitButtonQueue() {
+  netVISyncCounter = 0;
+  while (netButtonEventQueue) netPopButtonEvent();
+}
+
+void netKillButtonQueue() {
+  while (netButtonEventQueue) netPopButtonEvent();
+}
+  
 

@@ -65,6 +65,7 @@ void netProcessMessages();
 
 int serverStart(unsigned short port);
 void serverStop();
+void serverStopListening(); // Call this when emulator starts
 void serverProcessMessages();
 void serverAcceptConnection();
 void serverKillClient(int n);
@@ -73,5 +74,7 @@ void netAddButtonEvent(int controller, DWORD value, unsigned short timer);
 int netGetNextButtonEvent(int *controller, DWORD *value, unsigned short *timer);
 void netPopButtonEvent();
 void netProcessButtonQueue();
+void netInitButtonQueue();
+void netKillButtonQueue() ;
 
 void netMain();

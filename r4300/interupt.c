@@ -392,11 +392,13 @@ void gen_interupt()
             // if paused, poll for input events
             if(rompause)
             {
-                osd_render();  // draw Paused message in case updateScreen didn't do it
-                SDL_GL_SwapBuffers();
                 while(rompause)
                 {
-		    if (netClientIsConnected()) netClientProcessMessages();
+                    osd_render();  // draw Paused message in case updateScreen didn't do it
+                    SDL_GL_SwapBuffers();
+
+		    serverAcceptConnection();
+		    netClientProcessMessages();
                     struct timespec ts;
                     ts.tv_sec = 0;
                     ts.tv_nsec = 10000000;
