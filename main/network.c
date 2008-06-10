@@ -191,11 +191,13 @@ int serverBroadcastMessage(NetMessage *msg) {
 	if (serverSendMessage(Client[n], msg) != sizeof(NetMessage)) {
 		serverKillClient(n);
 	}
+  }
 }
 
 void serverKillClient(int n) {
-	SDLNet_TCP_Disconnect(Client[n]);
-	SDLNet_TCP_RemoveSocket(serverSocketSet, Client[n]);
+	SDLNet_TCP_Close(Client[n]);
+	SDLNet_TCP_DelSocket(serverSocketSet, Client[n]);
+	Controls[n].Present = 0;
 	fprintf(netLog, "Client %d disconnected.\n", n);
 }
 
@@ -210,6 +212,7 @@ void serverAcceptConnection() {
 	    for (n = 0; n < MAX_CLIENTS; n++)
 	      if (!Client[n]) {
 	  	SDLNet_TCP_AddSocket(serverSocketSet, (Client[n] = newClient));
+		Controls[n].Present = 1;
 		fprintf(netLog, "New connection accepted; Client %d\n", n);
 		break;
 	      }
@@ -236,6 +239,8 @@ void serverProcessMessages() {
 							}
 						break;
 					}
+				} else {
+					serverKillClient(n);
 				}
 			}
 		}
@@ -289,8 +294,9 @@ int netClientSendMessage(NetMessage *msg) {
 
 void netClientProcessMessages() {
 	NetMessage incomingMessage;
+	int n;
 
-	if (netClientRecvMessage(&incomingMessage) == sizeof(NetMessage)) {
+	if ((n = netClientRecvMessage(&incomingMessage)) == sizeof(NetMessage)) {
 		switch (incomingMessage.type) {
 			case NETMSG_BUTTON:
 				if (incomingMessage.data.buttonEvent.timer > netGetSyncCounter()) {
@@ -304,8 +310,12 @@ void netClientProcessMessages() {
 				rompause = 0;
 				fprintf(netLog, "Client STARTEMU message received.  Lets go!\n");
 			break;
+			default:
+				fprintf(netLog, "Client message type error.  Dropping packet.\n");
+			break;
+
 		}
-	}
+	} else if (n != 0) fprintf(netLog, "Client message size error.  Dropping packet.\n");
 }
 
 void netSendButtonState(int control, DWORD value) {
