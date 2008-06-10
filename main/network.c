@@ -148,8 +148,7 @@ unsigned short	netServerIsActive() {return bServerIsActive;}
 
 // netMain() : Handle everything!
 void netMain() {
-//  if (!bEmulatorIsRunning) serverAcceptConnection();
-  serverProcessMessages();
+  if (netServerIsActive()) serverProcessMessages();
   if (netClientIsConnected()) {
 	netProcessButtonQueue();
 	netClientProcessMessages();
