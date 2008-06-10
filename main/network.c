@@ -31,6 +31,11 @@
    =======================================================================================
 */ 
 
+#include "main.h"
+#include "../r4300/r4300.h"
+#include "plugin.h"
+#include "SDL_net.h"
+#include "../opengl/osd.h"
 #include "network.h"
 
 /* =======================================================================================
@@ -55,7 +60,7 @@ static pthread_t        serverThread;
 static unsigned char	bServerIsActive = 0;	// Is the server active?
 static TCPsocket	serverSocket;		// Socket descriptor for server (if this is one)
 static SDLNet_SocketSet	serverSocketSet;	// Set of all connected clients, along with the server socket descriptor
-
+static CONTROL		ControlCache[4];
 
 
 
@@ -197,7 +202,6 @@ int serverBroadcastMessage(NetMessage *msg) {
 void serverKillClient(int n) {
 	SDLNet_TCP_Close(Client[n]);
 	SDLNet_TCP_DelSocket(serverSocketSet, Client[n]);
-	Controls[n].Present = 0;
 	fprintf(netLog, "Client %d disconnected.\n", n);
 }
 
@@ -212,7 +216,6 @@ void serverAcceptConnection() {
 	    for (n = 0; n < MAX_CLIENTS; n++)
 	      if (!Client[n]) {
 	  	SDLNet_TCP_AddSocket(serverSocketSet, (Client[n] = newClient));
-		Controls[n].Present = 1;
 		fprintf(netLog, "New connection accepted; Client %d\n", n);
 		break;
 	      }
@@ -263,6 +266,8 @@ int clientConnect(char *server, int port) {
 		clientSocketSet = SDLNet_AllocSocketSet(1);
 		SDLNet_TCP_AddSocket(clientSocketSet, clientSocket);
 		bClientIsConnected = 1;
+		memcpy(&ControlCache, &Controls, sizeof(Controls)); // Restore when netplay is over
+                for (n = 0; n < 4; n++) Control[n].Present = TRUE; // Enable all controllers
 		fprintf(netLog, "Client successfully connected to %s:%d.\n", server, port);
 	} else fprintf(netLog, "Client failed to connected to %s:%d.\n", server, port);
 	return bClientIsConnected;
@@ -272,6 +277,7 @@ void netClientDisconnect() {
 	fprintf(netLog, "netClientDisconnect() called.\n");
 	SDLNet_FreeSocketSet(clientSocketSet);
 	SDLNet_TCP_Close(clientSocket);
+	memcpy(&Controls, &ControlCache, sizeof(Controls)); // Restore previous controller states
 	bClientIsConnected = 0;
 }
 
