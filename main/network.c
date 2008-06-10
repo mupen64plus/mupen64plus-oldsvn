@@ -160,9 +160,9 @@ static void *serverLoop(void *_arg) {
 	if (!bEmulatorIsRunning) serverAcceptConnection();
 	serverProcessMessages();
   }
+  for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) serverKillClient(n);
   SDLNet_TCP_Close(serverSocket);
   SDLNet_FreeSocketSet(serverSocketSet);
-  for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) serverKillClient(n);
   fprintf(netLog, "Exiting serverLoop() thread.\n");
 }
 
