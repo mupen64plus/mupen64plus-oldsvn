@@ -452,13 +452,11 @@ void startEmulation(void)
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
     {
-	netSetSyncCounter(0); // Reset network synchro counter
         emulationThread(NULL);
     }
     else if(!g_EmulationThread)
     {
         // spawn emulation thread
-	netSetSyncCounter(0); // Reset network synchro counter
         if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
         {
             g_EmulationThread = 0;

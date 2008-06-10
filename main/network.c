@@ -230,13 +230,16 @@ void serverAcceptConnection() {
 	SDLNet_CheckSockets(serverSocketSet, 0);
 	if (SDLNet_SocketReady(serverSocket)) {
 	  if (newClient = SDLNet_TCP_Accept(serverSocket)) {
-	    for (n = 0; n < MAX_CLIENTS; n++)
-	      if (!Client[n]) {
-	  	SDLNet_TCP_AddSocket(serverSocketSet, (Client[n] = newClient));
-		fprintf(netLog, "New connection accepted; Client %d\n", n);
-		break;
+            if (!g_EmulatorRunning) {
+    	      for (n = 0; n < MAX_CLIENTS; n++)
+	        if (!Client[n]) {
+	  	  SDLNet_TCP_AddSocket(serverSocketSet, (Client[n] = newClient));
+		  fprintf(netLog, "New connection accepted; Client %d\n", n);
+		  break;
+                }
+	        if (n == MAX_CLIENTS) SDLNet_TCP_Close(newClient); // No open slots
 	      }
-	    if (n == MAX_CLIENTS) SDLNet_TCP_Close(newClient); // No open slots
+	    } else SDLNet_TCP_Close(newClient);
 	  }
 	}
 }
