@@ -822,7 +822,9 @@ static void * emulationThread( void *_arg )
 #endif
     // load cheats for the current rom
     cheat_load_current_rom();
+
     netInitialize();
+
     if (netClientIsConnected()) {
 	osd_new_message(OSD_MIDDLE_CENTER, "Press F9 on server to begin...");
 	rompause = 1;
@@ -832,7 +834,6 @@ static void * emulationThread( void *_arg )
 	rompause = 0;
     }
     go();
-
 
 #ifdef WITH_LIRC
     lircStop();
@@ -852,8 +853,9 @@ static void * emulationThread( void *_arg )
 
     // clean up
     g_EmulationThread = 0;
-
     SDL_Quit();
+    fprintf(netGetLog(), "Calling netShutdown()\n");
+    netShutdown();
 
     if (l_Filename != 0)
     {
@@ -1353,9 +1355,6 @@ int main(int argc, char *argv[])
 
     // init multi-language support
     tr_init();
-
-    // initialize network support
-    netInitialize();
 
     // look for plugins in the install dir and set plugin config dir
     plugin_scan_installdir();

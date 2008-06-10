@@ -106,9 +106,9 @@ void netInitialize() {
 }
 
 void netShutdown() {
-  fclose(netLog);
-  clientDisconnect();
   serverStop();
+  clientDisconnect();
+  fclose(netLog);
 }
 
 /* =======================================================================================
@@ -152,21 +152,20 @@ void netMain() {
 */ 
 
 static void *serverLoop(void *_arg) {
+  int n;
   fprintf(netLog, "serverLoop() thread started.\n");
   while (netServerIsActive()) {
 	serverAcceptConnection();
 	serverProcessMessages();
   }
+  SDLNet_TCP_Close(serverSocket);
+  SDLNet_FreeSocketSet(serverSocketSet);
+  for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) serverKillClient(n);
   fprintf(netLog, "Exiting serverLoop() thread.\n");
 }
 
 void serverStop() {
-	int n;
 	fprintf(netLog, "serverStop() called.\n");
-	pthread_kill(serverThread);
-	SDLNet_FreeSocketSet(serverSocketSet);
-	for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) SDLNet_TCP_Close(Client[n]);
-	SDLNet_TCP_Close(serverSocket);
 	bServerIsActive = 0;
 }
 
