@@ -199,33 +199,31 @@ unsigned char mempack_crc(unsigned char *data)
 void internal_ReadController(int Control, BYTE *Command)
 {
    static BUTTONS KeyCache[4];
-   switch (Command[2])
-     {
-      case 1:
-    if ((Controls[Control].Present) || (netClientIsConnected()))
-      {
-         BUTTONS Keys;
+   BUTTONS Keys;
+
+   switch (Command[2]) {
+     case 1:
+
 #ifdef VCR_SUPPORT
-         VCR_getKeys(Control, &Keys);
+     VCR_getKeys(Control, &Keys);
 #else
-         getKeys(Control, &Keys);
+     getKeys(Control, &Keys);
 #endif
-	 // Update the server if we're connected to one and if the button state has actually changed
-	if (netClientIsConnected()) {
-		if (Keys.Value != KeyCache[Control].Value) {
-			netSendButtonState(Control, Keys.Value);
-			KeyCache[Control].Value = Keys.Value;
-		}
-		*((unsigned int *)(Command + 3)) = netGetKeys(Control);
-	}
-	else {
-		*((unsigned int *)(Command + 3)) = Keys.Value;
-	}
+
+     if (netClientIsConnected()) {
+        *((unsigned int *)(Command + 3)) = netGetKeys(Control);
+        if (Keys.Value != KeyCache[Control].Value) {
+          netSendButtonState(Control, Keys.Value);
+          KeyCache[Control].Value = Keys.Value;
+        }
+     }
+     else if (Controls[Control].Present) {
+	*((unsigned int *)(Command + 3)) = Keys.Value;
+     }
 
 #ifdef COMPARE_CORE
-         check_input_sync(Command+3);
+     check_input_sync(Command+3);
 #endif
-      }
     break;
 	// TODO: IMPORTANT! Make sure save packs are syncrhonized over network!
       case 2: // read controller pack
