@@ -1,3 +1,32 @@
+Mupen64Plus v1.4 - June, 2008
+-----------------------------------
+ - New feature: graphical debugger for R4300 core
+ - New feature: On Screen Display
+ - New feature: KDE4 GUI (experimental)
+ - New feature: cheat system with Gameshark codes
+ - New feature: search/filter box in GTK GUI
+ - New feature: single frame advance
+ - New feature: adjust emulator playback speed up or down in 5% increments
+ - New feature: Rumble Pak support with force feedback
+ - New feature: Map emulator functions (fullscreen, stop emulation, etc) to joystick buttons or axis movements.
+ - New feature: Volume up/down
+ - Blight Input: Individually configure each direction of X and Y axis, which allows inverting the axis
+ - JTTL_Audio: libsamplerate support for high quality audio resampling
+ - GTK GUI: Removed second status bar which was not used
+ - GTK GUI: Implemented accelerator keys
+ - GTK GUI: Replaced custom directory browser with GTK file chooser
+ - GTK GUI: numerous small changes and fixes
+ - Added Mupen64Plus 'man' (manual) page
+ - Removed mupen64_audio plugin, as it was unnecessary and mostly broken
+ - Added NoMemoryExpansion parameter to emulate 4MB console; fixes some games
+ - Overhaul of rom handling functions; numerous small fixes
+ - Bugfix: Removed NoAudioDelay core option to resolve issue #48
+ - Bugfix: check for stopped state in dynarec jump function, to fix unresponsive emulator when game gets stuck in loop
+ - Bugfix: GTK GUI: #6 - if a ROM is selected in the ROM browser and 'play' is pressed, emulation will start
+ - Bugfix: GTK GUI: #62 - ROM browser column sorting works
+ - Bugfix: Rice Video: Support hi-res textures with different scale factors for X and Y
+ - Bugfix: Blight Input: don't use 100% CPU in configuration dialog
+
 Mupen64Plus v1.3 - March 29th, 2008
 -----------------------------------
  - New feature: Glide64 video plugin for 32-bit and 64-bit, renamed project Mupen64Plus
@@ -8,7 +37,7 @@ Mupen64Plus v1.3 - March 29th, 2008
  - New feature: support for installation via "make install" or "./install.sh"
  - New feature: support for plugins given via command line option in GUI mode
  - New feature: config dialog checkbox to toggle "noask" setting
- - New feauter: pause/continue functionality with LIRC
+ - New feature: pause/continue functionality with LIRC
  - Removed messagebox utility and replaced it with cleaner alert_message/confirm_message calls
  - GTK GUI: Set parent window for all popups so WM will center popup windows over the main gui window
  - Added README file with information about usage of Mupen64Plus and plugins
