@@ -171,8 +171,8 @@ void netInteruptLoop() {
 
 
                     ts.tv_sec = 0;
-                    ts.tv_nsec = 17000000;
-                    nanosleep(&ts, NULL); // sleep for 17 ms
+                    ts.tv_nsec = 10000000;
+                    nanosleep(&ts, NULL); // sleep for 10 ms
 
                     SDL_PumpEvents();
 #ifdef WITH_LIRC
@@ -181,7 +181,10 @@ void netInteruptLoop() {
                     if (clientIsConnected()) {
 			clientProcessMessages();
 		    }
-                    if (serverIsActive()) serverAcceptConnection();
+                    if (serverIsActive()) {
+			serverAcceptConnection();
+			serverProcessMessages();
+		    }
 
 	    }
             }
@@ -227,7 +230,6 @@ int serverStart(unsigned short port) {
 	
 	if (serverSocket = SDLNet_TCP_Open(&serverAddr)) {
 		SDLNet_TCP_AddSocket(serverSocketSet, serverSocket);
-		//serverThread = pthread_create(&serverThread, NULL, serverLoop, NULL);
 		fprintf(netLog, "Server successfully initialized on port %d.\n", port);
                 bServerIsActive = 1;
 		bWaitForPlayers = 1;
@@ -273,6 +275,8 @@ void serverKillClient(int n) {
 
 void serverAcceptConnection() {
   TCPsocket newClient;
+  NetMessage msg;
+
   int n;
   SDLNet_CheckSockets(serverSocketSet, 0);
   if (SDLNet_SocketReady(serverSocket)) {
@@ -281,6 +285,13 @@ void serverAcceptConnection() {
           if (!Client[n]) {
             SDLNet_TCP_AddSocket(serverSocketSet, (Client[n] = newClient));
             fprintf(netLog, "New connection accepted; Client %d\n", n);
+            if (n > 0) {
+		fprintf(netLog, "Sending ping.\n", n);
+                msg.type = NETMSG_PING;
+                msg.genEvent.type = NETMSG_PING;
+                msg.genEvent.value = getSyncCounter();
+                serverSendMessage(newClient, &msg);
+            }
             break;
           }
         if (n == MAX_CLIENTS) SDLNet_TCP_Close(newClient); // No open slots
@@ -289,8 +300,8 @@ void serverAcceptConnection() {
 }
 
 void serverProcessMessages() {
-	NetMessage msg;
-	int recvRet, n;
+	NetMessage msg, nmsg;
+	int recvRet, n, netlag;
 
 	SDLNet_CheckSockets(serverSocketSet, 5); // 5 ms wait so server loop doesn't rail incesantly
 	for (n = 0; n < MAX_CLIENTS; n++) {
@@ -309,6 +320,13 @@ void serverProcessMessages() {
 							msg.genEvent.controller = n;
 							serverBroadcastMessage(&msg);
 						break;
+						case NETMSG_PING:
+						     netlag = getSyncCounter() - msg.genEvent.value;
+                                                     fprintf(netLog, "Server: ping received, lag %d sending sync\n", netlag);
+                                                     nmsg.genEvent.value = getSyncCounter() + netlag;
+						     nmsg.type = NETMSG_SYNC;
+						     serverSendMessage(Client[n], &nmsg);
+                                                break;
 					}
 				} else {
 					serverKillClient(n);
@@ -378,6 +396,7 @@ void clientProcessMessages() {
 					netAddEvent(incomingMessage.genEvent.type, incomingMessage.genEvent.controller,
 						  incomingMessage.genEvent.value,
 						  incomingMessage.genEvent.timer);
+                                fprintf(netLog, "Event received %d %d (%d)\n", incomingMessage.genEvent.type, incomingMessage.genEvent.timer, getSyncCounter());
 				}
 				else fprintf(netLog, "Desync Warning!: Event received for %d, current %d\n", 						incomingMessage.genEvent.timer, getSyncCounter());
 			break;
@@ -386,6 +405,14 @@ void clientProcessMessages() {
 				fprintf(netLog, "Player quit announcement %d\n", pn);
 				sprintf(announceString, "%s has disconnected.", PlayerName[pn]);
 				osd_new_message(OSD_BOTTOM_LEFT, tr(announceString));
+			break;
+			case NETMSG_PING:
+                                fprintf(netLog, "Ping received\n", incomingMessage.genEvent.value);
+                                clientSendMessage(&incomingMessage);
+			break;
+			case NETMSG_SYNC:
+                                fprintf(netLog, "Sync packet received (%d)\n", incomingMessage.genEvent.value);
+                                setSyncCounter(incomingMessage.genEvent.value);
 			break;
 			default:
 				fprintf(netLog, "Client message type error.  Dropping packet.\n");

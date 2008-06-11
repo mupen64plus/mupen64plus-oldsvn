@@ -1,14 +1,16 @@
 #define SERVER_PORT		7000
 #define MAX_CLIENTS		10
 
-#define 	NETMSG_BUTTON		0
-#define		NETMSG_STARTEMU		201	// Begin execution of ROM code
 
 #define 	NETMSG_EVENT		0
+#define		NETMSG_STARTEMU		1	// Begin execution of ROM code
+#define		NETMSG_PING		2
+#define		NETMSG_SYNC		3
 
 #define 	NET_INT_FREQ		3000 // This should be down to the milli second
 
 // Client to Server
+#define 	NETMSG_BUTTON		0
 #define		NETMSG_REQUEST		100	// Request to join a game
 
 // Server to Client
