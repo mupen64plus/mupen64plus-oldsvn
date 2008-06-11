@@ -323,7 +323,7 @@ void serverProcessMessages() {
 						case NETMSG_PING:
 						     netlag = getSyncCounter() - msg.genEvent.value;
                                                      fprintf(netLog, "Server: ping received, lag %d sending sync\n", netlag);
-                                                     nmsg.genEvent.value = getSyncCounter() + netlag;
+                                                     nmsg.genEvent.value = getSyncCounter() - netlag;
 						     nmsg.type = NETMSG_SYNC;
 						     serverSendMessage(Client[n], &nmsg);
                                                 break;
