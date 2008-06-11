@@ -209,17 +209,13 @@ PLUGINS	= plugins/blight_input.so \
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
-ifeq ($(DBG), 1)
-  ALL = mupen64plus_dbg $(PLUGINS)
-  OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL) $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
-else
-  ALL = mupen64plus $(PLUGINS)
-  OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
-endif
+ALL = mupen64plus $(PLUGINS)
+OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
 ifeq ($(DBG), 1)
+  OBJECTS +=  $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
   LIBS += -lopcodes -lbfd
 endif
 ifeq ($(VCR), 1)
@@ -281,9 +277,6 @@ mupen64plus: $(OBJECTS)
 	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
 	$(STRIP) $@
 
-mupen64plus_dbg: $(OBJECTS)
-	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
-
 install:
 	./install.sh $(PREFIX)
 
@@ -301,7 +294,7 @@ clean:
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o ./main/gui_gtk/debugger/*.o ./opengl/*.o
-	$(RM) -f mupen64plus mupen64plus_dbg
+	$(RM) -f mupen64plus
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
 	$(RM) -f main/gui_kde4/settings.cpp main/gui_kde4/settings.h main/gui_kde4/*.moc main/gui_kde4/ui_*.h main/gui_kde4/*.o
