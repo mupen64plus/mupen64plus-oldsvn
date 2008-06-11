@@ -69,6 +69,8 @@ static unsigned char	bServerIsActive = 0;	// Is the server active?
 static unsigned char    bWaitForPlayers = 0;
 static unsigned char	bNetplayEnabled = 0;
 
+static int		netDelay = 0;
+
 
 
 
@@ -92,12 +94,12 @@ void netInitialize() {
   netLog = fopen("netlog.txt", "w");
 
   netConfig = fopen("mupennet.conf", "r");
-  fscanf(netConfig, "%d %s %d\n", &start_server, &hostname, &hostport);
+  fscanf(netConfig, "server: %d\nhost: %s\nport: %d\ndelay: %d\n", &start_server, &hostname, &hostport, &netDelay);
   fclose(netConfig);
 
   fprintf(netLog, "Begining net log...\n");
 
-  fprintf(netLog, "Start_server %d\nHostname %s\nHostport %d\n", start_server, hostname, hostport);
+  fprintf(netLog, "Start_server %d\nHostname %s\nHostport %d\nnetDelay: %d\n", start_server, hostname, hostport, netDelay);
   for (n = 0; n < 4; n++) netKeys[n].Value = 0;
   for (n = 0; n < MAX_CLIENTS; n++) Client[n] = 0;
   if (SDLNet_Init() < 0) fprintf(netLog, "Failure to initialize SDLNet!\n");

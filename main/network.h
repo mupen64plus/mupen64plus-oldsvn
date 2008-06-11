@@ -1,5 +1,3 @@
-#define netDelay		16
-
 #define SERVER_PORT		7000
 #define MAX_CLIENTS		10
 
