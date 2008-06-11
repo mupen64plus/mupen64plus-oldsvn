@@ -171,7 +171,7 @@ OBJ_KDE_HEADERS = \
 	main/gui_kde4/ui_rombrowsersettingswidget.h
 
 OBJ_DBG = \
-        debugger/debugger.o \
+	debugger/debugger.o \
 	debugger/decoder.o \
 	debugger/memory.o \
 	debugger/breakpoints.o
@@ -194,7 +194,7 @@ OBJ_GTK_DBG_GUI = \
 	main/gui_gtk/debugger/regVI.o \
 	main/gui_gtk/debugger/regTLB.o \
 	main/gui_gtk/debugger/ui_clist_edit.o \
-        main/gui_gtk/debugger/ui_disasm_list.o
+	main/gui_gtk/debugger/ui_disasm_list.o
 
 PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
@@ -203,7 +203,6 @@ PLUGINS	= plugins/blight_input.so \
           plugins/ricevideo.so \
           plugins/glide64.so \
           plugins/jttl_audio.so \
-          plugins/mupen64_audio.so \
           plugins/mupen64_hle_rsp_azimer.so \
           plugins/mupen64_input.so
 
@@ -299,13 +298,12 @@ clean:
 	$(MAKE) -C rice_video clean
 	$(MAKE) -C glide64 clean
 	$(MAKE) -C jttl_audio clean
-	$(MAKE) -C mupen64_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o ./main/gui_gtk/debugger/*.o ./opengl/*.o
-	$(RM) -f mupen64plus mupen64plus_dbg 
-	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
-	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
+	$(RM) -f mupen64plus mupen64plus_dbg
+	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
+	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
 	$(RM) -f main/gui_kde4/settings.cpp main/gui_kde4/settings.h main/gui_kde4/*.moc main/gui_kde4/ui_*.h main/gui_kde4/*.o
 
 rebuild: clean all
@@ -351,10 +349,6 @@ plugins/glide64.so: FORCE
 plugins/jttl_audio.so: FORCE
 	$(MAKE) -C jttl_audio all
 	@$(CP) ./jttl_audio/jttl_audio.so ./plugins/jttl_audio.so
-
-plugins/mupen64_audio.so: FORCE
-	$(MAKE) -C mupen64_audio all
-	@$(CP) ./mupen64_audio/mupen64_audio.so ./plugins/mupen64_audio.so
 
 plugins/mupen64_hle_rsp_azimer.so: FORCE
 	$(MAKE) -C rsp_hle all
