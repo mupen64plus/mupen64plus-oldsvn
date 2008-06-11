@@ -52,6 +52,7 @@
 #include "../main/lirc.h"
 #endif //WITH_LIRC
 #include "../opengl/osd.h"
+#include "../main/network.h"
 
 unsigned int next_vi;
 int vi_field=0;
@@ -322,7 +323,6 @@ void check_interupt()
 
 void gen_interupt()
 {
-
     if (stop == 1)
     {
         vi_counter = 0; // debug
@@ -366,6 +366,7 @@ void gen_interupt()
             return;
             break;
         case VI_INT:
+            netInteruptLoop();
             if(vi_counter < 60)
             {
                 if (vi_counter == 0)
@@ -392,13 +393,12 @@ void gen_interupt()
             // if paused, poll for input events
             if(rompause)
             {
+               osd_render();  // draw Paused message in case updateScreen didn't do it
+               SDL_GL_SwapBuffers();
+
                 while(rompause)
                 {
-                    osd_render();  // draw Paused message in case updateScreen didn't do it
-                    SDL_GL_SwapBuffers();
-
-		    if (netServerIsActive()) serverAcceptConnection();
-		    netClientProcessMessages();
+                    fprintf(getNetLog(), "paused.\n");
                     struct timespec ts;
                     ts.tv_sec = 0;
                     ts.tv_nsec = 10000000;
@@ -539,7 +539,6 @@ void gen_interupt()
             if ((Status & 7) != 1) return;
             if (!(Status & Cause & 0xFF00)) return;
             break;
-
         default:
             remove_interupt_event();
             break;

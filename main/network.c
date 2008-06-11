@@ -53,22 +53,21 @@
 */ 
 
 static BUTTONS		netKeys[4];		// Key cache
-static unsigned short	netVISyncCounter = 0;	// Track VI in order to syncrhonize button events over network
+static unsigned short	SyncCounter = 0;	// Track VI in order to syncrhonize button events over network
 
 static TCPsocket	clientSocket;		// Socket descriptor for connection to server
 static SDLNet_SocketSet	clientSocketSet;	// Set for client connection to server
 static unsigned char 	bClientIsConnected = 0;	// Are we connected to a server?
 
-static NetButtonEvent	*netButtonEventQueue = NULL;	// Pointer to queue of upcoming button events
+static NetEvent	*NetEventQueue = NULL;	// Pointer to queue of upcoming button events
 static FILE		*netLog = NULL;
 
-static pthread_t        serverThread;
 static TCPsocket	serverSocket;		// Socket descriptor for server (if this is one)
 static SDLNet_SocketSet	serverSocketSet;	// Set of all connected clients, along with the server socket descriptor
 
 static unsigned char	bServerIsActive = 0;	// Is the server active?
-static unsigned char    bServerStop = 0;	// Do we need the server to stop?
-static unsigned char    bEmulatorIsRunning = 0;
+static unsigned char    bWaitForPlayers = 0;
+static unsigned char	bNetplayEnabled = 0;
 
 
 
@@ -110,7 +109,10 @@ void netInitialize() {
   }
   else n = clientConnect(hostname, hostport);
 
-  if (n) netInitButtonQueue();
+  if (n) {
+	netInitEventQueue();
+	bNetplayEnabled = 1;
+  }
   else {
     fprintf(netLog, "Client failed to connect to a server, playing offline.\n");
     netShutdown();
@@ -121,8 +123,7 @@ void netInitialize() {
 void netShutdown() {
   clientDisconnect();
   serverStop();
-  netKillButtonQueue();
-  bEmulatorIsRunning = 0;
+  netKillEventQueue();
   fprintf(netLog, "Goodbye.\n");
   fclose(netLog);
 }
@@ -135,14 +136,17 @@ void netShutdown() {
 */ 
 
 
-FILE *		netGetLog() {return netLog;}
-unsigned short	netGetSyncCounter() {return netVISyncCounter;}
-void		netSetSyncCounter(unsigned short v) {netVISyncCounter = v;}
-DWORD		netGetKeys(int control) {return netKeys[control].Value;}
-void		netSetKeys(int control, DWORD value) {netKeys[control].Value = value;}
+FILE *		getNetLog() {return netLog;}
+unsigned short	getSyncCounter() {return SyncCounter;}
+void		setSyncCounter(unsigned short v) {SyncCounter = v;}
+unsigned short  incSyncCounter() {SyncCounter++;}
+DWORD		getNetKeys(int control) {return netKeys[control].Value;}
+void		setNetKeys(int control, DWORD value) {netKeys[control].Value = value;}
 
-unsigned short	netClientIsConnected() {return bClientIsConnected;}
-unsigned short	netServerIsActive() {return bServerIsActive;}
+unsigned short	clientIsConnected() {return bClientIsConnected;}
+unsigned short	serverIsActive() {return bServerIsActive;}
+unsigned short  serverWaitingForPlayers() {return bWaitForPlayers;}
+unsigned short  netplayEnabled() {return bNetplayEnabled;}
 
 /* =======================================================================================
 
@@ -151,15 +155,41 @@ unsigned short	netServerIsActive() {return bServerIsActive;}
    =======================================================================================
 */
 
-// netMain() : Handle everything!
-void netMain() {
-  if (netServerIsActive()) serverProcessMessages();
-  if (netClientIsConnected()) {
-	netProcessButtonQueue();
-	netClientProcessMessages();
-  }
-}
+void netInteruptLoop() {
+	    if (serverWaitingForPlayers()) {
+	    fprintf(netLog, "waiting for signal to begin...\n");
+            while (serverWaitingForPlayers()) {
+                    struct timespec ts;
+                    incSyncCounter();
 
+                    osd_render();  // Continue updating OSD
+                    SDL_GL_SwapBuffers();
+
+
+                    ts.tv_sec = 0;
+                    ts.tv_nsec = 17000000;
+                    nanosleep(&ts, NULL); // sleep for 17 ms
+
+                    SDL_PumpEvents();
+#ifdef WITH_LIRC
+                    lircCheckInput();
+#endif //WITH_LIRC
+                    if (clientIsConnected()) {
+			clientProcessMessages();
+		    }
+                    if (serverIsActive()) serverAcceptConnection();
+
+	    }
+            }
+            else {
+                    incSyncCounter();
+                    if (serverIsActive()) serverProcessMessages();
+                    if (clientIsConnected()) {
+                         netProcessEventQueue();
+                         clientProcessMessages();
+                    }
+            }
+}
 
 /* =======================================================================================
 
@@ -177,7 +207,7 @@ void serverStop() {
   bServerIsActive = 0;
 }
 
-void serverStopListening() {
+void serverStopWaitingForPlayers() {
 	SDLNet_TCP_Close(serverSocket);
 	SDLNet_TCP_DelSocket(serverSocketSet, serverSocket);
 }
@@ -186,7 +216,7 @@ int serverStart(unsigned short port) {
         IPaddress serverAddr;
 
 	fprintf(netLog, "serverStart() called.\n");
-	if (netServerIsActive()) serverStop();
+	if (serverIsActive()) serverStop();
 
 	serverSocketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
 	SDLNet_ResolveHost(&serverAddr, NULL, port);
@@ -196,6 +226,7 @@ int serverStart(unsigned short port) {
 		//serverThread = pthread_create(&serverThread, NULL, serverLoop, NULL);
 		fprintf(netLog, "Server successfully initialized on port %d.\n", port);
                 bServerIsActive = 1;
+		bWaitForPlayers = 1;
 	}
 	else fprintf(netLog, "Failed to initialize server on port %d.\n", port);
 	return bServerIsActive;
@@ -231,7 +262,7 @@ void serverKillClient(int n) {
 	fprintf(netLog, "Client %d disconnected.\n", n);
 
 	msg.type = NETMSG_PLAYERQUIT;
-	msg.data.joinRequest.controller = n;
+	msg.genEvent.controller = n;
 	serverBroadcastMessage(&msg);
 	fprintf(netLog, "Broadcast player quit.\n");
 }
@@ -264,14 +295,14 @@ void serverProcessMessages() {
 				if (recvRet = serverRecvMessage(Client[n], &msg)) {
 					switch (msg.type) {
 						case NETMSG_BUTTON:
-							msg.data.buttonEvent.timer += netDelay;
+							msg.genEvent.timer += netDelay;
 							if (n < 4) {
-								msg.data.buttonEvent.controller = n;
+								msg.genEvent.controller = n;
 								serverBroadcastMessage(&msg);
 							}
 						break;
 						case NETMSG_SETNAME:
-							msg.data.joinRequest.controller = n;
+							msg.genEvent.controller = n;
 							serverBroadcastMessage(&msg);
 						break;
 					}
@@ -300,19 +331,20 @@ int clientConnect(char *server, int port) {
 		clientSocketSet = SDLNet_AllocSocketSet(1);
 		SDLNet_TCP_AddSocket(clientSocketSet, clientSocket);
 		bClientIsConnected = 1;
-		fprintf(netLog, "Client successfully connected to %s:%d.\n", server, port);
+		fprintf(netLog, "Client successfully connected to %s:%d... waiting for msg from server to start\n", server, port);
+		bWaitForPlayers = 1;
 	} else fprintf(netLog, "Client failed to connected to %s:%d.\n", server, port);
 	return bClientIsConnected;
 }
 
 void clientDisconnect() {
-	fprintf(netLog, "netClientDisconnect() called.\n");
+	fprintf(netLog, "clientDisconnect() called.\n");
 	SDLNet_FreeSocketSet(clientSocketSet);
 	SDLNet_TCP_Close(clientSocket);
 	bClientIsConnected = 0;
 }
 
-int netClientRecvMessage(NetMessage *msg) {
+int clientRecvMessage(NetMessage *msg) {
 	int netRet = 0;
 	SDLNet_CheckSockets(clientSocketSet, 0);
 	if (SDLNet_SocketReady(clientSocket))
@@ -320,45 +352,35 @@ int netClientRecvMessage(NetMessage *msg) {
 	return netRet;
 }
 
-int netClientSendMessage(NetMessage *msg) {
+int clientSendMessage(NetMessage *msg) {
   if (msg) {
-    if (netClientIsConnected()) {
+    if (clientIsConnected()) {
 	if (SDLNet_TCP_Send(clientSocket, msg, sizeof(NetMessage)) != sizeof(NetMessage))
 	  clientDisconnect();
     }
   }
 }
 
-void netClientProcessMessages() {
+void clientProcessMessages() {
 	NetMessage incomingMessage;
 	char announceString[64];
 	int n, pn;
 
-	if ((n = netClientRecvMessage(&incomingMessage)) == sizeof(NetMessage)) {
+	netProcessEventQueue();
+	if ((n = clientRecvMessage(&incomingMessage)) == sizeof(NetMessage)) {
 		switch (incomingMessage.type) {
-			case NETMSG_BUTTON:
-				if (incomingMessage.data.buttonEvent.timer > netGetSyncCounter()) {
-					netAddButtonEvent(incomingMessage.data.buttonEvent.controller,
-						  incomingMessage.data.buttonEvent.value,
-						  incomingMessage.data.buttonEvent.timer);
+			case NETMSG_EVENT:
+				if (incomingMessage.genEvent.timer > getSyncCounter()) {
+					netAddEvent(incomingMessage.genEvent.type, incomingMessage.genEvent.controller,
+						  incomingMessage.genEvent.value,
+						  incomingMessage.genEvent.timer);
 				}
-				else fprintf(netLog, "Desync Warning!: button event received for %d, current %d\n", 						incomingMessage.data.buttonEvent.timer, netGetSyncCounter());
-			break;
-			case NETMSG_STARTEMU:
-				rompause = 0;
-				fprintf(netLog, "Client STARTEMU message received.  Lets go!\n");
-				bEmulatorIsRunning = 1;
+				else fprintf(netLog, "Desync Warning!: Event received for %d, current %d\n", 						incomingMessage.genEvent.timer, getSyncCounter());
 			break;
 			case NETMSG_PLAYERQUIT:
-				pn = incomingMessage.data.joinRequest.controller;
+				pn = incomingMessage.genEvent.controller;
 				fprintf(netLog, "Player quit announcement %d\n", pn);
 				sprintf(announceString, "%s has disconnected.", PlayerName[pn]);
-				osd_new_message(OSD_BOTTOM_LEFT, tr(announceString));
-			break;
-			case NETMSG_SETNAME:
-				pn = incomingMessage.data.joinRequest.controller;
-				sprintf(announceString, "%s has changed their name to %s.", PlayerName[pn], 						incomingMessage.data.joinRequest.nickname);
-				strcpy(PlayerName[pn], incomingMessage.data.joinRequest.nickname);
 				osd_new_message(OSD_BOTTOM_LEFT, tr(announceString));
 			break;
 			default:
@@ -372,10 +394,10 @@ void netClientProcessMessages() {
 void netSendButtonState(int control, DWORD value) {
   NetMessage msg;
   msg.type = NETMSG_BUTTON;
-  msg.data.buttonEvent.controller = control;
-  msg.data.buttonEvent.value = value;
-  msg.data.buttonEvent.timer = netGetSyncCounter();
-  netClientSendMessage(&msg);
+  msg.genEvent.controller = control;
+  msg.genEvent.value = value;
+  msg.genEvent.timer = getSyncCounter();
+  clientSendMessage(&msg);
 }
 
 /* =======================================================================================
@@ -385,68 +407,79 @@ void netSendButtonState(int control, DWORD value) {
    =======================================================================================
 */ 
 
-// netProcessButtonQueue() : Process the events in the queue, if necessary.
-void netProcessButtonQueue() {
+// netProcessEventQueue() : Process the events in the queue, if necessary.
+void netProcessEventQueue() {
   int			controller, queueNotEmpty;
   DWORD			value;
   unsigned short	timer;
+  unsigned short	type;
   
-  netVISyncCounter++;
-  if (netButtonEventQueue) {
-    queueNotEmpty = netGetNextButtonEvent(&controller, &value, &timer);
-    while ((timer == netVISyncCounter) && (queueNotEmpty)) {
-	  netKeys[controller].Value = value;
-  	  netPopButtonEvent();
-          queueNotEmpty = netGetNextButtonEvent(&controller, &value, &timer);
+  if (NetEventQueue) {
+    queueNotEmpty = getNextEvent(&type, &controller, &value, &timer);
+    while ((timer == SyncCounter) && (queueNotEmpty)) {
+	switch (type) {
+          case NETMSG_BUTTON:     
+            netKeys[controller].Value = value;
+            break;
+          case NETMSG_STARTEMU:
+            fprintf(netLog, "EVENTQUEUE: Received start signal\n");
+            bWaitForPlayers = 0;
+            break;
+       }
+       netPopEvent();
+       queueNotEmpty = getNextEvent(&type, &controller, &value, &timer);
+
     }
   }
 }
 
-// netAddButtonEvent() : Add a new button event to the button event queue.
-void netAddButtonEvent(int controller, DWORD value, unsigned short timer) {
-  NetButtonEvent *newButtonEvent, *currButtonEvent;
+// netAddEvent() : Add a new button event to the button event queue.
+void netAddEvent(unsigned short type, int controller, DWORD value, unsigned short timer) {
+  NetEvent *newEvent, *currEvent;
 
-  newButtonEvent = malloc(sizeof(NetButtonEvent)); // TODO: Check for fail, even if it is unlikely
-  newButtonEvent->controller = controller;
-  newButtonEvent->value = value;
-  newButtonEvent->timer = timer;
-  newButtonEvent->next = NULL;
+  newEvent = malloc(sizeof(NetEvent)); // TODO: Check for fail, even if it is unlikely
+  newEvent->type = type;
+  newEvent->controller = controller;
+  newEvent->value = value;
+  newEvent->timer = timer;
+  newEvent->next = NULL;
 
  // TODO: Make sure queue is in order (lowest timer to highest timer) the packets may arrive out of order
-  if (netButtonEventQueue) {
-	currButtonEvent = netButtonEventQueue;
-	while(currButtonEvent->next) {currButtonEvent = currButtonEvent->next;}
-	currButtonEvent->next = newButtonEvent;
+  if (NetEventQueue) {
+	currEvent = NetEventQueue;
+	while(currEvent->next) {currEvent = currEvent->next;}
+	currEvent->next = newEvent;
   }
   else {
-	netButtonEventQueue = newButtonEvent;
+	NetEventQueue = newEvent;
   }
 }
 
-// netPopButtonEvent() : Remove the button event in the front of the queue.
-void netPopButtonEvent() {
-  NetButtonEvent *temp = netButtonEventQueue;
+// netPopEvent() : Remove the button event in the front of the queue.
+void netPopEvent() {
+  NetEvent *temp = NetEventQueue;
 
-  if (netButtonEventQueue) {
-	netButtonEventQueue = netButtonEventQueue->next;
+  if (NetEventQueue) {
+	NetEventQueue = NetEventQueue->next;
 	free(temp);
   }
 }
 
-// netGetNextButtonEvent() : Retrieve information about the button event in the front of the queue.
-int netGetNextButtonEvent(int *controller, DWORD *value, unsigned short *timer) {
+// getNextEvent() : Retrieve information about the button event in the front of the queue.
+int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned short *timer) {
   int retValue = 1;
-  NetButtonEvent *currButtonEvent = netButtonEventQueue;
+  NetEvent *currEvent = NetEventQueue;
 
-  if (netButtonEventQueue) {
-	while (currButtonEvent->timer < netGetSyncCounter()) {
-		netPopButtonEvent();
-		fprintf(netLog, "Desync Warning!: Button queue out of date (%d curr %d)! Popping next.\n",
-			currButtonEvent->timer, netGetSyncCounter());
+  if (NetEventQueue) {
+	while (NetEventQueue->timer < getSyncCounter()) {
+		fprintf(netLog, "Desync Warning!: Event queue out of date (%d curr %d)! Popping next.\n",
+			NetEventQueue->timer, getSyncCounter());
+                netPopEvent();
 	}
-	*controller = netButtonEventQueue->controller;
-	*value = netButtonEventQueue->value;
-	*timer = netButtonEventQueue->timer;
+        *type = NetEventQueue->type;
+	*controller = NetEventQueue->controller;
+	*value = NetEventQueue->value;
+	*timer = NetEventQueue->timer;
   }
   else {
     retValue = 0;
@@ -454,15 +487,15 @@ int netGetNextButtonEvent(int *controller, DWORD *value, unsigned short *timer) 
   return retValue;
 }
 
-void netInitButtonQueue() {
-  netVISyncCounter = 0;
-  while (netButtonEventQueue) netPopButtonEvent();
-  fprintf(netLog, "Button event queue initialized.\n");
+void netInitEventQueue() {
+  SyncCounter = 0;
+  while (NetEventQueue) netPopEvent();
+  fprintf(netLog, "Event queue initialized.\n");
 }
 
-void netKillButtonQueue() {
-  while (netButtonEventQueue) netPopButtonEvent();
-  fprintf(netLog, "Button event queue killed.\n");
+void netKillEventQueue() {
+  while (NetEventQueue) netPopEvent();
+  fprintf(netLog, "Event queue killed.\n");
 }
   
 

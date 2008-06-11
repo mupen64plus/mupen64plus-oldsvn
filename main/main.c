@@ -269,8 +269,6 @@ void new_vi(void)
     start_section(IDLE_SECTION);
     VI_Counter++;
 
-    netMain();
-
 #ifdef DBG
     if(debugger_mode) debugger_frontend_vi();
 #endif
@@ -550,11 +548,13 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-			if (netServerIsActive()) {
+			if (serverIsActive()) {
 				NetMessage startmsg;
-				startmsg.type = NETMSG_STARTEMU;
+				startmsg.type = NETMSG_BUTTON;
+				startmsg.genEvent.type =  NETMSG_STARTEMU;
+				startmsg.genEvent.timer = getSyncCounter() + netDelay;
 				serverBroadcastMessage(&startmsg);
-				serverStopListening();
+				serverStopWaitingForPlayers();
 			}
                     break;
 
@@ -823,16 +823,15 @@ static void * emulationThread( void *_arg )
     cheat_load_current_rom();
 
     netInitialize();
-
-    if (netClientIsConnected()) {
-	if (netServerIsActive()) osd_new_message(OSD_MIDDLE_CENTER, "Press F9 to begin");
-	else osd_new_message(OSD_MIDDLE_CENTER, "Waiting on server to begin");
-	rompause = 1;
+    if (netplayEnabled()) {
+      if (serverIsActive()) {
+        osd_new_message(OSD_MIDDLE_CENTER, "Press F9 to begin.");
+      }
+      else {
+        osd_new_message(OSD_MIDDLE_CENTER, "Waiting for server to begin.");
+      }
     }
-    else {
-	osd_new_message(OSD_MIDDLE_CENTER, "Failed to connect to server. Check netlog.");
-	rompause = 0;
-    }
+    else osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
     go();
 
 #ifdef WITH_LIRC
@@ -854,7 +853,7 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    netShutdown();
+    if (netplayEnabled()) netShutdown();
 
     if (l_Filename != 0)
     {
