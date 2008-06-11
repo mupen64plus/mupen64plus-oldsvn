@@ -171,8 +171,8 @@ void netInteruptLoop() {
 
 
                     ts.tv_sec = 0;
-                    ts.tv_nsec = 10000000;
-                    nanosleep(&ts, NULL); // sleep for 10 ms
+                    ts.tv_nsec = 100000000;
+                    nanosleep(&ts, NULL); // sleep for 100 ms
 
                     SDL_PumpEvents();
 #ifdef WITH_LIRC
@@ -309,12 +309,14 @@ void serverProcessMessages() {
 			if (SDLNet_SocketReady(Client[n])) {
 				if (recvRet = serverRecvMessage(Client[n], &msg)) {
 					switch (msg.type) {
-						case NETMSG_BUTTON:
-							msg.genEvent.timer += netDelay;
-							if (n < 4) {
+						case NETMSG_EVENT:
+                                                        if (msg.genEvent.type == NETMSG_BUTTON) {
+							    msg.genEvent.timer += netDelay;
+							    if (n < 4) {
 								msg.genEvent.controller = n;
 								serverBroadcastMessage(&msg);
-							}
+							    }
+                                                        }
 						break;
 						case NETMSG_SETNAME:
 							msg.genEvent.controller = n;
@@ -322,7 +324,7 @@ void serverProcessMessages() {
 						break;
 						case NETMSG_PING:
 						     netlag = getSyncCounter() - msg.genEvent.value;
-                                                     fprintf(netLog, "Server: ping received, lag %d sending sync\n", netlag);
+                                                     fprintf(netLog, "Server: ping received, lag %d sending sync (current %d)\n", netlag, getSyncCounter());
                                                      nmsg.genEvent.value = getSyncCounter() - netlag;
 						     nmsg.type = NETMSG_SYNC;
 						     serverSendMessage(Client[n], &nmsg);
