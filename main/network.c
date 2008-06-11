@@ -138,6 +138,7 @@ void netShutdown() {
 */ 
 
 
+unsigned short  getNetDelay() {return netDelay;}
 FILE *		getNetLog() {return netLog;}
 unsigned short	getSyncCounter() {return SyncCounter;}
 void		setSyncCounter(unsigned short v) {SyncCounter = v;}
