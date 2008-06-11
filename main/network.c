@@ -161,6 +161,7 @@ unsigned short  netplayEnabled() {return bNetplayEnabled;}
 void netInteruptLoop() {
 	    if (serverWaitingForPlayers()) {
 	    fprintf(netLog, "waiting for signal to begin...\n");
+            SyncCounter = 0;
             while (serverWaitingForPlayers()) {
                     struct timespec ts;
                     incSyncCounter();
