@@ -44,7 +44,7 @@
 #include "../main/plugin.h"
 #include "../main/guifuncs.h"
 #include "../main/vcr.h"
-#include "../main/network.h"
+#include "../network/network.h"
 #include "../opengl/osd.h"
 
 static unsigned char eeprom[0x800];

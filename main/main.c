@@ -67,7 +67,7 @@
 #include "cheat.h"
 #include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
-#include "network.h"
+#include "../network/network.h"
 
 #ifdef DBG
 #include <glib.h>
@@ -548,7 +548,8 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-			if (serverIsActive() && serverWaitingForPlayers()) serverBroadcastStart();
+			if (serverIsActive() && clientWaitingForServer()) serverBroadcastStart();
+                        // We should be checking Server.isAccepting, not called clientWaitingForServer :(
                     break;
 
                 case SDLK_ESCAPE:

@@ -71,7 +71,9 @@ OBJ_CORE = \
 	main/savestates.o \
 	main/unzip.o \
 	main/volume.o \
-	main/network.o \
+	network/network.o \
+	network/client.o \
+	network/server.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \

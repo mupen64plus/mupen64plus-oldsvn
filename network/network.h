@@ -11,6 +11,11 @@
 
    =======================================================================================
 */ 
+#include "../main/main.h"
+#include "../r4300/r4300.h"
+#include "../opengl/osd.h"
+#include "../main/plugin.h"
+#include <sys/types.h>
 #include <SDL_net.h>
 
 #define SERVER_PORT		7000
@@ -24,15 +29,21 @@
 #define 	NETMSG_BUTTON		0
 #define		NETMSG_PLAYERQUIT	205	// Player disconnect
 
-
-
 typedef struct TNetPlayer {
-        BUTTONS    keys;
         short      lag;
         TCPsocket  socket;
         char       nick[20];
         BOOL       isConnected;
 } NetPlayer;
+
+typedef struct TMupenServer {
+	TCPsocket        socket;        // Socket descriptor for server
+	SDLNet_SocketSet socketSet;     // Set of all connected clients, along with the server socket descriptor
+	int		 netDelay;      // For LCD network latency
+        NetPlayer        player[MAX_CLIENTS];
+        BOOL             isActive;
+        BOOL		 isAccepting;
+} MupenServer;
 
 // I made sure to use integer types here that were safe to send between 32bit and 64bit platforms
 typedef struct TNetEvent {
@@ -57,13 +68,34 @@ typedef struct TNetMessage {
 void netInitialize();
 void netShutdown();
 void netInteruptLoop();
-void clientSendButtons(int control, DWORD value);
 
 DWORD		getNetKeys(int control);
 void		setNetKeys(int control, DWORD value);
 u_int16_t	getEventCounter();
 unsigned short	clientIsConnected();
-unsigned short	netServerIsActive();
-unsigned short  serverWaitingForPlayers();
+
+BOOL serverIsActive();
+int serverStart(unsigned short port);
+void serverStop();
+void serverStopListening();
+void serverProcessMessages();
+void serverAcceptConnection();
+void serverBootPlayer(int n);
+
+int clientRecvMessage(NetMessage *msg);
+int clientSendMessage(NetMessage *msg);
+void clientProcessMessages();
+int clientConnect(char *server, int port);
+void clientDisconnect();
+void netProcessMessages();
+void addEventToQueue(unsigned short type, int controller, DWORD value, unsigned short timer);
+int netGetNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned short *timer);
+BOOL clientWaitingForServer();
+void popEventQueue();
+void processEventQueue();
+void initEventQueue();
+void killEventQueue();
+void clientSendButtons(int control, DWORD value);
+
 
 
