@@ -548,8 +548,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-			if (serverIsActive() && clientWaitingForServer()) serverBroadcastStart();
-                        // We should be checking Server.isAccepting, not called clientWaitingForServer :(
+			if (serverIsActive() && serverIsAccepting()) serverBroadcastStart();
                     break;
 
                 case SDLK_ESCAPE:

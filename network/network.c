@@ -21,8 +21,10 @@
 
 
 static FILE		*netLog = NULL;
-
 static unsigned char	bNetplayEnabled = 0;
+
+FILE *		getNetLog() {return netLog;}
+unsigned short  netplayEnabled() {return bNetplayEnabled;}
 
 unsigned int gettimeofday_msec(void)
 {
@@ -34,51 +36,62 @@ unsigned int gettimeofday_msec(void)
     return foo;
 }
 
+/* ======================================================================================
 
-FILE *		getNetLog() {return netLog;}
+      netInitialize()
 
-unsigned short  netplayEnabled() {return bNetplayEnabled;}
 
+
+========================================================================================= */
 
 void netInitialize() {
-  int n = 0, start_server, hostport;
-  char hostname[20];
-
+  int n = 0, start_server = 0, hostport = 0;
+  char hostname[20] = "";
   FILE *netConfig;
+
   netLog = fopen("netlog.txt", "w");
   fprintf(netLog, "Begining net log...\n");
-
   netConfig = fopen("mupennet.conf", "r");
-
-  if (!netConfig) { // If we failed to open the configuration file, quit.
-     fprintf(netLog, "Failed to open mupennet.conf configuration file.\nGoodbye.");
-     return;
-  } 
-
-  fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &start_server, &hostname, &hostport);
-  fclose(netConfig);
+  if (!netConfig) {
+     fprintf(netLog, "Failed to open mupennet.conf configuration file.\n");
+     start_server = 1;
+  } else {
+     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &start_server, &hostname, &hostport);
+     fclose(netConfig);
+  }
 
   fprintf(netLog, "Start_server %d\nHostname %s\nHostport %d\n", start_server, hostname, hostport);
 
-  if (SDLNet_Init() < 0) fprintf(netLog, "Failure to initialize SDLNet!\n");
+  if (SDLNet_Init() < 0) {
+     fprintf(netLog, "Failure to initialize SDLNet!\n");
+     return;
+  }
 
-  // If server started locally, always connect!
+  clientInitialize();
+  serverInitialize();
   if (start_server) {
-    serverStart(SERVER_PORT);
-    n = clientConnect("localhost", 7000);
+      serverStart(SERVER_PORT);
+      n = clientConnect("localhost", 7000);
   }
   else n = clientConnect(hostname, hostport);
 
   if (n) {
-	initEventQueue();
-	bNetplayEnabled = 1;
+      initEventQueue();
+      bNetplayEnabled = 1;
   }
   else {
-    fprintf(netLog, "Client failed to connect to a server, playing offline.\n");
-    netShutdown();
+      fprintf(netLog, "Client failed to connect to a server, playing offline.\n");
+      netShutdown();
   }
 
 }
+/* ======================================================================================
+
+      netShutdown()
+
+
+
+========================================================================================= */
 
 void netShutdown() {
   if (clientIsConnected()) {
@@ -92,6 +105,13 @@ void netShutdown() {
   fclose(netLog);
 }
 
+/* ======================================================================================
+
+      netInteruptLoop()
+
+          This function is called each time a vertical interupt is issued.
+
+========================================================================================= */
 
 void netInteruptLoop() {
             struct timespec ts;
@@ -116,8 +136,8 @@ void netInteruptLoop() {
 			serverProcessMessages();
 		    }
                     nanosleep(&ts, NULL); // sleep for 5 milliseconds so it doesn't rail the processor
-              setEventCounter(0);
 	      }
+              setEventCounter(0);
             }
             else {
                     incEventCounter();

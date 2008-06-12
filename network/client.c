@@ -17,51 +17,48 @@
 */ 
 
 #include "network.h"
+MupenClient     Client;
 
-static u_int16_t	EventCounter = 0;	// Track VI in order to syncrhonize button events over network
-static TCPsocket	clientSocket;		// Socket descriptor for connection to server
-static SDLNet_SocketSet	clientSocketSet;	// Set for client connection to server
-static NetEvent		*NetEventQueue = NULL;	// Pointer to queue of upcoming button events
-static unsigned char 	bClientIsConnected = 0;	// Are we connected to a server?
-static BUTTONS          playerKeys[MAX_CLIENTS];
-static int              bWaitingForServer = 0;
+DWORD		getNetKeys(int control) {return Client.playerKeys[control].Value;}
+void		setNetKeys(int control, DWORD value) {Client.playerKeys[control].Value = value;}
+BOOL            clientWaitingForServer() { return Client.isWaitingForServer;}
+BOOL            clientIsConnected() {return Client.isConnected;}
+u_int16_t	getEventCounter() {return Client.eventCounter;}
+void		setEventCounter(u_int16_t v) {Client.eventCounter = v;}
+void            incEventCounter() {Client.eventCounter++;}
 
-DWORD		getNetKeys(int control) {return playerKeys[control].Value;}
-void		setNetKeys(int control, DWORD value) {playerKeys[control].Value = value;}
-BOOL            clientWaitingForServer() { return bWaitingForServer;}
-u_int16_t	getEventCounter() {return EventCounter;}
-void		setEventCounter(u_int16_t v) {EventCounter = v;}
-unsigned short  incEventCounter() {EventCounter++;}
 
-unsigned short	clientIsConnected() {return bClientIsConnected;}
+void clientInitialize() {
+        memset(&Client, 0, sizeof(Client));
+}
 
 int clientConnect(char *server, int port) {
 	IPaddress serverAddr;
 	int n;
 
-	fprintf((FILE *)getNetLog(), "clientConnect() called.\n");
+        if (clientIsConnected()) clientDisconnect();
 	SDLNet_ResolveHost(&serverAddr, server, port);
-	if (clientSocket = SDLNet_TCP_Open(&serverAddr)) {
-		clientSocketSet = SDLNet_AllocSocketSet(1);
-		SDLNet_TCP_AddSocket(clientSocketSet, clientSocket);
-		bClientIsConnected = 1;
+	if (Client.socket = SDLNet_TCP_Open(&serverAddr)) {
+		Client.socketSet = SDLNet_AllocSocketSet(1);
+		SDLNet_TCP_AddSocket(Client.socketSet, Client.socket);
+		Client.isConnected = 1;
 		fprintf((FILE *)getNetLog(), "Client successfully connected to %s:%d.\n", server, port);
-		bWaitingForServer = 1;
+		Client.isWaitingForServer = 1;
 	} else fprintf((FILE *)getNetLog(), "Client failed to connected to %s:%d.\n", server, port);
-	return bClientIsConnected;
+	return Client.isConnected;
 }
 
 void clientDisconnect() {
-	fprintf((FILE *)getNetLog(), "clientDisconnect() called.\n");
-	SDLNet_FreeSocketSet(clientSocketSet);
-	SDLNet_TCP_Close(clientSocket);
-	bClientIsConnected = 0;
+	fprintf((FILE *)getNetLog(), "Client: clientDisconnect() called.\n");
+	SDLNet_FreeSocketSet(Client.socketSet);
+	SDLNet_TCP_Close(Client.socket);
+	Client.isConnected = 0;
 }
 
 int clientSendMessage(NetMessage *msg) {
   if (msg) {
     if (clientIsConnected()) {
-	if (SDLNet_TCP_Send(clientSocket, msg, sizeof(NetMessage)) != sizeof(NetMessage))
+	if (SDLNet_TCP_Send(Client.socket, msg, sizeof(NetMessage)) != sizeof(NetMessage))
 	  clientDisconnect();
     }
   }
@@ -73,12 +70,12 @@ void clientProcessMessages() {
 	int n, pn;
 
         if (!clientIsConnected()) return; // exit now if the client isnt' connected
-        SDLNet_CheckSockets(clientSocketSet, 0);
-        if (!SDLNet_SocketReady(clientSocket)) return; // exit now if there aren't any messages to fetch.
-        n = SDLNet_TCP_Recv(clientSocket, &incomingMessage, sizeof(NetMessage));
+        SDLNet_CheckSockets(Client.socketSet, 0);
+        if (!SDLNet_SocketReady(Client.socket)) return; // exit now if there aren't any messages to fetch.
+        n = SDLNet_TCP_Recv(Client.socket, &incomingMessage, sizeof(NetMessage));
 
         if (n <= 0) {
-          osd_new_message(OSD_BOTTOM_LEFT, tr("You've been disconnected from the server."));
+          osd_new_message(OSD_BOTTOM_LEFT, (void *)tr("You've been disconnected from the server."));
           netShutdown();
           return;
         }
@@ -98,13 +95,13 @@ void clientProcessMessages() {
 			break;
                         case NETMSG_STARTEMU:
                                 fprintf((FILE *)getNetLog(), "Client: STARTEMU message received.\n");
-                                bWaitingForServer = 0;
+                                Client.isWaitingForServer = 0;
                         break;
 			case NETMSG_PLAYERQUIT:
 				pn = incomingMessage.genEvent.controller;
 				fprintf((FILE *)getNetLog(), "Client: Player quit announcement %d\n", pn);
 				sprintf(announceString, "Player %d has disconnected.", pn+1);
-				osd_new_message(OSD_BOTTOM_LEFT, tr(announceString));
+				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(announceString));
 			break;
 			case NETMSG_PING:
                                 fprintf((FILE *)getNetLog(), "Client: Ping received.  Returning.\n", incomingMessage.genEvent.value);
@@ -148,9 +145,9 @@ void processEventQueue() {
   unsigned short	timer;
   unsigned short	type;
   
-  if (NetEventQueue) {
+  if (Client.eventQueue) {
     queueNotEmpty = getNextEvent(&type, &controller, &value, &timer);
-    while ((timer == EventCounter) && (queueNotEmpty)) {
+    while ((timer == Client.eventCounter) && (queueNotEmpty)) {
 	switch (type) {
           case NETMSG_BUTTON:     
             setNetKeys(controller, value);
@@ -175,22 +172,22 @@ void addEventToQueue(unsigned short type, int controller, DWORD value, unsigned 
   newEvent->next = NULL;
 
  // TODO: Make sure queue is in order (lowest timer to highest timer) the packets may arrive out of order
-  if (NetEventQueue) {
-	currEvent = NetEventQueue;
+  if (Client.eventQueue) {
+	currEvent = Client.eventQueue;
 	while(currEvent->next) {currEvent = currEvent->next;}
 	currEvent->next = newEvent;
   }
   else {
-	NetEventQueue = newEvent;
+	Client.eventQueue = newEvent;
   }
 }
 
 // popEventQueue() : Remove the event in the front of the queue.
 void popEventQueue() {
-  NetEvent *temp = NetEventQueue;
+  NetEvent *temp = Client.eventQueue;
 
-  if (NetEventQueue) {
-	NetEventQueue = NetEventQueue->next;
+  if (Client.eventQueue) {
+	Client.eventQueue = Client.eventQueue->next;
 	free(temp);
   }
 }
@@ -198,18 +195,18 @@ void popEventQueue() {
 // getNextEvent() : Retrieve information about the event in the front of the queue.
 int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned short *timer) {
   int retValue = 1;
-  NetEvent *currEvent = NetEventQueue;
+  NetEvent *currEvent = Client.eventQueue;
 
-  if (NetEventQueue) {
-	while (NetEventQueue->timer < getEventCounter()) {
+  if (Client.eventQueue) {
+	while (Client.eventQueue->timer < getEventCounter()) {
 		fprintf((FILE *)getNetLog(), "Desync Warning!: Event queue out of date (%d curr %d)! Popping next.\n",
-			NetEventQueue->timer, getEventCounter());
+			Client.eventQueue->timer, getEventCounter());
                 popEventQueue();
 	}
-        *type = NetEventQueue->type;
-	*controller = NetEventQueue->controller;
-	*value = NetEventQueue->value;
-	*timer = NetEventQueue->timer;
+        *type = Client.eventQueue->type;
+	*controller = Client.eventQueue->controller;
+	*value = Client.eventQueue->value;
+	*timer = Client.eventQueue->timer;
   }
   else {
     retValue = 0;
@@ -218,12 +215,12 @@ int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned s
 }
 
 void initEventQueue() {
-  while (NetEventQueue) popEventQueue();
+  while (Client.eventQueue) popEventQueue();
   fprintf((FILE *)getNetLog(), "Event queue initialized.\n");
 }
 
 void killEventQueue() {
-  while (NetEventQueue) popEventQueue();
+  while (Client.eventQueue) popEventQueue();
   fprintf((FILE *)getNetLog(), "Event queue killed.\n");
 }
   

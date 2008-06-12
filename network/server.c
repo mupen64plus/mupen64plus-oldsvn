@@ -1,23 +1,32 @@
+/* =======================================================================================
+
+	server.c
+	by orbitaldecay
+
+	Current problems (bugs that need fixing):
+
+	When playing multiplayer, all of the controllers must be enabled in the plugin
+	if input is being received over the net.  Haven't found an easy way of fixing
+	this yet.
+
+        All clients must be using the same core.
+
+        Obviously all clients must use the same rom, the server doesn't check yet.
+
+   =======================================================================================
+*/ 
+
 #include "network.h"
 
 MupenServer		Server;
 
 BOOL            serverIsActive() {return Server.isActive;}
+BOOL            serverIsAccepting() {return Server.isAccepting;}
 unsigned short  getNetDelay() {return Server.netDelay;}
 
 
-void serverStop() {
-  int n;
-  fprintf((FILE *)getNetLog(), "serverStop() called.\n");
-  for (n = 0; n < MAX_CLIENTS; n++) if (Server.player[n].isConnected) serverBootPlayer(n);
-  SDLNet_TCP_Close(Server.socket);
-  SDLNet_FreeSocketSet(Server.socketSet);
-  Server.isActive = 0;
-}
-
-void serverStopWaitingForPlayers() {
-	SDLNet_TCP_Close(Server.socket);
-	SDLNet_TCP_DelSocket(Server.socketSet, Server.socket);
+void serverInitialize() {
+        memset(&Server, 0, sizeof(Server));
 }
 
 int serverStart(unsigned short port) {
@@ -26,7 +35,6 @@ int serverStart(unsigned short port) {
 	fprintf((FILE *)getNetLog(), "serverStart() called.\n");
 	if (serverIsActive()) serverStop();
 
-        memset(&Server, 0, sizeof(Server));
 	Server.socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
 	SDLNet_ResolveHost(&serverAddr, NULL, port);
 	
@@ -38,6 +46,22 @@ int serverStart(unsigned short port) {
 	}
 	else fprintf((FILE *)getNetLog(), "Failed to initialize server on port %d.\n", port);
 	return Server.isActive;
+}
+
+void serverStop() {
+  int n;
+  fprintf((FILE *)getNetLog(), "serverStop() called.\n");
+  for (n = 0; n < MAX_CLIENTS; n++) if (Server.player[n].isConnected) serverBootPlayer(n);
+  SDLNet_TCP_Close(Server.socket);
+  SDLNet_FreeSocketSet(Server.socketSet);
+  Server.isActive = 0;
+  Server.isAccepting = 0;
+}
+
+void serverStopWaitingForPlayers() {
+	SDLNet_TCP_Close(Server.socket);
+	SDLNet_TCP_DelSocket(Server.socketSet, Server.socket);
+        Server.isAccepting = 0;
 }
 
 int serverBroadcastMessage(NetMessage *msg) {

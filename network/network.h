@@ -3,12 +3,6 @@
 	network.h
 	by orbitaldecay
 
-	KNOWN BUGS THAT NEED FIXING:
-
-	When playing multiplayer, all of the controllers must be enabled in the plugin
-	if input is being received over the net.  Haven't found an easy way of fixing
-	this yet.
-
    =======================================================================================
 */ 
 #include "../main/main.h"
@@ -28,22 +22,6 @@
 
 #define 	NETMSG_BUTTON		0
 #define		NETMSG_PLAYERQUIT	205	// Player disconnect
-
-typedef struct TNetPlayer {
-        short      lag;
-        TCPsocket  socket;
-        char       nick[20];
-        BOOL       isConnected;
-} NetPlayer;
-
-typedef struct TMupenServer {
-	TCPsocket        socket;        // Socket descriptor for server
-	SDLNet_SocketSet socketSet;     // Set of all connected clients, along with the server socket descriptor
-	int		 netDelay;      // For LCD network latency
-        NetPlayer        player[MAX_CLIENTS];
-        BOOL             isActive;
-        BOOL		 isAccepting;
-} MupenServer;
 
 // I made sure to use integer types here that were safe to send between 32bit and 64bit platforms
 typedef struct TNetEvent {
@@ -65,6 +43,33 @@ typedef struct TNetMessage {
         } genEvent;
 } NetMessage;
 
+typedef struct TNetPlayer {
+        short      lag;
+        TCPsocket  socket;
+        char       nick[20];
+        BOOL       isConnected;
+} NetPlayer;
+
+typedef struct TMupenClient {
+        u_int16_t          eventCounter;            // Track VI in order to syncrhonize button events over network
+        NetEvent          *eventQueue;              // Pointer to queue of upcoming button events
+        TCPsocket          socket;                  // Socket descriptor for connection to server
+        SDLNet_SocketSet   socketSet;               // Set for client connection to server
+        BUTTONS            playerKeys[MAX_CLIENTS];
+        BOOL               isConnected;
+        BOOL               isWaitingForServer;
+} MupenClient;
+
+typedef struct TMupenServer {
+	TCPsocket        socket;        // Socket descriptor for server
+	SDLNet_SocketSet socketSet;     // Set of all connected clients, along with the server socket descriptor
+	int		 netDelay;      // For LCD network latency
+        NetPlayer        player[MAX_CLIENTS];
+        BOOL             isActive;
+        BOOL		 isAccepting;
+} MupenServer;
+
+
 void netInitialize();
 void netShutdown();
 void netInteruptLoop();
@@ -72,8 +77,8 @@ void netInteruptLoop();
 DWORD		getNetKeys(int control);
 void		setNetKeys(int control, DWORD value);
 u_int16_t	getEventCounter();
-unsigned short	clientIsConnected();
 
+void serverInitialize();
 BOOL serverIsActive();
 int serverStart(unsigned short port);
 void serverStop();
@@ -82,6 +87,7 @@ void serverProcessMessages();
 void serverAcceptConnection();
 void serverBootPlayer(int n);
 
+void clientInitialize();
 int clientRecvMessage(NetMessage *msg);
 int clientSendMessage(NetMessage *msg);
 void clientProcessMessages();
@@ -90,6 +96,7 @@ void clientDisconnect();
 void netProcessMessages();
 void addEventToQueue(unsigned short type, int controller, DWORD value, unsigned short timer);
 int netGetNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned short *timer);
+BOOL clientIsConnected();
 BOOL clientWaitingForServer();
 void popEventQueue();
 void processEventQueue();
