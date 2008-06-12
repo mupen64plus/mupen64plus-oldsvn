@@ -101,7 +101,7 @@ void netInitialize() {
   netLog = fopen("netlog.txt", "w");
 
   netConfig = fopen("mupennet.conf", "r");
-  fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &start_server, &hostname, &hostport, &netDelay);
+  fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &start_server, &hostname, &hostport);
   fclose(netConfig);
 
   fprintf(netLog, "Begining net log...\n");
@@ -166,6 +166,7 @@ unsigned short  netplayEnabled() {return bNetplayEnabled;}
 */
 
 void netInteruptLoop() {
+            struct timespec ts;
 	    if (serverWaitingForPlayers()) {
               fprintf(netLog, "waiting for signal to begin...\n");
 
@@ -183,15 +184,18 @@ void netInteruptLoop() {
 			serverAcceptConnection();
 			serverProcessMessages();
 		    }
-              SyncCounter = 0;
+                    ts.tv_sec = 0;
+                    ts.tv_nsec = 5000000;
+                    nanosleep(&ts, NULL); // sleep for 5 milliseconds so it doesn't rail the processor
 	      }
+            SyncCounter = 0;
             }
             else {
                     incSyncCounter();
                     if (serverIsActive()) serverProcessMessages();
                     if (clientIsConnected()) {
-                         netProcessEventQueue();
                          clientProcessMessages();
+                         netProcessEventQueue();
                     }
             }
 }
@@ -301,7 +305,7 @@ void serverProcessMessages() {
 	NetMessage msg, nmsg;
 	int recvRet, n, netlag;
 
-	SDLNet_CheckSockets(serverSocketSet, 5); // 5 ms wait so server loop doesn't rail incesantly
+	SDLNet_CheckSockets(serverSocketSet, 0);
 	for (n = 0; n < MAX_CLIENTS; n++) {
 		if (Client[n]) {
 			if (SDLNet_SocketReady(Client[n])) {
@@ -425,14 +429,6 @@ void clientDisconnect() {
 	bClientIsConnected = 0;
 }
 
-int clientRecvMessage(NetMessage *msg) {
-	int netRet = 0;
-	SDLNet_CheckSockets(clientSocketSet, 0);
-	if (SDLNet_SocketReady(clientSocket))
-		netRet = SDLNet_TCP_Recv(clientSocket, msg, sizeof(NetMessage));
-	return netRet;
-}
-
 int clientSendMessage(NetMessage *msg) {
   if (msg) {
     if (clientIsConnected()) {
@@ -447,15 +443,20 @@ void clientProcessMessages() {
 	char announceString[64];
 	int n, pn;
 
-	netProcessEventQueue();
-	if ((n = clientRecvMessage(&incomingMessage)) == sizeof(NetMessage)) {
+        if (!clientIsConnected()) return; // exit now if the client isnt' connected
+        SDLNet_CheckSockets(clientSocketSet, 0);
+        if (!SDLNet_SocketReady(clientSocket)) return; // exit now if there aren't any messages to fetch.
+
+	if ((n = SDLNet_TCP_Recv(clientSocket, &incomingMessage, sizeof(NetMessage))) == sizeof(NetMessage)) {
 		switch (incomingMessage.type) {
 			case NETMSG_EVENT:
 				if (incomingMessage.genEvent.timer > getSyncCounter()) {
 					netAddEvent(incomingMessage.genEvent.type, incomingMessage.genEvent.controller,
 						  incomingMessage.genEvent.value,
 						  incomingMessage.genEvent.timer);
-                                fprintf(netLog, "Event received %d %d (%d)\n", incomingMessage.genEvent.type, incomingMessage.genEvent.timer, getSyncCounter());
+                                fprintf(netLog, "Event received %d %d (%d)\n", incomingMessage.genEvent.type,
+                                                                               incomingMessage.genEvent.timer,
+                                                                               getSyncCounter());
 				}
 				else fprintf(netLog, "Desync Warning!: Event received for %d, current %d\n", 						incomingMessage.genEvent.timer, getSyncCounter());
 			break;
@@ -482,7 +483,8 @@ void clientProcessMessages() {
 			break;
 
 		}
-	} else if (n != 0) fprintf(netLog, "Client message size error.  Dropping packet.\n"); // Check for server disconnects!
+	} else fprintf(netLog, "Client message size error (%d).\n", n);
+
 }
 
 void netSendButtonState(int control, DWORD value) {
