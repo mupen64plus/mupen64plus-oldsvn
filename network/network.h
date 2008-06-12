@@ -15,13 +15,14 @@
 #define SERVER_PORT		7000
 #define MAX_CLIENTS		10
 
-#define 	NETMSG_EVENT		0
+#define 	NETMSG_EVENT		0       // Time sensitive input events
 #define		NETMSG_STARTEMU		1	// Begin execution of ROM code
-#define		NETMSG_PING		2
-#define		NETMSG_SYNC		3
+#define		NETMSG_PING		2       // Used to detect latency
+#define		NETMSG_DESYNC		3       // Client sends this when they've desynced
+#define		NETMSG_PLAYERQUIT	4	// Player disconnect
 
-#define 	NETMSG_BUTTON		0
-#define		NETMSG_PLAYERQUIT	205	// Player disconnect
+#define 	EVENT_BUTTON		0
+
 
 // I made sure to use integer types here that were safe to send between 32bit and 64bit platforms
 typedef struct TNetEvent {
@@ -69,8 +70,14 @@ typedef struct TMupenServer {
         BOOL		 isAccepting;
 } MupenServer;
 
+typedef struct TNetPlaySettings {
+        BOOL             runServer;
+        char             hostname[128];
+        u_int16_t        port;
+} NetPlaySettings;
 
-void netInitialize();
+void net_init();
+void netEmuStart();
 void netShutdown();
 void netInteruptLoop();
 

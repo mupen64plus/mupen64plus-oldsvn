@@ -815,7 +815,7 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    netInitialize();
+    netStartNetplay();
 
     if (netplayEnabled()) {
       if (serverIsActive()) {
@@ -1347,6 +1347,7 @@ int main(int argc, char *argv[])
 
     // init multi-language support
     tr_init();
+    net_init();
 
     // look for plugins in the install dir and set plugin config dir
     plugin_scan_installdir();

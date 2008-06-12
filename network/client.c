@@ -36,7 +36,10 @@ int clientConnect(char *server, int port) {
 	IPaddress serverAddr;
 	int n;
 
+
         if (clientIsConnected()) clientDisconnect();
+        initEventQueue();
+
 	SDLNet_ResolveHost(&serverAddr, server, port);
 	if (Client.socket = SDLNet_TCP_Open(&serverAddr)) {
 		Client.socketSet = SDLNet_AllocSocketSet(1);
@@ -53,6 +56,7 @@ void clientDisconnect() {
 	SDLNet_FreeSocketSet(Client.socketSet);
 	SDLNet_TCP_Close(Client.socket);
 	Client.isConnected = 0;
+        killEventQueue();
 }
 
 int clientSendMessage(NetMessage *msg) {
@@ -65,9 +69,9 @@ int clientSendMessage(NetMessage *msg) {
 }
 
 void clientProcessMessages() {
-	NetMessage incomingMessage;
-	char announceString[64];
-	int n, pn;
+	NetMessage incomingMessage, outgoingMessage;
+	char osdString[64];
+	int n, playerNumber;
 
         if (!clientIsConnected()) return; // exit now if the client isnt' connected
         SDLNet_CheckSockets(Client.socketSet, 0);
@@ -81,6 +85,7 @@ void clientProcessMessages() {
         }
 
 	if (n == sizeof(NetMessage)) {
+                playerNumber = incomingMessage.genEvent.controller;
 		switch (incomingMessage.type) {
 			case NETMSG_EVENT:
 				if (incomingMessage.genEvent.timer > getEventCounter()) {
@@ -91,25 +96,28 @@ void clientProcessMessages() {
                                                                                incomingMessage.genEvent.timer,
                                                                                getEventCounter());
 				}
-				else fprintf((FILE *)getNetLog(), "Desync Warning!: Event received for %d, current %d\n", 						incomingMessage.genEvent.timer, getEventCounter());
+				else {
+                                   fprintf((FILE *)getNetLog(), "Desync Warning!: Event received for %d, current %d\n",
+                                                                         incomingMessage.genEvent.timer, getEventCounter());
+                                   outgoingMessage.type = NETMSG_DESYNC;
+                                   clientSendMessage(&outgoingMessage);
+                                }
 			break;
+                        case NETMSG_DESYNC:
+                                fprintf((FILE *)getNetLog(), "Client: Player %d DESYNC!\n", playerNumber + 1);
+				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
+				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         case NETMSG_STARTEMU:
                                 fprintf((FILE *)getNetLog(), "Client: STARTEMU message received.\n");
                                 Client.isWaitingForServer = 0;
                         break;
 			case NETMSG_PLAYERQUIT:
-				pn = incomingMessage.genEvent.controller;
-				fprintf((FILE *)getNetLog(), "Client: Player quit announcement %d\n", pn);
-				sprintf(announceString, "Player %d has disconnected.", pn+1);
-				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(announceString));
+				sprintf(osdString, "Player %d has disconnected.", playerNumber + 1);
+				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
 			break;
 			case NETMSG_PING:
                                 fprintf((FILE *)getNetLog(), "Client: Ping received.  Returning.\n", incomingMessage.genEvent.value);
                                 clientSendMessage(&incomingMessage);
-			break;
-			case NETMSG_SYNC:
-                                fprintf((FILE *)getNetLog(), "Client: Sync packet received (%d)\n", incomingMessage.genEvent.value);
-                                setEventCounter(incomingMessage.genEvent.value);
 			break;
 			default:
 				fprintf((FILE *)getNetLog(), "Client: Message type error.  Dropping packet.\n");
@@ -123,7 +131,7 @@ void clientProcessMessages() {
 void clientSendButtons(int control, DWORD value) {
   NetMessage msg;
   msg.type = NETMSG_EVENT;
-  msg.genEvent.type = NETMSG_BUTTON;
+  msg.genEvent.type = EVENT_BUTTON;
   msg.genEvent.controller = control;
   msg.genEvent.value = value;
   msg.genEvent.timer = getEventCounter();
@@ -149,7 +157,7 @@ void processEventQueue() {
     queueNotEmpty = getNextEvent(&type, &controller, &value, &timer);
     while ((timer == Client.eventCounter) && (queueNotEmpty)) {
 	switch (type) {
-          case NETMSG_BUTTON:     
+          case EVENT_BUTTON:     
             setNetKeys(controller, value);
             break;
        }

@@ -125,8 +125,8 @@ void serverProcessMessages() {
       }
       else {                   
         switch (incomingMsg.type) {
-            case NETMSG_EVENT:                                   // Events (Button presses, other time sensitive things)
-              if (incomingMsg.genEvent.type == NETMSG_BUTTON) {
+            case NETMSG_EVENT:                                   // Events (Button presses, other time sensitive input)
+              if (incomingMsg.genEvent.type == EVENT_BUTTON) {
                     incomingMsg.genEvent.timer += Server.netDelay;      // Add calculated delay to the timer
                     if (n < 4) {                                 // If the message comes from a player (n >= 4 is for spectators)
                         incomingMsg.genEvent.controller = n;     // Change the controller tag on the event
@@ -139,6 +139,10 @@ void serverProcessMessages() {
             case NETMSG_PING:
                 Server.player[n].lag = (gettimeofday_msec() - incomingMsg.genEvent.value);
                 fprintf((FILE *)getNetLog(), "Server: Ping returned from player %d, lag %d ms.\n", n+1, Server.player[n].lag);
+                break;
+            case NETMSG_DESYNC:
+                incomingMsg.genEvent.controller = n;
+                serverBroadcastMessage(&incomingMsg);
                 break;
         }
       }
@@ -182,7 +186,7 @@ void serverBroadcastStart() {
 
   fprintf((FILE *)getNetLog(), "Client Lag(ms):\n");
   for (n = 0; n < MAX_CLIENTS; n++) 
-        if (Server.player[n].isConnected) fprintf((FILE *)getNetLog(),"   Server.player %d: %d ms\n", sort_array[n]+1, Server.player[sort_array[n]].lag);
+        if (Server.player[n].isConnected) fprintf((FILE *)getNetLog(),"   Player %d: %d ms\n", sort_array[n]+1, Server.player[sort_array[n]].lag);
 
   startmsg.type = NETMSG_STARTEMU;
 
@@ -194,7 +198,7 @@ void serverBroadcastStart() {
      ptr = sort_array[n];
      lc  = sort_array[n+1];
      if (ptr >= 0) {
-       fprintf((FILE *)getNetLog(), "Sending start message to Server.player %d (ping %d ms)\n", ptr + 1, Server.player[ptr].lag);
+       fprintf((FILE *)getNetLog(), "Sending start message to Player %d (ping %d ms)\n", ptr + 1, Server.player[ptr].lag);
        SDLNet_TCP_Send(Server.player[ptr].socket, &startmsg, sizeof(NetMessage));
        if (lc >= 0) {
          ts.tv_sec = 0;

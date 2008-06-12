@@ -38,47 +38,62 @@ unsigned int gettimeofday_msec(void)
 
 /* ======================================================================================
 
-      netInitialize()
+      net_init()
 
+        to be called when program starts
 
 
 ========================================================================================= */
 
-void netInitialize() {
-  int n = 0, start_server = 0, hostport = 0;
-  char hostname[20] = "";
-  FILE *netConfig;
-
+void net_init() {
   netLog = fopen("netlog.txt", "w");
   fprintf(netLog, "Begining net log...\n");
-  netConfig = fopen("mupennet.conf", "r");
-  if (!netConfig) {
-     fprintf(netLog, "Failed to open mupennet.conf configuration file.\n");
-     start_server = 1;
-  } else {
-     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &start_server, &hostname, &hostport);
-     fclose(netConfig);
-  }
-
-  fprintf(netLog, "Start_server %d\nHostname %s\nHostport %d\n", start_server, hostname, hostport);
-
+  clientInitialize();
+  serverInitialize();
   if (SDLNet_Init() < 0) {
      fprintf(netLog, "Failure to initialize SDLNet!\n");
      return;
   }
+}
 
-  clientInitialize();
-  serverInitialize();
-  if (start_server) {
+/* ======================================================================================
+
+      netStartNetplay()
+
+        to be called when rom starts
+
+
+========================================================================================= */
+
+void netStartNetplay() {
+  int              n = 0;
+  NetPlaySettings  netSettings;
+  FILE            *netConfig;
+
+  // Right now we're reading the netplay settings from a conf file, soon this will be part of the GUI
+  // ===============================================================================================
+  netConfig = fopen("mupennet.conf", "r");
+  if (!netConfig) {
+     fprintf(netLog, "Failed to open mupennet.conf configuration file.  Playing on local server.\n");
+     netSettings.runServer = 1;
+  } else {
+     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &netSettings.runServer, &netSettings.hostname, &netSettings.port);
+     fclose(netConfig);
+  }
+  // ===============================================================================================
+  // Right now we're reading the netplay settings from a conf file, soon this will be part of the GUI
+
+  fprintf(netLog, "runServer %d\nhostname %s\nport %d\n", netSettings.runServer, netSettings.hostname, netSettings.port);
+
+
+  if (netSettings.runServer) {
       serverStart(SERVER_PORT);
-      n = clientConnect("localhost", 7000);
+      strcpy(netSettings.hostname, "localhost"); // If we're hosting a game, connect to it.
+      netSettings.port = SERVER_PORT;
   }
-  else n = clientConnect(hostname, hostport);
 
-  if (n) {
-      initEventQueue();
+  if (clientConnect(netSettings.hostname, netSettings.port))
       bNetplayEnabled = 1;
-  }
   else {
       fprintf(netLog, "Client failed to connect to a server, playing offline.\n");
       netShutdown();
@@ -89,18 +104,12 @@ void netInitialize() {
 
       netShutdown()
 
-
-
 ========================================================================================= */
 
 void netShutdown() {
-  if (clientIsConnected()) {
-    clientDisconnect();
-    killEventQueue();
-  }
+  if (clientIsConnected()) clientDisconnect();
   if (serverIsActive()) serverStop();
   bNetplayEnabled = 0;
-
   fprintf(netLog, "Goodbye.\n");
   fclose(netLog);
 }
