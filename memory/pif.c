@@ -213,7 +213,7 @@ void internal_ReadController(int Control, BYTE *Command)
 	 // Update the server if we're connected to one and if the button state has actually changed
 	if (clientIsConnected()) {
 		if (Keys.Value != KeyCache[Control].Value) {
-			netSendButtonState(Control, Keys.Value);
+			clientSendButtons(Control, Keys.Value);
 			KeyCache[Control].Value = Keys.Value;
 		}
 		*((unsigned int *)(Command + 3)) = getNetKeys(Control);

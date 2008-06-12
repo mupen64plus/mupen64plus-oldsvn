@@ -548,9 +548,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-			if (serverIsActive()) {
-				serverBroadcastStart();
-			}
+			if (serverIsActive() && serverWaitingForPlayers()) serverBroadcastStart();
                     break;
 
                 case SDLK_ESCAPE:
@@ -818,6 +816,7 @@ static void * emulationThread( void *_arg )
     cheat_load_current_rom();
 
     netInitialize();
+
     if (netplayEnabled()) {
       if (serverIsActive()) {
         osd_new_message(OSD_MIDDLE_CENTER, "Press F9 to begin.");
