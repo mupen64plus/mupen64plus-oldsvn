@@ -60,9 +60,8 @@ void netInteruptLoop();
 void clientSendButtons(int control, DWORD value);
 
 DWORD		getNetKeys(int control);
-u_int16_t	getSyncCounter();
 void		setNetKeys(int control, DWORD value);
-void		setSyncCounter(u_int16_t v);
+u_int16_t	getEventCounter();
 unsigned short	clientIsConnected();
 unsigned short	netServerIsActive();
 unsigned short  serverWaitingForPlayers();

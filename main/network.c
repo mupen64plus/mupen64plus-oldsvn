@@ -47,7 +47,7 @@ void netProcessMessages();
    =======================================================================================
 */ 
 
-static u_int16_t	SyncCounter = 0;	// Track VI in order to syncrhonize button events over network
+static u_int16_t	EventCounter = 0;	// Track VI in order to syncrhonize button events over network
 static TCPsocket	clientSocket;		// Socket descriptor for connection to server
 static SDLNet_SocketSet	clientSocketSet;	// Set for client connection to server
 static NetEvent		*NetEventQueue = NULL;	// Pointer to queue of upcoming button events
@@ -83,9 +83,9 @@ unsigned int gettimeofday_msec(void)
 
 unsigned short  getNetDelay() {return netDelay;}
 FILE *		getNetLog() {return netLog;}
-u_int16_t	getSyncCounter() {return SyncCounter;}
-void		setSyncCounter(u_int16_t v) {SyncCounter = v;}
-unsigned short  incSyncCounter() {SyncCounter++;}
+u_int16_t	getEventCounter() {return EventCounter;}
+void		setEventCounter(u_int16_t v) {EventCounter = v;}
+unsigned short  incEventCounter() {EventCounter++;}
 DWORD		getNetKeys(int control) {return Player[control].keys.Value;}
 void		setNetKeys(int control, DWORD value) {Player[control].keys.Value = value;}
 
@@ -142,9 +142,12 @@ void netInitialize() {
 }
 
 void netShutdown() {
-  clientDisconnect();
-  serverStop();
-  netKillEventQueue();
+  if (clientIsConnected()) {
+    clientDisconnect();
+    netKillEventQueue();
+  }
+  if (serverIsActive()) serverStop();
+
   fprintf(netLog, "Goodbye.\n");
   fclose(netLog);
 }
@@ -180,11 +183,11 @@ void netInteruptLoop() {
 			serverProcessMessages();
 		    }
                     nanosleep(&ts, NULL); // sleep for 5 milliseconds so it doesn't rail the processor
+              EventCounter = 0;
 	      }
-            SyncCounter = 0;
             }
             else {
-                    incSyncCounter();
+                    incEventCounter();
                     if (serverIsActive()) serverProcessMessages();
                     if (clientIsConnected()) {
                          clientProcessMessages();
@@ -267,13 +270,11 @@ void serverAcceptConnection() {
             SDLNet_TCP_AddSocket(serverSocketSet, (Player[n].socket = newClient));
             fprintf(netLog, "New connection accepted; Client %d\n", n);
             Player[n].isConnected = TRUE;
-            if (n > 0) {  // Don't bother pinging player 1
-		fprintf(netLog, "Sending ping.\n");
-                msg.type = NETMSG_PING;
-                msg.genEvent.type = NETMSG_PING;
-                msg.genEvent.value = gettimeofday_msec();
-                SDLNet_TCP_Send(newClient, &msg, sizeof(NetMessage));
-            }
+            fprintf(netLog, "Sending ping.\n");
+            msg.type = NETMSG_PING;
+            msg.genEvent.type = NETMSG_PING;
+            msg.genEvent.value = gettimeofday_msec();
+            SDLNet_TCP_Send(newClient, &msg, sizeof(NetMessage));
             break;
           }
         if (n == MAX_CLIENTS) SDLNet_TCP_Close(newClient); // No open slots
@@ -425,19 +426,26 @@ void clientProcessMessages() {
         if (!clientIsConnected()) return; // exit now if the client isnt' connected
         SDLNet_CheckSockets(clientSocketSet, 0);
         if (!SDLNet_SocketReady(clientSocket)) return; // exit now if there aren't any messages to fetch.
+        n = SDLNet_TCP_Recv(clientSocket, &incomingMessage, sizeof(NetMessage));
 
-	if ((n = SDLNet_TCP_Recv(clientSocket, &incomingMessage, sizeof(NetMessage))) == sizeof(NetMessage)) {
+        if (n <= 0) {
+          osd_new_message(OSD_BOTTOM_LEFT, tr("You've been disconnected from the server."));
+          netShutdown();
+          return;
+        }
+
+	if (n == sizeof(NetMessage)) {
 		switch (incomingMessage.type) {
 			case NETMSG_EVENT:
-				if (incomingMessage.genEvent.timer > getSyncCounter()) {
+				if (incomingMessage.genEvent.timer > getEventCounter()) {
 					netAddEvent(incomingMessage.genEvent.type, incomingMessage.genEvent.controller,
 						  incomingMessage.genEvent.value,
 						  incomingMessage.genEvent.timer);
                                 fprintf(netLog, "Client: Event received %d %d (%d)\n", incomingMessage.genEvent.type,
                                                                                incomingMessage.genEvent.timer,
-                                                                               getSyncCounter());
+                                                                               getEventCounter());
 				}
-				else fprintf(netLog, "Desync Warning!: Event received for %d, current %d\n", 						incomingMessage.genEvent.timer, getSyncCounter());
+				else fprintf(netLog, "Desync Warning!: Event received for %d, current %d\n", 						incomingMessage.genEvent.timer, getEventCounter());
 			break;
                         case NETMSG_STARTEMU:
                                 fprintf(netLog, "Client: STARTEMU message received.\n");
@@ -446,7 +454,7 @@ void clientProcessMessages() {
 			case NETMSG_PLAYERQUIT:
 				pn = incomingMessage.genEvent.controller;
 				fprintf(netLog, "Client: Player quit announcement %d\n", pn);
-				sprintf(announceString, "%s has disconnected.", Player[pn].nick);
+				sprintf(announceString, "Player %d has disconnected.", pn+1);
 				osd_new_message(OSD_BOTTOM_LEFT, tr(announceString));
 			break;
 			case NETMSG_PING:
@@ -455,7 +463,7 @@ void clientProcessMessages() {
 			break;
 			case NETMSG_SYNC:
                                 fprintf(netLog, "Client: Sync packet received (%d)\n", incomingMessage.genEvent.value);
-                                setSyncCounter(incomingMessage.genEvent.value);
+                                setEventCounter(incomingMessage.genEvent.value);
 			break;
 			default:
 				fprintf(netLog, "Client: Message type error.  Dropping packet.\n");
@@ -472,8 +480,8 @@ void clientSendButtons(int control, DWORD value) {
   msg.genEvent.type = NETMSG_BUTTON;
   msg.genEvent.controller = control;
   msg.genEvent.value = value;
-  msg.genEvent.timer = getSyncCounter();
-  fprintf(netLog, "Client: Sending button state (sync %d).\n", getSyncCounter());
+  msg.genEvent.timer = getEventCounter();
+  fprintf(netLog, "Client: Sending button state (sync %d).\n", getEventCounter());
   clientSendMessage(&msg);
 }
 
@@ -493,7 +501,7 @@ void netProcessEventQueue() {
   
   if (NetEventQueue) {
     queueNotEmpty = getNextEvent(&type, &controller, &value, &timer);
-    while ((timer == SyncCounter) && (queueNotEmpty)) {
+    while ((timer == EventCounter) && (queueNotEmpty)) {
 	switch (type) {
           case NETMSG_BUTTON:     
             Player[controller].keys.Value = value;
@@ -544,9 +552,9 @@ int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned s
   NetEvent *currEvent = NetEventQueue;
 
   if (NetEventQueue) {
-	while (NetEventQueue->timer < getSyncCounter()) {
+	while (NetEventQueue->timer < getEventCounter()) {
 		fprintf(netLog, "Desync Warning!: Event queue out of date (%d curr %d)! Popping next.\n",
-			NetEventQueue->timer, getSyncCounter());
+			NetEventQueue->timer, getEventCounter());
                 netPopEvent();
 	}
         *type = NetEventQueue->type;
@@ -561,7 +569,6 @@ int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned s
 }
 
 void netInitEventQueue() {
-  SyncCounter = 0;
   while (NetEventQueue) netPopEvent();
   fprintf(netLog, "Event queue initialized.\n");
 }
