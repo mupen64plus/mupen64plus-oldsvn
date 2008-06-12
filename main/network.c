@@ -363,6 +363,7 @@ void serverBroadcastStart() {
             && (Client[n]))
                tc = n;
      if (tc == lc) break;
+     sort_array[ptr] = tc;
      lc = tc;
      tc = 0;
   }
@@ -373,7 +374,7 @@ void serverBroadcastStart() {
   startmsg.type = NETMSG_STARTEMU;
   serverStopWaitingForPlayers();
 
-  netDelay = (netLag[sort_array[0]] / 17) + 3; // 60 VI/s = ~17ms per VI (+ 3 to be safe)
+  netDelay = (netLag[sort_array[0]] / 17) + 7; // 60 VI/s = ~17ms per VI (+ 7 to be safe)
   fprintf(netLog, "Net Delay: %d\n", netDelay);
 
   // Send STARTEMU signals, in order of slowest to fastest connection, compensate for net lag
@@ -383,7 +384,7 @@ void serverBroadcastStart() {
      if (ptr >= 0) {
        fprintf(netLog, "Sending start message to Player %d (lag %d ms)\n", ptr + 1, netLag[ptr]);
        serverSendMessage(Client[ptr], &startmsg);
-       if (lc > 0) {
+       if (lc >= 0) {
          ts.tv_sec = 0;
          ts.tv_nsec = 1000000 * (netLag[ptr] - netLag[lc]);
          fprintf(netLog, "Sleeping for %d ms\n", netLag[ptr] - netLag[lc]);
