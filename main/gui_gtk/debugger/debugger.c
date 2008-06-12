@@ -109,13 +109,13 @@ void update_debugger_frontend()
 //Runs each VI for auto-updating views
 void debugger_frontend_vi()
 {
-	if(memedit_auto_update && memedit_opened) {
+    if(memedit_auto_update && memedit_opened) {
         gdk_threads_enter();
         update_memory_editor();
         gdk_threads_leave();
     }
     
-	if(varlist_auto_update && varlist_opened) {
+    if(varlist_auto_update && varlist_opened) {
         gdk_threads_enter();
         update_varlist();
         gdk_threads_leave();

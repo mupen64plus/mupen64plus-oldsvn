@@ -950,7 +950,7 @@ static void callback_debuggerEnableToggled( GtkWidget *widget, gpointer data )
         }
     }
 
-  g_DebuggerEnabled = gtk_check_menu_item_get_active(widget);
+  g_DebuggerEnabled = gtk_check_menu_item_get_active((GtkCheckMenuItem *) widget);
   if (g_DebuggerEnabled == TRUE)
     {
       gtk_widget_set_sensitive( GTK_WIDGET(debuggerRegistersShow), TRUE);
@@ -974,7 +974,7 @@ static void callback_debuggerEnableToggled( GtkWidget *widget, gpointer data )
 
 static void callback_debuggerWindowShow( GtkWidget *widget, gpointer window )
 {
-  switch((int)window)
+  switch((long)window)
     {
     case 1:
       if(registers_opened==0)
@@ -1357,7 +1357,7 @@ static int create_menuBar( void )
     gtk_menu_append( GTK_MENU(debuggerMenu), debuggerVariablesShow );
 
     if(g_DebuggerEnabled)
-      gtk_check_menu_item_set_active( GTK_MENU(debuggerEnableItem), TRUE );
+      gtk_check_menu_item_set_active( (GtkCheckMenuItem *) debuggerEnableItem, TRUE );
     else 
       {
     gtk_widget_set_sensitive( GTK_WIDGET(debuggerRegistersShow), FALSE);

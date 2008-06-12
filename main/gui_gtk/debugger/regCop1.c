@@ -42,7 +42,7 @@ static GtkWidget * init_FGR_col()
     txt[0] = txt_regnum;
     txt[1] = "MMMMMMMMMM";
     
-    cl = gtk_clist_new(2);
+    cl = (GtkCList *) gtk_clist_new(2);
     gtk_widget_modify_font(GTK_WIDGET(cl), debugger_font_desc);
     gtk_clist_set_column_resizeable(cl, 0, FALSE);
     gtk_clist_set_column_resizeable(cl, 1, FALSE);

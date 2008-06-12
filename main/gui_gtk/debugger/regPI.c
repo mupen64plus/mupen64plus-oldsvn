@@ -70,7 +70,7 @@ void init_regPI()
     frRegPI = gtk_frame_new("Video Interface");
 
     //=== Creation of Registers Value Display =========/
-    clRegPI = init_hwreg_clist(13, mnemonicPI);
+    clRegPI = (GtkWidget *) init_hwreg_clist(13, mnemonicPI);
     gtk_container_add( GTK_CONTAINER(frRegPI), clRegPI);
     gtk_clist_set_selection_mode(GTK_CLIST(clRegPI), GTK_SELECTION_SINGLE);
 

@@ -57,7 +57,7 @@ void init_regRI()
     frRegRI = gtk_frame_new("RDRAM Interface");
 
     //=== Creation of Registers Value Display ==========/
-    clRegRI = init_hwreg_clist(5, mnemonicRI);
+    clRegRI = (GtkWidget *) init_hwreg_clist(5, mnemonicRI);
     gtk_container_add(GTK_CONTAINER(frRegRI), clRegRI);
     gtk_clist_set_selection_mode(GTK_CLIST(clRegRI), GTK_SELECTION_SINGLE);
 

@@ -54,7 +54,7 @@ void init_host_disassembler(void);
 int get_instruction( uint32 address, uint32 *ptr_instruction );
 char* get_recompiled_opcode( uint32 address, int index );
 char* get_recompiled_args( uint32 address, int index );
-int get_recompiled_addr( uint32 address, int index );
+void* get_recompiled_addr( uint32 address, int index );
 int get_num_recompiled( uint32 address );
 int get_has_recompiled( uint32 address );
 

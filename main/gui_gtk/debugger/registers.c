@@ -169,7 +169,7 @@ GtkCList * init_hwreg_clist(int n, char **regnames)
     
     txt[1] = "MMMMMMMMMM";
     
-    cl = gtk_clist_new(2);
+    cl = (GtkCList *) gtk_clist_new(2);
     gtk_widget_modify_font(GTK_WIDGET(cl), debugger_font_desc);
     
     for (i=0; i<n; i++) {

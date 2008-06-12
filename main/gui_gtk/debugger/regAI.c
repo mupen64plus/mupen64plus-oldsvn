@@ -58,7 +58,7 @@ void init_regAI()
     frRegAI = gtk_frame_new("Audio Interface");
 
     //=== Creation of Registers Value Display ==========/
-    clRegAI = init_hwreg_clist(6, mnemonicAI);
+    clRegAI = (GtkWidget *) init_hwreg_clist(6, mnemonicAI);
     gtk_container_add( GTK_CONTAINER(frRegAI), clRegAI);
     gtk_clist_set_selection_mode(GTK_CLIST(clRegAI), GTK_SELECTION_SINGLE);
 

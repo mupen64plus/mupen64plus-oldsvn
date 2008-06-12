@@ -108,8 +108,8 @@ void init_breakpoints()
     gtk_widget_show_all(winBreakpoints);
 
     //=== Signal Connections ===========================/
-    gtk_signal_connect( GTK_OBJECT(clBreakpoints), "select-row", on_row_selection, NULL );
-    gtk_signal_connect( GTK_OBJECT(clBreakpoints), "unselect-row", on_row_unselection, NULL );
+    gtk_signal_connect( GTK_OBJECT(clBreakpoints), "select-row", (GtkSignalFunc) on_row_selection, NULL );
+    gtk_signal_connect( GTK_OBJECT(clBreakpoints), "unselect-row", (GtkSignalFunc) on_row_unselection, NULL );
     gtk_signal_connect( GTK_OBJECT(buAdd), "clicked", on_add, NULL );
     gtk_signal_connect( GTK_OBJECT(buRemove), "clicked", on_remove, NULL );
     gtk_signal_connect( GTK_OBJECT(buEnable), "clicked", on_enable, NULL );
@@ -167,13 +167,13 @@ void update_breakpoints( )
     gtk_clist_clear( GTK_CLIST(clBreakpoints) );
     int i;
     for( i=0; i < g_NumBreakpoints; i++)
-    gtk_clist_append( GTK_CLIST(clBreakpoints), line );
+    gtk_clist_append( GTK_CLIST(clBreakpoints), (gchar **) line );
 
     for( i=0; i < g_NumBreakpoints; i++ )
     {
-        get_breakpoint_display_string(line, &g_Breakpoints[i]);
+        get_breakpoint_display_string(line[0], &g_Breakpoints[i]);
         printf("%s\n", line);
-        gtk_clist_set_text( GTK_CLIST(clBreakpoints), i, 0, line );
+        gtk_clist_set_text( GTK_CLIST(clBreakpoints), i, 0, line[0] );
         if(BPT_CHECK_FLAG(g_Breakpoints[i], BPT_FLAG_ENABLED))
             gtk_clist_set_background( GTK_CLIST(clBreakpoints), i, &color_BPEnabled);
         else
@@ -288,7 +288,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
         }
     }
     
-    gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer) newbp.address );
+    gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer)(long) newbp.address );
     
     update_breakpoints();
         refresh_desasm();
@@ -350,7 +350,7 @@ static void on_remove()
     for( i=BREAKPOINTS_MAX_NUMBER-1; i>=0; i-- )
     {
         if( selected[i] == 1 ) {
-            address = (uint32) gtk_clist_get_row_data( GTK_CLIST(clBreakpoints), i);
+            address = (uint32)(long) gtk_clist_get_row_data( GTK_CLIST(clBreakpoints), i);
             remove_breakpoint_by_row( i );
             selected[i] = 0;
         }

@@ -55,7 +55,7 @@ void init_regSI()
     frRegSI = gtk_frame_new("Serial Interface");
 
     //=== Creation of Registers Value Display ========/
-    clRegSI = init_hwreg_clist(4, mnemonicSI);
+    clRegSI = (GtkWidget *) init_hwreg_clist(4, mnemonicSI);
     gtk_container_add(GTK_CONTAINER(frRegSI), clRegSI);
     gtk_clist_set_selection_mode(GTK_CLIST(clRegSI), GTK_SELECTION_SINGLE);
     

@@ -30,7 +30,7 @@ int  num_decoded;
 
 char opcode_recompiled[564][MAX_DISASSEMBLY];
 char args_recompiled[564][MAX_DISASSEMBLY*4];
-int  opaddr_recompiled[564];
+void *opaddr_recompiled[564];
 
 disassemble_info dis_info;
 
@@ -82,7 +82,7 @@ void init_host_disassembler(void){
 
 
   INIT_DISASSEMBLE_INFO(dis_info, stderr, process_opcode_out);
-  dis_info.fprintf_func = process_opcode_out;
+  dis_info.fprintf_func = (fprintf_ftype) process_opcode_out;
   dis_info.stream = stderr;
   dis_info.bytes_per_line=1;
   dis_info.endian = 1;
@@ -106,7 +106,7 @@ void decode_recompiled(uint32 addr)
       {
     strcpy(opcode_recompiled[0],"NOTCOMPILED");
     strcpy(args_recompiled[0],"NOTCOMPILED");
-    opaddr_recompiled[0]=0;
+    opaddr_recompiled[0] = (void *) 0;
     addr_recompiled=0;
     lines_recompiled++;
     return;
@@ -127,15 +127,15 @@ void decode_recompiled(uint32 addr)
 
     while(assemb < end_addr)
       {
-        opaddr_recompiled[lines_recompiled] = (uint32)assemb;
-    num_decoded=0;
+        opaddr_recompiled[lines_recompiled] = assemb;
+        num_decoded=0;
 
-    assemb += print_insn_i386(assemb, &dis_info);
+        assemb += print_insn_i386((bfd_vma) assemb, &dis_info);
 
         lines_recompiled++;
       }
 
-    addr_recompiled=addr;
+    addr_recompiled = addr;
     //printf("\n");
 }
 
@@ -161,7 +161,7 @@ char* get_recompiled_args(uint32 addr, int index)
         return NULL;
 }
 
-int get_recompiled_addr(uint32 addr, int index)
+void * get_recompiled_addr(uint32 addr, int index)
 {
     if(addr != addr_recompiled)
         decode_recompiled(addr);

@@ -302,12 +302,12 @@ disasm_list_get_iter (GtkTreeModel *tree_model,
 
   // We store a pointer to our Disasm record in the iter
   iter->stamp      = disasm_list->stamp;
-  iter->user_data  = (uint32*) ((indices[0]-PRELINES)*4 + (DISASM_LIST(tree_model)->startAddr));
+  iter->user_data  = (gpointer) (long) ((indices[0]-PRELINES)*4 + (DISASM_LIST(tree_model)->startAddr));
 
   if(depth==2)
-      iter->user_data2 = (uint32*) indices[1];
+      iter->user_data2 = (gpointer) (long) indices[1];
   else
-      iter->user_data2 = (uint32*) -1;
+      iter->user_data2 = (gpointer) -1;
 
   return TRUE;
 }
@@ -335,10 +335,10 @@ disasm_list_get_path (GtkTreeModel *tree_model,
 
   path = gtk_tree_path_new();
 
-  gtk_tree_path_append_index(path, ((unsigned int)(iter->user_data - disasm_list->startAddr)) / 4 + PRELINES);
+  gtk_tree_path_append_index(path, ((unsigned int)(long)(iter->user_data - disasm_list->startAddr)) / 4 + PRELINES);
 
-  if(((uint32)iter->user_data2)!=-1)
-      gtk_tree_path_append_index(path, ((uint32)iter->user_data2));
+  if(((long)iter->user_data2)!=-1)
+      gtk_tree_path_append_index(path, ((uint32)(long)iter->user_data2));
 
   return path;
 }
@@ -360,6 +360,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
   char opcode[64];
   char args[128];
   uint32 instr;
+  long laddr;
 
   g_return_if_fail (DISASM_IS_LIST (tree_model));
   g_return_if_fail (iter != NULL);
@@ -367,7 +368,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
 
   g_value_init (value, disasm_list_get_column_type(tree_model,column));
 
-  if(((uint32)iter->user_data2)==-1)
+  if(((long)iter->user_data2)==-1)
     switch(column)
     {
     case 0:
@@ -376,20 +377,20 @@ disasm_list_get_value (GtkTreeModel *tree_model,
       break;
     case 1:
     case 2:
-      if((get_memory_flags(iter->user_data) & MEM_FLAG_READABLE) != 0)
-	{
-	  instr = read_memory_32(iter->user_data);
-	  r4300_decode_op( instr, opcode, args );
-	}
+      if((get_memory_flags((uint32)(long)iter->user_data) & MEM_FLAG_READABLE) != 0)
+    {
+      instr = read_memory_32((uint32)(long)iter->user_data);
+      r4300_decode_op( instr, opcode, args );
+    }
       else
-	{
-	  strcpy( opcode, "X+X+X+X");
-	  sprintf( args, "UNREADABLE (%d)",get_memory_type(iter->user_data));
-	}
+    {
+      strcpy( opcode, "X+X+X+X");
+      sprintf( args, "UNREADABLE (%d)",get_memory_type((uint32)(long)iter->user_data));
+    }
       if(column==1)
-	g_value_set_string(value, opcode);
+    g_value_set_string(value, opcode);
       else
-	g_value_set_string(value, args);
+    g_value_set_string(value, args);
 
       break;
     default:
@@ -399,15 +400,18 @@ disasm_list_get_value (GtkTreeModel *tree_model,
     switch(column)
     {
     case 0:
-      instr = get_recompiled_addr(iter->user_data, iter->user_data2);
-      sprintf(opcode, "[%08X]", instr);
+      laddr = (long) get_recompiled_addr((uint32)(long) iter->user_data, (int)(long) iter->user_data2);
+      if (sizeof(void *) == 4)
+        sprintf(opcode, "[%08X]", laddr);
+      else
+        sprintf(opcode, "[%016llX]", laddr);
       g_value_set_string(value, opcode);
       break;
     case 1:
-      g_value_set_string(value, (char *)get_recompiled_opcode(((uint32)iter->user_data), ((uint32)iter->user_data2)));
+      g_value_set_string(value, (char *)get_recompiled_opcode((uint32)(long) iter->user_data, (uint32)(long) iter->user_data2));
       break;
     case 2:
-      g_value_set_string(value, (char *)get_recompiled_args(((uint32)iter->user_data), ((uint32)iter->user_data2)));
+      g_value_set_string(value, (char *)get_recompiled_args((uint32)(long) iter->user_data, (uint32)(long) iter->user_data2));
       break;
     }
 }
@@ -434,11 +438,11 @@ disasm_list_iter_next (GtkTreeModel  *tree_model,
   disasm_list = DISASM_LIST(tree_model);
 
   // Is this a disassembly line, or recompiler disassemby line?
-  if(((uint32)iter->user_data2) == -1)
+  if ((long) iter->user_data2 == -1)
   {
-    if((((uint32)iter->user_data) >= disasm_list->startAddr+(POSTLINES*4)) || (((uint32)iter->user_data) >= 0xFFFFFFFC))
+    if ((long) iter->user_data >= disasm_list->startAddr+(POSTLINES*4) || (long) iter->user_data >= 0xFFFFFFFC)
       {
-	//printf("Disasm end addr: %016x\n", iter->user_data);
+    //printf("Disasm end addr: %016x\n", iter->user_data);
         return FALSE;
       }
     iter->stamp    = disasm_list->stamp;
@@ -446,7 +450,7 @@ disasm_list_iter_next (GtkTreeModel  *tree_model,
   }
   else // recompiler line
   {
-    if(((uint32)iter->user_data2) + 1 >= get_num_recompiled( iter->user_data ))
+    if ((long) iter->user_data2 + 1 >= get_num_recompiled((uint32)(long) iter->user_data))
         return FALSE;
     iter->stamp    = disasm_list->stamp;
     iter->user_data2++;
@@ -484,10 +488,10 @@ disasm_list_iter_children (GtkTreeModel *tree_model,
 
     /* Set iter to first item in list */
     iter->stamp     = disasm_list->stamp;
-    iter->user_data = (uint32*)disasm_list->startAddr-PRELINES;
-    iter->user_data2= (uint32*)-1;
+    iter->user_data = (gpointer)(long) disasm_list->startAddr-PRELINES;
+    iter->user_data2= (gpointer) -1;
   }
-  else if (((uint32)parent->user_data2)==-1)
+  else if ((long) parent->user_data2 == -1)
   {
     iter->stamp     = disasm_list->stamp;
     iter->user_data = parent->user_data;
@@ -512,8 +516,8 @@ static gboolean
 disasm_list_iter_has_child (GtkTreeModel *tree_model,
                             GtkTreeIter  *iter)
 {
-  if(((uint32)iter->user_data2) == -1)
-    return get_has_recompiled(iter->user_data);
+  if ((long) iter->user_data2 == -1)
+    return get_has_recompiled((uint32)(long) iter->user_data);
   return FALSE;
 }
 
@@ -544,8 +548,8 @@ disasm_list_iter_n_children (GtkTreeModel *tree_model,
   /* special case: if iter == NULL, return number of top-level rows */
   if (!iter)
       return 0x10;//disasm_list->num_rows;
-  else if (((uint32)iter->user_data2) == -1)
-      return get_num_recompiled( iter->user_data );
+  else if ((long) iter->user_data2 == -1)
+      return get_num_recompiled((uint32)(long) iter->user_data);
 
   return 0;
 }
@@ -577,14 +581,14 @@ disasm_list_iter_nth_child (GtkTreeModel *tree_model,
   if(parent==NULL)
   {
       iter->stamp = disasm_list->stamp;
-      iter->user_data = (uint32*)(disasm_list->startAddr - PRELINES + n*4);
-      iter->user_data2= (uint32*)-1;
+      iter->user_data = (gpointer)(long) (disasm_list->startAddr - PRELINES + n*4);
+      iter->user_data2= (gpointer) -1;
   }
-  else if(((uint32)parent->user_data2) == -1)
+  else if((long) parent->user_data2 == -1)
   {
       iter->stamp = disasm_list->stamp;
       iter->user_data = parent->user_data;
-      iter->user_data2= (uint32*)n;
+      iter->user_data2= (gpointer)(long) n;
   }
   else
       return FALSE;
@@ -605,7 +609,7 @@ disasm_list_iter_parent (GtkTreeModel *tree_model,
                          GtkTreeIter  *iter,
                          GtkTreeIter  *child)
 {
-  if(child == NULL || ((uint32)child->user_data2)==-1)
+  if (child == NULL || (long) child->user_data2 == -1)
       return FALSE;
 
   DisasmList    *disasm_list;

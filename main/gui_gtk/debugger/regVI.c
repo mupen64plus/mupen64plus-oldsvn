@@ -72,7 +72,7 @@ void init_regVI()
     frRegVI = gtk_frame_new("Video Interface");
 
     //=== Creation of Registers Value Display ==========/
-    clRegVI = init_hwreg_clist(15, mnemonicVI);
+    clRegVI = (GtkWidget *) init_hwreg_clist(15, mnemonicVI);
     gtk_container_add( GTK_CONTAINER(frRegVI), clRegVI);
     gtk_clist_set_selection_mode(GTK_CLIST(clRegVI), GTK_SELECTION_SINGLE);
     
