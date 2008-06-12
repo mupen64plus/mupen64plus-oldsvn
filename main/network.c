@@ -321,8 +321,8 @@ void serverProcessMessages() {
 							serverBroadcastMessage(&msg);
 						break;
 						case NETMSG_PING:
-						     netLag[n] = (gettimeofday_msec() - msg.genEvent.value) / 2;
-                                                                // Divide by 2 for one way trip
+						     netLag[n] = (gettimeofday_msec() - msg.genEvent.value);
+                                                                // should divide by 2 for one way trip
                                                      fprintf(netLog, "Server: ping received, lag %d\n", netLag[n]);
                                                 break;
 					}
