@@ -1,6 +1,19 @@
+/* =======================================================================================
+
+	network.h
+	by orbitaldecay
+
+	KNOWN BUGS THAT NEED FIXING:
+
+	When playing multiplayer, all of the controllers must be enabled in the plugin
+	if input is being received over the net.  Haven't found an easy way of fixing
+	this yet.
+
+   =======================================================================================
+*/ 
+
 #define SERVER_PORT		7000
 #define MAX_CLIENTS		10
-
 
 #define 	NETMSG_EVENT		0
 #define		NETMSG_STARTEMU		1	// Begin execution of ROM code

@@ -3,31 +3,6 @@
 	network.c
 	by orbitaldecay
 
-	Alright, so far the most basic network functionality has been included.  It still
-	needs to be incorporated in the gui, there are no ROM checks to ensure the clients
-	are running the same rom, and various other essential features are lacking; but
-	what is here should be enough to enable netplay.  In the running directory of
-	mupen64plus is a file titled mupennet.conf.  The first number represents whether
-	or not to start the server, the second word is the hostname to connect to and the
-	final number is the port to connect on.  For example:
-
-	1 localhost 7000
-
-	Run the server and connect to the localhost on port 7000.
-
-	0 192.168.0.152 7000
-
-	Don't run a server, connect to 192.168.0.152 on port 7000.
-
-	You get the idea.  Once the clients are connected, you must press F9 on the server
-	to send a message to all the clients telling them to begin running the ROM, this is
-	extremely crude and will be fixed later.  Like I say, this is the most basic functionality
-	imaginable, but the code does compensate for network latency, up to 100ms pings should 
-	be fine and remain perfectly synchronized.  Email me with any questions or comments
-	orbitaldecay@gmail.com.  Thanks ^_^
-
-	Bob
-
 	KNOWN BUGS THAT NEED FIXING:
 
 	When playing multiplayer, all of the controllers must be enabled in the plugin
@@ -46,36 +21,27 @@
 
 /* =======================================================================================
 
-	Globals for use within network.c
-	TODO: Actually define scope, don't be lazy!
+	Various globals
 
    =======================================================================================
 */ 
 
 static BUTTONS		netKeys[4];		// Key cache
 static u_int16_t	SyncCounter = 0;	// Track VI in order to syncrhonize button events over network
-
 static TCPsocket	clientSocket;		// Socket descriptor for connection to server
 static SDLNet_SocketSet	clientSocketSet;	// Set for client connection to server
-static unsigned char 	bClientIsConnected = 0;	// Are we connected to a server?
-
-static NetEvent	*NetEventQueue = NULL;	// Pointer to queue of upcoming button events
+static NetEvent		*NetEventQueue = NULL;	// Pointer to queue of upcoming button events
 static FILE		*netLog = NULL;
-
 static TCPsocket	serverSocket;		// Socket descriptor for server (if this is one)
 static SDLNet_SocketSet	serverSocketSet;	// Set of all connected clients, along with the server socket descriptor
-
+static int		netDelay = 0;
+static int		netLag[MAX_CLIENTS];
+static TCPsocket	Client[MAX_CLIENTS];
+static char		PlayerName[20][MAX_CLIENTS] = {"Player 1", "Player 2", "Player 3", "Player 4"};
 static unsigned char	bServerIsActive = 0;	// Is the server active?
 static unsigned char    bWaitForPlayers = 0;
 static unsigned char	bNetplayEnabled = 0;
-
-static int		netDelay = 0;
-
-static int		netLag[MAX_CLIENTS];
-static TCPsocket	Client[MAX_CLIENTS];
-
-static char PlayerName[20][MAX_CLIENTS] = {"Player 1", "Player 2", "Player 3", "Player 4"};
-
+static unsigned char 	bClientIsConnected = 0;	// Are we connected to a server?
 
 unsigned int gettimeofday_msec(void)
 {
@@ -86,6 +52,28 @@ unsigned int gettimeofday_msec(void)
     foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
     return foo;
 }
+
+/* =======================================================================================
+
+	A few getters and setters
+
+   =======================================================================================
+*/ 
+
+
+unsigned short  getNetDelay() {return netDelay;}
+FILE *		getNetLog() {return netLog;}
+u_int16_t	getSyncCounter() {return SyncCounter;}
+void		setSyncCounter(u_int16_t v) {SyncCounter = v;}
+unsigned short  incSyncCounter() {SyncCounter++;}
+DWORD		getNetKeys(int control) {return netKeys[control].Value;}
+void		setNetKeys(int control, DWORD value) {netKeys[control].Value = value;}
+
+unsigned short	clientIsConnected() {return bClientIsConnected;}
+unsigned short	serverIsActive() {return bServerIsActive;}
+unsigned short  serverWaitingForPlayers() {return bWaitForPlayers;}
+unsigned short  netplayEnabled() {return bNetplayEnabled;}
+
 /* =======================================================================================
 
 	Initialize!
@@ -139,34 +127,17 @@ void netShutdown() {
 
 /* =======================================================================================
 
-	Access to assorted variables outside of network.c
-
-   =======================================================================================
-*/ 
-
-
-unsigned short  getNetDelay() {return netDelay;}
-FILE *		getNetLog() {return netLog;}
-u_int16_t	getSyncCounter() {return SyncCounter;}
-void		setSyncCounter(u_int16_t v) {SyncCounter = v;}
-unsigned short  incSyncCounter() {SyncCounter++;}
-DWORD		getNetKeys(int control) {return netKeys[control].Value;}
-void		setNetKeys(int control, DWORD value) {netKeys[control].Value = value;}
-
-unsigned short	clientIsConnected() {return bClientIsConnected;}
-unsigned short	serverIsActive() {return bServerIsActive;}
-unsigned short  serverWaitingForPlayers() {return bWaitForPlayers;}
-unsigned short  netplayEnabled() {return bNetplayEnabled;}
-
-/* =======================================================================================
-
-	netMain: do the regular mainloop stuff
+	netInteruptLoop() : called every time there is a vi, causes emu to hang
+                            similar to rompause=1 when waiting server to start.
 
    =======================================================================================
 */
 
 void netInteruptLoop() {
             struct timespec ts;
+            ts.tv_sec = 0;
+            ts.tv_nsec = 5000000;
+
 	    if (serverWaitingForPlayers()) {
               fprintf(netLog, "waiting for signal to begin...\n");
 
@@ -184,8 +155,6 @@ void netInteruptLoop() {
 			serverAcceptConnection();
 			serverProcessMessages();
 		    }
-                    ts.tv_sec = 0;
-                    ts.tv_nsec = 5000000;
                     nanosleep(&ts, NULL); // sleep for 5 milliseconds so it doesn't rail the processor
 	      }
             SyncCounter = 0;
@@ -310,7 +279,7 @@ void serverProcessMessages() {
 		if (Client[n]) {
 			if (SDLNet_SocketReady(Client[n])) {
 				if (recvRet = serverRecvMessage(Client[n], &msg)) {
-                                        fprintf(netLog, "Server: received packet (%d bytes / type %d [%d])\n", recvRet, msg.type, msg.genEvent.type);
+                                        //fprintf(netLog, "Server: Received Packet (%d bytes)\n\ttype %d\n\tgenEvent.type %d\n", recvRet, msg.type, msg.genEvent.type);
 					switch (msg.type) {
 						case NETMSG_EVENT:
                                                         if (msg.genEvent.type == NETMSG_BUTTON) {
@@ -351,7 +320,7 @@ void serverBroadcastStart() {
 
   for (n = 0; n < MAX_CLIENTS; n++) sort_array[n] = -1;
 
-  // Sort out ping speeds stored in net lag from highest to lowest
+  // Sort out connection lag from highest to lowest
   for (n = 0; n < MAX_CLIENTS; n++)
       if  ( (netLag[n] >= netLag[tc])
          && (Client[n]) ) 
