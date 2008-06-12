@@ -33,7 +33,7 @@ int serverStart(unsigned short port) {
         IPaddress serverAddr;
 
 	fprintf((FILE *)getNetLog(), "serverStart() called.\n");
-	if (serverIsActive()) serverStop();
+	if (serverIsActive()) return;
 
 	Server.socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
 	SDLNet_ResolveHost(&serverAddr, NULL, port);
@@ -96,7 +96,7 @@ void serverAcceptConnection() {
         for (n = 0; n < MAX_CLIENTS; n++)
           if (!Server.player[n].isConnected) {
             SDLNet_TCP_AddSocket(Server.socketSet, (Server.player[n].socket = newClient));
-            fprintf((FILE *)getNetLog(), "New connection accepted; Client %d\n", n);
+            fprintf((FILE *)getNetLog(), "New connection accepted; Dubbed Player %d\n", n + 1);
             Server.player[n].isConnected = TRUE;
             fprintf((FILE *)getNetLog(), "Sending ping.\n");
             msg.type = NETMSG_PING;
@@ -143,6 +143,7 @@ void serverProcessMessages() {
             case NETMSG_DESYNC:
                 incomingMsg.genEvent.controller = n;
                 serverBroadcastMessage(&incomingMsg);
+                //serverBootPlayer(n); When testing is finished
                 break;
         }
       }

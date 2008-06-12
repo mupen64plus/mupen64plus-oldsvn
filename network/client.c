@@ -107,6 +107,7 @@ void clientProcessMessages() {
                                 fprintf((FILE *)getNetLog(), "Client: Player %d DESYNC!\n", playerNumber + 1);
 				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
+                        break;
                         case NETMSG_STARTEMU:
                                 fprintf((FILE *)getNetLog(), "Client: STARTEMU message received.\n");
                                 Client.isWaitingForServer = 0;
