@@ -52,4 +52,5 @@ void stopEmulation(void);
 int pauseContinueEmulation(void);
 void screenshot(void);
 
+
 #endif // __MAIN_H__

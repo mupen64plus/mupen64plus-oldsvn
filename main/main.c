@@ -549,13 +549,7 @@ static int sdl_event_filter( const SDL_Event *event )
 
                 case SDLK_F9:
 			if (serverIsActive()) {
-				NetMessage startmsg;
-				startmsg.type = NETMSG_BUTTON;
-				startmsg.genEvent.type =  NETMSG_STARTEMU;
-                                fprintf(getNetLog(), "F9 pressed... sending start signal %d %d\n",getSyncCounter(),getNetDelay());
-				startmsg.genEvent.timer = getSyncCounter() + getNetDelay();
-				serverBroadcastMessage(&startmsg);
-				serverStopWaitingForPlayers();
+				serverBroadcastStart();
 			}
                     break;
 

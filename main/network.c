@@ -71,14 +71,21 @@ static unsigned char	bNetplayEnabled = 0;
 
 static int		netDelay = 0;
 
-
-
-
+static int		netLag[MAX_CLIENTS];
 static TCPsocket	Client[MAX_CLIENTS];
+
 static char PlayerName[20][MAX_CLIENTS] = {"Player 1", "Player 2", "Player 3", "Player 4"};
 
 
-
+unsigned int gettimeofday_msec(void)
+{
+    struct timeval tv;
+    unsigned int foo;
+    
+    gettimeofday(&tv, NULL);
+    foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
+    return foo;
+}
 /* =======================================================================================
 
 	Initialize!
@@ -94,12 +101,12 @@ void netInitialize() {
   netLog = fopen("netlog.txt", "w");
 
   netConfig = fopen("mupennet.conf", "r");
-  fscanf(netConfig, "server: %d\nhost: %s\nport: %d\ndelay: %d\n", &start_server, &hostname, &hostport, &netDelay);
+  fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &start_server, &hostname, &hostport, &netDelay);
   fclose(netConfig);
 
   fprintf(netLog, "Begining net log...\n");
 
-  fprintf(netLog, "Start_server %d\nHostname %s\nHostport %d\nnetDelay: %d\n", start_server, hostname, hostport, netDelay);
+  fprintf(netLog, "Start_server %d\nHostname %s\nHostport %d\n", start_server, hostname, hostport, netDelay);
   for (n = 0; n < 4; n++) netKeys[n].Value = 0;
   for (n = 0; n < MAX_CLIENTS; n++) Client[n] = 0;
   if (SDLNet_Init() < 0) fprintf(netLog, "Failure to initialize SDLNet!\n");
@@ -160,20 +167,11 @@ unsigned short  netplayEnabled() {return bNetplayEnabled;}
 
 void netInteruptLoop() {
 	    if (serverWaitingForPlayers()) {
-	    fprintf(netLog, "waiting for signal to begin...\n");
-            SyncCounter = 0;
-            while (serverWaitingForPlayers()) {
-                    struct timespec ts;
-                    incSyncCounter();
+              fprintf(netLog, "waiting for signal to begin...\n");
 
+              while (serverWaitingForPlayers()) {
                     osd_render();  // Continue updating OSD
                     SDL_GL_SwapBuffers();
-
-
-                    ts.tv_sec = 0;
-                    ts.tv_nsec = 100000000;
-                    nanosleep(&ts, NULL); // sleep for 100 ms
-
                     SDL_PumpEvents();
 #ifdef WITH_LIRC
                     lircCheckInput();
@@ -185,8 +183,8 @@ void netInteruptLoop() {
 			serverAcceptConnection();
 			serverProcessMessages();
 		    }
-
-	    }
+              SyncCounter = 0;
+	      }
             }
             else {
                     incSyncCounter();
@@ -289,7 +287,7 @@ void serverAcceptConnection() {
 		fprintf(netLog, "Sending ping.\n", n);
                 msg.type = NETMSG_PING;
                 msg.genEvent.type = NETMSG_PING;
-                msg.genEvent.value = getSyncCounter();
+                msg.genEvent.value = gettimeofday_msec();
                 serverSendMessage(newClient, &msg);
             }
             break;
@@ -323,11 +321,9 @@ void serverProcessMessages() {
 							serverBroadcastMessage(&msg);
 						break;
 						case NETMSG_PING:
-						     netlag = getSyncCounter() - msg.genEvent.value;
-                                                     fprintf(netLog, "Server: ping received, lag %d sending sync (current %d)\n", netlag, getSyncCounter());
-                                                     nmsg.genEvent.value = getSyncCounter() - netlag;
-						     nmsg.type = NETMSG_SYNC;
-						     serverSendMessage(Client[n], &nmsg);
+						     netLag[n] = (gettimeofday_msec() - msg.genEvent.value) / 2;
+                                                                // Divide by 2 for one way trip
+                                                     fprintf(netLog, "Server: ping received, lag %d\n", netLag[n]);
                                                 break;
 					}
 				} else {
@@ -336,6 +332,66 @@ void serverProcessMessages() {
 			}
 		}
 	}
+}
+
+void serverBroadcastStart() {
+  int tc = 0, ptr = 0, n, lc;
+  NetMessage startmsg;
+  struct timespec ts;
+
+  fprintf(getNetLog(), "Server: F9 pressed\n");
+
+  short sort_array[MAX_CLIENTS];
+
+  for (n = 0; n < MAX_CLIENTS; n++) sort_array[n] = -1;
+
+  // Sort out ping speeds stored in net lag from highest to lowest
+  for (n = 0; n < MAX_CLIENTS; n++)
+      if  ( (netLag[n] >= netLag[tc])
+         && (Client[n]) ) 
+            tc = n;
+
+  sort_array[ptr] = tc;
+  lc = tc;
+  tc = 0;
+
+  for (ptr = 1; ptr < MAX_CLIENTS; ptr++) {
+     for (n = 0; n < MAX_CLIENTS; n++) 
+          if ( (netLag[n] >= netLag[tc])
+            && (netLag[n] <= netLag[lc]) 
+            && (n != lc) 
+            && (Client[n]))
+               tc = n;
+     if (tc == lc) break;
+     lc = tc;
+     tc = 0;
+  }
+
+  fprintf(netLog, "Client Lag(ms):\n");
+  for (n = 0; n < MAX_CLIENTS; n++) if (Client[n]) fprintf(netLog, "   Player %d: %d\n", sort_array[n]+1, netLag[sort_array[n]]);
+
+  startmsg.type = NETMSG_STARTEMU;
+  serverStopWaitingForPlayers();
+
+  netDelay = (netLag[sort_array[0]] / 17) + 3; // 60 VI/s = ~17ms per VI (+ 3 to be safe)
+  fprintf(netLog, "Net Delay: %d\n", netDelay);
+
+  // Send STARTEMU signals, in order of slowest to fastest connection, compensate for net lag
+  for (n = 0; n < MAX_CLIENTS; n++) {
+     ptr = sort_array[n];
+     lc  = sort_array[n+1];
+     if (ptr >= 0) {
+       fprintf(netLog, "Sending start message to Player %d (lag %d ms)\n", ptr + 1, netLag[ptr]);
+       serverSendMessage(Client[ptr], &startmsg);
+       if (lc > 0) {
+         ts.tv_sec = 0;
+         ts.tv_nsec = 1000000 * (netLag[ptr] - netLag[lc]);
+         fprintf(netLog, "Sleeping for %d ms\n", netLag[ptr] - netLag[lc]);
+         nanosleep(&ts, NULL);
+       }
+     }
+  }
+  fprintf(netLog, "Finished sending STARTEMU messages.\n");
 }
 
 /* =======================================================================================
@@ -402,6 +458,10 @@ void clientProcessMessages() {
 				}
 				else fprintf(netLog, "Desync Warning!: Event received for %d, current %d\n", 						incomingMessage.genEvent.timer, getSyncCounter());
 			break;
+                        case NETMSG_STARTEMU:
+                                fprintf(netLog, "Client: STARTEMU message received.\n");
+                                bWaitForPlayers = 0;
+                        break;
 			case NETMSG_PLAYERQUIT:
 				pn = incomingMessage.genEvent.controller;
 				fprintf(netLog, "Player quit announcement %d\n", pn);
@@ -453,10 +513,6 @@ void netProcessEventQueue() {
 	switch (type) {
           case NETMSG_BUTTON:     
             netKeys[controller].Value = value;
-            break;
-          case NETMSG_STARTEMU:
-            fprintf(netLog, "EVENTQUEUE: Received start signal\n");
-            bWaitForPlayers = 0;
             break;
        }
        netPopEvent();
