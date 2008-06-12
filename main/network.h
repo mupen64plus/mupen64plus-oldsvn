@@ -22,34 +22,31 @@
 #define		NETMSG_PLAYERQUIT	205	// Player disconnect
 #define		NETMSG_SETNAME		206
 
+
+// I made sure to use integer types here that were safe to send between 32bit and 64bit platforms
 typedef struct TNetEvent {
-        unsigned char		type;
-	unsigned char		controller;	// applicable controller
-	DWORD			value;		// new key state value to assign (BUTTONS.Value)
-	unsigned short		timer;		// when to activate the event (== netVISyncCounter)
+        u_int8_t		type;
+	u_int8_t		controller;	// applicable controller
+	u_int32_t		value;		// new key state value to assign (BUTTONS.Value)
+	u_int16_t		timer;		// when to activate the event (== netVISyncCounter)
 	struct TNetEvent	*next;		// Next button event in queue
 } NetEvent;
 
 typedef struct TNetMessage {
-	unsigned short	id;
-	unsigned char	type;
-	NetEvent genEvent;
+	u_int8_t	id;
+	u_int16_t	type;
+        struct {
+            u_int8_t		type;
+            u_int8_t		controller;	// applicable controller
+            u_int32_t		value;		// new key state value to assign (BUTTONS.Value)
+            u_int16_t		timer;		// when to activate the event (== netVISyncCounter)
+        } genEvent;
 } NetMessage;
-
-typedef struct TNetJoinRequest {
-	unsigned char		controller;
-	char			nickname[12];
-} NetJoinRequest;
-
-typedef struct TNetServerInfo {
-	unsigned char		availableSlots;
-	char			gameMD5;
-} NetServerInfo;
 
 void netInteruptLoop();
 
-unsigned short getSyncCounter();
-void setSyncCounter(unsigned short v);
+u_int16_t getSyncCounter();
+void setSyncCounter(u_int16_t v);
 unsigned short netIsConnected();
 DWORD getNetKeys(int control);
 void setNetKeys(int control, DWORD value);

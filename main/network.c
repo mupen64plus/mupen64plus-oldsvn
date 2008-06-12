@@ -53,7 +53,7 @@
 */ 
 
 static BUTTONS		netKeys[4];		// Key cache
-static unsigned short	SyncCounter = 0;	// Track VI in order to syncrhonize button events over network
+static u_int16_t	SyncCounter = 0;	// Track VI in order to syncrhonize button events over network
 
 static TCPsocket	clientSocket;		// Socket descriptor for connection to server
 static SDLNet_SocketSet	clientSocketSet;	// Set for client connection to server
@@ -147,8 +147,8 @@ void netShutdown() {
 
 unsigned short  getNetDelay() {return netDelay;}
 FILE *		getNetLog() {return netLog;}
-unsigned short	getSyncCounter() {return SyncCounter;}
-void		setSyncCounter(unsigned short v) {SyncCounter = v;}
+u_int16_t	getSyncCounter() {return SyncCounter;}
+void		setSyncCounter(u_int16_t v) {SyncCounter = v;}
 unsigned short  incSyncCounter() {SyncCounter++;}
 DWORD		getNetKeys(int control) {return netKeys[control].Value;}
 void		setNetKeys(int control, DWORD value) {netKeys[control].Value = value;}
@@ -310,10 +310,12 @@ void serverProcessMessages() {
 		if (Client[n]) {
 			if (SDLNet_SocketReady(Client[n])) {
 				if (recvRet = serverRecvMessage(Client[n], &msg)) {
+                                        fprintf(netLog, "Server: received packet (%d bytes / type %d [%d])\n", recvRet, msg.type, msg.genEvent.type);
 					switch (msg.type) {
 						case NETMSG_EVENT:
                                                         if (msg.genEvent.type == NETMSG_BUTTON) {
 							    msg.genEvent.timer += netDelay;
+                                                            fprintf(netLog, "Server: Button event from %d\n", n);
 							    if (n < 4) {
 								msg.genEvent.controller = n;
 								serverBroadcastMessage(&msg);
@@ -448,6 +450,7 @@ void clientProcessMessages() {
         if (!SDLNet_SocketReady(clientSocket)) return; // exit now if there aren't any messages to fetch.
 
 	if ((n = SDLNet_TCP_Recv(clientSocket, &incomingMessage, sizeof(NetMessage))) == sizeof(NetMessage)) {
+                fprintf(netLog, "Client: packet received %d bytes\n", n);
 		switch (incomingMessage.type) {
 			case NETMSG_EVENT:
 				if (incomingMessage.genEvent.timer > getSyncCounter()) {
@@ -489,10 +492,12 @@ void clientProcessMessages() {
 
 void netSendButtonState(int control, DWORD value) {
   NetMessage msg;
-  msg.type = NETMSG_BUTTON;
+  msg.type = NETMSG_EVENT;
+  msg.genEvent.type = NETMSG_BUTTON;
   msg.genEvent.controller = control;
   msg.genEvent.value = value;
   msg.genEvent.timer = getSyncCounter();
+  fprintf(netLog, "Client: Sending button state (sync %d)\n", getSyncCounter());
   clientSendMessage(&msg);
 }
 
