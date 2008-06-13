@@ -161,16 +161,14 @@ void netInteruptLoop() {
                       fprintf(netLog, "Client: Pausing for server now. EventCounter = %d.\n", getEventCounter());
                       clientPauseForServer();
                   }
-                  if (serverIsActive()) {
-//                      serverBroadcastSync(); Too slow to use once a second, kills VI rate
-
-                      syncMsg.type = NETMSG_SYNC;
-                      syncMsg.genEvent.timer = getEventCounter() + getNetDelay() - 1;
-                      serverBroadcastMessage(&syncMsg);
-
-                  }
               }
 
+	      if ((serverIsActive()) && ((getEventCounter() - getNetDelay()) % 60 == 0)) {
+//                serverBroadcastSync(); Too slow to use once a second, kills VI rate
+                  syncMsg.type = NETMSG_SYNC;
+                  syncMsg.genEvent.timer = getEventCounter() + getNetDelay() - 1;
+                  serverBroadcastMessage(&syncMsg);
+              }
             }
 }
 
