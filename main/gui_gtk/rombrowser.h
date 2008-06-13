@@ -21,15 +21,14 @@ Email                : blight@Ashitaka
 #include <gtk/gtk.h>
 
 int create_romBrowser( void );
-void rombrowser_refresh( void );
 void apply_filter( void );
 void fillrombrowser();
+
+void rombrowser_refresh( unsigned int roms, unsigned short clear );
 
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 void countrycodestring(unsigned short int countrycode, char *string);
 void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag);
 char* filefrompath(const char *string);
-
-extern GList *g_RomList;
 
 #endif // __ROMBROWSER_H__

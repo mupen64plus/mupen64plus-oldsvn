@@ -146,7 +146,7 @@ void gui_main_loop(void)
 }
 
 //External pulic function to update rombrowser.
-void updaterombrowser()
+void updaterombrowser( unsigned int roms, unsigned short clear )
 {
     pthread_t self = pthread_self();
 
@@ -156,7 +156,7 @@ void updaterombrowser()
         if(!pthread_equal(self, g_GuiThread))
             gdk_threads_enter();
 
-        rombrowser_refresh();
+        rombrowser_refresh(roms, clear);
 
         GUI_PROCESS_QUEUED_EVENTS();
 
@@ -191,10 +191,10 @@ void info_message(const char *fmt, ...)
             {
                 gtk_statusbar_pop(GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id);
                 gtk_statusbar_push(GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id, buf);
-        
+
                 // update status bar
                 GUI_PROCESS_QUEUED_EVENTS();
-        
+
                 if(!pthread_equal(self, g_GuiThread))
                     gdk_threads_leave();
 
@@ -1424,27 +1424,8 @@ static int create_statusBar( void )
 // main window
 static int create_mainWindow( void )
 {
-
- gchar *titles[16] = 
-    {
-    (gchar*)tr("Country"), 
-    (gchar*)tr("Good Name"),
-    (gchar*)tr("Status"),
-    (gchar*)tr("User Comments"),
-    (gchar*)tr("File Name"),
-    (gchar*)tr("MD5 Hash"),
-    (gchar*)tr("CRC1"),
-    (gchar*)tr("CRC2"),
-    (gchar*)tr("Internal Name"),
-    (gchar*)tr("Save Type"),
-    (gchar*)tr("Players"),
-    (gchar*)tr("Size"),
-    (gchar*)tr("Compression"),
-    (gchar*)tr("Image Type"),
-    (gchar*)tr("CIC Chip"),
-    (gchar*)tr("Rumble"),
-    };
-
+    g_MainWindow.romSortType = GTK_SORT_ASCENDING;
+    g_MainWindow.romSortColumn = 1;
 
     int width, height;
 

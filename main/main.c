@@ -132,7 +132,7 @@ char *get_installpath()
 char *get_savespath()
 {
     static char path[PATH_MAX];
-    strcpy(path, get_configpath());
+    strncpy(path, get_configpath(), PATH_MAX-5);
     strcat(path, "save/");
     return path;
 }
@@ -140,7 +140,7 @@ char *get_savespath()
 char *get_iconspath()
 {
     static char path[PATH_MAX];
-    strcpy(path, get_installpath());
+    strncpy(path, get_installpath(), PATH_MAX-6);
     strcat(path, "icons/");
     return path;
 }
@@ -148,7 +148,7 @@ char *get_iconspath()
 char *get_iconpath(char *iconfile)
 {
     static char path[PATH_MAX];
-    strcpy(path, get_iconspath());
+    strncpy(path, get_iconspath(), PATH_MAX-strlen(iconfile));
     strcat(path, iconfile);
     return path;
 }
@@ -434,14 +434,14 @@ void startEmulation(void)
             alert_message(tr("Couldn't spawn core thread!"));
             return;
         }
-        g_RCSTask = RCS_SLEEP;
+        g_romcache.rcstask = RCS_SLEEP;
         pthread_detach(g_EmulationThread);
         info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
     else if(rompause)
     {
-    	g_RCSTask = RCS_SLEEP;
+        g_romcache.rcstask = RCS_SLEEP;
         pauseContinueEmulation();
     }
 
@@ -462,7 +462,6 @@ void stopEmulation(void)
         g_EmulatorRunning = 0;
 
         info_message(tr("Emulation stopped."));
-        g_RCSTask = RCS_RESCAN;
     }
 }
 
@@ -473,15 +472,12 @@ int pauseContinueEmulation(void)
 
     if (rompause)
     {
-        g_RCSTask = RCS_SLEEP;
+        g_romcache.rcstask = RCS_SLEEP;
         info_message(tr("Emulation continued."));
     }
     else
-    {
-        g_RCSTask = RCS_RESCAN;
-        info_message(tr("Emulation paused."));
-    }
-    
+        { info_message(tr("Emulation paused.")); }
+
     rompause = !rompause;
     return rompause;
 }
@@ -498,10 +494,10 @@ void screenshot(void)
         char *pch, ch;
         filepath[0] = 0;
         filename[0] = 0;
-        strcpy(filepath, l_SshotDir);
+        strncpy(filepath, l_SshotDir, PATH_MAX);
         if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
             strcat(filepath, "/");
-        
+
         // add the game's name to the end, convert to lowercase, convert spaces to underscores
         pch = filepath + strlen(filepath);
         strncpy(pch, ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
@@ -514,7 +510,7 @@ void screenshot(void)
             else
                 *pch++ = tolower(ch);
         } while (ch != 0);
-        
+
         // look for a file
         int i;
         for (i = 0; i < 100; i++)
@@ -535,7 +531,9 @@ void screenshot(void)
         // free the memory
         free(pchImage);
         // print message -- this allows developers to capture frames and use them in the regression test
-        printf("Captured screenshot for frame %i\n", l_CurrentFrame);
+        char buffer[128];
+        snprintf(buffer, 127, "Captured screenshot for frame %i\n", l_CurrentFrame);
+        info_message(buffer);
     }
 }
 
@@ -1410,16 +1408,16 @@ int main(int argc, char *argv[])
     pthread_attr_getschedparam (&tattr, &param);
     param.sched_priority = newprio;
     pthread_attr_setschedparam (&tattr, &param);
-    g_RCSTask = RCS_INIT;
-    if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr) != 0)
-    {
+    g_romcache.rcstask = RCS_INIT;
+    if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
+        {
         g_RomCacheThread = 0;
         alert_message(tr("Couldn't spawn rom cache thread!"));
-    }
+        }
     // only display gui if user wants it
     if(l_GuiEnabled)
         gui_display();
-    
+
     // if rom file was specified, run it
     if (l_Filename)
     {
@@ -1428,7 +1426,7 @@ int main(int argc, char *argv[])
         {
             // cleanup and exit
             cheat_delete_all();
-            g_RCSTask = RCS_SHUTDOWN;
+            g_romcache.rcstask = RCS_SHUTDOWN;
             plugin_delete_list();
             tr_delete_languages();
             config_delete();
@@ -1445,7 +1443,7 @@ int main(int argc, char *argv[])
 
         // cleanup and exit
         cheat_delete_all();
-        g_RCSTask = RCS_SHUTDOWN;
+        g_romcache.rcstask = RCS_SHUTDOWN;
         plugin_delete_list();
         tr_delete_languages();
         config_delete();
@@ -1465,7 +1463,7 @@ int main(int argc, char *argv[])
     config_write();
     cheat_write_config();
     cheat_delete_all();
-    g_RCSTask = RCS_SHUTDOWN;
+    g_romcache.rcstask = RCS_SHUTDOWN;
     plugin_delete_list();
     tr_delete_languages();
     config_delete();

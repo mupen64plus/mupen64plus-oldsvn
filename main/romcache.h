@@ -23,7 +23,6 @@
 **/
 #include <limits.h> //PATH_MAX
 #define COMMENT_MAXLENGTH 256
-
 #include "md5.h"
 
 typedef struct
@@ -39,37 +38,24 @@ typedef struct
    unsigned short rumble;
 } romdatabase_entry;
 
-romdatabase_entry empty_entry;
-
-//Needs to be rearranged.
 typedef struct _cache_entry
 {
-    char filename[PATH_MAX];
     md5_byte_t md5[16];
     time_t timestamp;
+    char filename[PATH_MAX];
+    char usercomments[COMMENT_MAXLENGTH]; 
+    char internalname[80]; //Needs to be 4 times the stored value for UTF8 conversion. 
     unsigned short countrycode;
     unsigned short compressiontype;
     unsigned short imagetype;
     unsigned short cic;
-    unsigned int archivefile; //Not currently used, for locating file inside zip or 7zip archives.
-    int romsize;
-    char usercomments[COMMENT_MAXLENGTH]; 
-    char internalname[80]; //Needs to be 4 times the stored value for UTF8 conversion. 
+    unsigned int archivefile; //Not currently used, eventually for locating file inside zip or 7zip archives.
     unsigned int crc1;
     unsigned int crc2;
-     romdatabase_entry* inientry;
+    int romsize;
+    romdatabase_entry* inientry;
     struct _cache_entry* next;
 } cache_entry;
-
-//Use custom linked list. 
-typedef struct
-{
-    unsigned int length; 
-    cache_entry *top;
-    cache_entry *last;
-} rom_cache;
-
-rom_cache romcache;
 
 enum RCS_TASK
 {
@@ -78,12 +64,39 @@ enum RCS_TASK
     RCS_SLEEP,
     RCS_BUSY,
     RCS_SHUTDOWN,
-    RCS_WRITE_CACHE //For user comments.
+    RCS_WRITE_CACHE //For quickly saving user comments from the frontend.
 };
 
-enum RCS_TASK g_RCSTask;
-//When finished, move to header.
+typedef struct
+{
+    unsigned int length; 
+    enum RCS_TASK rcstask;
+    cache_entry* top;
+    cache_entry* last;
+} rom_cache;
 
-void *rom_cache_system(void *_arg);
+typedef struct _romdatabase_search
+{
+    romdatabase_entry entry;
+    struct _romdatabase_search* next_entry;
+    struct _romdatabase_search* next_crc;
+    struct _romdatabase_search* next_md5;
+} romdatabase_search;
+
+typedef struct
+{
+    char* comment;
+    romdatabase_search* crc_lists[256];
+    romdatabase_search* md5_lists[256];
+    romdatabase_search* list;
+} _romdatabase;
+
+extern romdatabase_entry empty_entry;
+extern rom_cache g_romcache;
+
+void* rom_cache_system(void* _arg);
 romdatabase_entry* ini_search_by_md5(md5_byte_t* md5);
+
+//Should be used by current cheat system (isn't), when cheat system is 
+//migrated to md5s, will be fully depreciated.
 romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);

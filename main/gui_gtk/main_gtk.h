@@ -32,6 +32,8 @@ typedef struct
     //Non-visable FullList from which we can filter.
     GtkWidget *romDisplay, *romFullList;
     GtkTreeViewColumn *column[17]; //columns in rombrowser.
+    int romSortColumn; // sort column
+    GtkSortType romSortType; // sort type (ascending/descending)
     GtkWidget *statusBarHBox;
     GtkAccelGroup *accelGroup;
     GtkAccelGroup *accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
@@ -40,13 +42,11 @@ typedef struct
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;
+extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 
 void reload();
 void statusbar_message( const char *section, const char *fmt, ... );
-void updaterombrowser();
 gboolean check_icon_theme();
-
-GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 
 // helper macro
 #define GUI_PROCESS_QUEUED_EVENTS() \

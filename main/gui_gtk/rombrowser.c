@@ -32,22 +32,15 @@ Email                : blight@Ashitaka
 #include <string.h>
 #include <limits.h>
 
-// rom file extensions
-static const char *g_romFileExtensions[] = 
-{
-    ".rom", ".v64", ".z64", ".gz", ".zip", ".n64", NULL
-};
-
 static void setup_view (GtkWidget *view);
 
 /*********************************************************************************************************
 * globals
 */
-static GtkWidget *playRomItem;
-static GtkWidget *romPropertiesItem;
-static GtkWidget *refreshRomBrowserItem;
-static int g_iNumRoms, g_iSortColumn = 1; // sort column
-static GtkSortType g_SortType = GTK_SORT_ASCENDING; // sort type (ascending/descending)
+GtkWidget *playRomItem;
+GtkWidget *romPropertiesItem;
+GtkWidget *refreshRomBrowserItem;
+GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 
 void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
 {
@@ -110,7 +103,7 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
 {
     short returnvalue;
 
-    if(g_iSortColumn==2||g_iSortColumn==11||g_iSortColumn==14)
+    if(g_MainWindow.romSortColumn==2||g_MainWindow.romSortColumn==11||g_MainWindow.romSortColumn==14)
         {
         cache_entry *entry1;
         cache_entry *entry2;
@@ -119,17 +112,17 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         gtk_tree_model_get ( model, ptr1, 22, &entry1, -1 );
         gtk_tree_model_get ( model, ptr2, 22, &entry2, -1 );
 
-        if(g_iSortColumn==2)
+        if(g_MainWindow.romSortColumn==2)
             {
             item1 = entry1->inientry->status;
             item2 = entry2->inientry->status;
             }
-        else if(g_iSortColumn==11)
+        else if(g_MainWindow.romSortColumn==11)
             {
             item1 = entry1->romsize;
             item2 = entry2->romsize;
             }
-        else if(g_iSortColumn==14)
+        else if(g_MainWindow.romSortColumn==14)
             {
             item1 = entry1->cic;
             item2 = entry2->cic;
@@ -146,8 +139,8 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         {
         gchar *buffer1, *buffer2;
 
-        gtk_tree_model_get ( model, ptr1, g_iSortColumn, &buffer1, -1 );
-        gtk_tree_model_get ( model, ptr2, g_iSortColumn, &buffer2, -1 );
+        gtk_tree_model_get ( model, ptr1, g_MainWindow.romSortColumn, &buffer1, -1 );
+        gtk_tree_model_get ( model, ptr2, g_MainWindow.romSortColumn, &buffer2, -1 );
 
         returnvalue = strcasecmp(buffer1, buffer2);
 
@@ -156,7 +149,7 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         }
 
     //If items are equal, fallback on Good Name and then File Name.
-    if(returnvalue==0&&g_iSortColumn!=1)
+    if(returnvalue==0&&g_MainWindow.romSortColumn!=1)
         {
         gchar *buffer1, *buffer2;
 
@@ -169,7 +162,7 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         g_free(buffer2);
         }
 
-    if(returnvalue==0&&g_iSortColumn!=4)
+    if(returnvalue==0&&g_MainWindow.romSortColumn!=4)
         {
         gchar *buffer1, *buffer2;
 
@@ -210,66 +203,86 @@ char* filefrompath(const char *string)
 
 void call_rcs(void)
 {
-    g_RCSTask = RCS_RESCAN;
+    g_romcache.rcstask = RCS_RESCAN;
 }
 
 //Load a fresh TreeView after re-scanning directories.
-void rombrowser_refresh( void )
+void rombrowser_refresh( unsigned int roms, unsigned short clear )
 {
-    GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
-    gtk_tree_selection_select_all(selection);
-    GtkTreeModel *model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
-    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_iSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
-    gtk_list_store_clear( GTK_LIST_STORE(model) );
-    selection = gtk_tree_view_get_selection (  GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-    gtk_tree_selection_select_all(selection);
-    model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_iSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
-    gtk_list_store_clear( GTK_LIST_STORE(model) );
+    int arrayroms;
+    GtkTreeModel *model;
 
-    gboolean fullpaths;
-
-    GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
-    char *country, *goodname, *usercomments, *filename, *md5hash, *crc1, *crc2, *internalname, *savetype, *players, *size, *compressiontype, *imagetype, *cicchip, *rumble;
-    GdkPixbuf *flag;
-    GdkPixbuf *status[5];
-    int i;
-
-    country = (char*)calloc(32,sizeof(char));
-    md5hash = (char*)calloc(33,sizeof(char));
-    crc1 = (char*)calloc(9,sizeof(char));
-    crc2 = (char*)calloc(9,sizeof(char));
-    savetype = (char*)calloc(16,sizeof(char));
-    players = (char*)calloc(16,sizeof(char));
-    size = (char*)calloc(16,sizeof(char));
-    compressiontype = (char*)calloc(16,sizeof(char));
-    imagetype = (char*)calloc(32,sizeof(char));
-    cicchip = (char*)calloc(16,sizeof(char));
-    rumble = (char*)calloc(8,sizeof(char));
-
-    if(iter==NULL||country==NULL||md5hash==NULL||crc1==NULL||crc2==NULL||size==NULL||compressiontype==NULL||imagetype==NULL||cicchip==NULL)
+    if(clear)
         {
-        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
-        return;
+        GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
+        gtk_tree_selection_select_all(selection);
+        model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
+        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_MainWindow.romSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
+        gtk_list_store_clear( GTK_LIST_STORE(model) );
+        selection = gtk_tree_view_get_selection (  GTK_TREE_VIEW(g_MainWindow.romDisplay) );
+        gtk_tree_selection_select_all(selection);
+        model = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
+        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_MainWindow.romSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
+        gtk_list_store_clear( GTK_LIST_STORE(model) );
         }
 
-    fullpaths = config_get_bool( "RomBrowserShowFullPaths", FALSE);
+    model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
+    arrayroms = gtk_tree_model_iter_n_children(model, NULL); 
 
-    if(romcache.length!=0)
+    if(roms>arrayroms)
         {
-        cache_entry *entry;
-        entry = romcache.top;
-        do
+        gboolean fullpaths;
+
+        GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+        char *country, *goodname, *usercomments, *filename, *md5hash, *crc1, *crc2, *internalname, *savetype, *players, *size, *compressiontype, *imagetype, *cicchip, *rumble;
+        GdkPixbuf *flag;
+        GdkPixbuf *status[5];
+        unsigned int romcounter;
+        int counter;
+
+        country = (char*)calloc(32,sizeof(char));
+        md5hash = (char*)calloc(33,sizeof(char));
+        crc1 = (char*)calloc(9,sizeof(char));
+        crc2 = (char*)calloc(9,sizeof(char));
+        savetype = (char*)calloc(16,sizeof(char));
+        players = (char*)calloc(16,sizeof(char));
+        size = (char*)calloc(16,sizeof(char));
+        compressiontype = (char*)calloc(16,sizeof(char));
+        imagetype = (char*)calloc(32,sizeof(char));
+        cicchip = (char*)calloc(16,sizeof(char));
+        rumble = (char*)calloc(8,sizeof(char));
+
+        if(iter==NULL||country==NULL||md5hash==NULL||crc1==NULL||crc2==NULL||size==NULL||compressiontype==NULL||imagetype==NULL||cicchip==NULL)
             {
-            countrycodestring(entry->countrycode, country);
-            countrycodeflag(entry->countrycode, &flag);
-            goodname = entry->inientry->goodname;
-            for ( i = 0; i < 5; ++i )
+            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
+            return;
+            }
+
+        fullpaths = config_get_bool( "RomBrowserShowFullPaths", FALSE);
+        cache_entry *entry;
+        entry = g_romcache.top;
+
+        //printf("Roms in array: %d Roms in cache: %d Romcounter: %d\n", arrayroms,roms,romcounter);
+
+        for ( romcounter=0; romcounter < arrayroms; ++romcounter )
+            {
+            entry = entry->next;
+            if((entry==NULL))
+                { printf("NULL\n"); return; }
+            }
+
+        for ( romcounter=0; (romcounter<roms)&&(entry!=NULL); ++romcounter )
+          {
+          countrycodestring(entry->countrycode, country);
+          countrycodeflag(entry->countrycode, &flag);
+          goodname = entry->inientry->goodname;
+
+          for ( counter = 0; counter < 5; ++counter )
                 {
-                if(entry->inientry->status>i)
-                    { status[i] = star; }
+                if(entry->inientry->status>counter)
+                    { status[counter] = star; }
                 else
-                    { status[i] = NULL; }
+                    { status[counter] = NULL; }
                 }
             usercomments = entry->usercomments;
             if(fullpaths)
@@ -277,8 +290,8 @@ void rombrowser_refresh( void )
             else
                 { filename = filefrompath(entry->filename); }
 
-            for ( i = 0; i < 16; ++i ) 
-                { sprintf(md5hash+i*2, "%02X", entry->md5[i]); }
+            for ( counter = 0; counter < 16; ++counter ) 
+                { sprintf(md5hash+counter*2, "%02X", entry->md5[counter]); }
             sprintf(crc1, "%08X", entry->crc1);
             sprintf(crc2, "%08X", entry->crc2);
             internalname=entry->internalname;
@@ -300,30 +313,29 @@ void rombrowser_refresh( void )
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
             gtk_list_store_set ( GTK_LIST_STORE(model), iter, 0, country, 1, goodname, 2, NULL, 3, usercomments, 4, filename, 5, md5hash, 6, crc1, 7, crc2, 8, internalname, 9, savetype, 10, players, 11, size, 12, compressiontype, 13, imagetype, 14, cicchip, 15, rumble, 16, status[0], 17, status[1], 18, status[2], 19, status[3], 20, status[4], 21, flag, 22, entry, -1);
 
+            //printf("Added: %s\n", goodname);
             entry = entry->next;
             }
-        while (entry!=NULL);
+
+        free(country);
+        free(md5hash);
+        free(crc1);
+        free(crc2);
+        free(savetype);
+        free(players);
+        free(size);
+        free(compressiontype);
+        free(imagetype);
+        free(cicchip);
+        free(rumble);
+        if(fullpaths==1)
+           { free(filename); }
+        free(iter);
+        //Do an initial sort.
+        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_MainWindow.romSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
+        gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(model), g_MainWindow.romSortColumn, g_MainWindow.romSortType );
+        gtk_tree_view_set_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay), model );
         }
-
-    free(country);
-    free(md5hash);
-    free(crc1);
-    free(crc2);
-    free(savetype);
-    free(players);
-    free(size);
-    free(compressiontype);
-    free(imagetype);
-    free(cicchip);
-    free(rumble);
-    if(fullpaths==1)
-       { free(filename); }
-    free(iter);
-    //Do an initial sort.
-    gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_iSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
-    gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(model), g_iSortColumn, g_SortType );
-    gtk_tree_view_set_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay), model );
-
 }
 
 //We're going our own filtering, but this is a GtkTreeModelFilter function.
@@ -335,7 +347,7 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
     filter = gtk_entry_get_text ( GTK_ENTRY(g_MainWindow.filter) );
     //printf("Filter: %s\n", filter);
 
-    if(g_iSortColumn==2)
+    if(g_MainWindow.romSortColumn==2)
         {
         cache_entry *entry;
         gtk_tree_model_get ( model, iter, 22, &entry, -1 );
@@ -352,7 +364,7 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
     char *buffer1, *buffer2;
     gboolean returnvalue;
 
-    gtk_tree_model_get (model, iter, g_iSortColumn, &buffer1, -1);
+    gtk_tree_model_get (model, iter, g_MainWindow.romSortColumn, &buffer1, -1);
     //printf("Value %s\n", buffer1);
     if(buffer1==NULL||filter==NULL)
         { returnvalue = TRUE; }
@@ -377,12 +389,12 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 static void callback_column_sort(GtkTreeViewColumn *treeviewcolumn, gpointer data)
 {
 
-    if( g_iSortColumn == gtk_tree_view_column_get_sort_column_id(treeviewcolumn) )
-        { g_SortType = ( g_SortType == GTK_SORT_ASCENDING ) ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING; }
+    if( g_MainWindow.romSortColumn == gtk_tree_view_column_get_sort_column_id(treeviewcolumn) )
+        { g_MainWindow.romSortType = ( g_MainWindow.romSortType == GTK_SORT_ASCENDING ) ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING; }
     else
         {
-        g_iSortColumn = gtk_tree_view_column_get_sort_column_id(treeviewcolumn); 
-        g_SortType = GTK_SORT_ASCENDING;
+        g_MainWindow.romSortColumn = gtk_tree_view_column_get_sort_column_id(treeviewcolumn); 
+        g_MainWindow.romSortType = GTK_SORT_ASCENDING;
         }
 
   apply_filter();
@@ -441,6 +453,7 @@ static void callback_apply_filter( GtkWidget *widget, gpointer data )
 
 void apply_filter( void )
 {
+    int g_iNumRoms;
     static short resort = 0;
     GtkTreeModel *destination;
     const gchar *filter;
@@ -474,7 +487,7 @@ void apply_filter( void )
         validiter = gtk_tree_model_get_iter_first(source, &sourceiter);
 
         destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
+        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_MainWindow.romSortColumn,  return_zero, (gpointer)NULL, (gpointer)NULL );
 
         if(validiter)
             {
@@ -492,17 +505,16 @@ void apply_filter( void )
                 }
            }
 
-        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
-        gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_iSortColumn, g_SortType );
+        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_MainWindow.romSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
+        gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_MainWindow.romSortColumn, g_MainWindow.romSortType );
         }
     else
         {
         destination = gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay) );
-        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_iSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
-        gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_iSortColumn, g_SortType );
+        gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(destination), g_MainWindow.romSortColumn,  rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
+        gtk_tree_sortable_set_sort_column_id ( GTK_TREE_SORTABLE(destination), g_MainWindow.romSortColumn, g_MainWindow.romSortType );
         }
 
-    g_iNumRoms = gtk_tree_model_iter_n_children(destination, NULL); 
 }
 
 static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
@@ -642,12 +654,6 @@ static void callback_romProperties( GtkWidget *widget, gpointer data )
 
         show_romPropDialog();
         }
-}
-
-// refresh rom browser
-static void callback_refreshRomBrowser( GtkWidget *widget, gpointer data )
-{
-    rombrowser_refresh();
 }
 
 static void setup_view (GtkWidget *view)

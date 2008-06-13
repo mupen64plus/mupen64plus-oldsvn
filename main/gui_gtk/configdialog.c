@@ -393,7 +393,7 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
         keepGoing = gtk_tree_model_iter_next(model, &iter);
     }
     config_put_number( "NumRomDirs", i );
-    g_RCSTask = RCS_RESCAN;
+    g_romcache.rcstask = RCS_RESCAN;
 
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton) ) )
         config_put_number( "Core", CORE_INTERPRETER );

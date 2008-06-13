@@ -43,7 +43,7 @@ static void callback_apply_changes( GtkWidget *widget, gpointer data )
     strncpy(g_RomPropDialog.entry->usercomments, gtk_entry_get_text(GTK_ENTRY(g_RomPropDialog.commentsEntry)),255);
 
     // update rombrowser
-    g_RCSTask = RCS_WRITE_CACHE;
+    g_romcache.rcstask = RCS_WRITE_CACHE;
     gtk_list_store_set ( GTK_LIST_STORE(gtk_tree_view_get_model ( GTK_TREE_VIEW(g_MainWindow.romDisplay))),&g_RomPropDialog.iter,3,g_RomPropDialog.entry->usercomments,-1);
 }
 
@@ -86,8 +86,8 @@ void show_romPropDialog()
     countrycodestring(g_RomPropDialog.entry->countrycode, country);
     for ( i = 0; i < 16; ++i ) 
         { sprintf(md5hash+i*2, "%02X", g_RomPropDialog.entry->md5[i]); }
-    sprintf(crc1, "%X", g_RomPropDialog.entry->inientry->crc1);
-    sprintf(crc2, "%X", g_RomPropDialog.entry->inientry->crc2);
+    sprintf(crc1, "%X", g_RomPropDialog.entry->crc1);
+    sprintf(crc2, "%X", g_RomPropDialog.entry->crc2);
     savestring(g_RomPropDialog.entry->inientry->savetype, savetype);
     playersstring(g_RomPropDialog.entry->inientry->players, players);
     sprintf(size, "%.1f MBits", (float)(g_RomPropDialog.entry->romsize / (float)0x20000) );
@@ -95,12 +95,6 @@ void show_romPropDialog()
     imagestring(g_RomPropDialog.entry->imagetype, imagetype);
     cicstring(g_RomPropDialog.entry->cic, cicchip);
     rumblestring(g_RomPropDialog.entry->inientry->rumble, rumble);
-
-    GtkIconTheme *theme = gtk_icon_theme_get_default();
-    if(gtk_icon_theme_has_icon(theme, "emblem-new"))
-        { star = gtk_icon_theme_load_icon(theme, "emblem-new", 16, 0, NULL); }
-    else
-        { star = gdk_pixbuf_new_from_file( get_iconpath("16x16/star.png"), NULL); }
 
     // fill dialog
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.filenameEntry), filename );
