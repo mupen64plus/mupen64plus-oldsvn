@@ -548,7 +548,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-			if (serverIsActive() && serverIsAccepting()) serverBroadcastStart();
+			if (serverIsActive() && serverIsAccepting()) serverBroadcastSync();
                     break;
 
                 case SDLK_ESCAPE:

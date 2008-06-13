@@ -127,8 +127,17 @@ void netInteruptLoop() {
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
 
+            incEventCounter();
+
+	    if (getEventCounter() % 60 == 0) {
+                if ((clientIsConnected()) && (clientLastSyncMsg() < getEventCounter()))
+                  clientPauseForServer();
+                if (serverIsActive())
+                  serverBroadcastSync();
+            }
+
 	    if (clientWaitingForServer()) {
-              fprintf(netLog, "waiting for signal to begin...\n");
+              fprintf(netLog, "waiting for sync msg...\n");
 
               while (clientWaitingForServer()) {
                     osd_render();  // Continue updating OSD

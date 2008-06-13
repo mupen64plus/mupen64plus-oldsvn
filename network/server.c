@@ -151,55 +151,59 @@ void serverProcessMessages() {
   }
 }
 
-void serverBroadcastStart() {
+void serverBroadcastSync() {
   int tc = 0, ptr = 0, n, lc;
   NetMessage startmsg;
   struct timespec ts;
-  short sort_array[MAX_CLIENTS];
+  static short sort_array[MAX_CLIENTS];
+  static BOOL runOnce = FALSE;
+  runOnce = TRUE;
 
+  if (!runOnce) {
+    serverStopWaitingForPlayers();
+    fprintf((FILE *)getNetLog(), "Server: F9 pressed\n");
+    for (n = 0; n < MAX_CLIENTS; n++) sort_array[n] = -1;
 
-  serverStopWaitingForPlayers();
-  fprintf((FILE *)getNetLog(), "Server: F9 pressed\n");
-  for (n = 0; n < MAX_CLIENTS; n++) sort_array[n] = -1;
+    // Sort out connection lag from highest to lowest
+    for (n = 0; n < MAX_CLIENTS; n++)
+        if  ( (Server.player[n].lag >= Server.player[tc].lag)
+           && (Server.player[n].isConnected) ) 
+              tc = n;
 
-  // Sort out connection lag from highest to lowest
-  for (n = 0; n < MAX_CLIENTS; n++)
-      if  ( (Server.player[n].lag >= Server.player[tc].lag)
-         && (Server.player[n].isConnected) ) 
-            tc = n;
+    sort_array[ptr] = tc;
+    lc = tc;
+    tc = 0;
 
-  sort_array[ptr] = tc;
-  lc = tc;
-  tc = 0;
+    for (ptr = 1; ptr < MAX_CLIENTS; ptr++) {
+       for (n = 0; n < MAX_CLIENTS; n++) 
+            if ( (Server.player[n].lag >= Server.player[tc].lag)
+              && (Server.player[n].lag <= Server.player[lc].lag) 
+              && (n != lc) 
+              && (Server.player[n].isConnected))
+                 tc = n;
+       if (tc == lc) break;
+       sort_array[ptr] = tc;
+       lc = tc;
+       tc = 0;
+    }
 
-  for (ptr = 1; ptr < MAX_CLIENTS; ptr++) {
-     for (n = 0; n < MAX_CLIENTS; n++) 
-          if ( (Server.player[n].lag >= Server.player[tc].lag)
-            && (Server.player[n].lag <= Server.player[lc].lag) 
-            && (n != lc) 
-            && (Server.player[n].isConnected))
-               tc = n;
-     if (tc == lc) break;
-     sort_array[ptr] = tc;
-     lc = tc;
-     tc = 0;
+    fprintf((FILE *)getNetLog(), "Client Lag(ms):\n");
+    for (n = 0; n < MAX_CLIENTS; n++) 
+          if (Server.player[n].isConnected) fprintf((FILE *)getNetLog(),"   Player %d: %d ms\n", sort_array[n]+1, Server.player[sort_array[n]].lag);
+
+    startmsg.type = NETMSG_SYNC;
+    Server.netDelay = (Server.player[sort_array[0]].lag / 17) + 7; // 60 VI/s = ~17ms per VI (+ 7 to be safe)
+    fprintf((FILE *)getNetLog(), "Net Delay: %d\n", Server.netDelay);
   }
 
-  fprintf((FILE *)getNetLog(), "Client Lag(ms):\n");
-  for (n = 0; n < MAX_CLIENTS; n++) 
-        if (Server.player[n].isConnected) fprintf((FILE *)getNetLog(),"   Player %d: %d ms\n", sort_array[n]+1, Server.player[sort_array[n]].lag);
+  startmsg.genEvent.timer = getEventCounter();
 
-  startmsg.type = NETMSG_STARTEMU;
-
-  Server.netDelay = (Server.player[sort_array[0]].lag / 17) + 7; // 60 VI/s = ~17ms per VI (+ 7 to be safe)
-  fprintf((FILE *)getNetLog(), "Net Delay: %d\n", Server.netDelay);
-
-  // Send STARTEMU signals, in order of slowest to fastest connection, compensate for net lag
+  // Send sync signals, in order of slowest to fastest connection, compensate for net lag
   for (n = 0; n < MAX_CLIENTS; n++) {
      ptr = sort_array[n];
      lc  = sort_array[n+1];
      if (ptr >= 0) {
-       fprintf((FILE *)getNetLog(), "Sending start message to Player %d (ping %d ms)\n", ptr + 1, Server.player[ptr].lag);
+       fprintf((FILE *)getNetLog(), "Sending sync message to Player %d (ping %d ms)\n", ptr + 1, Server.player[ptr].lag);
        SDLNet_TCP_Send(Server.player[ptr].socket, &startmsg, sizeof(NetMessage));
        if (lc >= 0) {
          ts.tv_sec = 0;
@@ -209,5 +213,5 @@ void serverBroadcastStart() {
        }
      }
   }
-  fprintf((FILE *)getNetLog(), "Finished sending STARTEMU messages.\n");
+  fprintf((FILE *)getNetLog(), "Finished sending sync messages.\n");
 }

@@ -22,6 +22,8 @@ MupenClient     Client;
 DWORD		getNetKeys(int control) {return Client.playerKeys[control].Value;}
 void		setNetKeys(int control, DWORD value) {Client.playerKeys[control].Value = value;}
 BOOL            clientWaitingForServer() { return Client.isWaitingForServer;}
+void            clientPauseForServer() { Client.isWaitingForServer = TRUE;}
+u_int16_t       clientLastSyncMsg() { return Client.lastSync; }
 BOOL            clientIsConnected() {return Client.isConnected;}
 u_int16_t	getEventCounter() {return Client.eventCounter;}
 void		setEventCounter(u_int16_t v) {Client.eventCounter = v;}
@@ -39,8 +41,8 @@ int clientConnect(char *server, int port) {
 
         if (clientIsConnected()) clientDisconnect();
         initEventQueue();
-
 	SDLNet_ResolveHost(&serverAddr, server, port);
+
 	if (Client.socket = SDLNet_TCP_Open(&serverAddr)) {
 		Client.socketSet = SDLNet_AllocSocketSet(1);
 		SDLNet_TCP_AddSocket(Client.socketSet, Client.socket);
@@ -108,9 +110,10 @@ void clientProcessMessages() {
 				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
-                        case NETMSG_STARTEMU:
-                                fprintf((FILE *)getNetLog(), "Client: STARTEMU message received.\n");
+                        case NETMSG_SYNC:
+                                fprintf((FILE *)getNetLog(), "Client: Sync message received.\n");
                                 Client.isWaitingForServer = 0;
+				Client.lastSync = incomingMessage.genEvent.timer;
                         break;
 			case NETMSG_PLAYERQUIT:
 				sprintf(osdString, "Player %d has disconnected.", playerNumber + 1);

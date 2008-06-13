@@ -13,10 +13,12 @@
 #include <SDL_net.h>
 
 #define SERVER_PORT		7000
+#define SYNC_PORT		7001
+
 #define MAX_CLIENTS		10
 
 #define 	NETMSG_EVENT		0       // Time sensitive input events
-#define		NETMSG_STARTEMU		1	// Begin execution of ROM code
+#define		NETMSG_SYNC		1	// Continue execution of ROM code
 #define		NETMSG_PING		2       // Used to detect latency
 #define		NETMSG_DESYNC		3       // Client sends this when they've desynced
 #define		NETMSG_PLAYERQUIT	4	// Player disconnect
@@ -57,6 +59,7 @@ typedef struct TMupenClient {
         TCPsocket          socket;                  // Socket descriptor for connection to server
         SDLNet_SocketSet   socketSet;               // Set for client connection to server
         BUTTONS            playerKeys[MAX_CLIENTS];
+        u_int16_t          lastSync;
         BOOL               isConnected;
         BOOL               isWaitingForServer;
 } MupenClient;
@@ -105,6 +108,8 @@ void addEventToQueue(unsigned short type, int controller, DWORD value, unsigned 
 int netGetNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned short *timer);
 BOOL clientIsConnected();
 BOOL clientWaitingForServer();
+void clientPauseForServer();
+u_int16_t clientLastSyncMsg();
 void popEventQueue();
 void processEventQueue();
 void initEventQueue();
