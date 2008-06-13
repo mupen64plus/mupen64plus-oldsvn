@@ -69,7 +69,7 @@ void process_opcode_out(void *strm, const char *fmt, ...){
 // bytes to disassemble ('read_memory_func' member of 'disassemble_info').
 int read_memory_func(bfd_vma memaddr, bfd_byte *myaddr, 
                             unsigned int length, disassemble_info *info) {
-  char* from = (char*)(memaddr);
+  char* from = (char*)(long)(memaddr);
   char* to =   (char*)myaddr;
   
   while (length-- != 0) {
@@ -130,7 +130,7 @@ void decode_recompiled(uint32 addr)
         opaddr_recompiled[lines_recompiled] = assemb;
         num_decoded=0;
 
-        assemb += print_insn_i386((bfd_vma) assemb, &dis_info);
+        assemb += print_insn_i386((bfd_vma)(long) assemb, &dis_info);
 
         lines_recompiled++;
       }
