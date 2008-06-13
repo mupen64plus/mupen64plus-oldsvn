@@ -133,17 +133,19 @@ void netInteruptLoop() {
               fprintf(netLog, "Waiting for sync msg...\n");
               osd_render();  // Updating OSD
               SDL_GL_SwapBuffers();
-
               while (clientWaitingForServer()) {
-                    SDL_PumpEvents();
+                    if (serverIsActive() && serverIsAccepting()) {
 #ifdef WITH_LIRC
-                    lircCheckInput();
+                        lircCheckInput();
 #endif //WITH_LIRC 
+                        SDL_PumpEvents();  // Check for F9 on server to begin game.
+                    }
+
                     if (clientIsConnected()) {
 			clientProcessMessages();
 		    }
                     if (serverIsActive()) {
-			serverAcceptConnection();
+			if (serverIsAccepting()) serverAcceptConnection();
 			serverProcessMessages();
 		    }
 //                    nanosleep(&ts, NULL); We can't sleep because the timing is inaccurate
@@ -162,9 +164,12 @@ void netInteruptLoop() {
                       clientPauseForServer();
                   }
                   if (serverIsActive()) {
+                      serverBroadcastSync();
+/*
                       syncMsg.type = NETMSG_SYNC;
                       syncMsg.genEvent.timer = getEventCounter();
-                      serverBroadcastMessage(&syncMsg);  // Don't bother using serverBroadcastSync to time them
+                      serverBroadcastMessage(&syncMsg);
+*/
                   }
               }
 
