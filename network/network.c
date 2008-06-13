@@ -131,24 +131,22 @@ void netInteruptLoop() {
 
 	    if (clientWaitingForServer()) {
               fprintf(netLog, "Waiting for sync msg...\n");
-              osd_render();  // Updating OSD
-              SDL_GL_SwapBuffers();
               while (clientWaitingForServer()) {
                     if (serverIsActive() && serverIsAccepting()) {
+                        osd_render();  // Updating OSD
+                        SDL_GL_SwapBuffers();
 #ifdef WITH_LIRC
                         lircCheckInput();
 #endif //WITH_LIRC 
                         SDL_PumpEvents();  // Check for F9 on server to begin game.
+			serverAcceptConnection();
+			serverProcessMessages();
+                        nanosleep(&ts, NULL);
                     }
 
                     if (clientIsConnected()) {
 			clientProcessMessages();
 		    }
-                    if (serverIsActive()) {
-			if (serverIsAccepting()) serverAcceptConnection();
-			serverProcessMessages();
-		    }
-//                    nanosleep(&ts, NULL); We can't sleep because the timing is inaccurate
 	      }
             }
             else {
@@ -167,7 +165,7 @@ void netInteruptLoop() {
 //                      serverBroadcastSync(); Too slow to use once a second, kills VI rate
 
                       syncMsg.type = NETMSG_SYNC;
-                      syncMsg.genEvent.timer = getEventCounter();
+                      syncMsg.genEvent.timer = getEventCounter() + getNetDelay() - 1;
                       serverBroadcastMessage(&syncMsg);
 
                   }
