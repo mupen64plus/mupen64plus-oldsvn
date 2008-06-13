@@ -1119,7 +1119,6 @@ static int create_menuBar( void )
     list_node_t *node;
     char *language;
     const char *confLang = config_get_string( "Language", "English" );
-    char buffer[1000];
     int i, lang_found;
 
     // accelerator group
@@ -1249,10 +1248,11 @@ static int create_menuBar( void )
     emulationSlotMenu = gtk_menu_new();
 
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(emulationSlotItem), emulationSlotMenu );
-    slotItem = gtk_radio_menu_item_new_with_mnemonic(NULL, buffer);
+    slotItem = gtk_radio_menu_item_new(NULL);
+    char buffer[128];
     for (i = 0; i < 10; ++i)
         {
-        snprintf(buffer, 999, tr(" Slot _%d"), i);
+        snprintf(buffer, 128, tr(" Slot _%d"), i);
 
         slotItem = gtk_radio_menu_item_new_with_mnemonic_from_widget(GTK_RADIO_MENU_ITEM(slotItem), buffer); 
 
