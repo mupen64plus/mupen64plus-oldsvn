@@ -114,8 +114,8 @@ static __inline uint32 SAI_INTERPOLATE_32( uint32 A, uint32 B)
 {
     if (A != B)
         return  ((A & 0xFEFEFEFE) >> 1) + 
-        ((B & 0xFEFEFEFE) >> 1) |
-        (A & B & 0x01010101);
+        (((B & 0xFEFEFEFE) >> 1) |
+        (A & B & 0x01010101));
     else
         return A;
 }
@@ -124,8 +124,8 @@ static __inline uint16 SAI_INTERPOLATE_16( uint16 A, uint16 B)
 {
     if (A != B)
         return  ((A & 0xFEFE) >> 1) + 
-        ((B & 0xFEFE) >> 1) |
-        (A & B & 0x0101);
+        (((B & 0xFEFE) >> 1) |
+        (A & B & 0x0101));
     else
         return A;
 }

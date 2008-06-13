@@ -127,10 +127,10 @@ static int firstFrameBufferSetting;
 int init_memory(int DoByteSwap)
 {
    int i;
-
+//printf("Are we byteswapping? %d\n", DoByteSwap);
    if (DoByteSwap != 0)
    {
-     //swap rom
+    //swap rom
      unsigned int *roml;
      roml = (void *)rom;
      for (i=0; i<(taille_rom/4); i++) roml[i] = sl(roml[i]);

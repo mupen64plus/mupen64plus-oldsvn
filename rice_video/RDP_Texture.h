@@ -2187,7 +2187,7 @@ void TMEM_Init()
         tmenEntryBuffer[i].rdramAddr=0;
         tmenEntryBuffer[i].next = &(tmenEntryBuffer[i+1]);
     }
-    tmenEntryBuffer[i].next = NULL;
+    //tmenEntryBuffer[i].next = NULL;
 }
 
 void TMEM_SetBlock(uint32 tmemstart, uint32 length, uint32 rdramaddr)

@@ -48,8 +48,8 @@ static inline u16 INTERPOLATE4444( u16 A, u16 B)
 {
     if (A != B)
         return  ((A & 0xEEEE) >> 1) + 
-                ((B & 0xEEEE) >> 1) |
-                (A & B & 0x1111);
+                (((B & 0xEEEE) >> 1) |
+                (A & B & 0x1111));
     else
         return A;
 }
@@ -58,8 +58,8 @@ static inline u16 INTERPOLATE5551( u16 A, u16 B)
 {
     if (A != B)
         return  ((A & 0xF7BC) >> 1) + 
-                ((B & 0xF7BC) >> 1) |
-                (A & B & 0x0843);
+                (((B & 0xF7BC) >> 1) |
+                (A & B & 0x0843));
     else
         return A;
 }
@@ -68,8 +68,8 @@ static inline u32 INTERPOLATE8888( u32 A, u32 B)
 {
     if (A != B)
         return  ((A & 0xFEFEFEFE) >> 1) + 
-                ((B & 0xFEFEFEFE) >> 1) |
-                (A & B & 0x01010101);
+                (((B & 0xFEFEFEFE) >> 1) |
+                (A & B & 0x01010101));
     else
         return A;
 }

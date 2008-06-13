@@ -50,7 +50,7 @@ static void uc5_dma_offsets ()
 static void uc5_matrix ()
 {
   // Use segment offset to get the address
-  DWORD addr = dma_offset_mtx + segoffset(rdp.cmd1) & BMASK;
+  DWORD addr = dma_offset_mtx + (segoffset(rdp.cmd1) & BMASK);
 
   BYTE n = (BYTE)((rdp.cmd0 >> 16) & 0xF);
   BYTE multiply;
@@ -120,7 +120,7 @@ static void uc5_matrix ()
 
 static void uc5_vertex ()
 {
-  DWORD addr = dma_offset_vtx + segoffset(rdp.cmd1) & BMASK;
+  DWORD addr = dma_offset_vtx + (segoffset(rdp.cmd1) & BMASK);
 
   // | cccc cccc 1111 1??? 0000 0002 2222 2222 | cmd1 = address |
   // c = vtx command

@@ -94,8 +94,8 @@ static __inline DWORD INTERPOLATE( DWORD A, DWORD B)
 {
     if (A != B)
         return  ((A & 0xFEFEFEFE) >> 1) + 
-                ((B & 0xFEFEFEFE) >> 1) |
-                (A & B & 0x01010101);
+                (((B & 0xFEFEFEFE) >> 1) |
+                (A & B & 0x01010101));
     else
         return A;
 }
@@ -104,8 +104,8 @@ static __inline WORD INTERPOLATE_16( WORD A, WORD B)
 {
     if (A != B)
         return  ((A & 0xFEFE) >> 1) + 
-                ((B & 0xFEFE) >> 1) |
-                (A & B & 0x0101);
+                (((B & 0xFEFE) >> 1) |
+                (A & B & 0x0101));
     else
         return A;
 }
