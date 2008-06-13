@@ -50,6 +50,7 @@ void net_init() {
   fprintf(netLog, "Begining net log...\n");
   clientInitialize();
   serverInitialize();
+  setEventCounter(0);
   if (SDLNet_Init() < 0) {
      fprintf(netLog, "Failure to initialize SDLNet!\n");
      return;
@@ -127,15 +128,6 @@ void netInteruptLoop() {
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
 
-            incEventCounter();
-
-	    if (getEventCounter() % 60 == 0) {
-                if ((clientIsConnected()) && (clientLastSyncMsg() < getEventCounter()))
-                  clientPauseForServer();
-                if (serverIsActive())
-                  serverBroadcastSync();
-            }
-
 	    if (clientWaitingForServer()) {
               fprintf(netLog, "waiting for sync msg...\n");
 
@@ -155,7 +147,6 @@ void netInteruptLoop() {
 		    }
                     nanosleep(&ts, NULL); // sleep for 5 milliseconds so it doesn't rail the processor
 	      }
-              setEventCounter(0);
             }
             else {
                     incEventCounter();
@@ -164,6 +155,14 @@ void netInteruptLoop() {
                          clientProcessMessages();
                          processEventQueue();
                     }
+	      if (getEventCounter() % 60 == 0) {
+                  if ((clientIsConnected()) && (clientLastSyncMsg() < getEventCounter())) {
+                    clientPauseForServer();
+                  }
+                  if (serverIsActive())
+                    serverBroadcastSync();
+              }
+
             }
 }
 

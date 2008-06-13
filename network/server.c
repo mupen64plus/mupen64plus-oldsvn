@@ -157,9 +157,10 @@ void serverBroadcastSync() {
   struct timespec ts;
   static short sort_array[MAX_CLIENTS];
   static BOOL runOnce = FALSE;
-  runOnce = TRUE;
+
 
   if (!runOnce) {
+    runOnce = TRUE;
     serverStopWaitingForPlayers();
     fprintf((FILE *)getNetLog(), "Server: F9 pressed\n");
     for (n = 0; n < MAX_CLIENTS; n++) sort_array[n] = -1;
@@ -191,11 +192,11 @@ void serverBroadcastSync() {
     for (n = 0; n < MAX_CLIENTS; n++) 
           if (Server.player[n].isConnected) fprintf((FILE *)getNetLog(),"   Player %d: %d ms\n", sort_array[n]+1, Server.player[sort_array[n]].lag);
 
-    startmsg.type = NETMSG_SYNC;
     Server.netDelay = (Server.player[sort_array[0]].lag / 17) + 7; // 60 VI/s = ~17ms per VI (+ 7 to be safe)
     fprintf((FILE *)getNetLog(), "Net Delay: %d\n", Server.netDelay);
   }
 
+  startmsg.type = NETMSG_SYNC;
   startmsg.genEvent.timer = getEventCounter();
 
   // Send sync signals, in order of slowest to fastest connection, compensate for net lag
