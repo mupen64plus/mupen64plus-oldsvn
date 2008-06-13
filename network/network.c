@@ -164,12 +164,12 @@ void netInteruptLoop() {
                       clientPauseForServer();
                   }
                   if (serverIsActive()) {
-                      serverBroadcastSync();
-/*
+//                      serverBroadcastSync(); Too slow to use once a second, kills VI rate
+
                       syncMsg.type = NETMSG_SYNC;
                       syncMsg.genEvent.timer = getEventCounter();
                       serverBroadcastMessage(&syncMsg);
-*/
+
                   }
               }
 
