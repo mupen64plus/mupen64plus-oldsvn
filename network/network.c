@@ -127,17 +127,18 @@ void netInteruptLoop() {
             struct timespec ts;
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
+            NetMessage syncMsg;
 
 	    if (clientWaitingForServer()) {
-              fprintf(netLog, "waiting for sync msg...\n");
+              fprintf(netLog, "Waiting for sync msg...\n");
+              osd_render();  // Updating OSD
+              SDL_GL_SwapBuffers();
 
               while (clientWaitingForServer()) {
-                    osd_render();  // Continue updating OSD
-                    SDL_GL_SwapBuffers();
                     SDL_PumpEvents();
 #ifdef WITH_LIRC
                     lircCheckInput();
-#endif //WITH_LIRC
+#endif //WITH_LIRC 
                     if (clientIsConnected()) {
 			clientProcessMessages();
 		    }
@@ -145,7 +146,7 @@ void netInteruptLoop() {
 			serverAcceptConnection();
 			serverProcessMessages();
 		    }
-                    nanosleep(&ts, NULL); // sleep for 5 milliseconds so it doesn't rail the processor
+//                    nanosleep(&ts, NULL); We can't sleep because the timing is inaccurate
 	      }
             }
             else {
@@ -157,10 +158,14 @@ void netInteruptLoop() {
                     }
 	      if (getEventCounter() % 60 == 0) {
                   if ((clientIsConnected()) && (clientLastSyncMsg() < getEventCounter())) {
-                    clientPauseForServer();
+                      fprintf(netLog, "Client: Pausing for server now. EventCounter = %d.\n", getEventCounter());
+                      clientPauseForServer();
                   }
-                  if (serverIsActive())
-                    serverBroadcastSync();
+                  if (serverIsActive()) {
+                      syncMsg.type = NETMSG_SYNC;
+                      syncMsg.genEvent.timer = getEventCounter();
+                      serverBroadcastMessage(&syncMsg);  // Don't bother using serverBroadcastSync to time them
+                  }
               }
 
             }
