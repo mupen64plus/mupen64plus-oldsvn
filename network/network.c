@@ -156,17 +156,21 @@ void netInteruptLoop() {
                          clientProcessMessages();
                          processEventQueue();
                     }
-	      if (getEventCounter() % 60 == 0) {
-                  if ((clientIsConnected()) && (clientLastSyncMsg() < getEventCounter())) {
-                      fprintf(netLog, "Client: Pausing for server now. EventCounter = %d.\n", getEventCounter());
+	      if ((getEventCounter() % 60 == 0) && (clientIsConnected())) {
+                  if (clientLastSyncMsg() < getEventCounter()) {
+                      fprintf(netLog, "Client: Server is lagging, waiting... event counter = %d.\n", getEventCounter());
                       clientPauseForServer();
+                  } else if (clientLastSyncMsg() > getEventCounter()) {
+                      fprintf(netLog, "Client: You're lagging, last sync %d current counter %d\n", clientLastSyncMsg(), getEventCounter());
+                  } else {
+                      fprintf(netLog, "Client: Perfect Sync\n");
                   }
               }
 
-	      if ((serverIsActive()) && ((getEventCounter() - getNetDelay()) % 60 == 0)) {
-//                serverBroadcastSync(); Too slow to use once a second, kills VI rate
+	      if ((serverIsActive()) && ((getEventCounter() + getNetDelay()) % 60 == 0)) {
+//                serverBroadcastSync(); Too slow to even use once a second, kills VI rate
                   syncMsg.type = NETMSG_SYNC;
-                  syncMsg.genEvent.timer = getEventCounter() + getNetDelay() - 1;
+                  syncMsg.genEvent.timer = getEventCounter() + getNetDelay();
                   serverBroadcastMessage(&syncMsg);
               }
             }

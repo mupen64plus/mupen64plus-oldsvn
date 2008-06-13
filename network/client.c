@@ -111,7 +111,6 @@ void clientProcessMessages() {
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
                         case NETMSG_SYNC:
-                                fprintf((FILE *)getNetLog(), "Client: Sync message received.\n");
                                 Client.isWaitingForServer = 0;
 				Client.lastSync = incomingMessage.genEvent.timer;
                         break;

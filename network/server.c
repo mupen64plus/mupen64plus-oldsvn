@@ -192,12 +192,12 @@ void serverBroadcastSync() {
     for (n = 0; n < MAX_CLIENTS; n++) 
           if (Server.player[n].isConnected) fprintf((FILE *)getNetLog(),"   Player %d: %d ms\n", sort_array[n]+1, Server.player[sort_array[n]].lag);
 
-    Server.netDelay = (Server.player[sort_array[0]].lag / 17); // 60 VI/s = ~17ms per VI (+ 7 to be safe)
+    Server.netDelay = (Server.player[sort_array[0]].lag / 17) + 5; // 60 VI/s = ~17ms per VI (+ 5 to be safe)
     fprintf((FILE *)getNetLog(), "Net Delay: %d\n", Server.netDelay);
   }
 
   startmsg.type = NETMSG_SYNC;
-  startmsg.genEvent.timer = getEventCounter();
+  startmsg.genEvent.timer = getEventCounter() + getNetDelay();
 
   // Send sync signals, in order of slowest to fastest connection, compensate for net lag
   for (n = 0; n < MAX_CLIENTS; n++) {
