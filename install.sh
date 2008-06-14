@@ -20,6 +20,7 @@ usage()
 {
 	echo "usage: $(basename $0) [prefix]"
 	echo -e "\tprefix - install prefix (default: /usr/local)"
+	echo "To install KDE4 version, use: GUI=KDE4 $(basename $0)"
 }
 
 if [ $# -gt 1 ]; then
@@ -54,5 +55,8 @@ $INSTALL -d -v "${INSTALLDIR}/lang" || exit $?
 $INSTALL -m 0644 lang/* "${INSTALLDIR}/lang" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/plugins" || exit $?
 $INSTALL -m 0755 plugins/* "${INSTALLDIR}/plugins" || exit $?
-$INSTALL -m 0644 main/gui_kde4/mupen64plusui.rc "${INSTALLDIR}" || exit $?
+if [ "${GUI}" == "KDE4" ]; then
+    $INSTALL -m 0644 main/gui_kde4/mupen64plusui.rc "${INSTALLDIR}" || exit $?
+fi
 echo "Done."
+
