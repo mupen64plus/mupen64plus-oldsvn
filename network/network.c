@@ -150,7 +150,7 @@ void netInteruptLoop() {
 	      }
             }
             else {
-              incEventCounter();
+
               if (serverIsActive()) serverProcessMessages();
               if (clientIsConnected()) {
                   clientProcessMessages();
@@ -176,6 +176,7 @@ void netInteruptLoop() {
                  }
               }              
             }
+            incEventCounter();
 }
 
 
