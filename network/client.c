@@ -137,7 +137,7 @@ void clientSendButtons(int control, DWORD value) {
   msg.genEvent.type = EVENT_BUTTON;
   msg.genEvent.controller = control;
   msg.genEvent.value = value;
-  msg.genEvent.timer = getEventCounter();
+  msg.genEvent.timer = 0;	
   fprintf((FILE *)getNetLog(), "Client: Sending button state (sync %d).\n", getEventCounter());
   clientSendMessage(&msg);
 }

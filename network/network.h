@@ -13,9 +13,10 @@
 #include <SDL_net.h>
 
 #define SERVER_PORT		7000
-#define SYNC_PORT		7001
+#define SYNC_FREQ		60 // Once a second (smaller numbers more often)
 
 #define MAX_CLIENTS		10
+
 
 #define 	NETMSG_EVENT		0       // Time sensitive input events
 #define		NETMSG_SYNC		1	// Continue execution of ROM code
@@ -51,6 +52,7 @@ typedef struct TNetPlayer {
         TCPsocket  socket;
         char       nick[20];
         BOOL       isConnected;
+        BOOL       isReady;
 } NetPlayer;
 
 typedef struct TMupenClient {

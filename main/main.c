@@ -529,6 +529,7 @@ static int sdl_event_filter( const SDL_Event *event )
     static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
     char *event_str = NULL;
+    NetMessage netMsg;
 
     switch( event->type )
     {
@@ -548,7 +549,11 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-			if (serverIsActive() && serverIsAccepting()) serverBroadcastSync();
+	            if (serverIsActive() && serverIsAccepting()) {
+                      netMsg.type = NETMSG_SYNC;
+                      netMsg.genEvent.timer = getEventCounter() + getNetDelay();
+                      serverBroadcastMessage(&netMsg);
+                    }
                     break;
 
                 case SDLK_ESCAPE:

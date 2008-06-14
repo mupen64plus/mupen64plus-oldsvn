@@ -150,13 +150,14 @@ void netInteruptLoop() {
 	      }
             }
             else {
-                    incEventCounter();
-                    if (serverIsActive()) serverProcessMessages();
-                    if (clientIsConnected()) {
-                         clientProcessMessages();
-                         processEventQueue();
-                    }
-	      if ((getEventCounter() % 60 == 0) && (clientIsConnected())) {
+              incEventCounter();
+              
+              if (serverIsActive()) serverProcessMessages();
+              if (clientIsConnected()) {
+                      clientProcessMessages();
+                      processEventQueue();
+                  }
+	      if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
                   if (clientLastSyncMsg() < getEventCounter()) {
                       fprintf(netLog, "Client: Server is lagging, waiting... event counter = %d.\n", getEventCounter());
                       clientPauseForServer();
@@ -167,8 +168,7 @@ void netInteruptLoop() {
                   }
               }
 
-	      if ((serverIsActive()) && ((getEventCounter() + getNetDelay()) % 60 == 0)) {
-//                serverBroadcastSync(); Too slow to even use once a second, kills VI rate
+	      if ((serverIsActive()) && ((getEventCounter() + getNetDelay()) % SYNC_FREQ == 0)) { // The server should lag behind
                   syncMsg.type = NETMSG_SYNC;
                   syncMsg.genEvent.timer = getEventCounter() + getNetDelay();
                   serverBroadcastMessage(&syncMsg);

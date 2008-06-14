@@ -27,6 +27,7 @@ unsigned short  getNetDelay() {return Server.netDelay;}
 
 void serverInitialize() {
         memset(&Server, 0, sizeof(Server));
+        Server.netDelay = 5;
 }
 
 int serverStart(unsigned short port) {
@@ -127,7 +128,7 @@ void serverProcessMessages() {
         switch (incomingMsg.type) {
             case NETMSG_EVENT:                                   // Events (Button presses, other time sensitive input)
               if (incomingMsg.genEvent.type == EVENT_BUTTON) {
-                    incomingMsg.genEvent.timer += Server.netDelay;      // Add calculated delay to the timer
+                    incomingMsg.genEvent.timer = getEventCounter() + Server.netDelay;      // Add calculated delay to the timer
                     if (n < 4) {                                 // If the message comes from a player (n >= 4 is for spectators)
                         incomingMsg.genEvent.controller = n;     // Change the controller tag on the event
                         serverBroadcastMessage(&incomingMsg);    // Broadcast the button event
