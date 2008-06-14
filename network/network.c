@@ -169,9 +169,9 @@ void netInteruptLoop() {
                   }
               }              
 
-	      if ((serverIsActive()) && ((getEventCounter() + getNetDelay()) % SYNC_FREQ == 0)) { // The server should lag behind
+	      if ((serverIsActive()) && ((getEventCounter() + 20) % SYNC_FREQ == 0)) { // The server should lag behind
                   syncMsg.type = NETMSG_SYNC;
-                  syncMsg.genEvent.timer = getEventCounter() + getNetDelay();
+                  syncMsg.genEvent.timer = getEventCounter() + 20; // 20 is an arbitrary value, this should be calculated
                   serverBroadcastMessage(&syncMsg);
               }
             }
