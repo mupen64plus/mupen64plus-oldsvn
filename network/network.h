@@ -94,7 +94,7 @@ void serverInitialize();
 BOOL serverIsActive();
 int serverStart(unsigned short port);
 void serverStop();
-void serverStopListening();
+void serverStopWaitingForPlayers();
 void serverProcessMessages();
 void serverAcceptConnection();
 void serverBootPlayer(int n);

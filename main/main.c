@@ -553,6 +553,7 @@ static int sdl_event_filter( const SDL_Event *event )
                       netMsg.type = NETMSG_SYNC;
                       netMsg.genEvent.timer = getEventCounter() + getNetDelay();
                       serverBroadcastMessage(&netMsg);
+                      serverStopWaitingForPlayers();
                     }
                     break;
 

@@ -131,7 +131,7 @@ void netInteruptLoop() {
 
 	    if (clientWaitingForServer()) {
               fprintf(netLog, "Waiting for sync msg...\n");
-              while ((clientWaitingForServer()) && (clientIsConnected())) {
+              while (clientWaitingForServer() && clientIsConnected()) {
                     if (serverIsActive() && serverIsAccepting()) {
                         osd_render();  // Updating OSD
                         SDL_GL_SwapBuffers();
@@ -146,7 +146,7 @@ void netInteruptLoop() {
                     clientProcessMessages();
 	      }
             }
-            incEventCounter();
+
             if (serverIsActive()) serverProcessMessages();
             if (clientIsConnected()) {
                 clientProcessMessages();
@@ -170,7 +170,7 @@ void netInteruptLoop() {
                     }
                 }
             }
-
+            incEventCounter();
 }
 
 

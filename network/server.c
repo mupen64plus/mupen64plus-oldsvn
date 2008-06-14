@@ -62,7 +62,7 @@ void serverStop() {
 }
 
 void serverStopWaitingForPlayers() {
-	SDLNet_TCP_Close(Server.socket);
+//	SDLNet_TCP_Close(Server.socket);
 	SDLNet_TCP_DelSocket(Server.socketSet, Server.socket);
         Server.isAccepting = 0;
 }

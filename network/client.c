@@ -32,6 +32,7 @@ void            incEventCounter() {Client.eventCounter++;}
 
 void clientInitialize() {
         memset(&Client, 0, sizeof(Client));
+
 }
 
 int clientConnect(char *server, int port) {
