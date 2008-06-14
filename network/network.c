@@ -151,12 +151,13 @@ void netInteruptLoop() {
             }
             else {
               incEventCounter();
-              
               if (serverIsActive()) serverProcessMessages();
               if (clientIsConnected()) {
-                      clientProcessMessages();
-                      processEventQueue();
-                  }
+                  clientProcessMessages();
+                  processEventQueue();
+              }
+
+
 	      if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
                   if (clientLastSyncMsg() < getEventCounter()) {
                       fprintf(netLog, "Client: Server is lagging, waiting... event counter = %d.\n", getEventCounter());
@@ -166,7 +167,7 @@ void netInteruptLoop() {
                   } else {
                       fprintf(netLog, "Client: Perfect Sync\n");
                   }
-              }
+              }              
 
 	      if ((serverIsActive()) && ((getEventCounter() + getNetDelay()) % SYNC_FREQ == 0)) { // The server should lag behind
                   syncMsg.type = NETMSG_SYNC;

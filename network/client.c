@@ -55,10 +55,12 @@ int clientConnect(char *server, int port) {
 
 void clientDisconnect() {
 	fprintf((FILE *)getNetLog(), "Client: clientDisconnect() called.\n");
-	SDLNet_FreeSocketSet(Client.socketSet);
-	SDLNet_TCP_Close(Client.socket);
-	Client.isConnected = 0;
-        killEventQueue();
+        if (!Client.isConnected) {
+          SDLNet_FreeSocketSet(Client.socketSet);
+          SDLNet_TCP_Close(Client.socket);
+          Client.isConnected = 0;
+          killEventQueue();
+        }
 }
 
 int clientSendMessage(NetMessage *msg) {
@@ -199,7 +201,7 @@ void popEventQueue() {
 
   if (Client.eventQueue) {
 	Client.eventQueue = Client.eventQueue->next;
-	free(temp);
+        free(temp);
   }
 }
 

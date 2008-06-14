@@ -27,7 +27,7 @@ unsigned short  getNetDelay() {return Server.netDelay;}
 
 void serverInitialize() {
         memset(&Server, 0, sizeof(Server));
-        Server.netDelay = 5;
+        Server.netDelay = 8;
 }
 
 int serverStart(unsigned short port) {
@@ -53,10 +53,12 @@ void serverStop() {
   int n;
   fprintf((FILE *)getNetLog(), "serverStop() called.\n");
   for (n = 0; n < MAX_CLIENTS; n++) if (Server.player[n].isConnected) serverBootPlayer(n);
-  SDLNet_TCP_Close(Server.socket);
   SDLNet_FreeSocketSet(Server.socketSet);
+  if (Server.isAccepting) {
+    SDLNet_TCP_Close(Server.socket);
+    Server.isAccepting = 0;
+  }
   Server.isActive = 0;
-  Server.isAccepting = 0;
 }
 
 void serverStopWaitingForPlayers() {
@@ -79,11 +81,13 @@ void serverBootPlayer(int n) {
 	msg.type = NETMSG_PLAYERQUIT;
 	msg.genEvent.controller = n;
 
-	SDLNet_TCP_Close(Server.player[n].socket);
-	SDLNet_TCP_DelSocket(Server.socketSet, Server.player[n].socket);
-        Server.player[n].isConnected = FALSE;
-	fprintf((FILE *)getNetLog(), "Client %d disconnected.\n", n);
-	serverBroadcastMessage(&msg);
+	if (!Server.player[n].isConnected) {
+          SDLNet_TCP_Close(Server.player[n].socket);
+          SDLNet_TCP_DelSocket(Server.socketSet, Server.player[n].socket);
+          Server.player[n].isConnected = FALSE;
+          serverBroadcastMessage(&msg);
+          fprintf((FILE *)getNetLog(), "Client %d disconnected.\n", n);
+        }
 }
 
 void serverAcceptConnection() {
