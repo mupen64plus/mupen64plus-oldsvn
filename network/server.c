@@ -27,7 +27,7 @@ unsigned short  getNetDelay() {return Server.netDelay;}
 
 void serverInitialize() {
         memset(&Server, 0, sizeof(Server));
-        Server.netDelay = 8;
+        Server.netDelay = 5;
 }
 
 int serverStart(unsigned short port) {

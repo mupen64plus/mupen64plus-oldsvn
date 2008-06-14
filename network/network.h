@@ -13,7 +13,7 @@
 #include <SDL_net.h>
 
 #define SERVER_PORT		7000
-#define SYNC_FREQ		30 // 60: Once a second (smaller numbers more often)
+#define SYNC_FREQ		60 // 60: Once a second (smaller numbers more often)
 
 #define MAX_CLIENTS		10
 

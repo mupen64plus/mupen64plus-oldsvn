@@ -167,13 +167,12 @@ void netInteruptLoop() {
                   } else {
                       fprintf(netLog, "Client: Perfect Sync\n");
                   }
+                  if (serverIsActive()) {
+                      syncMsg.type = NETMSG_SYNC;
+                      syncMsg.genEvent.timer = getEventCounter();
+                      serverBroadcastMessage(&syncMsg);
+                  }
               }              
-
-	      if ((serverIsActive()) && ((getEventCounter() + 20) % SYNC_FREQ == 0)) { // The server should lag behind
-                  syncMsg.type = NETMSG_SYNC;
-                  syncMsg.genEvent.timer = getEventCounter() + 20; // 20 is an arbitrary value, this should be calculated
-                  serverBroadcastMessage(&syncMsg);
-              }
             }
 }
 
