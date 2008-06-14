@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "stdafx.h"
-#include "_BldNum.h"
+#include "../main/version.h"
 
 #ifndef _DEBUG
 void __cdecl DebuggerAppendMsg(const char * Message, ...) {}
@@ -586,7 +586,7 @@ void __cdecl DebuggerAppendMsg(const char * Message, ...)
 void DebuggerPause()
 {
     char temp[300];
-    sprintf(temp,"%s Debug %s:Paused ",project_name, FILE_VERSION) ;
+    sprintf(temp,"%s Debug %s:Paused ",project_name, MUPEN_VERSION) ;
 
     while( debuggerPause )
     {
@@ -599,7 +599,7 @@ void DebuggerPause()
         usleep(100 * 1000);
         debuggerPause = false;
     }
-    sprintf(temp,"%s Debug %s",project_name, FILE_VERSION) ;
+    sprintf(temp,"%s Debug %s",project_name, MUPEN_VERSION) ;
 }
 
 void __cdecl LOG_UCODE(const char* szFormat, ...)

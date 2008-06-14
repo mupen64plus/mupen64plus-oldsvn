@@ -19,6 +19,7 @@
 */
 
 extern "C" {
+    #include "../version.h"
     #include "../guifuncs.h"
     #include "../main.h"
 }
@@ -57,7 +58,7 @@ void gui_init(int *argc, char ***argv)
 {
     aboutData = new KAboutData(
         "mupen64plus", 0, ki18n("Mupen64Plus"),
-        "1.3-development",
+        MUPEN_VERSION,
         ki18n("Cross-platform N64 emulator."),
         KAboutData::License_GPL,
         ki18n("Copyright (C) the Mupen64Plus team")

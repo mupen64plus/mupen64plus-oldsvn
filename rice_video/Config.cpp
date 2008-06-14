@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <limits.h> // PATH_MAX
 
 #include "stdafx.h"
-#include "_BldNum.h"
+#include "../main/version.h"
 
 #define INI_FILE        "RiceVideoLinux.ini"
 #define CONFIG_FILE     "RiceVideo.cfg"
@@ -2465,7 +2465,7 @@ static ConfigDialog *CreateConfigDialog()
    GtkWidget *dialog;
    dialog = gtk_dialog_new();
    char str[200];
-   sprintf(str, "Rice's Daedalus %s Configuration",FILE_VERSION);
+   sprintf(str, "Rice's Daedalus %s Configuration",MUPEN_VERSION);
    gtk_window_set_title(GTK_WINDOW(dialog), str);
    
    // ok button

@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "liblinux/BMGLibPNG.h"
 
-#include "_BldNum.h"
+#include "../main/version.h"
 
 COGLGraphicsContext::COGLGraphicsContext() :
     m_pScreen(0),
@@ -121,7 +121,7 @@ bool COGLGraphicsContext::Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth,
      }
    
    char caption[500];
-   sprintf(caption, "RiceVideoLinux N64 Plugin %s", FILE_VERSION);
+   sprintf(caption, "RiceVideoLinux N64 Plugin %s", MUPEN_VERSION);
    SDL_WM_SetCaption(caption, caption);
    SetWindowMode();
 
@@ -322,7 +322,7 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
     if(lastTick + 5000 <= nowTick)
       {
          char caption[200];
-         sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", FILE_VERSION, frames/5.0);
+         sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", MUPEN_VERSION, frames/5.0);
          SDL_WM_SetCaption(caption, caption);
          frames = 0;
          lastTick = nowTick;

@@ -94,10 +94,8 @@ KNOWN BUGS:
 #endif
 
 #include "../main/winlnxdefs.h"
+#include "../main/version.h"
 #include "Audio_1.2.h"
-
-/* Current version number */
-#define VERSION "1.3"
 
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
@@ -307,7 +305,7 @@ EXPORT void CALL DllAbout( HWND hParent )
     GtkWidget *dialog, *label, *okay_button;
 
     dialog = gtk_dialog_new();
-    sprintf(tMsg,"Mupen64 SDL Audio Plugin %s \nWritten by JttL", VERSION);
+    sprintf(tMsg,"Mupen64 SDL Audio Plugin %s \nWritten by JttL", MUPEN_VERSION);
     label = gtk_label_new(tMsg);
     okay_button = gtk_button_new_with_label("OK");
 
@@ -319,7 +317,7 @@ EXPORT void CALL DllAbout( HWND hParent )
     gtk_widget_show_all(dialog);
 #else
     char tMsg[256];
-    sprintf(tMsg,"Mupen64 SDL Audio Plugin %s \nWritten by JttL", VERSION);
+    sprintf(tMsg,"Mupen64 SDL Audio Plugin %s \nWritten by JttL", MUPEN_VERSION);
     fprintf(stderr, "[About JttL's SDL Audio plugin]\n%s\n[/About JttL's SDL Audio plugin]\n", tMsg);
 #endif
 }
@@ -531,7 +529,7 @@ EXPORT void CALL GetDllInfo( PLUGIN_INFO * PluginInfo )
 {
     PluginInfo->Version = 0x0101;
     PluginInfo->Type    = PLUGIN_TYPE_AUDIO;
-    sprintf(PluginInfo->Name,"JttL's SDL Audio %s", VERSION);
+    sprintf(PluginInfo->Name,"JttL's SDL Audio %s", MUPEN_VERSION);
     PluginInfo->NormalMemory  = TRUE;
     PluginInfo->MemoryBswaped = TRUE;
 }
@@ -660,7 +658,7 @@ void InitializeSDL()
 #ifdef DEBUG
     printf("[JttL's SDL Audio plugin] Sound plugin started in debug mode.\n");
 #endif
-    printf("[JttL's SDL Audio plugin] version %s initalizing.\n", VERSION);
+    printf("[JttL's SDL Audio plugin] version %s initalizing.\n", MUPEN_VERSION);
     printf("[JttL's SDL Audio plugin] Initializing SDL audio subsystem...\n");
 #ifdef DEBUG
     printf("[JttL's SDL Audio plugin] Debug: Primary buffer: %i bytes.\n", PrimaryBufferSize);
