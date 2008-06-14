@@ -146,33 +146,31 @@ void netInteruptLoop() {
                     clientProcessMessages();
 	      }
             }
-            else {
-
-              if (serverIsActive()) serverProcessMessages();
-              if (clientIsConnected()) clientProcessMessages();
-
-	      if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
-                  if (serverIsActive()) {
-                      syncMsg.type = NETMSG_SYNC;
-                      syncMsg.genEvent.timer = getEventCounter();
-                      serverBroadcastMessage(&syncMsg);
-                  }
-
-                  else {
-
-                      if (clientLastSyncMsg() < getEventCounter()) {
-                          fprintf(netLog, "Client: Server is lagging, waiting... event counter = %d.\n", getEventCounter());
-                          clientPauseForServer();
-                      } else if (clientLastSyncMsg() > getEventCounter()) {
-                          fprintf(netLog, "Client: You're lagging, last sync %d current counter %d\n", clientLastSyncMsg(), getEventCounter());
-                      } else {
-                          fprintf(netLog, "Client: Perfect Sync\n");
-                      }
-                 }
-              }
-            }
-            if (clientIsConnected()) processEventQueue();
             incEventCounter();
+            if (serverIsActive()) serverProcessMessages();
+            if (clientIsConnected()) {
+                clientProcessMessages();
+                processEventQueue();
+            }
+
+            if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
+                if (serverIsActive()) {
+                    syncMsg.type = NETMSG_SYNC;
+                    syncMsg.genEvent.timer = getEventCounter();
+                    serverBroadcastMessage(&syncMsg);
+                }
+                else {
+                    if (clientLastSyncMsg() < getEventCounter()) {
+                        fprintf(netLog, "Client: Server is lagging, waiting... event counter = %d.\n", getEventCounter());
+                        clientPauseForServer();
+                    } else if (clientLastSyncMsg() > getEventCounter()) {
+                        fprintf(netLog, "Client: You're lagging, last sync %d current counter %d\n", clientLastSyncMsg(), getEventCounter());
+                    } else {
+                        fprintf(netLog, "Client: Perfect Sync\n");
+                    }
+                }
+            }
+
 }
 
 
