@@ -364,7 +364,11 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
 
     i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion) );
     config_put_bool( "NoMemoryExpansion", i );
-   
+
+    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.OsdEnabled) );
+    g_OsdEnabled = i;
+    config_put_bool( "OsdEnabled", i );
+
         savestates_set_autoinc_slot(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton)));
         config_put_bool("AutoIncSaveSlot", savestates_get_autoinc_slot());
 
@@ -665,6 +669,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion), config_get_bool( "NoMemoryExpansion", FALSE ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton), config_get_bool( "AutoIncSaveSlot", FALSE ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton), !g_Noask );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.OsdEnabled), g_OsdEnabled );
     // if --noask was specified at the commandline, disable checkbox
     gtk_widget_set_sensitive( g_ConfigDialog.noaskCheckButton, !g_NoaskParam );
 
@@ -989,6 +994,9 @@ int create_configDialog( void )
 
             g_ConfigDialog.noaskCheckButton = gtk_check_button_new_with_label(tr("Ask before loading bad dump/hacked rom"));
             gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noaskCheckButton, FALSE, FALSE, 0);
+
+            g_ConfigDialog.OsdEnabled = gtk_check_button_new_with_label(tr("On Screen Display Enabled"));
+            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.OsdEnabled, FALSE, FALSE, 0);
         }
     
         // Create some misc. core options

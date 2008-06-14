@@ -91,6 +91,7 @@ int         g_NoaskParam = 0;           // was --noask passed at the commandline
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
+int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
 
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
@@ -107,7 +108,7 @@ static int  l_GuiEnabled = 1;           // GUI enabled?
 static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
 
-static int   l_OsdEnabled = 1;           // On Screen Display enabled?
+
 static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter
@@ -222,7 +223,7 @@ void video_plugin_render_callback(void)
     }
 
     // if the OSD is enabled, then draw it now
-    if (l_OsdEnabled)
+    if (g_OsdEnabled)
     {
         osd_render();
     }
@@ -782,9 +783,9 @@ static void * emulationThread( void *_arg )
     if (l_Fullscreen)
         changeWindow();
 
-    // init on-screen display
-    if (l_OsdEnabled)
+    if(g_OsdEnabled)
     {
+        // init on-screen display
         void *pvPixels = NULL;
         int width = 640, height = 480;
         readScreen(&pvPixels, &width, &height); // read screen to get width and height
@@ -793,7 +794,7 @@ static void * emulationThread( void *_arg )
             free(pvPixels);
             pvPixels = NULL;
         }
-        osd_init(width, height);
+    osd_init(width, height);
     }
 
     // setup rendering callback from video plugin to the core, for screenshots and On-Screen-Display
@@ -927,8 +928,9 @@ static void printUsage(const char *progname)
     printf("Usage: %s [parameter(s)] rom\n"
            "\n"
            "Parameters:\n"
-           "    --nogui             : do not display GUI\n"
-           "    --fullscreen        : turn fullscreen mode on\n"
+           "    --nogui             : do not display GUI.\n"
+           "    --fullscreen        : turn fullscreen mode on.\n"
+           "    --noosd             : disable onscreen display.\n"
            "    --gfx (path)        : use gfx plugin given by (path)\n"
            "    --audio (path)      : use audio plugin given by (path)\n"
            "    --input (path)      : use input plugin given by (path)\n"
@@ -937,7 +939,7 @@ static void printUsage(const char *progname)
            "    --sshotdir (dir)    : set screenshot directory to (dir)\n"
            "    --configdir (dir)   : force config dir (must contain mupen64plus.conf)\n"
            "    --installdir (dir)  : force install dir (place to look for plugins, icons, lang, etc)\n"
-           "    --noask             : don't ask to force load on bad dumps\n"
+           "    --noask             : don't ask to force load on bad dumps.\n"
            "    --testshots (list)  : take screenshots at frames given in comma-separated list, then quit\n"
 #ifdef DBG
            "    --debugger          : start with debugger enabled\n"
@@ -979,7 +981,7 @@ void parseCommandLine(int argc, char **argv)
     struct option long_options[] =
     {
         {"nogui", no_argument, &l_GuiEnabled, FALSE},
-        {"noosd", no_argument, &l_OsdEnabled, FALSE},
+        {"noosd", no_argument, &g_OsdEnabled, FALSE},
         {"fullscreen", no_argument, &l_Fullscreen, TRUE},
         {"gfx", required_argument, NULL, OPT_GFX},
         {"audio", required_argument, NULL, OPT_AUDIO},
@@ -1289,8 +1291,8 @@ static void setPaths(void)
 */
 int main(int argc, char *argv[])
 {
-#ifdef VCR_SUPPORT
     int i;
+#ifdef VCR_SUPPORT
     const char *p;
 #endif
     printf(" __  __                         __   _  _   ____  _             \n");  
@@ -1298,7 +1300,7 @@ int main(int argc, char *argv[])
     printf("| |\\/| | | | | '_ \\ / _ \\ '_ \\| '_ \\| || |_| |_) | | | | / __|  \n");
     printf("| |  | | |_| | |_) |  __/ | | | (_) |__   _|  __/| | |_| \\__ \\  \n");
     printf("|_|  |_|\\__,_| .__/ \\___|_| |_|\\___/   |_| |_|   |_|\\__,_|___/  \n");
-    printf("             |_|         http://code.google.com/p/mupen64plus/  \n\n");                                              
+    printf("             |_|         http://code.google.com/p/mupen64plus/  \n\n");
 
     // allow gui subsystem to init and parse gui-specific commandline args first
     if(l_GuiEnabled)
@@ -1307,6 +1309,16 @@ int main(int argc, char *argv[])
     parseCommandLine(argc, argv);
     setPaths();
     config_read();
+
+    i = config_get_bool("OsdEnabled", 2);
+    if(i==2)
+    {
+        config_put_bool("OsdEnabled", g_OsdEnabled);
+    }
+    else if(g_OsdEnabled==1)
+    {
+        g_OsdEnabled = i;
+    }
 
 #ifdef VCR_SUPPORT
     VCRComp_init();

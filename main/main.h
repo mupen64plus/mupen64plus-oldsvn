@@ -29,6 +29,7 @@ extern int g_Noask;
 extern int g_NoaskParam;
 extern int g_MemHasBeenBSwapped;
 extern int g_TakeScreenshot;
+extern int g_OsdEnabled;
 extern pthread_t g_EmulationThread;
 extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;

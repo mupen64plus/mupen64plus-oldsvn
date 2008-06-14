@@ -35,6 +35,7 @@ typedef struct
     GtkWidget   *corePureInterpCheckButton;
     GtkWidget       *autoincSaveSlotCheckButton;
     GtkWidget       *noaskCheckButton;
+    GtkWidget       *OsdEnabled;
     GList       *toolbarStyleGList;
     GtkWidget   *toolbarStyleCombo;
     GList       *toolbarSizeGList;
