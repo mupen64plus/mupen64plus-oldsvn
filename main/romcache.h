@@ -44,7 +44,7 @@ typedef struct _cache_entry
     time_t timestamp;
     char filename[PATH_MAX];
     char usercomments[COMMENT_MAXLENGTH]; 
-    char internalname[80]; //Needs to be 4 times the stored value for UTF8 conversion. 
+    char internalname[81]; //Needs to be 4 times +1 (for '\0') the stored value for UTF8 conversion. 
     unsigned short countrycode;
     unsigned short compressiontype;
     unsigned short imagetype;

@@ -242,11 +242,15 @@ static void scan_dir(const char *directoryname)
         {
         if( directoryentry->d_name[0] == '.' ) // .., . or hidden file
             { continue; }
-        snprintf(filename, PATH_MAX, "%s%s", directoryname, directoryentry->d_name);
+        snprintf(filename, PATH_MAX-1, "%s%s", directoryname, directoryentry->d_name);
+        filename[PATH_MAX-1] = '\0';
 
         //Use real path (maybe it's a link)
         if(realpath(filename,fullpath))
-            { strncpy(filename,fullpath,PATH_MAX); }
+            {
+            strncpy(filename,fullpath,PATH_MAX-1); 
+            filename[PATH_MAX-1] = '\0';
+            }
 
         //If we can't get information, move to next file.
         if(stat(fullpath,&filestatus)==-1)
@@ -304,7 +308,8 @@ static void scan_dir(const char *directoryname)
 
         if(found==0)
             {
-            strncpy(entry->filename,filename,PATH_MAX);
+            strncpy(entry->filename,filename,PATH_MAX-1);
+            entry->filename[PATH_MAX-1] = '\0';
 
             unsigned char* localrom;
 
@@ -336,14 +341,17 @@ static void scan_dir(const char *directoryname)
             //GUIs and Rice can use this for Japanese titles in a moderm *NIX environment.
             iconv_t conversion = iconv_open ("UTF-8", "SHIFT-JIS");
             if(conversion==(iconv_t)-1)
-                { strncpy(entry->internalname,(char*)localrom+0x20,20); }
+                {
+                strncpy(entry->internalname,(char*)localrom+0x20,20); 
+                entry->internalname[20]='\0';
+                }
             else
                 {
                 char *shiftjis, *shiftjisstart, *utf8, *utf8start;
                 size_t shiftjislength = 20;
                 size_t utf8length = 80; 
                 shiftjisstart = shiftjis = (char*)calloc(20,sizeof(char));
-                utf8start = utf8 = (char*)calloc(80,sizeof(char));
+                utf8start = utf8 = (char*)calloc(81,sizeof(char));
 
                 strncpy(shiftjis, (char*)localrom+0x20, 20);
 
@@ -351,6 +359,7 @@ static void scan_dir(const char *directoryname)
                 iconv_close(conversion);
 
                 strncpy(entry->internalname , utf8start, 80);
+                entry->internalname[80]='\0';
 
                 free(shiftjisstart);
                 free(utf8start);
@@ -549,13 +558,15 @@ void romdatabase_open()
             stringlength+=strlen(buffer);
             if(g_romdatabase.comment==NULL) 
                 {
-                g_romdatabase.comment = (char*)malloc(stringlength+1);
+                g_romdatabase.comment = (char*)malloc(stringlength+2);
                 strncpy(g_romdatabase.comment, buffer, stringlength);
+                buffer[stringlength+1] = '\0';
                 }
             else
                 {
-                g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, stringlength+1);
+                g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, stringlength+2);
                 strcat(g_romdatabase.comment, buffer);
+                buffer[stringlength+1] = '\0';
                 }
             }
         }
@@ -623,7 +634,8 @@ void romdatabase_open()
                     if(buffer[stringlength+namelength]=='\n'||buffer[stringlength+namelength]=='\r')
                         { buffer[stringlength+namelength] = '\0'; }
                     strncpy(search->entry.goodname, buffer+stringlength+1, namelength);
-                    //printf("Name: %s, Length: %d\n", search->entry.goodname, namelength);
+                    search->entry.goodname[namelength-1] = '\0';
+                    //printf("Name: %s, Length: %d\n", search->entry.goodname, namelength-1);
                     }
                 else if(!strcmp(buffer, "CRC"))
                     {
