@@ -129,9 +129,10 @@ void netInteruptLoop() {
             ts.tv_nsec = 5000000;
             NetMessage syncMsg;
 
+            incEventCounter();
 	    if (clientWaitingForServer()) {
               fprintf(netLog, "Waiting for sync msg...\n");
-              while (clientWaitingForServer()) {
+              while ((clientWaitingForServer()) && (clientIsConnected())) {
                     if (serverIsActive() && serverIsAccepting()) {
                         osd_render();  // Updating OSD
                         SDL_GL_SwapBuffers();
@@ -143,10 +144,7 @@ void netInteruptLoop() {
 			serverProcessMessages();
                         nanosleep(&ts, NULL);
                     }
-
-                    if (clientIsConnected()) {
-			clientProcessMessages();
-		    }
+                    clientProcessMessages();
 	      }
             }
             else {
@@ -164,7 +162,9 @@ void netInteruptLoop() {
                       syncMsg.genEvent.timer = getEventCounter();
                       serverBroadcastMessage(&syncMsg);
                   }
+
                   else {
+
                       if (clientLastSyncMsg() < getEventCounter()) {
                           fprintf(netLog, "Client: Server is lagging, waiting... event counter = %d.\n", getEventCounter());
                           clientPauseForServer();
@@ -176,7 +176,6 @@ void netInteruptLoop() {
                  }
               }              
             }
-            incEventCounter();
 }
 
 

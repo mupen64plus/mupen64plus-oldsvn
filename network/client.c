@@ -92,7 +92,7 @@ void clientProcessMessages() {
                 playerNumber = incomingMessage.genEvent.controller;
 		switch (incomingMessage.type) {
 			case NETMSG_EVENT:
-				if (incomingMessage.genEvent.timer > getEventCounter()) {
+				if (incomingMessage.genEvent.timer >= getEventCounter()) {
 					addEventToQueue(incomingMessage.genEvent.type, incomingMessage.genEvent.controller,
 						  incomingMessage.genEvent.value,
 						  incomingMessage.genEvent.timer);
