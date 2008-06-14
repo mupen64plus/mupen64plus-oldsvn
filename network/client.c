@@ -210,20 +210,22 @@ int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned s
   int retValue = 1;
   NetEvent *currEvent = Client.eventQueue;
 
+  while ((Client.eventQueue) && (Client.eventQueue->timer < getEventCounter())) {
+      fprintf((FILE *)getNetLog(), "Desync Warning!: Event queue out of date (%d curr %d)! Popping next.\n", Client.eventQueue>timer,
+                                                                                                             getEventCounter());
+      popEventQueue();
+  }
+
   if (Client.eventQueue) {
-	while (Client.eventQueue->timer < getEventCounter()) {
-		fprintf((FILE *)getNetLog(), "Desync Warning!: Event queue out of date (%d curr %d)! Popping next.\n",
-			Client.eventQueue->timer, getEventCounter());
-                popEventQueue();
-	}
-        *type = Client.eventQueue->type;
-	*controller = Client.eventQueue->controller;
-	*value = Client.eventQueue->value;
-	*timer = Client.eventQueue->timer;
+      *type = Client.eventQueue->type;
+      *controller = Client.eventQueue->controller;
+      *value = Client.eventQueue->value;
+      *timer = Client.eventQueue->timer;
   }
   else {
-    retValue = 0;
+      retValue = 0;
   }
+        
   return retValue;
 }
 

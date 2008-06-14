@@ -129,7 +129,6 @@ void netInteruptLoop() {
             ts.tv_nsec = 5000000;
             NetMessage syncMsg;
 
-            incEventCounter();
 	    if (clientWaitingForServer()) {
               fprintf(netLog, "Waiting for sync msg...\n");
               while ((clientWaitingForServer()) && (clientIsConnected())) {
@@ -150,11 +149,7 @@ void netInteruptLoop() {
             else {
 
               if (serverIsActive()) serverProcessMessages();
-              if (clientIsConnected()) {
-                  clientProcessMessages();
-                  processEventQueue();
-              }
-
+              if (clientIsConnected()) clientProcessMessages();
 
 	      if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
                   if (serverIsActive()) {
@@ -174,8 +169,10 @@ void netInteruptLoop() {
                           fprintf(netLog, "Client: Perfect Sync\n");
                       }
                  }
-              }              
+              }
             }
+            if (clientIsConnected()) processEventQueue();
+            incEventCounter();
 }
 
 
