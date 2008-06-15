@@ -52,14 +52,20 @@ static char fname[1024] = {0};
 
 void savestates_select_slot(unsigned int s)
 {
-    if (s < 1 || s > 10 || s == slot) return;
+    if (s < 0 || s > 9 || s == slot) return;
     slot = s;
 
     char buffer[1024];
     if(rom)
-        snprintf(buffer, 1023, "%s: %s", tr("Selected state file"), savestates_get_filename());
+    {
+        char *filename = savestates_get_filename();
+        snprintf(buffer, 1023, "%s: %s", tr("Selected state file"), filename);
+        free(filename);
+    }
     else 
+    {
         snprintf(buffer, 1023, "%s: %d", tr("Selected state slot"), slot);
+    }
 
    osd_new_message(OSD_BOTTOM_LEFT, buffer);
 }
@@ -85,8 +91,8 @@ int savestates_get_autoinc_slot(void)
 // increment save slot
 void savestates_inc_slot(void)
 {
-    if (++slot > 10)
-        slot = 1;
+    if (++slot > 9)
+        slot = 0;
 }
 
 void savestates_select_filename(const char *fn)
@@ -100,7 +106,7 @@ char* savestates_get_filename()
     size_t length;
     length = strlen(ROM_SETTINGS.goodname)+4+1;
     char *filename = (char*)malloc(length);
-    snprintf(filename, length, "%s.st%d", ROM_SETTINGS.goodname, slot - 1);
+    snprintf(filename, length, "%s.st%d", ROM_SETTINGS.goodname, slot);
     return filename;
 } 
 

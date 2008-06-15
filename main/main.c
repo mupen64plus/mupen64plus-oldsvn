@@ -587,9 +587,6 @@ static int sdl_event_filter( const SDL_Event *event )
                     switch (event->key.keysym.unicode)
                     {
                         case '0':
-                            savestates_select_slot( 10 );
-                            break;
-
                         case '1':
                         case '2':
                         case '3':
