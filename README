@@ -38,6 +38,8 @@ Type 'make' by itself to view all available build options:
      BITS=32       == build 32-bit binaries on 64-bit machine
      VCR=1         == enable video recording
      LIRC=1        == enable LIRC support
+     NO_RESAMP=1   == disable libsamplerate support in jttl_audio
+     NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)
      GUI=NONE      == build without GUI support
      GUI=GTK2      == build GTK2 GUI support (default)
      GUI=KDE4      == build KDE4 GUI support
@@ -100,6 +102,7 @@ Run 'mupen64plus --help' for a complete list of commandline options:
  Parameters:
          --nogui                 : do not display GUI
          --fullscreen            : turn fullscreen mode on
+         --noosd                 : disable onscreen display.
          --gfx (path)            : use gfx plugin given by (path)
          --audio (path)          : use audio plugin given by (path)
          --input (path)          : use input plugin given by (path)
@@ -109,6 +112,7 @@ Run 'mupen64plus --help' for a complete list of commandline options:
          --configdir (dir)       : force config dir (must contain mupen64plus.conf)
          --installdir (dir)      : force install dir (place to look for plugins, icons, lang, etc)
          --noask                 : don't ask to force load on bad dumps
+         --testshots (list)      : take screenshots at frames given in comma-separated list, then quit
          -h, --help              : see this help message
 
 
@@ -120,9 +124,14 @@ The keys or joystick/mouse inputs which will be mapped to the N64 controller for
       0-9 == Select virtual 'slot' for save/load state (F5 and F7) commands
        F5 == Save emulator state
        F7 == Load emulator state
+      F10 == slow down emulator by 5%
+      F11 == speed up emulator by 5%
+      F12 == take screenshot
 Alt-Enter == Toggle between windowed and fullscreen (may not be supported by all video plugins)
-   p or P == Pause on/off
+    Pause == Pause on/off
    m or M == Mute/unmute sound
+   / or ? == single frame advance while paused
+        F == Fast Forward (playback at 250% normal speed while F key is pressed)
         [ == Decrease volume
         ] == Increase volume
 
