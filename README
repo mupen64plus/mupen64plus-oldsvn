@@ -8,14 +8,41 @@ http://code.google.com/p/mupen64plus/wiki/README
 Mupen64Plus is based off of mupen64, originally created by Hacktarux. The Mupen64Plus package contains the mupen64 emulator program (renamed mupen64plus) plus graphics, sound, input, and RSP plugins.
 
 README Sections
-  1. Building From Source
-  2. Installation
-  3. Multi-user Support
-  4. Key Commands In Emulator
-  5. Known Issues
+  1. Requirements for building or running Mupen64Plus
+  2. Building From Source
+  3. Installation
+  4. Multi-user Support
+  5. Key Commands In Emulator
+  6. Known Issues
 
+1. Requirements and Pre-requisites
+----------------------------------
 
-1. Building From Source
+*Binary Package Requirements*
+
+  - GTK2 libraries (unless built from source with GUI=NONE)
+  - SDL 1.2
+  - SDL_ttf
+  - Mesa / OpenGL libraries
+  - libpng
+  - freetype 2
+  - zlib 
+
+*Source Build Requirements*
+
+In addition to the binary libraries, the following packages are required if you build Mupen64Plus from source:
+
+  - GNU C and C++ compiler, libraries, and headers
+  - GNU make
+  - Development packages for all the libraries above
+  - libsamplerate (aka Secret Rabbit Code)
+  - yasm v0.6.2 or newer 
+
+Most of these pre-requisites are installed by default, but some are more uncommon. Here is an example for adding the 'yasm' and 'SDL_ttf' development packages on Fedora systems:
+
+  # yum install yasm SDL_ttf SDL_ttf-devel
+
+2. Building From Source
 -----------------------
 
 If you downloaded the binary distribution of Mupen64Plus, skip to the Installation section. To build the source distribution, unzip and cd into the source directory, then build using make:
@@ -59,7 +86,7 @@ NOTE: If you want to build a nogui-only version of mupen64plus, i.e. without gtk
 
  $ make GUI=NONE all
 
-2. Installation
+3. Installation
 ---------------
 
 *Binary Distribution*
@@ -85,7 +112,7 @@ After building mupen64plus and all plugins, su to root and type 'make install' t
  # exit
  $
 
-3. Multi-user Support
+4. Multi-user Support
 ---------------------
 
 As of version 1.3, Mupen64Plus now has support for multi-user environments.
@@ -116,7 +143,7 @@ Run 'mupen64plus --help' for a complete list of commandline options:
          -h, --help              : see this help message
 
 
-4. Key Commands In Emulator
+5. Key Commands In Emulator
 ---------------------------
 The keys or joystick/mouse inputs which will be mapped to the N64 controller for playing the games are determined by the input plugin.  The emulator core also supports several key commands during emulation, which are fixed and cannot be changed.  They are:
 
@@ -136,7 +163,7 @@ Alt-Enter == Toggle between windowed and fullscreen (may not be supported by all
         ] == Increase volume
 
 
-5. Known Issues
+6. Known Issues
 -----------------------
 As of March 2008, the RiceVideoLinux plugin may be unstable with users of the open source drivers for an ATI Radeon graphics adapter when fog is enabled.  If you have are using the open source Radeon driver, you should set the "EnableFog" value in RiceVideo.cfg to 0.
 
