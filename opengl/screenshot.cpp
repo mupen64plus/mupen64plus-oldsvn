@@ -105,6 +105,8 @@ static int SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, in
     // free memory
     free(row_pointers);
     png_destroy_write_struct(&png_write, &png_info);
+    // close file
+    fclose(savefile);
     // all done
     return 0;
 }
