@@ -11,7 +11,7 @@
 
         All clients must be using the same core.
 
-        Obviously all clients must use the same rom, the server doesn't check yet.
+        Obviously all clients must use the same rom, the ms doesn't check yet.
 
    =======================================================================================
 */ 
@@ -21,6 +21,7 @@
 
 
 static FILE		*netLog = NULL;
+
 static unsigned char	bNetplayEnabled = 0;
 
 FILE *		getNetLog() {return netLog;}
@@ -45,16 +46,11 @@ unsigned int gettimeofday_msec(void)
 
 ========================================================================================= */
 
-void net_init() {
-  netLog = fopen("netlog.txt", "w");
-  fprintf(netLog, "Begining net log...\n");
+void net_init(MupenServer *mupenServer) {
   clientInitialize();
-  serverInitialize();
+  msInitialize(mupenServer);
   setEventCounter(0);
-  if (SDLNet_Init() < 0) {
-     fprintf(netLog, "Failure to initialize SDLNet!\n");
-     return;
-  }
+  SDLNet_Init();
 }
 
 /* ======================================================================================
@@ -66,16 +62,17 @@ void net_init() {
 
 ========================================================================================= */
 
-void netStartNetplay() {
+void netStartNetplay(MupenServer *mupenServer) {
   int              n = 0;
   NetPlaySettings  netSettings;
   FILE            *netConfig;
+
+  net_init(mupenServer);  //Make sure log file is open to avoid crashes
 
   // Right now we're reading the netplay settings from a conf file, soon this will be part of the GUI
   // ===============================================================================================
   netConfig = fopen("mupennet.conf", "r");
   if (!netConfig) {
-     fprintf(netLog, "Failed to open mupennet.conf configuration file.  Playing on local server.\n");
      netSettings.runServer = 1;
   } else {
      fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &netSettings.runServer, &netSettings.hostname, &netSettings.port);
@@ -84,11 +81,8 @@ void netStartNetplay() {
   // ===============================================================================================
   // Right now we're reading the netplay settings from a conf file, soon this will be part of the GUI
 
-  fprintf(netLog, "runServer %d\nhostname %s\nport %d\n", netSettings.runServer, netSettings.hostname, netSettings.port);
-
-
   if (netSettings.runServer) {
-      serverStart(SERVER_PORT);
+      msStart(mupenServer, SERVER_PORT);
       strcpy(netSettings.hostname, "localhost"); // If we're hosting a game, connect to it.
       netSettings.port = SERVER_PORT;
   }
@@ -96,8 +90,7 @@ void netStartNetplay() {
   if (clientConnect(netSettings.hostname, netSettings.port))
       bNetplayEnabled = 1;
   else {
-      fprintf(netLog, "Client failed to connect to a server, playing offline.\n");
-      netShutdown();
+      netShutdown(mupenServer);
   }
 
 }
@@ -107,12 +100,10 @@ void netStartNetplay() {
 
 ========================================================================================= */
 
-void netShutdown() {
+void netShutdown(MupenServer *mupenServer) {
   if (clientIsConnected()) clientDisconnect();
-  if (serverIsActive()) serverStop();
+  if (msIsActive(mupenServer)) msStop(mupenServer);
   bNetplayEnabled = 0;
-  fprintf(netLog, "Goodbye.\n");
-  fclose(netLog);
 }
 
 /* ======================================================================================
@@ -123,50 +114,47 @@ void netShutdown() {
 
 ========================================================================================= */
 
-void netInteruptLoop() {
+void netInteruptLoop(MupenServer *mupenServer) {
             struct timespec ts;
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
             NetMessage syncMsg;
 
 	    if (clientWaitingForServer()) {
-              fprintf(netLog, "Waiting for sync msg...\n");
+
               while (clientWaitingForServer() && clientIsConnected()) {
-                    if (serverIsActive() && serverIsAccepting()) {
+                    if (msIsActive(mupenServer) && msIsAccepting(mupenServer)) {
                         osd_render();  // Updating OSD
                         SDL_GL_SwapBuffers();
 #ifdef WITH_LIRC
                         lircCheckInput();
 #endif //WITH_LIRC 
-                        SDL_PumpEvents();  // Check for F9 on server to begin game.
-			serverAcceptConnection();
-			serverProcessMessages();
+                        SDL_PumpEvents();  // Check for F9 on ms to begin game.
+			msAcceptConnection(mupenServer);
+			msProcessMessages(mupenServer);
                         nanosleep(&ts, NULL);
                     }
                     clientProcessMessages();
 	      }
             }
 
-            if (serverIsActive()) serverProcessMessages();
+            if (msIsActive(mupenServer)) msProcessMessages(mupenServer);
             if (clientIsConnected()) {
                 clientProcessMessages();
                 processEventQueue();
             }
 
             if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
-                if (serverIsActive()) {
+                if (msIsActive(mupenServer)) {
                     syncMsg.type = NETMSG_SYNC;
                     syncMsg.genEvent.timer = getEventCounter();
-                    serverBroadcastMessage(&syncMsg);
+                    msBroadcastMessage(mupenServer, &syncMsg);
                 }
                 else {
                     if (clientLastSyncMsg() < getEventCounter()) {
-                        fprintf(netLog, "Client: Server is lagging, waiting... event counter = %d.\n", getEventCounter());
                         clientPauseForServer();
                     } else if (clientLastSyncMsg() > getEventCounter()) {
-                        fprintf(netLog, "Client: You're lagging, last sync %d current counter %d\n", clientLastSyncMsg(), getEventCounter());
                     } else {
-                        fprintf(netLog, "Client: Perfect Sync\n");
                     }
                 }
             }

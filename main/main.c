@@ -117,6 +117,8 @@ static int   l_TestShotIdx = 0;          // index of next screenshot frame in li
 static char *l_Filename = NULL;          // filename to load & run at startup (if given at command line)
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
+static MupenServer  l_NetplayServer;
+
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -266,6 +268,7 @@ void new_vi(void)
     double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
+    netInteruptLoop(&l_NetplayServer);
     start_section(IDLE_SECTION);
     VI_Counter++;
 
@@ -549,11 +552,9 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-	            if (serverIsActive() && serverIsAccepting()) {
-                      netMsg.type = NETMSG_SYNC;
-                      netMsg.genEvent.timer = getEventCounter() + getNetDelay();
-                      serverBroadcastMessage(&netMsg);
-                      serverStopWaitingForPlayers();
+	            if (clientIsConnected()) {
+                      netMsg.type = NETMSG_READY;
+                      clientSendMessage(&netMsg);                      
                     }
                     break;
 
@@ -821,15 +822,10 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    netStartNetplay();
+    netStartNetplay(&l_NetplayServer);
 
     if (netplayEnabled()) {
-      if (serverIsActive()) {
-        osd_new_message(OSD_MIDDLE_CENTER, "Press F9 to begin.");
-      }
-      else {
-        osd_new_message(OSD_MIDDLE_CENTER, "Waiting for server to begin.");
-      }
+      osd_new_message(OSD_MIDDLE_CENTER, "Press F9 when you are ready, then wait for others to do the same.");
     }
     else osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
     go();
@@ -853,7 +849,7 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    if (netplayEnabled()) netShutdown();
+    if (netplayEnabled()) netShutdown(&l_NetplayServer);
 
     if (l_Filename != 0)
     {
@@ -1353,7 +1349,6 @@ int main(int argc, char *argv[])
 
     // init multi-language support
     tr_init();
-    net_init();
 
     // look for plugins in the install dir and set plugin config dir
     plugin_scan_installdir();

@@ -42,20 +42,19 @@ int clientConnect(char *server, int port) {
 
         if (clientIsConnected()) clientDisconnect();
         initEventQueue();
+        clientInitialize();
 	SDLNet_ResolveHost(&serverAddr, server, port);
 
 	if (Client.socket = SDLNet_TCP_Open(&serverAddr)) {
 		Client.socketSet = SDLNet_AllocSocketSet(1);
 		SDLNet_TCP_AddSocket(Client.socketSet, Client.socket);
 		Client.isConnected = 1;
-		fprintf((FILE *)getNetLog(), "Client successfully connected to %s:%d.\n", server, port);
 		Client.isWaitingForServer = 1;
-	} else fprintf((FILE *)getNetLog(), "Client failed to connected to %s:%d.\n", server, port);
+	}
 	return Client.isConnected;
 }
 
 void clientDisconnect() {
-	fprintf((FILE *)getNetLog(), "Client: clientDisconnect() called.\n");
         if (!Client.isConnected) {
           SDLNet_FreeSocketSet(Client.socketSet);
           SDLNet_TCP_Close(Client.socket);
@@ -97,19 +96,13 @@ void clientProcessMessages() {
 					addEventToQueue(incomingMessage.genEvent.type, incomingMessage.genEvent.controller,
 						  incomingMessage.genEvent.value,
 						  incomingMessage.genEvent.timer);
-                                fprintf((FILE *)getNetLog(), "Client: Event received %d %d (%d)\n", incomingMessage.genEvent.type,
-                                                                               incomingMessage.genEvent.timer,
-                                                                               getEventCounter());
 				}
 				else {
-                                   fprintf((FILE *)getNetLog(), "Desync Warning!: Event received for %d, current %d\n",
-                                                                         incomingMessage.genEvent.timer, getEventCounter());
                                    outgoingMessage.type = NETMSG_DESYNC;
                                    clientSendMessage(&outgoingMessage);
                                 }
 			break;
                         case NETMSG_DESYNC:
-                                fprintf((FILE *)getNetLog(), "Client: Player %d DESYNC!\n", playerNumber + 1);
 				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
@@ -118,19 +111,16 @@ void clientProcessMessages() {
 				Client.lastSync = incomingMessage.genEvent.timer;
                         break;
 			case NETMSG_PLAYERQUIT:
-				sprintf(osdString, "Player %d has disconnected.", playerNumber + 1);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
 			break;
 			case NETMSG_PING:
-                                fprintf((FILE *)getNetLog(), "Client: Ping received.  Returning.\n", incomingMessage.genEvent.value);
                                 clientSendMessage(&incomingMessage);
 			break;
 			default:
-				fprintf((FILE *)getNetLog(), "Client: Message type error.  Dropping packet.\n");
 			break;
 
 		}
-	} else fprintf((FILE *)getNetLog(), "Client: Message size error (%d expecting %d).\n", n, sizeof(NetMessage));
+	}
 
 }
 
@@ -141,7 +131,6 @@ void clientSendButtons(int control, DWORD value) {
   msg.genEvent.controller = control;
   msg.genEvent.value = value;
   msg.genEvent.timer = 0;	
-  fprintf((FILE *)getNetLog(), "Client: Sending button state (sync %d).\n", getEventCounter());
   clientSendMessage(&msg);
 }
 
@@ -212,8 +201,6 @@ int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned s
   NetEvent *currEvent = Client.eventQueue;
 
   while ((Client.eventQueue) && (Client.eventQueue->timer < getEventCounter())) {
-      fprintf((FILE *)getNetLog(), "Desync Warning!: Event queue out of date (%d curr %d)! Popping next.\n", Client.eventQueue>timer,
-                                                                                                             getEventCounter());
       popEventQueue();
   }
 
@@ -232,12 +219,10 @@ int getNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned s
 
 void initEventQueue() {
   while (Client.eventQueue) popEventQueue();
-  fprintf((FILE *)getNetLog(), "Event queue initialized.\n");
 }
 
 void killEventQueue() {
   while (Client.eventQueue) popEventQueue();
-  fprintf((FILE *)getNetLog(), "Event queue killed.\n");
 }
   
 

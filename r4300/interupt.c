@@ -52,7 +52,6 @@
 #include "../main/lirc.h"
 #endif //WITH_LIRC
 #include "../opengl/osd.h"
-#include "../network/network.h"
 
 unsigned int next_vi;
 int vi_field=0;
@@ -366,7 +365,6 @@ void gen_interupt()
             return;
             break;
         case VI_INT:
-            netInteruptLoop();
             if(vi_counter < 60)
             {
                 if (vi_counter == 0)
@@ -398,7 +396,6 @@ void gen_interupt()
 
                 while(rompause)
                 {
-                    fprintf(getNetLog(), "paused.\n");
                     struct timespec ts;
                     ts.tv_sec = 0;
                     ts.tv_nsec = 10000000;

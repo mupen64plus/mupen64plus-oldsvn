@@ -11,99 +11,90 @@
 
         All clients must be using the same core.
 
-        Obviously all clients must use the same rom, the server doesn't check yet.
+        Obviously all clients must use the same rom, the ms doesn't check yet.
 
    =======================================================================================
 */ 
 
 #include "network.h"
 
-MupenServer		Server;
-
-BOOL            serverIsActive() {return Server.isActive;}
-BOOL            serverIsAccepting() {return Server.isAccepting;}
-unsigned short  getNetDelay() {return Server.netDelay;}
+BOOL            msIsActive(MupenServer *Server) {return Server->isActive;}
+BOOL            msIsAccepting(MupenServer *Server) {return Server->isAccepting;}
+unsigned short  getNetDelay(MupenServer *Server) {return Server->netDelay;}
 
 
-void serverInitialize() {
-        memset(&Server, 0, sizeof(Server));
-        Server.netDelay = 5;
+void msInitialize(MupenServer *Server) {
+        memset(Server, 0, sizeof(MupenServer));
+        Server->netDelay = 5;
 }
 
-int serverStart(unsigned short port) {
-        IPaddress serverAddr;
+int msStart(MupenServer *Server, unsigned short port) {
+        IPaddress msAddr;
 
-	fprintf((FILE *)getNetLog(), "serverStart() called.\n");
-	if (serverIsActive()) return;
+	if (msIsActive(Server)) return;
 
-	Server.socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
-	SDLNet_ResolveHost(&serverAddr, NULL, port);
+	Server->socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
+	SDLNet_ResolveHost(&msAddr, NULL, port);
 	
-	if (Server.socket = SDLNet_TCP_Open(&serverAddr)) {
-		SDLNet_TCP_AddSocket(Server.socketSet, Server.socket);
-		fprintf((FILE *)getNetLog(), "Server successfully initialized on port %d.\n", port);
-                Server.isActive = 1;
-		Server.isAccepting = 1;
+	if (Server->socket = SDLNet_TCP_Open(&msAddr)) {
+		SDLNet_TCP_AddSocket(Server->socketSet, Server->socket);
+                Server->isActive = 1;
+		Server->isAccepting = 1;
 	}
-	else fprintf((FILE *)getNetLog(), "Failed to initialize server on port %d.\n", port);
-	return Server.isActive;
+	return Server->isActive;
 }
 
-void serverStop() {
+void msStop(MupenServer *Server) {
   int n;
-  fprintf((FILE *)getNetLog(), "serverStop() called.\n");
-  for (n = 0; n < MAX_CLIENTS; n++) if (Server.player[n].isConnected) serverBootPlayer(n);
-  SDLNet_FreeSocketSet(Server.socketSet);
-  if (Server.isAccepting) {
-    SDLNet_TCP_Close(Server.socket);
-    Server.isAccepting = 0;
+  for (n = 0; n < MAX_CLIENTS; n++) if (Server->player[n].isConnected) msBootPlayer(Server, n);
+  SDLNet_FreeSocketSet(Server->socketSet);
+  if (Server->isAccepting) {
+    SDLNet_TCP_Close(Server->socket);
+    Server->isAccepting = 0;
   }
-  Server.isActive = 0;
+  Server->isActive = 0;
 }
 
-void serverStopWaitingForPlayers() {
-//	SDLNet_TCP_Close(Server.socket);
-	SDLNet_TCP_DelSocket(Server.socketSet, Server.socket);
-        Server.isAccepting = 0;
+void msStopWaitingForPlayers(MupenServer *Server) {
+	SDLNet_TCP_DelSocket(Server->socketSet, Server->socket);
+        Server->isAccepting = 0;
 }
 
-int serverBroadcastMessage(NetMessage *msg) {
+int msBroadcastMessage(MupenServer *Server, NetMessage *msg) {
   int n;
-  for (n = 0; n < MAX_CLIENTS; n++) if (Server.player[n].isConnected) {
-	if (SDLNet_TCP_Send(Server.player[n].socket, msg, sizeof(NetMessage)) != sizeof(NetMessage)) {
-		serverBootPlayer(n);                   // If the player disconnected, clean up.
+  for (n = 0; n < MAX_CLIENTS; n++) if (Server->player[n].isConnected) {
+	if (SDLNet_TCP_Send(Server->player[n].socket, msg, sizeof(NetMessage)) != sizeof(NetMessage)) {
+		msBootPlayer(Server, n);                   // If the player disconnected, clean up.
 	}
   }
 }
 
-void serverBootPlayer(int n) {
+void msBootPlayer(MupenServer *Server, int n) {
 	NetMessage msg;
 	msg.type = NETMSG_PLAYERQUIT;
 	msg.genEvent.controller = n;
 
-	if (!Server.player[n].isConnected) {
-          SDLNet_TCP_Close(Server.player[n].socket);
-          SDLNet_TCP_DelSocket(Server.socketSet, Server.player[n].socket);
-          Server.player[n].isConnected = FALSE;
-          serverBroadcastMessage(&msg);
-          fprintf((FILE *)getNetLog(), "Client %d disconnected.\n", n);
+	if (!Server->player[n].isConnected) {
+          SDLNet_TCP_Close(Server->player[n].socket);
+          SDLNet_TCP_DelSocket(Server->socketSet, Server->player[n].socket);
+          Server->player[n].isConnected = FALSE;
+          msBroadcastMessage(Server, &msg);
         }
 }
 
-void serverAcceptConnection() {
+void msAcceptConnection(MupenServer *Server) {
   TCPsocket newClient;
   NetMessage msg;
 
-  int n;
-  SDLNet_CheckSockets(Server.socketSet, 0);
-  if (SDLNet_SocketReady(Server.socket)) {
-    if (newClient = SDLNet_TCP_Accept(Server.socket)) {
+  int n, allPlayersReady = 1;
+
+  SDLNet_CheckSockets(Server->socketSet, 0);
+  if (SDLNet_SocketReady(Server->socket)) {
+    if (newClient = SDLNet_TCP_Accept(Server->socket)) {
         for (n = 0; n < MAX_CLIENTS; n++)
-          if (!Server.player[n].isConnected) {
-            SDLNet_TCP_AddSocket(Server.socketSet, (Server.player[n].socket = newClient));
-            fprintf((FILE *)getNetLog(), "New connection accepted; Dubbed Player %d\n", n + 1);
-            Server.player[n].isConnected = TRUE;
-            fprintf((FILE *)getNetLog(), "Sending ping.\n");
+          if (!Server->player[n].isConnected) {
+            SDLNet_TCP_AddSocket(Server->socketSet, (Server->player[n].socket = newClient));
+            Server->player[n].isConnected = TRUE;
             msg.type = NETMSG_PING;
             msg.genEvent.type = NETMSG_PING;
             msg.genEvent.value = gettimeofday_msec();
@@ -113,42 +104,53 @@ void serverAcceptConnection() {
         if (n == MAX_CLIENTS) SDLNet_TCP_Close(newClient); // No open slots
     }
   }
+
+  for (n = 0; n < MAX_CLIENTS; n++) {
+    if ((Server->player[n].isConnected) && (!Server->player[n].isReady)) allPlayersReady = 0;
+  }
+
+  if (allPlayersReady) {
+    msStopWaitingForPlayers(Server);
+    msg.type = NETMSG_SYNC;
+    msg.genEvent.timer = getEventCounter();
+    msBroadcastMessage(Server, &msg);    
+  } 
+ 
 }
 
-void serverProcessMessages() {
+void msProcessMessages(MupenServer *Server) {
   NetMessage incomingMsg;
   int tempReturn, n;
 
-  SDLNet_CheckSockets(Server.socketSet, 0);
+  SDLNet_CheckSockets(Server->socketSet, 0);
 
   for (n = 0; n < MAX_CLIENTS; n++) {
-    if ((Server.player[n].isConnected) && (SDLNet_SocketReady(Server.player[n].socket))) {
-      tempReturn = SDLNet_TCP_Recv(Server.player[n].socket, &incomingMsg, sizeof(NetMessage));
+    if ((Server->player[n].isConnected) && (SDLNet_SocketReady(Server->player[n].socket))) {
+      tempReturn = SDLNet_TCP_Recv(Server->player[n].socket, &incomingMsg, sizeof(NetMessage));
 
       if (tempReturn <= 0) {                                     
-        serverBootPlayer(n);                                     // If there was an error or the player disconnected then cleanup.
+        msBootPlayer(Server, n);                                     // If there was an error or the player disconnected then cleanup.
       }
       else {                   
         switch (incomingMsg.type) {
-            case NETMSG_EVENT:                                   // Events (Button presses, other time sensitive input)
+            case NETMSG_EVENT:                                       // Events (Button presses, other time sensitive input)
               if (incomingMsg.genEvent.type == EVENT_BUTTON) {
-                    incomingMsg.genEvent.timer = getEventCounter() + Server.netDelay;      // Add calculated delay to the timer
-                    if (n < 4) {                                 // If the message comes from a player (n >= 4 is for spectators)
-                        incomingMsg.genEvent.controller = n;     // Change the controller tag on the event
-                        serverBroadcastMessage(&incomingMsg);    // Broadcast the button event
+                    incomingMsg.genEvent.timer = getEventCounter() + Server->netDelay;      // Add calculated delay to the timer
+                    if (n < 4) {                                     // If the message comes from a player (n >= 4 is for spectators)
+                        incomingMsg.genEvent.controller = n;         // Change the controller tag on the event
+                        msBroadcastMessage(Server, &incomingMsg);    // Broadcast the button event
                     }
-              } else {
-                    fprintf((FILE *)getNetLog(), "Server: Received unrecognized event from player %d.\n", n+1);
               }
               break;
-            case NETMSG_PING:
-                Server.player[n].lag = (gettimeofday_msec() - incomingMsg.genEvent.value);
-                fprintf((FILE *)getNetLog(), "Server: Ping returned from player %d, lag %d ms.\n", n+1, Server.player[n].lag);
+            case NETMSG_READY: // Client is notifying server that it is ready to begin
+                Server->player[n].isReady = TRUE;
                 break;
-            case NETMSG_DESYNC:
+            case NETMSG_PING: // Client is returning a ping request
+                Server->player[n].lag = (gettimeofday_msec() - incomingMsg.genEvent.value);
+                break;
+            case NETMSG_DESYNC: // Client is notifying the server that it has desynchronized
                 incomingMsg.genEvent.controller = n;
-                serverBroadcastMessage(&incomingMsg);
-                //serverBootPlayer(n); When testing is finished
+                msBroadcastMessage(Server, &incomingMsg);
                 break;
         }
       }
@@ -156,68 +158,3 @@ void serverProcessMessages() {
   }
 }
 
-void serverBroadcastSync() {
-  int tc = 0, ptr = 0, n, lc;
-  NetMessage startmsg;
-  struct timespec ts;
-  static short sort_array[MAX_CLIENTS];
-  static BOOL runOnce = FALSE;
-
-
-  if (!runOnce) {
-    runOnce = TRUE;
-    serverStopWaitingForPlayers();
-    fprintf((FILE *)getNetLog(), "Server: F9 pressed\n");
-    for (n = 0; n < MAX_CLIENTS; n++) sort_array[n] = -1;
-
-    // Sort out connection lag from highest to lowest
-    for (n = 0; n < MAX_CLIENTS; n++)
-        if  ( (Server.player[n].lag >= Server.player[tc].lag)
-           && (Server.player[n].isConnected) ) 
-              tc = n;
-
-    sort_array[ptr] = tc;
-    lc = tc;
-    tc = 0;
-
-    for (ptr = 1; ptr < MAX_CLIENTS; ptr++) {
-       for (n = 0; n < MAX_CLIENTS; n++) 
-            if ( (Server.player[n].lag >= Server.player[tc].lag)
-              && (Server.player[n].lag <= Server.player[lc].lag) 
-              && (n != lc) 
-              && (Server.player[n].isConnected))
-                 tc = n;
-       if (tc == lc) break;
-       sort_array[ptr] = tc;
-       lc = tc;
-       tc = 0;
-    }
-
-    fprintf((FILE *)getNetLog(), "Client Lag(ms):\n");
-    for (n = 0; n < MAX_CLIENTS; n++) 
-          if (Server.player[n].isConnected) fprintf((FILE *)getNetLog(),"   Player %d: %d ms\n", sort_array[n]+1, Server.player[sort_array[n]].lag);
-
-    Server.netDelay = (Server.player[sort_array[0]].lag / 17) + 5; // 60 VI/s = ~17ms per VI (+ 5 to be safe)
-    fprintf((FILE *)getNetLog(), "Net Delay: %d\n", Server.netDelay);
-  }
-
-  startmsg.type = NETMSG_SYNC;
-  startmsg.genEvent.timer = getEventCounter() + getNetDelay();
-
-  // Send sync signals, in order of slowest to fastest connection, compensate for net lag
-  for (n = 0; n < MAX_CLIENTS; n++) {
-     ptr = sort_array[n];
-     lc  = sort_array[n+1];
-     if (ptr >= 0) {
-       fprintf((FILE *)getNetLog(), "Sending sync message to Player %d (ping %d ms)\n", ptr + 1, Server.player[ptr].lag);
-       SDLNet_TCP_Send(Server.player[ptr].socket, &startmsg, sizeof(NetMessage));
-       if (lc >= 0) {
-         ts.tv_sec = 0;
-         ts.tv_nsec = 1000000 * (Server.player[ptr].lag - Server.player[lc].lag) / 2; // Divide by 2 for one way trip
-         fprintf((FILE *)getNetLog(), "Sleeping for %d ms\n", (Server.player[ptr].lag - Server.player[lc].lag) / 2);
-         nanosleep(&ts, NULL);
-       }
-     }
-  }
-  fprintf((FILE *)getNetLog(), "Finished sending sync messages.\n");
-}
