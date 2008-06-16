@@ -18,11 +18,6 @@
 
 #include "network.h"
 
-BOOL            msIsActive(MupenServer *Server) {return Server->isActive;}
-BOOL            msIsAccepting(MupenServer *Server) {return Server->isAccepting;}
-unsigned short  getNetDelay(MupenServer *Server) {return Server->netDelay;}
-
-
 void msInitialize(MupenServer *Server) {
         memset(Server, 0, sizeof(MupenServer));
         Server->netDelay = 5;
@@ -31,7 +26,7 @@ void msInitialize(MupenServer *Server) {
 int msStart(MupenServer *Server, unsigned short port) {
         IPaddress msAddr;
 
-	if (msIsActive(Server)) return;
+	if (Server->isActive) return;
 
 	Server->socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
 	SDLNet_ResolveHost(&msAddr, NULL, port);

@@ -856,7 +856,6 @@ static void * emulationThread( void *_arg )
     g_EmulationThread = 0;
     SDL_Quit();
     if (l_NetplayEnabled) netShutdown(&l_NetplayServer);
-
     if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is

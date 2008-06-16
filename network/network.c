@@ -83,7 +83,7 @@ int netStartNetplay(MupenServer *mupenServer, NetPlaySettings netSettings) {
 
 void netShutdown(MupenServer *mupenServer) {
   if (clientIsConnected()) clientDisconnect();
-  if (msIsActive(mupenServer)) msStop(mupenServer);
+  if (mupenServer->isActive) msStop(mupenServer);
 }
 
 /* ======================================================================================
@@ -107,7 +107,7 @@ void netInteruptLoop(MupenServer *mupenServer) {
                     SDL_GL_SwapBuffers();
                     SDL_PumpEvents();
 
-                    if (msIsActive(mupenServer) && msIsAccepting(mupenServer)) {
+                    if (mupenServer->isActive && mupenServer->isAccepting) {
 #ifdef WITH_LIRC
                         lircCheckInput();
 #endif //WITH_LIRC 
@@ -119,24 +119,19 @@ void netInteruptLoop(MupenServer *mupenServer) {
 	      }
             }
 
-            if (msIsActive(mupenServer)) msProcessMessages(mupenServer);
+            if (mupenServer->isActive) msProcessMessages(mupenServer);
             if (clientIsConnected()) {
                 clientProcessMessages();
                 processEventQueue();
             }
 
             if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
-                if (msIsActive(mupenServer)) {
+                if (mupenServer->isActive) {
                     syncMsg.type = NETMSG_SYNC;
                     syncMsg.genEvent.timer = getEventCounter();
                     msBroadcastMessage(mupenServer, &syncMsg);
-                }
-                else {
-                    if (clientLastSyncMsg() < getEventCounter()) {
+                } else if (clientLastSyncMsg() < getEventCounter()) {
                         clientPauseForServer();
-                    } else if (clientLastSyncMsg() > getEventCounter()) {
-                    } else {
-                    }
                 }
             }
             incEventCounter();
