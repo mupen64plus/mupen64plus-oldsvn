@@ -6,6 +6,7 @@
    =======================================================================================
 */ 
 
+#include "../opengl/osd.h"
 #include "../main/plugin.h" // Need typdef BUTTONS, DWORD, BOOL
 #include <sys/types.h>
 #include <SDL_net.h>
