@@ -128,10 +128,10 @@ void msProcessMessages(MupenServer *Server) {
     if ((Server->player[n].isConnected) && (SDLNet_SocketReady(Server->player[n].socket))) {
       tempReturn = SDLNet_TCP_Recv(Server->player[n].socket, &incomingMsg, sizeof(NetMessage));
 
-      if (tempReturn <= 0) {                                     
+      if (tempReturn <= 0) {
+        printf("Player %d disconnected.\n", n+1);
         msBootPlayer(Server, n);                                     // If there was an error or the player disconnected then cleanup.
-      }
-      else {                   
+      } else {                   
         switch (incomingMsg.type) {
             case NETMSG_EVENT:                                       // Events (Button presses, other time sensitive input)
               if (incomingMsg.genEvent.type == EVENT_BUTTON) {
@@ -144,6 +144,7 @@ void msProcessMessages(MupenServer *Server) {
               break;
             case NETMSG_READY: // Client is notifying server that it is ready to begin
                 Server->player[n].isReady = TRUE;
+                printf("Player %d is ready.\n", n+1);
                 break;
             case NETMSG_PING: // Client is returning a ping request
                 Server->player[n].lag = (gettimeofday_msec() - incomingMsg.genEvent.value);
@@ -152,6 +153,9 @@ void msProcessMessages(MupenServer *Server) {
                 incomingMsg.genEvent.controller = n;
                 msBroadcastMessage(Server, &incomingMsg);
                 break;
+            default:
+                printf("Unrecognized message received from player %d.\n", n+1);
+            break;
         }
       }
     }

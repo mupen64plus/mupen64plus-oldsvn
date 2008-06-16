@@ -123,13 +123,14 @@ void netInteruptLoop(MupenServer *mupenServer) {
 	    if (clientWaitingForServer()) {
 
               while (clientWaitingForServer() && clientIsConnected()) {
+                    osd_render();  // Updating OSD
+                    SDL_GL_SwapBuffers();
+                    SDL_PumpEvents();
+
                     if (msIsActive(mupenServer) && msIsAccepting(mupenServer)) {
-                        osd_render();  // Updating OSD
-                        SDL_GL_SwapBuffers();
 #ifdef WITH_LIRC
                         lircCheckInput();
 #endif //WITH_LIRC 
-                        SDL_PumpEvents();  // Check for F9 on ms to begin game.
 			msAcceptConnection(mupenServer);
 			msProcessMessages(mupenServer);
                         nanosleep(&ts, NULL);
