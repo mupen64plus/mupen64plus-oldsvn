@@ -104,6 +104,7 @@ void clientProcessMessages() {
 			break;
                         case NETMSG_DESYNC:
 				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
+                                printf("%s\n", osdString);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
                         case NETMSG_SYNC:
@@ -111,12 +112,15 @@ void clientProcessMessages() {
 				Client.lastSync = incomingMessage.genEvent.timer;
                         break;
 			case NETMSG_PLAYERQUIT:
+				sprintf(osdString, "Player %d has disconnected.", playerNumber + 1);
+                                printf("%s\n", osdString);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
 			break;
 			case NETMSG_PING:
                                 clientSendMessage(&incomingMessage);
 			break;
 			default:
+                                printf("Client received an unrecognized message from the server.\n");
 			break;
 
 		}

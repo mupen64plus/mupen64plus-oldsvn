@@ -23,6 +23,7 @@
 #define		NETMSG_DESYNC		3       // Client sends this when they've desynced
 #define		NETMSG_PLAYERQUIT	4	// Player disconnect
 #define         NETMSG_READY		5       // Client is ready to play
+#define         NETMSG_WAIT             6       // Client telling server to slow down
 
 #define 	EVENT_BUTTON		0
 
@@ -37,14 +38,14 @@ typedef struct TNetEvent {
 } NetEvent;
 
 typedef struct TNetMessage {
-	u_int8_t	id;
-	u_int16_t	type;
         struct {
-            u_int8_t		type;
-            u_int8_t		controller;	// applicable controller
             u_int32_t		value;		// new key state value to assign (BUTTONS.Value)
             u_int16_t		timer;		// when to activate the event (== netVISyncCounter)
+            u_int8_t		type;
+            u_int8_t		controller;	// applicable controller
         } genEvent;
+	u_int16_t	type;
+	u_int8_t	id;
 } NetMessage;
 
 typedef struct TNetPlayer {

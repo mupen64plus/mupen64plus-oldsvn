@@ -11,7 +11,7 @@
 
         All clients must be using the same core.
 
-        Obviously all clients must use the same rom, the ms doesn't check yet.
+        Obviously all clients must use the same rom, the server doesn't check yet.
 
    =======================================================================================
 */ 
@@ -69,7 +69,8 @@ void msBootPlayer(MupenServer *Server, int n) {
 	msg.type = NETMSG_PLAYERQUIT;
 	msg.genEvent.controller = n;
 
-	if (!Server->player[n].isConnected) {
+	if (Server->player[n].isConnected) {
+          printf("Player %d disconnected.\n", n+1);
           SDLNet_TCP_Close(Server->player[n].socket);
           SDLNet_TCP_DelSocket(Server->socketSet, Server->player[n].socket);
           Server->player[n].isConnected = FALSE;
@@ -88,6 +89,7 @@ void msAcceptConnection(MupenServer *Server) {
     if (newClient = SDLNet_TCP_Accept(Server->socket)) {
         for (n = 0; n < MAX_CLIENTS; n++)
           if (!Server->player[n].isConnected) {
+            printf("Player %d has connected.\n", n+1);
             SDLNet_TCP_AddSocket(Server->socketSet, (Server->player[n].socket = newClient));
             Server->player[n].isConnected = TRUE;
             msg.type = NETMSG_PING;
@@ -116,6 +118,9 @@ void msAcceptConnection(MupenServer *Server) {
 void msProcessMessages(MupenServer *Server) {
   NetMessage incomingMsg;
   int tempReturn, n;
+  struct timespec ts;
+
+  ts.tv_sec = 0;
 
   SDLNet_CheckSockets(Server->socketSet, 0);
 
@@ -124,7 +129,6 @@ void msProcessMessages(MupenServer *Server) {
       tempReturn = SDLNet_TCP_Recv(Server->player[n].socket, &incomingMsg, sizeof(NetMessage));
 
       if (tempReturn <= 0) {
-        printf("Player %d disconnected.\n", n+1);
         msBootPlayer(Server, n);                                     // If there was an error or the player disconnected then cleanup.
       } else {                   
         switch (incomingMsg.type) {
@@ -145,12 +149,13 @@ void msProcessMessages(MupenServer *Server) {
                 Server->player[n].lag = (gettimeofday_msec() - incomingMsg.genEvent.value);
                 break;
             case NETMSG_DESYNC: // Client is notifying the server that it has desynchronized
+                printf("Player %d has desynchronized.\n", n+1);
                 incomingMsg.genEvent.controller = n;
                 msBroadcastMessage(Server, &incomingMsg);
                 break;
             default:
                 printf("Unrecognized message received from player %d.\n", n+1);
-            break;
+                break;
         }
       }
     }
