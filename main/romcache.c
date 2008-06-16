@@ -566,7 +566,7 @@ void romdatabase_open()
                 {
                 g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, stringlength+2);
                 strcat(g_romdatabase.comment, buffer);
-                buffer[stringlength+1] = '\0';
+                buffer[strlen(buffer)+1] = '\0';
                 }
             }
         }
