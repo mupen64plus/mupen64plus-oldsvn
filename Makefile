@@ -63,14 +63,14 @@ OBJ_CORE = \
 	main/cheat.o \
 	main/config.o \
 	main/adler32.o \
-	main/ioapi.o \
 	main/md5.o \
 	main/mupenIniApi.o \
 	main/plugin.o \
 	main/rom.o \
 	main/savestates.o \
-	main/unzip.o \
 	main/volume.o \
+        compression/zip/unzip.o \
+        compression/zip/ioapi.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
