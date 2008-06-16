@@ -109,6 +109,7 @@ static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
 
 static int   l_OsdEnabled = 1;           // On Screen Display enabled?
+static BOOL  l_NetplayEnabled = 1;       // Netplay enabled?
 static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter
@@ -118,6 +119,8 @@ static char *l_Filename = NULL;          // filename to load & run at startup (i
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 static MupenServer  l_NetplayServer;
+static NetPlaySettings  l_NetSettings;
+
 
 
 /*********************************************************************************************************
@@ -822,13 +825,16 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    netStartNetplay(&l_NetplayServer);
-
-    if (netplayEnabled()) {
-      osd_new_message(OSD_MIDDLE_CENTER, "Press F9 when you are ready, then wait for others to do the same.");
+    if (l_NetplayEnabled) {
+        netReadConfigFile(&l_NetSettings);
+        if (netStartNetplay(&l_NetplayServer, l_NetSettings)) {
+          osd_new_message(OSD_MIDDLE_CENTER, "Press F9 when you are ready, then wait for others to do the same.");
+          go();
+        }
+    } else {
+        osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
+        go();
     }
-    else osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
-    go();
 
 #ifdef WITH_LIRC
     lircStop();
@@ -849,7 +855,7 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    if (netplayEnabled()) netShutdown(&l_NetplayServer);
+    if (l_NetplayEnabled) netShutdown(&l_NetplayServer);
 
     if (l_Filename != 0)
     {

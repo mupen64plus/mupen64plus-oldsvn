@@ -83,7 +83,8 @@ typedef struct TNetPlaySettings {
 } NetPlaySettings;
 
 void net_init(MupenServer *);
-void netStartNetplay(MupenServer *);
+int netStartNetplay(MupenServer *, NetPlaySettings netSettings);
+void netReadConfigFile(NetPlaySettings *netSettings);
 void netShutdown(MupenServer *);
 void netInteruptLoop(MupenServer *);
 

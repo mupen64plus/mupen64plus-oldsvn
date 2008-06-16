@@ -20,13 +20,6 @@
 #include "network.h"
 
 
-static FILE		*netLog = NULL;
-
-static unsigned char	bNetplayEnabled = 0;
-
-FILE *		getNetLog() {return netLog;}
-unsigned short  netplayEnabled() {return bNetplayEnabled;}
-
 unsigned int gettimeofday_msec(void)
 {
     struct timeval tv;
@@ -41,7 +34,7 @@ unsigned int gettimeofday_msec(void)
 
       net_init()
 
-        to be called when program starts
+        to be called when emu starts
 
 
 ========================================================================================= */
@@ -61,38 +54,26 @@ void net_init(MupenServer *mupenServer) {
 
 
 ========================================================================================= */
-
-void netStartNetplay(MupenServer *mupenServer) {
-  int              n = 0;
-  NetPlaySettings  netSettings;
+void netReadConfigFile(NetPlaySettings *netSettings) {
   FILE            *netConfig;
-
-  net_init(mupenServer);  //Make sure log file is open to avoid crashes
-
-  // Right now we're reading the netplay settings from a conf file, soon this will be part of the GUI
-  // ===============================================================================================
   netConfig = fopen("mupennet.conf", "r");
   if (!netConfig) {
-     netSettings.runServer = 1;
+     netSettings->runServer = 1;
   } else {
-     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &netSettings.runServer, &netSettings.hostname, &netSettings.port);
+     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", netSettings->runServer, netSettings->hostname, netSettings->port);
      fclose(netConfig);
   }
-  // ===============================================================================================
-  // Right now we're reading the netplay settings from a conf file, soon this will be part of the GUI
+}
 
+int netStartNetplay(MupenServer *mupenServer, NetPlaySettings netSettings) {
+  net_init(mupenServer);
   if (netSettings.runServer) {
       msStart(mupenServer, SERVER_PORT);
       strcpy(netSettings.hostname, "localhost"); // If we're hosting a game, connect to it.
       netSettings.port = SERVER_PORT;
   }
 
-  if (clientConnect(netSettings.hostname, netSettings.port))
-      bNetplayEnabled = 1;
-  else {
-      netShutdown(mupenServer);
-  }
-
+  return clientConnect(netSettings.hostname, netSettings.port);
 }
 /* ======================================================================================
 
@@ -103,7 +84,6 @@ void netStartNetplay(MupenServer *mupenServer) {
 void netShutdown(MupenServer *mupenServer) {
   if (clientIsConnected()) clientDisconnect();
   if (msIsActive(mupenServer)) msStop(mupenServer);
-  bNetplayEnabled = 0;
 }
 
 /* ======================================================================================
