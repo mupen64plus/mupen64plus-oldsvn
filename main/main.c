@@ -828,7 +828,7 @@ static void * emulationThread( void *_arg )
     if (l_NetplayEnabled) {
         netReadConfigFile(&l_NetSettings);
         if (netStartNetplay(&l_NetplayServer, l_NetSettings)) {
-          osd_new_message(OSD_MIDDLE_CENTER, "Press F9 when you are ready, then wait for others to do the same.");
+          osd_new_message(OSD_MIDDLE_CENTER, "Wait for all players to connect, then press F9.");
           go();
         }
     } else {
