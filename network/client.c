@@ -84,7 +84,7 @@ void clientProcessMessages() {
 
         if (n <= 0) {
           osd_new_message(OSD_BOTTOM_LEFT, (void *)tr("You've been disconnected from the server."));
-          netShutdown();
+//          netShutdown();
           return;
         }
 
