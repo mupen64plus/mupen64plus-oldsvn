@@ -521,7 +521,7 @@ void romdatabase_open()
     romdatabase_search *search = NULL;
     romdatabase_entry *entry = NULL;
 
-    int stringlength, namelength, index, counter, value;
+    int stringlength, totallength, namelength, index, counter, value;
     char hashtemp[3];
     hashtemp[2] = '\0';
 
@@ -549,13 +549,14 @@ void romdatabase_open()
 
     //Move through opening comments, set romdatabase.comment to non-NULL 
     //to signal we have a database.
-    stringlength = 0;
+    totallength = 0;
     do
         {
         gzgets(gzfile, buffer, 255);
         if(buffer[0]!='[')
             {
-            stringlength+=strlen(buffer);
+            stringlength=strlen(buffer);
+            totallength+=stringlength;
             if(g_romdatabase.comment==NULL) 
                 {
                 g_romdatabase.comment = (char*)malloc(stringlength+2);
@@ -564,9 +565,9 @@ void romdatabase_open()
                 }
             else
                 {
-                g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, stringlength+2);
+                g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, totallength+2);
                 strcat(g_romdatabase.comment, buffer);
-                buffer[strlen(buffer)+1] = '\0';
+                buffer[stringlength+1] = '\0';
                 }
             }
         }
