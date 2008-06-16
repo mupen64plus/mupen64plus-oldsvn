@@ -60,7 +60,7 @@ void netReadConfigFile(NetPlaySettings *netSettings) {
   if (!netConfig) {
      netSettings->runServer = 1;
   } else {
-     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", netSettings->runServer, netSettings->hostname, netSettings->port);
+     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &(netSettings->runServer), &(netSettings->hostname), &(netSettings->port));
      fclose(netConfig);
   }
 }
