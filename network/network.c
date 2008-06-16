@@ -54,26 +54,23 @@ void net_init(MupenServer *mupenServer) {
 
 
 ========================================================================================= */
-void netReadConfigFile(NetPlaySettings *netSettings) {
-  FILE            *netConfig;
-  netConfig = fopen("mupennet.conf", "r");
-  if (!netConfig) {
-     netSettings->runServer = 1;
-  } else {
-     fscanf(netConfig, "server: %d\nhost: %s\nport: %d\n", &(netSettings->runServer), &(netSettings->hostname), &(netSettings->port));
-     fclose(netConfig);
-  }
-}
 
 int netStartNetplay(MupenServer *mupenServer, NetPlaySettings netSettings) {
+  int ret = 0;
+
   net_init(mupenServer);
   if (netSettings.runServer) {
       msStart(mupenServer, SERVER_PORT);
       strcpy(netSettings.hostname, "localhost"); // If we're hosting a game, connect to it.
-      netSettings.port = SERVER_PORT;
   }
 
-  return clientConnect(netSettings.hostname, netSettings.port);
+  if (clientConnect(netSettings.hostname, SERVER_PORT)) {
+      printf("[Netplay] Connected to %s.\n", netSettings.hostname);
+      ret = 1;
+  }
+
+  return ret;
+
 }
 /* ======================================================================================
 

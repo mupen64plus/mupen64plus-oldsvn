@@ -79,7 +79,6 @@ typedef struct TMupenServer {
 typedef struct TNetPlaySettings {
         BOOL             runServer;
         char             hostname[128];
-        u_int16_t        port;
 } NetPlaySettings;
 
 void net_init(MupenServer *);

@@ -83,8 +83,9 @@ void clientProcessMessages() {
         n = SDLNet_TCP_Recv(Client.socket, &incomingMessage, sizeof(NetMessage));
 
         if (n <= 0) {
-          osd_new_message(OSD_BOTTOM_LEFT, (void *)tr("You've been disconnected from the server."));
-//          netShutdown();
+          printf("[Netplay] Disconnected from server.\n");
+          osd_new_message(OSD_BOTTOM_LEFT, (void *)tr("You have disconnected from the server."));
+          clientDisconnect();
           return;
         }
 
@@ -104,7 +105,7 @@ void clientProcessMessages() {
 			break;
                         case NETMSG_DESYNC:
 				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
-                                printf("%s\n", osdString);
+                                printf("[Netplay] %s\n", osdString);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
                         case NETMSG_SYNC:
@@ -113,14 +114,14 @@ void clientProcessMessages() {
                         break;
 			case NETMSG_PLAYERQUIT:
 				sprintf(osdString, "Player %d has disconnected.", playerNumber + 1);
-                                printf("%s\n", osdString);
+                                printf("[Netplay] %s\n", osdString);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
 			break;
 			case NETMSG_PING:
                                 clientSendMessage(&incomingMessage);
 			break;
 			default:
-                                printf("Client received an unrecognized message from the server.\n");
+                                printf("[Netplay] Received an unrecognized message from the server.\n");
 			break;
 
 		}

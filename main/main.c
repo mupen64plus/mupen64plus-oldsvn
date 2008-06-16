@@ -109,7 +109,7 @@ static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
 
 static int   l_OsdEnabled = 1;           // On Screen Display enabled?
-static BOOL  l_NetplayEnabled = 1;       // Netplay enabled?
+static BOOL  l_NetplayEnabled = 0;       // Netplay enabled?
 static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter
@@ -755,7 +755,7 @@ static void * emulationThread( void *_arg )
     /* Determine which plugins to use:
      *  -If valid plugin was specified at the commandline, use it
      *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
-     */
+     */  
     if(g_GfxPlugin)
         gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
     else
@@ -826,11 +826,11 @@ static void * emulationThread( void *_arg )
     cheat_load_current_rom();
 
     if (l_NetplayEnabled) {
-        netReadConfigFile(&l_NetSettings);
         if (netStartNetplay(&l_NetplayServer, l_NetSettings)) {
           osd_new_message(OSD_MIDDLE_CENTER, "Wait for all players to connect, then press F9.");
           go();
-        }
+        } else
+          printf("Failed to connect to server %s.\n", l_NetSettings.hostname);
     } else {
         osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
         go();
@@ -964,6 +964,8 @@ static void printUsage(const char *progname)
 #ifdef DBG
            "    --debugger          : start with debugger enabled\n"
 #endif 
+           "    --connect (host)    : connect to server for netplay\n"
+           "    --server            : start server\n"
            "    -h, --help          : see this help message\n"
            "\n", basename(str));
 
@@ -996,7 +998,9 @@ void parseCommandLine(int argc, char **argv)
     OPT_DEBUGGER,
 #endif
         OPT_NOASK,
-        OPT_TESTSHOTS
+        OPT_TESTSHOTS,
+        OPT_CONNECT,
+        OPT_SERVER
     };
     struct option long_options[] =
     {
@@ -1016,6 +1020,8 @@ void parseCommandLine(int argc, char **argv)
 #endif
         {"noask", no_argument, NULL, OPT_NOASK},
         {"testshots", required_argument, NULL, OPT_TESTSHOTS},
+        {"connect", required_argument, NULL, OPT_CONNECT}, 
+        {"server", no_argument, NULL, OPT_SERVER}, 
         {"help", no_argument, NULL, 'h'},
         {0, 0, 0, 0}    // last opt must be empty
     };
@@ -1125,6 +1131,14 @@ void parseCommandLine(int argc, char **argv)
                     }
                     l_TestShotList[idx] = 0;
                 }
+                break;
+            case OPT_CONNECT:
+                strncpy(l_NetSettings.hostname, optarg, 128);
+                l_NetplayEnabled = 1;
+                break;
+            case OPT_SERVER:
+                l_NetplayEnabled = 1;
+                l_NetSettings.runServer = 1;
                 break;
 #ifdef DBG
             case OPT_DEBUGGER:
@@ -1326,6 +1340,7 @@ int main(int argc, char *argv[])
     if(l_GuiEnabled)
         gui_init(&argc, &argv);
 
+    memset(&l_NetSettings, 0, sizeof(l_NetSettings));
     parseCommandLine(argc, argv);
     setPaths();
     config_read();
