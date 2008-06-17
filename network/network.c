@@ -90,7 +90,7 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         setSpeedFactor(100);
                         mClient->isWaitingForServer = TRUE;
                         printf("[Netplay] Too far ahead, resyncing.\n");
-                } else if (mClient->lastSync > mClient->eventCounter) { // 20 * 17 (60vi/s) == 340ms this will be fine with pings below
+                } else if (mClient->lastSync > mClient->eventCounter) { // 30 * 17 (60vi/s) == 510ms this will be fine with pings below
                         retValue = SYNC_BEHIND;
                         setSpeedFactor(200);
                         printf("[Netplay] Falling behind, resyncing.\n");
