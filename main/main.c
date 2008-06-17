@@ -270,12 +270,12 @@ void new_vi(void)
     static unsigned int CounterTime = 0;
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
-    BOOL netSkip = FALSE;
 
+
+    netMain(&l_NetplayServer, &l_NetplayClient);
     double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
-    netMain(&l_NetplayServer, &l_NetplayClient, &netSkip);
     start_section(IDLE_SECTION);
     VI_Counter++;
 
@@ -299,7 +299,7 @@ void new_vi(void)
         time = (int)(CalculatedTime - CurrentFPSTime);
         if (time > 0)
         {
-            if (!netSkip) usleep(time * 1000);
+            usleep(time * 1000);
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }

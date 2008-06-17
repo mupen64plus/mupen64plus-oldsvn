@@ -83,7 +83,7 @@ typedef struct TNetPlaySettings {
 
 int netStartNetplay(MupenServer *mServer, MupenClient *mClient, NetPlaySettings netSettings);
 void netShutdown(MupenServer *mServer, MupenClient *mClient);
-int netMain(MupenServer *mServer, MupenClient *mClient, BOOL *netSkip);
+int netMain(MupenServer *mServer, MupenClient *mClient);
 
 void serverInit(MupenServer *Server);
 int serverStart(MupenServer *Server, unsigned short port);
