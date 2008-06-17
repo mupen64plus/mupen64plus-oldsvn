@@ -80,6 +80,7 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
             processEventQueue(mClient);
 
             if ((mClient->eventCounter % SYNC_FREQ == 0) && (mClient->isConnected)) {
+                printf("[Netplay] Sync time %d current time %d.\n", mClient->lastSync, mClient->eventCounter);
                 if (mServer->isActive) {
                     syncMsg.type = NETMSG_SYNC;
                     syncMsg.genEvent.timer = mClient->eventCounter;

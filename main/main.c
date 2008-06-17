@@ -240,7 +240,6 @@ void video_plugin_render_callback(void)
 
 void new_frame(void)
 {
-    SyncStatus = netMain(&l_NetplayServer, &l_NetplayClient);
     // take a screenshot if we need to
     if (l_TestShotList != NULL)
     {
@@ -273,7 +272,7 @@ void new_vi(void)
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
 
-
+    SyncStatus = netMain(&l_NetplayServer, &l_NetplayClient);
     double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
