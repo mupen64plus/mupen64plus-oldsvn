@@ -69,8 +69,8 @@ OBJ_CORE = \
 	main/rom.o \
 	main/savestates.o \
 	main/volume.o \
-        compression/zip/unzip.o \
-        compression/zip/ioapi.o \
+	main/zip/ioapi.o \
+	main/zip/unzip.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
