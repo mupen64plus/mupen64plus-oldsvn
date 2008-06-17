@@ -35,6 +35,7 @@ extern char *g_AudioPlugin;
 extern char *g_InputPlugin;
 extern char *g_RspPlugin;
 
+
 char *get_configpath(void);
 char *get_installpath(void);
 char *get_savespath(void);
@@ -51,6 +52,5 @@ void startEmulation(void);
 void stopEmulation(void);
 int pauseContinueEmulation(void);
 void screenshot(void);
-
 
 #endif // __MAIN_H__

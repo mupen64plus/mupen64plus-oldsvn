@@ -200,6 +200,7 @@ void internal_ReadController(int Control, BYTE *Command)
 {
    static BUTTONS KeyCache[4];
    BUTTONS Keys;
+   MupenClient *mClient = (MupenClient *)getNetplayClient();
 
    switch (Command[2])
      {
@@ -209,12 +210,12 @@ void internal_ReadController(int Control, BYTE *Command)
 #else
         getKeys(Control, &Keys);
 #endif
-        if (clientIsConnected()) { //Update the server if we're connected to one and if the button state has actually changed
+        if (mClient->isConnected) { //Update the server if we're connected to one and if the button state has actually changed
           if (Keys.Value != KeyCache[Control].Value) {
-              clientSendButtons(Control, Keys.Value);
+              clientSendButtons(mClient, Control, Keys.Value);
               KeyCache[Control].Value = Keys.Value;
           }
-          *((unsigned int *)(Command + 3)) = getNetKeys(Control);
+          *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
         } else if (Controls[Control].Present) {
           *((unsigned int *)(Command + 3)) = Keys.Value;
 #ifdef COMPARE_CORE

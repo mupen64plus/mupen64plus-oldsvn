@@ -30,108 +30,69 @@ unsigned int gettimeofday_msec(void)
     return foo;
 }
 
-/* ======================================================================================
-
-      net_init()
-
-        to be called when emu starts
-
-
-========================================================================================= */
-
-void net_init(MupenServer *mupenServer) {
-  clientInitialize();
-  msInitialize(mupenServer);
-  setEventCounter(0);
-  SDLNet_Init();
-}
-
-/* ======================================================================================
-
-      netStartNetplay()
-
-        to be called when rom starts
-
-
-========================================================================================= */
-
-int netStartNetplay(MupenServer *mupenServer, NetPlaySettings netSettings) {
+int netStartNetplay(MupenServer *mServer, MupenClient *mClient, NetPlaySettings netSettings) {
   int ret = 0;
 
-  net_init(mupenServer);
+  SDLNet_Init();
   if (netSettings.runServer) {
-      msStart(mupenServer, SERVER_PORT);
+      serverStart(mServer, SERVER_PORT);
       strcpy(netSettings.hostname, "localhost"); // If we're hosting a game, connect to it.
   }
-
-  if (clientConnect(netSettings.hostname, SERVER_PORT)) {
+  if (clientConnect(mClient, netSettings.hostname, SERVER_PORT)) {
       printf("[Netplay] Connected to %s.\n", netSettings.hostname);
       ret = 1;
   }
-
   return ret;
-
-}
-/* ======================================================================================
-
-      netShutdown()
-
-========================================================================================= */
-
-void netShutdown(MupenServer *mupenServer) {
-  if (clientIsConnected()) clientDisconnect();
-  if (mupenServer->isActive) msStop(mupenServer);
 }
 
-/* ======================================================================================
+void netShutdown(MupenServer *mServer, MupenClient *mClient) {
+  clientDisconnect(mClient);
+  serverStop(mServer);
+}
 
-      netInteruptLoop()
-
-          This function is called each time a vertical interupt is issued.
-
-========================================================================================= */
-
-void netInteruptLoop(MupenServer *mupenServer) {
+int netMain(MupenServer *mServer, MupenClient *mClient, BOOL *netSkip) {
             struct timespec ts;
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
             NetMessage syncMsg;
+            netSkip = FALSE;
 
-	    if (clientWaitingForServer()) {
+	    if (mClient->isWaitingForServer) {
 
-              while (clientWaitingForServer() && clientIsConnected()) {
+              while (mClient->isWaitingForServer && mClient->isConnected) {
                     osd_render();  // Updating OSD
                     SDL_GL_SwapBuffers();
                     SDL_PumpEvents();
-
-                    if (mupenServer->isActive && mupenServer->isAccepting) {
 #ifdef WITH_LIRC
-                        lircCheckInput();
+                    lircCheckInput();
 #endif //WITH_LIRC 
-			msAcceptConnection(mupenServer);
-			msProcessMessages(mupenServer);
+                    if (mServer->isActive && mServer->isAccepting) {
+			serverAccept(mServer);
+			serverProcessMessages(mServer);
                         nanosleep(&ts, NULL);
                     }
-                    clientProcessMessages();
+                    clientProcessMessages(mClient);
 	      }
             }
 
-            if (mupenServer->isActive) msProcessMessages(mupenServer);
-            if (clientIsConnected()) {
-                clientProcessMessages();
-                processEventQueue();
-            }
+            if (mServer->isActive) serverProcessMessages(mServer);
+            clientProcessMessages(mClient);
+            processEventQueue(mClient);
 
-            if ((getEventCounter() % SYNC_FREQ == 0) && (clientIsConnected())) {
-                if (mupenServer->isActive) {
+            if ((mClient->eventCounter % SYNC_FREQ == 0) && (mClient->isConnected)) {
+                if (mServer->isActive) {
                     syncMsg.type = NETMSG_SYNC;
-                    syncMsg.genEvent.timer = getEventCounter();
-                    msBroadcastMessage(mupenServer, &syncMsg);
-                } else if (clientLastSyncMsg() < getEventCounter()) {
-                        clientPauseForServer();
+                    syncMsg.genEvent.timer = mClient->eventCounter;
+                    serverBroadcastMessage(mServer, &syncMsg);
+                } else if (mClient->lastSync < mClient->eventCounter) {
+                        mClient->isWaitingForServer = TRUE;
+                        printf("[Netplay] Resyncing (slow server).\n");
+                } else if (mClient->lastSync > (mClient->eventCounter + 15)) { // 15 * 17 (60vi/s) == 255ms this will be fine with pings below
+                    *netSkip = TRUE;
+                    printf("[Netplay] Resyncing (slow client).\n");
                 }
             }
-            incEventCounter();
+            mClient->eventCounter++;
 }
 
 

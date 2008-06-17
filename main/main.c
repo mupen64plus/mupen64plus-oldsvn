@@ -118,10 +118,13 @@ static int   l_TestShotIdx = 0;          // index of next screenshot frame in li
 static char *l_Filename = NULL;          // filename to load & run at startup (if given at command line)
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
-static MupenServer  l_NetplayServer;
+
+static MupenServer	l_NetplayServer;
 static NetPlaySettings  l_NetSettings;
+static MupenClient      l_NetplayClient;
 
-
+MupenClient *getNetplayClient();
+MupenClient *getNetplayClient() {return &l_NetplayClient;}
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -267,11 +270,12 @@ void new_vi(void)
     static unsigned int CounterTime = 0;
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
+    BOOL netSkip = FALSE;
 
     double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
-    netInteruptLoop(&l_NetplayServer);
+    netMain(&l_NetplayServer, &l_NetplayClient, &netSkip);
     start_section(IDLE_SECTION);
     VI_Counter++;
 
@@ -295,7 +299,7 @@ void new_vi(void)
         time = (int)(CalculatedTime - CurrentFPSTime);
         if (time > 0)
         {
-            usleep(time * 1000);
+            if (!netSkip) usleep(time * 1000);
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }
@@ -555,9 +559,9 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-	            if (clientIsConnected()) {
+	            if (l_NetplayEnabled && l_NetplayClient.isConnected) {
                       netMsg.type = NETMSG_READY;
-                      clientSendMessage(&netMsg);                      
+                      clientSendMessage(&l_NetplayClient, &netMsg);                      
                     }
                     break;
 
@@ -826,7 +830,7 @@ static void * emulationThread( void *_arg )
     cheat_load_current_rom();
 
     if (l_NetplayEnabled) {
-        if (netStartNetplay(&l_NetplayServer, l_NetSettings)) {
+        if (netStartNetplay(&l_NetplayServer, &l_NetplayClient, l_NetSettings)) {
           osd_new_message(OSD_MIDDLE_CENTER, "Wait for all players to connect, then press F9.");
           go();
         } else
@@ -855,7 +859,7 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    if (l_NetplayEnabled) netShutdown(&l_NetplayServer);
+    if (l_NetplayEnabled) netShutdown(&l_NetplayServer, &l_NetplayClient);
     if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is

@@ -18,16 +18,18 @@
 
 #include "network.h"
 
-void msInitialize(MupenServer *Server) {
-        memset(Server, 0, sizeof(MupenServer));
-        Server->netDelay = 5;
+u_int16_t getEventCounter() {
+    MupenClient *mClient;
+    mClient = (MupenClient *)getNetplayClient();
+    return mClient->eventCounter;
 }
 
-int msStart(MupenServer *Server, unsigned short port) {
+int serverStart(MupenServer *Server, unsigned short port) {
         IPaddress msAddr;
 
 	if (Server->isActive) return;
-
+        memset(Server, 0, sizeof(MupenServer));
+        Server->netDelay = 3;  // For now --should be calculated (5 is approximate)
 	Server->socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
 	SDLNet_ResolveHost(&msAddr, NULL, port);
 	
@@ -39,46 +41,48 @@ int msStart(MupenServer *Server, unsigned short port) {
 	return Server->isActive;
 }
 
-void msStop(MupenServer *Server) {
+void serverStop(MupenServer *Server) {
   int n;
-  for (n = 0; n < MAX_CLIENTS; n++) if (Server->player[n].isConnected) msBootPlayer(Server, n);
-  SDLNet_FreeSocketSet(Server->socketSet);
-  if (Server->isAccepting) {
-    SDLNet_TCP_Close(Server->socket);
-    Server->isAccepting = 0;
+  if (Server->isActive) {
+      for (n = 0; n < MAX_CLIENTS; n++) if (Server->player[n].isConnected) serverBootPlayer(Server, n);
+      SDLNet_FreeSocketSet(Server->socketSet);
+      if (Server->isAccepting) {
+        SDLNet_TCP_Close(Server->socket);
+        Server->isAccepting = 0;
+      }
+      Server->isActive = 0;
   }
-  Server->isActive = 0;
 }
 
-void msStopWaitingForPlayers(MupenServer *Server) {
+void serverStopWaitingForPlayers(MupenServer *Server) {
 	SDLNet_TCP_DelSocket(Server->socketSet, Server->socket);
         Server->isAccepting = 0;
 }
 
-int msBroadcastMessage(MupenServer *Server, NetMessage *msg) {
+int serverBroadcastMessage(MupenServer *Server, NetMessage *msg) {
   int n;
   for (n = 0; n < MAX_CLIENTS; n++) if (Server->player[n].isConnected) {
 	if (SDLNet_TCP_Send(Server->player[n].socket, msg, sizeof(NetMessage)) != sizeof(NetMessage)) {
-		msBootPlayer(Server, n);                   // If the player disconnected, clean up.
+		serverBootPlayer(Server, n);                   // If the player disconnected, clean up.
 	}
   }
 }
 
-void msBootPlayer(MupenServer *Server, int n) {
+void serverBootPlayer(MupenServer *Server, int n) {
 	NetMessage msg;
 	msg.type = NETMSG_PLAYERQUIT;
-	msg.genEvent.controller = n;
+	msg.genEvent.player = n;
 
 	if (Server->player[n].isConnected) {
           printf("Player %d disconnected.\n", n+1);
           SDLNet_TCP_Close(Server->player[n].socket);
           SDLNet_TCP_DelSocket(Server->socketSet, Server->player[n].socket);
           Server->player[n].isConnected = FALSE;
-          msBroadcastMessage(Server, &msg);
+          serverBroadcastMessage(Server, &msg);
         }
 }
 
-void msAcceptConnection(MupenServer *Server) {
+void serverAccept(MupenServer *Server) {
   TCPsocket newClient;
   NetMessage msg;
 
@@ -107,15 +111,15 @@ void msAcceptConnection(MupenServer *Server) {
   }
 
   if (allPlayersReady) {
-    msStopWaitingForPlayers(Server);
+    serverStopWaitingForPlayers(Server);
     msg.type = NETMSG_SYNC;
     msg.genEvent.timer = getEventCounter();
-    msBroadcastMessage(Server, &msg);    
+    serverBroadcastMessage(Server, &msg);    
   } 
  
 }
 
-void msProcessMessages(MupenServer *Server) {
+void serverProcessMessages(MupenServer *Server) {
   NetMessage incomingMsg;
   int tempReturn, n;
   struct timespec ts;
@@ -129,15 +133,15 @@ void msProcessMessages(MupenServer *Server) {
       tempReturn = SDLNet_TCP_Recv(Server->player[n].socket, &incomingMsg, sizeof(NetMessage));
 
       if (tempReturn <= 0) {
-        msBootPlayer(Server, n);                                     // If there was an error or the player disconnected then cleanup.
+        serverBootPlayer(Server, n);                                     // If there was an error or the player disconnected then cleanup.
       } else {                   
         switch (incomingMsg.type) {
             case NETMSG_EVENT:                                       // Events (Button presses, other time sensitive input)
               if (incomingMsg.genEvent.type == EVENT_BUTTON) {
                     incomingMsg.genEvent.timer = getEventCounter() + Server->netDelay;      // Add calculated delay to the timer
                     if (n < 4) {                                     // If the message comes from a player (n >= 4 is for spectators)
-                        incomingMsg.genEvent.controller = n;         // Change the controller tag on the event
-                        msBroadcastMessage(Server, &incomingMsg);    // Broadcast the button event
+                        incomingMsg.genEvent.player = n;         // Change the controller tag on the event
+                        serverBroadcastMessage(Server, &incomingMsg);    // Broadcast the button event
                     }
               }
               break;
@@ -150,8 +154,8 @@ void msProcessMessages(MupenServer *Server) {
                 break;
             case NETMSG_DESYNC: // Client is notifying the server that it has desynchronized
                 printf("Player %d has desynchronized.\n", n+1);
-                incomingMsg.genEvent.controller = n;
-                msBroadcastMessage(Server, &incomingMsg);
+                incomingMsg.genEvent.player = n;
+                serverBroadcastMessage(Server, &incomingMsg);
                 break;
             default:
                 printf("Unrecognized message received from player %d.\n", n+1);

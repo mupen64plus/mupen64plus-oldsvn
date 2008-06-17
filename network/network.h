@@ -42,10 +42,9 @@ typedef struct TNetMessage {
             u_int32_t		value;		// new key state value to assign (BUTTONS.Value)
             u_int16_t		timer;		// when to activate the event (== netVISyncCounter)
             u_int8_t		type;
-            u_int8_t		controller;	// applicable controller
+            u_int8_t		player;		// applicable controller
         } genEvent;
 	u_int16_t	type;
-	u_int8_t	id;
 } NetMessage;
 
 typedef struct TNetPlayer {
@@ -63,6 +62,7 @@ typedef struct TMupenClient {
         SDLNet_SocketSet   socketSet;               // Set for client connection to ms
         BUTTONS            playerKeys[MAX_CLIENTS];
         u_int16_t          lastSync;
+        u_int16_t	   lag;
         BOOL               isConnected;
         BOOL               isWaitingForServer;
 } MupenClient;
@@ -81,43 +81,31 @@ typedef struct TNetPlaySettings {
         char             hostname[128];
 } NetPlaySettings;
 
-void net_init(MupenServer *);
-int netStartNetplay(MupenServer *, NetPlaySettings netSettings);
-void netReadConfigFile(NetPlaySettings *netSettings);
-void netShutdown(MupenServer *);
-void netInteruptLoop(MupenServer *);
+int netStartNetplay(MupenServer *mServer, MupenClient *mClient, NetPlaySettings netSettings);
+void netShutdown(MupenServer *mServer, MupenClient *mClient);
+int netMain(MupenServer *mServer, MupenClient *mClient, BOOL *netSkip);
 
-DWORD		getNetKeys(int control);
-void		setNetKeys(int control, DWORD value);
-u_int16_t	getEventCounter();
+void serverInit(MupenServer *Server);
+int serverStart(MupenServer *Server, unsigned short port);
+void serverStop(MupenServer *Server);
+void serverAccept(MupenServer *Server);
+void serverStopWaitingForPlayers(MupenServer *Server);
+void serverProcessMessages(MupenServer *Server);
+void serverBootPlayer(MupenServer *Server, int n);
+int serverBroadcastMessage(MupenServer *Server, NetMessage *msg);
 
-void msInitialize(MupenServer *Server);
-BOOL msIsActive(MupenServer *Server);
-int msStart(MupenServer *Server, unsigned short port);
-void msStop(MupenServer *Server);
-void msAcceptConnection(MupenServer *Server);
-void msStopWaitingForPlayers(MupenServer *Server);
-void msProcessMessages(MupenServer *Server);
-void msBootPlayer(MupenServer *Server, int n);
+int clientSendMessage(MupenClient *Client, NetMessage *msg);
+void clientProcessMessages(MupenClient *Client);
+int clientConnect(MupenClient *Client, char *server, int port);
+void clientDisconnect(MupenClient *Client);
+void clientSendButtons(MupenClient *Client, int control, DWORD value);
 
-void clientInitialize();
-int clientRecvMessage(NetMessage *msg);
-int clientSendMessage(NetMessage *msg);
-void clientProcessMessages();
-int clientConnect(char *ms, int port);
-void clientDisconnect();
-void netProcessMessages();
-void addEventToQueue(unsigned short type, int controller, DWORD value, unsigned short timer);
-int netGetNextEvent(unsigned short *type, int *controller, DWORD *value, unsigned short *timer);
-BOOL clientIsConnected();
-BOOL clientWaitingForServer();
-void clientPauseForServer();
-u_int16_t clientLastSyncMsg();
-void popEventQueue();
-void processEventQueue();
-void initEventQueue();
-void killEventQueue();
-void clientSendButtons(int control, DWORD value);
+void addEventToQueue(MupenClient *Client, NetMessage msg);
+void popEventQueue(MupenClient *Client);
+void processEventQueue(MupenClient *Client);
+void flushEventQueue(MupenClient *Client);
+
+
 
 
 
