@@ -122,6 +122,7 @@ static int   l_FrameAdvance = 0;         // variable to check if we pause on nex
 static MupenServer	l_NetplayServer;
 static NetPlaySettings  l_NetSettings;
 static MupenClient      l_NetplayClient;
+static int              SyncStatus;
 
 MupenClient *getNetplayClient();
 MupenClient *getNetplayClient() {return &l_NetplayClient;}
@@ -239,6 +240,7 @@ void video_plugin_render_callback(void)
 
 void new_frame(void)
 {
+    SyncStatus = netMain(&l_NetplayServer, &l_NetplayClient);
     // take a screenshot if we need to
     if (l_TestShotList != NULL)
     {
@@ -272,7 +274,6 @@ void new_vi(void)
     static int VI_Counter = 0;
 
 
-    netMain(&l_NetplayServer, &l_NetplayClient);
     double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
@@ -297,7 +298,7 @@ void new_vi(void)
     {
         CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
         time = (int)(CalculatedTime - CurrentFPSTime);
-        if (time > 0)
+        if ((time > 0) && (SyncStatus != SYNC_BEHIND))
         {
             usleep(time * 1000);
         }

@@ -51,6 +51,7 @@ void netShutdown(MupenServer *mServer, MupenClient *mClient) {
 }
 
 int netMain(MupenServer *mServer, MupenClient *mClient) {
+            static int retValue = SYNC_PERFECT;
             struct timespec ts;
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
@@ -84,17 +85,22 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                     syncMsg.genEvent.timer = mClient->eventCounter;
                     serverBroadcastMessage(mServer, &syncMsg);
                 } else if (mClient->lastSync < mClient->eventCounter) {
+                        retValue = SYNC_AHEAD;
                         setSpeedFactor(100);
                         mClient->isWaitingForServer = TRUE;
-                        printf("[Netplay] Resyncing (slow server).\n");
-                } else if (mClient->lastSync > (mClient->eventCounter + 20)) { // 20 * 17 (60vi/s) == 340ms this will be fine with pings below
+                        printf("[Netplay] Too far ahead, resyncing.\n");
+                } else if (mClient->lastSync > mClient->eventCounter) { // 20 * 17 (60vi/s) == 340ms this will be fine with pings below
+                        retValue = SYNC_BEHIND;
                         setSpeedFactor(200);
-                        printf("[Netplay] Resyncing (slow client).\n");
-
+                        printf("[Netplay] Falling behind, resyncing.\n");
+                } else {
+                        //printf("[Netplay] Perfect sync.\n");
+                        retValue = SYNC_PERFECT;
+                        setSpeedFactor(100);
                 }
             }
             mClient->eventCounter++;
-            return 0;
+            return retValue;
 }
 
 

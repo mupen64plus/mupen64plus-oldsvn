@@ -27,6 +27,10 @@
 
 #define 	EVENT_BUTTON		0
 
+#define         SYNC_PERFECT            0
+#define         SYNC_AHEAD              1
+#define         SYNC_BEHIND             2
+
 
 // I made sure to use integer types here that were safe to send between 32bit and 64bit platforms
 typedef struct TNetEvent {
