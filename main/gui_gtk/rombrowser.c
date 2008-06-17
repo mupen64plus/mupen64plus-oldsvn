@@ -142,10 +142,19 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         gtk_tree_model_get ( model, ptr1, g_MainWindow.romSortColumn, &buffer1, -1 );
         gtk_tree_model_get ( model, ptr2, g_MainWindow.romSortColumn, &buffer2, -1 );
 
-        returnvalue = strcasecmp(buffer1, buffer2);
+        if (buffer1 == NULL && buffer2 == NULL)
+            returnvalue = 0;
+        else if (buffer1 == NULL)
+            returnvalue = 1;
+        else if (buffer2 == NULL)
+            returnvalue = -1;
+        else
+            returnvalue = strcasecmp(buffer1, buffer2);
 
-        g_free(buffer1);
-        g_free(buffer2);
+        if (buffer1)
+            g_free(buffer1);
+        if (buffer2)
+            g_free(buffer2);
         }
 
     //If items are equal, fallback on Good Name and then File Name.
@@ -156,23 +165,41 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
         gtk_tree_model_get ( model, ptr1, 1, &buffer1, -1 );
         gtk_tree_model_get ( model, ptr2, 1, &buffer2, -1 );
 
-        returnvalue = strcasecmp(buffer1, buffer2);
+        if (buffer1 == NULL && buffer2 == NULL)
+            returnvalue = 0;
+        else if (buffer1 == NULL)
+            returnvalue = 1;
+        else if (buffer2 == NULL)
+            returnvalue = -1;
+        else
+            returnvalue = strcasecmp(buffer1, buffer2);
 
-        g_free(buffer1);
-        g_free(buffer2);
+        if (buffer1)
+            g_free(buffer1);
+        if (buffer2)
+            g_free(buffer2);
         }
 
     if(returnvalue==0&&g_MainWindow.romSortColumn!=4)
         {
         gchar *buffer1, *buffer2;
 
-        gtk_tree_model_get ( model, ptr1, 1, &buffer1, -1 );
-        gtk_tree_model_get ( model, ptr2, 1, &buffer2, -1 );
+        gtk_tree_model_get ( model, ptr1, 4, &buffer1, -1 );
+        gtk_tree_model_get ( model, ptr2, 4, &buffer2, -1 );
 
-        returnvalue = strcasecmp(buffer1, buffer2);
+        if (buffer1 == NULL && buffer2 == NULL)
+            returnvalue = 0;
+        else if (buffer1 == NULL)
+            returnvalue = 1;
+        else if (buffer2 == NULL)
+            returnvalue = -1;
+        else
+            returnvalue = strcasecmp(buffer1, buffer2);
 
-        g_free(buffer1);
-        g_free(buffer2);
+        if (buffer1)
+            g_free(buffer1);
+        if (buffer2)
+            g_free(buffer2);
         }
 
     return returnvalue;
