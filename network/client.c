@@ -25,7 +25,7 @@ int clientConnect(MupenClient *Client, char *server, int port) {
         flushEventQueue(Client);
         memset(Client, 0, sizeof(Client));
 	SDLNet_ResolveHost(&serverAddr, server, port);
-        Client->syncFreq = 10;
+        Client->syncFreq = 5;
 
 	if (Client->socket = SDLNet_TCP_Open(&serverAddr)) {
 		Client->socketSet = SDLNet_AllocSocketSet(1);
@@ -43,7 +43,6 @@ void clientDisconnect(MupenClient *Client) {
           SDLNet_FreeSocketSet(Client->socketSet);
           SDLNet_TCP_Close(Client->socket);
           Client->isConnected = 0;
-          Client->lag = 20; // We'll actually calculate this later
           flushEventQueue(Client);
        }
 }
