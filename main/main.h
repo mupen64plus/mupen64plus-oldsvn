@@ -31,6 +31,9 @@ extern int g_MemHasBeenBSwapped;
 extern int g_TakeScreenshot;
 extern int g_OsdEnabled;
 extern pthread_t g_EmulationThread;
+extern int g_SpeedFactor;          // percentage of nominal game speed at which emulator is running
+extern int g_FrameAdvance;         // variable to check if we pause on next frame
+
 extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;
 extern char *g_InputPlugin;

@@ -65,8 +65,8 @@
 #include "translate.h"
 #include "volume.h"
 #include "cheat.h"
-#include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
+#include "../opengl/osd.h"
 
 #ifdef DBG
 #include <glib.h>
@@ -93,6 +93,8 @@ pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
+int         g_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
+int         g_FrameAdvance = 0;         // variable to check if we pause on next frame
 
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
@@ -115,8 +117,6 @@ static int   l_CurrentFrame = 0;         // frame counter
 static int  *l_TestShotList = NULL;      // list of screenshots to take for regression test support
 static int   l_TestShotIdx = 0;          // index of next screenshot frame in list
 static char *l_Filename = NULL;          // filename to load & run at startup (if given at command line)
-static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
-static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -270,7 +270,7 @@ void new_vi(void)
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
 
-    double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
+    double AdjustedLimit = VILimitMilliseconds * 100.0 / g_SpeedFactor;  // adjust for selected emulator speed
     int time;
 
     start_section(IDLE_SECTION);
@@ -309,9 +309,9 @@ void new_vi(void)
     
     LastFPSTime = CurrentFPSTime ;
     end_section(IDLE_SECTION);
-    if (l_FrameAdvance) {
+    if (g_FrameAdvance) {
         rompause = 1;
-        l_FrameAdvance = 0;
+        g_FrameAdvance = 0;
     }
 }
 
@@ -564,19 +564,19 @@ static int sdl_event_filter( const SDL_Event *event )
                         changeWindow();
                     break;
                 case SDLK_F10:
-                    if (l_SpeedFactor > 10)
+                    if (g_SpeedFactor > 10)
                     {
-                        l_SpeedFactor -= 5;
-                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), l_SpeedFactor);
-                        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                        g_SpeedFactor -= 5;
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     }
                     break;
                 case SDLK_F11:
-                    if (l_SpeedFactor < 300)
+                    if (g_SpeedFactor < 300)
                     {
-                        l_SpeedFactor += 5;
-                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), l_SpeedFactor);
-                        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                        g_SpeedFactor += 5;
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     }
                     break;
                 case SDLK_F12:
@@ -587,7 +587,7 @@ static int sdl_event_filter( const SDL_Event *event )
                 // Pause
                 case SDLK_PAUSE:
                     pauseContinueEmulation();
-                    l_FrameAdvance = 0;
+                    g_FrameAdvance = 0;
                     break;
 
                 default:
@@ -621,9 +621,9 @@ static int sdl_event_filter( const SDL_Event *event )
                         // fast-forward
                         case 'f':
                         case 'F':
-                            SavedSpeedFactor = l_SpeedFactor;
-                            l_SpeedFactor = 250;
-                            setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                            SavedSpeedFactor = g_SpeedFactor;
+                            g_SpeedFactor = 250;
+                            setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                             // set fast-forward indicator
                             msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
                             osd_message_set_static(msgFF);
@@ -631,7 +631,7 @@ static int sdl_event_filter( const SDL_Event *event )
                         // frame advance
                         case '/':
                         case '?':
-                            l_FrameAdvance = 1;
+                            g_FrameAdvance = 1;
                             rompause = 0;
                             break;
                         
@@ -651,8 +651,8 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
                 case SDLK_f:
                     // cancel fast-forward
-                    l_SpeedFactor = SavedSpeedFactor;
-                    setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                    g_SpeedFactor = SavedSpeedFactor;
+                    setSpeedFactor(g_SpeedFactor);  // call to audio plugin
                     // remove message
                     osd_delete_message(msgFF);
                     break;

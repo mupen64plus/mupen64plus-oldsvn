@@ -28,6 +28,8 @@
 #include "savestates.h"
 #include "plugin.h"
 #include "volume.h"
+#include "../opengl/osd.h"
+#include "../r4300/r4300.h"
 
 static struct lirc_config *g_config;
 static int g_lircfd = 0;
@@ -107,6 +109,34 @@ void lircCheckInput(void)
                     volChange(-2);
                 else if(strcmp(c, "SCREENSHOT") == 0)
                     take_next_screenshot();
+                else if(strcmp(c, "SPEED+") == 0)
+                {
+                    if (g_SpeedFactor < 300)
+                    {
+                        g_SpeedFactor += 5;
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                    }
+                }
+                else if(strcmp(c, "SPEED-") == 0)
+                {
+                    if (g_SpeedFactor > 10)
+                    {
+                        g_SpeedFactor -= 5;
+                        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), g_SpeedFactor);
+                        setSpeedFactor(g_SpeedFactor);  // call to audio plugin
+                    }
+                }
+                else if(strcmp(c, "ADVANCE") == 0)
+                {
+                    g_FrameAdvance = 1;
+                    rompause = 0;
+                }
+                else if(strcmp(c, "PAUSE") == 0)
+                {
+                    pauseContinueEmulation();
+                    g_FrameAdvance = 0;
+                }
                 else
                 {
                     int val = ((int)c[0])-((int) '0');
