@@ -25,6 +25,7 @@ int clientConnect(MupenClient *Client, char *server, int port) {
         flushEventQueue(Client);
         memset(Client, 0, sizeof(Client));
 	SDLNet_ResolveHost(&serverAddr, server, port);
+        Client->syncFreq = 5;
 
 	if (Client->socket = SDLNet_TCP_Open(&serverAddr)) {
 		Client->socketSet = SDLNet_AllocSocketSet(1);

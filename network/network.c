@@ -85,7 +85,7 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                  setSpeedFactor(100);
             }
 
-            if ((mClient->eventCounter % SYNC_FREQ == 0) && (mClient->isConnected)) {
+            if ((mClient->eventCounter % mClient->syncFreq == 0) && (mClient->isConnected)) {
 //                printf("[Netplay] Sync time %d current time %d.\n", mClient->lastSync, mClient->eventCounter);
                 if (mServer->isActive) {
                     syncMsg.type = NETMSG_SYNC;
@@ -96,7 +96,7 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         retValue = SYNC_AHEAD;
                         setSpeedFactor(100);
                         mClient->isWaitingForServer = TRUE;
-                } else if (mClient->lastSync > mClient->eventCounter + SYNC_FREQ) {
+                } else if (mClient->lastSync > mClient->eventCounter + mClient->syncFreq) {
                         if (retValue != SYNC_BEHIND) printf("[Netplay] Resynchronizing (Catching up).\n");
 //                        if (retValue != SYNC_BEHIND) osd_new_message(OSD_BOTTOM_LEFT, (void *)tr("Resynchronizing"));
                         retValue = SYNC_BEHIND;
