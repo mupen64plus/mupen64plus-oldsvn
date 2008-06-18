@@ -42,6 +42,7 @@ void clientDisconnect(MupenClient *Client) {
           SDLNet_FreeSocketSet(Client->socketSet);
           SDLNet_TCP_Close(Client->socket);
           Client->isConnected = 0;
+          Client->lag = 20; // We'll actually calculate this later
           flushEventQueue(Client);
        }
 }
