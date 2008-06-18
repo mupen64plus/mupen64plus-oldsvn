@@ -13,7 +13,7 @@ else
 endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS = -O2 -Wall -g -DGCC -DUSE_GTK $(SDL_CFLAGS) $(GTK_FLAGS) -Iwrapper/ -ffast-math -funroll-loops
+CFLAGS = -O3 -Wall -g -DGCC -DUSE_GTK $(SDL_CFLAGS) $(GTK_FLAGS) -Iwrapper/ -ffast-math -funroll-loops
 LDFLAGS	= -shared -Wl,-Bsymbolic -lGL -lGLU -L/usr/X11R6/lib $(SDL_LIBS)
 
 # set special flags per-system
@@ -21,7 +21,7 @@ ifeq ($(CPU), X86)
   ifeq ($(ARCH), 64BITS)
     CFLAGS += -march=athlon64 -fPIC
   else
-    CFLAGS += -march=i686 -mtune=pentium-m -mmmx -msse
+    CFLAGS += -march=athlon-xp -mmmx -msse
     ifneq ($(PROFILE), 1)
     ifneq ($(VPDEBUG), 1)
       CFLAGS += -fomit-frame-pointer
