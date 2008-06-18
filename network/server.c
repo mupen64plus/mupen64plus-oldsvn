@@ -21,7 +21,7 @@
 u_int16_t getEventCounter() {
     MupenClient *mClient;
     mClient = (MupenClient *)getNetplayClient();
-    return mClient->eventCounter;
+    return mClient->frameCounter;
 }
 
 int serverStart(MupenServer *Server, unsigned short port) {

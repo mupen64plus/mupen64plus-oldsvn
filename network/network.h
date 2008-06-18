@@ -60,7 +60,7 @@ typedef struct TNetPlayer {
 } NetPlayer;
 
 typedef struct TMupenClient {
-        u_int16_t          eventCounter;            // Track VI in order to syncrhonize button events over network
+        u_int16_t          frameCounter;            // Track frames in order to syncrhonize button events over network
         NetEvent          *eventQueue;              // Pointer to queue of upcoming button events
         TCPsocket          socket;                  // Socket descriptor for connection to ms
         SDLNet_SocketSet   socketSet;               // Set for client connection to ms

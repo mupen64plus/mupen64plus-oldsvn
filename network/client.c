@@ -75,7 +75,7 @@ void clientProcessMessages(MupenClient *Client) {
                 playerNumber = incomingMessage.genEvent.player;
 		switch (incomingMessage.type) {
 			case NETMSG_EVENT:
-				if (incomingMessage.genEvent.timer >= Client->eventCounter) {
+				if (incomingMessage.genEvent.timer >= Client->frameCounter) {
 					addEventToQueue(Client, incomingMessage);
 				}
 				else {
@@ -132,7 +132,7 @@ void processEventQueue(MupenClient *Client) {
  
   if (!Client->isConnected) return; // exit now if the client isnt' connected
   if (Client->eventQueue) {
-    while ((Client->eventQueue) && (Client->eventQueue->timer == Client->eventCounter)) {
+    while ((Client->eventQueue) && (Client->eventQueue->timer == Client->frameCounter)) {
 	switch (Client->eventQueue->type) {
           case EVENT_BUTTON: 
             if (Client->eventQueue->controller < MAX_CLIENTS) {

@@ -51,7 +51,7 @@ void netShutdown(MupenServer *mServer, MupenClient *mClient) {
 }
 
 int netMain(MupenServer *mServer, MupenClient *mClient) {
-            static int retValue = SYNC_PERFECT;
+            static unsigned int syncStatus = SYNC_PERFECT, stopCatchingUp = 0;
             struct timespec ts;
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
@@ -80,29 +80,30 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
             processEventQueue(mClient);
 
 
-            if ((!mServer->isActive) && (mClient->lastSync < mClient->eventCounter) && (retValue != SYNC_AHEAD)) {
-                 retValue = SYNC_AHEAD;
+            if ((syncStatus == SYNC_BEHIND) && (mClient->frameCounter == stopCatchingUp)) {
+                 syncStatus = SYNC_PERFECT;
                  setSpeedFactor(100);
             }
 
-            if ((mClient->eventCounter % mClient->syncFreq == 0) && (mClient->isConnected)) {
+            if ((mClient->frameCounter % mClient->syncFreq == 0) && (mClient->isConnected)) {
                 if (mServer->isActive) {
                     syncMsg.type = NETMSG_SYNC;
-                    syncMsg.genEvent.timer = mClient->eventCounter;
+                    syncMsg.genEvent.timer = mClient->frameCounter;
                     serverBroadcastMessage(mServer, &syncMsg);
-                } else if (mClient->lastSync < mClient->eventCounter) {
-                        retValue = SYNC_AHEAD;
+                } else if ((mClient->lastSync < mClient->frameCounter) && (syncStatus != SYNC_BEHIND)) {
+                        syncStatus = SYNC_AHEAD;
                         mClient->isWaitingForServer = TRUE;
-                } else if (mClient->lastSync > mClient->eventCounter + mClient->syncFreq) {
-                        if (retValue != SYNC_BEHIND) {
+                } else if (mClient->lastSync > mClient->frameCounter + 5) { // 5 is ok, should be based on distribution of ping times
+                        if (syncStatus != SYNC_BEHIND) {
                             printf("[Netplay] Resynchronizing (Catching up).\n");
                             setSpeedFactor(200);
-                            retValue = SYNC_BEHIND;
+                            syncStatus = SYNC_BEHIND;
+                            stopCatchingUp = mClient->frameCounter + (mClient->lastSync - mClient->frameCounter) * 2;
                         }
                 }
             }
-            mClient->eventCounter++;
-            return retValue;
+            mClient->frameCounter++;
+            return syncStatus;
 }
 
 
