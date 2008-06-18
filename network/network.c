@@ -92,15 +92,15 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                     syncMsg.genEvent.timer = mClient->eventCounter;
                     serverBroadcastMessage(mServer, &syncMsg);
                 } else if (mClient->lastSync < mClient->eventCounter) {
-//                        printf("[Netplay] Resynchronizing (Waiting).\n");
+//                      printf("[Netplay] Resynchronizing (Waiting).\n");
                         retValue = SYNC_AHEAD;
-                        setSpeedFactor(100);
                         mClient->isWaitingForServer = TRUE;
                 } else if (mClient->lastSync > mClient->eventCounter + mClient->syncFreq) {
-                        if (retValue != SYNC_BEHIND) printf("[Netplay] Resynchronizing (Catching up).\n");
-//                        if (retValue != SYNC_BEHIND) osd_new_message(OSD_BOTTOM_LEFT, (void *)tr("Resynchronizing"));
-                        retValue = SYNC_BEHIND;
-                        setSpeedFactor(200);
+                        if (retValue != SYNC_BEHIND) {
+                            printf("[Netplay] Resynchronizing (Catching up).\n");
+                            setSpeedFactor(200);
+                            retValue = SYNC_BEHIND;
+                        }
                 }
             }
             mClient->eventCounter++;
