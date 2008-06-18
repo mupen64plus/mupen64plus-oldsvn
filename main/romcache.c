@@ -561,13 +561,13 @@ void romdatabase_open()
                 {
                 g_romdatabase.comment = (char*)malloc(stringlength+2);
                 strncpy(g_romdatabase.comment, buffer, stringlength);
-                buffer[stringlength+1] = '\0';
+                g_romdatabase.comment[stringlength+1] = '\0';
                 }
             else
                 {
                 g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, totallength+2);
                 snprintf(g_romdatabase.comment, totallength+1, "%s%s", g_romdatabase.comment, buffer);
-                buffer[totallength+1] = '\0';
+                g_romdatabase.comment[totallength+1] = '\0';
                 }
             }
         }
