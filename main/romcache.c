@@ -459,9 +459,9 @@ int load_initial_cache(char* cache_filename)
         gzread(gzfile, &entry->compressiontype, sizeof(unsigned short));
         gzread(gzfile, &entry->imagetype, sizeof(unsigned short));
         gzread(gzfile, &entry->cic, sizeof(unsigned short));
+        gzread(gzfile, &entry->archivefile, sizeof(unsigned int));
         gzread(gzfile, &entry->crc1, sizeof(unsigned int));
         gzread(gzfile, &entry->crc2, sizeof(unsigned int));
-        gzread(gzfile, &entry->archivefile, sizeof(unsigned int));
         gzread(gzfile, &entry->romsize, sizeof(int));
 
         //Check rom is valid.
@@ -566,8 +566,8 @@ void romdatabase_open()
             else
                 {
                 g_romdatabase.comment = (char*)realloc(g_romdatabase.comment, totallength+2);
-                strcat(g_romdatabase.comment, buffer);
-                buffer[stringlength+1] = '\0';
+                snprintf(g_romdatabase.comment, totallength+1, "%s%s", g_romdatabase.comment, buffer);
+                buffer[totallength+1] = '\0';
                 }
             }
         }

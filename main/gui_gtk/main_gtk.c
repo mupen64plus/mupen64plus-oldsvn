@@ -453,6 +453,7 @@ static void callback_languageSelected(GtkWidget *widget, gpointer data)
     config_put_string( "Language", name );
 
     reload();
+    g_romcache.rcstask = RCS_RESCAN;
 }
 
 // reload windows
@@ -466,6 +467,7 @@ void reload()
     create_aboutDialog();
     create_configDialog();
     gtk_widget_show_all( g_MainWindow.window );
+    
 }
 
 /** emulation **/
@@ -527,7 +529,7 @@ static void callback_Save( GtkWidget *widget, gpointer data )
         savestates_job |= SAVESTATE;
 }
 
-// Save As
+//Save As
 //Need to add default filename here...
 static void callback_SaveAs( GtkWidget *widget, gpointer data )
 {

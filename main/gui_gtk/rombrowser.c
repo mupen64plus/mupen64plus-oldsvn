@@ -631,7 +631,7 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
         { startEmulation(); }
 }
 
-static void  callback_column_visible(GtkWidget *widget, int column)
+static void callback_column_visible(GtkWidget *widget, int column)
 {
     int i;
     gboolean visible = gtk_tree_view_column_get_visible(GTK_TREE_VIEW_COLUMN(g_MainWindow.column[column]));
@@ -647,7 +647,7 @@ static void  callback_column_visible(GtkWidget *widget, int column)
     gtk_tree_view_column_set_visible(g_MainWindow.column[16], TRUE);
 }
 
-static void  callback_header_clicked(GtkWidget *widget, GdkEventButton *event, gpointer column)
+static void callback_header_clicked(GtkWidget *widget, GdkEventButton *event, gpointer column)
 {
     if(event->type==GDK_BUTTON_PRESS)
         {
