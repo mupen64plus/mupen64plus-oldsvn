@@ -79,13 +79,13 @@ void clientProcessMessages(MupenClient *Client) {
 					addEventToQueue(Client, incomingMessage);
 				}
 				else {
+                                   printf("[Netplay] DESYNC: Recieved a late event for frame %d (currently frame %d).\n", incomingMessage.genEvent.timer, Client->frameCounter);
                                    outgoingMessage.type = NETMSG_DESYNC;
                                    clientSendMessage(Client, &outgoingMessage);
                                 }
 			break;
                         case NETMSG_DESYNC:
 				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
-                                printf("[Netplay] %s\n", osdString);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
                         case NETMSG_SYNC:
@@ -129,9 +129,16 @@ void clientSendButtons(MupenClient *Client, int control, DWORD value) {
 
 // processEventQueue() : Process the events in the queue, if necessary.
 void processEventQueue(MupenClient *Client) {
- 
+  NetMessage outgoingMessage;
+
   if (!Client->isConnected) return; // exit now if the client isnt' connected
   if (Client->eventQueue) {
+    while (Client->eventQueue->timer < Client->frameCounter) {
+       printf("[Netplay] DESYNC: Missed event for frame %d (currently frame %d).\n", Client->eventQueue->timer, Client->frameCounter);
+       outgoingMessage.type = NETMSG_DESYNC;
+       clientSendMessage(Client, &outgoingMessage);
+       popEventQueue(Client);
+    }
     while ((Client->eventQueue) && (Client->eventQueue->timer == Client->frameCounter)) {
 	switch (Client->eventQueue->type) {
           case EVENT_BUTTON: 

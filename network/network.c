@@ -51,7 +51,7 @@ void netShutdown(MupenServer *mServer, MupenClient *mClient) {
 }
 
 int netMain(MupenServer *mServer, MupenClient *mClient) {
-            static unsigned int syncStatus = SYNC_PERFECT, stopCatchingUp = 0;
+            static unsigned int syncStatus = SYNC_PERFECT, stopCatchingUp = 0, stopWaiting = 0;
             struct timespec ts;
             ts.tv_sec = 0;
             ts.tv_nsec = 5000000;
@@ -72,6 +72,10 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         nanosleep(&ts, NULL);
                     }
                     clientProcessMessages(mClient);
+                    if ((mClient->eventQueue) && (mClient->eventQueue->timer == mClient->frameCounter)) { 
+                       // We need to go process an event before time runs out!
+                       mClient->isWaitingForServer = FALSE;
+                    }
 	      }
             }
 
