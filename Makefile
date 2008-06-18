@@ -305,7 +305,7 @@ clean:
 	$(MAKE) -C mupen64_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
-	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o ./main/gui_gtk/debugger/*.o ./opengl/*.o
+	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o ./main/gui_gtk/debugger/*.o ./opengl/*.o ./network/*.o
 	$(RM) -f mupen64plus mupen64plus_dbg 
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so 
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/mupen64_audio.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so

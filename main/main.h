@@ -53,4 +53,6 @@ void stopEmulation(void);
 int pauseContinueEmulation(void);
 void screenshot(void);
 
+void netplayReady(void);
+
 #endif // __MAIN_H__

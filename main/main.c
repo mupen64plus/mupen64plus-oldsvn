@@ -531,6 +531,18 @@ int pauseContinueEmulation(void)
     return rompause;
 }
 
+
+void netplayReady(void)
+{
+    NetMessage netMsg;
+
+    if (l_NetplayEnabled && l_NetplayClient.isConnected) {
+        netMsg.type = NETMSG_READY;
+        clientSendMessage(&l_NetplayClient, &netMsg);
+    }
+}
+
+
 /*********************************************************************************************************
 * sdl event filter
 */
@@ -539,7 +551,6 @@ static int sdl_event_filter( const SDL_Event *event )
     static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
     char *event_str = NULL;
-    NetMessage netMsg;
 
     switch( event->type )
     {
@@ -559,10 +570,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
 
                 case SDLK_F9:
-	            if (l_NetplayEnabled && l_NetplayClient.isConnected) {
-                      netMsg.type = NETMSG_READY;
-                      clientSendMessage(&l_NetplayClient, &netMsg);                      
-                    }
+                    netplayReady();
                     break;
 
                 case SDLK_ESCAPE:

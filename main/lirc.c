@@ -105,8 +105,11 @@ void lircCheckInput(void)
                     volChange(2);
                 else if(strcmp(c, "VOL-") == 0)
                     volChange(-2);
-                else if(strcmp(c, "SCREENSHOT") == 0)
-                    screenshot();
+//this is a quick fix for an issue already resolved in trunk
+//                else if(strcmp(c, "SCREENSHOT") == 0)
+//                    screenshot();
+		else if(strcmp(c, "NETPLAYREADY") == 0)
+                      netplayReady();
                 else
                 {
                     int val = ((int)c[0])-((int) '0');
