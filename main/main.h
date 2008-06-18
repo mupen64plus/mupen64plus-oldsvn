@@ -51,6 +51,6 @@ int close_rom(void);
 void startEmulation(void);
 void stopEmulation(void);
 int pauseContinueEmulation(void);
-void screenshot(void);
+void take_next_screenshot(void);
 
 #endif // __MAIN_H__

@@ -106,7 +106,7 @@ void lircCheckInput(void)
                 else if(strcmp(c, "VOL-") == 0)
                     volChange(-2);
                 else if(strcmp(c, "SCREENSHOT") == 0)
-                    screenshot();
+                    take_next_screenshot();
                 else
                 {
                     int val = ((int)c[0])-((int) '0');
