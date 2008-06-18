@@ -213,6 +213,13 @@ static unsigned int gettimeofday_msec(void)
     return foo;
 }
 
+/* this function could be called as a result of a keypress, joystick/button movement,
+   LIRC command, or 'testshots' command-line option timer */
+void take_next_screenshot(void)
+{
+    g_TakeScreenshot = l_CurrentFrame + 1;
+}
+
 void video_plugin_render_callback(void)
 {
     // if the flag is set to take a screenshot, then grab it now
@@ -238,7 +245,7 @@ void new_frame(void)
         if (nextshot == l_CurrentFrame)
         {
             // set global variable so screenshot will be taken just before OSD is drawn at the end of frame rendering
-            g_TakeScreenshot = l_CurrentFrame + 1;
+            take_next_screenshot();
             // advance list index to next screenshot frame number.  If it's 0, then quit
             l_TestShotIdx++;
         }
@@ -574,7 +581,7 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
                 case SDLK_F12:
                     // set flag so that screenshot will be taken at the end of frame rendering
-                    g_TakeScreenshot = l_CurrentFrame + 1;
+                    take_next_screenshot();
                     break;
 
                 // Pause
@@ -679,7 +686,7 @@ static int sdl_event_filter( const SDL_Event *event )
             else if(strcmp(event_str, config_get_string("Joy Mapping Increment Slot", "")) == 0)
                 savestates_inc_slot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Screenshot", "")) == 0)
-                g_TakeScreenshot = l_CurrentFrame + 1;
+                take_next_screenshot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Mute", "")) == 0)
                 volMute();
             else if(strcmp(event_str, config_get_string("Joy Mapping Decrease Volume", "")) == 0)
