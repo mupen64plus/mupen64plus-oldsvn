@@ -69,8 +69,10 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         lircCheckInput();
 #endif //WITH_LIRC 
                         if (mServer->isActive) {
-                            if (mServer->isAccepting) serverAccept(mServer);
-                            if (!sentSyncMessage) {
+                            if (mServer->isAccepting) {
+                                serverAccept(mServer);
+                                serverProcessMessages(mServer);
+                            } else if (!sentSyncMessage) {
                                 serverProcessMessages(mServer);
                                 syncMsg.type = NETMSG_SYNC;
                                 syncMsg.genEvent.timer = mClient->frameCounter;
