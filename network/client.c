@@ -89,7 +89,6 @@ void clientProcessMessages(MupenClient *Client) {
                         case NETMSG_SYNC:
                                 //printf("[Netplay] Recieved sync message (End of frame %d)\n", incomingMessage.genEvent.timer);
 				Client->lastSync = incomingMessage.genEvent.timer;
-                                if (Client->lastSync == Client->frameCounter) Client->isWaitingForServer = 0;
                         break;
 			case NETMSG_PLAYERQUIT:
 				sprintf(osdString, "Player %d has disconnected.", playerNumber + 1);
