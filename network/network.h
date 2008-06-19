@@ -38,6 +38,7 @@ typedef struct TNetEvent {
 	u_int8_t		controller;	// applicable controller
 	u_int32_t		value;		// new key state value to assign (BUTTONS.Value)
 	u_int16_t		timer;		// when to activate the event (== netVISyncCounter)
+        u_int32_t               time_stamp;
 	struct TNetEvent	*next;		// Next button event in queue
 } NetEvent;
 
@@ -48,6 +49,7 @@ typedef struct TNetMessage {
             u_int8_t		type;
             u_int8_t		player;		// applicable controller
         } genEvent;
+        u_int32_t       time_stamp;
 	u_int16_t	type;
 } NetMessage;
 
@@ -109,8 +111,6 @@ void addEventToQueue(MupenClient *Client, NetMessage msg);
 void popEventQueue(MupenClient *Client);
 void processEventQueue(MupenClient *Client);
 void flushEventQueue(MupenClient *Client);
-
-
 
 
 

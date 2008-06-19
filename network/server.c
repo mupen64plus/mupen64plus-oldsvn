@@ -123,6 +123,7 @@ void serverAccept(MupenServer *Server) {
   }
 
   if (allPlayersReady) {
+    printf("All players ready, begining game.\n");
     serverStopWaitingForPlayers(Server);
     msg.type = NETMSG_SYNC;
     msg.genEvent.timer = getEventCounter();

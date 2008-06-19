@@ -19,7 +19,6 @@
 
 #include "network.h"
 
-
 unsigned int gettimeofday_msec(void)
 {
     struct timeval tv;

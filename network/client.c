@@ -25,7 +25,7 @@ int clientConnect(MupenClient *Client, char *server, int port) {
         flushEventQueue(Client);
         memset(Client, 0, sizeof(Client));
 	SDLNet_ResolveHost(&serverAddr, server, port);
-        Client->syncFreq = 7;
+        Client->syncFreq = 2;
 
 	if (Client->socket = SDLNet_TCP_Open(&serverAddr)) {
 		Client->socketSet = SDLNet_AllocSocketSet(1);
@@ -115,6 +115,7 @@ void clientSendButtons(MupenClient *Client, int control, DWORD value) {
   msg.genEvent.player = control;
   msg.genEvent.value = value;
   msg.genEvent.timer = 0;	
+  msg.time_stamp = gettimeofday_msec();
   clientSendMessage(Client, &msg);
 }
 
@@ -142,6 +143,7 @@ void processEventQueue(MupenClient *Client) {
           case EVENT_BUTTON: 
             if (Client->eventQueue->controller < MAX_CLIENTS) {
                 Client->playerKeys[Client->eventQueue->controller].Value = Client->eventQueue->value;
+                printf("[Netplay] Player %d: button lag %d ms.\n", Client->eventQueue->controller + 1, gettimeofday_msec()-Client->eventQueue->time_stamp);
             } else {
                 printf("[Netplay] Received message from player %d (out of range).\n", Client->eventQueue->controller);
             }
@@ -161,6 +163,7 @@ void addEventToQueue(MupenClient *Client, NetMessage msg) {
   newEvent->controller = msg.genEvent.player;
   newEvent->value = msg.genEvent.value;
   newEvent->timer = msg.genEvent.timer;
+  newEvent->time_stamp = msg.time_stamp;
   newEvent->next = NULL;
 
  // TODO: Make sure queue is in order (lowest timer to highest timer) the packets may arrive out of order
