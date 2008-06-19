@@ -53,7 +53,7 @@
 #include "config.h"
 #include "plugin.h"
 #include "rom.h"
-#include "mupenIniApi.h"
+#include "romcache.h"
 #include "../r4300/r4300.h"
 #include "../r4300/recomph.h"
 #include "../memory/memory.h"
@@ -84,12 +84,14 @@ static void parseCommandLine(int argc, char **argv);
 static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
 static void *emulationThread( void *_arg );
 static void sighandler( int signal, siginfo_t *info, void *context ); // signal handler
+extern void *rom_cache_system(void *_arg);
 
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 pthread_t   g_EmulationThread = 0;      // core thread handle
+pthread_t   g_RomCacheThread = 0;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
@@ -134,7 +136,7 @@ char *get_installpath()
 char *get_savespath()
 {
     static char path[PATH_MAX];
-    strcpy(path, get_configpath());
+    strncpy(path, get_configpath(), PATH_MAX-5);
     strcat(path, "save/");
     return path;
 }
@@ -142,7 +144,7 @@ char *get_savespath()
 char *get_iconspath()
 {
     static char path[PATH_MAX];
-    strcpy(path, get_installpath());
+    strncpy(path, get_installpath(), PATH_MAX-6);
     strcat(path, "icons/");
     return path;
 }
@@ -150,7 +152,7 @@ char *get_iconspath()
 char *get_iconpath(char *iconfile)
 {
     static char path[PATH_MAX];
-    strcpy(path, get_iconspath());
+    strncpy(path, get_iconspath(), PATH_MAX-strlen(iconfile));
     strcat(path, iconfile);
     return path;
 }
@@ -500,12 +502,14 @@ void startEmulation(void)
             alert_message(tr("Couldn't spawn core thread!"));
             return;
         }
+        g_romcache.rcstask = RCS_SLEEP;
         pthread_detach(g_EmulationThread);
         info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
     else if(rompause)
     {
+        g_romcache.rcstask = RCS_SLEEP;
         main_pause();
     }
 
@@ -538,6 +542,7 @@ int pauseContinueEmulation(void)
 
     if (rompause)
     {
+        g_romcache.rcstask = RCS_SLEEP;
         info_message(tr("Emulation continued."));
         if(msg)
         {
@@ -1379,9 +1384,6 @@ int main(int argc, char *argv[])
     if(!g_NoaskParam)
         g_Noask = config_get_bool("No Ask", FALSE);
 
-    /* TODO: nogui version does not use ini file */
-    ini_openFile();
-
     cheat_read_config();
 
     // build gui, but do not display
@@ -1391,6 +1393,20 @@ int main(int argc, char *argv[])
     // must be called after building gui
     info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
 
+    pthread_attr_t tattr;
+    int ret;
+    int newprio = 80;
+    struct sched_param param;
+    pthread_attr_init (&tattr);
+    pthread_attr_getschedparam (&tattr, &param);
+    param.sched_priority = newprio;
+    pthread_attr_setschedparam (&tattr, &param);
+    g_romcache.rcstask = RCS_INIT;
+    if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
+        {
+        g_RomCacheThread = 0;
+        alert_message(tr("Couldn't spawn rom cache thread!"));
+        }
     // only display gui if user wants it
     if(l_GuiEnabled)
         gui_display();
@@ -1403,7 +1419,7 @@ int main(int argc, char *argv[])
         {
             // cleanup and exit
             cheat_delete_all();
-            ini_closeFile();
+            g_romcache.rcstask = RCS_SHUTDOWN;
             plugin_delete_list();
             tr_delete_languages();
             config_delete();
@@ -1420,7 +1436,7 @@ int main(int argc, char *argv[])
 
         // cleanup and exit
         cheat_delete_all();
-        ini_closeFile();
+        g_romcache.rcstask = RCS_SHUTDOWN;
         plugin_delete_list();
         tr_delete_languages();
         config_delete();
@@ -1438,10 +1454,9 @@ int main(int argc, char *argv[])
     // cleanup and exit
     stopEmulation();
     config_write();
-    ini_updateFile(1);
     cheat_write_config();
     cheat_delete_all();
-    ini_closeFile();
+    g_romcache.rcstask = RCS_SHUTDOWN;
     plugin_delete_list();
     tr_delete_languages();
     config_delete();

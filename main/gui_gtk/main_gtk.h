@@ -22,25 +22,31 @@ Email                : blight@Ashitaka
 
 typedef struct
 {
-    GtkWidget   *window;
-    GtkWidget   *toplevelVBox;  // vbox containing menubar, toolbar, rombrowser, statusbar
-    GtkWidget   *menuBar;
-    GtkWidget   *toolBar;
-    GtkWidget   *filter;
-    GtkWidget   *romScrolledWindow;
-//Make two TreeViews, a visable manually filtered one for the Display, and a
-//Non-visable FullList from which we can filter.
-    GtkWidget   *romDisplay, *romFullList;
-    GtkWidget   *statusBarHBox;
+    GtkWidget *window;
+    GtkWidget *toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
+    GtkWidget *menuBar;
+    GtkWidget *toolBar;
+    GtkWidget *filter;
+    GtkWidget *romScrolledWindow;
+    //Make two TreeViews, a visable manually filtered one for the Display, and a
+    //Non-visable FullList from which we can filter.
+    GtkWidget *romDisplay, *romFullList;
+    GtkTreeViewColumn *column[17]; //columns in rombrowser.
+    int romSortColumn; // sort column
+    GtkSortType romSortType; // sort type (ascending/descending)
+    GtkWidget *statusBarHBox;
     GtkAccelGroup *accelGroup;
     GtkAccelGroup *accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
     gboolean accelUnsafeActive; //From getting keypresses, so must be deactivated.
+    GtkWidget *romHeaderMenu; //Context menu for rombrowser header to control visible columns.
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;
+extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 
 void reload();
 void statusbar_message( const char *section, const char *fmt, ... );
+gboolean check_icon_theme();
 
 // helper macro
 #define GUI_PROCESS_QUEUED_EVENTS() \

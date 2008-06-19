@@ -35,294 +35,264 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct _iniElem
+typedef struct _romdatabase_search
 {
-   mupenEntry entry;
-   struct _iniElem* next_entry;
-   struct _iniElem* next_crc;
-   struct _iniElem* next_MD5;
-} iniElem;
+    mupenEntry entry;
+    struct _romdatabase_search* next_entry;
+    struct _romdatabase_search* next_crc;
+    struct _romdatabase_search* next_md5;
+} romdatabase_search;
 
 typedef struct
 {
-   char *comment;
-   iniElem* CRC_lists[256];
-   iniElem* MD5_lists[256];
-   iniElem* list;
-} iniFile;
+    char *comment;
+    romdatabase_search* crc_lists[256];
+    romdatabase_search* md5_lists[256];
+    romdatabase_search* list;
+} _romdatabase;
 
-static iniFile ini = {NULL};
+static _romdatabase romdatabase;
 
-mupenEntry * emptyEntry ;
+typedef mupenEntry romdatabase_entry;
+
+romdatabase_entry emptyEntry;
 
 static int split_property(char *s)
 {
-   int i = 0;
-   while(s[i] != '=' && s[i] != 0) i++;
-   if (s[i] == 0) return -1;
-   s[i] = 0;
-   return i;
-}
-
-static char* get_ini_path()
-{
-   char *path = malloc(strlen(get_configpath())+1+strlen("mupen64plus.ini"));
-
-   strcpy(path, get_configpath());
-   strcat(path, "mupen64plus.ini");
-
-   return path;
+    int i = 0;
+    while(s[i] != '=' && s[i] != 0) i++;
+    if (s[i] == 0) return -1;
+    s[i] = 0;
+    return i;
 }
 
 void ini_openFile()
 {
-   gzFile f;
-   char buf[256];
-   int i=0;
-   iniElem *cur = NULL;
-   
-   if (ini.comment != NULL) return;
-   
-   memset( &emptyEntry,0,sizeof(emptyEntry));
-   char* pathname = get_ini_path();
-   f = gzopen(pathname, "rb");
-   free(pathname);
-   if (f==NULL) return;
-   do
-     {
-    gzgets(f, buf, 255);
-    if (buf[0] != '[')
-      {
-         i+= strlen(buf);
-         if (ini.comment == NULL) 
-           {
-          ini.comment = (char*)malloc(i+1);
-          strcpy(ini.comment, buf);
-           }
-         else 
-           {
-          ini.comment = (char*)realloc(ini.comment, i+1);
-          strcat(ini.comment, buf);
-           }
-      }
-     }
-   while (buf[0] != '[' && !gzeof(f));
-   
-   for (i=0; i<255; i++)
-     {
-        ini.CRC_lists[i] = NULL;
-     }
-   ini.list = NULL;
-   
-   do
-     {
-    if (buf[0] == '[')
-      {
-         if (ini.list == NULL)
-           {
-          ini.list = (iniElem*)malloc(sizeof(iniElem));
-          ini.list->next_entry = NULL;
-          ini.list->next_crc = NULL;
-          ini.list->next_MD5 = NULL;
-          cur = ini.list;
-           }
-         else
-           {
-          cur->next_entry = (iniElem*)malloc(sizeof(iniElem));
-          cur = cur->next_entry;
-          cur->next_entry = NULL;
-          cur->next_crc = NULL;
-          cur->next_MD5 = NULL;
-           }
-         i = strlen(buf);
-         while(buf[i] != ']') i--;
-         buf[i] = 0;
-         strncpy(cur->entry.MD5, buf+1, 32);
-         cur->entry.MD5[32] = '\0';
-         buf[3] = 0;
-         sscanf(buf+1, "%X", &i);
-         
-         if (ini.MD5_lists[i] == NULL)
-           ini.MD5_lists[i] = cur;
-         else
-           {
-          iniElem *aux = ini.MD5_lists[i];
-          cur->next_MD5 = aux;
-          ini.MD5_lists[i] = cur;
-           }
-         cur->entry.eeprom16kb = 0;
-         strcpy(cur->entry.refMD5, "");
-         strcpy(cur->entry.comments, "");
-      }
-    else
-      {
-         i = split_property(buf);
-         if (i != -1)
-           {
-          if (!strcmp(buf, "Good Name"))
+    gzFile gzfile;
+    char buf[256];
+    int i=0;
+    romdatabase_search *cur = NULL;
+    int free_buffer = 0;
+
+    if(romdatabase.comment!=NULL)
+        { return; }
+
+    //Query config system and open romdatabase.
+    char *pathname = (char*)config_get_string("RomDatabaseFile", NULL);
+    if(pathname==NULL)
+        {
+        printf("[rcs] Database not in config.\n");
+        pathname = (char*)malloc(PATH_MAX*sizeof(char));
+        snprintf(pathname, PATH_MAX, "%s%s", get_configpath(), "mupen64plus.ini");
+        config_put_string("RomDatabaseFile", pathname);
+        free_buffer = 1;
+        }
+
+    //printf("Database file: %s \n", pathname);
+    gzfile = gzopen(pathname, "rb");
+    if(free_buffer)
+        { free(pathname); }
+
+    if(gzfile==NULL)
+        {
+        printf("[rcs] Unable to open rom database.\n");
+        return;
+        }
+
+    //Move through opening comments, set romdatabase.comment to non-NULL 
+    //to signal we have a database.
+    do
+        {
+        gzgets(gzfile, buf, 255);
+        if(buf[0]!='[')
             {
-               if (buf[i+1+strlen(buf+i+1)-1] == '\n')
-             buf[i+1+strlen(buf+i+1)-1] = '\0';
-               if (buf[i+1+strlen(buf+i+1)-1] == '\r')
-             buf[i+1+strlen(buf+i+1)-1] = '\0';
-               strncpy(cur->entry.goodname, buf+i+1, 99);
+            i+= strlen(buf);
+            if(romdatabase.comment==NULL) 
+                {
+                romdatabase.comment = (char*)malloc(i+1);
+                strcpy(romdatabase.comment, buf);
+                }
+            else
+                {
+                romdatabase.comment = (char*)realloc(romdatabase.comment, i+1);
+                strcat(romdatabase.comment, buf);
+                }
             }
-          else if (!strcmp(buf, "Header Code"))
+        }
+    while (buf[0] != '[' && !gzeof(gzfile));
+
+    //Clear premade indices.
+    for ( i = 0; i < 255; ++i )
+        { romdatabase.crc_lists[i] = NULL; }
+    for ( i = 0; i < 255; ++i )
+        { romdatabase.md5_lists[i] = NULL; }
+    romdatabase.list = NULL;
+
+    do
+        {
+        if(buf[0]=='[')
             {
-               strncpy(cur->entry.CRC, buf+i+1, 21);
-               cur->entry.CRC[21] = '\0';
-               buf[i+3] = 0;
-               sscanf(buf+i+1, "%X", &i);
-               
-               if (ini.CRC_lists[i] == NULL)
-             ini.CRC_lists[i] = cur;
-               else
-             {
-                iniElem *aux = ini.CRC_lists[i];
-                cur->next_crc = aux;
-                ini.CRC_lists[i] = cur;
-             }
+            if(romdatabase.list==NULL)
+                {
+                romdatabase.list = (romdatabase_search*)malloc(sizeof(romdatabase_search));
+                romdatabase.list->next_entry = NULL;
+                romdatabase.list->next_crc = NULL;
+                romdatabase.list->next_md5 = NULL;
+                cur = romdatabase.list;
+                }
+            else
+                {
+                cur->next_entry = (romdatabase_search*)malloc(sizeof(romdatabase_search));
+                cur = cur->next_entry;
+                cur->next_entry = NULL;
+                cur->next_crc = NULL;
+                cur->next_md5 = NULL;
+                }
+            i = strlen(buf);
+            while(buf[i] != ']') i--;
+            buf[i] = 0;
+            strncpy(cur->entry.md5, buf+1, 32);
+            cur->entry.md5[32] = '\0';
+            buf[3] = 0;
+            sscanf(buf+1, "%X", &i);
+
+            if(romdatabase.md5_lists[i]==NULL)
+                { romdatabase.md5_lists[i] = cur; }
+            else
+                {
+                romdatabase_search *aux = romdatabase.md5_lists[i];
+                cur->next_md5 = aux;
+                romdatabase.md5_lists[i] = cur;
+                }
+            cur->entry.status=3;
+            cur->entry.eeprom16kb = 0;
+            strcpy(cur->entry.refmd5, "");
+            strcpy(cur->entry.comments, "");
             }
-          else if (!strcmp(buf, "Reference"))
+        else
             {
-               strncpy(cur->entry.refMD5, buf+i+1, 32);
-               cur->entry.refMD5[32] = '\0';
+            i = split_property(buf);
+            if(i!=-1)
+                {
+                if(!strcmp(buf, "Good Name"))
+                    {
+                    if(buf[i+1+strlen(buf+i+1)-1]=='\n')
+                        { buf[i+1+strlen(buf+i+1)-1] = '\0'; }
+                    if (buf[i+1+strlen(buf+i+1)-1]=='\r')
+                        { buf[i+1+strlen(buf+i+1)-1] = '\0'; }
+                    strncpy(cur->entry.goodname, buf+i+1, 99);
+                    }
+                else if(!strcmp(buf, "Header Code"))
+                    {
+                    strncpy(cur->entry.crc, buf+i+1, 21);
+                    cur->entry.crc[21] = '\0';
+                    buf[i+3] = 0;
+                    sscanf(buf+i+1, "%X", &i);
+
+                    if(romdatabase.crc_lists[i]==NULL)
+                        { romdatabase.crc_lists[i] = cur; }
+                    else
+                        {
+                        romdatabase_search *aux = romdatabase.crc_lists[i];
+                        cur->next_crc = aux;
+                        romdatabase.crc_lists[i] = cur;
+                        }
+                    }
+                else if(!strcmp(buf, "Reference"))
+                    {
+                    strncpy(cur->entry.refmd5, buf+i+1, 32);
+                    cur->entry.refmd5[32] = '\0';
+                    }
+                else if(!strcmp(buf, "Eeprom"))
+                    {
+                    if(!strncmp(buf+i+1, "16k", 3))
+                        { cur->entry.eeprom16kb = 1;
+ }
+                    }
+                }
             }
-          else if (!strcmp(buf, "Eeprom"))
-            {
-               if (!strncmp(buf+i+1, "16k", 3))
-             cur->entry.eeprom16kb = 1;
-            }
-          else if (!strcmp(buf, "Comments"))
-            {
-               if (buf[i+1+strlen(buf+i+1)-1] == '\n')
-             buf[i+1+strlen(buf+i+1)-1] = '\0';
-               if (buf[i+1+strlen(buf+i+1)-1] == '\r')
-             buf[i+1+strlen(buf+i+1)-1] = '\0';
-               strcpy(cur->entry.comments, buf+i+1);
-            }
-           }
-      }
-    gzgets(f, buf, 255);
-     }
-   while (!gzeof(f));
-   
-   gzclose(f);
+
+        gzgets(gzfile, buf, 255);
+        }
+   while (!gzeof(gzfile));
+
+   gzclose(gzfile);
 }
 
-void ini_closeFile()
+void romdatabase_close()
 {
-   if (ini.comment == NULL) return;
+    if (romdatabase.comment == NULL)
+        { return; }
 
-   free(ini.comment);
-   ini.comment = NULL;
-   while(ini.list != NULL)
-     {
-        iniElem *aux = ini.list->next_entry;
-        free(ini.list);
-        ini.list = aux;
-     }
-}
+    free(romdatabase.comment);
 
-void ini_updateFile(int compress)
-{
-   gzFile zf = NULL;
-   FILE *f = NULL;
-   iniElem *aux;
-   
-   if (ini.comment == NULL) return ;
-   char* pathname=get_ini_path();
-   if (compress) 
-     {
-    zf = gzopen(pathname, "wb");
-    gzprintf(zf, "%s", ini.comment);
-     }
-   else
-     {
-    f = fopen(pathname, "wb");
-    fprintf(f, "%s", ini.comment);
-     }
-   free(pathname);
-   aux = ini.list;
-   while (aux != NULL)
-     {
-    if (compress) 
-      {
-         gzprintf(zf, "[%s]\n", aux->entry.MD5);
-         gzprintf(zf, "Good Name=%s\n", aux->entry.goodname);
-         gzprintf(zf, "Header Code=%s\n", aux->entry.CRC);
-         if (strcmp(aux->entry.refMD5, ""))
-           gzprintf(zf, "Reference=%s\n", aux->entry.refMD5);
-         if (aux->entry.eeprom16kb == 1)
-           gzprintf(zf, "Eeprom=16k\n");
-         if (strcmp(aux->entry.comments, ""))
-           gzprintf(zf, "Comments=%s\n", aux->entry.comments);
-         gzprintf(zf, "\n");
-      }
-    else
-      {
-         fprintf(f, "[%s]\n", aux->entry.MD5);
-         fprintf(f, "Good Name=%s\n", aux->entry.goodname);
-         fprintf(f, "Header Code=%s\n", aux->entry.CRC);
-         if (strcmp(aux->entry.refMD5, ""))
-           fprintf(f, "Reference=%s\n", aux->entry.refMD5);
-         if (aux->entry.eeprom16kb == 1)
-           fprintf(f, "Eeprom=16k\n");
-         if (strcmp(aux->entry.comments, ""))
-           fprintf(f, "Comments=%s\n", aux->entry.comments);
-         fprintf(f, "\n");
-      }
-    
-    aux = aux->next_entry;
-     }
-   
-   if (compress) gzclose(zf);
-   else fclose(f);
+    while(romdatabase.list != NULL)
+        {
+        romdatabase_search *search = romdatabase.list->next_entry;
+        free(romdatabase.list);
+        romdatabase.list = search;
+        }
 }
 
 mupenEntry* ini_search_by_md5(const char *md5)
 {
-   char t[3];
-   int i;
-   iniElem *aux;
-   
-   if (ini.comment == NULL) return emptyEntry;
-   
-   t[0] = md5[0];
-   t[1] = md5[1];
-   t[2] = 0;
-   sscanf(t, "%X", &i);
-   aux = ini.MD5_lists[i];
-   while (aux != NULL && strncmp(aux->entry.MD5, md5, 32))
-     aux = aux->next_MD5;
-   if (aux == NULL) return NULL;
-   return &(aux->entry);
+    char buffer[3];
+    int i;
+    romdatabase_search *search;
+
+    //If no database, return empty.
+    if(romdatabase.comment==NULL)
+        { return &emptyEntry; }
+
+    //Convert first 2 hex digits to search premade index.
+    buffer[0] = md5[0];
+    buffer[1] = md5[1];
+    buffer[2] = '\0';
+    sscanf(buffer, "%X", &i);
+    search = romdatabase.md5_lists[i];
+
+    while (search != NULL && strncmp(search->entry.md5, md5, 32))
+        { search = search->next_md5; }
+
+    //If found return pointer, if not return empty.
+    if(search==NULL)
+        { return &emptyEntry; }
+    else 
+        { return &(search->entry); }
 }
 
-mupenEntry* ini_search_by_CRC(const char *crc)
+mupenEntry* ini_search_by_crc(const char *crc)
 {
-   char t[3];
-   int i;
-   iniElem *aux;
-   
-   if (ini.comment == NULL) return emptyEntry;
-   
-   t[0] = crc[0];
-   t[1] = crc[1];
-   t[2] = 0;
-   sscanf(t, "%X", &i);
-   aux = ini.CRC_lists[i];
-   while (aux != NULL && strncmp(aux->entry.CRC, crc, 21))
-     aux = aux->next_crc;
-   if (aux == NULL) return NULL;
-   if (strcmp(aux->entry.refMD5, ""))
-     {
-    mupenEntry* temp = ini_search_by_md5(aux->entry.refMD5);
-    if (strncmp(aux->entry.CRC, temp->CRC, 21))
-      return &(aux->entry);
-    else
-      return temp;
-     }
+    char buffer[3];
+    int i;
+    romdatabase_search *search;
+
+    //If no database, return empty.
+    if(romdatabase.comment==NULL) 
+        { return &emptyEntry; }
+
+    //Convert first 2 hex digits to search premade index.
+    buffer[0] = crc[0];
+    buffer[1] = crc[1];
+    buffer[2] = '\0';
+    sscanf(buffer, "%X", &i);
+    search = romdatabase.crc_lists[i];
+
+    while (search != NULL && strncmp(search->entry.crc, crc, 21))
+        { search = search->next_crc; }
+
+    if(search == NULL) 
+        { return &emptyEntry; }
+
+    //Return crc of reference rom if different.
+    if(strcmp(search->entry.refmd5, ""))
+        {
+        mupenEntry* temp = ini_search_by_md5(search->entry.refmd5);
+        if(strncmp(search->entry.crc, temp->crc, 21))
+            { return &(search->entry); }
+        else
+            { return temp; }
+        }
    else
-     return &(aux->entry);
+        { return &(search->entry); }
 }

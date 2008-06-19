@@ -1,5 +1,5 @@
 /***************************************************************************
- vcrcomp_dialog.h - Handles VCR mode GUI elements
+rombrowser.h - Handles VCR mode GUI elements
 ----------------------------------------------------------------------------
 Began                : Sat Nov 9 2002
 Copyright            : (C) 2002 by blight
@@ -20,55 +20,15 @@ Email                : blight@Ashitaka
 
 #include <gtk/gtk.h>
 
-#include "../mupenIniApi.h"
-
 int create_romBrowser( void );
-void rombrowser_refresh( void );
 void apply_filter( void );
+void fillrombrowser();
 
-// cache
-void rombrowser_readCache( void );
-void rombrowser_writeCache( void );
+void rombrowser_refresh( unsigned int roms, unsigned short clear );
 
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
-
-/** global rom list */
-typedef struct
-{
-    char cFilename[PATH_MAX];
-
-    char cName[100];
-    char cSize[20];
-    char cCountry[20];
-
-    // rom info
-    struct
-    {
-        char          cName[21];                    // rom name
-        int           iSize;                            // size in bytes
-        short         sCartID;                      // cartridge id
-        int           iManufacturer;            // manufacturer
-        unsigned char cCountry;                     // country id
-        unsigned int  iCRC1;                            // crc part 1
-        unsigned int  iCRC2;                            // crc part 2
-        char          cMD5[33];                     // md5 code
-        char          cGoodName[100];           // from ini
-        char          cComments[200];           // from ini
-
-//      char     Status[60];                // from ini
-//      char     FileName[200];
-//      char     PluginNotes[250];  // from ini
-//      char     CoreNotes[250];        // from ini
-//      char     UserNotes[250];        // from ini
-//      char     Developer[30];         // from ini
-//      char     ReleaseDate[30];       // from ini
-//      char     Genre[15];                 // from ini
-    } info; // data saved in cache
-
-    // other data
-    GdkPixbuf  *flag;   // flag GdkImage
-    mupenEntry *iniEntry;   // ini entry of this rom
-} SRomEntry;
-extern GList *g_RomList;
+void countrycodestring(unsigned short int countrycode, char *string);
+void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag);
+char* filefrompath(const char *string);
 
 #endif // __ROMBROWSER_H__

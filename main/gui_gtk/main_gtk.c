@@ -126,8 +126,6 @@ void gui_build(void)
     // info_message function can safely be used after we get the gdk lock
     gdk_threads_enter();
 
-    rombrowser_readCache();
-
     create_mainWindow();
     create_configDialog();
 #ifdef VCR_SUPPORT
@@ -151,6 +149,28 @@ void gui_main_loop(void)
 {
     gtk_main();
     gdk_threads_leave();
+}
+
+//External pulic function to update rombrowser.
+void updaterombrowser( unsigned int roms, unsigned short clear )
+{
+    pthread_t self = pthread_self();
+
+    if(gui_enabled())
+        {
+        // if we're calling from a thread other than the main gtk thread, take gdk lock
+        if(!pthread_equal(self, g_GuiThread))
+            gdk_threads_enter();
+
+        rombrowser_refresh(roms, clear);
+
+        GUI_PROCESS_QUEUED_EVENTS();
+
+        if(!pthread_equal(self, g_GuiThread))
+        gdk_threads_leave();
+
+        return;
+        }
 }
 
 // prints informational message to status bar
@@ -177,10 +197,10 @@ void info_message(const char *fmt, ...)
             {
                 gtk_statusbar_pop(GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id);
                 gtk_statusbar_push(GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id, buf);
-        
+
                 // update status bar
                 GUI_PROCESS_QUEUED_EVENTS();
-        
+
                 if(!pthread_equal(self, g_GuiThread))
                     gdk_threads_leave();
 
@@ -439,6 +459,7 @@ static void callback_languageSelected(GtkWidget *widget, gpointer data)
     config_put_string( "Language", name );
 
     reload();
+    g_romcache.rcstask = RCS_RESCAN;
 }
 
 // reload windows
@@ -452,6 +473,7 @@ void reload()
     create_aboutDialog();
     create_configDialog();
     gtk_widget_show_all( g_MainWindow.window );
+    
 }
 
 /** emulation **/
@@ -461,7 +483,7 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
     if(!rom)
         {
         GList *list = NULL, *llist = NULL;
-        SRomEntry *entry;
+        cache_entry *entry;
         GtkTreeIter iter;
         GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
         GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
@@ -485,7 +507,7 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
             g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
             g_list_free (list);
          
-            if(open_rom( entry->cFilename ) == 0)
+            if(open_rom( entry->filename ) == 0)
                 { startEmulation(); }
             else
                 { return; }
@@ -513,7 +535,7 @@ static void callback_Save( GtkWidget *widget, gpointer data )
         savestates_job |= SAVESTATE;
 }
 
-// Save As
+//Save As
 //Need to add default filename here...
 static void callback_SaveAs( GtkWidget *widget, gpointer data )
 {
@@ -1014,27 +1036,7 @@ static void callback_aboutMupen( GtkWidget *widget, gpointer data )
 // hide on delete
 static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-    int i, w, h;
-
-    // save configuration
-    w = g_MainWindow.window->allocation.width;
-    h = g_MainWindow.window->allocation.height;
-    if (w != 0 && h != 0)
-    {
-        config_put_number( "MainWindow Width", w );
-        config_put_number( "MainWindow Height", h );
-    }
-    for( i = 0; i < 6; i++ )
-    {
-        w = gtk_tree_view_get_column( GTK_TREE_VIEW(g_MainWindow.romDisplay), i )->width;
-        if (w != 0)
-        {
-            char buf[30];
-            sprintf( buf, "RomBrowser ColWidth[%d]", i );
-            config_put_number( buf, w );
-        }
-    }
-
+    //Put new rombrowser config saving code here...
     gtk_main_quit();
 
     return TRUE; // undeleteable
@@ -1426,27 +1428,54 @@ static int create_toolBar( void )
             gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
     }
     gtk_toolbar_set_tooltips( GTK_TOOLBAR(g_MainWindow.toolBar), TRUE );
-    gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.toolBar, FALSE, FALSE, 0 );
 
     // load icons from memory
-    if(config_get_number( "ToolbarSize", 1 ) == 1)
-    {
-        openImage = gtk_image_new_from_file( get_iconpath("open.png") );
-        playImage = gtk_image_new_from_file( get_iconpath("play.png") );
-        pauseImage = gtk_image_new_from_file( get_iconpath("pause.png") );
-        stopImage = gtk_image_new_from_file( get_iconpath("stop.png") );
-        fullscreenImage = gtk_image_new_from_file( get_iconpath("fullscreen.png") );
-        configureImage = gtk_image_new_from_file( get_iconpath("configure.png") );
-    }
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+    GdkPixbuf *pixbuf;
+    short size = config_get_number( "ToolbarSize", 22 );
+
+    if(check_icon_theme())
+        {
+        pixbuf = gtk_icon_theme_load_icon(theme, "document-open", size,  0, NULL);
+        openImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "media-playback-start", size,  0, NULL);
+        playImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "media-playback-pause", size,  0, NULL);
+        pauseImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "media-playback-stop", size,  0, NULL);
+        stopImage = gtk_image_new_from_pixbuf(pixbuf); 
+        pixbuf = gtk_icon_theme_load_icon(theme, "view-fullscreen", size,  0, NULL);
+        fullscreenImage = gtk_image_new_from_pixbuf(pixbuf);
+        pixbuf = gtk_icon_theme_load_icon(theme, "preferences-system", size,  0, NULL);
+        configureImage = gtk_image_new_from_pixbuf(pixbuf);
+        }
+    else if(size==32)
+        {
+        openImage = gtk_image_new_from_file(get_iconpath("32x32/document-open.png")); 
+        playImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-start.png")); 
+        pauseImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-pause.png")); 
+        stopImage = gtk_image_new_from_file(get_iconpath("32x32/media-playback-stop.png"));
+        fullscreenImage = gtk_image_new_from_file(get_iconpath("32x32/view-fullscreen.png")); 
+        configureImage = gtk_image_new_from_file(get_iconpath("32x32/preferences-system.png"));
+        }
+    else if(size==16)
+        {
+        openImage = gtk_image_new_from_file(get_iconpath("16x16/document-open.png")); 
+        playImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-start.png")); 
+        pauseImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-pause.png")); 
+        stopImage = gtk_image_new_from_file(get_iconpath("16x16/media-playback-stop.png"));
+        fullscreenImage = gtk_image_new_from_file(get_iconpath("16x16/view-fullscreen.png")); 
+        configureImage = gtk_image_new_from_file(get_iconpath("16x16/preferences-system.png"));
+        }
     else
-    {
-        openImage = gtk_image_new_from_file( get_iconpath("open-small.png") );
-        playImage = gtk_image_new_from_file( get_iconpath("play-small.png") );
-        pauseImage = gtk_image_new_from_file( get_iconpath("pause-small.png") );
-        stopImage = gtk_image_new_from_file( get_iconpath("stop-small.png") );
-        fullscreenImage = gtk_image_new_from_file( get_iconpath("fullscreen-small.png") );
-        configureImage = gtk_image_new_from_file( get_iconpath("configure-small.png") );
-    }
+        {
+        openImage = gtk_image_new_from_file(get_iconpath("22x22/document-open.png")); 
+        playImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-start.png")); 
+        pauseImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-pause.png")); 
+        stopImage = gtk_image_new_from_file(get_iconpath("22x22/media-playback-stop.png"));
+        fullscreenImage = gtk_image_new_from_file(get_iconpath("22x22/view-fullscreen.png")); 
+        configureImage = gtk_image_new_from_file(get_iconpath("22x22/preferences-system.png"));
+        }
 
     // add icons to toolbar
     gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar),tr("Open"),tr("Open Rom"),"",openImage,GTK_SIGNAL_FUNC(callback_openRom),NULL);
@@ -1455,9 +1484,10 @@ static int create_toolBar( void )
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Pause"),tr("Pause/ Continue Emulation"),"",pauseImage,GTK_SIGNAL_FUNC(callback_pauseContinueEmulation),NULL );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Stop"),tr("Stop Emulation"),"",stopImage,GTK_SIGNAL_FUNC(callback_stopEmulation),NULL );
     gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
-    gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Fullscreen"),tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );
-    gtk_toolbar_append_space( GTK_TOOLBAR(g_MainWindow.toolBar) );
     gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Configure"),tr("Configure"),"",configureImage,GTK_SIGNAL_FUNC(callback_configure),NULL );
+    gtk_toolbar_append_item( GTK_TOOLBAR(g_MainWindow.toolBar),tr("Fullscreen"),tr("Fullscreen"),"",fullscreenImage,GTK_SIGNAL_FUNC(callback_fullScreen),NULL );
+
+    gtk_box_pack_start( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.toolBar, FALSE, FALSE, 0 );
 
     return 0;
 }
@@ -1485,6 +1515,9 @@ static int create_statusBar( void )
 // main window
 static int create_mainWindow( void )
 {
+    g_MainWindow.romSortType = GTK_SORT_ASCENDING;
+    g_MainWindow.romSortColumn = 1;
+
     int width, height;
 
     width = config_get_number( "MainWindow Width", 600 );
@@ -1518,7 +1551,25 @@ static int create_mainWindow( void )
     // statusbar
     create_statusBar();
 
-    // fill rom browser
-    rombrowser_refresh();
     return 0;
 }
+
+//Add a check for all Gtk icons here.
+gboolean check_icon_theme()
+{
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+
+    if(gtk_icon_theme_has_icon(theme, "document-open")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-start")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-pause")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-stop")&&
+       gtk_icon_theme_has_icon(theme, "view-fullscreen")&&
+       gtk_icon_theme_has_icon(theme, "preferences-system")&& 
+       gtk_icon_theme_has_icon(theme, "video-display")&& 
+       gtk_icon_theme_has_icon(theme, "audio-card")&& 
+       gtk_icon_theme_has_icon(theme, "input-gaming"))
+        { return TRUE; }
+    else
+        { return FALSE; }
+}
+

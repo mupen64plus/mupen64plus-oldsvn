@@ -50,7 +50,18 @@ $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/fonts" || exit $?
 $INSTALL -m 0644 fonts/* "${INSTALLDIR}/fonts" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/icons" || exit $?
-$INSTALL -m 0644 icons/* "${INSTALLDIR}/icons" || exit $?
+$INSTALL -m 0644 icons/*.png "${INSTALLDIR}/icons" || exit $?
+$INSTALL -m 0644 icons/*.xpm "${INSTALLDIR}/icons" || exit $?
+
+$INSTALL -d -v "${INSTALLDIR}/icons/32x32" || exit $?
+$INSTALL -m 0644 icons/32x32/* "${INSTALLDIR}/icons/32x32" || exit $?
+
+$INSTALL -d -v "${INSTALLDIR}/icons/22x22" || exit $?
+$INSTALL -m 0644 icons/22x22/* "${INSTALLDIR}/icons/22x22" || exit $?
+
+$INSTALL -d -v "${INSTALLDIR}/icons/16x16" || exit $?
+$INSTALL -m 0644 icons/16x16/* "${INSTALLDIR}/icons/16x16" || exit $?
+
 $INSTALL -d -v "${INSTALLDIR}/lang" || exit $?
 $INSTALL -m 0644 lang/* "${INSTALLDIR}/lang" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/plugins" || exit $?

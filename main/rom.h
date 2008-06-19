@@ -31,29 +31,29 @@
 #define ROM_H
 
 int rom_read(const char *filename);
-int fill_header(const char *filename);
-int calculateMD5(const char *filename, char digeststring[32]);
+unsigned char* load_rom(const char *filename, int *romsize, unsigned short *compressiontype, unsigned short *imagetype, int *loadlength);
+
 extern unsigned char *rom;
 extern int taille_rom;
 
 typedef struct _rom_header
 {
-   unsigned char init_PI_BSB_DOM1_LAT_REG;
-   unsigned char init_PI_BSB_DOM1_PGS_REG;
-   unsigned char init_PI_BSB_DOM1_PWD_REG;
-   unsigned char init_PI_BSB_DOM1_PGS_REG2;
-   unsigned int ClockRate;
-   unsigned int PC;
-   unsigned int Release;
-   unsigned int CRC1;
-   unsigned int CRC2;
-   unsigned int Unknown[2];
-   unsigned char nom[20];
-   unsigned int unknown;
-   unsigned int Manufacturer_ID;
-   unsigned short Cartridge_ID;
-   unsigned short Country_code;
-   unsigned int Boot_Code[1008];
+   unsigned char init_PI_BSB_DOM1_LAT_REG; //0x00
+   unsigned char init_PI_BSB_DOM1_PGS_REG; //0x01
+   unsigned char init_PI_BSB_DOM1_PWD_REG; //0x02
+   unsigned char init_PI_BSB_DOM1_PGS_REG2; //0x03
+   unsigned int ClockRate; //0x04
+   unsigned int PC; //0x08
+   unsigned int Release; //0x0C
+   unsigned int CRC1; //0x10
+   unsigned int CRC2; //0x14
+   unsigned int Unknown[2]; //0x18
+   unsigned char nom[20]; //0x20
+   unsigned int unknown;  //0x34
+   unsigned int Manufacturer_ID; //0x38
+   unsigned short Cartridge_ID;  //0x3C //Game serial number
+   unsigned short Country_code;  //0x3E //Possible byte alignment padding here???
+   unsigned int Boot_Code[1008]; //0x40
 } rom_header;
 extern rom_header *ROM_HEADER;
 
@@ -65,4 +65,44 @@ typedef struct _rom_settings
 } rom_settings;
 extern rom_settings ROM_SETTINGS;
 
+//Supported rom compressiontypes.
+enum 
+{
+    UNCOMPRESSED,
+    ZIP_COMPRESSION,
+    GZIP_COMPRESSION,
+    //7ZIP_COMPRESSION,
+    //BZIP_COMPRESSION,
+    //LZMA_COMPRESSION
+};
+
+//Supported rom image types.
+enum 
+{
+    Z64IMAGE,
+    V64IMAGE,
+    N64IMAGE
+};
+
+enum
+{
+    CIC_NUS_6101,
+    CIC_NUS_6102,
+    CIC_NUS_6103,
+    CIC_NUS_6105,
+    CIC_NUS_6106
+};
+
+enum
+{
+    EEPROM_4KB,
+    EEPROM_16KB,
+    SRAM,
+    FLASH_RAM,
+    CONTROLLER_PACK,
+    NONE
+};
+
+
 #endif
+

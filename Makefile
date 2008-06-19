@@ -57,6 +57,7 @@ CFLAGS += -DPREFIX=\"$(PREFIX)\" $(FREETYPEINC)
 # list of object files to generate
 OBJ_CORE = \
 	main/main.o \
+	main/romcache.o \
 	main/util.o \
 	main/translate.o \
 	main/guifuncs.o \
@@ -64,7 +65,6 @@ OBJ_CORE = \
 	main/config.o \
 	main/adler32.o \
 	main/md5.o \
-	main/mupenIniApi.o \
 	main/plugin.o \
 	main/rom.o \
 	main/savestates.o \

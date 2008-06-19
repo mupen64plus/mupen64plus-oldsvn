@@ -20,24 +20,36 @@ Email                : blight@Ashitaka
 
 #include <gtk/gtk.h>
 
-#include "rombrowser.h"
+#include "../romcache.h"
 
 typedef struct
 {
     GtkWidget *dialog;
-
     // entries
-    GtkWidget *romNameEntry;
-    GtkWidget *fileNameEntry;
-    GtkWidget *sizeEntry;
+    GtkWidget *filenameEntry;
+    GtkWidget *goodnameEntry;
+    GtkWidget *flag;
     GtkWidget *countryEntry;
-    GtkWidget *iniCodeEntry;
+    GtkWidget *status[5];
+    GtkWidget *fullpathEntry;
+    GtkWidget *crc1Entry;
+    GtkWidget *crc2Entry;
     GtkWidget *md5Entry;
+    GtkWidget *internalnameEntry;
+    GtkWidget *sizeEntry;
+    GtkWidget *savetypeEntry;
+    GtkWidget *playersEntry;
+    GtkWidget *compressiontypeEntry;
+    GtkWidget *imagetypeEntry;
+    GtkWidget *cicchipEntry;
+    GtkWidget *rumbleEntry;
     GtkWidget *commentsEntry;
+    GtkTreeIter iter;
+    cache_entry *entry;
 } SRomPropertiesDialog;
 extern SRomPropertiesDialog g_RomPropDialog;
 
-int create_romPropDialog( void );
-void show_romPropDialog( SRomEntry *entry );
+int create_romPropDialog();
+void show_romPropDialog();
 
 #endif // __ROMPROPERTIES_H__

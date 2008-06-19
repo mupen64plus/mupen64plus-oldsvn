@@ -32,18 +32,18 @@
 
 typedef struct
 {
-   char goodname[100];
    int eeprom16kb;
-   char MD5[33];
-   char CRC[22];
-   char refMD5[33];
-   char comments[200];
+   char goodname[128];
+   char md5[33];
+   char crc[22];
+   unsigned short status;
+   char refmd5[33];
+   char comments[256];
 } mupenEntry;
 
 void ini_openFile();
 void ini_closeFile();
-void ini_updateFile(int compress);
 mupenEntry* ini_search_by_md5(const char *md5);
-mupenEntry* ini_search_by_CRC(const char *CRC);
+mupenEntry* ini_search_by_crc(const char *crc);
 
 #endif
