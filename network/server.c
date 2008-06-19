@@ -129,18 +129,18 @@ void serverProcessMessages(MupenServer *Server) {
   SDLNet_CheckSockets(Server->socketSet, 0);
 
   for (n = 0; n < MAX_CLIENTS; n++) {
-    if ((Server->player[n].isConnected) && (SDLNet_SocketReady(Server->player[n].socket))) {
+    while ((Server->player[n].isConnected) && (SDLNet_SocketReady(Server->player[n].socket))) {
       tempReturn = SDLNet_TCP_Recv(Server->player[n].socket, &incomingMsg, sizeof(NetMessage));
 
       if (tempReturn <= 0) {
         serverBootPlayer(Server, n);                                     // If there was an error or the player disconnected then cleanup.
       } else {                   
         switch (incomingMsg.type) {
-            case NETMSG_EVENT:                                       // Events (Button presses, other time sensitive input)
+            case NETMSG_EVENT:                                           // Events (Button presses, other time sensitive input)
               if (incomingMsg.genEvent.type == EVENT_BUTTON) {
-                    incomingMsg.genEvent.timer = getEventCounter() + Server->netDelay;      // Add calculated delay to the timer
-                    if (n < 4) {                                     // If the message comes from a player (n >= 4 is for spectators)
-                        incomingMsg.genEvent.player = n;         // Change the controller tag on the event
+                    incomingMsg.genEvent.timer = getEventCounter();      // Don't add anything (can't desync)
+                    if (n < 4) {                                         // If the message comes from a player (n >= 4 is for spectators)
+                        incomingMsg.genEvent.player = n;                 // Change the controller tag on the event
                         serverBroadcastMessage(Server, &incomingMsg);    // Broadcast the button event
                     }
               }

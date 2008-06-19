@@ -25,7 +25,7 @@ int clientConnect(MupenClient *Client, char *server, int port) {
         flushEventQueue(Client);
         memset(Client, 0, sizeof(Client));
 	SDLNet_ResolveHost(&serverAddr, server, port);
-        Client->syncFreq = 5;
+        Client->syncFreq = 1;
 
 	if (Client->socket = SDLNet_TCP_Open(&serverAddr)) {
 		Client->socketSet = SDLNet_AllocSocketSet(1);
@@ -63,15 +63,13 @@ void clientProcessMessages(MupenClient *Client) {
 
         if (!Client->isConnected) return; // exit now if the client isnt' connected
         SDLNet_CheckSockets(Client->socketSet, 0);
-        if (!SDLNet_SocketReady(Client->socket)) return; // exit now if there aren't any messages to fetch.
-        n = SDLNet_TCP_Recv(Client->socket, &incomingMessage, sizeof(NetMessage));
-
-        if (n <= 0) {
-          clientDisconnect(Client);
-          return;
-        }
-
-	if (n == sizeof(NetMessage)) {
+        while (SDLNet_SocketReady(Client->socket)) {
+          n = SDLNet_TCP_Recv(Client->socket, &incomingMessage, sizeof(NetMessage));
+          if (n <= 0) {
+            clientDisconnect(Client);
+            return;
+          }
+          if (n == sizeof(NetMessage)) {
                 playerNumber = incomingMessage.genEvent.player;
 		switch (incomingMessage.type) {
 			case NETMSG_EVENT:
@@ -89,8 +87,9 @@ void clientProcessMessages(MupenClient *Client) {
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
                         case NETMSG_SYNC:
-                                Client->isWaitingForServer = 0;
+                                //printf("[Netplay] Recieved sync message (End of frame %d)\n", incomingMessage.genEvent.timer);
 				Client->lastSync = incomingMessage.genEvent.timer;
+                                if (Client->lastSync == Client->frameCounter) Client->isWaitingForServer = 0;
                         break;
 			case NETMSG_PLAYERQUIT:
 				sprintf(osdString, "Player %d has disconnected.", playerNumber + 1);
@@ -104,10 +103,9 @@ void clientProcessMessages(MupenClient *Client) {
 			default:
                                 printf("[Netplay] Received an unrecognized message from the server.\n");
 			break;
-
 		}
-	}
-
+	  }
+        }
 }
 
 void clientSendButtons(MupenClient *Client, int control, DWORD value) {

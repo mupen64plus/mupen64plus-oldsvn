@@ -18,12 +18,12 @@
 
 
 #define 	NETMSG_EVENT		0       // Time sensitive input events
-#define		NETMSG_SYNC		1	// Continue execution of ROM code
+#define		NETMSG_SYNC		1	// Continue/begin execution of ROM code
 #define		NETMSG_PING		2       // Used to detect latency
 #define		NETMSG_DESYNC		3       // Client sends this when they've desynced
 #define		NETMSG_PLAYERQUIT	4	// Player disconnect
-#define         NETMSG_READY		5       // Client is ready to play
 #define         NETMSG_WAIT             6       // Client telling server to slow down
+#define		NETMSG_READY		5       // Tell server that client is ready
 
 #define 	EVENT_BUTTON		0
 

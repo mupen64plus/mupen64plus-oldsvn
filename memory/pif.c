@@ -196,6 +196,16 @@ unsigned char mempack_crc(unsigned char *data)
    return CRC;
 }
 
+static unsigned int gettimeofday_msec(void)
+{
+    struct timeval tv;
+    unsigned int foo;
+    
+    gettimeofday(&tv, NULL);
+    foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
+    return foo;
+}
+
 void internal_ReadController(int Control, BYTE *Command)
 {
    static BUTTONS KeyCache[4];

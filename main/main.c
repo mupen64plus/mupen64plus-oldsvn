@@ -297,7 +297,7 @@ void new_vi(void)
     {
         CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
         time = (int)(CalculatedTime - CurrentFPSTime);
-        if ((time > 0) && (SyncStatus != SYNC_BEHIND))
+        if (time > 0)
         {
             usleep(time * 1000);
         }
