@@ -60,8 +60,8 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
             if (mClient->isConnected) {
                 if (mClient->frameCounter % mClient->syncFreq == 0) mClient->isWaitingForServer = TRUE;
                 if (mClient->isWaitingForServer) {
+                    sentSyncMessage = 0;
                     while (mClient->isWaitingForServer && mClient->isConnected) {
-                        sentSyncMessage = 0;
                         osd_render();  // Updating OSD
                         SDL_GL_SwapBuffers();
                         SDL_PumpEvents();
@@ -84,7 +84,7 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         processEventQueue(mClient);
                     }
 	        } else {
-                  serverProcessMessages(mServer);
+                  if (mServer->isActive) serverProcessMessages(mServer);
                   clientProcessMessages(mClient);
                   processEventQueue(mClient);
                 }
