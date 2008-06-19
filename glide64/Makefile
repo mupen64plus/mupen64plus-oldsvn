@@ -21,7 +21,7 @@ ifeq ($(CPU), X86)
   ifeq ($(ARCH), 64BITS)
     CFLAGS += -march=athlon64 -fPIC
   else
-    CFLAGS += -march=athlon-xp -mmmx -msse
+    CFLAGS += -march=i686 -mtune=pentium-m -mmmx -msse
     ifneq ($(PROFILE), 1)
     ifneq ($(VPDEBUG), 1)
       CFLAGS += -fomit-frame-pointer
