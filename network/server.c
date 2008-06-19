@@ -24,6 +24,18 @@ u_int16_t getEventCounter() {
     return mClient->frameCounter;
 }
 
+u_int16_t getNextSync() {
+    MupenClient *mClient;
+    mClient = (MupenClient *)getNetplayClient();
+    return mClient->lastSync + mClient->syncFreq;
+}
+
+u_int16_t getSyncFreq() {
+    MupenClient *mClient;
+    mClient = (MupenClient *)getNetplayClient();
+    return mClient->syncFreq;
+}
+
 int serverStart(MupenServer *Server, unsigned short port) {
         IPaddress msAddr;
 
@@ -138,7 +150,7 @@ void serverProcessMessages(MupenServer *Server) {
         switch (incomingMsg.type) {
             case NETMSG_EVENT:                                           // Events (Button presses, other time sensitive input)
               if (incomingMsg.genEvent.type == EVENT_BUTTON) {
-                    incomingMsg.genEvent.timer = getEventCounter();      // Don't add anything (can't desync)
+                    incomingMsg.genEvent.timer = getEventCounter() + getSyncFreq();          // Can't desync this way
                     if (n < 4) {                                         // If the message comes from a player (n >= 4 is for spectators)
                         incomingMsg.genEvent.player = n;                 // Change the controller tag on the event
                         serverBroadcastMessage(Server, &incomingMsg);    // Broadcast the button event

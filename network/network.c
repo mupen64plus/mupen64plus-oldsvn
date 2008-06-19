@@ -57,11 +57,11 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
             ts.tv_nsec = 5000000;
             NetMessage syncMsg;
 
-            if ((mClient->frameCounter % mClient->syncFreq == 0) && (mClient->isConnected)) {
-                sentSyncMessage = 0;
-                mClient->isWaitingForServer = TRUE;
+            if (mClient->isConnected) {
+                if (mClient->frameCounter % mClient->syncFreq == 0) mClient->isWaitingForServer = TRUE;
                 if (mClient->isWaitingForServer) {
-                  while (mClient->isWaitingForServer && mClient->isConnected) {
+                    while (mClient->isWaitingForServer && mClient->isConnected) {
+                        sentSyncMessage = 0;
                         osd_render();  // Updating OSD
                         SDL_GL_SwapBuffers();
                         SDL_PumpEvents();
@@ -82,8 +82,12 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         }
                         clientProcessMessages(mClient);
                         processEventQueue(mClient);
-	          }
-              }
+                    }
+	        } else {
+                  serverProcessMessages(mServer);
+                  clientProcessMessages(mClient);
+                  processEventQueue(mClient);
+                }
             }
 
             mClient->frameCounter++;
