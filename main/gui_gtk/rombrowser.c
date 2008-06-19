@@ -32,8 +32,6 @@ Email                : blight@Ashitaka
 #include <string.h>
 #include <limits.h>
 
-static void setup_view (GtkWidget *view);
-
 /*********************************************************************************************************
 * globals
 */

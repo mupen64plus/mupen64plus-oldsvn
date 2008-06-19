@@ -593,6 +593,9 @@ void compressionstring(unsigned short compressiontype, char *string)
     case GZIP_COMPRESSION:
         strcpy(string, tr("Gzip"));
         break;
+    case BZIP2_COMPRESSION:
+        strcpy(string, tr("Bzip2"));
+        break;
     default:
         string[0] = '\0';
     }

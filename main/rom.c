@@ -1,6 +1,6 @@
 /**
  * Mupen64 - rom.c
- * Copyright (C) 2002 Hacktarux
+ * Copyright (C) 2002 Hacktarux Tillin9
  *
  * Mupen64 homepage: http://mupen64.emulation64.com
  * email address: hacktarux@yahoo.fr
@@ -39,10 +39,12 @@
 #include <ctype.h>
 #include <limits.h> 
 
+#include "zip/unzip.h"
+#include "bzip2/bzlib.h"
+
 #include "md5.h"
 #include "rom.h"
 #include "../memory/memory.h"
-#include "zip/unzip.h"
 #include "guifuncs.h"
 #include "romcache.h"
 #include "guifuncs.h"
@@ -87,10 +89,12 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
     unsigned char *localrom;
 
     FILE *romfile;
-    gzFile *gzromfile;
+    BZFILE* bzfile;
+    int bzerror;
     unzFile zipromfile;
     unz_file_info fileinfo;
     char szFileName[256], szExtraField[256], szComment[256];
+    gzFile *gzromfile;
 
     //Uncompressed roms.
     romfile=fopen(filename, "rb");
@@ -112,6 +116,47 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
             fread(localrom, 1, *loadlength, romfile); 
             fclose(romfile);
             romread = 1;
+            }
+        else
+            {
+            //Bzip2 roms.
+            fseek(romfile, 0L, SEEK_SET);
+            bzfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
+            if(bzerror==BZ_OK)
+                { BZ2_bzRead(&bzerror, bzfile, buffer, 4); }
+            if(bzerror==BZ_OK)
+                {
+                if(is_valid_rom(buffer))
+                    {
+                    *compressiontype = BZIP2_COMPRESSION;
+                    fseek(romfile, 0L, SEEK_SET);
+                    bzfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
+                    *romsize=0;
+                    localrom=malloc(100000);
+                    if(localrom==NULL)
+                        {
+                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                        return NULL;
+                        }
+                    while(bzerror==BZ_OK)
+                        { *romsize += BZ2_bzRead(&bzerror, bzfile, localrom, 100000); }
+                    free(localrom);
+                    if(bzerror==BZ_STREAM_END)
+                       {
+                       localrom = malloc(*loadlength);
+                       if(localrom==NULL)
+                           {
+                           fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                           return NULL;
+                           }
+                       fseek(romfile, 0L, SEEK_SET);
+                       bzfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
+                       BZ2_bzRead(&bzerror, bzfile, localrom, *loadlength); 
+                       romread = 1;
+                       }
+                    }
+                }
+            BZ2_bzReadClose(&bzerror, bzfile);
             }
        }
 

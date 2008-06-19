@@ -61,7 +61,7 @@ rom_cache g_romcache;
 
 static const char *romextensions[] = 
 {
- ".v64", ".z64", ".gz", ".zip", ".n64", NULL //".rom" causes to many false positives.
+ ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2",  NULL //".rom" causes to many false positives.
 };
 
 static void scan_dir( const char *dirname );

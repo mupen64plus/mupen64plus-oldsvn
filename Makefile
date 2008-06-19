@@ -71,6 +71,13 @@ OBJ_CORE = \
 	main/volume.o \
 	main/zip/ioapi.o \
 	main/zip/unzip.o \
+        main/bzip2/bzlib.o \
+        main/bzip2/crctable.o \
+        main/bzip2/decompress.o \
+        main/bzip2/compress.o \
+        main/bzip2/randtable.o \
+        main/bzip2/huffman.o \
+        main/bzip2/blocksort.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \

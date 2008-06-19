@@ -13,6 +13,8 @@
 #include "zlib.h"
 #include "ioapi.h"
 
+
+
 /* I've found an old Unix (a SunOS 4.1.3_U1) without all SEEK_* defined.... */
 
 #ifndef SEEK_CUR
@@ -173,4 +175,3 @@ void fill_fopen_filefunc (pzlib_filefunc_def)
     pzlib_filefunc_def->zerror_file = ferror_file_func;
     pzlib_filefunc_def->opaque = NULL;
 }
-

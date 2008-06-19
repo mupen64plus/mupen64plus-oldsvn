@@ -401,10 +401,12 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
 
     // add filter for rom file types
     file_filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(file_filter, "N64 ROM (*.z64, *.v64, *.n64, *.rom, *.gz, *.zip)");
+    gtk_file_filter_set_name(file_filter, "N64 ROM (*.z64, *.v64, *.n64, *.gz, *.zip. *.bz2, *.lzma)");
     gtk_file_filter_add_mime_type(file_filter, "application/x-gzip");
     gtk_file_filter_add_mime_type(file_filter, "application/zip");
+    gtk_file_filter_add_mime_type(file_filter, "application/x-bzip2");
     gtk_file_filter_add_pattern(file_filter, "*.[zZ]64");
+    gtk_file_filter_add_pattern(file_filter, "*.lzma");
 
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
                                 file_filter);
