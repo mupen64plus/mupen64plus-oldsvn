@@ -49,9 +49,9 @@ typedef struct _rom_header
    unsigned int CRC2; //0x14
    unsigned int Unknown[2]; //0x18
    unsigned char nom[20]; //0x20
-   unsigned int unknown;  //0x35
-   unsigned int Manufacturer_ID; //0x39
-   unsigned short Cartridge_ID;  //0x3D //Game serial number
+   unsigned int unknown;  //0x34
+   unsigned int Manufacturer_ID; //0x38
+   unsigned short Cartridge_ID;  //0x3C //Game serial number
    unsigned short Country_code;  //0x3E //Possible byte alignment padding here???
    unsigned int Boot_Code[1008]; //0x40
 } rom_header;

@@ -1739,33 +1739,6 @@ void go()
      last_addr = PC->addr;
      while (!stop)
       {
-         //if ((debug_count+Count) >= 0x78a8091) break; // obj 0x16aeb8a
-         //if ((debug_count+Count) >= 0x16b1360)
-         /*if ((debug_count+Count) >= 0xf203ae0)
-           {
-          printf ("PC=%x:%x\n", (unsigned int)(PC->addr), 
-              (unsigned int)(rdram[(PC->addr&0xFFFFFF)/4]));
-          for (j=0; j<16; j++)
-            printf ("reg[%2d]:%8x%8x        reg[%d]:%8x%8x\n",   
-                j,
-                (unsigned int)(reg[j] >> 32),
-                (unsigned int)reg[j],
-                j+16,
-                (unsigned int)(reg[j+16] >> 32),
-                (unsigned int)reg[j+16]);
-          printf("hi:%8x%8x        lo:%8x%8x\n",
-             (unsigned int)(hi >> 32),
-             (unsigned int)hi,
-             (unsigned int)(lo >> 32),
-             (unsigned int)lo);
-          printf("apr�s %d instructions soit %x\n",(unsigned int)(debug_count+Count)
-             ,(unsigned int)(debug_count+Count));
-          getchar();
-           }*/
-         /*if ((debug_count+Count) >= 0x80000000) 
-           printf("%x:%x, %x\n", (int)PC->addr, 
-              (int)rdram[(PC->addr & 0xFFFFFF)/4],
-              (int)(debug_count+Count));*/
 #ifdef COMPARE_CORE
          if (PC->ops == FIN_BLOCK && 
          (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
@@ -1773,12 +1746,6 @@ void go()
          compare_core();
 #endif
          PC->ops();
-         /*if (j!= (Count & 0xFFF00000))
-           {
-          j = (Count & 0xFFF00000);
-          printf("%x\n", j);
-           }*/
-         //check_PC;
 #ifdef DBG
          if (debugger_mode)
            update_debugger();
