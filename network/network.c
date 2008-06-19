@@ -82,7 +82,7 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         }
                         clientProcessMessages(mClient);
                         processEventQueue(mClient);
-                        if (mClient->lastSync == mClient->frameCounter) mClient->isWaitingForServer = FALSE;
+                        if (mClient->lastSync >= mClient->frameCounter) mClient->isWaitingForServer = FALSE;
                     }
 	        } else {
                   if (mServer->isActive) serverProcessMessages(mServer);
