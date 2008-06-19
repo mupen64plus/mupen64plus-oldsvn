@@ -84,6 +84,7 @@ void clientProcessMessages(MupenClient *Client) {
 			break;
                         case NETMSG_DESYNC:
 				sprintf(osdString, "Player %d has desynchronized!", playerNumber + 1);
+                                printf("[Netplay] %s\n", osdString);
 				osd_new_message(OSD_BOTTOM_LEFT, (void *)tr(osdString));
                         break;
                         case NETMSG_SYNC:
