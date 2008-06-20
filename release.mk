@@ -58,7 +58,7 @@ src: FORCE
 
 bin-32: FORCE
 	$(MAKE) -f ./Makefile clean
-	$(MAKE) -f ./Makefile all BITS=32
+	$(MAKE) -f ./Makefile all BITS=32 RELEASE=1
 	# remove binary tree and zip file if they exist, then make empty directory for binary tree
 	rm -rf ../$(BINNAME_32)
 	rm -f ../$(BINNAME_32).zip
@@ -87,7 +87,7 @@ bin-32: FORCE
 
 bin-64: FORCE
 	$(MAKE) -f ./Makefile clean
-	$(MAKE) -f ./Makefile all
+	$(MAKE) -f ./Makefile all RELEASE=1
 	# remove binary tree and zip file if they exist, then make empty directory for binary tree
 	rm -rf ../$(BINNAME_64)
 	rm -f ../$(BINNAME_64).zip

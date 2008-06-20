@@ -277,6 +277,9 @@ targets:
 	@echo "    DBG_COUNT=1   == print R4300 instruction count totals (64-bit dynarec only)"
 	@echo "    DBG_COMPARE=1 == enable core-synchronized r4300 debugging"
 	@echo "    DBG_PROFILE=1 == dump profiling data for r4300 dynarec to data file"
+#	@echo "    RELEASE=1     == inhibit SVN info from version strings"
+# The RELEASE flag is hidden from view as it should only be used internally.  It only affects
+# the version strings
 
 all: $(ALL)
 

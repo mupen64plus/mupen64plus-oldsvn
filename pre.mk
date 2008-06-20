@@ -163,8 +163,10 @@ LIBGL_LIBS	= -L/usr/X11R6/lib -lGL -lGLU
 
 ########################
 # create SVN version defines
-ifneq ($(shell svn info ./ 2>/dev/null),)
-  CFLAGS += -DSVN_REVISION="\"$(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')\""
-  CFLAGS += -DSVN_BRANCH="\"$(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')\""
-  CFLAGS += -DSVN_DIFFHASH="\"$(shell svn diff ./ 2>/dev/null | md5sum | sed '/.*/s/  -//;/^d41d8cd98f00b204e9800998ecf8427e/d')\""
+ifneq ($(RELEASE),1)
+  ifneq ($(shell svn info ./ 2>/dev/null),)
+    CFLAGS += -DSVN_REVISION="\"$(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')\""
+    CFLAGS += -DSVN_BRANCH="\"$(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')\""
+    CFLAGS += -DSVN_DIFFHASH="\"$(shell svn diff ./ 2>/dev/null | md5sum | sed '/.*/s/  -//;/^d41d8cd98f00b204e9800998ecf8427e/d')\""
+  endif
 endif
