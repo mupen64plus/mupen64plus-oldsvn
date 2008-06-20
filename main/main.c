@@ -1329,7 +1329,8 @@ int main(int argc, char *argv[])
     printf("| |\\/| | | | | '_ \\ / _ \\ '_ \\| '_ \\| || |_| |_) | | | | / __|  \n");
     printf("| |  | | |_| | |_) |  __/ | | | (_) |__   _|  __/| | |_| \\__ \\  \n");
     printf("|_|  |_|\\__,_| .__/ \\___|_| |_|\\___/   |_| |_|   |_|\\__,_|___/  \n");
-    printf("             |_|         http://code.google.com/p/mupen64plus/  \n\n");
+    printf("             |_|         http://code.google.com/p/mupen64plus/  \n");
+    printf("Version %s\n\n",MUPEN_VERSION);
 
     // allow gui subsystem to init and parse gui-specific commandline args first
     if(l_GuiEnabled)
