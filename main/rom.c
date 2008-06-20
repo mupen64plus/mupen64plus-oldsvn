@@ -83,13 +83,14 @@ int is_valid_rom(unsigned char buffer[4])
  */
 unsigned char* load_rom(const char *filename, int *romsize, unsigned short *compressiontype, unsigned short *imagetype, int *loadlength)
 {
-    int i, romread = 0;
+    int i, oldvalue;
+    unsigned short romread = 0;
     char temp;
     unsigned char buffer[4];
     unsigned char *localrom;
 
     FILE *romfile;
-    BZFILE* bzfile;
+    BZFILE* bzromfile;
     int bzerror;
     unzFile zipromfile;
     unz_file_info fileinfo;
@@ -121,42 +122,38 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
             {
             //Bzip2 roms.
             fseek(romfile, 0L, SEEK_SET);
-            bzfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
+            bzromfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
             if(bzerror==BZ_OK)
-                { BZ2_bzRead(&bzerror, bzfile, buffer, 4); }
+                { BZ2_bzRead(&bzerror, bzromfile, buffer, 4); }
             if(bzerror==BZ_OK)
                 {
                 if(is_valid_rom(buffer))
                     {
                     *compressiontype = BZIP2_COMPRESSION;
                     fseek(romfile, 0L, SEEK_SET);
-                    bzfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
+                    bzromfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
                     *romsize=0;
-                    localrom=malloc(100000);
-                    if(localrom==NULL)
+                    localrom=NULL;
+                    for( i = 0; bzerror==BZ_OK; ++i )
                         {
-                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
-                        return NULL;
-                        }
-                    while(bzerror==BZ_OK)
-                        { *romsize += BZ2_bzRead(&bzerror, bzfile, localrom, 100000); }
-                    free(localrom);
-                    if(bzerror==BZ_STREAM_END)
-                       {
-                       localrom = malloc(*loadlength);
-                       if(localrom==NULL)
+                        localrom = (char*)realloc(localrom, (i+1)*100000);
+                        if(localrom==NULL)
                            {
                            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
                            return NULL;
                            }
-                       fseek(romfile, 0L, SEEK_SET);
-                       bzfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
-                       BZ2_bzRead(&bzerror, bzfile, localrom, *loadlength); 
-                       romread = 1;
+                        *romsize += BZ2_bzRead(&bzerror, bzromfile, localrom+(i*100000), 100000); 
+                        }
+                    if(bzerror==BZ_STREAM_END)
+                       {
+                       localrom = (char*)realloc(localrom, *loadlength);
+                       romread = 1; 
                        }
+                    else
+                       { free(localrom); }
                     }
                 }
-            BZ2_bzReadClose(&bzerror, bzfile);
+            BZ2_bzReadClose(&bzerror, bzromfile);
             }
        }
 
@@ -211,30 +208,25 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
                 *compressiontype = GZIP_COMPRESSION;
                 gzseek(gzromfile, 0L, SEEK_SET);
                 *romsize=0;
-                localrom=malloc(100000);
-                if(localrom==NULL)
+                localrom=NULL;
+                for( i = 0; !gzeof(gzromfile); ++i )
                     {
-                    fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
-                    return NULL;
+                    localrom = (char*)realloc(localrom, (i+1)*100000);
+                    if(localrom==NULL)
+                       {
+                       fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                       return NULL;
+                       }
+                    *romsize += gzread(gzromfile, localrom+(i*100000), 100000);
                     }
-                while((i=gzread(gzromfile, localrom, 100000)))
-                    { *romsize += i; }
-                if(!gzeof(gzromfile)) //gzread error.
-                    { 
-                    free(localrom);
-                    return NULL;
-                    }
-                gzseek(gzromfile, 0L, SEEK_SET);
-                free(localrom);
-                localrom = malloc(*loadlength);
-                if(localrom==NULL)
-                    {
-                    fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
-                    return NULL;
-                    }
-                gzread(gzromfile, localrom, *loadlength); 
+                if(gzeof(gzromfile))
+                       {
+                       localrom = (char*)realloc(localrom, *loadlength);
+                       romread = 1; 
+                       }
+                    else
+                       { free(localrom); }
                 gzclose(gzromfile);
-                romread = 1;
                 }
             }
         }
