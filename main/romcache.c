@@ -479,8 +479,6 @@ int load_initial_cache(char* cache_filename)
             {
             //Actually add rom to cache.
             entry->inientry = ini_search_by_md5(entry->md5);
-            if(entry->inientry==&empty_entry)
-                { printf("Empty\n"); }
 
             if(counter==0)
                 {
@@ -527,6 +525,18 @@ void romdatabase_open()
 
     if(g_romdatabase.comment!=NULL)
         { return; }
+
+    //Setup empty_entry.
+    empty_entry.goodname = NULL;
+    for( counter=0; counter<16; ++counter)
+       { empty_entry.md5[counter]=0; }
+    empty_entry.refmd5 = NULL;
+    empty_entry.crc1 = 0;
+    empty_entry.crc2 = 0;
+    empty_entry.status = 0;
+    empty_entry.savetype = DEFAULT;
+    empty_entry.players = DEFAULT;
+    empty_entry.rumble = DEFAULT;
 
     //Query config system and open romdatabase.
     char *pathname = (char*)config_get_string("RomDatabaseFile", NULL);
@@ -616,6 +626,10 @@ void romdatabase_open()
                 search->next_md5 = aux;
                 g_romdatabase.md5_lists[index] = search;
                 }
+            search->entry.goodname = NULL;
+            search->entry.refmd5 = NULL;
+            search->entry.crc1 = 0;
+            search->entry.crc2 = 0;
             search->entry.status=0; //Set default to 0 stars.
             search->entry.savetype=DEFAULT; //Set default to NULL 
             search->entry.rumble=DEFAULT; 
@@ -741,8 +755,8 @@ void romdatabase_close()
 
 romdatabase_entry* ini_search_by_md5(md5_byte_t* md5)
 {
-   // if(g_romdatabase.comment==NULL)
-     //   { return &empty_entry; }
+    if(g_romdatabase.comment==NULL)
+        { return &empty_entry; }
     romdatabase_search *search;
     search = g_romdatabase.md5_lists[md5[0]];
 
