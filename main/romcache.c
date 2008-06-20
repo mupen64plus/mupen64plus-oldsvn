@@ -539,18 +539,11 @@ void romdatabase_open()
     empty_entry.rumble = DEFAULT;
 
     //Query config system and open romdatabase.
-    char *pathname = (char*)config_get_string("RomDatabaseFile", NULL);
-    if(pathname==NULL)
-        {
-        printf("[rcs] Database not in config.\n");
-        pathname = (char*)malloc(PATH_MAX*sizeof(char));
-        snprintf(pathname, PATH_MAX, "%s%s", get_configpath(), "mupen64plus.ini");
-        config_put_string("RomDatabaseFile", pathname);
-        }
+    char* pathname = (char*)malloc(PATH_MAX*sizeof(char));
+    snprintf(pathname, PATH_MAX, "%s%s", get_installpath(), "mupen64plus.ini");
 
     //printf("Database file: %s \n", pathname);
     gzfile = gzopen(pathname, "rb");
-
     if(gzfile==NULL)
         {
         printf("[rcs] Unable to open rom database.\n");
@@ -630,10 +623,10 @@ void romdatabase_open()
             search->entry.refmd5 = NULL;
             search->entry.crc1 = 0;
             search->entry.crc2 = 0;
-            search->entry.status=0; //Set default to 0 stars.
-            search->entry.savetype=DEFAULT; //Set default to NULL 
-            search->entry.rumble=DEFAULT; 
-            search->entry.players=DEFAULT; 
+            search->entry.status = 0; //Set default to 0 stars.
+            search->entry.savetype = DEFAULT; //Set default to NULL 
+            search->entry.rumble = DEFAULT; 
+            search->entry.players = DEFAULT; 
             }
         else
             {
