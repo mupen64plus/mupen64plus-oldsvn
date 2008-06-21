@@ -61,7 +61,7 @@ rom_cache g_romcache;
 
 static const char *romextensions[] = 
 {
- ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2",  NULL //".rom" causes to many false positives.
+ ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2", ".lzma",  NULL //".rom" causes to many false positives.
 };
 
 static void scan_dir( const char *dirname );
@@ -538,7 +538,7 @@ void romdatabase_open()
     empty_entry.players = DEFAULT;
     empty_entry.rumble = DEFAULT;
 
-    //Query config system and open romdatabase.
+    //Open romdatabase.
     char* pathname = (char*)malloc(PATH_MAX*sizeof(char));
     snprintf(pathname, PATH_MAX, "%s%s", get_installpath(), "mupen64plus.ini");
 

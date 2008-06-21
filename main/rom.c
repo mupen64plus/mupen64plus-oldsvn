@@ -27,11 +27,6 @@
  *
 **/
 
-/* This is the functions that load a rom into memory, it loads a roms
- * in multiple formats, gzipped or not. It searches the rom, in the roms
- * subdirectory or in the path specified in the path.cfg file.
- */
-
 #include <stdio.h> 
 #include <stdlib.h>
 #include <zlib.h>
@@ -41,6 +36,7 @@
 
 #include "zip/unzip.h"
 #include "bzip2/bzlib.h"
+#include "lzma/lzmadec.h"
 
 #include "md5.h"
 #include "rom.h"
@@ -51,6 +47,8 @@
 #include "translate.h"
 #include "main.h"
 #include "util.h"
+
+#define CHUNKSIZE 1024*128 //Read files 128KB at a time.
 
 //Global loaded rom memory space.
 unsigned char *rom;
@@ -78,25 +76,16 @@ int is_valid_rom(unsigned char buffer[4])
 /*
  * Open a rom.
  * Determins compression type by testing if the decompressed file has a valid rom 4 byte header.
- * Loads loadlength of the rom into rom. //
- * and byteswaps if necessary.
+ * Loads loadlength of the rom and byteswaps if necessary.
  */
 unsigned char* load_rom(const char *filename, int *romsize, unsigned short *compressiontype, unsigned short *imagetype, int *loadlength)
 {
-    int i, oldvalue;
+    int i;
     unsigned short romread = 0;
-    char temp;
     unsigned char buffer[4];
     unsigned char *localrom;
 
     FILE *romfile;
-    BZFILE* bzromfile;
-    int bzerror;
-    unzFile zipromfile;
-    unz_file_info fileinfo;
-    char szFileName[256], szExtraField[256], szComment[256];
-    gzFile *gzromfile;
-
     //Uncompressed roms.
     romfile=fopen(filename, "rb");
     if(romfile!=NULL)
@@ -108,19 +97,20 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
             fseek(romfile, 0L, SEEK_END);
             *romsize=ftell(romfile);
             fseek(romfile, 0L, SEEK_SET);
-            localrom = malloc(*loadlength);
+            localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
             if(localrom==NULL)
                 {
                 fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
                 return NULL;
                 }
             fread(localrom, 1, *loadlength, romfile); 
-            fclose(romfile);
             romread = 1;
             }
-        else
+        if(romread==0)
             {
             //Bzip2 roms.
+            BZFILE* bzromfile;
+            int bzerror;
             fseek(romfile, 0L, SEEK_SET);
             bzromfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
             if(bzerror==BZ_OK)
@@ -136,17 +126,17 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
                     localrom=NULL;
                     for( i = 0; bzerror==BZ_OK; ++i )
                         {
-                        localrom = (char*)realloc(localrom, (i+1)*100000);
+                        localrom = (unsigned char*)realloc(localrom, (i+1)*CHUNKSIZE*sizeof(unsigned char));
                         if(localrom==NULL)
                            {
                            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
                            return NULL;
                            }
-                        *romsize += BZ2_bzRead(&bzerror, bzromfile, localrom+(i*100000), 100000); 
+                        *romsize += BZ2_bzRead(&bzerror, bzromfile, localrom+(i*CHUNKSIZE), CHUNKSIZE); 
                         }
                     if(bzerror==BZ_STREAM_END)
                        {
-                       localrom = (char*)realloc(localrom, *loadlength);
+                       localrom = (unsigned char*)realloc(localrom,*loadlength*sizeof(unsigned char));
                        romread = 1; 
                        }
                     else
@@ -155,11 +145,92 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
                 }
             BZ2_bzReadClose(&bzerror, bzromfile);
             }
-       }
+        if(romread==0)
+            {
+            //LZMA roms.
+            fseek(romfile, 0L, SEEK_SET);
+            int lzmastatus;
+            lzmadec_stream stream;
+            stream.lzma_alloc = NULL;
+            stream.lzma_free = NULL;
+            stream.opaque = NULL;
+            stream.avail_in = 0;
+            stream.next_in = NULL;
+
+            //Minimum size to get decoded blocks back is 45.
+            //LZMA has 13 byte headers, likely 32 byte internal buffer.
+            unsigned char *buffer_in = (unsigned char*)malloc(45*sizeof(unsigned char));
+            unsigned char *buffer_out = (unsigned char*)malloc(45*128*sizeof(unsigned char));
+            if(buffer_in==NULL||buffer_out==NULL||lzmadec_init(&stream)!=LZMADEC_OK)
+                {
+                fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                return NULL;
+                }
+
+            fread(buffer_in, sizeof(unsigned char), 45, romfile);
+
+            stream.next_in = buffer_in;
+            stream.avail_in = 45;
+            stream.next_out = buffer_out;
+            stream.avail_out = 45;
+
+            lzmastatus = lzmadec_decode (&stream, (stream.avail_in==0));
+            if(lzmastatus==LZMADEC_OK&&is_valid_rom(buffer_out))
+                {
+                *compressiontype = LZMA_COMPRESSION;
+                int oldsize;
+                *romsize = 45 - stream.avail_out;
+
+                buffer_in = (unsigned char*)realloc(buffer_in,CHUNKSIZE*sizeof(unsigned char));
+                buffer_out = (unsigned char*)realloc(buffer_out,CHUNKSIZE*128*sizeof(unsigned char));
+                localrom = (unsigned char*)malloc(*romsize*sizeof(unsigned char));
+                if(buffer_in==NULL||buffer_out==NULL||localrom==NULL)
+                    {
+                    fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                    return NULL;
+                    }
+
+                memcpy(localrom,buffer_out,*romsize);
+                while(lzmastatus==LZMADEC_OK)
+                    {
+                    fread(buffer_in, sizeof(unsigned char), CHUNKSIZE, romfile);
+                    stream.next_in = buffer_in;
+                    stream.avail_in = CHUNKSIZE;
+                    stream.next_out = buffer_out;
+                    stream.avail_out = CHUNKSIZE*128;
+                    lzmastatus = lzmadec_decode (&stream, (stream.avail_in==0));
+
+                    oldsize = *romsize;
+                    *romsize += CHUNKSIZE*128-stream.avail_out;
+
+                    localrom = (unsigned char*)realloc(localrom,*romsize*sizeof(unsigned char));
+                    if(localrom==NULL)
+                        {
+                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                        return NULL;
+                        }
+                    memcpy(localrom+oldsize,buffer_out,CHUNKSIZE*128-stream.avail_out);
+                    }
+
+                if(lzmastatus==LZMADEC_STREAM_END) 
+                    {
+                    lzmadec_end(&stream);
+                    localrom = (unsigned char*)realloc(localrom,*loadlength*sizeof(unsigned char));
+                    romread = 1;
+                    }
+                }
+            free(buffer_in);
+            free(buffer_out);
+            }
+        fclose(romfile);
+        }
 
     //Zipped roms.
     if(romread==0)
         {
+        unzFile zipromfile;
+        unz_file_info fileinfo;
+        char szFileName[256], szExtraField[256], szComment[256];
         zipromfile = unzOpen(filename);
         if(zipromfile!=NULL) 
             {
@@ -177,7 +248,7 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
                        { 
                        *compressiontype = ZIP_COMPRESSION;
                        *romsize = fileinfo.uncompressed_size;
-                       localrom = malloc(*loadlength);
+                       localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
                        if(localrom==NULL)
                            {
                            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
@@ -198,7 +269,8 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
 
     //Gzipped roms.
     if(romread==0)
-        { 
+        {
+        gzFile *gzromfile;
         gzromfile=gzopen(filename, "rb");
         if(gzromfile!=NULL)
             {
@@ -211,17 +283,17 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
                 localrom=NULL;
                 for( i = 0; !gzeof(gzromfile); ++i )
                     {
-                    localrom = (char*)realloc(localrom, (i+1)*100000);
+                    localrom = (unsigned char*)realloc(localrom, (i+1)*CHUNKSIZE*sizeof(unsigned char));
                     if(localrom==NULL)
                        {
                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
                        return NULL;
                        }
-                    *romsize += gzread(gzromfile, localrom+(i*100000), 100000);
+                    *romsize += gzread(gzromfile, localrom+(i*CHUNKSIZE), CHUNKSIZE);
                     }
                 if(gzeof(gzromfile))
                        {
-                       localrom = (char*)realloc(localrom, *loadlength);
+                       localrom = (unsigned char*)realloc(localrom,*loadlength*sizeof(unsigned char));
                        romread = 1; 
                        }
                     else
@@ -237,6 +309,8 @@ unsigned char* load_rom(const char *filename, int *romsize, unsigned short *comp
         romsize = 0;
         return NULL;
         }
+
+    char temp;
 
     //Btyeswap if .v64 image.
     if(localrom[0]==0x37)

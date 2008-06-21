@@ -72,7 +72,7 @@ enum
     ZIP_COMPRESSION,
     GZIP_COMPRESSION,
     BZIP2_COMPRESSION,
-    //LZMA_COMPRESSION
+    LZMA_COMPRESSION,
 };
 
 //Supported rom image types.

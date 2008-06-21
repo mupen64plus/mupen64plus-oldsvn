@@ -78,6 +78,9 @@ OBJ_CORE = \
         main/bzip2/randtable.o \
         main/bzip2/huffman.o \
         main/bzip2/blocksort.o \
+        main/lzma/buffer.o \
+        main/lzma/io.o \
+        main/lzma/main.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
