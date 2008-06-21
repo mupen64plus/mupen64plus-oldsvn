@@ -29,5 +29,9 @@
 #elif !defined(SVN_BRANCH)
   #define MUPEN_VERSION MUPEN_RELEASE "-development"
 #else
+  #if defined(SVN_DIFFHASH)
   #define MUPEN_VERSION MUPEN_RELEASE "-" SVN_BRANCH "-r" SVN_REVISION "." SVN_DIFFHASH
+  #else
+  #define MUPEN_VERSION MUPEN_RELEASE "-" SVN_BRANCH "-r" SVN_REVISION
+  #endif
 #endif
