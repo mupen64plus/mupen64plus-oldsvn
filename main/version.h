@@ -24,7 +24,9 @@
 #define MUPEN_NAME    "Mupen64Plus"
 #define MUPEN_RELEASE "1.4"
 
-#ifndef SVN_BRANCH
+#if defined(RELEASE_BUILD)
+  #define MUPEN_VERSION MUPEN_RELEASE
+#elif !defined(SVN_BRANCH)
   #define MUPEN_VERSION MUPEN_RELEASE "-development"
 #else
   #define MUPEN_VERSION MUPEN_RELEASE "-" SVN_BRANCH "-r" SVN_REVISION "." SVN_DIFFHASH
