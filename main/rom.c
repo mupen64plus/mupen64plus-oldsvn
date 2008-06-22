@@ -461,8 +461,7 @@ int rom_read(const char *filename)
                 ROM_HEADER = NULL;
                 return -3;
                 }
-            strcpy(ROM_SETTINGS.goodname, entry->goodname);
-            strcat(ROM_SETTINGS.goodname, " (bad dump)");
+            strcpy(ROM_SETTINGS.goodname, "(unknown)");
             if(entry->savetype==EEPROM_16KB)
                 { ROM_SETTINGS.eeprom_16kb = 1; }
             return 0;

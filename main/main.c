@@ -1394,20 +1394,25 @@ int main(int argc, char *argv[])
     // must be called after building gui
     info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
 
-    pthread_attr_t tattr;
-    int ret;
-    int newprio = 80;
-    struct sched_param param;
-    pthread_attr_init (&tattr);
-    pthread_attr_getschedparam (&tattr, &param);
-    param.sched_priority = newprio;
-    pthread_attr_setschedparam (&tattr, &param);
-    g_romcache.rcstask = RCS_INIT;
-    if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
-        {
-        g_RomCacheThread = 0;
-        alert_message(tr("Couldn't spawn rom cache thread!"));
-        }
+    // only create the ROM Cache Thread if GUI is enabled
+    if (l_GuiEnabled)
+    {
+        pthread_attr_t tattr;
+        int ret;
+        int newprio = 80;
+        struct sched_param param;
+        pthread_attr_init (&tattr);
+        pthread_attr_getschedparam (&tattr, &param);
+        param.sched_priority = newprio;
+        pthread_attr_setschedparam (&tattr, &param);
+        g_romcache.rcstask = RCS_INIT;
+        if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
+            {
+            g_RomCacheThread = 0;
+            alert_message(tr("Couldn't spawn rom cache thread!"));
+            }
+    }
+
     // only display gui if user wants it
     if(l_GuiEnabled)
         gui_display();
