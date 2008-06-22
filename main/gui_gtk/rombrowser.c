@@ -427,21 +427,6 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 /*********************************************************************************************************
 * callbacks
 */
-// column clicked (title) -> sort
-static void callback_column_sort(GtkTreeViewColumn *treeviewcolumn, gpointer data)
-{
-
-    if( g_MainWindow.romSortColumn == gtk_tree_view_column_get_sort_column_id(treeviewcolumn) )
-        { g_MainWindow.romSortType = ( g_MainWindow.romSortType == GTK_SORT_ASCENDING ) ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING; }
-    else
-        {
-        g_MainWindow.romSortColumn = gtk_tree_view_column_get_sort_column_id(treeviewcolumn); 
-        g_MainWindow.romSortType = GTK_SORT_ASCENDING;
-        }
-
-  apply_filter();
-}
-
 // row double clicked -> play rom
 static gboolean callback_rowSelected(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
 {
@@ -679,7 +664,19 @@ static void callback_header_clicked(GtkWidget *widget, GdkEventButton *event, gp
             event->button, event->time );
             }
         else if(event->button==1) //Left click.
-            { callback_column_sort(column, NULL); }
+            {
+            if(g_MainWindow.romSortColumn==gtk_tree_view_column_get_sort_column_id(column))
+                { g_MainWindow.romSortType = ( g_MainWindow.romSortType == GTK_SORT_ASCENDING ) ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING; }
+            else
+                {
+                g_MainWindow.romSortColumn = gtk_tree_view_column_get_sort_column_id(column); 
+                g_MainWindow.romSortType = GTK_SORT_ASCENDING;
+                }
+
+            config_put_number("RomSortColumn",g_MainWindow.romSortColumn);
+            config_put_number("RomSortType",g_MainWindow.romSortType);
+            apply_filter(); 
+            }
         }
 }
 

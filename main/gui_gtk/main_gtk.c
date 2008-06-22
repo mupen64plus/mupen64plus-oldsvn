@@ -1596,8 +1596,22 @@ static int create_statusBar( void )
 // main window
 static int create_mainWindow( void )
 {
-    g_MainWindow.romSortType = GTK_SORT_ASCENDING;
-    g_MainWindow.romSortColumn = 1;
+    int i=config_get_number("RomSortType",16);
+    if(i!=GTK_SORT_ASCENDING&&i!=GTK_SORT_DESCENDING)
+        {
+        g_MainWindow.romSortType = GTK_SORT_ASCENDING;
+        config_put_number("RomSortType",GTK_SORT_ASCENDING);
+        }
+    else
+        { g_MainWindow.romSortType = i; }
+    i=config_get_number("RomSortColumn",17);
+    if(i<0||i>16)
+        {
+        g_MainWindow.romSortColumn = 1;
+        config_put_number("RomSortColumn",1);
+        }
+    else
+        { g_MainWindow.romSortColumn = i; }
 
     int width, height;
 

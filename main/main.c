@@ -1340,14 +1340,17 @@ int main(int argc, char *argv[])
     setPaths();
     config_read();
 
-    i = config_get_bool("OsdEnabled", 2);
-    if(i==2)
+    if(l_GuiEnabled)
     {
-        config_put_bool("OsdEnabled", g_OsdEnabled);
-    }
-    else if(g_OsdEnabled==1)
-    {
+        i = config_get_bool("OsdEnabled", 2);
+        if(i==2)
+        {
+            config_put_bool("OsdEnabled", g_OsdEnabled);
+        }
+        else if(g_OsdEnabled==1)
+        {
         g_OsdEnabled = i;
+        }
     }
 
 #ifdef VCR_SUPPORT
@@ -1381,6 +1384,15 @@ int main(int argc, char *argv[])
 
     savestates_set_autoinc_slot(config_get_bool("AutoIncSaveSlot", FALSE));
 
+    if((i=config_get_number("CurrentSaveSlot",10))!=10)
+    {
+        savestates_select_slot((unsigned int)i);
+    }
+    else
+    {
+        config_put_number("CurrentSaveSlot",0);
+    }
+
     // if --noask was not specified at the commandline, try config file
     if(!g_NoaskParam)
         g_Noask = config_get_bool("No Ask", FALSE);
@@ -1394,6 +1406,8 @@ int main(int argc, char *argv[])
     // must be called after building gui
     info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
 
+    //The database needs to be opened regardless of GUI mode.
+    romdatabase_open();
     // only create the ROM Cache Thread if GUI is enabled
     if (l_GuiEnabled)
     {
@@ -1426,6 +1440,7 @@ int main(int argc, char *argv[])
             // cleanup and exit
             cheat_delete_all();
             g_romcache.rcstask = RCS_SHUTDOWN;
+            romdatabase_close();
             plugin_delete_list();
             tr_delete_languages();
             config_delete();
@@ -1443,6 +1458,7 @@ int main(int argc, char *argv[])
         // cleanup and exit
         cheat_delete_all();
         g_romcache.rcstask = RCS_SHUTDOWN;
+        romdatabase_close();
         plugin_delete_list();
         tr_delete_languages();
         config_delete();
@@ -1463,6 +1479,7 @@ int main(int argc, char *argv[])
     cheat_write_config();
     cheat_delete_all();
     g_romcache.rcstask = RCS_SHUTDOWN;
+    romdatabase_close();
     plugin_delete_list();
     tr_delete_languages();
     config_delete();

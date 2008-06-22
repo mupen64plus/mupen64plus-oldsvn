@@ -46,7 +46,11 @@
 #include "translate.h"
 
 //This if for updaterombrowser(), which needs the same type of abstraction as info_message().
-#include "gui_gtk/rombrowser.h"
+#ifdef NO_GUI
+#include "guifuncs.h"
+#else
+#include "gui_gtk/main_gtk.h"
+#endif
 
 #define UPDATE_FREQUENCY 12
 #define DEFAULT 16
@@ -99,7 +103,6 @@ void* rom_cache_system(void* _arg)
             {
             case RCS_INIT:
                 g_romcache.rcstask = RCS_BUSY;
-                romdatabase_open();
                 buffer = (char*)config_get_string("RomCacheFile", NULL);
                 if(buffer==NULL)
                     {
@@ -150,7 +153,6 @@ void* rom_cache_system(void* _arg)
             }
         }
 
-    romdatabase_close();
     printf("[rcs] RCS Terminated!\n");
 }
 

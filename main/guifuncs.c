@@ -97,4 +97,7 @@ int confirm_message(const char *fmt, ...)
     }
 }
 
+void updaterombrowser( unsigned int roms, unsigned short clear )
+{
+}
 #endif // NO_GUI

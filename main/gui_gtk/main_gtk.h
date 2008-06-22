@@ -47,6 +47,7 @@ extern SMainWindow g_MainWindow;
 extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 
 void reload();
+void updaterombrowser( unsigned int roms, unsigned short clear );
 void statusbar_message( const char *section, const char *fmt, ... );
 gboolean check_icon_theme();
 

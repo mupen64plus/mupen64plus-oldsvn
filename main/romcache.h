@@ -96,6 +96,8 @@ extern rom_cache g_romcache;
 
 void* rom_cache_system(void* _arg);
 romdatabase_entry* ini_search_by_md5(md5_byte_t* md5);
+void romdatabase_open();
+void romdatabase_close();
 
 //Should be used by current cheat system (isn't), when cheat system is 
 //migrated to md5s, will be fully depreciated.

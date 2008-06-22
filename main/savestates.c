@@ -46,7 +46,7 @@ extern unsigned int interp_addr;
 
 int savestates_job = 0;
 
-static unsigned int slot = 1;
+static unsigned int slot = 0;
 static int autoinc_save_slot = 0;
 static char fname[1024] = {0};
 
@@ -54,6 +54,7 @@ void savestates_select_slot(unsigned int s)
 {
     if (s < 0 || s > 9 || s == slot) return;
     slot = s;
+    config_put_number("CurrentSaveSlot",s);
 
     char buffer[1024];
     if(rom)
