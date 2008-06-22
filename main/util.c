@@ -705,3 +705,17 @@ void playersstring(unsigned short players, char *string)
 
     sprintf(string, "%d %s", players, (netplay) ? "Netplay" : "");
 }
+
+char* strnstrip(char* string, int size)
+{
+    int counter, place;
+    for( counter = place = 0; counter < size && string[counter]!='\0'; ++counter )
+        {
+        string[place]=string[counter];
+        if(string[counter]==' ')
+            { --place; }
+        ++place;
+        }
+    string[place]='\0';
+    return string;
+}

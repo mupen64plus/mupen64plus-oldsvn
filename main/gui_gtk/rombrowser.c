@@ -1,9 +1,8 @@
 /***************************************************************************
-rombrowser.c - Handles VCR mode GUI elements
+rombrowser.c - Handles rombrowser GUI elements
 ----------------------------------------------------------------------------
 Began                : Sat Nov 9 2002
-Copyright            : (C) 2002 by blight
-Email                : blight@Ashitaka
+Copyright            : (C) 2002 by blight, 2008 by Tillin9
 ****************************************************************************/
 
 /***************************************************************************
@@ -39,6 +38,26 @@ GtkWidget *playRomItem;
 GtkWidget *romPropertiesItem;
 GtkWidget *refreshRomBrowserItem;
 GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
+
+char *column_names[16] =
+    {
+    "Country",
+    "Good Name",
+    "Status",
+    "User Comments",
+    "File Name",
+    "MD5 Hash",
+    "CRC1",
+    "CRC2",
+    "Internal Name",
+    "Save Type",
+    "Players",
+    "Size",
+    "Compression",
+    "Image Type",
+    "CIC Chip",
+    "Rumble",
+    };
 
 void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag)
 {
@@ -286,8 +305,6 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
         fullpaths = config_get_bool( "RomBrowserShowFullPaths", FALSE);
         cache_entry *entry;
         entry = g_romcache.top;
-
-        //printf("Roms in array: %d Roms in cache: %d Romcounter: %d\n", arrayroms,roms,romcounter);
 
         for ( romcounter=0; romcounter < arrayroms; ++romcounter )
             {
@@ -568,7 +585,6 @@ static gboolean callback_filter_grab_unselected( GtkWidget *widget, gpointer dat
 // create GUI filter widgets.
 int create_filter( void )
 {
-    GtkWidget *filter;
     GtkToolItem *toolitem;
     GtkWidget *label;
     GtkWidget *Hbox;
@@ -577,8 +593,8 @@ int create_filter( void )
     toolitem = gtk_tool_item_new();
     gtk_tool_item_set_expand(toolitem, TRUE);
 
-    filter = gtk_toolbar_new();
-    gtk_toolbar_set_orientation( GTK_TOOLBAR(filter), GTK_ORIENTATION_HORIZONTAL );
+    g_MainWindow.filterBar = gtk_toolbar_new();
+    gtk_toolbar_set_orientation( GTK_TOOLBAR(g_MainWindow.filterBar), GTK_ORIENTATION_HORIZONTAL );
 
     label = gtk_label_new_with_mnemonic ( tr("F_ilter:") );
     g_MainWindow.filter = gtk_entry_new();
@@ -598,9 +614,9 @@ int create_filter( void )
     gtk_box_pack_start ( GTK_BOX(Hbox), g_MainWindow.filter, TRUE, TRUE, 5);
 
     gtk_container_add(GTK_CONTAINER(toolitem), Hbox);
-    gtk_toolbar_insert ( GTK_TOOLBAR(filter), toolitem, 0);
+    gtk_toolbar_insert ( GTK_TOOLBAR(g_MainWindow.filterBar), toolitem, 0);
 
-    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), filter, FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.filterBar, FALSE, FALSE, 0 );
 }
 
 // play rom menu item
@@ -632,14 +648,22 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
 static void callback_column_visible(GtkWidget *widget, int column)
 {
     int i;
+    char buffer1[32], buffer2[32];
+
     gboolean visible = gtk_tree_view_column_get_visible(GTK_TREE_VIEW_COLUMN(g_MainWindow.column[column]));
     gtk_tree_view_column_set_visible(g_MainWindow.column[column], !visible);
+    g_MainWindow.columnVisible[column]=!g_MainWindow.columnVisible[column];
+    strncpy(buffer1,column_names[column],31);
+    buffer1[31]='\0';
+    snprintf(buffer2, 31, "Column%sVisible", strnstrip(buffer1,31));
+
+    config_put_bool(buffer2,g_MainWindow.columnVisible[column]); 
 
     //Control if emptry header column is visibile.
     gtk_tree_view_column_set_visible(g_MainWindow.column[16], FALSE);
     for ( i = 0; i < 16; ++i )
         {
-        if(gtk_tree_view_column_get_visible(GTK_TREE_VIEW_COLUMN(g_MainWindow.column[i])))
+        if(g_MainWindow.columnVisible[i])
             { return; }
         }
     gtk_tree_view_column_set_visible(g_MainWindow.column[16], TRUE);
@@ -675,7 +699,6 @@ static void callback_romProperties( GtkWidget *widget, gpointer data )
         gtk_tree_model_get (model, &g_RomPropDialog.iter, 22, &g_RomPropDialog.entry, -1);
 
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
-        //g_list_free (list);
 
         show_romPropDialog();
         }
@@ -683,26 +706,6 @@ static void callback_romProperties( GtkWidget *widget, gpointer data )
 
 static void setup_view (GtkWidget *view)
 {
-    gchar *titles[16] = 
-        {
-        (gchar*)tr("Country"), 
-        (gchar*)tr("Good Name"),
-        (gchar*)tr("Status"),
-        (gchar*)tr("User Comments"),
-        (gchar*)tr("File Name"),
-        (gchar*)tr("MD5 Hash"),
-        (gchar*)tr("CRC1"),
-        (gchar*)tr("CRC2"),
-        (gchar*)tr("Internal Name"),
-        (gchar*)tr("Save Type"),
-        (gchar*)tr("Players"),
-        (gchar*)tr("Size"),
-        (gchar*)tr("Compression"),
-        (gchar*)tr("Image Type"),
-        (gchar*)tr("CIC Chip"),
-        (gchar*)tr("Rumble"),
-        };
-
     GtkListStore *store = gtk_list_store_new (23, 
     G_TYPE_STRING, //Country 0
     G_TYPE_STRING, //Good Name 1
@@ -734,11 +737,12 @@ static void setup_view (GtkWidget *view)
     GtkTreeViewColumn   *column;
     int i;
     model = GTK_TREE_MODEL (store);
+    char buffer1[32], buffer2[32];
 
     renderer = gtk_cell_renderer_pixbuf_new ();
     g_MainWindow.column[0] = gtk_tree_view_column_new();
     column = g_MainWindow.column[0];
-    gtk_tree_view_column_set_title(column, titles[0]); 
+    gtk_tree_view_column_set_title(column, tr(column_names[0])); 
     gtk_tree_view_column_pack_start(column, renderer, FALSE);
     gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", 21);
     g_object_set(renderer, "xpad", 5, NULL);
@@ -752,7 +756,7 @@ static void setup_view (GtkWidget *view)
     gtk_signal_connect( GTK_OBJECT(column->button), "button-press-event", G_CALLBACK(callback_header_clicked), column);
 
     renderer = gtk_cell_renderer_text_new ();
-    g_MainWindow.column[1] = gtk_tree_view_column_new_with_attributes (titles[1], renderer, "text", 1, NULL);
+    g_MainWindow.column[1] = gtk_tree_view_column_new_with_attributes (tr(column_names[1]), renderer, "text", 1, NULL);
     column = g_MainWindow.column[1];
     gtk_tree_view_column_set_resizable (column, TRUE);
     gtk_tree_view_column_set_reorderable (column, TRUE);
@@ -762,7 +766,7 @@ static void setup_view (GtkWidget *view)
 
     g_MainWindow.column[2] = gtk_tree_view_column_new();
     column = g_MainWindow.column[2];
-    gtk_tree_view_column_set_title(column, titles[2]); 
+    gtk_tree_view_column_set_title(column, tr(column_names[2])); 
     renderer = gtk_cell_renderer_pixbuf_new ();
     g_object_set(renderer, "xpad", 2, NULL);
     gtk_tree_view_column_pack_start(column, renderer, FALSE);
@@ -786,7 +790,7 @@ static void setup_view (GtkWidget *view)
     for ( i = 3; i < 16; ++i )
         {
         renderer = gtk_cell_renderer_text_new ();
-        g_MainWindow.column[i] = gtk_tree_view_column_new_with_attributes (titles[i], renderer, "text", i, NULL);
+        g_MainWindow.column[i] = gtk_tree_view_column_new_with_attributes (tr(column_names[i]), renderer, "text", i, NULL);
         column = g_MainWindow.column[i];
         gtk_tree_view_column_set_resizable (column, TRUE);
         gtk_tree_view_column_set_reorderable (column, TRUE);
@@ -808,22 +812,35 @@ static void setup_view (GtkWidget *view)
     g_MainWindow.romHeaderMenu = gtk_menu_new();
 
     GtkWidget *item;
+
     for (i = 0; i < 16; ++i)
         {
-        item = gtk_check_menu_item_new_with_label(titles[i]); 
-        //This needs to be integrated with config system.
-        if(i<5) 
+        strncpy(buffer1,column_names[i],31);
+        buffer1[31]='\0';
+        item = gtk_check_menu_item_new_with_label(tr(buffer1)); 
+        snprintf(buffer2, 31, "Column%sVisible", strnstrip(buffer1,31));
+        if((g_MainWindow.columnVisible[i]=config_get_bool(buffer2,2))==2)
              {
-             gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), TRUE); 
-             gtk_tree_view_column_set_visible(g_MainWindow.column[i], TRUE);
+             if(i<5) 
+                 { g_MainWindow.columnVisible[i] = TRUE; }
+             else
+                 { g_MainWindow.columnVisible[i] = FALSE; }
+             config_put_bool(buffer2,g_MainWindow.columnVisible[i]);
              }
-        else
-             { gtk_tree_view_column_set_visible(g_MainWindow.column[i], FALSE); }
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), g_MainWindow.columnVisible[i]); 
+        gtk_tree_view_column_set_visible(g_MainWindow.column[i], g_MainWindow.columnVisible[i]);
         gtk_menu_append(GTK_MENU(g_MainWindow.romHeaderMenu), item);
         gtk_widget_show(item);
         g_signal_connect(item, "activate", G_CALLBACK(callback_column_visible), GUINT_TO_POINTER(i));
         }
 
+    gtk_tree_view_column_set_visible(g_MainWindow.column[16], FALSE);
+    for ( i = 0; i < 16; ++i )
+        {
+        if(g_MainWindow.columnVisible[i])
+            { return; }
+        }
+    gtk_tree_view_column_set_visible(g_MainWindow.column[16], TRUE);
 }
 
 /*********************************************************************************************************

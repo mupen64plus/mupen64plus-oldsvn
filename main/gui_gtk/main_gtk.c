@@ -140,6 +140,12 @@ void gui_build(void)
 void gui_display(void)
 {
     gtk_widget_show_all(g_MainWindow.window);
+    if(!(config_get_bool("ToolbarVisible",TRUE)))
+        { gtk_widget_hide(g_MainWindow.toolBar); }
+    if(!(config_get_bool("FilterVisible",TRUE)))
+        { gtk_widget_hide(g_MainWindow.filterBar); }
+    if(!(config_get_bool("StatusbarVisible",TRUE)))
+        { gtk_widget_hide(g_MainWindow.statusBarHBox); }
 }
 
 /** gui_main_loop
@@ -368,10 +374,6 @@ void statusbar_message(const char *section, const char *fmt, ...)
             return;
         }
     }
-
-#ifdef _DEBUG
-    printf( "statusbar_message(): unknown section '%s'!\n", section );
-#endif
 }
 
 /*********************************************************************************************************
@@ -475,7 +477,6 @@ void reload()
     create_aboutDialog();
     create_configDialog();
     gtk_widget_show_all( g_MainWindow.window );
-    
 }
 
 /** emulation **/
@@ -951,8 +952,41 @@ static void callback_vcrSetup( GtkWidget *widget, gpointer data )
 }
 #endif // VCR_SUPPORT
 
-/** debugger **/
+static void callback_toggle_toolbar( GtkWidget *widget, gpointer data )
+{
+    if(GTK_WIDGET_VISIBLE(g_MainWindow.toolBar))
+        { gtk_widget_hide(g_MainWindow.toolBar); }
+    else
+        { gtk_widget_show(g_MainWindow.toolBar); }
 
+    config_put_bool("ToolbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
+}
+
+static void callback_toggle_filter( GtkWidget *widget, gpointer data )
+{
+    if(GTK_WIDGET_VISIBLE(g_MainWindow.filterBar))
+        {
+        gtk_entry_set_text(GTK_ENTRY(g_MainWindow.filter),"");
+        gtk_widget_hide(g_MainWindow.filterBar); 
+        }
+    else
+        { gtk_widget_show(g_MainWindow.filterBar); }
+
+    config_put_bool("FilterVisible",GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
+}
+
+static void callback_toggle_statusbar( GtkWidget *widget, gpointer data )
+{
+    if(GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox))
+        { gtk_widget_hide(g_MainWindow.statusBarHBox); }
+    else
+        { gtk_widget_show(g_MainWindow.statusBarHBox); }
+
+    config_put_bool("StatusbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
+}
+
+
+/** debugger **/
 #ifdef DBG
 static GtkWidget   *debuggerRegistersShow;
 static GtkWidget   *debuggerBreakpointsShow;
@@ -1064,6 +1098,11 @@ static int create_menuBar( void )
     GtkWidget   *vcrMenu;
     GtkWidget   *vcrMenuItem;
 #endif
+    GtkWidget   *viewMenu;
+    GtkWidget   *viewMenuItem;
+    GtkWidget   *viewToolbar;
+    GtkWidget   *viewFilter;
+    GtkWidget   *viewStatusbar;
 #ifdef DBG
     GtkWidget   *debuggerMenu;
     GtkWidget   *debuggerMenuItem;
@@ -1339,12 +1378,51 @@ static int create_menuBar( void )
     gtk_signal_connect_object( GTK_OBJECT(vcrSetupItem), "activate", GTK_SIGNAL_FUNC(callback_vcrSetup), (gpointer)NULL );
 #endif // VCR_SUPPORT
 
+    viewMenu = gtk_menu_new();
+    viewMenuItem = gtk_menu_item_new_with_mnemonic(tr("_View"));
+    gtk_menu_item_set_submenu( GTK_MENU_ITEM(viewMenuItem), viewMenu );
+    viewToolbar = gtk_check_menu_item_new_with_mnemonic(tr(" _Toolbar"));
+    viewFilter = gtk_check_menu_item_new_with_mnemonic(tr(" _Filer"));
+    viewStatusbar = gtk_check_menu_item_new_with_mnemonic(tr(" _Statusbar"));
+
+    if((i=config_get_bool("ToolbarVisible",2))==2)
+        {
+        config_put_bool("ToolbarVisible",TRUE);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewToolbar),TRUE); 
+        }
+    else
+        { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewToolbar),i); }
+
+    if((i=config_get_bool("FilterVisible",2))==2)
+        {
+        config_put_bool("FilterVisible",TRUE);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewFilter),TRUE); 
+        }
+    else
+        { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewFilter),i); }
+
+    if((i=config_get_bool("StatusBarVisible",2))==2)
+        {
+        config_put_bool("StatusBarVisible",TRUE);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewStatusbar),TRUE); 
+        }
+    else
+        { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewStatusbar),i); }
+
+    gtk_signal_connect_object( GTK_OBJECT(viewToolbar), "toggled", GTK_SIGNAL_FUNC(callback_toggle_toolbar), (gpointer)NULL );
+    gtk_signal_connect_object( GTK_OBJECT(viewFilter), "toggled", GTK_SIGNAL_FUNC(callback_toggle_filter), (gpointer)NULL );
+    gtk_signal_connect_object( GTK_OBJECT(viewStatusbar), "toggled", GTK_SIGNAL_FUNC(callback_toggle_statusbar), (gpointer)NULL );
+
+    gtk_menu_append( GTK_MENU(viewMenu), viewToolbar );
+    gtk_menu_append( GTK_MENU(viewMenu), viewFilter );
+    gtk_menu_append( GTK_MENU(viewMenu), viewStatusbar );
+
     // debugger menu
 #ifdef DBG
     debuggerMenu = gtk_menu_new();
     debuggerMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Debugger"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(debuggerMenuItem), debuggerMenu );
-    debuggerEnableItem = gtk_check_menu_item_new_with_mnemonic(tr("_Enable"));
+    debuggerEnableItem = gtk_check_menu_item_new_with_mnemonic(tr(" _Enable"));
     debuggerSeparator = gtk_menu_item_new();
     debuggerRegistersShow = gtk_menu_item_new_with_mnemonic(tr("_Registers"));
     debuggerBreakpointsShow = gtk_menu_item_new_with_mnemonic(tr("_Breakpoints"));
@@ -1395,6 +1473,7 @@ static int create_menuBar( void )
 #ifdef VCR_SUPPORT
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), vcrMenuItem );
 #endif
+    gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), viewMenuItem );
 #ifdef DBG
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), debuggerMenuItem );
 #endif

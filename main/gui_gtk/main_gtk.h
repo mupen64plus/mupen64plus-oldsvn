@@ -26,12 +26,14 @@ typedef struct
     GtkWidget *toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
     GtkWidget *menuBar;
     GtkWidget *toolBar;
+    GtkWidget *filterBar;
     GtkWidget *filter;
     GtkWidget *romScrolledWindow;
     //Make two TreeViews, a visable manually filtered one for the Display, and a
     //Non-visable FullList from which we can filter.
     GtkWidget *romDisplay, *romFullList;
-    GtkTreeViewColumn *column[17]; //columns in rombrowser.
+    GtkTreeViewColumn *column[17]; //columns in rombrowser. 
+    unsigned short columnVisible[16];
     int romSortColumn; // sort column
     GtkSortType romSortType; // sort type (ascending/descending)
     GtkWidget *statusBarHBox;

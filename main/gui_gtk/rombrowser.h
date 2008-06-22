@@ -20,12 +20,12 @@ Email                : blight@Ashitaka
 
 #include <gtk/gtk.h>
 
+extern char *column_names[16];
+
 int create_romBrowser( void );
 void apply_filter( void );
 void fillrombrowser();
-
 void rombrowser_refresh( unsigned int roms, unsigned short clear );
-
 gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 void countrycodestring(unsigned short int countrycode, char *string);
 void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag);

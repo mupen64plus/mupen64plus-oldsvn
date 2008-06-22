@@ -407,7 +407,7 @@ int rom_read(const char *filename)
         { sprintf(buffer+i*2, "%02X", digest[i]); }
     buffer[32] = '\0';
     strcpy(ROM_SETTINGS.MD5, buffer);
-    printf("MD5: %s", buffer);
+    printf("MD5: %s\n", buffer);
 
     if(ROM_HEADER)
         { free(ROM_HEADER); }
