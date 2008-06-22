@@ -323,6 +323,7 @@ void GetTexInfo (int id, int tile)
             }
 #elif !defined(NO_ASM)
         int i;
+        int tempheight = height;
        asm volatile (
              "xor %[crc], %[crc]      \n"                           // eax is final result
              "crc_loop_y:           \n"
@@ -340,15 +341,15 @@ void GetTexInfo (int id, int tile)
              "dec %[i]             \n"
              "jnz crc_loop_x        \n"
              
-             "mov %[height], %%edx      \n"
+             "mov %[tempheight], %%edx      \n"
              "mul %%edx             \n"
              "add %%edx, %[crc]      \n"
              
              "add %[line], %[addr]      \n"
              
-             "dec %[height]             \n"
+             "dec %[tempheight]             \n"
              "jnz crc_loop_y        \n"
-             : [crc] "=&a"(crc), [i] "=&r" (i), [height] "+r"(height), [addr]"+r"(addr)
+             : [crc] "=&a"(crc), [i] "=&r" (i), [tempheight] "+r"(tempheight), [addr]"+r"(addr)
              : [line] "g" ((intptr_t)line), [wid_64] "g" (wid_64)
              : "memory", "cc", "edx"
              );
