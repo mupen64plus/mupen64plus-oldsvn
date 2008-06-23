@@ -23,13 +23,29 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <iconv.h>
 
 #include <zlib.h>
+
+#include "romcache.h"
+#include "config.h"
+#include "rom.h"
+#include "translate.h"
+
+#define DEFAULT 16
+
+void romdatabase_open();
+void romdatabase_close();
+
+_romdatabase g_romdatabase;
+romdatabase_entry empty_entry;
+
+#ifndef NO_GUI
+#include <iconv.h>
+
 #include <errno.h>
 #include <pthread.h>
 
-#include <limits.h> //PATH_MAX
+#include <limits.h> //PATH_MAX //There is a more standards compliant way of doing this.
 #include <dirent.h> //Directory support.
 //Includes for POSIX file status.
 #include <sys/stat.h>
@@ -40,27 +56,10 @@
 #include "md5.h"
 #include "main.h"
 #include "util.h"
-#include "romcache.h"
-#include "config.h"
-#include "rom.h"
-#include "translate.h"
-
-//This if for updaterombrowser(), which needs the same type of abstraction as info_message().
-#ifdef NO_GUI
-#include "guifuncs.h"
-#else
-#include "gui_gtk/main_gtk.h"
-#endif
 
 #define UPDATE_FREQUENCY 12
-#define DEFAULT 16
 #define RCS_VERSION "RCS1.0"
 
-void romdatabase_open();
-void romdatabase_close();
-
-_romdatabase g_romdatabase;
-romdatabase_entry empty_entry;
 rom_cache g_romcache;
 
 static const char *romextensions[] = 
@@ -98,7 +97,7 @@ void* rom_cache_system(void* _arg)
     // Setup job parser
     while (g_romcache.rcstask != RCS_SHUTDOWN)
         {
-        //printf("Task: %d\n", g_romcache.rcstask);  
+        //printf("Task: %d\n", g_romcache.rcstask);
         switch(g_romcache.rcstask)
             {
             case RCS_INIT:
@@ -502,6 +501,7 @@ int load_initial_cache(char* cache_filename)
 
     return 1;
 }
+#endif
 
 static int split_property(char *string)
 {

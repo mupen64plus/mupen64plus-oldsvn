@@ -522,13 +522,11 @@ void startEmulation(void)
             alert_message(tr("Couldn't spawn core thread!"));
             return;
         }
-        g_romcache.rcstask = RCS_SLEEP;
         pthread_detach(g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
     else if(rompause)
     {
-        g_romcache.rcstask = RCS_SLEEP;
         main_pause();
     }
 
@@ -561,7 +559,7 @@ int pauseContinueEmulation(void)
 
     if (rompause)
     {
-        g_romcache.rcstask = RCS_SLEEP;
+
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
         if(msg)
         {
@@ -677,9 +675,8 @@ static int sdl_event_filter( const SDL_Event *event )
                         case '?':
                             main_advance_one();
                             break;
-                        
+
                         // pass all other keypresses to the input plugin
-                        
                         default:
                             keyDown( 0, event->key.keysym.sym );
                     }
@@ -1242,7 +1239,7 @@ static void setPaths(void)
     {
         strncpy(l_InstallDir, PREFIX, PATH_MAX);
         strncat(l_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(l_InstallDir));
-        
+
         // if install dir is not in the default location, try the same dir as the binary
         if(!isdir(l_InstallDir))
         {
@@ -1313,7 +1310,7 @@ static void setPaths(void)
             {
                 strncpy(buf2, l_ConfigDir, PATH_MAX);
                 strncat(buf2, entry->d_name, PATH_MAX - strlen(buf2));
-                                
+
                 printf("Copying %s to %s\n", buf, l_ConfigDir);
                 if(copyfile(buf, buf2) != 0)
                     printf("Error copying file\n");
@@ -1339,9 +1336,6 @@ static void setPaths(void)
 int main(int argc, char *argv[])
 {
     int i;
-#ifdef VCR_SUPPORT
-    const char *p;
-#endif
     printf(" __  __                         __   _  _   ____  _             \n");  
     printf("|  \\/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \\| |_   _ ___ \n");
     printf("| |\\/| | | | | '_ \\ / _ \\ '_ \\| '_ \\| || |_| |_) | | | | / __|  \n");
@@ -1349,10 +1343,6 @@ int main(int argc, char *argv[])
     printf("|_|  |_|\\__,_| .__/ \\___|_| |_|\\___/   |_| |_|   |_|\\__,_|___/  \n");
     printf("             |_|         http://code.google.com/p/mupen64plus/  \n");
     printf("Version %s\n\n",MUPEN_VERSION);
-
-    // allow gui subsystem to init and parse gui-specific commandline args first
-    if(l_GuiEnabled)
-        gui_init(&argc, &argv);
 
     parseCommandLine(argc, argv);
     setPaths();
@@ -1373,7 +1363,7 @@ int main(int argc, char *argv[])
 
 #ifdef VCR_SUPPORT
     VCRComp_init();
-    p = config_get_string( "VCR Video Codec", "XviD" );
+    const char *p = config_get_string( "VCR Video Codec", "XviD" );
     for (i = 0; i < VCRComp_numVideoCodecs(); i++)
     {
         if (!strcasecmp( VCRComp_videoCodecName( i ), p ))
@@ -1402,10 +1392,13 @@ int main(int argc, char *argv[])
 
     cheat_read_config();
 
-    // build gui, but do not display
+#ifndef NO_GUI
     if(l_GuiEnabled)
-        gui_build();
+        gui_init(&argc, &argv);
 
+    if(l_GuiEnabled)
+        { gui_build(); }
+#endif
     // must be called after building gui
     // look for plugins in the install dir and set plugin config dir
     savestates_set_autoinc_slot(config_get_bool("AutoIncSaveSlot", FALSE));
@@ -1425,6 +1418,7 @@ int main(int argc, char *argv[])
 
     //The database needs to be opened regardless of GUI mode.
     romdatabase_open();
+#ifndef NO_GUI
     // only create the ROM Cache Thread if GUI is enabled
     if (l_GuiEnabled)
     {
@@ -1447,16 +1441,18 @@ int main(int argc, char *argv[])
     // only display gui if user wants it
     if(l_GuiEnabled)
         gui_display();
+#endif
 
     // if rom file was specified, run it
     if (l_Filename)
     {
-        if(open_rom(l_Filename) < 0 &&
-           !l_GuiEnabled)
+        if(open_rom(l_Filename) < 0 && !l_GuiEnabled)
         {
             // cleanup and exit
             cheat_delete_all();
+#ifndef NO_GUI
             g_romcache.rcstask = RCS_SHUTDOWN;
+#endif
             romdatabase_close();
             plugin_delete_list();
             tr_delete_languages();
@@ -1474,7 +1470,6 @@ int main(int argc, char *argv[])
 
         // cleanup and exit
         cheat_delete_all();
-        g_romcache.rcstask = RCS_SHUTDOWN;
         romdatabase_close();
         plugin_delete_list();
         tr_delete_languages();
@@ -1482,10 +1477,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+#ifndef NO_GUI
     // give control of this thread to the gui
     if(l_GuiEnabled)
         gui_main_loop();
-
     // free allocated memory
     if (l_TestShotList != NULL)
         free(l_TestShotList);
@@ -1500,7 +1495,7 @@ int main(int argc, char *argv[])
     plugin_delete_list();
     tr_delete_languages();
     config_delete();
-
+#endif
     return EXIT_SUCCESS;
 }
 

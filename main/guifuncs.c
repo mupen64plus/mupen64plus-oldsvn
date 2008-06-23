@@ -9,7 +9,6 @@
  * me first (maybe someone is already making what you are
  * planning to do).
  *
- *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
  * cence as published by the Free Software Foundation; either
@@ -32,33 +31,11 @@
 
 #ifdef NO_GUI
 
-#include <unistd.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <time.h>
-#include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "main.h"
 #include "translate.h"
-#include "../r4300/r4300.h"
-
-void gui_init(int *argc, char ***argv) { }
-void gui_build(void) { }
-void gui_display(void) { }
-void gui_main_loop(void) { }
-
-// print info message to console
-void info_message(const char *fmt, ...)
-{
-    va_list ap = {0};
-
-    va_start(ap, fmt);
-    printf(tr("Info"));
-    printf(": ");
-    vprintf(fmt, ap);
-    printf("\n");
-    va_end(ap);
-}
 
 // print alert message to console
 void alert_message(const char *fmt, ...)
@@ -97,7 +74,4 @@ int confirm_message(const char *fmt, ...)
     }
 }
 
-void updaterombrowser( unsigned int roms, unsigned short clear )
-{
-}
 #endif // NO_GUI
