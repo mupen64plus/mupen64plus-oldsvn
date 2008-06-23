@@ -1391,6 +1391,8 @@ int main(int argc, char *argv[])
         g_Noask = config_get_bool("No Ask", FALSE);
 
     cheat_read_config();
+    plugin_scan_installdir();
+    plugin_set_configdir(l_ConfigDir);
 
 #ifndef NO_GUI
     if(l_GuiEnabled)
@@ -1412,8 +1414,6 @@ int main(int argc, char *argv[])
         config_put_number("CurrentSaveSlot",0);
     }
 
-    plugin_scan_installdir();
-    plugin_set_configdir(l_ConfigDir);
     main_message(0, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\"\n"), l_ConfigDir, l_InstallDir);
 
     //The database needs to be opened regardless of GUI mode.
