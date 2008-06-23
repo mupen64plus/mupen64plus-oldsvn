@@ -56,20 +56,18 @@ void savestates_select_slot(unsigned int s)
     slot = s;
     config_put_number("CurrentSaveSlot",s);
 
-    char buffer[1024];
     if(rom)
     {
         char *filename = savestates_get_filename();
-        snprintf(buffer, 1023, "%s: %s", tr("Selected state file"), filename);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %s\n", tr("Selected state file"), filename);
         free(filename);
     }
     else 
     {
-        snprintf(buffer, 1023, "%s: %d", tr("Selected state slot"), slot);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %d\n", tr("Selected state slot"), slot);
     }
-
-   osd_new_message(OSD_BOTTOM_LEFT, buffer);
 }
+
 
 // returns the currently selected save slot
 unsigned int savestates_get_slot(void)
@@ -187,8 +185,7 @@ void savestates_save()
     gzwrite(f, buffer, queuelength);
 
     gzclose(f);
-    snprintf(buffer, 1023, "%s: %s", tr("Saved state to"), filename);
-    osd_new_message(OSD_BOTTOM_LEFT, buffer);
+    main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %s\n", tr("Saved state to"), filename);
     free(filename);
 }
 
@@ -304,8 +301,7 @@ void savestates_load()
     else
         last_addr = PC->addr;
 
-    snprintf(buffer, 1023, "%s: %s", tr("State loaded from"), filename);
-    osd_new_message(OSD_BOTTOM_LEFT, buffer);
+    main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %s\n", tr("State loaded from"), filename);
     free(filename);
 
 }

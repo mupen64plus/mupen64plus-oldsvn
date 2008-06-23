@@ -58,5 +58,6 @@ void main_speedup(int percent);
 void main_speeddown(int percent);
 
 void take_next_screenshot(void);
+void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char *format, ...);
 
 #endif // __MAIN_H__

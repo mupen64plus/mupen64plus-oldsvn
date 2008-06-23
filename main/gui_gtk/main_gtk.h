@@ -36,6 +36,7 @@ typedef struct
     unsigned short columnVisible[16];
     int romSortColumn; // sort column
     GtkSortType romSortType; // sort type (ascending/descending)
+    GtkWidget *statusBar;
     GtkWidget *statusBarHBox;
     GtkAccelGroup *accelGroup;
     GtkAccelGroup *accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
@@ -47,8 +48,8 @@ extern SMainWindow g_MainWindow;
 extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 
 void reload();
-void updaterombrowser( unsigned int roms, unsigned short clear );
-void statusbar_message( const char *section, const char *fmt, ... );
+void updaterombrowser(unsigned int roms, unsigned short clear);
+void statusbar_message(const char *format, ...);
 gboolean check_icon_theme();
 
 // helper macro

@@ -162,6 +162,26 @@ int gui_enabled(void)
     return l_GuiEnabled;
 }
 
+void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char *format, ...)
+{
+    va_list ap;
+    char buffer[2049];
+    va_start(ap, format);
+    vsnprintf(buffer, 2047, format, ap);
+    buffer[2048]='\0';
+    va_end(ap);
+
+    if(g_OsdEnabled&&osd)
+        { osd_new_message(osd_corner, buffer); }
+#ifndef NO_GUI
+    if(l_GuiEnabled&&statusbar)
+        { statusbar_message(buffer); }
+#endif
+    if(console||!l_GuiEnabled)
+        { printf(buffer); }
+}
+
+
 /*********************************************************************************************************
 * timer functions
 */
@@ -209,7 +229,7 @@ static unsigned int gettimeofday_msec(void)
 {
     struct timeval tv;
     unsigned int foo;
-    
+
     gettimeofday(&tv, NULL);
     foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
     return foo;
@@ -227,7 +247,7 @@ void main_speeddown(int percent)
     if (l_SpeedFactor - percent > 10)  /* 10% minimum speed */
     {
         l_SpeedFactor -= percent;
-        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), l_SpeedFactor);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%\n", tr("Playback speed:"), l_SpeedFactor);
         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
     }
 }
@@ -237,7 +257,7 @@ void main_speedup(int percent)
     if (l_SpeedFactor + percent < 300) /* 300% maximum speed */
     {
         l_SpeedFactor += percent;
-        osd_new_message(OSD_BOTTOM_LEFT, tr("playback speed: %i%%"), l_SpeedFactor);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%\n", tr("Playback speed:"), l_SpeedFactor);
         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
     }
 }
@@ -382,7 +402,7 @@ int open_rom( const char *filename )
     {
         // rc of -3 means rom file was a hack or bad dump and the user did not want to load it.
         if(rc == -3)
-            info_message(tr("Rom closed."));
+            main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed.\n"));
         else
             alert_message(tr("Couldn't load Rom!"));
 
@@ -420,7 +440,7 @@ int close_rom(void)
 
     // clear Byte-swapped flag, since ROM is now deleted
     g_MemHasBeenBSwapped = 0;
-    info_message(tr("Rom closed."));
+    main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed.\n"));
 
     return 0;
 }
@@ -504,7 +524,6 @@ void startEmulation(void)
         }
         g_romcache.rcstask = RCS_SLEEP;
         pthread_detach(g_EmulationThread);
-        info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
     else if(rompause)
@@ -519,7 +538,7 @@ void stopEmulation(void)
 {
     if(g_EmulationThread || g_EmulatorRunning)
     {
-        info_message(tr("Stopping emulation."));
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Stopping emulation.\n"));
         rompause = 0;
         stop_it();
 
@@ -529,7 +548,7 @@ void stopEmulation(void)
 
         g_EmulatorRunning = 0;
 
-        info_message(tr("Emulation stopped."));
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation stopped.\n"));
     }
 }
 
@@ -543,7 +562,7 @@ int pauseContinueEmulation(void)
     if (rompause)
     {
         g_romcache.rcstask = RCS_SLEEP;
-        info_message(tr("Emulation continued."));
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
         if(msg)
         {
             osd_delete_message(msg);
@@ -552,15 +571,14 @@ int pauseContinueEmulation(void)
     }
     else
     {
-        info_message(tr("Emulation paused."));
-
         if(msg)
             osd_delete_message(msg);
 
-        msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused"));
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Paused\n"));
+        msg = osd_new_message(OSD_BOTTOM_LEFT, tr("Paused\n"));
         osd_message_set_static(msg);
     }
-    
+
     rompause = !rompause;
     return rompause;
 }
@@ -1378,21 +1396,6 @@ int main(int argc, char *argv[])
     // init multi-language support
     tr_init();
 
-    // look for plugins in the install dir and set plugin config dir
-    plugin_scan_installdir();
-    plugin_set_configdir(l_ConfigDir);
-
-    savestates_set_autoinc_slot(config_get_bool("AutoIncSaveSlot", FALSE));
-
-    if((i=config_get_number("CurrentSaveSlot",10))!=10)
-    {
-        savestates_select_slot((unsigned int)i);
-    }
-    else
-    {
-        config_put_number("CurrentSaveSlot",0);
-    }
-
     // if --noask was not specified at the commandline, try config file
     if(!g_NoaskParam)
         g_Noask = config_get_bool("No Ask", FALSE);
@@ -1404,7 +1407,21 @@ int main(int argc, char *argv[])
         gui_build();
 
     // must be called after building gui
-    info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
+    // look for plugins in the install dir and set plugin config dir
+    savestates_set_autoinc_slot(config_get_bool("AutoIncSaveSlot", FALSE));
+
+    if((i=config_get_number("CurrentSaveSlot",10))!=10)
+    {
+        savestates_select_slot((unsigned int)i);
+    }
+    else
+    {
+        config_put_number("CurrentSaveSlot",0);
+    }
+
+    plugin_scan_installdir();
+    plugin_set_configdir(l_ConfigDir);
+    main_message(0, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\"\n"), l_ConfigDir, l_InstallDir);
 
     //The database needs to be opened regardless of GUI mode.
     romdatabase_open();

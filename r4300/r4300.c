@@ -1497,7 +1497,6 @@ void go()
    j=0;
    debug_count = 0;
    printf("Starting r4300 emulator\n");
-   printf("%X %X %X %X\n", rom[0], rom[1], rom[2], rom[3]);
    memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFBC);
    delay_slot=0;
    stop = 0;

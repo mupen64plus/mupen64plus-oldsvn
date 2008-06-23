@@ -49,9 +49,7 @@ Email                : blight@Ashitaka
 #include "debugger/varlist.h"       //
 #endif
 
-#include <glib.h>
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
 #include <SDL.h>
@@ -92,11 +90,6 @@ typedef struct
 } statusBarSection;
 
 static pthread_t g_GuiThread = 0; // main gui thread
-
-static statusBarSection statusBarSections[] = {
-    { "status", -1, NULL },
-    { NULL, -1, NULL }
-};
 
 /*********************************************************************************************************
 * GUI interfaces (declared in ../guifuncs.h)
@@ -180,49 +173,40 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
 }
 
 // prints informational message to status bar
-void info_message(const char *fmt, ...)
+void statusbar_message(const char *format, ...)
 {
     va_list ap;
-    char buf[2049];
-    int i;
+    char buffer[2049];
     pthread_t self = pthread_self();
 
-    va_start(ap, fmt);
-    vsnprintf(buf, 2048, fmt, ap);
+    va_start(ap, format);
+    vsnprintf(buffer, 2047, format, ap);
+    buffer[2048] = '\0';
     va_end(ap);
 
-    if(gui_enabled())
-    {
-        // if we're calling from a thread other than the main gtk thread, take gdk lock
-        if(!pthread_equal(self, g_GuiThread))
-            gdk_threads_enter();
-
-        for(i = 0; statusBarSections[i].name; i++)
+    int counter;
+    for( counter = 0; counter < 2048; ++counter )
         {
-            if(!strcasecmp("status", statusBarSections[i].name))
+        if(buffer[counter]=='\n')
             {
-                gtk_statusbar_pop(GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id);
-                gtk_statusbar_push(GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id, buf);
-
-                // update status bar
-                GUI_PROCESS_QUEUED_EVENTS();
-
-                if(!pthread_equal(self, g_GuiThread))
-                    gdk_threads_leave();
-
-                return;
+            buffer[counter]='\0';
+            break;
             }
         }
 
-        if(!pthread_equal(self, g_GuiThread))
-            gdk_threads_leave();
-    }
-    // if gui not enabled, just print to console
-    else
-    {
-        printf(tr("Info"));
-        printf(": %s\n", buf);
-    }
+    // If we're calling from a thread other than the main gtk thread, take gdk lock.
+    if(!pthread_equal(self, g_GuiThread))
+        { gdk_threads_enter(); }
+
+    gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
+    gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
+
+    GUI_PROCESS_QUEUED_EVENTS();
+
+    if(!pthread_equal(self, g_GuiThread))
+        { gdk_threads_leave(); }
+
+    return;
 }
 
 // pops up dialog box with error message and ok button
@@ -251,32 +235,35 @@ void alert_message(const char *fmt, ...)
                                              GTK_DIALOG_DESTROY_WITH_PARENT,
                                              GTK_STOCK_OK, GTK_RESPONSE_NONE,
                                              NULL);
-        
+
         g_signal_connect_swapped(dialog, "response",
                                  G_CALLBACK(gtk_widget_destroy), dialog);
-        
+
         hbox = gtk_hbox_new(FALSE, 5);
-        
-        icon = gtk_image_new_from_file(get_iconpath("messagebox-error.png"));
+
+        //Update with icon from theme!!!
+        GtkIconTheme *theme = gtk_icon_theme_get_default();
+        GdkPixbuf *pixbuf;
+        if(check_icon_theme())
+            {
+            pixbuf = gtk_icon_theme_load_icon(theme, "dialog-error", 32,  0, NULL);
+            icon = gtk_image_new_from_pixbuf(pixbuf); 
+            }
+        else
+            { icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-error.png")); }
         gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
-        
+
         label = gtk_label_new(buf);
         gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
         gtk_widget_set_size_request(label, 165, -1);
         gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-        
+
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 5);
-        
+
         gtk_widget_show_all(dialog);
 
         if(!pthread_equal(self, g_GuiThread))
             gdk_threads_leave();
-    }
-    // if gui not enabled, just print to console
-    else
-    {
-        printf(tr("Error"));
-        printf(": %s\n", buf);
     }
 }
 
@@ -308,25 +295,32 @@ int confirm_message(const char *fmt, ...)
                                              GTK_STOCK_YES, GTK_RESPONSE_ACCEPT,
                                              GTK_STOCK_NO, GTK_RESPONSE_REJECT,
                                              NULL);
-        
+
         hbox = gtk_hbox_new(FALSE, 5);
-        
-        icon = gtk_image_new_from_file(get_iconpath("messagebox-quest.png"));
+
+        //Update with icon from theme!!!
+        GtkIconTheme *theme = gtk_icon_theme_get_default();
+        GdkPixbuf *pixbuf;
+        if(check_icon_theme())
+            {
+            pixbuf = gtk_icon_theme_load_icon(theme, "dialog-question", 32,  0, NULL);
+            icon = gtk_image_new_from_pixbuf(pixbuf); 
+            }
+        else
+            { icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-question.png")); }
         gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
-        
+
         label = gtk_label_new(buf);
         gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
         gtk_widget_set_size_request(label, 200, -1);
         gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-        
+
         gtk_widget_show_all(hbox);
-        
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 5);
-        
+
         response = gtk_dialog_run(GTK_DIALOG(dialog));
-        
         gtk_widget_destroy(dialog);
-        
+
         if(!pthread_equal(self, g_GuiThread))
             gdk_threads_leave();
 
@@ -347,31 +341,6 @@ int confirm_message(const char *fmt, ...)
             else if(tolower(c) == 'n') return 0;
 
             printf(tr("Please answer 'y' (%s) or 'n' (%s).\n"), tr("Yes"), tr("No"));
-        }
-    }
-}
-
-/*********************************************************************************************************
-* internal gui funcs
-*/
-// status bar
-void statusbar_message(const char *section, const char *fmt, ...)
-{
-    va_list ap;
-    char buf[2049];
-    int i;
-
-    va_start( ap, fmt );
-    vsnprintf( buf, 2048, fmt, ap );
-    va_end( ap );
-
-    for( i = 0; statusBarSections[i].name; i++ )
-    {
-        if( !strcasecmp( section, statusBarSections[i].name ) )
-        {
-            gtk_statusbar_pop( GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id );
-            gtk_statusbar_push( GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].id, buf );
-            return;
         }
     }
 }
@@ -1072,9 +1041,13 @@ static void callback_aboutMupen( GtkWidget *widget, gpointer data )
 // hide on delete
 static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-    //Put new rombrowser config saving code here...
-    gtk_main_quit();
+    int width, height;
 
+    gtk_window_get_size(GTK_WINDOW(g_MainWindow.window), &width, &height);
+
+    config_put_number("MainWindowWidth",width);
+    config_put_number("MainWindowHeight",height);
+    gtk_main_quit();
     return TRUE; // undeleteable
 }
 
@@ -1576,19 +1549,12 @@ static int create_toolBar( void )
 // status bar
 static int create_statusBar( void )
 {
-    int i;
-
-    //create status bar
     g_MainWindow.statusBarHBox = gtk_hbox_new( FALSE, 5 );
     gtk_box_pack_end( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.statusBarHBox, FALSE, FALSE, 0 );
 
-    // request context ids
-    for( i = 0; statusBarSections[i].name; ++i )
-        {
-        statusBarSections[i].bar = gtk_statusbar_new();
-        gtk_box_pack_start( GTK_BOX(g_MainWindow.statusBarHBox), statusBarSections[i].bar, (i == 0) ? TRUE : FALSE, TRUE, 0 );
-        statusBarSections[i].id = gtk_statusbar_get_context_id( GTK_STATUSBAR(statusBarSections[i].bar), statusBarSections[i].name );
-        }
+    g_MainWindow.statusBar = gtk_statusbar_new();
+    gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(g_MainWindow.statusBar), FALSE);
+    gtk_box_pack_start( GTK_BOX(g_MainWindow.statusBarHBox), g_MainWindow.statusBar, TRUE , TRUE, 0 );
 
     return 0;
 }
@@ -1615,13 +1581,14 @@ static int create_mainWindow( void )
 
     int width, height;
 
-    width = config_get_number( "MainWindow Width", 600 );
-    height = config_get_number( "MainWindow Height", 400 );
+    width = config_get_number("MainWindowWidth",600);
+    height = config_get_number("MainWindowHeight",400);
 
     // window
     g_MainWindow.window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_set_title( GTK_WINDOW(g_MainWindow.window), MUPEN_NAME " v" MUPEN_VERSION );
     gtk_window_set_default_size( GTK_WINDOW(g_MainWindow.window), width, height  );
+
     gtk_signal_connect(GTK_OBJECT(g_MainWindow.window), "delete_event", GTK_SIGNAL_FUNC(callback_mainWindowDeleteEvent), (gpointer)NULL);
 
     // toplevel vbox
@@ -1662,7 +1629,9 @@ gboolean check_icon_theme()
        gtk_icon_theme_has_icon(theme, "preferences-system")&& 
        gtk_icon_theme_has_icon(theme, "video-display")&& 
        gtk_icon_theme_has_icon(theme, "audio-card")&& 
-       gtk_icon_theme_has_icon(theme, "input-gaming"))
+       gtk_icon_theme_has_icon(theme, "input-gaming")&&
+       gtk_icon_theme_has_icon(theme, "dialog-error")&&
+       gtk_icon_theme_has_icon(theme, "dialog-question"))
         { return TRUE; }
     else
         { return FALSE; }

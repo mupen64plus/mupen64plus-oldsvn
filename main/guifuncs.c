@@ -87,9 +87,9 @@ int confirm_message(const char *fmt, ...)
         vprintf(fmt, ap);
         printf("(y/n) ");
         va_end(ap);
-        
+
         c = fgetc(stdin);
-        
+
         if(tolower(c) == 'y') return 1;
         else if(tolower(c) == 'n') return 0;
 
