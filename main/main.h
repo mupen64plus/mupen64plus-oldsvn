@@ -27,7 +27,6 @@ Email                : blight@Ashitaka
 /* globals */
 extern int g_Noask;
 extern int g_NoaskParam;
-extern int g_MemHasBeenBSwapped;
 extern int g_TakeScreenshot;
 extern int g_OsdEnabled;
 extern pthread_t g_EmulationThread;
@@ -46,8 +45,6 @@ int   gui_enabled(void);
 void new_frame();
 void new_vi();
 
-int open_rom(const char *filename);
-int close_rom(void);
 void startEmulation(void);
 void stopEmulation(void);
 int pauseContinueEmulation(void);

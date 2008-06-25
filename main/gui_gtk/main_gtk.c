@@ -397,12 +397,14 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
         // hide dialog while rom is loading
         gtk_widget_hide(file_chooser);
 
-        if(open_rom(filename) == 0)
+        if(open_rom(filename, 0) == 0)
         {
             char buf[300];
             snprintf(buf, 300, MUPEN_NAME " v" MUPEN_VERSION " - %s", ROM_HEADER->nom);
             gtk_window_set_title(GTK_WINDOW(g_MainWindow.window), buf);
         }
+        else
+            { startEmulation(); }
 
         g_free(filename);
     }
@@ -472,14 +474,16 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
             {
 
             llist = g_list_first (list);
-         
+
             gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-            gtk_tree_model_get(model, &iter, 5, &entry, -1);
-         
+            gtk_tree_model_get(model, &iter, 22, &entry, -1);
+
             g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
             g_list_free (list);
-         
-            if(open_rom( entry->filename ) == 0)
+
+            printf("Hm... Filename: %s\n", entry->filename);
+
+            if(open_rom( entry->filename, entry->archivefile ) == 0)
                 { startEmulation(); }
             else
                 { return; }

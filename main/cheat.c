@@ -454,16 +454,8 @@ void cheat_load_current_rom(void)
 
     if(!ROM_HEADER) return;
 
-    if(g_MemHasBeenBSwapped)
-    {
-        crc1 = sl(ROM_HEADER->CRC1);
-        crc2 = sl(ROM_HEADER->CRC2);
-    }
-    else
-    {
-        crc1 = ROM_HEADER->CRC1;
-        crc2 = ROM_HEADER->CRC2;
-    }
+    crc1 = ROM_HEADER->CRC1;
+    crc2 = ROM_HEADER->CRC2;
 
     list_foreach(g_Cheats, node)
     {
