@@ -49,6 +49,9 @@ else
     STRIP = true
   endif
 endif
+ifeq ($(NO_ASM), 1)
+  CFLAGS += -DNO_ASM
+endif
 ifeq ($(VPDEBUG), 1)
   CFLAGS  += -DVPDEBUG
   LDFLAGS += -lIL
@@ -75,12 +78,6 @@ OBJECTS = \
 	Config.o \
 	3dmath.o \
 	DepthBufferRender.o
-
-ifeq ($(NO_ASM), 1)
-  CFLAGS += -DNO_ASM
-else
-  OBJECTS += Tmem_nasm.o
-endif
 
 WRAPPEROBJECTS = \
 	wrapper/combiner.o \
@@ -117,6 +114,7 @@ targets:
 	@echo "    BITS=32       == build 32-bit binaries on 64-bit machine"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
 	@echo "    DBGSYM=1      == add debugging symbols to binaries"
+	@echo "    NO_ASM=1      == disable inline assembly language code"
 	@echo "    VPDEBUG=1     == some kind of debugging"
 	@echo "    RDP_LOG=1     == Dump out RDP instruction data"
 	@echo "    RDP_LOG_ERR=1 == Dump out RDP instruction data + errors"
@@ -138,9 +136,6 @@ compiletex: compiletex.c
 	@rm -f compiletex compiletex.o
 	$(CC) -o compiletex.o -c $<
 	$(LD) -o $@ compiletex.o
-
-Tmem_nasm.o: Tmem_nasm.asm
-	$(ASM) -f elf $(MOPT) -DBITS=$(BITS) $< -o $@
 
 rdp.o: ucode06.h
 
