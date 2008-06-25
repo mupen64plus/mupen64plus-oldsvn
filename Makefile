@@ -71,16 +71,16 @@ OBJ_CORE = \
 	main/volume.o \
 	main/zip/ioapi.o \
 	main/zip/unzip.o \
-        main/bzip2/bzlib.o \
-        main/bzip2/crctable.o \
-        main/bzip2/decompress.o \
-        main/bzip2/compress.o \
-        main/bzip2/randtable.o \
-        main/bzip2/huffman.o \
-        main/bzip2/blocksort.o \
-        main/lzma/buffer.o \
-        main/lzma/io.o \
-        main/lzma/main.o \
+	main/bzip2/bzlib.o \
+	main/bzip2/crctable.o \
+	main/bzip2/decompress.o \
+	main/bzip2/compress.o \
+	main/bzip2/randtable.o \
+	main/bzip2/huffman.o \
+	main/bzip2/blocksort.o \
+	main/lzma/buffer.o \
+	main/lzma/io.o \
+	main/lzma/main.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
@@ -306,7 +306,8 @@ clean:
 	$(MAKE) -C jttl_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
-	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./main/*.o ./main/gui_gtk/*.o ./debugger/*.o ./main/gui_gtk/debugger/*.o ./opengl/*.o
+	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
+	$(RM) -f ./main/*.o ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
 	$(RM) -f mupen64plus
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
