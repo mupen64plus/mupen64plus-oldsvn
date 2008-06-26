@@ -682,29 +682,29 @@ namespace OGLFT
 
 
     // Draw the (latin1) string at the given position.
-    void Face::draw (GLfloat x, GLfloat y, const char* s)
+    void Face::draw (GLfloat x, GLfloat y, const char* s, float *sizebox)
     {
+        // sizebox is xmin,ymin, xmax,ymax
         if(!advance_) glPushMatrix();
 
         if(horizontal_justification_ != ORIGIN || vertical_justification_ != BASELINE)
         {
             glPushMatrix();
 
-            BBox bbox = measure_nominal(s);
             GLfloat dx = 0, dy = 0;
 
             switch (horizontal_justification_)
             {
-                case LEFT:   dx = -bbox.x_min_ + 1; break;
-                case CENTER: dx = -(bbox.x_min_ + bbox.x_max_)/ 2.; break;
-                case RIGHT:  dx = -bbox.x_max_ - 1; break;
+                case LEFT:   dx = -sizebox[0] + 1; break;
+                case CENTER: dx = -(sizebox[0] + sizebox[2])/ 2.; break;
+                case RIGHT:  dx = -sizebox[2] - 1; break;
                 default: break;
             }
             switch (vertical_justification_)
             {
-                case BOTTOM: dy = -bbox.y_min_ + 1; break;
-                case MIDDLE: dy = -(bbox.y_min_ + bbox.y_max_)/ 2.; break;
-                case TOP: dy = -bbox.y_max_ - 1; break;
+                case BOTTOM: dy = -sizebox[1] + 1; break;
+                case MIDDLE: dy = -(sizebox[1] + sizebox[3])/ 2.; break;
+                case TOP: dy = -sizebox[3] - 1; break;
                 default: break;
             }
 
