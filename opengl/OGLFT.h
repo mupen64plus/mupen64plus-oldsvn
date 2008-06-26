@@ -261,7 +261,7 @@ namespace OGLFT
             void draw ( GLfloat x, GLfloat y, GLfloat z, unsigned char c );
             void draw ( GLfloat x, GLfloat y, wchar_t c );
             void draw ( GLfloat x, GLfloat y, GLfloat z, wchar_t c );
-            void draw ( GLfloat x, GLfloat y, const char* s, BBox bbox );
+            void draw ( GLfloat x, GLfloat y, const char* s );
             void draw ( GLfloat x, GLfloat y, GLfloat z, const char* s );
             void draw ( GLfloat x, GLfloat y, const wchar_t* s );
             void draw ( GLfloat x, GLfloat y, GLfloat z, const wchar_t* s );
@@ -269,8 +269,6 @@ namespace OGLFT
             void draw ( GLfloat x, GLfloat y, GLfloat z, const wchar_t* format, double number );
             int ascender ( void ) { return faces_.front().face_->ascender; }
             int descender ( void ) { return faces_.front().face_->descender; }
-            BBox measure_nominal ( const char* s );
-            BBox measure_nominal ( const wchar_t* s );
 
         protected:
             virtual GLuint compileGlyph ( FT_Face face, FT_UInt glyph_index ) = 0;
@@ -281,6 +279,8 @@ namespace OGLFT
 
         private:
             void init ( void );
+            BBox measure_nominal ( const char* s );
+            BBox measure_nominal ( const wchar_t* s );
     };
     
     class Raster : public Face 
