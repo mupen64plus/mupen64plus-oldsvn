@@ -46,16 +46,17 @@
 #include "guifuncs.h"
 #include "translate.h"
 #include "main.h"
+#include "../opengl/osd.h"
 #include "util.h"
 
 #define CHUNKSIZE 1024*128 //Read files 128KB at a time.
 
 //Global loaded rom memory space.
-unsigned char *rom;
+unsigned char* rom;
 //Global loaded rom size.
 int taille_rom;
 //Global loaded rom header information.
-rom_header *ROM_HEADER;
+rom_header* ROM_HEADER;
 rom_settings ROM_SETTINGS;
 
 int is_valid_rom(unsigned char buffer[4])
@@ -78,14 +79,14 @@ int is_valid_rom(unsigned char buffer[4])
  * Determins compression type by testing if the decompressed file has a valid rom 4 byte header.
  * Loads loadlength of the rom and byteswaps if necessary.
  */
-unsigned char* load_rom(const char *filename, int *romsize, unsigned short *compressiontype, unsigned short *imagetype, int *loadlength)
+unsigned char* load_rom(const char* filename, int* romsize, unsigned short* compressiontype, unsigned short* imagetype, int* loadlength)
 {
     int i;
     unsigned short romread = 0;
     unsigned char buffer[4];
-    unsigned char *localrom;
+    unsigned char* localrom;
 
-    FILE *romfile;
+    FILE* romfile;
     //Uncompressed roms.
     romfile=fopen(filename, "rb");
     if(romfile!=NULL)
@@ -369,39 +370,49 @@ static int ask_hack(void)
                            " Do you still want to run it?"));
 }
 
-int rom_read(const char *filename)
+int open_rom(const char* filename, unsigned int archivefile)
 {
+    if(g_EmulationThread)
+         {
+         if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
+             { return -1; }
+         stopEmulation();
+         }
+
     md5_state_t state;
     md5_byte_t digest[16];
     romdatabase_entry *entry;
-    char buffer[PATH_MAX], *s;
-    char image[16], compression[16];
+    char buffer[PATH_MAX];
     unsigned short compressiontype, imagetype;
     int i;
 
     if(rom)
         { free(rom); }
 
+    // clear Byte-swapped flag, since ROM is now deleted
+    //This is (and never was) set in the code below... 
+    g_MemHasBeenBSwapped = 0;
+
     strncpy(buffer, filename, PATH_MAX-1);
     buffer[PATH_MAX-1] = 0;
     if ((rom=load_rom(filename, &taille_rom, &compressiontype, &imagetype, &taille_rom))==NULL)
         {
-        printf ("File not found or wrong path.\n");
+        alert_message(tr("Couldn't load Rom!"));
         return -1;
         }
 
-    compressionstring(compressiontype, compression);
-    printf("Compression: %s\n", compression);
+    compressionstring(compressiontype, buffer);
+    printf("Compression: %s\n", buffer);
 
-    imagestring(imagetype, image);
-    printf("Imagetype: %s\n", image);
+    imagestring(imagetype, buffer);
+    printf("Imagetype: %s\n", buffer);
 
     printf("Rom size: %d bytes (or %d Mb or %d Megabits)\n",
     taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
 
     // loading rom settings and checking if it's a good dump
     md5_init(&state);
-    md5_append(&state, (const md5_byte_t *)rom, taille_rom);
+    md5_append(&state, (const md5_byte_t*)rom, taille_rom);
     md5_finish(&state, digest);
     for ( i = 0; i < 16; ++i ) 
         { sprintf(buffer+i*2, "%02X", digest[i]); }
@@ -434,68 +445,50 @@ int rom_read(const char *filename)
         { printf("Manufacturer: %x\n", (unsigned int)(ROM_HEADER->Manufacturer_ID)); }
     printf("Cartridge_ID: %x\n", ROM_HEADER->Cartridge_ID);
 
-   char country[32];
-   countrycodestring(ROM_HEADER->Country_code, buffer);
-   printf("Country: %s\n", buffer);
-   printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
+    countrycodestring(ROM_HEADER->Country_code, buffer);
+    printf("Country: %s\n", buffer);
+    printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 
     if((entry=ini_search_by_md5(digest))==&empty_entry)
         {
-        char mycrc[1024];
-        printf("%lx\n", (long)entry);
-        if((entry=ini_search_by_crc(sl(ROM_HEADER->CRC1),sl(ROM_HEADER->CRC2)))==NULL)
+        if((entry=ini_search_by_crc(sl(ROM_HEADER->CRC1),sl(ROM_HEADER->CRC2)))==&empty_entry)
             {
-            strcpy(ROM_SETTINGS.goodname, (char *) ROM_HEADER->nom);
+            strcpy(ROM_SETTINGS.goodname, (char*)ROM_HEADER->nom);
             strcat(ROM_SETTINGS.goodname, " (unknown rom)");
             printf("%s\n", ROM_SETTINGS.goodname);
             ROM_SETTINGS.eeprom_16kb = 0;
             return 0;
             }
-        else
+        }
+
+    unsigned short close = 0;
+    for ( i = strlen(entry->goodname); i > 0 && entry->goodname[i-1] != '['; --i );
+    if(i!=0)
+        {
+        if(entry->goodname[i]=='T'||entry->goodname[i]=='t'||entry->goodname[i]=='h'||entry->goodname[i]=='f'||entry->goodname[i]=='o')
+            {
+            if(!ask_hack())
+                { close = 1; }
+            }
+        else if(entry->goodname[i]=='b')
             {
             if(!ask_bad())
-                {
-                free(rom);
-                rom = NULL;
-                free(ROM_HEADER);
-                ROM_HEADER = NULL;
-                return -3;
-                }
-            strcpy(ROM_SETTINGS.goodname, "(unknown)");
-            if(entry->savetype==EEPROM_16KB)
-                { ROM_SETTINGS.eeprom_16kb = 1; }
-            return 0;
+                { close = 1; }
             }
         }
 
-    s=entry->goodname;
-    for ( i = strlen(s); i > 0 && s[i-1] != '['; --i );
-    if(i!=0)
-           {
-       if(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o')
-           {
-           if(!ask_hack())
-               {
-               free(rom);
-               rom = NULL;
-               free(ROM_HEADER);
-               ROM_HEADER = NULL;
-               return -3;
-               }
-           }
-       if(s[i]=='b')
-            {
-            if(!ask_bad())
-                {
-                free(rom);
-                rom = NULL;
-                free(ROM_HEADER);
-                ROM_HEADER = NULL;
-                return -3;
-                }
-            }
+    if(close)
+        {
+        free(rom);
+        rom = NULL;
+        free(ROM_HEADER);
+        ROM_HEADER = NULL;
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed."));
+        return -3;
         }
-    strcpy(ROM_SETTINGS.goodname, entry->goodname);
+
+    strncpy(ROM_SETTINGS.goodname, entry->goodname, 255);
+    ROM_SETTINGS.goodname[255] = '\0';
 
     if(entry->savetype==EEPROM_16KB)
         { ROM_SETTINGS.eeprom_16kb = 1; }
@@ -503,3 +496,30 @@ int rom_read(const char *filename)
     return 0;
 }
 
+int close_rom(void)
+{
+    if(g_EmulationThread)
+        {
+        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
+            { return -1; }
+        stopEmulation();
+        }
+
+    if(ROM_HEADER)
+        {
+        free(ROM_HEADER);
+        ROM_HEADER = NULL;
+        }
+
+    if(rom)
+        {
+        free(rom);
+        rom = NULL;
+        }
+
+    // clear Byte-swapped flag, since ROM is now deleted
+    g_MemHasBeenBSwapped = 0;
+    main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed."));
+
+    return 0;
+}

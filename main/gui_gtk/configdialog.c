@@ -25,6 +25,7 @@ Email                : blight@Ashitaka
 #include "../guifuncs.h"
 #include "../translate.h"
 #include "../util.h"
+#include "../../opengl/osd.h"
 
 #include "../winlnxdefs.h"
 #include "../plugin.h"

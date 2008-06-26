@@ -46,8 +46,6 @@ int   gui_enabled(void);
 void new_frame();
 void new_vi();
 
-int open_rom(const char *filename);
-int close_rom(void);
 void startEmulation(void);
 void stopEmulation(void);
 int pauseContinueEmulation(void);

@@ -218,13 +218,6 @@ static int GetVILimit(void)
     }
 }
 
-static void InitTimer(void)
-{
-    VILimit = GetVILimit();
-    VILimitMilliseconds = (double) 1000.0/VILimit; 
-    printf("init timer!\n");
-}
-
 static unsigned int gettimeofday_msec(void)
 {
     struct timeval tv;
@@ -369,88 +362,16 @@ void new_vi(void)
     }
 }
 
-int open_rom( const char *filename )
-{
-    int rc;
-
-    if(g_EmulationThread)
-    {
-        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
-        {
-            return -1;
-        }
-        stopEmulation();
-    }
-
-    if(ROM_HEADER)
-    {
-        free(ROM_HEADER);
-        ROM_HEADER = NULL;
-    }
-
-    if(rom)
-    {
-        free(rom);
-        rom = NULL;
-    }
-
-    // clear Byte-swapped flag, since ROM is now deleted
-    //This is (and never was) set in the code below... 
-    g_MemHasBeenBSwapped = 0;
-
-    if((rc = rom_read(filename)) != 0)
-    {
-        // rc of -3 means rom file was a hack or bad dump and the user did not want to load it.
-        if(rc == -3)
-            main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed.\n"));
-        else
-            alert_message(tr("Couldn't load Rom!"));
-
-        return -3;
-    }
-    //Quit here to make sure bad roms aren't loaded when testing rom handling code.
-    //return -2;
-    InitTimer();
-
-    return 0;
-}
-
-int close_rom(void)
-{
-    if(g_EmulationThread)
-    {
-        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
-        {
-            return -1;
-        }
-        stopEmulation();
-    }
-
-    if(ROM_HEADER)
-    {
-        free(ROM_HEADER);
-        ROM_HEADER = NULL;
-    }
-
-    if(rom)
-    {
-        free(rom);
-        rom = NULL;
-    }
-
-    // clear Byte-swapped flag, since ROM is now deleted
-    g_MemHasBeenBSwapped = 0;
-    main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed.\n"));
-
-    return 0;
-}
-
 /** emulation **/
 /* startEmulation
  *  Begins emulation thread
  */
 void startEmulation(void)
 {
+    VILimit = GetVILimit();
+    VILimitMilliseconds = (double) 1000.0/VILimit; 
+    printf("init timer!\n");
+
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
                *input_plugin = NULL,
@@ -1449,7 +1370,7 @@ int main(int argc, char *argv[])
     // if rom file was specified, run it
     if (l_Filename)
     {
-        if(open_rom(l_Filename) < 0 && !l_GuiEnabled)
+        if(open_rom(l_Filename, 0) < 0 && !l_GuiEnabled)
         {
             // cleanup and exit
             cheat_delete_all();

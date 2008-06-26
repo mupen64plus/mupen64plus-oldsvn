@@ -397,12 +397,7 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
         // hide dialog while rom is loading
         gtk_widget_hide(file_chooser);
 
-        if(open_rom(filename) == 0)
-        {
-            char buf[300];
-            snprintf(buf, 300, MUPEN_NAME " v" MUPEN_VERSION " - %s", ROM_HEADER->nom);
-            gtk_window_set_title(GTK_WINDOW(g_MainWindow.window), buf);
-        }
+        open_rom(filename, 0);
 
         g_free(filename);
     }
@@ -462,7 +457,7 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
 
         list = gtk_tree_selection_get_selected_rows (selection, &model);
 
-        if( !list ) //Nothing selected.
+        if(!list) //Nothing selected.
             { 
             if(confirm_message(tr("There is no Rom loaded. Do you want to load one?")))
                 { callback_openRom(NULL, NULL); }
@@ -470,21 +465,21 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
             }
         else
             {
+            llist = g_list_first(list);
 
-            llist = g_list_first (list);
-         
-            gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-            gtk_tree_model_get(model, &iter, 5, &entry, -1);
-         
+            gtk_tree_model_get_iter(model, &iter,(GtkTreePath *) llist->data);
+            gtk_tree_model_get(model, &iter, 22, &entry, -1);
+
             g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
-            g_list_free (list);
-         
-            if(open_rom( entry->filename ) == 0)
+            g_list_free(list);
+
+            if(open_rom(entry->filename, entry->archivefile)==0)
                 { startEmulation(); }
             else
                 { return; }
             }
         }
+
     startEmulation();
 }
 
