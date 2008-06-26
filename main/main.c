@@ -46,7 +46,6 @@
 #include <getopt.h> // getopt_long
 #include <libgen.h> // basename, dirname
 #include <png.h>    // for writing screenshot PNG files
-#include <SDL.h>
 
 #include "main.h"
 #include "version.h"
@@ -59,6 +58,8 @@
 #include "../r4300/recomph.h"
 #include "../memory/memory.h"
 #include "savestates.h"
+#include "vcr.h"
+#include "vcr_compress.h"
 #include "guifuncs.h" // gui-specific functions
 #include "util.h"
 #include "translate.h"
@@ -76,10 +77,7 @@
 #include "lirc.h"
 #endif //WITH_LIRC
 
-#ifdef VCR_SUPPORT
-#include "vcr.h"
-#include "vcr_compress.h"
-#endif
+#include <SDL.h>
 
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
@@ -91,6 +89,7 @@ extern void *rom_cache_system(void *_arg);
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
+int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
 pthread_t   g_EmulationThread = 0;      // core thread handle
 pthread_t   g_RomCacheThread = 0;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
@@ -180,8 +179,6 @@ void main_message(unsigned int console, unsigned int statusbar, unsigned int osd
 #endif
     if(console||!l_GuiEnabled)
         { printf(buffer); }
-
-    return;
 }
 
 
@@ -219,6 +216,13 @@ static int GetVILimit(void)
         default:
             return 60;
     }
+}
+
+static void InitTimer(void)
+{
+    VILimit = GetVILimit();
+    VILimitMilliseconds = (double) 1000.0/VILimit; 
+    printf("init timer!\n");
 }
 
 static unsigned int gettimeofday_msec(void)
@@ -337,9 +341,9 @@ void new_vi(void)
         return;
     }
     CurrentFPSTime = gettimeofday_msec();
-
+    
     Dif = CurrentFPSTime - LastFPSTime;
-
+    
     if (Dif < AdjustedLimit) 
     {
         CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
@@ -356,13 +360,89 @@ void new_vi(void)
         CounterTime = gettimeofday_msec();
         VI_Counter = 0 ;
     }
-
+    
     LastFPSTime = CurrentFPSTime ;
     end_section(IDLE_SECTION);
     if (l_FrameAdvance) {
         rompause = 1;
         l_FrameAdvance = 0;
     }
+}
+
+int open_rom( const char *filename )
+{
+    int rc;
+
+    if(g_EmulationThread)
+    {
+        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
+        {
+            return -1;
+        }
+        stopEmulation();
+    }
+
+    if(ROM_HEADER)
+    {
+        free(ROM_HEADER);
+        ROM_HEADER = NULL;
+    }
+
+    if(rom)
+    {
+        free(rom);
+        rom = NULL;
+    }
+
+    // clear Byte-swapped flag, since ROM is now deleted
+    //This is (and never was) set in the code below... 
+    g_MemHasBeenBSwapped = 0;
+
+    if((rc = rom_read(filename)) != 0)
+    {
+        // rc of -3 means rom file was a hack or bad dump and the user did not want to load it.
+        if(rc == -3)
+            main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed.\n"));
+        else
+            alert_message(tr("Couldn't load Rom!"));
+
+        return -3;
+    }
+    //Quit here to make sure bad roms aren't loaded when testing rom handling code.
+    //return -2;
+    InitTimer();
+
+    return 0;
+}
+
+int close_rom(void)
+{
+    if(g_EmulationThread)
+    {
+        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
+        {
+            return -1;
+        }
+        stopEmulation();
+    }
+
+    if(ROM_HEADER)
+    {
+        free(ROM_HEADER);
+        ROM_HEADER = NULL;
+    }
+
+    if(rom)
+    {
+        free(rom);
+        rom = NULL;
+    }
+
+    // clear Byte-swapped flag, since ROM is now deleted
+    g_MemHasBeenBSwapped = 0;
+    main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed.\n"));
+
+    return 0;
 }
 
 /** emulation **/
@@ -428,11 +508,6 @@ void startEmulation(void)
         return;
     }
 
-    //Initialize the timer.
-    VILimit = GetVILimit();
-    VILimitMilliseconds = (double) 1000.0/VILimit; 
-    printf("init timer!\n");
-
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
     {
@@ -448,7 +523,6 @@ void startEmulation(void)
             return;
         }
         pthread_detach(g_EmulationThread);
-        main_message(0, 1, 0, OSD_BOTTOM_LEFT,  tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
     else if(rompause)
@@ -733,7 +807,15 @@ static void * emulationThread( void *_arg )
         RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
 
     // initialize memory, and do byte-swapping if it's not been done yet
-    init_memory(1);
+    if (g_MemHasBeenBSwapped == 0)
+    {
+        init_memory(1);
+        g_MemHasBeenBSwapped = 1;
+    }
+    else
+    {
+        init_memory(0);
+    }
 
     // load the plugins and attach the ROM to them
     plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
@@ -1332,7 +1414,7 @@ int main(int argc, char *argv[])
         config_put_number("CurrentSaveSlot",0);
     }
 
-    printf(tr("Config Dir: \"%s\", Install Dir: \"%s\"\n"), l_ConfigDir, l_InstallDir);
+    main_message(0, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\"\n"), l_ConfigDir, l_InstallDir);
 
     //The database needs to be opened regardless of GUI mode.
     romdatabase_open();
@@ -1364,7 +1446,7 @@ int main(int argc, char *argv[])
     // if rom file was specified, run it
     if (l_Filename)
     {
-        if(open_rom(l_Filename, 0) < 0 && !l_GuiEnabled)
+        if(open_rom(l_Filename) < 0 && !l_GuiEnabled)
         {
             // cleanup and exit
             cheat_delete_all();
