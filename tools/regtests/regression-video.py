@@ -29,6 +29,7 @@ def main(rootdir, cfgfile, nobuild):
     refdir = os.path.join(rootdir, "reference")
     archivedir = os.path.join(rootdir, "archive")
     # run the test procedure
+    tester = RegTester(rootdir, srcdir, shotdir)
     rval = 0
     while True:
         # Step 1: check out from SVN and build the source
@@ -40,7 +41,6 @@ def main(rootdir, cfgfile, nobuild):
                 rval = 2
                 break
         # Step 2: load the test config file, run the tests
-        tester = RegTester(rootdir, srcdir, shotdir)
         if not tester.LoadConfig(cfgfile):
             rval = 3
             break
@@ -220,7 +220,7 @@ class RegTester:
                         continue
                 # construct the command line
                 exepath = os.path.join(self.bindir, "mupen64plus")
-                exeparms = ["--nogui", "--noask", "--emumode", "1" ]
+                exeparms = ["--nogui", "--noosd", "--noask", "--emumode", "1" ]
                 exeparms += [ "--testshots",  ",".join(shotlist) ]
                 exeparms += [ "--installdir", self.bindir ]
                 exeparms += [ "--sshotdir", os.path.join(self.screenshotdir, videoname) ]
@@ -301,7 +301,11 @@ class RegTester:
                 pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
                 similarity = pipe.read().strip()
                 pipe.close()
-                if similarity == "inf":
+                try:
+                    db = float(similarity)
+                except:
+                    db = 0
+                if db > 60.0:
                     os.unlink(diffimage)
                 else:
                     report += "    Warning: test image '%s/%s' does not match reference.  PSNR = %s\n" % (videoname, filename, similarity)
