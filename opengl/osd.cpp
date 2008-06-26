@@ -45,6 +45,7 @@ static int l_OsdInitialized = 0;
 
 static list_t l_messageQueue = NULL;
 static OGLFT::Monochrome *l_font;
+static float l_fLineHeight = -1.0;
 
 static void animation_none(osd_message_t *);
 static void animation_fade(osd_message_t *);
@@ -144,7 +145,14 @@ static void draw_message(osd_message_t *msg, int width, int height)
     // yoffset moves message up
     y += msg->yoffset;
 
-    l_font->draw(x, y, msg->text);
+    // get the bounding box if invalid
+    if (msg->bbox.x_min_ == 0 && msg->bbox.x_max_ == 0)
+    {
+        msg->bbox = l_font->measure_nominal(msg->text);
+    }
+
+    // draw the text line
+    l_font->draw(x, y, msg->text, msg->bbox);
 }
 
 // null animation handler
@@ -201,15 +209,15 @@ void osd_init(int width, int height)
     snprintf(fontpath, PATH_MAX, "%sfonts/%s", get_installpath(), FONT_FILENAME);
     l_font = new OGLFT::Monochrome(fontpath, height / 35);  // make font size proportional to screen height
 
-    // clear statics
-    for (int i = 0; i < OSD_NUM_CORNERS; i++)
-        fCornerScroll[i] = 0.0;
-
     if(!l_font || !l_font->isValid())
     {
         printf("Could not construct face from %s\n", fontpath);
         return;
     }
+
+    // clear statics
+    for (int i = 0; i < OSD_NUM_CORNERS; i++)
+        fCornerScroll[i] = 0.0;
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 #if defined(GL_RASTER_POSITION_UNCLIPPED_IBM)
@@ -305,14 +313,17 @@ void osd_render()
     glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
     glShadeModel(GL_FLAT);
 
-    // get height of line
-    OGLFT::BBox bbox = l_font->measure("01abjZpqRGB");
-    float fLineHeight = (bbox.y_max_ - bbox.y_min_) / 30.0;
+    // get line height if invalid
+    if (l_fLineHeight < 0.0)
+    {
+        OGLFT::BBox bbox = l_font->measure("01abjZpqRGB");
+        l_fLineHeight = (bbox.y_max_ - bbox.y_min_) / 30.0;
+    }
 
     // keeps track of next message position for each corner
     float fCornerPos[OSD_NUM_CORNERS];
     for (i = 0; i < OSD_NUM_CORNERS; i++)
-        fCornerPos[i] = 0.5 * fLineHeight;
+        fCornerPos[i] = 0.5 * l_fLineHeight;
 
     list_foreach(l_messageQueue, node)
     {
@@ -346,13 +357,13 @@ void osd_render()
         if (msg->corner >= OSD_MIDDLE_LEFT && msg->corner <= OSD_MIDDLE_RIGHT)  // don't scroll the middle messages
             fStartOffset = fCornerPos[msg->corner];
         else
-            fStartOffset = fCornerPos[msg->corner] + (fCornerScroll[msg->corner] * fLineHeight);
+            fStartOffset = fCornerPos[msg->corner] + (fCornerScroll[msg->corner] * l_fLineHeight);
         msg->yoffset += get_message_offset(msg, fStartOffset);
 
         draw_message(msg, viewport[2], viewport[3]);
 
         msg->yoffset -= get_message_offset(msg, fStartOffset);
-        fCornerPos[msg->corner] += fLineHeight;
+        fCornerPos[msg->corner] += l_fLineHeight;
     }
 
     // do the scrolling
@@ -423,6 +434,8 @@ osd_message_t * osd_new_message(enum osd_corner eCorner, const char *fmt, ...)
     msg->color[G] = 1.;
     msg->color[B] = 1.;
 
+    msg->bbox = OGLFT::BBox();  // set a null bounding box
+
     msg->corner = eCorner;
     msg->state = OSD_APPEAR;
     fCornerScroll[eCorner] -= 1.0;  // start this one before the beginning of the list and scroll it in
@@ -467,6 +480,9 @@ void osd_update_message(osd_message_t *msg, const char *fmt, ...)
         free(msg->text);
 
     msg->text = strdup(buf);
+
+    // reset bounding box
+    msg->bbox = OGLFT::BBox();
 
     // reset display time counter
     if (msg->state >= OSD_DISPLAY)

@@ -29,6 +29,8 @@
 #ifndef __OSD_H__
 #define __OSD_H__
 
+#include "OGLFT.h"
+
 /******************************************************************
    osd_corner
    0    1    2 |
@@ -76,6 +78,7 @@ typedef struct {
     float xoffset; // Relative X position
     float yoffset; // Relative Y position
     float color[3]; // Red, Green, Blue values
+    OGLFT::BBox bbox;      // bounding box (size of rendered message)
     int state; // display state of current message
     enum osd_animation_type animation[OSD_NUM_STATES]; // animations for each display state
     unsigned int timeout[OSD_NUM_STATES]; // timeouts for each display state

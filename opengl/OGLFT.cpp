@@ -682,7 +682,7 @@ namespace OGLFT
 
 
     // Draw the (latin1) string at the given position.
-    void Face::draw (GLfloat x, GLfloat y, const char* s)
+    void Face::draw (GLfloat x, GLfloat y, const char* s, BBox bbox)
     {
         if(!advance_) glPushMatrix();
 
@@ -690,7 +690,6 @@ namespace OGLFT
         {
             glPushMatrix();
 
-            BBox bbox = measure_nominal(s);
             GLfloat dx = 0, dy = 0;
 
             switch (horizontal_justification_)
