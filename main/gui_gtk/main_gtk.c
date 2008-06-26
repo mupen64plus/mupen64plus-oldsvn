@@ -180,7 +180,7 @@ void statusbar_message(const char *format, ...)
     pthread_t self = pthread_self();
 
     va_start(ap, format);
-    vsnprintf(buffer, 2047, format, ap);
+    vsnprintf(buffer, 2048, format, ap);
     buffer[2048] = '\0';
     va_end(ap);
 

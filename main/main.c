@@ -171,14 +171,14 @@ void main_message(unsigned int console, unsigned int statusbar, unsigned int osd
     buffer[2048]='\0';
     va_end(ap);
 
-    if(g_OsdEnabled&&osd)
+    if (g_OsdEnabled && osd)
         { osd_new_message(osd_corner, buffer); }
 #ifndef NO_GUI
-    if(l_GuiEnabled&&statusbar)
+    if (l_GuiEnabled && statusbar)
         { statusbar_message(buffer); }
 #endif
-    if(console||!l_GuiEnabled)
-        { printf(buffer); }
+    if (console)
+        { printf("%s\n", buffer); }
 }
 
 
@@ -247,7 +247,7 @@ void main_speeddown(int percent)
     if (l_SpeedFactor - percent > 10)  /* 10% minimum speed */
     {
         l_SpeedFactor -= percent;
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%\n", tr("Playback speed:"), l_SpeedFactor);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%", tr("Playback speed:"), l_SpeedFactor);
         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
     }
 }
@@ -257,7 +257,7 @@ void main_speedup(int percent)
     if (l_SpeedFactor + percent < 300) /* 300% maximum speed */
     {
         l_SpeedFactor += percent;
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%\n", tr("Playback speed:"), l_SpeedFactor);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%", tr("Playback speed:"), l_SpeedFactor);
         setSpeedFactor(l_SpeedFactor);  // call to audio plugin
     }
 }
@@ -573,7 +573,7 @@ int pauseContinueEmulation(void)
             osd_delete_message(msg);
 
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Paused\n"));
-        msg = osd_new_message(OSD_BOTTOM_LEFT, tr("Paused\n"));
+        msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused\n"));
         osd_message_set_static(msg);
     }
 
@@ -1414,7 +1414,7 @@ int main(int argc, char *argv[])
         config_put_number("CurrentSaveSlot",0);
     }
 
-    main_message(0, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\"\n"), l_ConfigDir, l_InstallDir);
+    main_message(1, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
 
     //The database needs to be opened regardless of GUI mode.
     romdatabase_open();
