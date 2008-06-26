@@ -190,8 +190,6 @@ namespace OGLFT
             background_color_[G] = green;
             background_color_[B] = blue;
             background_color_[A] = alpha;
-
-            clearCaches();
         }
     }
 
@@ -204,43 +202,25 @@ namespace OGLFT
             foreground_color_[G] = green;
             foreground_color_[B] = blue;
             foreground_color_[A] = alpha;
-
-            clearCaches();
         }
     }
 
     // Note: Changing the foreground color also clears the display list cache.
     void Face::setForegroundColor (const GLfloat foreground_color[4])
     {
-        if(foreground_color_[R] != foreground_color[R] ||
-           foreground_color_[G] != foreground_color[G] ||
-           foreground_color_[B] != foreground_color[B] ||
-           foreground_color_[A] != foreground_color[A]) 
-        {
-            foreground_color_[R] = foreground_color[R];
-            foreground_color_[G] = foreground_color[G];
-            foreground_color_[B] = foreground_color[B];
-            foreground_color_[A] = foreground_color[A];
-
-            clearCaches();
-        }
+        foreground_color_[R] = foreground_color[R];
+        foreground_color_[G] = foreground_color[G];
+        foreground_color_[B] = foreground_color[B];
+        foreground_color_[A] = foreground_color[A];
     }
 
     // Note: Changing the background color also clears the display list cache.
     void Face::setBackgroundColor (const GLfloat background_color[4])
     {
-        if(background_color_[R] != background_color[R] ||
-           background_color_[G] != background_color[G] ||
-           background_color_[B] != background_color[B] ||
-           background_color_[A] != background_color[A])
-        {
-            background_color_[R] = background_color[R];
-            background_color_[G] = background_color[G];
-            background_color_[B] = background_color[B];
-            background_color_[A] = background_color[A];
-
-            clearCaches();
-        }
+        background_color_[R] = background_color[R];
+        background_color_[G] = background_color[G];
+        background_color_[B] = background_color[B];
+        background_color_[A] = background_color[A];
     }
 
     // Note: Changing the string rotation angle clears the display list cache
@@ -484,47 +464,6 @@ namespace OGLFT
         for(unsigned int f=0; f<faces_.size(); f++)FT_Set_Transform(faces_[f].face_, &rotation_matrix, 0);
 
         return bbox;
-    }
-
-    // Compile a (latin1) string into a display list
-    GLuint Face::compile (const char* s)
-    {
-        const char* s_tmp = s;
-
-        for(char c = *s_tmp; c != 0; c = *++s_tmp) compile((const char*)c);
-
-        GLuint dlist = glGenLists(1);
-        glNewList(dlist, GL_COMPILE);
-
-        glColor4f(foreground_color_[R], foreground_color_[G], foreground_color_[B], foreground_color_[A]);
-        if(!advance_) glPushMatrix();
-        draw(s);
-        if(!advance_) glPopMatrix();
-
-        glEndList();
-
-        return dlist;
-    }
-
-    // Compile a (UNICODE) string into a display list
-    GLuint Face::compile (const wchar_t* s)
-    {
-        // First, make sure all the characters in the string are themselves
-        // in display lists
-        for(unsigned int i=0; i<wstrlen(s); i++) compile(s[i]);
-
-        GLuint dlist = glGenLists(1);
-        glNewList(dlist, GL_COMPILE);
-
-        glColor4f(foreground_color_[R], foreground_color_[G], foreground_color_[B], foreground_color_[A]);
-        
-        if(!advance_) glPushMatrix();
-        draw(s);
-        if(!advance_) glPopMatrix();
-
-        glEndList();
-
-        return dlist;
     }
 
     // Compile a (latin1) character glyph into a display list and cache

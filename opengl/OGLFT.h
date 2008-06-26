@@ -251,8 +251,6 @@ namespace OGLFT
             virtual BBox measure ( const wchar_t* s );
             virtual BBox measure ( const wchar_t* format, double number );
             virtual BBox measureRaw ( const wchar_t* s );
-            GLuint compile ( const char* s );
-            GLuint compile ( const wchar_t* s );
             GLuint compile ( unsigned char c );
             GLuint compile ( const wchar_t c );
             void draw ( const char* s );
