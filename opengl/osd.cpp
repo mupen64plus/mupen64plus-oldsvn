@@ -239,8 +239,11 @@ void osd_exit(void)
     osd_message_t *msg;
 
     // delete font renderer
-    if(l_font)
+    if (l_font)
+    {
         delete l_font;
+        l_font = NULL;
+    }
 
     // delete message queue
     list_foreach(l_messageQueue, node)
@@ -252,6 +255,9 @@ void osd_exit(void)
         free(msg);
     }
     list_delete(&l_messageQueue);
+
+    // reset initialized flag
+    l_OsdInitialized = 0;
 }
 
 // renders the current osd message queue to the screen

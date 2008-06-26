@@ -827,7 +827,7 @@ static void * emulationThread( void *_arg )
     if (l_Fullscreen)
         changeWindow();
 
-    if(g_OsdEnabled)
+    if (g_OsdEnabled)
     {
         // init on-screen display
         void *pvPixels = NULL;
@@ -838,7 +838,7 @@ static void * emulationThread( void *_arg )
             free(pvPixels);
             pvPixels = NULL;
         }
-    osd_init(width, height);
+        osd_init(width, height);
     }
 
     // setup rendering callback from video plugin to the core, for screenshots and On-Screen-Display
@@ -862,7 +862,10 @@ static void * emulationThread( void *_arg )
     lircStop();
 #endif // WITH_LIRC
 
-    osd_exit();
+    if (g_OsdEnabled)
+    {
+        osd_exit();
+    }
 
     romClosed_RSP();
     romClosed_input();
