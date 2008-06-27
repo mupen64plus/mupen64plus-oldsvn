@@ -389,44 +389,71 @@ static void scan_dir(const char *directoryname)
             //printf("File: %s\n", filename);
 
             //Test if we're a valid rom.
-            if((localrom=load_rom(filename, &entry->romsize, &entry->compressiontype, &entry->imagetype, &entry->romsize))==NULL)
-                { 
-                free(entry);
-                continue;  
-                }
-
-            fill_entry(entry, localrom);
-
-            //When we support multifile archives load_rom needs a archivefile field.
-            entry->archivefile = 0; //For now we're the 1st valid ROM only.
-            entry->timestamp = filestatus.st_mtime;
-
-            //Actually add rom to cache.
-            if(g_romcache.length==0)
+            if((localrom=load_single_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize))==NULL)
                 {
-                g_romcache.top = entry; 
-                g_romcache.last = entry; 
-                ++g_romcache.length;
-                }
-            else
-                {
-                g_romcache.last->next = entry;
-                g_romcache.last = entry;
-                ++g_romcache.length;
-                }
-            printf("Added ROM: %s\n", entry->inientry->goodname);
-            ++romcounter;
-            if(romcounter%UPDATE_FREQUENCY==0)
-                {
-                updaterombrowser(g_romcache.length, 0); 
-                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Added ROMs %d-%d."), g_romcache.length-UPDATE_FREQUENCY+1, g_romcache.length);
+                if((localrom=load_archive_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize, &entry->archivefile))==NULL)
+                    {
+                    free(entry);
+                    continue; 
+                    }
                 }
 
-            free(localrom);
+            unsigned int archivefile = 0;
+            int multi;
+            do
+                {
+                multi = 0;
+                swap_rom(localrom, &entry->imagetype, entry->romsize);
+                fill_entry(entry, localrom);
+                free(localrom);
+
+                entry->timestamp = filestatus.st_mtime;
+                entry->archivefile = archivefile;
+                ++archivefile;
+
+                //Actually add rom to cache.
+                if(g_romcache.length==0)
+                    {
+                    g_romcache.top = entry; 
+                    g_romcache.last = entry; 
+                    ++g_romcache.length;
+                    }
+                else
+                    {
+                    g_romcache.last->next = entry;
+                    g_romcache.last = entry;
+                    ++g_romcache.length;
+                    }
+                printf("Added ROM: %s\n", entry->inientry->goodname);
+                ++romcounter;
+                if(romcounter%UPDATE_FREQUENCY==0)
+                    {
+                    updaterombrowser(g_romcache.length, 0); 
+                    main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Added ROMs %d-%d."), g_romcache.length-UPDATE_FREQUENCY+1, g_romcache.length);
+                    }
+
+                if(entry->compressiontype==ZIP_COMPRESSION)
+                    {
+                    entry = (cache_entry*)calloc(1,sizeof(cache_entry));
+                    strncpy(entry->filename,filename,PATH_MAX-1);
+                    entry->filename[PATH_MAX-1] = '\0';
+
+                    if((localrom=load_archive_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize, &archivefile))!=NULL)
+                        {
+                        multi = 1; 
+                        if(entry==NULL)
+                            {
+                            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                            continue;
+                            }
+                        }
+                    }
+                }
+            while(multi);
             }
         }
-    closedir(directory);
-}
+     closedir(directory);
+ }
 
 int load_initial_cache(char* cache_filename)
 {

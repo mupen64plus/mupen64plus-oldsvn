@@ -55,10 +55,13 @@
 unsigned char* rom;
 //Global loaded rom size.
 int taille_rom;
+
+//Possibly replace with a glocal cache_entry?
 //Global loaded rom header information.
 rom_header* ROM_HEADER;
 rom_settings ROM_SETTINGS;
 
+//Tests if a file is a valid N64 rom by checking the first 4 bytes.
 int is_valid_rom(unsigned char buffer[4])
 {
     //Test if rom is a native .z64 image with header 0x80371240. [ABCD]
@@ -74,12 +77,50 @@ int is_valid_rom(unsigned char buffer[4])
         { return 0; }
 }
 
-/*
- * Open a rom.
- * Determins compression type by testing if the decompressed file has a valid rom 4 byte header.
- * Loads loadlength of the rom and byteswaps if necessary.
+
+/* If rom is a .v64 or .n64 image, byteswap or wordswap loadlength amount of
+ * rom data to native .z64 before forwarding. Makes sure that data extraction
+ * and MD5ing routines always deal with a .z64 image.
  */
-unsigned char* load_rom(const char* filename, int* romsize, unsigned short* compressiontype, unsigned short* imagetype, int* loadlength)
+void swap_rom(unsigned char* localrom, unsigned short *imagetype, int loadlength)
+{
+    char temp;
+    int i;
+
+    //Btyeswap if .v64 image.
+    if(localrom[0]==0x37)
+        {
+        *imagetype = V64IMAGE;
+        for ( i = 0; i < (loadlength/2); ++i )
+            {
+            temp=localrom[i*2];
+            localrom[i*2]=localrom[i*2+1];
+            localrom[i*2+1]=temp;
+            }
+        }
+    //Wordswap if .n64 image.
+    else if(localrom[0]==0x40)
+        {
+        *imagetype = N64IMAGE;
+        for ( i = 0; i < (loadlength/4); ++i )
+            {
+            temp=localrom[i*4];
+            localrom[i*4]=localrom[i*4+3];
+            localrom[i*4+3]=temp;
+            temp=localrom[i*4+1];
+            localrom[i*4+1]=localrom[i*4+2];
+            localrom[i*4+2]=temp;
+            }
+        }
+    else
+        { *imagetype = Z64IMAGE; }
+}
+
+/* Open a file and test if its an uncompressed rom, bzip2ed rom, lzma stream compressed
+ * rom, or gzipped rom. If so, set compressiontype and load *loadlength of the rom
+ * into the returned pointer. On failure return NULL.
+ */
+unsigned char* load_single_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength)
 {
     int i;
     unsigned short romread = 0;
@@ -226,49 +267,7 @@ unsigned char* load_rom(const char* filename, int* romsize, unsigned short* comp
         fclose(romfile);
         }
 
-    //Zipped roms.
-    if(romread==0)
-        {
-        unzFile zipromfile;
-        unz_file_info fileinfo;
-        char szFileName[256], szExtraField[256], szComment[256];
-        zipromfile = unzOpen(filename);
-        if(zipromfile!=NULL) 
-            {
-            unzGoToFirstFile(zipromfile);
-            //Get first valid rom in archive.
-            do
-                {
-                unzGetCurrentFileInfo(zipromfile, &fileinfo, szFileName, 255, 
-                szExtraField, 255, szComment, 255);
-                unzOpenCurrentFile(zipromfile);
-                if(fileinfo.uncompressed_size>=4)
-                   {
-                   unzReadCurrentFile(zipromfile, buffer, 4);
-                   if(is_valid_rom(buffer))
-                       { 
-                       *compressiontype = ZIP_COMPRESSION;
-                       *romsize = fileinfo.uncompressed_size;
-                       localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
-                       if(localrom==NULL)
-                           {
-                           fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
-                           return NULL;
-                           }
-                       unzOpenCurrentFile(zipromfile);
-                       unzReadCurrentFile(zipromfile, localrom, *loadlength);
-                       unzCloseCurrentFile(zipromfile);
-                       romread = 1;
-                       break; //Prevent error from .zips with multiple roms.
-                       }
-                   }
-                }
-            while (unzGoToNextFile(zipromfile) != UNZ_END_OF_LIST_OF_FILE);
-            unzClose(zipromfile);
-            }
-        }
-
-    //Gzipped roms.
+     //Gzipped roms.
     if(romread==0)
         {
         gzFile *gzromfile;
@@ -311,36 +310,68 @@ unsigned char* load_rom(const char* filename, int* romsize, unsigned short* comp
         return NULL;
         }
 
-    char temp;
+ 
+    return localrom;
+}
 
-    //Btyeswap if .v64 image.
-    if(localrom[0]==0x37)
+/* Open a file and test if its a .zip archive. If so load check if *archivefile is a
+ * rom and load *loadlength into the returned pointer. If *archivefile is not a rom
+ * in a many file archive, function will keep checking until a rom is found or the 
+ * end of the archive is reached. Returns NULL if unable to find a rom.
+ */
+unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile)
+{
+    unsigned int filecounter = 0;
+    unsigned short romread = 0;
+    unsigned char buffer[4];
+    unsigned char* localrom;
+    unzFile zipromfile;
+    unz_file_info fileinfo;
+    char szFileName[256], szExtraField[256], szComment[256];
+    zipromfile = unzOpen(filename);
+    if(zipromfile!=NULL) 
         {
-        *imagetype = V64IMAGE;
-        for ( i = 0; i < (*loadlength/2); ++i )
+        unzGoToFirstFile(zipromfile);
+        //Get first valid rom in archive.
+        do
             {
-            temp=localrom[i*2];
-            localrom[i*2]=localrom[i*2+1];
-            localrom[i*2+1]=temp;
+            unzGetCurrentFileInfo(zipromfile, &fileinfo, szFileName, 255, 
+            szExtraField, 255, szComment, 255);
+            unzOpenCurrentFile(zipromfile);
+            if(fileinfo.uncompressed_size>=4&&filecounter>=*archivefile)
+                {
+                unzReadCurrentFile(zipromfile, buffer, 4);
+                if(is_valid_rom(buffer))
+                    {
+                    *compressiontype = ZIP_COMPRESSION;
+                    *romsize = fileinfo.uncompressed_size;
+                    localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
+                    if(localrom==NULL)
+                        {
+                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                        return NULL;
+                        }
+                    unzOpenCurrentFile(zipromfile);
+                    unzReadCurrentFile(zipromfile, localrom, *loadlength);
+                    unzCloseCurrentFile(zipromfile);
+                    romread = 1;
+                    break;
+                    }
+                }
+            ++filecounter;
             }
+        while (unzGoToNextFile(zipromfile) != UNZ_END_OF_LIST_OF_FILE);
+        unzClose(zipromfile);
         }
-    //Wordswap if .n64 image.
-    else if(localrom[0]==0x40)
-        {
-        *imagetype = N64IMAGE;
-        for ( i = 0; i < (*loadlength/4); ++i )
-            {
-            temp=localrom[i*4];
-            localrom[i*4]=localrom[i*4+3];
-            localrom[i*4+3]=temp;
-            temp=localrom[i*4+1];
-            localrom[i*4+1]=localrom[i*4+2];
-            localrom[i*4+2]=temp;
-            }
-        }
-    else
-        { *imagetype = Z64IMAGE; }
 
+    //File invalid, or valid rom not found in file.
+    if(romread==0)
+        {
+        romsize = 0;
+        return NULL;
+        }
+
+    *archivefile = filecounter;
     return localrom;
 }
 
@@ -395,11 +426,16 @@ int open_rom(const char* filename, unsigned int archivefile)
 
     strncpy(buffer, filename, PATH_MAX-1);
     buffer[PATH_MAX-1] = 0;
-    if ((rom=load_rom(filename, &taille_rom, &compressiontype, &imagetype, &taille_rom))==NULL)
+    if ((rom=load_single_rom(filename, &taille_rom, &compressiontype, &taille_rom))==NULL)
         {
-        alert_message(tr("Couldn't load Rom!"));
-        return -1;
+        if((rom=load_archive_rom(filename, &taille_rom, &compressiontype, &taille_rom, &archivefile))==NULL)
+            {
+            alert_message(tr("Couldn't load Rom!")); 
+            return -1;
+            }
         }
+
+    swap_rom(rom, &imagetype, taille_rom);
 
     compressionstring(compressiontype, buffer);
     printf("Compression: %s\n", buffer);
@@ -465,7 +501,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     char* s = entry->goodname;
     if(s!=NULL)
         {
-        for ( i = strlen(s); i > 0 && s[i-1] != '['; --i );
+        for ( i = strlen(s); i > 1 && s[i-1] != '['; --i );
         if(i!=0)
             {
             if(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o')

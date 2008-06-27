@@ -32,7 +32,9 @@
 
 int open_rom(const char* filename, unsigned int archivefile);
 int close_rom(void);
-unsigned char* load_rom(const char* filename, int* romsize, unsigned short* compressiontype, unsigned short* imagetype, int* loadlength);
+unsigned char* load_single_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength);
+unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile);
+void swap_rom(unsigned char* localrom, unsigned short *imagetype, int loadlength);
 
 extern unsigned char* rom;
 extern int taille_rom;
