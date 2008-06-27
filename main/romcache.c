@@ -216,6 +216,78 @@ void* rom_cache_system(void* _arg)
     printf("Rom cache system terminated!\n");
 }
 
+void fill_entry(cache_entry* entry, unsigned char* localrom)
+{
+    //Compute md5.
+    md5_state_t state;
+
+    md5_init(&state);
+    md5_append(&state, (const md5_byte_t *)localrom, entry->romsize);
+    md5_finish(&state, entry->md5);
+
+    entry->inientry = ini_search_by_md5(entry->md5);
+
+    //See rom.h for header layout.
+    entry->countrycode = (unsigned short)*(localrom+0x3E);
+    entry->crc1 = sl(*(unsigned int*)(localrom+0x10));
+    entry->crc2 = sl(*(unsigned int*)(localrom+0x14));
+
+    //Internal name is encoded in SHIFT-JIS. Attempt to convert to UTF-8 so that
+    //GUIs and (ideally) Rice can use this for Japanese titles in a moderm environment.
+    iconv_t conversion = iconv_open ("UTF-8", "SHIFT-JIS");
+    if(conversion==(iconv_t)-1)
+        {
+        strncpy(entry->internalname,(char*)localrom+0x20,20); 
+        entry->internalname[20]='\0';
+        }
+    else
+        {
+        char *shiftjis, *shiftjisstart, *utf8, *utf8start;
+        size_t shiftjislength = 20;
+        size_t utf8length = 80; 
+        shiftjisstart = shiftjis = (char*)calloc(20,sizeof(char));
+        utf8start = utf8 = (char*)calloc(81,sizeof(char));
+
+        strncpy(shiftjis, (char*)localrom+0x20, 20);
+
+        iconv(conversion, &shiftjis, &shiftjislength, &utf8, &utf8length);
+        iconv_close(conversion);
+
+        strncpy(entry->internalname , utf8start, 80);
+        entry->internalname[80]='\0';
+
+        free(shiftjisstart);
+        free(utf8start);
+        }
+
+    //Detect CIC copy protection boot chip by CRCing the boot code.
+    long long CRC = 0;
+    int counter;
+    for ( counter = 0x40/4; counter < 0x1000/4; ++counter )
+        { CRC += ((unsigned int*)localrom)[counter]; }
+
+    switch(CRC)
+        {
+        case 0x000000A0F26F62FELL:
+            entry->cic = CIC_NUS_6101;
+            break;
+        case 0x000000A316ADC55ALL:
+           entry->cic = CIC_NUS_6102;
+            break;
+        case 0x000000A9229D7C45LL:
+            entry->cic = CIC_NUS_6103;
+            break;
+        case 0x000000F8B860ED00LL:
+            entry->cic = CIC_NUS_6105;
+            break;
+        case 0x000000BA5BA4B8CDLL:
+            entry->cic = CIC_NUS_6106;
+            break;
+        default:
+            entry->cic = CIC_NUS_6102;
+        }
+}
+
 static void scan_dir(const char *directoryname)
 {
     char filename[PATH_MAX];
@@ -314,8 +386,7 @@ static void scan_dir(const char *directoryname)
 
             unsigned char* localrom;
 
-            //When we support multifile archives load_rom needs a archivefile field.
-            entry->archivefile = 0; //For now we're the 1st valid ROM only.
+            //printf("File: %s\n", filename);
 
             //Test if we're a valid rom.
             if((localrom=load_rom(filename, &entry->romsize, &entry->compressiontype, &entry->imagetype, &entry->romsize))==NULL)
@@ -324,75 +395,10 @@ static void scan_dir(const char *directoryname)
                 continue;  
                 }
 
-            //Compute md5.
-            md5_state_t state;
+            fill_entry(entry, localrom);
 
-            md5_init(&state);
-            md5_append(&state, (const md5_byte_t *)localrom, entry->romsize);
-            md5_finish(&state, entry->md5);
-
-            entry->inientry = ini_search_by_md5(entry->md5);
-
-            //See rom.h for header layout.
-            entry->countrycode = (unsigned short)*(localrom+0x3E);
-            entry->crc1 = sl(*(unsigned int*)(localrom+0x10));
-            entry->crc2 = sl(*(unsigned int*)(localrom+0x14));
-
-            //Internal name is encoded in SHIFT-JIS. Attempt to convert to UTF-8 so that
-            //GUIs and Rice can use this for Japanese titles in a moderm *NIX environment.
-            iconv_t conversion = iconv_open ("UTF-8", "SHIFT-JIS");
-            if(conversion==(iconv_t)-1)
-                {
-                strncpy(entry->internalname,(char*)localrom+0x20,20); 
-                entry->internalname[20]='\0';
-                }
-            else
-                {
-                char *shiftjis, *shiftjisstart, *utf8, *utf8start;
-                size_t shiftjislength = 20;
-                size_t utf8length = 80; 
-                shiftjisstart = shiftjis = (char*)calloc(20,sizeof(char));
-                utf8start = utf8 = (char*)calloc(81,sizeof(char));
-
-                strncpy(shiftjis, (char*)localrom+0x20, 20);
-
-                iconv(conversion, &shiftjis, &shiftjislength, &utf8, &utf8length);
-                iconv_close(conversion);
-
-                strncpy(entry->internalname , utf8start, 80);
-                entry->internalname[80]='\0';
-
-                free(shiftjisstart);
-                free(utf8start);
-                }
-
-            //Detect CIC copy protection boot chip by CRCing the boot code.
-            long long CRC = 0;
-
-            for ( counter = 0x40/4; counter < 0x1000/4; ++counter )
-                { CRC += ((unsigned int*)localrom)[counter]; }
-
-            switch(CRC)
-                {
-                case 0x000000A0F26F62FELL:
-                    entry->cic = CIC_NUS_6101;
-                    break;
-                case 0x000000A316ADC55ALL:
-                    entry->cic = CIC_NUS_6102;
-                    break;
-                case 0x000000A9229D7C45LL:
-                    entry->cic = CIC_NUS_6103;
-                    break;
-                case 0x000000F8B860ED00LL:
-                    entry->cic = CIC_NUS_6105;
-                    break;
-                case 0x000000BA5BA4B8CDLL:
-                    entry->cic = CIC_NUS_6106;
-                    break;
-                default:
-                    entry->cic = CIC_NUS_6102;
-                }
-
+            //When we support multifile archives load_rom needs a archivefile field.
+            entry->archivefile = 0; //For now we're the 1st valid ROM only.
             entry->timestamp = filestatus.st_mtime;
 
             //Actually add rom to cache.
