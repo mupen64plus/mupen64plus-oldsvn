@@ -30,6 +30,7 @@
 #include "config.h"
 #include "rom.h"
 #include "translate.h"
+#include "../opengl/osd.h"
 
 #define DEFAULT 16
 
@@ -67,9 +68,9 @@ static const char *romextensions[] =
  ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2", ".lzma",  NULL //".rom" causes to many false positives.
 };
 
-static void scan_dir( const char *dirname );
+static void scan_dir(const char* dirname );
 
-void clear_cache()
+static void clear_cache()
 {
     cache_entry *entry, *entrynext;
 
@@ -88,74 +89,7 @@ void clear_cache()
         }
 }
 
-void* rom_cache_system(void* _arg)
-{
-    char* buffer;
-    struct sched_param param;
-    char cache_filename[PATH_MAX];
-
-    // Setup job parser
-    while (g_romcache.rcstask != RCS_SHUTDOWN)
-        {
-        //printf("Task: %d\n", g_romcache.rcstask);
-        switch(g_romcache.rcstask)
-            {
-            case RCS_INIT:
-                g_romcache.rcstask = RCS_BUSY;
-                buffer = (char*)config_get_string("RomCacheFile", NULL);
-                if(buffer==NULL)
-                    {
-                    printf("[rcs] Cache not in config.\n");
-                    buffer = (char*)malloc(PATH_MAX*sizeof(char));
-                    snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
-                    config_put_string("RomCacheFile", buffer);
-                    }
-
-                snprintf(cache_filename, PATH_MAX, "%s", buffer);
-
-                if(load_initial_cache(cache_filename))
-                    { updaterombrowser(g_romcache.length, 1); }
-
-                param.sched_priority = 0;
-                pthread_attr_setschedparam (_arg, &param);
-
-                remove(cache_filename);
-                rebuild_cache_file(cache_filename);
-                updaterombrowser(g_romcache.length, 0);
-
-                printf("[rcs] Cache file up to date.\n");
-                if(g_romcache.rcstask==RCS_BUSY)
-                   { g_romcache.rcstask = RCS_SLEEP; }
-                break;
-            case RCS_WRITE_CACHE:
-                g_romcache.rcstask = RCS_BUSY;
-                remove(cache_filename);
-                write_cache_file(cache_filename);
-                if (g_romcache.rcstask == RCS_BUSY)
-                    { g_romcache.rcstask = RCS_SLEEP; }
-                break;
-            case RCS_RESCAN:
-                g_romcache.rcstask = RCS_BUSY;
-
-                printf("[rcs] Rescanning rom cache!\n");
-                rebuild_cache_file(cache_filename);
-                updaterombrowser(g_romcache.length, 0);
-                printf("[rcs] Cache file up to date.\n");
-
-                if(g_romcache.rcstask==RCS_BUSY)
-                    { g_romcache.rcstask = RCS_SLEEP; }
-                break;
-            case RCS_SLEEP:
-                // Sleep to not use any CPU power.
-                usleep(1000);
-                break;
-            }
-        }
-
-    printf("[rcs] RCS Terminated!\n");
-}
-
-int write_cache_file(char* cache_filename)
+static int write_cache_file(char* cache_filename)
 {
     gzFile *gzfile;
 
@@ -196,24 +130,90 @@ int write_cache_file(char* cache_filename)
     return 1;
 }
 
-int rebuild_cache_file(char* cache_filename)
+static void rebuild_cache_file(char* cache_filename)
 {
     char real_path[PATH_MAX];
     char buffer[32];
     const char *directory; 
-    int i;
+    int counter;
 
-    printf("[rcs] Rebuilding cache file.\n",g_romcache.length);
-
-    for ( i = 0; i < config_get_number("NumRomDirs",0); ++i )
+    for ( counter = 0; counter < config_get_number("NumRomDirs",0); ++counter )
         {
-        sprintf(buffer,"RomDirectory[%d]",i);
+        sprintf(buffer,"RomDirectory[%d]",counter);
         directory = config_get_string(buffer,"");
         printf("Scanning... %s\n",directory);
         scan_dir(directory);
         }
 
     write_cache_file(cache_filename);
+}
+
+
+void* rom_cache_system(void* _arg)
+{
+    char* buffer;
+    struct sched_param param;
+    char cache_filename[PATH_MAX];
+
+    // Setup job parser
+    while (g_romcache.rcstask != RCS_SHUTDOWN)
+        {
+        //printf("Task: %d\n", g_romcache.rcstask);
+        switch(g_romcache.rcstask)
+            {
+            case RCS_INIT:
+                g_romcache.rcstask = RCS_BUSY;
+                buffer = (char*)config_get_string("RomCacheFile", NULL);
+                if(buffer==NULL)
+                    {
+                    buffer = (char*)malloc(PATH_MAX*sizeof(char));
+                    snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
+                    config_put_string("RomCacheFile", buffer);
+                    }
+
+                snprintf(cache_filename, PATH_MAX, "%s", buffer);
+
+                if(load_initial_cache(cache_filename))
+                    { updaterombrowser(g_romcache.length, 1); }
+
+                param.sched_priority = 0;
+                pthread_attr_setschedparam (_arg, &param);
+
+                remove(cache_filename);
+                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
+                rebuild_cache_file(cache_filename);
+                updaterombrowser(g_romcache.length, 0);
+
+                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROMs."), g_romcache.length);
+                if(g_romcache.rcstask==RCS_BUSY)
+                   { g_romcache.rcstask = RCS_SLEEP; }
+                break;
+            case RCS_WRITE_CACHE:
+                g_romcache.rcstask = RCS_BUSY;
+                remove(cache_filename);
+                write_cache_file(cache_filename);
+                if (g_romcache.rcstask == RCS_BUSY)
+                    { g_romcache.rcstask = RCS_SLEEP; }
+                break;
+            case RCS_RESCAN:
+                g_romcache.rcstask = RCS_BUSY;
+
+                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
+                rebuild_cache_file(cache_filename);
+                updaterombrowser(g_romcache.length, 0);
+                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROMs."), g_romcache.length);
+
+                if(g_romcache.rcstask==RCS_BUSY)
+                    { g_romcache.rcstask = RCS_SLEEP; }
+                break;
+            case RCS_SLEEP:
+                // Sleep to not use any CPU power.
+                usleep(1000);
+                break;
+            }
+        }
+
+    printf("Rom cache system terminated!\n");
 }
 
 static void scan_dir(const char *directoryname)
@@ -232,7 +232,7 @@ static void scan_dir(const char *directoryname)
     directory = opendir(directoryname);
     if(!directory)
         {
-        printf( "[rcs] Could not open directory '%s': %s\n", directoryname, strerror(errno) );
+        printf( "Could not open directory '%s': %s\n", directoryname, strerror(errno) );
         return;
         }
 
@@ -256,7 +256,7 @@ static void scan_dir(const char *directoryname)
         //If we can't get information, move to next file.
         if(stat(fullpath,&filestatus)==-1)
             {
-            printf( "[rcs] Could not open file '%s': %s\n", fullpath, strerror(errno) );
+            printf( "Could not open file '%s': %s\n", fullpath, strerror(errno) );
             continue; 
             }
 
@@ -411,7 +411,10 @@ static void scan_dir(const char *directoryname)
             printf("Added ROM: %s\n", entry->inientry->goodname);
             ++romcounter;
             if(romcounter%UPDATE_FREQUENCY==0)
-                { updaterombrowser(g_romcache.length, 0); }
+                {
+                updaterombrowser(g_romcache.length, 0); 
+                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Added ROMs %d-%d."), g_romcache.length-UPDATE_FREQUENCY+1, g_romcache.length);
+                }
 
             free(localrom);
             }
@@ -430,13 +433,13 @@ int load_initial_cache(char* cache_filename)
 
     if((gzfile = gzopen(cache_filename,"rb"))==NULL)
         {
-        printf("[rcs] Could not open %s\n",cache_filename);
+        printf("Could not open %s\n",cache_filename);
         return 0;
         }
 
     if(!gzread(gzfile, &header, 6*sizeof(char))||(strstr(header, RCS_VERSION)==NULL))
         {
-        printf("[rcs] Cache corrupt or from previous version.\n");
+        printf("Rom cache corrupt or from previous version.\n");
         return 0;
         }
 
@@ -497,8 +500,6 @@ int load_initial_cache(char* cache_filename)
 
     gzclose(gzfile);
 
-    printf("[rcs] Cache file processed.\n");
-
     return 1;
 }
 #endif
@@ -548,7 +549,7 @@ void romdatabase_open()
     gzfile = gzopen(pathname, "rb");
     if(gzfile==NULL)
         {
-        printf("[rcs] Unable to open rom database.\n");
+        printf("Unable to open rom database.\n");
         return;
         }
 

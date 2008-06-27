@@ -46,6 +46,7 @@
 #include <getopt.h> // getopt_long
 #include <libgen.h> // basename, dirname
 #include <png.h>    // for writing screenshot PNG files
+#include <SDL.h>
 
 #include "main.h"
 #include "version.h"
@@ -58,8 +59,6 @@
 #include "../r4300/recomph.h"
 #include "../memory/memory.h"
 #include "savestates.h"
-#include "vcr.h"
-#include "vcr_compress.h"
 #include "guifuncs.h" // gui-specific functions
 #include "util.h"
 #include "translate.h"
@@ -77,7 +76,10 @@
 #include "lirc.h"
 #endif //WITH_LIRC
 
-#include <SDL.h>
+#ifdef VCR_SUPPORT
+#include "vcr.h"
+#include "vcr_compress.h"
+#endif
 
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
@@ -444,6 +446,7 @@ void startEmulation(void)
             return;
         }
         pthread_detach(g_EmulationThread);
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT,  tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
     else if(rompause)
