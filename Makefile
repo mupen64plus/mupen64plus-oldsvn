@@ -73,7 +73,6 @@ OBJ_CORE = \
 	main/volume.o \
 	network/network.o \
 	network/client.o \
-	network/server.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
@@ -96,6 +95,7 @@ OBJ_CORE = \
 	r4300/special.o \
 	r4300/regimm.o \
 	r4300/tlb.o
+#	network/server.o \
 
 # handle dynamic recompiler objects
 ifneq ($(NO_ASM), 1)

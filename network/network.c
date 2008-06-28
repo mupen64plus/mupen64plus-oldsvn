@@ -18,6 +18,7 @@
 
 
 #include "network.h"
+#include "../r4300/r4300.h"
 
 unsigned int gettimeofday_msec(void)
 {
@@ -29,34 +30,57 @@ unsigned int gettimeofday_msec(void)
     return foo;
 }
 
-int netStartNetplay(MupenServer *mServer, MupenClient *mClient, NetPlaySettings netSettings) {
+int netInitialize(MupenClient *mClient) {
+  SDLNet_Init();
+  fprintf(stderr,"netInitialize()\n");
+  rompause=1;
+  return clientInitialize(mClient);
+}
+
+int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings) {
   int ret = 0;
 
-  SDLNet_Init();
-  if (netSettings.runServer) {
-      serverStart(mServer, SERVER_PORT);
-      strcpy(netSettings.hostname, "localhost"); // If we're hosting a game, connect to it.
-  }
-  if (clientConnect(mClient, netSettings.hostname, SERVER_PORT)) {
+  if (netSettings.hostname[0]!='\0') {
+    if (clientConnect(mClient, netSettings.hostname, SERVER_PORT)) {
       printf("[Netplay] Connected to %s.\n", netSettings.hostname);
       ret = 1;
+    }
   }
+  else
+    ret = 1;
   return ret;
 }
 
-void netShutdown(MupenServer *mServer, MupenClient *mClient) {
+void netShutdown(MupenClient *mClient) {
   clientDisconnect(mClient);
-  serverStop(mServer);
 }
 
-int netMain(MupenServer *mServer, MupenClient *mClient) {
-            int sentSyncMessage = 0;
-            struct timespec ts;
-            ts.tv_sec = 0;
-            ts.tv_nsec = 5000000;
-            NetMessage syncMsg;
+int netMain(MupenClient *mClient) {
+    int sentSyncMessage = 0;
+    struct timespec ts;
 
-            if (mClient->isConnected) {
+    if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0) {
+        int i;
+        for(i=0; i<mClient->numConnected-1;i++){
+            int curID=sourceID(mClient->myID, i);
+            mClient->packet->address=mClient->player[curID].address;
+            mClient->packet->len=4;
+            SDLNet_Write16((mClient->frameCounter/VI_PER_FRAME)&FRAME_MASK,mClient->packet->data);
+            mClient->packet->data[2]=mClient->myID;
+            mClient->packet->data[3]=mClient->lag[curID];
+            fprintf(stderr,"send sync %08x\n",mClient->packet->address.host);
+            SDLNet_UDP_Send(mClient->socket, -1, mClient->packet);
+        }
+    }
+    clientProcessMessages(mClient);
+    processEventQueue(mClient);
+    mClient->frameCounter++;
+    mClient->frameCounter=mClient->frameCounter&FRAME_MASK;
+
+    return 0;
+
+            //else fprintf(stderr,"Frame %d, bool %d",mClient->frameCounter,mClient->numConnected);
+		/*
                 if (mClient->frameCounter % mClient->syncFreq == 0) mClient->isWaitingForServer = TRUE;
                 if (mClient->isWaitingForServer) {
                     sentSyncMessage = 0;
@@ -84,19 +108,25 @@ int netMain(MupenServer *mServer, MupenClient *mClient) {
                         if (mClient->lastSync >= mClient->frameCounter) mClient->isWaitingForServer = FALSE;
                     }
 	        } else {
-                  if (mServer->isActive) serverProcessMessages(mServer);
+                  //if (mServer->isActive) serverProcessMessages(mServer);
                   clientProcessMessages(mClient);
                   processEventQueue(mClient);
                 }
-            }
+            }*/
 
-            mClient->frameCounter++;
-            return 0;
 }
 
+int frameDelta(MupenClient *Client, Uint32 frame) {
+  int result=Client->frameCounter-frame;
+  if (result > (FRAME_MASK*VI_PER_FRAME)/2)
+    result-=result-FRAME_MASK*VI_PER_FRAME;
+  else if (-result > (FRAME_MASK*VI_PER_FRAME)/2)
+    result+=FRAME_MASK*VI_PER_FRAME;
+  return result;
+}
 
-
-
-
-
-
+int sourceID(int myID, int index) {
+    if(index<myID)
+        return index;
+    return index+1;
+}

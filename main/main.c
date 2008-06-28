@@ -119,7 +119,7 @@ static char *l_Filename = NULL;          // filename to load & run at startup (i
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 
-static MupenServer	l_NetplayServer;
+//static MupenServer	l_NetplayServer;
 static NetPlaySettings  l_NetSettings;
 static MupenClient      l_NetplayClient;
 static int              SyncStatus;
@@ -167,6 +167,13 @@ char *get_iconpath(char *iconfile)
 int gui_enabled(void)
 {
     return l_GuiEnabled;
+}
+
+void setSpeed(unsigned int speed)
+{
+    fprintf(stderr,"speed %d\n",speed);
+    l_SpeedFactor = speed;
+    setSpeedFactor(l_SpeedFactor);  // call to audio plugin
 }
 
 /*********************************************************************************************************
@@ -272,46 +279,63 @@ void new_vi(void)
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
 
-    SyncStatus = netMain(&l_NetplayServer, &l_NetplayClient);
-    double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
-    int time;
-
-    start_section(IDLE_SECTION);
-    VI_Counter++;
-
 #ifdef DBG
     if(debugger_mode) debugger_frontend_vi();
 #endif
 
-    if(LastFPSTime == 0)
-    {
-        LastFPSTime = gettimeofday_msec();
-        CounterTime = gettimeofday_msec();
-        return;
-    }
-    CurrentFPSTime = gettimeofday_msec();
-    
-    Dif = CurrentFPSTime - LastFPSTime;
-    
-    if (Dif < AdjustedLimit) 
-    {
-        CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
-        time = (int)(CalculatedTime - CurrentFPSTime);
-        if (time > 0)
-        {
-            usleep(time * 1000);
-        }
-        CurrentFPSTime = CurrentFPSTime + time;
+    // if paused, poll for input events
+    if(rompause) {
+        osd_render();  // draw Paused message in case updateScreen didn't do it
+        SDL_GL_SwapBuffers();
     }
 
-    if (CurrentFPSTime - CounterTime >= 1000.0 ) 
-    {
-        CounterTime = gettimeofday_msec();
-        VI_Counter = 0 ;
-    }
-    
-    LastFPSTime = CurrentFPSTime ;
-    end_section(IDLE_SECTION);
+    do  {
+        SyncStatus = netMain(&l_NetplayClient); //may adjust l_SpeedFactor
+
+        double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
+        int time;
+
+        SDL_PumpEvents();
+#ifdef WITH_LIRC
+        lircCheckInput();
+#endif //WITH_LIRC
+
+
+        start_section(IDLE_SECTION);
+        VI_Counter++;
+
+        if(LastFPSTime == 0)
+        {
+            LastFPSTime = gettimeofday_msec();
+            CounterTime = gettimeofday_msec();
+            return;
+        }
+        CurrentFPSTime = gettimeofday_msec();
+
+        Dif = CurrentFPSTime - LastFPSTime;
+
+        if (Dif < AdjustedLimit) 
+        {
+            CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
+            time = (int)(CalculatedTime - CurrentFPSTime);
+            if (time > 0)
+            {
+                usleep(time * 1000);
+            }
+        CurrentFPSTime = CurrentFPSTime + time;
+        }
+
+        if (CurrentFPSTime - CounterTime >= 1000.0 ) 
+        {
+            CounterTime = gettimeofday_msec();
+            VI_Counter = 0 ;
+        }
+
+        LastFPSTime = CurrentFPSTime ;
+        end_section(IDLE_SECTION);
+        fprintf(stderr,"frameadv: %d rompause: %d\n",l_FrameAdvance,rompause);
+    } while (rompause);
+
     if (l_FrameAdvance) {
         rompause = 1;
         l_FrameAdvance = 0;
@@ -534,12 +558,12 @@ int pauseContinueEmulation(void)
 
 void netplayReady(void)
 {
-    NetMessage netMsg;
+    //NetMessage netMsg;
 
-    if (l_NetplayEnabled && l_NetplayClient.isConnected) {
-        netMsg.type = NETMSG_READY;
-        clientSendMessage(&l_NetplayClient, &netMsg);
-    }
+    //if (l_NetplayEnabled && l_NetplayClient.isConnected) {
+    //    netMsg.type = NETMSG_READY;
+    //    clientSendMessage(&l_NetplayClient, &netMsg);
+    //}
 }
 
 
@@ -837,13 +861,21 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    if (l_NetplayEnabled) {
-        if (netStartNetplay(&l_NetplayServer, &l_NetplayClient, l_NetSettings)) {
-          osd_new_message(OSD_MIDDLE_CENTER, "Wait for all players to connect, then press F9.");
-          go();
-        } else
-          printf("Failed to connect to server %s.\n", l_NetSettings.hostname);
-    } else {
+    if(l_NetplayEnabled)
+    {
+        if(netInitialize(&l_NetplayClient))
+	    {
+            if (netStartNetplay(&l_NetplayClient, l_NetSettings))
+                go();
+            else
+                printf("Failed to connect to server %s.\n", l_NetSettings.hostname);
+
+        } 
+        else
+            printf("Couldn't initialize network socket\n");
+    } 
+    else 
+    {
         osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
         go();
     }
@@ -867,7 +899,7 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    if (l_NetplayEnabled) netShutdown(&l_NetplayServer, &l_NetplayClient);
+    if (l_NetplayEnabled) netShutdown(/*&l_NetplayServer, */&l_NetplayClient);
     if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is
@@ -1149,8 +1181,9 @@ void parseCommandLine(int argc, char **argv)
                 l_NetplayEnabled = 1;
                 break;
             case OPT_SERVER:
+                strncpy(l_NetSettings.hostname, "", 128);
                 l_NetplayEnabled = 1;
-                l_NetSettings.runServer = 1;
+//                l_NetSettings.runServer = 1;
                 break;
 #ifdef DBG
             case OPT_DEBUGGER:

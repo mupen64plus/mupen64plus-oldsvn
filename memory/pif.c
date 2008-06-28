@@ -220,7 +220,7 @@ void internal_ReadController(int Control, BYTE *Command)
 #else
         getKeys(Control, &Keys);
 #endif
-        if (mClient->isConnected) { // Update the server if we're connected to one and if the button state has actually changed
+        if (mClient->numConnected>2) { // Update the server if we're connected to one and if the button state has actually changed
           if (Keys.Value != KeyCache[Control].Value) {
               clientSendButtons(mClient, Control, Keys.Value);
               KeyCache[Control].Value = Keys.Value;

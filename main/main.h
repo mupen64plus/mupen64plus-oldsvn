@@ -42,6 +42,7 @@ char *get_savespath(void);
 char *get_iconspath(void);
 char *get_iconpath(char *iconfile);
 int   gui_enabled(void);
+void setSpeed(unsigned int);
 
 void new_frame();
 void new_vi();

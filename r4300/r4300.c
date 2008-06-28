@@ -1500,7 +1500,7 @@ void go()
    memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFBC);
    delay_slot=0;
    stop = 0;
-   rompause = 0;
+   //rompause = 0;
    for (i=0;i<32;i++)
      {
     reg[i]=0;
