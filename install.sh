@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # mupen64plus install script
