@@ -149,8 +149,8 @@ void clientProcessMessages(MupenClient *Client) {
                     }
                 }
                 else
-                    fprintf(stderr,"[NETPLAY]Received invalid length JoinRequest from %08X:%d\n",
-                        Client->packet->address, Client->packet->address.port);
+                    fprintf(stderr,"[NETPLAY]Received invalid length JoinRequest from %08X:%d %d bytes\n",
+                        Client->packet->address, Client->packet->address.port, Client->packet->len);
                 break;
               case FRAME_JOIN:
                 if(Client->packet->len ==16) {
@@ -264,8 +264,9 @@ void processEventQueue(MupenClient *Client) {
                 clientLoadPacket(Client,&(Client->joinState.packet),sizeof(JoinRequest));
                 SDLNet_UDP_Send(Client->socket, -1, Client->packet);
                 Client->eventQueue[0]->task.time=Client->frameCounter+QUEUE_JOIN_DELAY;
-                heapifyEventQueue(Client,0);
-                fprintf(stderr,"[NETPLAY] Issuing join request to %d.%d.%d.%d:%d\n");
+                heapifyEventQueue(Client,0);                Client->packet->len=sizeof(JoinRequest);
+                fprintf(stderr,"[NETPLAY] Issuing join request to %d.%d.%d.%d:%d\n",
+                    GET_IP(Client->joinState.host.host),GET_PORT(Client->joinState.host.port));
             }
             else if (Client->joinState.state==disabled) {
                 Client->joinState.state=enabled;
