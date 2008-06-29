@@ -110,6 +110,7 @@ void clientProcessFrame(MupenClient *Client) {
             Client->playerEvent[(frame/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
             Client->playerEvent[(frame/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
             fprintf(stderr,"chunk %x %d\n",curChunk->input.player, sizeof(FrameChunk));
+            len+=sizeof(InputChunk);
           break;
           default:
             fprintf(stderr,"Invalid Frame received!\n");
@@ -192,6 +193,11 @@ void clientProcessMessages(MupenClient *Client) {
                         SDLNet_Write32(Client->numConnected, Client->packet->data+8);
                         SDLNet_Write32(Client->myID, Client->packet->data+12);
                         SDLNet_UDP_Send(Client->socket, -1, Client->packet);
+
+                        Client->eventQueue[Client->numQueued]->evt=EVENT_INPUT;
+                        Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay;
+                        addEventToQueue(Client);
+
                     }
                 }
                 else
@@ -208,7 +214,7 @@ void clientProcessMessages(MupenClient *Client) {
 
                     Client->player[remoteID].address=Client->packet->address;
 
-                    Client->eventQueue[Client->numQueued]->evt=EVENT_JOIN;
+                    Client->eventQueue[Client->numQueued]->evt=EVENT_INPUT;
                     Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay;
                     addEventToQueue(Client);
 
