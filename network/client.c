@@ -110,7 +110,7 @@ void clientProcessFrame(MupenClient *Client) {
             Client->playerEvent[(frame/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
             Client->playerEvent[(frame/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
             fprintf(stderr,"chunk %x %d\n",curChunk->input.player, sizeof(FrameChunk));
-            len+=sizeof(InputChunk);
+            len-=sizeof(InputChunk);
           break;
           default:
             fprintf(stderr,"Invalid Frame received!\n");
@@ -350,8 +350,9 @@ void processEventQueue(MupenClient *Client) {
                         curUpdate->control=0; 
                         rompause=!rompause;
                     }
-                    
                 }
+            Client->eventQueue[0]->time=Client->frameCounter+VI_PER_FRAME;
+            heapifyEventQueue(Client,0);
             }
           break;
           default:
