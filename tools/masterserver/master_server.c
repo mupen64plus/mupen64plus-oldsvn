@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     printf("Goodbye.\n");
     signal(SIGINT, SIG_DFL);
     kill(getpid(), SIGINT);
-    while (1) {} // Wait for process to be killed
+//    while (1) {} // Wait for process to be killed
 
   /* Useful information regarding proper handling of sigints can be
      found at: http://www.cons.org/cracauer/sigint.html */
@@ -179,13 +179,12 @@ void process_packet(UDPpacket *packet) {
 
     case OPEN_GAME:
       if (packet->len == 19) {
+          // Check to see if the host already has an open game, remove the entry if so
+          if ((n = find_host_in_game_list(packet->address.host)) != -1) {
+              printf("Multiple game entries for %d.%d.%d.%d, removing old entry.\n", GET_IP(packet->address.host));              
+              remove_game_entry(n);
+          }
           if ((gameDesc = get_free_game_desc()) != -1) { // Find free game descriptor
-
-              // Check to see if the host already has an open game, remove the entry if so
-              if ((n = find_host_in_game_list(packet->address.host)) != -1) {
-                  printf("Multiple game entries for %d.%d.%d.%d, removing old entry.\n", GET_IP(packet->address.host));              
-                  remove_game_entry(n);
-              }
               memcpy(&md5_checksum, packet->data + 1, 16);
               port = SDLNet_Read16(packet->data + 17);
               g_GameList[gameDesc] = malloc(sizeof(GameEntry));
@@ -195,7 +194,7 @@ void process_packet(UDPpacket *packet) {
               // Add to linked list
               // Send game descriptor to server
               g_GameCount++;
-              printf("OPEN_GAME request from %d.%d.%d.%d granted.\n", GET_IP(packet->address.host));
+              printf("OPEN_GAME request for %d.%d.%d.%d:%d granted (%d).\n", GET_IP(packet->address.host), port, gameDesc);
           } else {
               printf("OPEN_GAME request from %d.%d.%d.%d failed (no available game descriptors).\n", GET_IP(packet->address.host));
           }
@@ -298,7 +297,7 @@ void clean_game_list() {
     if (g_GameList[n]) { // If pointer array element is not null
 
       if (!g_GameList[n]->keep_alive) { // No keep alive received this round
-        printf("Game entry for %d.%d.%d.%d has timed out.\n", GET_IP(g_GameList[n]->host));
+        printf("Game entry for %d.%d.%d.%d (%d) has timed out.\n", GET_IP(g_GameList[n]->host), n);
         remove_game_entry(n);
       } else {
         g_GameList[n]->keep_alive = 0;
@@ -329,11 +328,11 @@ int find_host_in_game_list(uint32_t host) {
    =============================================================================
 */
 void remove_game_entry(int n) {
-  if ((n > 0) && (n < MAX_GAME_DESC) && (g_GameList[n])) {
+  if ((n >= 0) && (n < MAX_GAME_DESC) && (g_GameList[n])) {
 
     // Remove node from linked list (no need to check for null we have a head and tail node)
-    g_GameList[n]->prev->next = g_GameList[n]->next;
-    g_GameList[n]->next->prev = g_GameList[n]->prev;
+//    g_GameList[n]->prev->next = g_GameList[n]->next;
+//    g_GameList[n]->next->prev = g_GameList[n]->prev;
 
     // Free the node and set the pointer array element to null
     free(g_GameList[n]);
