@@ -1,3 +1,18 @@
+/* --------------------------------------------------------------------------------
+
+    master_server.c
+    by orbitaldecay
+
+    This is a work in progress, there is some functionality that is still
+    missing.  It should be complete soon.
+
+    A discussion of the master server network protocol can be found at
+    http://groups.google.com/group/mupen64plus  An abstract is available under the 
+    file section entitled master_server_protocol_rev_02.
+
+   --------------------------------------------------------------------------------
+*/
+
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -6,9 +21,14 @@
 #include <sys/time.h>
 #include <SDL_net.h>
 
-#define MAX_PACKET	19
-#define SERVER_PORT	2000
-#define MAX_GAME_DESC   32768 // Not greater than 65536
+// ================================================================================
+// == master_server.h =============================================================
+// ================================================================================
+
+#define MAX_PACKET	19    // In bytes, the largest packet permitted by the protocol
+#define SERVER_PORT	2000  // The udp port to run the server on
+#define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
+#define CLEAN_FREQ      60    // In seconds, how often clean_game_list() is called
 
 #define FIND_GAMES      00
 #define GAME_LIST	01
@@ -42,27 +62,33 @@ typedef struct MD5EntryNode_t {
 
 
 extern void interupt_trap(int value);
-extern void clean_game_alarm (int sig);
+extern void clean_game_list_alarm (int sig);
 
 void process_packet(UDPpacket *packet);
 void remove_game_entry(int n);
 int get_free_game_desc();
 int find_host_in_game_list(uint32_t host);
 void clean_game_list();
+void send_game_descriptor(UDPpacket *packet, int gameDesc);
+void add_node_to_linked_list(GameEntry *newGameEntry, md5_byte_t md5_checksum[16]);
 
 int        g_QuitMainLoop = 0;
 int        g_GameCount = 0;
 GameEntry *g_GameList[MAX_GAME_DESC];
+UDPsocket  g_ListenSock;
 
-/* =============================================================================
+// ================================================================================
+// == main() and processPacket() ==================================================
+// ================================================================================
+
+/* --------------------------------------------------------------------------------
 
     main()
 
-   =============================================================================
+   --------------------------------------------------------------------------------
 */
 
 int main(int argc, char **argv) {
-  UDPsocket listenSock;
   UDPpacket *recvPacket;
   int retValue, n;
 
@@ -77,10 +103,10 @@ int main(int argc, char **argv) {
       }
   }
 
-  if (signal(SIGALRM, clean_game_alarm) == SIG_ERR) {
+  if (signal(SIGALRM, clean_game_list_alarm) == SIG_ERR) {
       fprintf(stderr, "signal(): Error %d trapping SIGALRM.\n", errno);
   } else {
-      alarm(30);
+      alarm(CLEAN_FREQ);
   }
   
   printf("Initializing SDL_net...\t\t");
@@ -92,7 +118,7 @@ int main(int argc, char **argv) {
   } else printf("[Ok]\n");
 
   printf("Opening UDP port...\t\t");
-  if (!(listenSock = SDLNet_UDP_Open(SERVER_PORT))) {
+  if (!(g_ListenSock = SDLNet_UDP_Open(SERVER_PORT))) {
       printf("[FAIL]\n");
       fprintf(stderr, "SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
       printf("Goodbye.\n");
@@ -110,7 +136,7 @@ int main(int argc, char **argv) {
   } else printf("[Ok]\n");
 
   printf("Ready.\n");
-  retValue = SDLNet_UDP_Recv(listenSock, recvPacket);
+  retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
   while ((retValue != -1) && (!g_QuitMainLoop)) {
     if (retValue > 0) {
         process_packet(recvPacket);
@@ -119,7 +145,7 @@ int main(int argc, char **argv) {
         // nanosleep or clean server list
 
     }
-    retValue = SDLNet_UDP_Recv(listenSock, recvPacket);
+    retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
   }
  
   // Cleanup
@@ -151,11 +177,11 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-/* =============================================================================
+/* --------------------------------------------------------------------------------
 
     process_packet(UDPpacket *packet)
 
-   =============================================================================
+   --------------------------------------------------------------------------------
 */
 
 void process_packet(UDPpacket *packet) {
@@ -179,6 +205,7 @@ void process_packet(UDPpacket *packet) {
 
     case OPEN_GAME:
       if (packet->len == 19) {
+
           // Check to see if the host already has an open game, remove the entry if so
           if ((n = find_host_in_game_list(packet->address.host)) != -1) {
               printf("Multiple game entries for %d.%d.%d.%d, removing old entry.\n", GET_IP(packet->address.host));              
@@ -191,13 +218,14 @@ void process_packet(UDPpacket *packet) {
               g_GameList[gameDesc]->host = packet->address.host; // Network byte order
               g_GameList[gameDesc]->port = port;
               g_GameList[gameDesc]->keep_alive = 1;
-              // Add to linked list
-              // Send game descriptor to server
+              add_node_to_linked_list(g_GameList[gameDesc], md5_checksum);
+              send_game_descriptor(packet, gameDesc);
               g_GameCount++;
               printf("OPEN_GAME request for %d.%d.%d.%d:%d granted (%d).\n", GET_IP(packet->address.host), port, gameDesc);
           } else {
               printf("OPEN_GAME request from %d.%d.%d.%d failed (no available game descriptors).\n", GET_IP(packet->address.host));
           }
+
       } else {
           printf("Bad packet length for OPEN_GAME packet from %d.%d.%d.%d.\n", GET_IP(packet->address.host));
       }
@@ -230,37 +258,15 @@ void process_packet(UDPpacket *packet) {
 
 }
 
-/* =============================================================================
+// ================================================================================
+// == Functions which help with the g_GameList array ==============================
+// ================================================================================
 
-    interupt_trap()
-
-   =============================================================================
-*/
-
-void interupt_trap(int value) {
-  printf("!!Interupt signal received, cleaning up!!\n");
-  g_QuitMainLoop = 1;
-}
-
-/* =============================================================================
-
-    clean_game_alarm()
-
-   =============================================================================
-*/
-
-void clean_game_alarm (int sig) {
-//  printf("!!Alarm signal received, cleaning game list!!\n");
-  clean_game_list();
-  signal(sig, clean_game_alarm);
-  alarm(30);
-}
-
-/* =============================================================================
+/* --------------------------------------------------------------------------------
 
     get_free_game_desc()
 
-   =============================================================================
+   --------------------------------------------------------------------------------
 */
 
 int get_free_game_desc() {
@@ -281,13 +287,11 @@ int get_free_game_desc() {
   return currentGameDesc;
 }
 
-/* =============================================================================
+/* --------------------------------------------------------------------------------
 
     clean_game_list()
 
-    This function should be run once every 60 seconds.
-
-   =============================================================================
+   --------------------------------------------------------------------------------
 */
 
 void clean_game_list() {
@@ -306,11 +310,12 @@ void clean_game_list() {
   }
 }
 
-/* =============================================================================
+
+/* --------------------------------------------------------------------------------
 
     find_host_in_game_list(uint32_t host)
 
-   =============================================================================
+   --------------------------------------------------------------------------------
 */
 
 int find_host_in_game_list(uint32_t host) {
@@ -321,12 +326,13 @@ int find_host_in_game_list(uint32_t host) {
   return n;
 }
 
-/* =============================================================================
+/* --------------------------------------------------------------------------------
 
     remove_game_entry(int n)
 
-   =============================================================================
+   --------------------------------------------------------------------------------
 */
+
 void remove_game_entry(int n) {
   if ((n >= 0) && (n < MAX_GAME_DESC) && (g_GameList[n])) {
 
@@ -343,23 +349,66 @@ void remove_game_entry(int n) {
   }
 }
 
-/* =============================================================================
+// ================================================================================
+// == Signal callbacks ============================================================
+// ================================================================================
 
-    gettimeofday_msec()
+/* --------------------------------------------------------------------------------
 
-    might be useful in the future
+    interupt_trap()
 
-   =============================================================================
+   --------------------------------------------------------------------------------
 */
-/*
-static unsigned int gettimeofday_msec(void)
-{
-    struct timeval tv;
-    unsigned int foo;
-    
-    gettimeofday(&tv, NULL);
-    foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
-    return foo;
+
+void interupt_trap(int value) {
+  printf("!!Interupt signal received, cleaning up!!\n");
+  g_QuitMainLoop = 1;
 }
+
+/* --------------------------------------------------------------------------------
+
+    clean_game_list_alarm()
+
+   --------------------------------------------------------------------------------
 */
+
+void clean_game_list_alarm (int sig) {
+//  printf("!!Alarm signal received, cleaning game list!!\n");
+  clean_game_list();
+  signal(sig, clean_game_list_alarm);
+  alarm(CLEAN_FREQ);
+}
+
+// ================================================================================
+// == Linked list functions =======================================================
+// ================================================================================
+
+/* --------------------------------------------------------------------------------
+
+    add_node_to_linked_list(GameEntry *, md5_checksum)
+
+   --------------------------------------------------------------------------------
+*/
+void add_node_to_linked_list(GameEntry *newGameEntry, md5_byte_t md5_checksum[16]) {
+}
+
+// ================================================================================
+// == UDP Packet senders ==========================================================
+// ================================================================================
+
+/* --------------------------------------------------------------------------------
+
+    send_game_descriptor(UDPpacket *packet, int gameDesc)
+
+   --------------------------------------------------------------------------------
+*/
+
+void send_game_descriptor(UDPpacket *packet, int gameDesc) {
+    packet->data[0] = GAME_DESC;
+    packet->len     = 3;
+    SDLNet_Write16(gameDesc, packet->data + 1);
+    if (!SDLNet_UDP_Send(g_ListenSock, -1, packet)) {
+      printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+    }
+}
 

@@ -66,6 +66,11 @@ int main(int argc, char **argv)
             p->data[0] = OPEN_GAME;
             SDLNet_Write16(666, p->data + 17);
             p->len = 19;
+            SDLNet_UDP_Send(sd, -1, p);
+
+            while (SDLNet_UDP_Recv(sd, p) == 0) {}
+            printf("Packet Type: %d\n", (char)p->data[0]);
+            printf("Value:       %d\n", SDLNet_Read16(p->data + 1));
         }
 
         if (strcmp(argv[3], "KEEP_ALIVE") == 0) {
@@ -73,7 +78,7 @@ int main(int argc, char **argv)
             SDLNet_Write16(0, p->data + 1);
             p->len = 3;
         }
-        SDLNet_UDP_Send(sd, -1, p); /* This sets the p->channel */ 
+
 	SDLNet_FreePacket(p);
 	SDLNet_Quit();
  
