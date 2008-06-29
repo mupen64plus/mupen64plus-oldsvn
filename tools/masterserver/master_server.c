@@ -7,7 +7,7 @@
 
 #define MAX_PACKET	19
 #define SERVER_PORT	2000
-#define MAX_GAME_DESC   32768
+#define MAX_GAME_DESC   32768 // Not greater than 65536
 
 #define FIND_GAMES      00
 #define GAME_LIST	01
@@ -42,7 +42,8 @@ typedef struct MD5EntryNode_t {
 
 extern void interupt_trap(int value);
 void process_packet(UDPpacket *packet);
-int find_next_game_desc(uint16_t currentGameDesc);
+void remove_game_entry(int n);
+int get_free_game_desc();
 int find_host_in_game_list(uint32_t host);
 
 int        g_QuitMainLoop = 0;
@@ -110,7 +111,7 @@ int main(int argc, char **argv) {
     retValue = SDLNet_UDP_Recv(listenSock, recvPacket);
   }
 
-  // If server loop kicks due to SDLNet_UDP_Recv error, display it and quit
+  // If server loop kicks due to SDLNet_UDP_Recv error, display it
   if (retValue == -1) {
     fprintf(stderr, "SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
     // Don't quit yet, allow cleanup to occur
@@ -119,10 +120,7 @@ int main(int argc, char **argv) {
   // Cleanup
   for (n = 0; n < MAX_GAME_DESC; n++) {
     if (g_GameList[n]) {
-      g_GameList[n]->prev->next = g_GameList[n]->next;
-      g_GameList[n]->next->prev = g_GameList[n]->prev;
-      free(g_GameList[n]);
-      g_GameList[n] = NULL;
+      remove_game_entry(n);
     }
   }
   SDLNet_FreePacket(recvPacket);
@@ -139,7 +137,7 @@ int main(int argc, char **argv) {
 */
 
 void process_packet(UDPpacket *packet) {
-  static int      nextGameDesc = 0;
+  int             gameDesc, n;
   md5_byte_t      md5_checksum[16];
   uint16_t        port;
   uint16_t        game;
@@ -159,21 +157,25 @@ void process_packet(UDPpacket *packet) {
 
     case OPEN_GAME:
       if (packet->len == 19) {
-          nextGameDesc = find_next_game_desc(nextGameDesc);
-          if (nextGameDesc != -1) {
-              if (find_host_in_game_list(packet->address.host) == -1) {
-                  memcpy(&md5_checksum, packet->data + 1, 16);
-                  port = SDLNet_Read16(packet->data + 17);
-                  g_GameList[nextGameDesc] = malloc(sizeof(GameEntry));
-                  g_GameList[nextGameDesc]->host = packet->address.host; // Network byte order
-                  g_GameList[nextGameDesc]->port = port;
-                  g_GameList[nextGameDesc]->keep_alive = 1;
-                  // Add to linked list
-              } else {
-                  printf("Multiple OPEN_GAME requests from %d.%d.%d.%d ignored.\n", GET_IP(packet->address.host));
+          if ((gameDesc = get_free_game_desc()) != -1) { // Find free game descriptor
+
+              // Check to see if the host already has an open game, remove the entry if so
+              if ((n = find_host_in_game_list(packet->address.host)) != -1) {
+                  printf("Multiple game entries for %d.%d.%d.%d, removing old entry.\n", GET_IP(packet->address.host));              
+                  remove_game_entry(n);
               }
+
+              memcpy(&md5_checksum, packet->data + 1, 16);
+              port = SDLNet_Read16(packet->data + 17);
+              g_GameList[gameDesc] = malloc(sizeof(GameEntry));
+              g_GameList[gameDesc]->host = packet->address.host; // Network byte order
+              g_GameList[gameDesc]->port = port;
+              g_GameList[gameDesc]->keep_alive = 1;
+              // Add to linked list
+              // Send game descriptor to server
+              printf("OPEN_GAME request from %d.%d.%d.%d granted.\n", GET_IP(packet->address.host));
           } else {
-              printf("OPEN_GAME request from %d.%d.%d.%d failed (server is full).\n", GET_IP(packet->address.host));
+              printf("OPEN_GAME request from %d.%d.%d.%d failed (no available game descriptors).\n", GET_IP(packet->address.host));
           }
       } else {
           printf("Bad packet length for OPEN_GAME packet from %d.%d.%d.%d.\n", GET_IP(packet->address.host));
@@ -188,6 +190,7 @@ void process_packet(UDPpacket *packet) {
             // don't let anybody keep other hosts alive (potential dos)
             if (g_GameList[game]->host == packet->address.host) {
               g_GameList[game]->keep_alive = 1;
+              printf("KEEP_ALIVE request from %d.%d.%d.%d granted.\n", GET_IP(packet->address.host));
             } else {
               // If this happens, someone is screwing around
               printf("Mismatched game descriptor in KEEP_ALIVE packet from %d.%d.%d.%d.\n", GET_IP(packet->address.host));
@@ -220,17 +223,26 @@ void interupt_trap(int value) {
 
 /* =============================================================================
 
-    find_next_game_desc()
+    get_free_game_desc()
 
    =============================================================================
 */
 
-int find_next_game_desc(uint16_t currentGameDesc) {
-  uint16_t oldGameDesc = currentGameDesc;
+int get_free_game_desc() {
+  static int currentGameDesc = 0;
+  int oldGameDesc;
 
-  currentGameDesc++;
-  while((g_GameList[currentGameDesc]) && (oldGameDesc != currentGameDesc)) currentGameDesc++;
-  if (oldGameDesc == currentGameDesc) currentGameDesc = -1;
+  if (currentGameDesc == -1) currentGameDesc = 0;
+  oldGameDesc = currentGameDesc;
+  if (g_GameList[currentGameDesc]) {
+      currentGameDesc++;
+      while((g_GameList[currentGameDesc]) && (oldGameDesc != currentGameDesc)) {
+          currentGameDesc++;
+          if (currentGameDesc == MAX_GAME_DESC) currentGameDesc = 0;
+      }
+      if (g_GameList[currentGameDesc]) currentGameDesc = -1;
+  }
+
   return currentGameDesc;
 }
 
@@ -250,15 +262,7 @@ void clean_game_list() {
     if (g_GameList[n]) { // If pointer array element is not null
 
       if (!g_GameList[n]->keep_alive) { // No keep alive received this round
-
-        // Remove node from linked list (no need to check for null we have a head and tail node)
-        g_GameList[n]->prev->next = g_GameList[n]->next;
-        g_GameList[n]->next->prev = g_GameList[n]->prev;
-
-        // Free the node and set the pointer array element to null
-        free(g_GameList[n]);
-        g_GameList[n] = NULL;
-
+        remove_game_entry(n);
       } else {
         g_GameList[n]->keep_alive = 0;
       }
@@ -279,6 +283,27 @@ int find_host_in_game_list(uint32_t host) {
       if ((g_GameList[n]) && (g_GameList[n]->host == host)) break;
   if (n == MAX_GAME_DESC) n = -1;
   return n;
+}
+
+/* =============================================================================
+
+    remove_game_entry()
+
+   =============================================================================
+*/
+void remove_game_entry(int n) {
+  if ((n > 0) && (n < MAX_GAME_DESC) && (g_GameList[n])) {
+
+    // Remove node from linked list (no need to check for null we have a head and tail node)
+    g_GameList[n]->prev->next = g_GameList[n]->next;
+    g_GameList[n]->next->prev = g_GameList[n]->prev;
+
+    // Free the node and set the pointer array element to null
+    free(g_GameList[n]);
+    g_GameList[n] = NULL;
+  } else {
+    printf("remove_game_entry(): Invalid game descriptor %d.\n", n);
+  }
 }
 
 /* =============================================================================
