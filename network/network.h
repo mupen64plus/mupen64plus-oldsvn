@@ -73,14 +73,9 @@ typedef struct TJoinState {
     IPaddress       host;
 } JoinState;
 
-typedef struct TNetTask {
-    unsigned int    time;
-    u_int8_t	    msg;
-} NetTask;
-
 typedef struct TNetEvent {
     unsigned int    time;
-    NetTask         task;
+    Uint8           evt;
 } NetEvent;
 
 typedef struct TNetPlayerUpdate {

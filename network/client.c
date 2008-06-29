@@ -67,8 +67,8 @@ int clientConnect(MupenClient *Client, char *server, int port) {
         SDLNet_Write16(FRAME_JOINREQUEST,&(packet->eID));
 
         Client->joinState.state=waiting;
-        Client->eventQueue[Client->numQueued]->task.msg=NETMSG_JOIN;
-        Client->eventQueue[Client->numQueued]->task.time=Client->frameCounter;
+        Client->eventQueue[Client->numQueued]->evt=NETMSG_JOIN;
+        Client->eventQueue[Client->numQueued]->time=Client->frameCounter;
         addEventToQueue(Client);
         return 1;
     }
@@ -107,7 +107,6 @@ void clientProcessMessages(MupenClient *Client) {
     //    return; // exit now if the client isnt' connected
 
     SDLNet_CheckSockets(Client->socketSet, 0);
-    fprintf(stderr,"a");
     while (SDLNet_SocketReady(Client->socket)) {
         n = SDLNet_UDP_Recv(Client->socket, Client->packet);
         //n = SDLNet_TCP_Recv(Client->socket, &incomingMessage, sizeof(NetMessage));
@@ -115,7 +114,6 @@ void clientProcessMessages(MupenClient *Client) {
             clientDisconnect(Client);
             return;
         }
-        fprintf(stderr,"b\n");
 	    if(Client->packet->len >= 2) {
             Uint16 frameID=SDLNet_Read16(Client->packet->data);
             switch(frameID) {
@@ -154,6 +152,7 @@ void clientProcessMessages(MupenClient *Client) {
                 break;
               case FRAME_JOIN:
                 if(Client->packet->len ==16) {
+                    Client->joinState.state=enabled;
                     Client->frameCounter = SDLNet_Read16(Client->packet->data+2);
                     Client->myID = SDLNet_Read32(Client->packet->data+4);
                     Client->numConnected = SDLNet_Read32(Client->packet->data+8);
@@ -255,25 +254,30 @@ void clientLoadPacket(MupenClient *Client, void *data, int len) {
 
 // processEventQueue() : Process the events in the queue, if necessary.
 void processEventQueue(MupenClient *Client) {
-
-    while(Client->numQueued > 0 && Client->eventQueue[0]->time < Client->frameCounter) {
-        switch(Client->eventQueue[0]->task.msg) {
+    //fprintf(stderr,"A\n");
+    while((Client->numQueued > 0) && (Client->eventQueue[0]->time <= Client->frameCounter)) {
+        //fprintf(stderr,"B q-%d t-%d c-%d\n",Client->numQueued,Client->eventQueue[0]->time,Client->frameCounter);
+        switch(Client->eventQueue[0]->evt) {
           case NETMSG_JOIN:
             if (Client->joinState.state==waiting) {
                 Client->packet->address=Client->joinState.host;
                 clientLoadPacket(Client,&(Client->joinState.packet),sizeof(JoinRequest));
                 SDLNet_UDP_Send(Client->socket, -1, Client->packet);
-                Client->eventQueue[0]->task.time=Client->frameCounter+QUEUE_JOIN_DELAY;
-                fprintf(stderr,"frame: %d event0 counter: %d\n",Client->frameCounter,Client->eventQueue[0]->task.time);
-                heapifyEventQueue(Client,0);                Client->packet->len=sizeof(JoinRequest);
+                Client->eventQueue[0]->time=Client->frameCounter+QUEUE_JOIN_DELAY;
+                heapifyEventQueue(Client,0);
+                Client->packet->len=sizeof(JoinRequest);
                 fprintf(stderr,"[NETPLAY] Issuing join request to %d.%d.%d.%d:%d\n",
                     GET_IP(Client->joinState.host.host),GET_PORT(Client->joinState.host.port));
             }
             else if (Client->joinState.state==disabled) {
                 Client->joinState.state=enabled;
-            }
+            } 
+            else if (Client->joinState.state==enabled)
+                popEventQueue(Client);
           break;
-          case NETMSG_PAUSE:
+          //case NETMSG_PAUSE:
+          default:
+            fprintf(stderr,"Unexpected Event popped off of queue ID:%02x\n",Client->eventQueue[0]->evt);
           break;
         }
     }
@@ -310,18 +314,25 @@ void swapQueueItems(MupenClient *Client, int a, int b) {
 void heapifyEventQueue(MupenClient *Client,unsigned int elem){
     int left=elem*2+1;
     int right=elem*2+2;
-    if(left < Client->numQueued &&
-            Client->eventQueue[left]->time <= Client->eventQueue[right]->time) {
+    if(right < Client->numQueued) {
+        if(Client->eventQueue[right]->time <= Client->eventQueue[left]->time) {
+            if(Client->eventQueue[right]->time < Client->eventQueue[elem]->time) {
+                swapQueueItems(Client,right,elem);
+                heapifyEventQueue(Client,right);
+                return;
+            }
+            else
+                return;
+        }
+    }
+    if (left < Client->numQueued){
         if(Client->eventQueue[left]->time < Client->eventQueue[elem]->time) {
             swapQueueItems(Client,left,elem);
             heapifyEventQueue(Client,left);
+            return;
         }
-    }
-    else if (right < Client->numQueued){
-        if(Client->eventQueue[right]->time < Client->eventQueue[elem]->time) {
-            swapQueueItems(Client,right,elem);
-            heapifyEventQueue(Client,right);
-        }
+        else
+            return;
     }
 }
 
@@ -343,12 +354,11 @@ void addEventToQueue(MupenClient *Client) {
 // popEventQueue() : Remove the event in the front of the queue.
 void popEventQueue(MupenClient *Client) {
 
-    Client->numQueued--;
+    if((--Client->numQueued)>0) {
+        swapQueueItems(Client,0,Client->numQueued);
 
-    swapQueueItems(Client,0,Client->numQueued);
-
-    heapifyEventQueue(Client,0);
-
+        heapifyEventQueue(Client,0);
+    }
     if(Client->numQueued>QUEUE_HEAP_LEN) {
         fprintf(stderr,"[NETPLAY] Queue Underflow!\n");
         exit(1);
