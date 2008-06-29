@@ -110,20 +110,9 @@ ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
 endif
 
-# find installed assembler: yasm or nasm
+# set CFLAGS macro for no assembly language if required
 ifeq ($(NO_ASM), 1)
   CFLAGS += -DNO_ASM
-else
-  ifneq ("$(shell which yasm 2>&1 | head -c 9)", "which: no")
-    ASM=yasm
-  else
-    ifneq ("$(shell which nasm 2>&1 | head -c 9)", "which: no")
-      ASM=nasm
-    else
-      # throw error
-      $(error No yasm or nasm found!)
-    endif
-  endif
 endif
 
 # set variables for profiling

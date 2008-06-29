@@ -368,12 +368,12 @@ void list_delete(list_t *list)
         if(prev != NULL)
             free(prev);
 
-        // if we're on the last node, delete it
-        if(curr->next == NULL)
-            free(curr);
-        else
-            prev = curr;
+        prev = curr;
     }
+    
+    // the last node wasn't deleted, do it now
+    if (prev != NULL)
+        free(prev);
 
     *list = NULL;
 }

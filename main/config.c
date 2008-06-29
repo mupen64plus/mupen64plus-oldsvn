@@ -267,9 +267,11 @@ void config_delete(void)
 
             free(val->key);
             free(val->cValue);
+            free(val);
         }
         free(sec->name);
         list_delete(&(sec->values));
+        free(sec);
     }
     list_delete(&m_config);
 }

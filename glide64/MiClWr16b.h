@@ -155,10 +155,10 @@ loop_x:
    //printf("wrap16bS\n");
     intptr_t fake_esi, fake_eax;
    asm volatile (
-         "loop_y2:                 \n"
+         "0:                 \n"
 
          "xor %%edx, %%edx         \n"
-         "loop_x2:                 \n"
+         "1:                 \n"
          
          "mov %[tex], %[S]       \n"
          "mov %%edx, %%eax         \n"
@@ -171,13 +171,13 @@ loop_x:
          
          "inc %%edx                \n"
          "cmp %[count], %%edx     \n"
-         "jne loop_x2              \n"
+         "jne 1b              \n"
          
          "add %[line], %[start]      \n"
          "add %[line_full], %[tex] \n"
          
          "dec %%ecx                \n"
-         "jnz loop_y2              \n"
+         "jnz 0b              \n"
          : [S] "=&S" (fake_esi), [a]"=&a"(fake_eax), [start]"+D"(start), "+c"(height), [tex] "+r"(tex)
          : [mask_mask] "g" (mask_mask), [count] "g" (count), [line] "g" ((intptr_t)line), [line_full] "g" ((intptr_t)line_full)
          : "memory", "cc", "edx"

@@ -71,12 +71,13 @@ enum osd_animation_type {
 };
 
 typedef struct {
-    char *text; // Text that this object will have when displayed
+    char *text;        // Text that this object will have when displayed
     enum osd_corner corner; // One of the 9 corners
-    float xoffset; // Relative X position
-    float yoffset; // Relative Y position
-    float color[3]; // Red, Green, Blue values
-    int state; // display state of current message
+    float xoffset;     // Relative X position
+    float yoffset;     // Relative Y position
+    float color[3];    // Red, Green, Blue values
+    float sizebox[4];  // bounding box (xmin, ymin, xmax, ymax)
+    int state;         // display state of current message
     enum osd_animation_type animation[OSD_NUM_STATES]; // animations for each display state
     unsigned int timeout[OSD_NUM_STATES]; // timeouts for each display state
 #define OSD_INFINITE_TIMEOUT 0xffffffff

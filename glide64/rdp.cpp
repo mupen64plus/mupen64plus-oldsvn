@@ -59,6 +59,9 @@ DWORD frame_count;  // frame counter
 BOOL ucode_error_report = TRUE;
 int wrong_tile = -1;
 
+#define BYTESWAP1(s1) asm volatile (" bswap %0; " : "+r" (s1) : :);
+#define BYTESWAP2(s1,s2) asm volatile (" bswap %0; bswap %1; " : "+r" (s1), "+r" (s2) : :);
+
 // global strings
 const char *ACmp[4] = { "NONE", "THRESHOLD", "UNKNOWN", "DITHER" };
 
@@ -2027,6 +2030,90 @@ static void rdp_settilesize()
         tile, ul_s, ul_t, lr_s, lr_t);
 }
 
+static void CopyswapBlock(int *pDst, unsigned int cnt, unsigned int SrcOffs)
+{
+    // copy and byteswap a block of 8-byte dwords
+    int rem = SrcOffs & 3;
+    if (rem == 0)
+    {
+        int *pSrc = (int *) ((uintptr_t) gfx.RDRAM + SrcOffs);
+        for (unsigned int x = 0; x < cnt; x++)
+        {
+            int s1 = *pSrc++;
+            int s2 = *pSrc++;
+            BYTESWAP2(s1, s2)
+            *pDst++ = s1;
+            *pDst++ = s2;
+        }
+    }
+    else
+    {
+        // set source pointer to 4-byte aligned RDRAM location before the start
+        int *pSrc = (int *) ((uintptr_t) gfx.RDRAM + (SrcOffs & 0xfffffffc));
+        // do the first partial 32-bit word
+        int s0 = *pSrc++;
+        BYTESWAP1(s0)
+        for (int x = 0; x < rem; x++)
+            s0 >>= 8;
+        for (int x = 4; x > rem; x--)
+        {
+            *((char *) pDst) = s0 & 0xff;
+            pDst = (int *) ((char *) pDst + 1);
+            s0 >>= 8;
+        }
+        // do one full 32-bit word
+        s0 = *pSrc++;
+        BYTESWAP1(s0)
+        *pDst++ = s0;
+        // do 'cnt-1' 64-bit dwords
+        for (unsigned int x = 0; x < cnt-1; x++)
+        {
+            int s1 = *pSrc++;
+            int s2 = *pSrc++;
+            BYTESWAP2(s1, s2)
+            *pDst++ = s1;
+            *pDst++ = s2;
+        }
+        // do last partial 32-bit word
+        s0 = *pSrc++;
+        BYTESWAP1(s0)
+        for (; rem > 0; rem--)
+        {
+            *((char *) pDst) = s0 & 0xff;
+            pDst = (int *) ((char *) pDst + 1);
+            s0 >>= 8;
+        }
+    }
+}
+
+static void WordswapBlock(int *pDst, unsigned int cnt, unsigned int TileSize)
+{
+    // Since it's not loading 32-bit textures as the N64 would, 32-bit textures need to
+    // be swapped by 64-bits, not 32.
+    if (TileSize == 3)
+    {
+        // swapblock64 dst, cnt
+        for (unsigned int x = 0; x < cnt / 2; x++, pDst += 4)
+        {
+            long long s1 = ((long long *) pDst)[0];
+            long long s2 = ((long long *) pDst)[1];
+            ((long long *) pDst)[0] = s2;
+            ((long long *) pDst)[1] = s1;
+        }
+    }
+    else
+    {
+        // swapblock32 dst, cnt
+        for (unsigned int x = 0; x < cnt; x++, pDst += 2)
+        {
+            int s1 = pDst[0];
+            int s2 = pDst[1];
+            pDst[0] = s2;
+            pDst[1] = s1;
+        }
+    }
+}
+
 static void rdp_loadblock()
 {
     if (rdp.skip_drawing)
@@ -2071,105 +2158,47 @@ static void rdp_loadblock()
     if (addr+(lr_s<<3) > BMASK+1)
         lr_s = (WORD)((BMASK-addr)>>3);
     
-    DWORD off = rdp.timg.addr;
-    uintptr_t dst = (uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3);
+    DWORD offs = rdp.timg.addr;
     DWORD cnt = lr_s+1;
     if (rdp.tiles[tile].size == 3)
         cnt <<= 1;
   //FIXME: unused? DWORD start_line = 0;
-    
-    // Since it's not loading 32-bit textures as the N64 would, 32-bit textures need to
-    //  be swapped by 64-bits, not 32.
-    uintptr_t SwapMethod = (rdp.tiles[tile].size==3)?(uintptr_t)SwapBlock64:(uintptr_t)SwapBlock32;
-    
+
   //    if (lr_s > 0)
     rdp.timg.addr += cnt << 3;
-#if !defined(__GNUC__) && !defined(NO_ASM)
-    __asm {
-        // copy the data
-        mov edi,dword ptr [dst]
-            mov esi,dword ptr [gfx.RDRAM]
-            mov ecx,dword ptr [cnt]
-            mov edx,dword ptr [off]
-            call CopyBlock
-            
-            // now swap it
-            mov eax,dword ptr [cnt]   // eax = count remaining
-            xor edx,edx         // edx = dxt counter
-            mov edi,dword ptr [dst]
-            mov ebx,dword ptr [_dxt]
-            
-            xor ecx,ecx     // ecx = how much to copy
-dxt_test:
-        add edi,8
-            dec eax
-            jz end_dxt_test
-            add edx,ebx
-            jns dxt_test
-            
-dxt_s_test:
-        inc ecx
-            dec eax
-            jz end_dxt_test
-            add edx,ebx
-            js dxt_s_test
-            
-            // swap this data (ecx set, dst set)
-            call dword ptr [SwapMethod] // (ecx reset to 0 after)
-            
-            jmp dxt_test  // and repeat
-            
-end_dxt_test:
-        // swap any remaining data
-        call dword ptr [SwapMethod]
-    }
-#elif !defined(NO_ASM)
-    uintptr_t dst_arg = dst;
-    DWORD cnt_arg = cnt;
-    asm volatile(
-        // copy the data
-        // ;edi = dest_addr -> end of dest; ecx = num_words; esi = base_addr (preserved); edx = offset (preserved)
-        "call CopyBlock"
-        : "+&D"(dst_arg)
-        : "S"(gfx.RDRAM), "c"(cnt_arg), "d"(off)
-        : "memory", "cc"
-        );
-   asm volatile(
-        // now swap it
-        "xor %%edx,%%edx           \n"         // edx = dxt counter
-            
-        "xor %%ecx, %%ecx          \n"     // ecx = how much to copy
-        "0:                        \n" // dxt_test:
-        "add $8, %[dst]            \n"
-        "dec %[cnt]                \n"
-        "jz 2f                     \n" // jz end_dxt_test
-        "add %[_dxt], %%edx        \n"
-        "jns 0b                    \n" // jns dxt_test
-            
-        "1:                        \n" // dxt_s_test:
-        "inc %%ecx                 \n"
-        "dec %[cnt]                \n"
-        "jz 2f                     \n" // jz end_dxt_test
-        "add %[_dxt], %%edx        \n"
-        "js 1b                     \n" // js dxt_s_test
-        
-        // swap this data (ecx: count, edi: dst)
-        //  call dword ptr [SwapMethod] 
-        "call *%[SwapMethod]       \n"
-        // (ecx reset to 0 after)       
 
-        "jmp 0b                    \n" // jmp dxt_test  // and repeat
-        
-        "2:                        \n" //end_dxt_test:
-        // swap any remaining data
-        //call dword ptr [SwapMethod]
-        "call *%[SwapMethod]       \n"
-        : [cnt] "+&r"(cnt), [dst] "+&D" (dst)
-        : [_dxt] "r" (_dxt), [SwapMethod] "g" (SwapMethod)
-        : "memory", "cc", "ecx", "edx"
-        );
-#endif
-    
+    int * pDst = (int *) ((uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3));
+
+    // Load the block from RDRAM and byteswap it as it loads
+    CopyswapBlock(pDst, cnt, offs);
+
+    // now do 32-bit or 64-bit word swapping on every other row of data
+    int dxt_accum = 0;
+    while (cnt > 0)
+    {
+        // skip over unswapped blocks
+        do
+        {
+            pDst += 2;
+            if (--cnt == 0)
+                break;
+            dxt_accum += _dxt;
+        } while (!(dxt_accum & 0x80000000));
+        // count number of blocks to swap
+        if (cnt == 0) break;
+        int swapcnt = 0;
+        do
+        {
+            swapcnt++;
+            if (--cnt == 0)
+                break;
+            dxt_accum += _dxt;
+        } while (dxt_accum & 0x80000000);
+        // do 32-bit or 64-bit swap operation on this block
+        WordswapBlock(pDst, swapcnt, rdp.tiles[tile].size);
+        pDst += swapcnt * 2;
+    }
+   
     rdp.update |= UPDATE_TEXTURE;
     
     FRDP ("loadblock: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, dxt: %08lx -> %08lx\n",
@@ -2231,7 +2260,7 @@ static void rdp_loadtile()
     DWORD width = lr_s - ul_s + 1;
     
     DWORD wid_64 = rdp.tiles[tile].line;
-    
+
     // CHEAT: it's very unlikely that it loads more than 1 32-bit texture in one command,
     //   so i don't bother to write in two different places at once.  Just load once with
     //   twice as much data.
@@ -2260,97 +2289,20 @@ static void rdp_loadtile()
   if (offs + line_n*height > BMASK)
     height = (BMASK - offs) / line_n;
     
-    uintptr_t SwapMethod = (rdp.tiles[tile].size==3)?(uintptr_t)SwapBlock64:(uintptr_t)SwapBlock32;
-    
-    uintptr_t dst = (uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3);
-    uintptr_t end = (uintptr_t)rdp.tmem+4096 - (wid_64<<3);
-#if !defined(__GNUC__) && !defined(NO_ASM)
-    __asm {
-        // set initial values
-        mov edi,dword ptr [dst]
-            mov ecx,dword ptr [wid_64]
-            mov esi,dword ptr [gfx.RDRAM]
-            mov edx,dword ptr [offs]
-            xor ebx,ebx         // swap this line?
-            mov eax,dword ptr [height]
-            
-loadtile_loop:
-        cmp dword ptr [end],edi   // end of tmem: error
-            jc loadtile_end
-            
-            // copy this line
-            push edi
-            push ecx
-            call CopyBlock
-            pop ecx
-            
-            // swap it?
-            xor ebx,1
-            jnz loadtile_no_swap
-            
-            // (ecx set, restore edi)
-            pop edi
-            push ecx
-            call dword ptr [SwapMethod]
-            pop ecx
-            jmp loadtile_swap_end
-loadtile_no_swap:
-        add sp,4  // forget edi, we are already at the next position
-loadtile_swap_end:
-        
-        add edx,dword ptr [line_n]
-            
-            dec eax
-            jnz loadtile_loop
-            
-loadtile_end:
+    int * pDst = (int *) ((uintptr_t)rdp.tmem+(rdp.tiles[tile].t_mem<<3));
+    int * pEnd = (int *) ((uintptr_t)rdp.tmem+4096 - (wid_64<<3));
+
+    for (unsigned int y = 0; y < height; y++)
+    {
+        if (pDst > pEnd) break;
+        CopyswapBlock(pDst, wid_64, offs);
+        if (y & 1)
+        {
+            WordswapBlock(pDst, wid_64, rdp.tiles[tile].size);
+        }
+        pDst += wid_64 * 2;
+        offs += line_n;
     }
-#elif !defined(NO_ASM)
-    DWORD save_wid_64;
-    uintptr_t save_dst;
-   asm volatile (
-         // set initial values
-         "xor %%ebx,%%ebx           \n"         // swap this line?
-            
-         "0:                        \n" // loadtile_loop:
-         "cmp %[dst], %[end]         \n"   // end of tmem: error
-         "jc 3f                     \n" // jc loadtile_end
-         
-         // copy this line
-         "mov %[dst], %[save_dst]    \n"
-         "mov %[wid_64], %[save_wid_64]\n"
-         "call CopyBlock            \n"
-         "mov %[save_wid_64], %[wid_64]\n"
-         
-         // swap it?
-         "xor $1, %%ebx             \n"
-         "jnz 1f                    \n" // jnz loadtile_no_swap
-         
-         // (ecx/wid64 set, restore edi/dst)
-         "mov %[save_dst], %[dst]   \n"
-         "mov %[wid_64], %[save_wid_64]\n"
-         //call dword ptr [SwapMethod]
-         "call *%[SwapMethod]       \n"
-         
-         "mov %[save_wid_64], %[wid_64]\n"
-         "jmp 2f                    \n" // jmp loadtile_swap_end
-         "1:                        \n" // loadtile_no_swap:
-         // forget edi, we are already at the next position
-         "2:                        \n" // loadtile_swap_end:
-         
-         "add %[line_n], %%edx     \n"
-         
-         "dec %%eax                 \n"
-         "jnz 0b                    \n" // jnz loadtile_loop
-         
-         "3:                        \n" // loadtile_end:
-         // &+ is necessary so gcc does not use the same register for both
-         : [save_wid_64] "=&g" (save_wid_64), [save_dst] "=&g" (save_dst)
-         : [dst] "D" (dst), [wid_64] "c" (wid_64), "S" (gfx.RDRAM), "d" (offs), "a" (height),
-         [end] "g" (end), [SwapMethod] "g" (SwapMethod), [line_n] "g" (line_n)
-         : "memory", "cc", "ebx"
-         );
-#endif
     
     FRDP("loadtile: tile: %d, ul_s: %d, ul_t: %d, lr_s: %d, lr_t: %d\n", tile,
         ul_s, ul_t, lr_s, lr_t);

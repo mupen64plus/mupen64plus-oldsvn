@@ -1,3 +1,22 @@
+Mupen64Plus v1.4-branch development
+-----------------------------------
+*** Merged from trunk:
+ - r587: issue #111: close screenshot file after saving
+ - r605: fix from Tub for free() bug in main/util.c/list_delete()
+ - r608: another couple of memory leak fixes from Tub, in main/config.c
+ - r619: fix LIRC build to integrate w/ new screenshot mechanism
+ - r622: Fixed segfault in Glide64 as per issue 133
+ - r628,633: Small patch to get glide64.so to compile with O3 optimizations
+ - r673: removed inline assembly sections in rdp_loadblock and rdp_loadtile, including their dependency on functions in Tmem_nasm.asm.  Replaced with new C code.  This fixes a segfault on some 64-bit source builds
+ - r674: Removed glide64/Tmem_nasm.asm source file and the project dependency on nasm/yasm assemblers
+ - r676: bugfix in my BYTESWAP macros
+ - r680: removed many unused classes from OGLFT font library code
+ - r681: Refactored OGLFT to do color setting outside of glyph compiling, so the OSD fading doesnt force bitmaps to be continually recreated with calls to renderGlyph.  Seems to have cut the excessive cpu usage of the OSD about by half
+ - r684: OGLFT measuring functions were taking a huge chunk of CPU time.  Refactored code to measure only once and store the line size and the message sizes instead of re-measuring all the time.  This eliminated nearly all of the OSD overhead on my PC
+ - r686: fixed OSD crash bug after running a game, disabling OSD, then running another game
+ - r694: require bash shell scripting for install.sh
+
+
 Mupen64Plus v1.4 - June 14, 2008
 -----------------------------------
  - New feature: graphical debugger for R4300 core
