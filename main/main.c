@@ -333,7 +333,6 @@ void new_vi(void)
 
         LastFPSTime = CurrentFPSTime ;
         end_section(IDLE_SECTION);
-        fprintf(stderr,"frameadv: %d rompause: %d\n",l_FrameAdvance,rompause);
     } while (rompause);
 
     if (l_FrameAdvance) {

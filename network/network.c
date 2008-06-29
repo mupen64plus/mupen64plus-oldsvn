@@ -58,7 +58,7 @@ void netShutdown(MupenClient *mClient) {
 int netMain(MupenClient *mClient) {
     int sentSyncMessage = 0;
     struct timespec ts;
-
+    fprintf(stderr,"netMain loop\n");
     if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0) {
         int i;
         for(i=0; i<mClient->numConnected-1;i++){

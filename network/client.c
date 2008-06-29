@@ -103,19 +103,19 @@ void clientProcessMessages(MupenClient *Client) {
     char osdString[64];
     int n, playerNumber, adjust;
 
-    if (!(Client->isListening))
-        return; // exit now if the client isnt' connected
+    //if (!(Client->isListening))
+    //    return; // exit now if the client isnt' connected
 
     SDLNet_CheckSockets(Client->socketSet, 0);
-
+    fprintf(stderr,"a");
     while (SDLNet_SocketReady(Client->socket)) {
         n = SDLNet_UDP_Recv(Client->socket, Client->packet);
         //n = SDLNet_TCP_Recv(Client->socket, &incomingMessage, sizeof(NetMessage));
-        if (n <= 0) {
+        if (n < 0) {
             clientDisconnect(Client);
             return;
         }
-
+        fprintf(stderr,"b\n");
 	    if(Client->packet->len >= 2) {
             Uint16 frameID=SDLNet_Read16(Client->packet->data);
             switch(frameID) {
@@ -251,7 +251,7 @@ void clientLoadPacket(MupenClient *Client, void *data, int len) {
 	The following functions are used to process the event queue 
 
    =======================================================================================
-*/ 
+*/
 
 // processEventQueue() : Process the events in the queue, if necessary.
 void processEventQueue(MupenClient *Client) {
@@ -264,6 +264,7 @@ void processEventQueue(MupenClient *Client) {
                 clientLoadPacket(Client,&(Client->joinState.packet),sizeof(JoinRequest));
                 SDLNet_UDP_Send(Client->socket, -1, Client->packet);
                 Client->eventQueue[0]->task.time=Client->frameCounter+QUEUE_JOIN_DELAY;
+                fprintf(stderr,"frame: %d event0 counter: %d\n",Client->frameCounter,Client->eventQueue[0]->task.time);
                 heapifyEventQueue(Client,0);                Client->packet->len=sizeof(JoinRequest);
                 fprintf(stderr,"[NETPLAY] Issuing join request to %d.%d.%d.%d:%d\n",
                     GET_IP(Client->joinState.host.host),GET_PORT(Client->joinState.host.port));
