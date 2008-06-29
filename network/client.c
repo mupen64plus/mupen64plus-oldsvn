@@ -102,7 +102,7 @@ void clientProcessFrame(MupenClient *Client) {
     int len=Client->packet->len-sizeof(Frame);
     int player=curChunk->header.peer;
     unsigned int frame=curChunk->header.eID;
-    curChunk=curChunk+sizeof(Frame);
+    curChunk=((char *)curChunk)+sizeof(Frame);
     while(len>0) {
         switch(curChunk->type) {
           case CHUNK_INPUT:
