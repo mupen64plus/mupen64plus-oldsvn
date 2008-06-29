@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <signal.h>
 #include <stdint.h>
 #include <sys/time.h>
@@ -41,12 +42,16 @@ typedef struct MD5EntryNode_t {
 
 
 extern void interupt_trap(int value);
+extern void clean_game_alarm (int sig);
+
 void process_packet(UDPpacket *packet);
 void remove_game_entry(int n);
 int get_free_game_desc();
 int find_host_in_game_list(uint32_t host);
+void clean_game_list();
 
 int        g_QuitMainLoop = 0;
+int        g_GameCount = 0;
 GameEntry *g_GameList[MAX_GAME_DESC];
 
 /* =============================================================================
@@ -64,14 +69,20 @@ int main(int argc, char **argv) {
   printf("\nMupen64Plus Master Server 0.1 by orbitaldecay\n\n");
   memset(&g_GameList, 0, sizeof(g_GameList));
 
+  // TODO: Process command line arguments here 
+
   if (signal(SIGINT, SIG_IGN) != SIG_IGN) {
       if (signal(SIGINT, interupt_trap) == SIG_ERR) {
-          fprintf(stderr, "signal(): Error %d.  Cannot trap interupt signal.\n", errno);
+          fprintf(stderr, "signal(): Error %d trapping SIGINT.\n", errno);
       }
   }
 
-  // TODO: Process command line arguments here 
-
+  if (signal(SIGALRM, clean_game_alarm) == SIG_ERR) {
+      fprintf(stderr, "signal(): Error %d trapping SIGALRM.\n", errno);
+  } else {
+      alarm(30);
+  }
+  
   printf("Initializing SDL_net...\t\t");
   if (SDLNet_Init() == -1) {
       printf("[FAIL]\n");
@@ -105,18 +116,12 @@ int main(int argc, char **argv) {
         process_packet(recvPacket);
     } else {
 
-        // nanosleep or sweep nonactive server entries
+        // nanosleep or clean server list
 
     }
     retValue = SDLNet_UDP_Recv(listenSock, recvPacket);
   }
-
-  // If server loop kicks due to SDLNet_UDP_Recv error, display it
-  if (retValue == -1) {
-    fprintf(stderr, "SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
-    // Don't quit yet, allow cleanup to occur
-  }
-  
+ 
   // Cleanup
   for (n = 0; n < MAX_GAME_DESC; n++) {
     if (g_GameList[n]) {
@@ -125,13 +130,30 @@ int main(int argc, char **argv) {
   }
   SDLNet_FreePacket(recvPacket);
   SDLNet_Quit();
-  printf("Goodbye.\n");
+  
+  // If server loop kicked due to SDLNet_UDP_Recv error, display it
+  if (retValue == -1) {
+    fprintf(stderr, "SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
+    printf("Goodbye.\n");
+
+  // Otherwise we received a sigint, call the default handler
+  } else {
+    printf("Goodbye.\n");
+    signal(SIGINT, SIG_DFL);
+    kill(getpid(), SIGINT);
+    while (1) {} // Wait for process to be killed
+
+  /* Useful information regarding proper handling of sigints can be
+     found at: http://www.cons.org/cracauer/sigint.html */
+
+  }
+
   return EXIT_SUCCESS;
 }
 
 /* =============================================================================
 
-    process_packet()
+    process_packet(UDPpacket *packet)
 
    =============================================================================
 */
@@ -164,7 +186,6 @@ void process_packet(UDPpacket *packet) {
                   printf("Multiple game entries for %d.%d.%d.%d, removing old entry.\n", GET_IP(packet->address.host));              
                   remove_game_entry(n);
               }
-
               memcpy(&md5_checksum, packet->data + 1, 16);
               port = SDLNet_Read16(packet->data + 17);
               g_GameList[gameDesc] = malloc(sizeof(GameEntry));
@@ -173,6 +194,7 @@ void process_packet(UDPpacket *packet) {
               g_GameList[gameDesc]->keep_alive = 1;
               // Add to linked list
               // Send game descriptor to server
+              g_GameCount++;
               printf("OPEN_GAME request from %d.%d.%d.%d granted.\n", GET_IP(packet->address.host));
           } else {
               printf("OPEN_GAME request from %d.%d.%d.%d failed (no available game descriptors).\n", GET_IP(packet->address.host));
@@ -217,8 +239,22 @@ void process_packet(UDPpacket *packet) {
 */
 
 void interupt_trap(int value) {
-  printf("!!Interupt signal received, shutting down!!\n");
+  printf("!!Interupt signal received, cleaning up!!\n");
   g_QuitMainLoop = 1;
+}
+
+/* =============================================================================
+
+    clean_game_alarm()
+
+   =============================================================================
+*/
+
+void clean_game_alarm (int sig) {
+//  printf("!!Alarm signal received, cleaning game list!!\n");
+  clean_game_list();
+  signal(sig, clean_game_alarm);
+  alarm(30);
 }
 
 /* =============================================================================
@@ -262,6 +298,7 @@ void clean_game_list() {
     if (g_GameList[n]) { // If pointer array element is not null
 
       if (!g_GameList[n]->keep_alive) { // No keep alive received this round
+        printf("Game entry for %d.%d.%d.%d has timed out.\n", GET_IP(g_GameList[n]->host));
         remove_game_entry(n);
       } else {
         g_GameList[n]->keep_alive = 0;
@@ -272,7 +309,7 @@ void clean_game_list() {
 
 /* =============================================================================
 
-    find_host_in_game_list()
+    find_host_in_game_list(uint32_t host)
 
    =============================================================================
 */
@@ -287,7 +324,7 @@ int find_host_in_game_list(uint32_t host) {
 
 /* =============================================================================
 
-    remove_game_entry()
+    remove_game_entry(int n)
 
    =============================================================================
 */
@@ -301,6 +338,7 @@ void remove_game_entry(int n) {
     // Free the node and set the pointer array element to null
     free(g_GameList[n]);
     g_GameList[n] = NULL;
+    g_GameCount--;
   } else {
     printf("remove_game_entry(): Invalid game descriptor %d.\n", n);
   }
