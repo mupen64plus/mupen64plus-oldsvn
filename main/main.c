@@ -109,7 +109,6 @@ static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
 
 static int   l_OsdEnabled = 1;           // On Screen Display enabled?
-static BOOL  l_NetplayEnabled = 0;       // Netplay enabled?
 static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter
@@ -119,7 +118,6 @@ static char *l_Filename = NULL;          // filename to load & run at startup (i
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 
-//static MupenServer	l_NetplayServer;
 static NetPlaySettings  l_NetSettings;
 static MupenClient      l_NetplayClient;
 static int              SyncStatus;
@@ -558,7 +556,7 @@ int pauseContinueEmulation(void)
 void netplayReady(void)
 {
     //NetMessage netMsg;
-
+    l_NetplayClient.startEvt=1;
     //if (l_NetplayEnabled && l_NetplayClient.isConnected) {
     //    netMsg.type = NETMSG_READY;
     //    clientSendMessage(&l_NetplayClient, &netMsg);
@@ -860,7 +858,7 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    if(l_NetplayEnabled)
+    if(l_NetplayClient.isEnabled)
     {
         if(netInitialize(&l_NetplayClient))
 	    {
@@ -898,7 +896,7 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    if (l_NetplayEnabled) netShutdown(/*&l_NetplayServer, */&l_NetplayClient);
+    if (l_NetplayClient.isEnabled) netShutdown(&l_NetplayClient);
     if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is
@@ -1177,11 +1175,11 @@ void parseCommandLine(int argc, char **argv)
                 break;
             case OPT_CONNECT:
                 strncpy(l_NetSettings.hostname, optarg, 128);
-                l_NetplayEnabled = 1;
+                l_NetplayClient.isEnabled = 1;
                 break;
             case OPT_SERVER:
                 strncpy(l_NetSettings.hostname, "", 128);
-                l_NetplayEnabled = 1;
+                l_NetplayClient.isEnabled = 1;
 //                l_NetSettings.runServer = 1;
                 break;
 #ifdef DBG

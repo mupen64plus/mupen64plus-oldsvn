@@ -208,7 +208,6 @@ static unsigned int gettimeofday_msec(void)
 
 void internal_ReadController(int Control, BYTE *Command)
 {
-   static BUTTONS KeyCache[4];
    BUTTONS Keys;
    MupenClient *mClient = (MupenClient *)getNetplayClient();
 
@@ -220,16 +219,13 @@ void internal_ReadController(int Control, BYTE *Command)
 #else
         getKeys(Control, &Keys);
 #endif
-        if (mClient->numConnected>2) { // Update the server if we're connected to one and if the button state has actually changed
-          if (Keys.Value != KeyCache[Control].Value) {
-              clientSendButtons(mClient, Control, Keys.Value);
-              KeyCache[Control].Value = Keys.Value;
-          }
-          *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
+        if (mClient->isEnabled) { // Update the server if we're connected to one and if the button state has actually changed
+            clientSendButtons(mClient, Control, Keys.Value);
+            *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
         } else if (Controls[Control].Present) {
-          *((unsigned int *)(Command + 3)) = Keys.Value;
+            *((unsigned int *)(Command + 3)) = Keys.Value;
 #ifdef COMPARE_CORE
-          check_input_sync(Command+3);
+            check_input_sync(Command+3);
 #endif
         }
     break;

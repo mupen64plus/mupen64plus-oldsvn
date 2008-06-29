@@ -56,25 +56,11 @@ void netShutdown(MupenClient *mClient) {
 }
 
 int netMain(MupenClient *mClient) {
-    int sentSyncMessage = 0;
-    struct timespec ts;
-    if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0) {
-        int i;
-        for(i=0; i<mClient->numConnected-1;i++){
-            int curID=sourceID(mClient->myID, i);
-            mClient->packet->address=mClient->player[curID].address;
-            mClient->packet->len=4;
-            SDLNet_Write16((mClient->frameCounter/VI_PER_FRAME)&FRAME_MASK,mClient->packet->data);
-            mClient->packet->data[2]=mClient->myID;
-            mClient->packet->data[3]=mClient->lag[curID];
-            fprintf(stderr,"send sync %08x\n",mClient->packet->address.host);
-            SDLNet_UDP_Send(mClient->socket, -1, mClient->packet);
-        }
-    }
+    if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0)
+        clientSendFrame(mClient);
     clientProcessMessages(mClient);
     processEventQueue(mClient);
     mClient->frameCounter++;
-    mClient->frameCounter=mClient->frameCounter&FRAME_MASK;
 
     return 0;
 
@@ -117,9 +103,9 @@ int netMain(MupenClient *mClient) {
 
 int frameDelta(MupenClient *Client, Uint32 frame) {
   int result=Client->frameCounter-frame;
-  if (result > (FRAME_MASK*VI_PER_FRAME)/2)
+  while (result > (FRAME_MASK*VI_PER_FRAME)/2)
     result-=result-FRAME_MASK*VI_PER_FRAME;
-  else if (-result > (FRAME_MASK*VI_PER_FRAME)/2)
+  while (-result > (FRAME_MASK*VI_PER_FRAME)/2)
     result+=FRAME_MASK*VI_PER_FRAME;
   return result;
 }

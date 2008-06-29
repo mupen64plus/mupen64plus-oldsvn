@@ -17,6 +17,7 @@
 */ 
 
 #include "network.h"
+#include "../r4300/r4300.h"
 
 int clientInitialize(MupenClient *Client) {
     int i;
@@ -24,6 +25,7 @@ int clientInitialize(MupenClient *Client) {
     Client->socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS);
     Client->socket=SDLNet_UDP_Open(SERVER_PORT);
     Client->packet=SDLNet_AllocPacket(MAX_PACKET_SIZE);
+    Client->inputDelay=DEFAULT_INPUT_DELAY;
 
     for(i=0; i<QUEUE_HEAP_LEN; i++)
         Client->eventQueue[i]=&(Client->events[i]);
@@ -67,7 +69,7 @@ int clientConnect(MupenClient *Client, char *server, int port) {
         SDLNet_Write16(FRAME_JOINREQUEST,&(packet->eID));
 
         Client->joinState.state=waiting;
-        Client->eventQueue[Client->numQueued]->evt=NETMSG_JOIN;
+        Client->eventQueue[Client->numQueued]->evt=EVENT_JOIN;
         Client->eventQueue[Client->numQueued]->time=Client->frameCounter;
         addEventToQueue(Client);
         return 1;
@@ -96,7 +98,53 @@ int clientSendMessage(MupenClient *Client) {
 }
 
 void clientProcessFrame(MupenClient *Client) {
-    
+    FrameChunk* curChunk = (FrameChunk*) Client->packet->data;
+    int len=Client->packet->len-sizeof(Frame);
+    int player=curChunk->header.peer;
+    unsigned int frame=curChunk->header.eID;
+    curChunk=curChunk+sizeof(Frame);
+    while(len>0) {
+        switch(curChunk->type) {
+          case CHUNK_INPUT:
+            Client->playerEvent[(frame/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][curChunk->input.player].timer=frame;
+            Client->playerEvent[(frame/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
+            Client->playerEvent[(frame/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
+            fprintf(stderr,"chunk %x %d\n",curChunk->input.player, sizeof(FrameChunk));
+          break;
+          default:
+            fprintf(stderr,"Invalid Frame received!\n");
+        }
+    }
+}
+
+void clientSendFrame(MupenClient *Client) {
+    int i;
+    FrameChunk *chunk = (FrameChunk*) Client->packet->data;
+
+    for(i=0; i<Client->numConnected-1;i++){
+        int curID=sourceID(Client->myID, i);
+        Client->packet->address=Client->player[curID].address;
+        Client->packet->len=sizeof(Frame);
+        SDLNet_Write16((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK,&(chunk->header.eID));
+        chunk->header.peer=Client->myID;
+        chunk->header.lag=Client->lag[curID];
+        chunk = (FrameChunk*)(((char*)chunk)+sizeof(Frame));
+
+        chunk->input.type = CHUNK_INPUT;
+        chunk->input.player = Client->myID;
+        NetPlayerUpdate *update = &(Client->playerEvent[(Client->frameCounter/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][Client->myID]);
+        if(update->timer!=Client->frameCounter-1)
+            fprintf(stderr,"[NETPLAY]Sending bad event\n");
+        else {
+            chunk->input.buttons.Value = update->value & (0x8000 * Client->startEvt);
+            Client->startEvt=0;
+        }
+        Client->packet->len+=sizeof(InputChunk);
+
+        fprintf(stderr,"send sync %d.%d.%d.%d:%d\n",GET_IP(Client->packet->address.host), GET_PORT(Client->packet->address.port));
+        SDLNet_UDP_Send(Client->socket, -1, Client->packet);
+    }
+
 }
 
 void clientProcessMessages(MupenClient *Client) {
@@ -151,7 +199,7 @@ void clientProcessMessages(MupenClient *Client) {
                         Client->packet->address, Client->packet->address.port, Client->packet->len);
                 break;
               case FRAME_JOIN:
-                if(Client->packet->len ==16) {
+                if(Client->packet->len == 16) {
                     Client->joinState.state=enabled;
                     Client->frameCounter = SDLNet_Read16(Client->packet->data+2);
                     Client->myID = SDLNet_Read32(Client->packet->data+4);
@@ -159,6 +207,12 @@ void clientProcessMessages(MupenClient *Client) {
                     Uint32 remoteID = SDLNet_Read32(Client->packet->data+12);
 
                     Client->player[remoteID].address=Client->packet->address;
+
+                    Client->eventQueue[Client->numQueued]->evt=EVENT_JOIN;
+                    Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay;
+                    addEventToQueue(Client);
+
+
                     fprintf(stderr,"[NETPLAY]Received Join from %d.%d.%d.%d:%d\n",
                         GET_IP(Client->packet->address.host), GET_PORT(Client->packet->address.port));
                     //TODO: must connect to other peers as well!
@@ -234,6 +288,11 @@ void clientProcessMessages(MupenClient *Client) {
 }
 
 void clientSendButtons(MupenClient *Client, int control, DWORD value) {
+    if(control==Client->myID) {//will only allow 1 player per host, must be changed
+        int bufInd=((Client->frameCounter+1)/VI_PER_FRAME) % FRAME_BUFFER_LENGTH;
+        Client->playerEvent[bufInd][control].timer = Client->frameCounter;
+        Client->playerEvent[bufInd][control].value = value;
+    }
 }
 
 
@@ -254,18 +313,17 @@ void clientLoadPacket(MupenClient *Client, void *data, int len) {
 
 // processEventQueue() : Process the events in the queue, if necessary.
 void processEventQueue(MupenClient *Client) {
-    //fprintf(stderr,"A\n");
+    int i;
     while((Client->numQueued > 0) && (Client->eventQueue[0]->time <= Client->frameCounter)) {
         //fprintf(stderr,"B q-%d t-%d c-%d\n",Client->numQueued,Client->eventQueue[0]->time,Client->frameCounter);
         switch(Client->eventQueue[0]->evt) {
-          case NETMSG_JOIN:
+          case EVENT_JOIN:
             if (Client->joinState.state==waiting) {
                 Client->packet->address=Client->joinState.host;
                 clientLoadPacket(Client,&(Client->joinState.packet),sizeof(JoinRequest));
                 SDLNet_UDP_Send(Client->socket, -1, Client->packet);
                 Client->eventQueue[0]->time=Client->frameCounter+QUEUE_JOIN_DELAY;
                 heapifyEventQueue(Client,0);
-                Client->packet->len=sizeof(JoinRequest);
                 fprintf(stderr,"[NETPLAY] Issuing join request to %d.%d.%d.%d:%d\n",
                     GET_IP(Client->joinState.host.host),GET_PORT(Client->joinState.host.port));
             }
@@ -275,9 +333,23 @@ void processEventQueue(MupenClient *Client) {
             else if (Client->joinState.state==enabled)
                 popEventQueue(Client);
           break;
-          //case NETMSG_PAUSE:
+          case EVENT_INPUT:
+            for(i=0; i<Client->numConnected;i++) {
+                int frame=Client->frameCounter-Client->inputDelay;
+                NetPlayerUpdate *curUpdate=&(Client->playerEvent[(frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH][i]);
+                if(curUpdate->timer!=frame)
+                    fprintf(stderr,"[NETPLAY] Out of sync at frame %d\n",frame);
+                else {
+                    if(curUpdate->control==1) {
+                        curUpdate->control=0; 
+                        rompause=!rompause;
+                    }
+                    
+                }
+            }
+          break;
           default:
-            fprintf(stderr,"Unexpected Event popped off of queue ID:%02x\n",Client->eventQueue[0]->evt);
+            fprintf(stderr,"[NETPLAY] Unexpected Event popped off of queue ID:%02x\n", Client->eventQueue[0]->evt);
           break;
         }
     }
