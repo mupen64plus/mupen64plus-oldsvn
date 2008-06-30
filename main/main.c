@@ -1324,9 +1324,6 @@ int main(int argc, char *argv[])
 #ifndef NO_GUI
     if(l_GuiEnabled)
         gui_init(&argc, &argv);
-
-    if(l_GuiEnabled)
-        { gui_build(); }
 #endif
     // must be called after building gui
     // look for plugins in the install dir and set plugin config dir

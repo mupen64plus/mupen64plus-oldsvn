@@ -95,8 +95,7 @@ static pthread_t g_GuiThread = 0; // main gui thread
 * GUI interfaces (declared in ../guifuncs.h)
 */
 
-/** gui_init
- *    Parse gui-specific arguments and remove them from argument list.
+/* Parse gui-specific arguments, remove them from argument list, and create gtk gui in thread-safe manner.
  */
 void gui_init(int *argc, char ***argv)
 {
@@ -109,15 +108,6 @@ void gui_init(int *argc, char ***argv)
 
     // call gtk to parse arguments
     gtk_init(argc, argv);
-}
-
-/** gui_build
- *    Create GUI components, but do not display
- */
-void gui_build(void)
-{
-    // info_message function can safely be used after we get the gdk lock
-    gdk_threads_enter();
 
     create_mainWindow();
     create_configDialog();
@@ -127,9 +117,7 @@ void gui_build(void)
     create_aboutDialog();
 }
 
-/** gui_display
- *    Display GUI components to the screen
- */
+// Display GUI components to the screen
 void gui_display(void)
 {
     gtk_widget_show_all(g_MainWindow.window);
@@ -141,12 +129,22 @@ void gui_display(void)
         { gtk_widget_hide(g_MainWindow.statusBarHBox); }
 }
 
-/** gui_main_loop
- *    Give control of thread to gtk
- */
+//Better gui cleanup...
+void gui_destroy(void)
+{
+    gtk_widget_destroy( g_MainWindow.window );
+    gtk_widget_destroy( g_AboutDialog.dialog );
+    gtk_widget_destroy( g_ConfigDialog.dialog );
+    gtk_widget_destroy( g_RomPropDialog.dialog );
+}
+
+//gui_main_loop, give control of thread to gtk
 void gui_main_loop(void)
 {
     gtk_main();
+
+    gui_destroy();
+
     gdk_threads_leave();
 }
 
@@ -155,21 +153,18 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
 {
     pthread_t self = pthread_self();
 
-    if(gui_enabled())
-        {
-        // if we're calling from a thread other than the main gtk thread, take gdk lock
-        if(!pthread_equal(self, g_GuiThread))
-            gdk_threads_enter();
+    //if we're calling from a thread other than the main gtk thread, take gdk lock
+    if(!pthread_equal(self, g_GuiThread))
+        { gdk_threads_enter(); }
 
-        rombrowser_refresh(roms, clear);
+    rombrowser_refresh(roms, clear);
 
-        GUI_PROCESS_QUEUED_EVENTS();
+    GUI_PROCESS_QUEUED_EVENTS();
 
-        if(!pthread_equal(self, g_GuiThread))
-        gdk_threads_leave();
+    if(!pthread_equal(self, g_GuiThread))
+        { gdk_threads_leave(); }
 
-        return;
-        }
+    return;
 }
 
 // prints informational message to status bar
@@ -439,6 +434,7 @@ void reload()
     gtk_widget_destroy( g_MainWindow.window );
     gtk_widget_destroy( g_AboutDialog.dialog );
     gtk_widget_destroy( g_ConfigDialog.dialog );
+    gtk_widget_destroy( g_RomPropDialog.dialog );
     create_mainWindow();
     create_aboutDialog();
     create_configDialog();

@@ -47,6 +47,7 @@ typedef struct
     GtkTreeIter iter;
     cache_entry *entry;
 } SRomPropertiesDialog;
+
 extern SRomPropertiesDialog g_RomPropDialog;
 
 int create_romPropDialog();
