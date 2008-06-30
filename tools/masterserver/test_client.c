@@ -77,6 +77,7 @@ int main(int argc, char **argv)
             p->data[0] = KEEP_ALIVE;
             SDLNet_Write16(0, p->data + 1);
             p->len = 3;
+            SDLNet_UDP_Send(sd, -1, p);
         }
 
 	SDLNet_FreePacket(p);
