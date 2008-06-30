@@ -1,17 +1,26 @@
-/* --------------------------------------------------------------------------------
-
-    master_server.c
-    by orbitaldecay
-
-    This is a work in progress, there is some functionality that is still
-    missing.  It should be complete soon.
-
-    A discussion of the master server network protocol can be found at
-    http://groups.google.com/group/mupen64plus  An abstract is available under the 
-    file section entitled master_server_protocol_rev_02.
-
-   --------------------------------------------------------------------------------
-*/
+/**
+ * Mupen64 - master_server.c
+ * Copyright (C) 2008 orbitaldecay
+ *
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
+ * 
+ *
+ * This program is free software; you can redistribute it and/
+ * or modify it under the terms of the GNU General Public Li-
+ * cence as published by the Free Software Foundation; either
+ * version 2 of the Licence, or any later version.
+ *
+ * This program is distributed in the hope that it will be use-
+ * ful, but WITHOUT ANY WARRANTY; without even the implied war-
+ * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public Licence for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * Licence along with this program; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
+ * USA.
+ *
+**/
 
 #include <errno.h>
 #include <stdio.h>
@@ -25,16 +34,19 @@
 // == master_server.h =============================================================
 // ================================================================================
 
-#define MAX_PACKET	19    // In bytes, the largest packet permitted by the protocol
+#define MAX_PACKET	1470  // In bytes, the largest packet permitted by the protocol
 #define SERVER_PORT	2000  // The udp port to run the server on
 #define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
 #define CLEAN_FREQ      60    // In seconds, how often free_timed_out_game_desc() is called
+
+#define HEADER_ID       "M64+"
 
 #define FIND_GAMES      00
 #define GAME_LIST	01
 #define OPEN_GAME       02
 #define GAME_DESC	03
 #define KEEP_ALIVE      04
+#define BAD_VERSION     05
 
 // Thanks to DarkJeztr for this little biddy
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -509,18 +521,32 @@ void send_game_descriptor(UDPpacket *packet, int gameDesc) {
    --------------------------------------------------------------------------------
 */
 void send_game_list(UDPpacket *packet, md5_byte_t md5_checksum[16]) {
-    MD5Entry *temp_md5_entry;
+    MD5Entry  *temp_md5_entry;
     GameEntry *temp_ge;
+    int        packet_offset = 2;
 
-    if (!(temp_md5_entry = find_md5_node(md5_checksum))) {
-        printf("No games!");
-    } else {
+    packet->data[0] = GAME_LIST;
+    if ((temp_md5_entry = find_md5_node(md5_checksum))) {
       temp_ge = temp_md5_entry->first_game_entry->next;
-      while(temp_ge->next != NULL) {
-          printf("%d.%d.%d.%d:%d\n", GET_IP(temp_ge->host), temp_ge->port);
+      while (temp_ge->next != NULL) {
+          if (packet_offset + 6 > MAX_PACKET) {
+              packet->len = packet_offset;
+              packet->data[1] = 1;
+              packet_offset = 2;
+              if (!SDLNet_UDP_Send(g_ListenSock, -1, packet)) {
+                 printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+              }    
+          }
+          memcpy(packet->data + packet_offset, &(temp_ge->host), 4);
+          SDLNet_Write16(temp_ge->port, packet->data + packet_offset + 4);
+          packet_offset += 6;
           temp_ge = temp_ge->next;
       }
     }
-    
+    packet->len = packet_offset;
+    packet->data[1] = 0;
+    packet_offset = 0;
+    if (!SDLNet_UDP_Send(g_ListenSock, -1, packet)) {
+        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+    }    
 }
-
