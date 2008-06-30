@@ -144,8 +144,7 @@ int create_romPropDialog( void )
     char buffer[32];
 
     PangoAttrList *Bold = pango_attr_list_new(); 
-    PangoAttribute *Attribute = NULL;
-    Attribute = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
+    PangoAttribute *Attribute = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
     pango_attr_list_insert ( Bold, Attribute );
 
     g_RomPropDialog.dialog = gtk_dialog_new();
