@@ -117,6 +117,7 @@ MD5Entry     *g_MD5List = NULL;
 int main(int argc, char **argv) {
   UDPpacket *recvPacket;
   int retValue, n, minorVersion, majorVersion;
+  MD5Entry *temp_md5_entry;
 
   printf("\nMupen64Plus Master Server 0.1 by orbitaldecay\n\n");
   memset(&g_GameList, 0, sizeof(g_GameList));
@@ -165,13 +166,12 @@ int main(int argc, char **argv) {
   retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
   while ((retValue != -1) && (!g_QuitMainLoop)) {
     if (retValue > 0) {
-
        if (recvPacket->data[0] == 'M' && recvPacket->data[1] == '+') { // Check for protocol ID
            // Grab version info from header
-           minorVersion = recvPacket->data[2];
-           majorVersion = recvPacket->data[3];
+           majorVersion = recvPacket->data[2];
+           minorVersion = recvPacket->data[3];
 
-           // Truncate header
+           // Truncate header so that it's invisible
            recvPacket->data += 4;
            recvPacket->len -= 4;
 
@@ -182,11 +182,13 @@ int main(int argc, char **argv) {
                      break;
                }
            }
-       }
 
-    } else {
-        // nanosleep?
+           // Fix packet header trunc (this was an annoying segfault)
+           recvPacket->data -= 4;
+           recvPacket->len += 4;
+       }
     }
+
     retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
   }
  
@@ -196,25 +198,19 @@ int main(int argc, char **argv) {
       remove_game_desc(n);
     }
   }
+  while (g_MD5List != NULL) {
+    temp_md5_entry = g_MD5List->next;
+    remove_md5_node(g_MD5List);
+    g_MD5List = temp_md5_entry;
+  }
+  
+  printf("Goodbye.\n");
   SDLNet_FreePacket(recvPacket);
   SDLNet_Quit();
+
   
   // If server loop kicked due to SDLNet_UDP_Recv error, display it
-  if (retValue == -1) {
-    fprintf(stderr, "SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
-    printf("Goodbye.\n");
-
-  // Otherwise we received a sigint, call the default handler
-  } else {
-    printf("Goodbye.\n");
-    signal(SIGINT, SIG_DFL);
-    kill(getpid(), SIGINT);
-//    while (1) {} // Wait for process to be killed
-
-  /* Useful information regarding proper handling of sigints can be
-     found at: http://www.cons.org/cracauer/sigint.html */
-
-  }
+  if (retValue == -1) fprintf(stderr, "SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
 
   return EXIT_SUCCESS;
 }
