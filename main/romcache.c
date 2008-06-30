@@ -213,7 +213,6 @@ void* rom_cache_system(void* _arg)
                 break;
             }
         }
-
     printf("Rom cache system terminated!\n");
 }
 
@@ -557,6 +556,25 @@ int load_initial_cache(char* cache_filename)
 }
 #endif
 
+unsigned char hexconvert(const char *bigraph)
+{
+    unsigned char returnvalue = 0;
+    char character;
+    int digits;
+
+    for ( digits = 2; digits > 0; --digits )
+        {
+        returnvalue = returnvalue << 4;
+        character = *bigraph++ | 0x20;
+        if(character>='0'&&character<='9')
+            { returnvalue += character - '0'; }
+        else if(character>='a'&&character<='f')
+            { returnvalue += character - 'a' + 10; }
+        }
+
+    return returnvalue;
+}
+
 static int split_property(char *string)
 {
     int counter = 0;
@@ -663,7 +681,7 @@ void romdatabase_open()
               {
               hashtemp[0] = buffer[counter*2+1];
               hashtemp[1] = buffer[counter*2+2];
-              sscanf(hashtemp, "%X", search->entry.md5+counter); 
+              search->entry.md5[counter] = hexconvert(hashtemp);
               }
             //Index MD5s by first 8 bits.
             index = search->entry.md5[0];
@@ -708,7 +726,7 @@ void romdatabase_open()
                     buffer[stringlength+9] = '\0';
                     sscanf(buffer+stringlength+1, "%X", &search->entry.crc1);
                     buffer[stringlength+3] = '\0';
-                    sscanf(buffer+stringlength+1, "%X", &index);
+                    index = hexconvert(buffer+stringlength+1);
                     //Index CRCs by first 8 bits.
                     if(g_romdatabase.crc_lists[index]==NULL)
                         { g_romdatabase.crc_lists[index] = search; }
@@ -727,7 +745,7 @@ void romdatabase_open()
                         {
                         hashtemp[0] = buffer[stringlength+1+counter*2];
                         hashtemp[1] = buffer[stringlength+2+counter*2];
-                        sscanf(hashtemp, "%X", search->entry.refmd5+counter); 
+                        search->entry.refmd5[counter] = hexconvert(hashtemp);
                         }
                     //Lookup reference MD5 and replace non-default entries.
                     if((entry = ini_search_by_md5(search->entry.refmd5))!=&empty_entry)
@@ -797,6 +815,10 @@ void romdatabase_close()
     while(g_romdatabase.list != NULL)
         {
         romdatabase_search *search = g_romdatabase.list->next_entry;
+        if(g_romdatabase.list->entry.goodname)
+            { free(g_romdatabase.list->entry.goodname); }
+        if(g_romdatabase.list->entry.refmd5)
+            { free(g_romdatabase.list->entry.refmd5); }
         free(g_romdatabase.list);
         g_romdatabase.list = search;
         }

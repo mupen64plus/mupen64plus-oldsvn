@@ -52,13 +52,19 @@
  */
 char *trim(char *str)
 {
+    int i;
     char *p = str;
 
     while (isspace(*p))
         p++;
 
     if(str != p)
-        strcpy(str, p);
+        {
+        for ( i = 0; i < strlen(p); ++i )
+            { str[i]=p[i]; }
+        for ( ; i < strlen(str); ++i )
+            { str[i]='\0'; }
+        }
 
     p = str + strlen(str) - 1;
     if (p > str)
@@ -77,8 +83,8 @@ char* strnstrip(char* string, int size)
     for (counter = place = 0; counter < size && string[counter] != '\0'; counter++)
         {
         string[place] = string[counter];
-        if (string[counter] != ' ')
-          place++;
+        if(string[counter]!=' ')
+            { place++; }
         }
     string[place] = '\0';
     return string;
