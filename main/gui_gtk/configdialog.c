@@ -503,6 +503,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
 {
     int i;
     char *name;
+    char* combo;
 
     // Load configuration
 
@@ -518,7 +519,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
         name = plugin_name_by_filename(g_GfxPlugin);
     else
         name = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
-    if( name )
+    if(name)
     {
         int index = 0;
         if( g_ConfigDialog.gfxPluginGList )
@@ -527,13 +528,16 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
             while(element)
             {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo), index);
-                if(strcmp(gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo)), name)==0)
+                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo));
+                if(strcmp(combo, name)==0)
                 {
+                    free(combo);
                     // if plugin was specified at the commandline, don't let user modify
                     if(g_GfxPlugin)
                         gtk_widget_set_sensitive(g_ConfigDialog.gfxCombo, FALSE);
                     break;
                 }
+                free(combo);
                 index++;
                 element = g_list_next(element);
             }
@@ -553,13 +557,16 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
             while(element)
             {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.audioCombo), index);
-                if(strcmp(gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo)), name)==0)
+                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
+                if(strcmp(combo, name)==0)
                 {
+                    free(combo);
                     // if plugin was specified at the commandline, don't let user modify
                     if(g_AudioPlugin)
                         gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, FALSE);
                     break;
                 }
+                free(combo);
                 index++;
                 element = g_list_next(element);
             }
@@ -579,13 +586,16 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
             while(element)
             {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.inputCombo), index);
-                if(strcmp(gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo)), name)==0)
+                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
+                if(strcmp(combo, name)==0)
                 {
+                    free(combo);
                     // if plugin was specified at the commandline, don't let user modify
                     if(g_InputPlugin)
                         gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, FALSE);
                     break;
                 }
+                free(combo);
                 index++;
                 element = g_list_next(element);
             }
@@ -605,13 +615,16 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
             while(element)
             {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo), index);
-                if(strcmp(gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo)), name)==0)
+                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo));
+                if(strcmp(combo, name)==0)
                 {
+                    free(combo);
                     // if plugin was specified at the commandline, don't let user modify
                     if(g_RspPlugin)
                         gtk_widget_set_sensitive(g_ConfigDialog.RSPCombo, FALSE);
                     break;
                 }
+                free(combo);
                 index++;
                 element = g_list_next(element);
             }

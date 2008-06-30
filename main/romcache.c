@@ -213,7 +213,9 @@ void* rom_cache_system(void* _arg)
                 break;
             }
         }
+
     printf("Rom cache system terminated!\n");
+    pthread_join(g_RomCacheThread, NULL);
 }
 
 void fill_entry(cache_entry* entry, unsigned char* localrom)
@@ -489,7 +491,7 @@ int load_initial_cache(char* cache_filename)
         return 0;
         }
 
-    if(!gzread(gzfile, &header, 6*sizeof(char))||(strstr(header, RCS_VERSION)==NULL))
+    if(!gzread(gzfile, &header, 6*sizeof(char))||strncmp(header, RCS_VERSION,6)!=0)
         {
         printf("Rom cache corrupt or from previous version.\n");
         return 0;
@@ -621,8 +623,10 @@ void romdatabase_open()
     if(gzfile==NULL)
         {
         printf("Unable to open rom database.\n");
+        free(pathname);
         return;
         }
+    free(pathname);
 
     //Move through opening comments, set romdatabase.comment to non-NULL 
     //to signal we have a database.

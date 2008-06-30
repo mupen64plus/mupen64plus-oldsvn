@@ -98,6 +98,7 @@ void show_romPropDialog()
 
     // fill dialog
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.filenameEntry), filename );
+    free(filename);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.goodnameEntry), g_RomPropDialog.entry->inientry->goodname );
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.countryEntry), country );
     gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.flag), flag); 

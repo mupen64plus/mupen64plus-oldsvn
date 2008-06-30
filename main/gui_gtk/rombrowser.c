@@ -224,25 +224,23 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
 
 char* filefrompath(const char *string)
 {
-    char *buffer1, *buffer2;
-    buffer1=(char*)string;
-    while((buffer2=strstr(buffer1, "/"))!=NULL)
-        { buffer1=buffer2+1; }
+    int counter;
+    char* buffer;
 
-    if(buffer1==(char*)string)
-        { return buffer1; }
-    else
+    for ( counter = strlen(string); counter > 0; --counter )
         {
-        int size = strlen(buffer1)+1;
-        buffer2 = malloc(size*sizeof(char));
-        if(buffer2==NULL)
+        if(string[counter]=='/')
             {
-            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ ); 
-            return buffer1;
+            ++counter;
+            break; 
             }
-        snprintf(buffer2, size, "%s\0", buffer1);
-        return buffer2;
         }
+
+    buffer = (char*)malloc((counter+1)*sizeof(char));
+    strncpy(buffer,string+counter,counter);
+    buffer[counter] = '\0';
+
+    return buffer;
 }
 
 void call_rcs(void)
@@ -370,7 +368,7 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
         free(imagetype);
         free(cicchip);
         free(rumble);
-        if(fullpaths==1)
+        if(fullpaths)
            { free(filename); }
         free(iter);
         //Do an initial sort.

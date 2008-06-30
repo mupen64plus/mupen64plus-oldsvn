@@ -1363,6 +1363,8 @@ int main(int argc, char *argv[])
             g_RomCacheThread = 0;
             alert_message(tr("Couldn't spawn rom cache thread!"));
             }
+        else
+           { pthread_detach(g_RomCacheThread); }
     }
 
     // only display gui if user wants it
