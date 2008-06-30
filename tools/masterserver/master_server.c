@@ -165,6 +165,7 @@ int main(int argc, char **argv) {
   retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
   while ((retValue != -1) && (!g_QuitMainLoop)) {
     if (retValue > 0) {
+       // Check header, then process_packet for appropriate version
         process_packet(recvPacket);
     } else {
         // nanosleep?
@@ -531,7 +532,7 @@ void send_game_list(UDPpacket *packet, md5_byte_t md5_checksum[16]) {
       while (temp_ge->next != NULL) {
           if (packet_offset + 6 > MAX_PACKET) {
               packet->len = packet_offset;
-              packet->data[1] = 1;
+              packet->data[1] = 1; // Fragmented
               packet_offset = 2;
               if (!SDLNet_UDP_Send(g_ListenSock, -1, packet)) {
                  printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());

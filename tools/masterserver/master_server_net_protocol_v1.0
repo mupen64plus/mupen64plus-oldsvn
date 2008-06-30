@@ -1,0 +1,168 @@
+Mupen64Plus Master Server Network Protocol v1.0 (r03)
+orbitaldecay
+June 30th 2008
+
+== Changes in this revision ====================================================
+
+    * Added a header structure including protocol version information.
+    * The GAME_LIST response packet can now be fragmented.  These have the
+      potential to get very big.
+    * This revision now officially describes version 1.0 of the Mupen64Plus
+      master server communication protocol.
+
+== Introduction ================================================================
+
+    The purpose of this document is to describe the behavior of a stand alone
+master server for use with Mupen64Plus netplay.  I want to be careful to make a
+clear distinction between the "master server" and "game server".  Any mention of
+"game server" in this document will refer to the netplay game server which is to
+be programmed into the Mupen64Plus emulator.  The "game server" will coordinate
+input between players during game sessions.  The "master server" will provide a
+list of game servers for the Mupen64Plus emulator upon request.  The term "game
+client" will refer to the future netplay client portion of the Mupen64Plus
+emulator.
+    This document will focus primarily on an abstract description of the
+network protocol used when interacting with the master server.  The protocol for
+use between the game server and game client is beyond the scope of this document
+and will not be addressed... yet!
+    Please direct questions and comments to the Mupen64Plus code group located
+at http://groups.google.com/group/mupen64plus.
+
+== Master Server Network Interaction ===========================================
+
+    The master server will ONLY act as a repository of game server addresses.
+Further information regarding the status of each game server must be retrieved
+by the game client from the game server itself.  This will simplify the role of
+the master server and will reduce net load simultaneously.
+    All traffic going to or from the master server will be conducted using the
+UDP protocol.  The master server will not handle any delicate or time sensitive
+data, and the bandwidth that will be saved by using UDP will allow the master
+server to handle a greater number of games.
+    Any program which has sent a packet to the master server should not expect
+a response unconditionally.  The master server may choose not to respond to any
+request or query without explaination.
+
+I.  Header Description
+
+    All packets sent to the master server will be proceeded by an 4 byte header.
+The first field will be the 2 byte string "M+".  This will act as an identifier
+for the protocol.  The following byte will identify the major version of the
+protocol, followed by the minor version of the protocol.  The master server will
+not utilize this header--- any packets it sends will be in response to a query
+or request and it will be assumed that if the master server is responding, then
+it supports the protocol version of the request and is responding using the same
+protocol version.
+
+  ==== Header =========================
+  I                                   I
+  I Size (in bits)   Name             I
+  I --------------------------------  I
+  I 16               "M+"             I
+  I 8                Major Version    I
+  I 8                Minor Version    I
+  I                                   I
+  =====================================
+
+II.  FIND_GAMES
+
+    There will only be one type of message that will be sent from the game
+client to the master server; a FIND_GAMES query.  The query packet will consist
+of a single byte 'type' field (set to 0) and a 16 byte md5 checksum which will
+indicate the ROM the game client will be running.  A diagram of the packet is
+provided bellow.
+
+  ==== FIND_GAMES Query ===============
+  I                                   I
+  I Size (in bits)   Name             I
+  I --------------------------------  I
+  I 8                Packet Type (00) I
+  I 256              Rom MD5 Checksum I
+  I                                   I
+  =====================================
+
+    The master server will respond with a GAME_LIST packet which will begin 
+with a single byte 'type' field (set to 1) followed by an 8 bit
+"fragmented" flag.  If the fragmented flag is set to true, then the game client
+can anticipate receiving another GAME_LIST packet.  Each game entry will be
+defined by a 32bit IP field and a 16bit port field representing the location of
+a game server.  All further information concerning the game server will be
+obtained by the game client through queries to the game server.  Again, this
+will reduce network traffic going to and from the master server, freeing it to
+support a greater number of games.  The number of entries present in a single
+GAME_LIST packet can be determined by subtracting 2 from the size of the
+packet and dividing by 6.
+
+  ==== GAME_LIST Response ==============
+  I                                    I
+  I Size (in bits) Name                I
+  I ---------------------------------- I
+  I 8              Packet Type (01)    I
+  I 8              Fragmented          I
+  I 32             Game Server #1 IP   I
+  I 16             Game Server #1 Port I
+  I 32             Game Server #2 IP   I
+  I 16             Game Server #2 Port I
+  I ...                                I
+  I                                    I
+  ======================================
+
+III.  OPEN_GAME
+
+    When a game server wants to invite players from all over the internet to
+join, it will send an OPEN_GAME request to the master server.  The OPEN_GAME
+request will be almost identical in structure to the FIND_GAMES query, the only
+difference being that the packet type will be set to 02 and there will be an
+additional "port" field, defining the port on the game server that will be
+accepting game client connections.  The MD5 checksum will specify the type of
+game that the game server will be hosting.
+
+  ==== OPEN_GAME Request ==============
+  I                                   I
+  I Size (in bits)   Name             I
+  I --------------------------------  I
+  I 8                Packet Type (02) I
+  I 256              Rom MD5 Checksum I
+  I 16               Listening Port   I
+  I                                   I
+  =====================================
+
+  The master server will send a game descriptor packet in response if the game
+was successfully added to the master server list.  It will consist of a single
+byte packet type field set to 03 and a 16bit game descriptor field.  The game
+descriptor will be used for future KEEP_ALIVE requests that the game client
+will send to the master server.
+
+  ==== GAME_DESC Response =============
+  I                                   I
+  I Size (in bits)   Name             I
+  I --------------------------------  I
+  I 8                Packet Type (03) I
+  I 16               Game Descriptor  I
+  I                                   I
+  =====================================
+
+IV.  KEEP_ALIVE
+
+    The master server will routinely purge game servers from the game list that
+have not requested to be kept alive.  The game server must send a KEEP_ALIVE 
+packet at least once every 60 seconds to prevent this from occuring.  The keep
+alive packet consists of a single byte packet type set to 04 and a 16bit game
+descriptor that should be set to the value that was sent in response to the
+OPEN_GAME request.
+
+  ==== KEEP_ALIVE Request =============
+  I                                   I
+  I Size (in bits)   Name             I
+  I --------------------------------  I
+  I 8                Packet Type (04) I
+  I 16               Game Descriptor  I
+  I                                   I
+  =====================================
+
+V.  Other Considerations
+
+    I believe it would be useful to include a way of linking together multiple
+master servers, though this would be approaching a more complex topic.
+
+
+
