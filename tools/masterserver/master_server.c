@@ -39,7 +39,7 @@
 #define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
 #define CLEAN_FREQ      60    // In seconds, how often free_timed_out_game_desc() is called
 
-#define HEADER_ID       "M64+"
+#define PROTOCOL_ID     "M+"
 
 #define FIND_GAMES      00
 #define GAME_LIST	01
@@ -116,7 +116,7 @@ MD5Entry     *g_MD5List = NULL;
 
 int main(int argc, char **argv) {
   UDPpacket *recvPacket;
-  int retValue, n;
+  int retValue, n, minorVersion, majorVersion;
 
   printf("\nMupen64Plus Master Server 0.1 by orbitaldecay\n\n");
   memset(&g_GameList, 0, sizeof(g_GameList));
@@ -165,8 +165,25 @@ int main(int argc, char **argv) {
   retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
   while ((retValue != -1) && (!g_QuitMainLoop)) {
     if (retValue > 0) {
-       // Check header, then process_packet for appropriate version
-        process_packet(recvPacket);
+
+       if (recvPacket->data[0] == 'M' && recvPacket->data[1] == '+') { // Check for protocol ID
+           // Grab version info from header
+           minorVersion = recvPacket->data[2];
+           majorVersion = recvPacket->data[3];
+
+           // Truncate header
+           recvPacket->data += 4;
+           recvPacket->len -= 4;
+
+           if (majorVersion == 1) {
+               switch(minorVersion) {
+                 case 0:
+                     process_packet(recvPacket);
+                     break;
+               }
+           }
+       }
+
     } else {
         // nanosleep?
     }

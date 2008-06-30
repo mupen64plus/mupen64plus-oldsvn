@@ -63,9 +63,13 @@ int main(int argc, char **argv)
         p->address.port = srvadd.port; /* And destination port */
 
         if (strcmp(argv[3], "OPEN_GAME") == 0) {
-            p->data[0] = OPEN_GAME;
-            SDLNet_Write16(666, p->data + 17);
-            p->len = 19;
+            p->data[0] = 'M';
+            p->data[1] = '+';
+            p->data[2] = 1;
+            p->data[3] = 0; 
+            p->data[4] = OPEN_GAME;
+            SDLNet_Write16(666, p->data + 21);
+            p->len = 23;
             SDLNet_UDP_Send(sd, -1, p);
 
             while (SDLNet_UDP_Recv(sd, p) == 0) {}
@@ -74,9 +78,13 @@ int main(int argc, char **argv)
         }
 
         if (strcmp(argv[3], "KEEP_ALIVE") == 0) {
-            p->data[0] = KEEP_ALIVE;
-            SDLNet_Write16(0, p->data + 1);
-            p->len = 3;
+            p->data[0] = 'M';
+            p->data[1] = '+';
+            p->data[2] = 1;
+            p->data[3] = 0; 
+            p->data[4] = KEEP_ALIVE;
+            SDLNet_Write16(0, p->data + 5);
+            p->len = 7;
             SDLNet_UDP_Send(sd, -1, p);
         }
 
