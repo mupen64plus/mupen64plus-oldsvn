@@ -52,6 +52,7 @@ romdatabase_entry empty_entry;
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "7zip/Types.h"
 #include "../memory/memory.h" //sl
 
 #include "md5.h"
@@ -65,7 +66,7 @@ rom_cache g_romcache;
 
 static const char *romextensions[] = 
 {
- ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2", ".lzma",  NULL //".rom" causes to many false positives.
+ ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2", ".lzma", ".7z", NULL //".rom" causes to many false positives.
 };
 
 static void scan_dir(const char* dirname );
@@ -184,7 +185,7 @@ void* rom_cache_system(void* _arg)
                 rebuild_cache_file(cache_filename);
                 updaterombrowser(g_romcache.length, 0);
 
-                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROMs."), g_romcache.length);
+                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
                 if(g_romcache.rcstask==RCS_BUSY)
                    { g_romcache.rcstask = RCS_SLEEP; }
                 break;
@@ -201,7 +202,7 @@ void* rom_cache_system(void* _arg)
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
                 rebuild_cache_file(cache_filename);
                 updaterombrowser(g_romcache.length, 0);
-                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROMs."), g_romcache.length);
+                main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
 
                 if(g_romcache.rcstask==RCS_BUSY)
                     { g_romcache.rcstask = RCS_SLEEP; }
@@ -388,17 +389,31 @@ static void scan_dir(const char *directoryname)
 
             //printf("File: %s\n", filename);
 
+            UInt32 blockIndex = 0xFFFFFFFF;
+            Byte* outBuffer = NULL;
+            size_t outBufferSize = 0;
+
+            CFileInStream archiveStream;
+            archiveStream.File=NULL;
+            archiveStream.InStream.Read = SzFileReadImp;
+            archiveStream.InStream.Seek = SzFileSeekImp;
+
+            CArchiveDatabaseEx db;
+            SzArDbExInit(&db);
+            CrcGenerateTable();
+
+            unsigned int archivefile = 0;
+
             //Test if we're a valid rom.
             if((localrom=load_single_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize))==NULL)
                 {
-                if((localrom=load_archive_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize, &entry->archivefile))==NULL)
+                if((localrom=load_archive_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize, &archivefile, &blockIndex, &outBuffer, &outBufferSize, &archiveStream, &db))==NULL)
                     {
                     free(entry);
                     continue; 
                     }
                 }
 
-            unsigned int archivefile = 0;
             int multi;
             do
                 {
@@ -432,13 +447,13 @@ static void scan_dir(const char *directoryname)
                     main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Added ROMs %d-%d."), g_romcache.length-UPDATE_FREQUENCY+1, g_romcache.length);
                     }
 
-                if(entry->compressiontype==ZIP_COMPRESSION)
+                if(entry->compressiontype==ZIP_COMPRESSION||entry->compressiontype==SZIP_COMPRESSION)
                     {
                     entry = (cache_entry*)calloc(1,sizeof(cache_entry));
                     strncpy(entry->filename,filename,PATH_MAX-1);
                     entry->filename[PATH_MAX-1] = '\0';
 
-                    if((localrom=load_archive_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize, &archivefile))!=NULL)
+                    if((localrom=load_archive_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize, &archivefile, &blockIndex, &outBuffer, &outBufferSize, &archiveStream, &db))!=NULL)
                         {
                         multi = 1; 
                         if(entry==NULL)
@@ -450,6 +465,10 @@ static void scan_dir(const char *directoryname)
                     }
                 }
             while(multi);
+            if(outBuffer)
+                { free(outBuffer); }
+            if(archiveStream.File)
+                { fclose(archiveStream.File); }
             }
         }
      closedir(directory);

@@ -612,6 +612,9 @@ void compressionstring(unsigned short compressiontype, char *string)
     case LZMA_COMPRESSION:
         strcpy(string, tr("LZMA"));
         break;
+    case SZIP_COMPRESSION:
+        strcpy(string, tr("7zip"));
+        break;
     default:
         string[0] = '\0';
     }

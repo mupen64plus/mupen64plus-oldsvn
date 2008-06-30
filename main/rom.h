@@ -30,10 +30,12 @@
 #ifndef ROM_H
 #define ROM_H
 
+#include "7zip/7zMain.h"
+
 int open_rom(const char* filename, unsigned int archivefile);
 int close_rom(void);
 unsigned char* load_single_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength);
-unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile);
+unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile, UInt32* blockIndex, Byte** outBuffer, size_t* outBufferSize, CFileInStream* archiveStream, CArchiveDatabaseEx* db);
 void swap_rom(unsigned char* localrom, unsigned short *imagetype, int loadlength);
 
 extern unsigned char* rom;
@@ -77,6 +79,7 @@ enum
     GZIP_COMPRESSION,
     BZIP2_COMPRESSION,
     LZMA_COMPRESSION,
+    SZIP_COMPRESSION
 };
 
 //Supported rom image types.

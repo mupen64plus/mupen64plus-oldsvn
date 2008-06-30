@@ -1,14 +1,9 @@
 /**
- * Mupen64 - rom.c
- * Copyright (C) 2002 Hacktarux Tillin9
+ * Mupen64plus - rom.c
+ * Copyright (C) 2008 Tillin9
+ * based on work in Mupen64 (C) 2002 Hacktarux
  *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
+ * http://code.google.com/p/mupen64plus/
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -37,6 +32,8 @@
 #include "zip/unzip.h"
 #include "bzip2/bzlib.h"
 #include "lzma/lzmadec.h"
+#include "7zip/7zExtract.h"
+#include "7zip/7zCrc.h"
 
 #include "md5.h"
 #include "rom.h"
@@ -76,7 +73,6 @@ int is_valid_rom(unsigned char buffer[4])
     else
         { return 0; }
 }
-
 
 /* If rom is a .v64 or .n64 image, byteswap or wordswap loadlength amount of
  * rom data to native .z64 before forwarding. Makes sure that data extraction
@@ -267,7 +263,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned shor
         fclose(romfile);
         }
 
-     //Gzipped roms.
+    //Gzipped roms.
     if(romread==0)
         {
         gzFile *gzromfile;
@@ -305,26 +301,26 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned shor
 
     //File invalid, or valid rom not found in file.
     if(romread==0)
-        { 
-        romsize = 0;
-        return NULL;
-        }
+        { return NULL; }
 
- 
     return localrom;
 }
 
-/* Open a file and test if its a .zip archive. If so load check if *archivefile is a
- * rom and load *loadlength into the returned pointer. If *archivefile is not a rom
+/* Open a file and test if its a zip or 7zip archive. If so load check if *archivefile
+ * is a rom and load *loadlength into the returned pointer. If *archivefile is not a rom
  * in a many file archive, function will keep checking until a rom is found or the 
- * end of the archive is reached. Returns NULL if unable to find a rom.
+ * end of the archive is reached. Returns NULL if unable to find a rom. The large function
+ * API is to allow for persistent 7zip memory space.
  */
-unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile)
+unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile, UInt32* blockIndex, Byte** outBuffer, size_t* outBufferSize, CFileInStream* archiveStream, CArchiveDatabaseEx* db)
 {
+    int status;
     unsigned int filecounter = 0;
     unsigned short romread = 0;
-    unsigned char buffer[4];
     unsigned char* localrom;
+
+    //Zip roms.
+    unsigned char buffer[4];
     unzFile zipromfile;
     unz_file_info fileinfo;
     char szFileName[256], szExtraField[256], szComment[256];
@@ -360,16 +356,74 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned sho
                 }
             ++filecounter;
             }
-        while (unzGoToNextFile(zipromfile) != UNZ_END_OF_LIST_OF_FILE);
+        while (status=(unzGoToNextFile(zipromfile)) != UNZ_END_OF_LIST_OF_FILE);
         unzClose(zipromfile);
+        }
+    else
+        {
+        //7zip 
+        ISzAlloc allocImp;
+        allocImp.Free = SzFree;
+        allocImp.Alloc = SzAlloc;
+
+        ISzAlloc allocTempImp;
+        allocTempImp.Alloc = SzAllocTemp;
+        allocTempImp.Free = SzFreeTemp;
+
+        if(archiveStream->File==NULL)
+            {
+            archiveStream->File = fopen(filename, "rb");
+            if(archiveStream->File==NULL)
+                { return NULL; }
+            status = SzArchiveOpen(&(archiveStream->InStream), db, &allocImp, &allocTempImp);
+            if(status==SZ_OK)
+                { printf("Deflating 7zip archive.\n"); }
+            }
+        else
+            { status = SZ_OK; }
+
+        if(status==SZ_OK)
+            {
+            for (filecounter = *archivefile; filecounter < db->Database.NumFiles; ++filecounter)
+                {
+                size_t offset;
+                size_t outSizeProcessed;
+
+                CFileItem *f = db->Database.Files + filecounter;
+                status = SzExtract(&(archiveStream->InStream), db, filecounter, blockIndex, outBuffer, outBufferSize, &offset, &outSizeProcessed, &allocImp, &allocTempImp);
+                if(status!=SZ_OK)
+                    {
+                    if(status==SZE_NOTIMPL)
+                        { printf("7zip decoder doesn't support this archive."); }
+                    else if(status==SZE_OUTOFMEMORY)
+                        { printf("7zip decoder can not allocate memory\n"); }
+                    else if(status==SZE_CRC_ERROR)
+                       { printf("7zip CRC error"); }
+                    else
+                       { printf("7zip Error# %d\n", status); }
+                    break; 
+                    }
+                if(is_valid_rom(*outBuffer+offset))
+                    {
+                    *romsize=f->Size;
+                    *compressiontype = SZIP_COMPRESSION;
+                    localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
+                    if(localrom==NULL)
+                        {
+                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                        return NULL;
+                        }
+                    memcpy(localrom,*outBuffer+offset,*loadlength);
+                    romread = 1;
+                    break;
+                    }
+                }
+            }
         }
 
     //File invalid, or valid rom not found in file.
     if(romread==0)
-        {
-        romsize = 0;
-        return NULL;
-        }
+        { return NULL; }
 
     *archivefile = filecounter;
     return localrom;
@@ -424,16 +478,34 @@ int open_rom(const char* filename, unsigned int archivefile)
     //This is (and never was) set in the code below... 
     g_MemHasBeenBSwapped = 0;
 
+    UInt32 blockIndex = 0xFFFFFFFF;
+    Byte* outBuffer = NULL;
+    size_t outBufferSize = 0;
+
+    CFileInStream archiveStream;
+    archiveStream.File = NULL;
+    archiveStream.InStream.Read = SzFileReadImp;
+    archiveStream.InStream.Seek = SzFileSeekImp;
+
+    CArchiveDatabaseEx db;
+    SzArDbExInit(&db);
+    CrcGenerateTable();
+
     strncpy(buffer, filename, PATH_MAX-1);
     buffer[PATH_MAX-1] = 0;
     if ((rom=load_single_rom(filename, &taille_rom, &compressiontype, &taille_rom))==NULL)
         {
-        if((rom=load_archive_rom(filename, &taille_rom, &compressiontype, &taille_rom, &archivefile))==NULL)
+        if((rom=load_archive_rom(filename, &taille_rom, &compressiontype, &taille_rom, &archivefile, &blockIndex, &outBuffer, &outBufferSize, &archiveStream, &db))==NULL)
             {
             alert_message(tr("Couldn't load Rom!")); 
             return -1;
             }
         }
+
+    if(outBuffer)
+        { free(outBuffer); }
+    if(archiveStream.File)
+        { fclose(archiveStream.File); }
 
     swap_rom(rom, &imagetype, taille_rom);
 
