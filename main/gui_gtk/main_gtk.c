@@ -185,7 +185,7 @@ void statusbar_message(const char *format, ...)
     va_end(ap);
 
     int counter;
-    for( counter = 0; counter < 2048; ++counter )
+    for( counter = 0; counter < strlen(buffer); ++counter )
         {
         if(buffer[counter]=='\n')
             {

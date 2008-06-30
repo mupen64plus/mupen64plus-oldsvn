@@ -469,6 +469,7 @@ static void scan_dir(const char *directoryname)
                 { free(outBuffer); }
             if(archiveStream.File)
                 { fclose(archiveStream.File); }
+            SzArDbExFree(&db, free);
             }
         }
      closedir(directory);

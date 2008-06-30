@@ -506,6 +506,7 @@ int open_rom(const char* filename, unsigned int archivefile)
         { free(outBuffer); }
     if(archiveStream.File)
         { fclose(archiveStream.File); }
+    SzArDbExFree(&db, free);
 
     swap_rom(rom, &imagetype, taille_rom);
 
