@@ -95,7 +95,9 @@ static pthread_t g_GuiThread = 0; // main gui thread
 * GUI interfaces (declared in ../guifuncs.h)
 */
 
-/* Parse gui-specific arguments, remove them from argument list, and create gtk gui in thread-safe manner.
+/** gui_init
+ *    Parse gui-specific arguments, remove them from argument list, 
+ *    and create gtk gui in thread-safe manner, but do not display.
  */
 void gui_init(int *argc, char ***argv)
 {
@@ -117,7 +119,9 @@ void gui_init(int *argc, char ***argv)
     create_aboutDialog();
 }
 
-// Display GUI components to the screen
+/* gui_display
+ *   Display GUI components to the screen
+ */
 void gui_display(void)
 {
     gtk_widget_show_all(g_MainWindow.window);
@@ -129,7 +133,9 @@ void gui_display(void)
         { gtk_widget_hide(g_MainWindow.statusBarHBox); }
 }
 
-//Better gui cleanup...
+/* gui_destroy
+ *   Better gui cleanup...
+ */
 void gui_destroy(void)
 {
     gtk_widget_destroy( g_MainWindow.window );
@@ -138,7 +144,9 @@ void gui_destroy(void)
     gtk_widget_destroy( g_RomPropDialog.dialog );
 }
 
-//gui_main_loop, give control of thread to gtk
+/* gui_main_loop
+ *   give control of thread to gtk
+ */
 void gui_main_loop(void)
 {
     gtk_main();
@@ -154,15 +162,15 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
     pthread_t self = pthread_self();
 
     //if we're calling from a thread other than the main gtk thread, take gdk lock
-    if(!pthread_equal(self, g_GuiThread))
-        { gdk_threads_enter(); }
+    if (!pthread_equal(self, g_GuiThread))
+        gdk_threads_enter();
 
     rombrowser_refresh(roms, clear);
 
     GUI_PROCESS_QUEUED_EVENTS();
 
-    if(!pthread_equal(self, g_GuiThread))
-        { gdk_threads_leave(); }
+    if (!pthread_equal(self, g_GuiThread))
+        gdk_threads_leave();
 
     return;
 }
