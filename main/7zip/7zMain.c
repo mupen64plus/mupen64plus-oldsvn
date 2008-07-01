@@ -40,3 +40,5 @@ SZ_RESULT SzFileSeekImp(void *object, CFileSize pos)
     return SZ_OK;
   return SZE_FAIL;
 }
+
+
