@@ -30,24 +30,18 @@
 #include <time.h>
 #include <SDL_net.h>
 
-// ================================================================================
-// == master_server.h =============================================================
-// ================================================================================
-
 #define SERVER_VER     "0.1"
-
-
 #define MAX_PACKET	1470  // In bytes, the largest packet permitted by the protocol
-#define SERVER_PORT	2000  // The udp port to run the server on
 #define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
 #define CLEAN_FREQ      60    // In seconds, how often free_timed_out_game_desc() is called
 #define PROTOCOL_ID     "M+"
+
 #define FIND_GAMES      00
 #define GAME_LIST	01
 #define OPEN_GAME       02
 #define GAME_DESC	03
 #define KEEP_ALIVE      04
-#define BAD_VERSION     05
+
 #define ELAPSED(dt)          (int)(((dt) - ((dt) % 3600)) / 3600), (int)((((dt) - ((dt) % 60)) / 60) % 60), (int)((dt) % 60)
 // Thanks to DarkJeztr for this little biddy
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -74,6 +68,7 @@ typedef struct MD5Entry_t {
 } MD5Entry;
 
 
+// Primary Functions
 void        process_packet(UDPpacket *packet);
 void *      track_malloc(int size);
 void        track_free(void *ptr);
@@ -98,16 +93,17 @@ MD5Entry *  add_md5_node(md5_byte_t md5_checksum[16]);
 void        remove_md5_node(MD5Entry *deadNode);
 MD5Entry *  find_md5_node(md5_byte_t md5_checksum[16]);
 void        flush_game_entry_list(MD5Entry* md5_node);
+void        clean_md5_list();
 
 // Global Variables
-time_t        g_StartTime;
-int           g_QuitMainLoop = 0;
-int           g_Interupted = 0;
-int           g_GameCount = 0;
-int           g_BlocksAllocated = 0;
-GameEntry    *g_GameList[MAX_GAME_DESC];
-UDPsocket     g_ListenSock;
-MD5Entry     *g_MD5List = NULL;
+time_t         g_StartTime;
+int            g_QuitMainLoop = 0;
+int            g_GameCount = 0;
+int            g_BlocksAllocated = 0;
+unsigned short g_ServerPort;
+GameEntry     *g_GameList[MAX_GAME_DESC];
+UDPsocket      g_ListenSock;
+MD5Entry      *g_MD5List = NULL;
 
 // ================================================================================
 // == main() and processPacket() ==================================================
@@ -125,53 +121,61 @@ int main(int argc, char **argv) {
   int retValue, n, minorVersion, majorVersion;
   MD5Entry *temp_md5_entry;
 
+  if (argc != 2) {
+       printf("Usage: master_server <port>\n");
+       return 0;
+  } else {
+       g_ServerPort = atoi(argv[1]);
+  }
+
   g_StartTime = time(NULL);
-       printf("*********************************************\n");
-       printf("**                                         **\n");
-       printf("**   /~ Mupen64Plus Master Server %s ~\\   **\n", SERVER_VER);
-       printf("**           orbitaldecay 2008             **\n");
-       printf("**                                         **\n");
-       printf("*********************************************\n\n");
   memset(&g_GameList, 0, sizeof(g_GameList));
-  // TODO: Process command line arguments here 
+  printf("*********************************************\n");
+  printf("**                                         **\n");
+  printf("**   /~ Mupen64Plus Master Server %s ~\\   **\n", SERVER_VER);
+  printf("**           orbitaldecay 2008             **\n");
+  printf("**                                         **\n");
+  printf("*********************************************\n");
 
   if (signal(SIGINT, SIG_IGN) != SIG_IGN) {
       if (signal(SIGINT, interupt_pause) == SIG_ERR) {
-          fprintf(stderr, "signal(): Error %d trapping SIGINT.\n", errno);
+          fprintf(stderr, "signal(SIGINT): Error %d\n", errno);
+          return 1;
       }
   }
 
   if (signal(SIGALRM, alarm_func) == SIG_ERR) {
-      fprintf(stderr, "signal(): Error %d trapping SIGALRM.\n", errno);
+      fprintf(stderr, "signal(SIGALRM): Error %d\n", errno);
+      return 1;
   } else {
       alarm(CLEAN_FREQ);
   }
-  
-  printf("Initializing SDL_net...\t\t");
+
+  printf("Initializing SDL_net                   ");
   if (SDLNet_Init() == -1) {
       printf("[FAIL]\n");
       fprintf(stderr, "SDLNet_Init(): %s\n", SDLNet_GetError());
       printf("Goodbye.\n");
       exit(EXIT_FAILURE);
-  } else printf("[Ok]\n");
+  } else printf("[OKAY]\n");
 
-  printf("Opening UDP port...\t\t");
-  if (!(g_ListenSock = SDLNet_UDP_Open(SERVER_PORT))) {
+  printf("Opening UDP port %-5d                 ", g_ServerPort);
+  if (!(g_ListenSock = SDLNet_UDP_Open(g_ServerPort))) {
       printf("[FAIL]\n");
       fprintf(stderr, "SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
       printf("Goodbye.\n");
       SDLNet_Quit();
       exit(EXIT_FAILURE);
-  } else printf("[Ok]\n");
+  } else printf("[OKAY]\n");
 
-  printf("Allocating packet buffer...\t");
+  printf("Allocating packet buffer               ");
   if (!(recvPacket = SDLNet_AllocPacket(MAX_PACKET))) {
       printf("[FAIL]\n");
       fprintf(stderr, "SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
       printf("Goodbye.\n");
       SDLNet_Quit();
       exit(EXIT_FAILURE);
-  } else printf("[Ok]\n");
+  } else printf("[OKAY]\n");
 
   printf("Ready.\n");
   retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
@@ -247,6 +251,7 @@ void process_packet(UDPpacket *packet) {
     case FIND_GAMES:
       if (packet->len == 17) {
         memcpy(&md5_checksum, packet->data + 1, 16);
+        printf("FIND_GAMES MD5 %X%X for %d.%d.%d.%d\n", md5_checksum[0], md5_checksum[1], GET_IP(packet->address.host));
         send_game_list(packet->address.host, packet->address.port, md5_checksum);
       } else {
         printf("Bad packet length for FIND_GAMES packet from %d.%d.%d.%d.\n", GET_IP(packet->address.host));
@@ -272,7 +277,7 @@ void process_packet(UDPpacket *packet) {
                   add_game_entry_node(g_GameList[gameDesc], md5_checksum);
                   send_game_descriptor(packet->address.host, packet->address.port, gameDesc);
                   g_GameCount++;
-                  printf("OPEN_GAME request for %d.%d.%d.%d:%d granted (%d).\n", GET_IP(packet->address.host), port, gameDesc);
+                  printf("OPEN_GAME request for %d.%d.%d.%d:%d %X%X granted (%d).\n", GET_IP(packet->address.host), port, md5_checksum[0], md5_checksum[1], gameDesc);
               } else printf("OPEN_GAME failed, out of memory!\n");
 
           } else {
@@ -404,6 +409,7 @@ void remove_game_desc(int n) {
     track_free(g_GameList[n]);
     g_GameList[n] = NULL;
     g_GameCount--;
+    clean_md5_list();
   } else {
     printf("remove_game_desc(): Invalid game descriptor %d.\n", n);
   }
@@ -422,19 +428,18 @@ void remove_game_desc(int n) {
 void interupt_pause(int value) {
     static time_t  last_interupt = 0;
 
-    printf("\n");
     if (time(NULL) - last_interupt < 5) {
        g_QuitMainLoop = 1;
-       printf("*********************************************\n");
-       printf("**          Sigint received, adios!        **\n");
-       printf("*********************************************\n");
+       printf("Sigint received, cleaning up.\n");
     } else {
        last_interupt = time(NULL);
+       printf("\n");
        printf("*********************************************\n");
        printf("**   /~ Mupen64Plus Master Server %s ~\\   **\n", SERVER_VER);
        printf("**           orbitaldecay 2008             **\n");
        printf("**                                         **\n");
        printf("**      Server Uptime:      %4d:%02d:%02d     **\n", ELAPSED(last_interupt - g_StartTime)); 
+       printf("**      Server Port:             %5d     **\n", g_ServerPort);
        printf("**      Blocks Allocated:        %5d     **\n", g_BlocksAllocated);
        printf("**      Open Games:              %5d     **\n", g_GameCount);
        printf("**                                         **\n");
@@ -504,12 +509,11 @@ void clean_md5_list() {
 MD5Entry *add_md5_node(md5_byte_t md5_checksum[16]) {
   MD5Entry *tempNode;
 
-  clean_md5_list();
   tempNode = track_malloc(sizeof(MD5Entry));
   if (!tempNode) {
       return NULL;
   }
-  memcpy(&(tempNode->md5_checksum), &md5_checksum, sizeof(md5_checksum));
+  memcpy(tempNode->md5_checksum, md5_checksum, 16);
   if (!(tempNode->first_game_entry = track_malloc(sizeof(GameEntry)))) {
       track_free(tempNode);
       return NULL;
@@ -539,8 +543,9 @@ MD5Entry *add_md5_node(md5_byte_t md5_checksum[16]) {
 MD5Entry *find_md5_node(md5_byte_t md5_checksum[16]) {
   MD5Entry *tempNode = g_MD5List;
   while (tempNode) {
-    if (memcmp(&(tempNode->md5_checksum), &md5_checksum, sizeof(md5_checksum)) == 0)
-        break;
+    if (memcmp(tempNode->md5_checksum, md5_checksum, 16) == 0) {
+       break;
+    }
     tempNode = tempNode->next;
   }
   return tempNode;
@@ -554,7 +559,6 @@ MD5Entry *find_md5_node(md5_byte_t md5_checksum[16]) {
 */
 void remove_md5_node(MD5Entry *deadNode) {
   MD5Entry *tempNode = g_MD5List;
-
   flush_game_entry_list(deadNode);
   if (deadNode == g_MD5List) {
     g_MD5List = deadNode->next;
@@ -621,7 +625,6 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
     UDPpacket *sendPacket;
     GameEntry *temp_ge;
     int        packet_offset = 2;
-
     if ((sendPacket = SDLNet_AllocPacket(MAX_PACKET)) == NULL) {
         printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
         return;
@@ -629,7 +632,6 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
     sendPacket->address.host = host;
     sendPacket->address.port = port;
     sendPacket->data[0] = GAME_LIST;
-
     if ((temp_md5_entry = find_md5_node(md5_checksum))) {
       temp_ge = temp_md5_entry->first_game_entry->next;
       while (temp_ge->next != NULL) {
