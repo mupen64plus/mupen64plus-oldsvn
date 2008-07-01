@@ -174,13 +174,13 @@ void main_message(unsigned int console, unsigned int statusbar, unsigned int osd
     va_end(ap);
 
     if (g_OsdEnabled && osd)
-        { osd_new_message(osd_corner, buffer); }
+        osd_new_message(osd_corner, buffer);
 #ifndef NO_GUI
     if (l_GuiEnabled && statusbar)
-        { statusbar_message(buffer); }
+        statusbar_message(buffer);
 #endif
     if (console)
-        { printf("%s\n", buffer); }
+        printf("%s\n", buffer);
 }
 
 
@@ -1361,7 +1361,7 @@ int main(int argc, char *argv[])
             alert_message(tr("Couldn't spawn rom cache thread!"));
             }
         else
-           { pthread_detach(g_RomCacheThread); }
+           pthread_detach(g_RomCacheThread);
     }
 
     // only display gui if user wants it

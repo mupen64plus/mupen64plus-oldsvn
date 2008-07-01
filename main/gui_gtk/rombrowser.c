@@ -146,11 +146,11 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
             }
 
         if(item1==item2)
-            { returnvalue = 0; }
+            returnvalue = 0;
         else if(item1>item2)
-            { returnvalue = -1; }
+            returnvalue = -1;
         else
-            { returnvalue = 1; }
+            returnvalue = 1;
         }
     else
         {
@@ -320,18 +320,18 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
           for ( counter = 0; counter < 5; ++counter )
                 {
                 if(entry->inientry->status>counter)
-                    { status[counter] = star; }
+                    status[counter] = star;
                 else
-                    { status[counter] = NULL; }
+                    status[counter] = NULL;
                 }
             usercomments = entry->usercomments;
             if(fullpaths)
-                { filename = entry->filename; }
+                filename = entry->filename;
             else
-                { filename = filefrompath(entry->filename); }
+                filename = filefrompath(entry->filename);
 
             for ( counter = 0; counter < 16; ++counter ) 
-                { sprintf(md5hash+counter*2, "%02X", entry->md5[counter]); }
+                sprintf(md5hash+counter*2, "%02X", entry->md5[counter]);
             sprintf(crc1, "%08X", entry->crc1);
             sprintf(crc2, "%08X", entry->crc2);
             internalname=entry->internalname;
@@ -369,7 +369,7 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
         free(cicchip);
         free(rumble);
         if(fullpaths)
-           { free(filename); }
+           free(filename);
         free(iter);
         //Do an initial sort.
         gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE(model), g_MainWindow.romSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL );
@@ -393,12 +393,12 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
         gtk_tree_model_get ( model, iter, 22, &entry, -1 );
 
         if(filter[0]=='\0')
-            { return TRUE; }
+            return TRUE;
 
         if(atoi(filter)==entry->inientry->status)
-            { return TRUE; }
+            return TRUE;
         else
-            { return FALSE; }
+            return FALSE;
         }
 
     char *buffer1, *buffer2;
@@ -407,14 +407,14 @@ gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
     gtk_tree_model_get (model, iter, g_MainWindow.romSortColumn, &buffer1, -1);
     //printf("Value %s\n", buffer1);
     if(buffer1==NULL||filter==NULL)
-        { returnvalue = TRUE; }
+        returnvalue = TRUE;
     else
         {
         buffer2 = strcasestr( buffer1, filter );
         if ( buffer2 != NULL )
-            { returnvalue =  TRUE; }
+            returnvalue =  TRUE;
        else
-            { returnvalue =  FALSE; }
+            returnvalue =  FALSE;
        }
 
     free(buffer1);
@@ -436,7 +436,7 @@ static gboolean callback_rowSelected(GtkTreeView *tree_view, GtkTreePath *path, 
     gtk_tree_model_get (model, &iter, 22, &entry, -1);
 
     if(open_rom(entry->filename, entry->archivefile)==0)
-        { startEmulation(); }
+        startEmulation();
 
     return FALSE;
 }
@@ -487,9 +487,9 @@ void apply_filter( void )
     if(filter[0]!='\0'||resort==1)
         {
         if(filter[0]!='\0')
-            { resort=1; }
+            resort=1;
         else
-            { resort=0; }
+            resort=0;
 
         GtkTreeModel *model, *source;
         GtkTreeIter sourceiter, destinationiter;
@@ -526,7 +526,7 @@ void apply_filter( void )
                     gtk_list_store_set ( GTK_LIST_STORE(destination), &destinationiter, 0, country, 1, goodname, 2, NULL, 3, usercomments, 4, filename, 5, md5hash, 6, crc1, 7, crc2, 8, internalname, 9, savetype, 10, players, 11, size, 12, compressiontype, 13, imagetype, 14, cicchip, 15, rumble, 16, status[0], 17, status[1], 18, status[2], 19, status[3], 20, status[4], 21, flag, 22, entry, -1);
                     }
                 if(!gtk_tree_model_iter_next(source, &sourceiter))
-                     { break; }
+                     break;
                 }
            }
 
@@ -545,7 +545,7 @@ void apply_filter( void )
 static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
 {
     if(g_MainWindow.accelUnsafeActive)
-        { gtk_window_remove_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe); }
+        gtk_window_remove_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe);
     return FALSE;
 }
 
@@ -553,14 +553,14 @@ static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
 static gboolean callback_filter_unselected( GtkWidget *widget, gpointer data )
 {
     if(g_MainWindow.accelUnsafeActive)
-        { gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe); }
+        gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe);
     return FALSE;
 }
 
 static gboolean callback_filter_grab_unselected( GtkWidget *widget, gpointer data )
 {
     if(!g_MainWindow.accelUnsafeActive)
-        { gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe); }
+        gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe);
     gtk_window_set_focus(GTK_WINDOW(g_MainWindow.window), NULL);
     return FALSE;
 }
@@ -614,7 +614,7 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
     list = gtk_tree_selection_get_selected_rows (selection, &model);
 
     if( !list ) // should never happen since the item is only active when a row is selected
-        { return; }
+        return;
 
     llist = g_list_first (list);
 
@@ -625,7 +625,7 @@ static void callback_playRom( GtkWidget *widget, gpointer data )
     g_list_free (list);
 
     if(open_rom(entry->filename, entry->archivefile)==0)
-        { startEmulation(); }
+        startEmulation();
 }
 
 static void callback_column_visible(GtkWidget *widget, int column)
@@ -647,7 +647,7 @@ static void callback_column_visible(GtkWidget *widget, int column)
     for ( i = 0; i < 16; ++i )
         {
         if(g_MainWindow.columnVisible[i])
-            { return; }
+            return;
         }
     gtk_tree_view_column_set_visible(g_MainWindow.column[16], TRUE);
 }
@@ -664,7 +664,7 @@ static void callback_header_clicked(GtkWidget *widget, GdkEventButton *event, gp
         else if(event->button==1) //Left click.
             {
             if(g_MainWindow.romSortColumn==gtk_tree_view_column_get_sort_column_id(column))
-                { g_MainWindow.romSortType = ( g_MainWindow.romSortType == GTK_SORT_ASCENDING ) ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING; }
+                g_MainWindow.romSortType = ( g_MainWindow.romSortType == GTK_SORT_ASCENDING ) ? GTK_SORT_DESCENDING : GTK_SORT_ASCENDING;
             else
                 {
                 g_MainWindow.romSortColumn = gtk_tree_view_column_get_sort_column_id(column); 
@@ -817,9 +817,9 @@ static void setup_view (GtkWidget *view)
         if((g_MainWindow.columnVisible[i]=config_get_bool(buffer2,2))==2)
              {
              if(i<5) 
-                 { g_MainWindow.columnVisible[i] = TRUE; }
+                 g_MainWindow.columnVisible[i] = TRUE;
              else
-                 { g_MainWindow.columnVisible[i] = FALSE; }
+                 g_MainWindow.columnVisible[i] = FALSE;
              config_put_bool(buffer2,g_MainWindow.columnVisible[i]);
              }
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), g_MainWindow.columnVisible[i]); 
@@ -833,7 +833,7 @@ static void setup_view (GtkWidget *view)
     for ( i = 0; i < 16; ++i )
         {
         if(g_MainWindow.columnVisible[i])
-            { return; }
+            return;
         }
     gtk_tree_view_column_set_visible(g_MainWindow.column[16], TRUE);
 }
@@ -849,9 +849,9 @@ int create_romBrowser( void )
 
     GtkIconTheme *theme = gtk_icon_theme_get_default();
     if(gtk_icon_theme_has_icon(theme, "emblem-new"))
-        { star = gtk_icon_theme_load_icon(theme, "emblem-new", 16, 0, NULL); }
+        star = gtk_icon_theme_load_icon(theme, "emblem-new", 16, 0, NULL);
     else
-        { star = gdk_pixbuf_new_from_file( get_iconpath("16x16/star.png"), NULL); }
+        star = gdk_pixbuf_new_from_file( get_iconpath("16x16/star.png"), NULL);
 
     australia = gdk_pixbuf_new_from_file( get_iconpath("australia.png"), NULL);
     europe = gdk_pixbuf_new_from_file( get_iconpath("europe.png"), NULL);

@@ -63,15 +63,15 @@ int is_valid_rom(unsigned char buffer[4])
 {
     //Test if rom is a native .z64 image with header 0x80371240. [ABCD]
     if((buffer[0]==0x80)&&(buffer[1]==0x37)&&(buffer[2]==0x12)&&(buffer[3]==0x40))
-        { return 1; }
+        return 1;
     //Test if rom is a byteswapped .v64 image with header 0x37804012. [BADC]
     else if((buffer[0]==0x37)&&(buffer[1]==0x80)&&(buffer[2]==0x40)&&(buffer[3]==0x12))
-        { return 1; }
+        return 1;
     //Test if rom is a wordswapped .n64 image with header  0x40123780. [DCBA]
     else if((buffer[0]==0x40)&&(buffer[1]==0x12)&&(buffer[2]==0x37)&&(buffer[3]==0x80))
-        { return 1; }
+        return 1;
     else
-        { return 0; }
+        return 0;
 }
 
 /* If rom is a .v64 or .n64 image, byteswap or wordswap loadlength amount of
@@ -109,7 +109,7 @@ void swap_rom(unsigned char* localrom, unsigned short *imagetype, int loadlength
             }
         }
     else
-        { *imagetype = Z64IMAGE; }
+        *imagetype = Z64IMAGE;
 }
 
 /* Open a file and test if its an uncompressed rom, bzip2ed rom, lzma stream compressed
@@ -152,7 +152,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned shor
             fseek(romfile, 0L, SEEK_SET);
             bzromfile = BZ2_bzReadOpen(&bzerror, romfile, 0, 0, NULL, 0);
             if(bzerror==BZ_OK)
-                { BZ2_bzRead(&bzerror, bzromfile, buffer, 4); }
+                BZ2_bzRead(&bzerror, bzromfile, buffer, 4);
             if(bzerror==BZ_OK)
                 {
                 if(is_valid_rom(buffer))
@@ -178,7 +178,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned shor
                        romread = 1; 
                        }
                     else
-                       { free(localrom); }
+                       free(localrom);
                     }
                 }
             BZ2_bzReadClose(&bzerror, bzromfile);
@@ -293,7 +293,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned shor
                        romread = 1; 
                        }
                     else
-                       { free(localrom); }
+                       free(localrom);
                 gzclose(gzromfile);
                 }
             }
@@ -301,7 +301,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned shor
 
     //File invalid, or valid rom not found in file.
     if(romread==0)
-        { return NULL; }
+        return NULL;
 
     return localrom;
 }
@@ -374,13 +374,13 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned sho
             {
             archiveStream->File = fopen(filename, "rb");
             if(archiveStream->File==NULL)
-                { return NULL; }
+                return NULL;
             status = SzArchiveOpen(&(archiveStream->InStream), db, &allocImp, &allocTempImp);
             if(status==SZ_OK)
-                { printf("Deflating 7zip archive.\n"); }
+                printf("Deflating 7zip archive.\n");
             }
         else
-            { status = SZ_OK; }
+            status = SZ_OK;
 
         if(status==SZ_OK)
             {
@@ -394,13 +394,13 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned sho
                 if(status!=SZ_OK)
                     {
                     if(status==SZE_NOTIMPL)
-                        { printf("7zip decoder doesn't support this archive."); }
+                        printf("7zip decoder doesn't support this archive.");
                     else if(status==SZE_OUTOFMEMORY)
-                        { printf("7zip decoder can not allocate memory\n"); }
+                        printf("7zip decoder can not allocate memory\n");
                     else if(status==SZE_CRC_ERROR)
-                       { printf("7zip CRC error"); }
+                       printf("7zip CRC error");
                     else
-                       { printf("7zip Error# %d\n", status); }
+                       printf("7zip Error# %d\n", status);
                     break; 
                     }
                 if(is_valid_rom(*outBuffer+offset))
@@ -423,7 +423,7 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned sho
 
     //File invalid, or valid rom not found in file.
     if(romread==0)
-        { return NULL; }
+        return NULL;
 
     *archivefile = filecounter;
     return localrom;
@@ -460,7 +460,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     if(g_EmulationThread)
          {
          if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
-             { return -1; }
+             return -1;
          stopEmulation();
          }
 
@@ -472,7 +472,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     int i;
 
     if(rom)
-        { free(rom); }
+        free(rom);
 
     // clear Byte-swapped flag, since ROM is now deleted
     //This is (and never was) set in the code below... 
@@ -503,9 +503,9 @@ int open_rom(const char* filename, unsigned int archivefile)
         }
 
     if(outBuffer)
-        { free(outBuffer); }
+        free(outBuffer);
     if(archiveStream.File)
-        { fclose(archiveStream.File); }
+        fclose(archiveStream.File);
     SzArDbExFree(&db, free);
 
     swap_rom(rom, &imagetype, taille_rom);
@@ -524,13 +524,13 @@ int open_rom(const char* filename, unsigned int archivefile)
     md5_append(&state, (const md5_byte_t*)rom, taille_rom);
     md5_finish(&state, digest);
     for ( i = 0; i < 16; ++i ) 
-        { sprintf(buffer+i*2, "%02X", digest[i]); }
+        sprintf(buffer+i*2, "%02X", digest[i]);
     buffer[32] = '\0';
     strcpy(ROM_SETTINGS.MD5, buffer);
     printf("MD5: %s\n", buffer);
 
     if(ROM_HEADER)
-        { free(ROM_HEADER); }
+        free(ROM_HEADER);
     ROM_HEADER = malloc(sizeof(rom_header));
     if(ROM_HEADER==NULL)
         {
@@ -549,9 +549,9 @@ int open_rom(const char* filename, unsigned int archivefile)
     printf("CRC: %x %x\n", sl((unsigned int)ROM_HEADER->CRC1), sl((unsigned int)ROM_HEADER->CRC2));
     printf ("Name: %s\n", ROM_HEADER->nom);
     if(sl(ROM_HEADER->Manufacturer_ID) == 'N')
-        { printf ("Manufacturer: Nintendo\n"); }
+        printf ("Manufacturer: Nintendo\n");
     else
-        { printf("Manufacturer: %x\n", (unsigned int)(ROM_HEADER->Manufacturer_ID)); }
+        printf("Manufacturer: %x\n", (unsigned int)(ROM_HEADER->Manufacturer_ID));
     printf("Cartridge_ID: %x\n", ROM_HEADER->Cartridge_ID);
 
     countrycodestring(ROM_HEADER->Country_code, buffer);
@@ -580,12 +580,12 @@ int open_rom(const char* filename, unsigned int archivefile)
             if(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o')
                 {
                 if(!ask_hack())
-                    { close = 1; }
+                    close = 1;
                 }
             else if(s[i]=='b')
                 {
                 if(!ask_bad())
-                    { close = 1; }
+                    close = 1;
                 }
             }
         }
@@ -604,7 +604,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     ROM_SETTINGS.goodname[255] = '\0';
 
     if(entry->savetype==EEPROM_16KB)
-        { ROM_SETTINGS.eeprom_16kb = 1; }
+        ROM_SETTINGS.eeprom_16kb = 1;
     printf("EEPROM type: %d\n", ROM_SETTINGS.eeprom_16kb);
     return 0;
 }
@@ -614,7 +614,7 @@ int close_rom(void)
     if(g_EmulationThread)
         {
         if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
-            { return -1; }
+            return -1;
         stopEmulation();
         }
 

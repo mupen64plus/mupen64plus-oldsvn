@@ -126,11 +126,11 @@ void gui_display(void)
 {
     gtk_widget_show_all(g_MainWindow.window);
     if(!(config_get_bool("ToolbarVisible",TRUE)))
-        { gtk_widget_hide(g_MainWindow.toolBar); }
+        gtk_widget_hide(g_MainWindow.toolBar);
     if(!(config_get_bool("FilterVisible",TRUE)))
-        { gtk_widget_hide(g_MainWindow.filterBar); }
+        gtk_widget_hide(g_MainWindow.filterBar);
     if(!(config_get_bool("StatusbarVisible",TRUE)))
-        { gtk_widget_hide(g_MainWindow.statusBarHBox); }
+        gtk_widget_hide(g_MainWindow.statusBarHBox);
 }
 
 /* gui_destroy
@@ -199,7 +199,7 @@ void statusbar_message(const char *format, ...)
 
     // If we're calling from a thread other than the main gtk thread, take gdk lock.
     if(!pthread_equal(self, g_GuiThread))
-        { gdk_threads_enter(); }
+        gdk_threads_enter();
 
     gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
     gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
@@ -207,7 +207,7 @@ void statusbar_message(const char *format, ...)
     GUI_PROCESS_QUEUED_EVENTS();
 
     if(!pthread_equal(self, g_GuiThread))
-        { gdk_threads_leave(); }
+        gdk_threads_leave();
 
     return;
 }
@@ -253,7 +253,7 @@ void alert_message(const char *fmt, ...)
             icon = gtk_image_new_from_pixbuf(pixbuf); 
             }
         else
-            { icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-error.png")); }
+            icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-error.png"));
         gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
 
         label = gtk_label_new(buf);
@@ -310,7 +310,7 @@ int confirm_message(const char *fmt, ...)
             icon = gtk_image_new_from_pixbuf(pixbuf); 
             }
         else
-            { icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-question.png")); }
+            icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-question.png"));
         gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
 
         label = gtk_label_new(buf);
@@ -466,7 +466,7 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
         if(!list) //Nothing selected.
             { 
             if(confirm_message(tr("There is no Rom loaded. Do you want to load one?")))
-                { callback_openRom(NULL, NULL); }
+                callback_openRom(NULL, NULL);
             return;
             }
         else
@@ -480,9 +480,9 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
             g_list_free(list);
 
             if(open_rom(entry->filename, entry->archivefile)==0)
-                { startEmulation(); }
+                startEmulation();
             else
-                { return; }
+                return;
             }
         }
 
@@ -586,7 +586,7 @@ static void cb_SaveSlotSelected(GtkMenuItem *item, int slot)
     if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
         {
         if(slot!=savestates_get_slot()) //Only actually change slot when not a GUI update.
-            { savestates_select_slot(slot); }
+            savestates_select_slot(slot);
         }
 }
 
@@ -605,7 +605,7 @@ static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
         if(slot==savestates_get_slot())
             {
             if(!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(slotItem)))
-                { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(slotItem), TRUE); }
+                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(slotItem), TRUE);
             break;
             }
         }
@@ -925,9 +925,9 @@ static void callback_vcrSetup( GtkWidget *widget, gpointer data )
 static void callback_toggle_toolbar( GtkWidget *widget, gpointer data )
 {
     if(GTK_WIDGET_VISIBLE(g_MainWindow.toolBar))
-        { gtk_widget_hide(g_MainWindow.toolBar); }
+        gtk_widget_hide(g_MainWindow.toolBar);
     else
-        { gtk_widget_show(g_MainWindow.toolBar); }
+        gtk_widget_show(g_MainWindow.toolBar);
 
     config_put_bool("ToolbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
 }
@@ -940,7 +940,7 @@ static void callback_toggle_filter( GtkWidget *widget, gpointer data )
         gtk_widget_hide(g_MainWindow.filterBar); 
         }
     else
-        { gtk_widget_show(g_MainWindow.filterBar); }
+        gtk_widget_show(g_MainWindow.filterBar);
 
     config_put_bool("FilterVisible",GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
 }
@@ -948,9 +948,9 @@ static void callback_toggle_filter( GtkWidget *widget, gpointer data )
 static void callback_toggle_statusbar( GtkWidget *widget, gpointer data )
 {
     if(GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox))
-        { gtk_widget_hide(g_MainWindow.statusBarHBox); }
+        gtk_widget_hide(g_MainWindow.statusBarHBox);
     else
-        { gtk_widget_show(g_MainWindow.statusBarHBox); }
+        gtk_widget_show(g_MainWindow.statusBarHBox);
 
     config_put_bool("StatusbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
 }
@@ -1369,7 +1369,7 @@ static int create_menuBar( void )
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewToolbar),TRUE); 
         }
     else
-        { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewToolbar),i); }
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewToolbar),i);
 
     if((i=config_get_bool("FilterVisible",2))==2)
         {
@@ -1377,7 +1377,7 @@ static int create_menuBar( void )
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewFilter),TRUE); 
         }
     else
-        { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewFilter),i); }
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewFilter),i);
 
     if((i=config_get_bool("StatusBarVisible",2))==2)
         {
@@ -1385,7 +1385,7 @@ static int create_menuBar( void )
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewStatusbar),TRUE); 
         }
     else
-        { gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewStatusbar),i); }
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewStatusbar),i);
 
     gtk_signal_connect_object( GTK_OBJECT(viewToolbar), "toggled", GTK_SIGNAL_FUNC(callback_toggle_toolbar), (gpointer)NULL );
     gtk_signal_connect_object( GTK_OBJECT(viewFilter), "toggled", GTK_SIGNAL_FUNC(callback_toggle_filter), (gpointer)NULL );
@@ -1574,7 +1574,7 @@ static int create_mainWindow( void )
         config_put_number("RomSortType",GTK_SORT_ASCENDING);
         }
     else
-        { g_MainWindow.romSortType = i; }
+        g_MainWindow.romSortType = i;
     i=config_get_number("RomSortColumn",17);
     if(i<0||i>16)
         {
@@ -1582,7 +1582,7 @@ static int create_mainWindow( void )
         config_put_number("RomSortColumn",1);
         }
     else
-        { g_MainWindow.romSortColumn = i; }
+        g_MainWindow.romSortColumn = i;
 
     gint width, height, xposition, yposition;
 
@@ -1598,19 +1598,19 @@ static int create_mainWindow( void )
     gint screenheight = gdk_screen_get_height(screen);
 
     if(xposition>screenwidth)
-        { xposition = 0; }
+        xposition = 0;
     if(yposition>screenheight)
-        { yposition = 0; }
+        yposition = 0;
 
     if(width>screenwidth)
-        { width = 600; }
+        width = 600;
     if(height>screenheight)
-        { height = 400; }
+        height = 400;
 
     if((xposition+width)>screenwidth)
-        { xposition = screenwidth - width; }
+        xposition = screenwidth - width;
     if((yposition+height)>screenheight)
-        { yposition = screenheight - height; }
+        yposition = screenheight - height;
 
     // window
     g_MainWindow.window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
@@ -1661,8 +1661,8 @@ gboolean check_icon_theme()
        gtk_icon_theme_has_icon(theme, "input-gaming")&&
        gtk_icon_theme_has_icon(theme, "dialog-error")&&
        gtk_icon_theme_has_icon(theme, "dialog-question"))
-        { return TRUE; }
+        return TRUE;
     else
-        { return FALSE; }
+        return FALSE;
 }
 

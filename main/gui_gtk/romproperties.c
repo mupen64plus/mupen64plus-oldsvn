@@ -85,7 +85,7 @@ void show_romPropDialog()
     countrycodeflag(g_RomPropDialog.entry->countrycode, &flag);
     countrycodestring(g_RomPropDialog.entry->countrycode, country);
     for ( i = 0; i < 16; ++i ) 
-        { sprintf(md5hash+i*2, "%02X", g_RomPropDialog.entry->md5[i]); }
+        sprintf(md5hash+i*2, "%02X", g_RomPropDialog.entry->md5[i]);
     sprintf(crc1, "%X", g_RomPropDialog.entry->crc1);
     sprintf(crc2, "%X", g_RomPropDialog.entry->crc2);
     savestring(g_RomPropDialog.entry->inientry->savetype, savetype);
@@ -105,9 +105,9 @@ void show_romPropDialog()
     for( i = 0; i < 5; ++i)
         {
         if(g_RomPropDialog.entry->inientry->status>i)
-            { gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[i]), star);  }
+            gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[i]), star); 
         else 
-            { gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[i]), NULL);  }
+            gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[i]), NULL); 
         }
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.fullpathEntry), g_RomPropDialog.entry->filename);
     gtk_entry_set_text( GTK_ENTRY(g_RomPropDialog.md5Entry), md5hash);

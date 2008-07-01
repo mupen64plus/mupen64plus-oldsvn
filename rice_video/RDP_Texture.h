@@ -1365,7 +1365,7 @@ tile.lastTileCmd = CMD_LOADTLUT;
 #ifdef _DEBUG
 /*
 if((((gfx->words.w0)>>12)&0x3) != 0 || (((gfx->words.w0))&0x3) != 0 || (((gfx->words.w1)>>12)&0x3) != 0 || (((gfx->words.w1))&0x3) != 0)
-    { TRACE0("Load tlut, sl,tl,sh,th are not integers"); }
+    TRACE0("Load tlut, sl,tl,sh,th are not integers");
 */
 #endif
 
@@ -1376,12 +1376,12 @@ uint32 dwPalAddress = g_TI.dwAddr + dwRDRAMOffset;
 //Copy PAL to the PAL memory
 uint16 *srcPal = (uint16*)(g_pRDRAMu8 + (dwPalAddress& (g_dwRamSize-1)) );
 for (uint32 i=0; i<dwCount && i<0x100; i++)
-    { g_wRDPTlut[(i+dwTMEMOffset)^1] = srcPal[i^1]; }
+    g_wRDPTlut[(i+dwTMEMOffset)^1] = srcPal[i^1];
 
 if( options.bUseFullTMEM )
     {
     for (uint32 i=0; i<dwCount && i+tile.dwTMem<0x200; i++)
-        { *(uint16*)(&g_Tmem.g_Tmem64bit[tile.dwTMem+i]) = srcPal[i^1]; }
+        *(uint16*)(&g_Tmem.g_Tmem64bit[tile.dwTMem+i]) = srcPal[i^1];
     }
 
 LOG_TEXTURE(
@@ -1400,7 +1400,7 @@ if( pauseAtNext && eventToPause == NEXT_LOADTLUT && dwCount == 16 )
         {
         sprintf(buf+strlen(buf), "%04X ", g_wRDPTlut[dwTMEMOffset+i]);
         if(i%4 == 3)
-            { sprintf(buf+strlen(buf), "\n"); }
+            sprintf(buf+strlen(buf), "\n");
         }
     sprintf(buf+strlen(buf), "\n");
     TRACE0(buf);

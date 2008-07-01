@@ -2223,14 +2223,14 @@ int i;
 for (i=0; (size_t)i<sizeof(TextureEnhancementSettings)/sizeof(SettingInfo); ++i)
     {
     if (!strcmp(gtk_entry_get_text(GTK_ENTRY(widget)), TextureEnhancementSettings[i].description)) 
-        { break; }
+        break;
     }
 
 if (TextureEnhancementSettings[i].setting == TEXTURE_NO_ENHANCEMENT ||
    TextureEnhancementSettings[i].setting >= TEXTURE_SHARPEN_ENHANCEMENT)
-   { gtk_widget_set_sensitive(configDialog->enhancementControlCombo, FALSE); }
+   gtk_widget_set_sensitive(configDialog->enhancementControlCombo, FALSE);
 else
-   { gtk_widget_set_sensitive(configDialog->enhancementControlCombo, TRUE); }
+   gtk_widget_set_sensitive(configDialog->enhancementControlCombo, TRUE);
 }
 
 static void inN64NativeResolutionCallback(GtkWidget *widget, void *data)
@@ -2238,9 +2238,9 @@ static void inN64NativeResolutionCallback(GtkWidget *widget, void *data)
 ConfigDialog *configDialog = (ConfigDialog*)data;
 defaultRomOptions.bInN64Resolution = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->inN64NativeResolutionCheckButton));
 if(defaultRomOptions.bInN64Resolution)
-    { gtk_widget_set_sensitive(configDialog->doubleResolutionBufferCheckButton, FALSE); }
+    gtk_widget_set_sensitive(configDialog->doubleResolutionBufferCheckButton, FALSE);
 else
-    { gtk_widget_set_sensitive(configDialog->doubleResolutionBufferCheckButton, TRUE); }
+    gtk_widget_set_sensitive(configDialog->doubleResolutionBufferCheckButton, TRUE);
 }
 
 static void okButtonCallback(GtkWidget *widget, void *data)
@@ -2254,14 +2254,14 @@ CDeviceBuilder::SelectDeviceType(OGL_DEVICE);
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->windowModeCombo)->entry));
 for (i=0; i<numberOfResolutions; i++)
-    { if (!strcmp(resolutionsS[i], s)) break; }
+    if (!strcmp(resolutionsS[i], s)) break;
 
 windowSetting.uWindowDisplayWidth = resolutions[i][0];
 windowSetting.uWindowDisplayHeight = resolutions[i][1];
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->fullScreenCombo)->entry));
 for (i=0; i<numberOfResolutions; i++)
-    { if (!strcmp(resolutionsS[i], s)) break; }
+    if (!strcmp(resolutionsS[i], s)) break;
     windowSetting.uFullScreenDisplayWidth = resolutions[i][0];
     windowSetting.uFullScreenDisplayHeight = resolutions[i][1];
 
@@ -2273,15 +2273,15 @@ windowSetting.uDisplayHeight = windowSetting.uWindowDisplayHeight;
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->colorBufferDepthCombo)->entry));
 for (i=0; (size_t)i<sizeof(colorQualitySettings)/sizeof(SettingInfo); i++)
-    { if (!strcmp(colorQualitySettings[i].description, s)) break; }
+    if (!strcmp(colorQualitySettings[i].description, s)) break;
 
 options.colorQuality = colorQualitySettings[i].setting;
 options.bEnableSSE = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->enableSSECheckButton));
 status.isSSEEnabled = status.isSSESupported && options.bEnableSSE;
 if (status.isSSEEnabled) 
-   { ProcessVertexData = ProcessVertexDataSSE; }
+   ProcessVertexData = ProcessVertexDataSSE;
 else
-   { ProcessVertexData = ProcessVertexDataNoSSE; }
+   ProcessVertexData = ProcessVertexDataNoSSE;
 
 options.bSkipFrame = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->skipFrameCheckButton));
 options.bWinFrameMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->winFrameCheckButton));
@@ -2291,39 +2291,39 @@ options.bShowFPS = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->
 //OpenGL
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->combinerTypeCombo)->entry));
 for (i=0; i<numberOfOpenGLRenderEngineSettings; i++)
-    { if (!strcmp(OpenGLRenderSettings[i].name, s)) break; }
+    if (!strcmp(OpenGLRenderSettings[i].name, s)) break;
 
 options.OpenglRenderSetting = OpenGLRenderSettings[i].type;
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->depthBufferSettingCombo)->entry));
 for( i=0; (size_t)i<sizeof(openGLDepthBufferSettings)/sizeof(SettingInfo); i++)
-    { if (!strcmp(openGLDepthBufferSettings[i].description, s)) break; }
+    if (!strcmp(openGLDepthBufferSettings[i].description, s)) break;
 
 options.OpenglDepthBufferSetting = openGLDepthBufferSettings[i].setting;
 
 //Texture Filters
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->textureQualityCombo)->entry));
 for (i=0; (size_t)i<sizeof(TextureQualitySettings)/sizeof(SettingInfo); i++)
-    { if (!strcmp(TextureQualitySettings[i].description, s)) break; }
+    if (!strcmp(TextureQualitySettings[i].description, s)) break;
 
 options.textureQuality = i;
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->forceTextureFilterCombo)->entry));
 for (i=0; (size_t)i<sizeof(ForceTextureFilterSettings)/sizeof(SettingInfo); i++)
-    { if (!strcmp(ForceTextureFilterSettings[i].description, s)) break; }
+    if (!strcmp(ForceTextureFilterSettings[i].description, s)) break;
 
 options.forceTextureFilter = ForceTextureFilterSettings[i].setting;
 options.bFullTMEM = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->fullTMEMCheckButton));
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->textureEnhancementCombo)->entry));
 for (i=0; (size_t)i<sizeof(TextureEnhancementSettings)/sizeof(SettingInfo); i++)
-   { if (!strcmp(TextureEnhancementSettings[i].description, s)) break; }
+   if (!strcmp(TextureEnhancementSettings[i].description, s)) break;
 
 options.textureEnhancement = TextureEnhancementSettings[i].setting;
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->enhancementControlCombo)->entry));
 for (i=0; (size_t)i<sizeof(TextureEnhancementControlSettings)/sizeof(SettingInfo); i++)
-    { if (!strcmp(TextureEnhancementControlSettings[i].description, s)) break; }
+    if (!strcmp(TextureEnhancementControlSettings[i].description, s)) break;
 
 options.textureEnhancementControl = TextureEnhancementControlSettings[i].setting;
 
@@ -2348,7 +2348,7 @@ defaultRomOptions.bFastTexCRC = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(c
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->renderingToTextureEmulationCombo)->entry));
 for (i=0; (size_t)i<sizeof(renderToTextureSettings)/sizeof(char*); i++)
-    { if (!strcmp(renderToTextureSettings[i], s)) break; }
+    if (!strcmp(renderToTextureSettings[i], s)) break;
 
 defaultRomOptions.N64RenderToTextureEmuType = i;
 
@@ -2359,25 +2359,25 @@ defaultRomOptions.bDoubleSizeForSmallTxtrBuf = gtk_toggle_button_get_active(GTK_
 //Current Game Options
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->frameUpdateAtCombo)->entry));
 if(!strcmp("Default", s))
-    { g_curRomInfo.dwScreenUpdateSetting = 0; }
+    g_curRomInfo.dwScreenUpdateSetting = 0;
 else
     {
     for (i=0; (size_t)i<sizeof(screenUpdateSettings)/sizeof(char*); i++)
-         { if (!strcmp(screenUpdateSettings[i], s)) break; }
+         if (!strcmp(screenUpdateSettings[i], s)) break;
     g_curRomInfo.dwScreenUpdateSetting = i+1;
     }
 
 s = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(configDialog->renderingToTextureEmulationRCombo)->entry));
 for (i=0; (size_t)i<sizeof(renderToTextureSettings)/sizeof(char*); i++)
-    { if (!strcmp(renderToTextureSettings[i], s)) break; }
+    if (!strcmp(renderToTextureSettings[i], s)) break;
     g_curRomInfo.dwRenderToTextureOption = i;
 
 if(gtk_menu_get_active(GTK_MENU(configDialog->normalBlenderMenu)) == configDialog->normalBlenderDefaultMenuItem)
-    { g_curRomInfo.dwNormalBlender = 0; }
+    g_curRomInfo.dwNormalBlender = 0;
 else if(gtk_menu_get_active(GTK_MENU(configDialog->normalBlenderMenu)) == configDialog->normalBlenderDisableMenuItem)
-    { g_curRomInfo.dwNormalBlender = 1; }
+    g_curRomInfo.dwNormalBlender = 1;
 else if(gtk_menu_get_active(GTK_MENU(configDialog->normalBlenderMenu)) == configDialog->normalBlenderEnableMenuItem)
-    { g_curRomInfo.dwNormalBlender = 2; }
+    g_curRomInfo.dwNormalBlender = 2;
 
    if(gtk_menu_get_active(GTK_MENU(configDialog->fineTextureMappingMenu)) == configDialog->fineTextureMappingDefaultMenuItem)
      g_curRomInfo.dwAccurateTextureMapping = 0;
@@ -3125,7 +3125,7 @@ static ConfigDialog *CreateConfigDialog()
 //FullScreenCombo list
 GList *fullScreenComboList = NULL;
 for (int i=0; i<numberOfResolutions; i++)
-   { fullScreenComboList = g_list_append(fullScreenComboList,(char*)resolutionsS[i]); }
+   fullScreenComboList = g_list_append(fullScreenComboList,(char*)resolutionsS[i]);
 gtk_combo_set_popdown_strings(GTK_COMBO(fullScreenCombo), fullScreenComboList);
 
 //ColorBufferDepthCombo list
@@ -3416,9 +3416,9 @@ if(CGraphicsContext::m_FullScreenResolutions[CGraphicsContext::m_numOfResolution
 for (int i=0; i<numberOfResolutions; i++)
     {
     if (windowSetting.uWindowDisplayWidth == resolutions[i][0])
-         { gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->windowModeCombo)->entry), resolutionsS[i]); }
+         gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->windowModeCombo)->entry), resolutionsS[i]);
     if (windowSetting.uFullScreenDisplayWidth == resolutions[i][0])
-         { gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->fullScreenCombo)->entry), resolutionsS[i]); }
+         gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->fullScreenCombo)->entry), resolutionsS[i]);
     }
 
 for (int i=0; (size_t)i<sizeof(colorQualitySettings)/sizeof(SettingInfo); i++)
@@ -3442,7 +3442,7 @@ else
     }
 
 if(status.isSSESupported)
-    { gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialog->enableSSECheckButton), options.bEnableSSE); }
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialog->enableSSECheckButton), options.bEnableSSE);
 else
     {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialog->enableSSECheckButton), FALSE);
@@ -3549,7 +3549,7 @@ if(g_curRomInfo.dwScreenUpdateSetting)
                       screenUpdateSettings[g_curRomInfo.dwScreenUpdateSetting-1]);
     }
 else
-    { gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->frameUpdateAtCombo)->entry), "Default"); }
+    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->frameUpdateAtCombo)->entry), "Default");
 
 gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->renderingToTextureEmulationRCombo)->entry),
                   renderToTextureSettings[g_curRomInfo.dwRenderToTextureOption]);
@@ -3593,11 +3593,11 @@ if( g_curRomInfo.VIHeight > 0 )
    }
 
 if(g_curRomInfo.UseCIWidthAndRatio == 0)
-   { gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->useCICombo)->entry), "No"); }
+   gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->useCICombo)->entry), "No");
 else if(g_curRomInfo.UseCIWidthAndRatio == 1)
-   { gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->useCICombo)->entry), "NTSC"); }
+   gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->useCICombo)->entry), "NTSC");
 else if(g_curRomInfo.UseCIWidthAndRatio == 2)
-   { gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->useCICombo)->entry), "PAL"); }
+   gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(configDialog->useCICombo)->entry), "PAL");
 
 gtk_widget_show_all(configDialog->dialog);
 }

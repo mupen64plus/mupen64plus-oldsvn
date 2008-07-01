@@ -202,7 +202,7 @@ static void callback_aboutRSP( GtkWidget *widget, gpointer data )
 gboolean callback_deleteForEach (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer userdata)
 {
     if(gtk_tree_model_get_iter_first(model, iter))
-        { gtk_list_store_remove(GTK_LIST_STORE(model), iter); }
+        gtk_list_store_remove(GTK_LIST_STORE(model), iter);
     return 0;
 }
 gboolean Match = 0;
@@ -284,7 +284,7 @@ static void callback_romDirectoryRemove( GtkWidget *widget, gpointer data )
         do{
             GtkTreeIter iter;
             if(gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data))
-                { gtk_list_store_remove(GTK_LIST_STORE(model), &iter); }
+                gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
         } while ((llist = g_list_next (llist)));
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
         g_list_free (list);
@@ -306,7 +306,7 @@ static void callback_romDirectoryRemoveAll( GtkWidget *widget, gpointer data )
         {
             GtkTreeIter iter;
             if(gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data))
-                { gtk_list_store_remove(GTK_LIST_STORE(model), &iter); }
+                gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
         } while ((llist = g_list_next (llist)));
         g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
         g_list_free (list);
@@ -1048,7 +1048,7 @@ int create_configDialog( void )
                 icon = gtk_image_new_from_pixbuf(pixbuf); 
                 }
             else
-                { icon = gtk_image_new_from_file( get_iconpath("32x32/video-display.png") ); }
+                icon = gtk_image_new_from_file( get_iconpath("32x32/video-display.png") );
         
             g_ConfigDialog.gfxCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.gfxPluginGList )
@@ -1099,7 +1099,7 @@ int create_configDialog( void )
                 icon = gtk_image_new_from_pixbuf(pixbuf); 
                 }
             else
-                { icon = gtk_image_new_from_file( get_iconpath("32x32/audio-card.png") ); }
+                icon = gtk_image_new_from_file( get_iconpath("32x32/audio-card.png") );
         
             g_ConfigDialog.audioCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.audioPluginGList )
@@ -1150,7 +1150,7 @@ int create_configDialog( void )
                 icon = gtk_image_new_from_pixbuf(pixbuf); 
                 }
             else
-                { icon = gtk_image_new_from_file( get_iconpath("32x32/input-gaming.png") ); }
+                icon = gtk_image_new_from_file( get_iconpath("32x32/input-gaming.png") );
         
             g_ConfigDialog.inputCombo = gtk_combo_box_new_text();
             if( g_ConfigDialog.inputPluginGList )

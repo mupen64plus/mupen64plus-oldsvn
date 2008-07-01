@@ -289,7 +289,7 @@ void savestates_load()
     {
         gzread(f, buffer+queuelength, 4);
         if (*((unsigned int*)&buffer[queuelength]) == 0xFFFFFFFF)
-            { break; }
+            break;
         gzread(f, buffer+queuelength+4, 4);
         queuelength += 8;
     }

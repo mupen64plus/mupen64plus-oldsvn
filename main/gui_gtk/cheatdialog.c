@@ -112,7 +112,7 @@ static void cb_removeCode(GtkWidget *button, GtkTreeView *treeview)
 
     //If there are codes left, select the first one.
     if(gtk_tree_model_get_iter_first(model, &iter))
-        { gtk_tree_selection_select_iter(selection, &iter); }
+        gtk_tree_selection_select_iter(selection, &iter);
 }
 
 // user edited cheat code (address or value)
@@ -249,9 +249,9 @@ static void cb_newCheat(GtkButton *button, GtkTreeView *view)
 
         // get pointer to rom iter
         if(gtk_tree_model_iter_parent(model, &parentIter, &selectedIter))
-            { romIter = &parentIter; }
+            romIter = &parentIter;
         else
-            { romIter = &selectedIter; }
+            romIter = &selectedIter;
 
         // grab pointer to rom cheat data out of model
         gtk_tree_model_get(model, romIter, 1, &romcheat, -1);
@@ -320,7 +320,7 @@ static void cb_delete(GtkButton *button, GtkTreeView *view)
 
                 //If there any roms are left, set selection to first rom.
                 if(gtk_tree_model_get_iter_first(model, &iter))
-                    { gtk_tree_selection_select_iter(selection, &iter); }
+                    gtk_tree_selection_select_iter(selection, &iter);
                 }
             }
        }
@@ -342,7 +342,7 @@ static void cb_romNameChanged(GtkWidget *textbox, GtkTreeSelection *selection)
 
         // change rom name in rom_cheats_t struct
         if(romcheat->rom_name)
-            { free(romcheat->rom_name); }
+            free(romcheat->rom_name);
         romcheat->rom_name = strdup(text);
 
         // change rom name in tree model
@@ -387,7 +387,7 @@ static GtkWidget *edit_rom_info_widget(rom_cheats_t *romcheat, GtkTreeSelection 
     textbox = gtk_entry_new();
     gtk_widget_set_size_request(textbox, 170, -1);
     if(romcheat->rom_name)
-        { gtk_editable_insert_text(GTK_EDITABLE(textbox), romcheat->rom_name, strlen(romcheat->rom_name), &i); }
+        gtk_editable_insert_text(GTK_EDITABLE(textbox), romcheat->rom_name, strlen(romcheat->rom_name), &i);
 
     // connect signal such that as the user changes the Rom name in the textbox, it's updated in the model
     g_signal_connect(textbox, "changed", G_CALLBACK(cb_romNameChanged), selection);
@@ -439,7 +439,7 @@ static void cb_cheatNameChanged(GtkWidget *textbox, GtkTreeSelection *selection)
 
         // change cheat name in cheat_t struct
         if(cheat->name)
-            { free(cheat->name); }
+            free(cheat->name);
         cheat->name = strdup(text);
 
         // change rom name in tree model
@@ -482,9 +482,9 @@ static void cb_cheat_data_func(GtkTreeViewColumn *col,
     // get cell value from model
     gtk_tree_model_get(tree_model, iter, column, &val, -1);
     if(column == ADDRESS_COLUMN)
-        { snprintf(buf, 20, "%.8x", val); }
+        snprintf(buf, 20, "%.8x", val);
     else
-        { snprintf(buf, 20, "%.4x", val); }
+        snprintf(buf, 20, "%.4x", val);
 
     // set cell text to value
     g_object_set(G_OBJECT(cell), "text", buf, NULL);
@@ -596,7 +596,7 @@ static GtkWidget *edit_cheat_widget(cheat_t *cheat, GtkTreeSelection *selection)
     textbox = gtk_entry_new();
     gtk_widget_set_size_request(textbox, 170, -1);
     if(cheat->name)
-       { gtk_editable_insert_text(GTK_EDITABLE(textbox), cheat->name, strlen(cheat->name), &i); }
+       gtk_editable_insert_text(GTK_EDITABLE(textbox), cheat->name, strlen(cheat->name), &i);
 
     // connect signal such that as the user changes the cheat name in the textbox, it's updated in the model
     g_signal_connect(textbox, "changed", G_CALLBACK(cb_cheatNameChanged), selection);
@@ -610,13 +610,13 @@ static GtkWidget *edit_cheat_widget(cheat_t *cheat, GtkTreeSelection *selection)
     button = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(button), tr("Enabled  (Session)"));
     g_signal_connect(button, "toggled", G_CALLBACK(cb_cheatEnabled), cheat);
     if(cheat->enabled)
-        { gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE); }
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 1, 2, 2, 3);
 
     button = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(button), tr("Enabled (Always)"));
     g_signal_connect(button, "toggled", G_CALLBACK(cb_cheatEnabledAlways), cheat);
     if(cheat->always_enabled)
-       { gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE); }
+       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 1, 2, 3, 4);
 
     // create tree view of cheat codes (address/value pairs)
@@ -664,7 +664,7 @@ static void cb_updateFrame(GtkTreeSelection *selection, GtkWidget *frame)
     // empty current frame contents
     frame_contents = gtk_bin_get_child(GTK_BIN(frame));
     if(frame_contents)
-        { gtk_widget_destroy(frame_contents); }
+        gtk_widget_destroy(frame_contents);
 
     //If there are no cheats, put a label in the frame saying so.
     if(!gtk_tree_selection_get_selected(selection, &model, &iter))
@@ -676,7 +676,7 @@ static void cb_updateFrame(GtkTreeSelection *selection, GtkWidget *frame)
             frame_contents = label;
             gtk_container_add(GTK_CONTAINER(frame), frame_contents);
             if(GTK_WIDGET_VISIBLE(frame))
-                { gtk_widget_show_all(frame_contents); }
+                gtk_widget_show_all(frame_contents);
             return;
             }
         else
@@ -707,7 +707,7 @@ static void cb_updateFrame(GtkTreeSelection *selection, GtkWidget *frame)
 
     // if we're being called to update the frame, display the updated frame contents
     if(GTK_WIDGET_VISIBLE(frame))
-       { gtk_widget_show_all(frame_contents); }
+       gtk_widget_show_all(frame_contents);
 }
 
 /** public functions **/

@@ -664,7 +664,7 @@ void DEBUGGER_PAUSE_COUNT_N(uint32 val)
 if (eventToPause == (int)val)
     {   
     if(debuggerPauseCount>0) 
-        { debuggerPauseCount--; }
+        debuggerPauseCount--;
     if(debuggerPauseCount==0)
         {
         CGraphicsContext::Get()->UpdateFrame();
@@ -678,7 +678,7 @@ void DEBUGGER_PAUSE_COUNT_N_WITHOUT_UPDATE(uint32 val)
 if(eventToPause == (int)val)
     {
     if(debuggerPauseCount>0) 
-        { debuggerPauseCount--; }
+        debuggerPauseCount--;
     if(debuggerPauseCount==0)
         {
         debuggerPauseCount = countToPause;

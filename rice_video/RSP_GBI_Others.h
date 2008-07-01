@@ -1202,9 +1202,9 @@ void DLParser_Ucode8_0x05(Gfx *gfx)
 */
 
 if((gfx->words.w1) == 0)
-    { return; }
+    return;
 else
-    { DLParser_Unknown_Skip4(gfx); }
+    DLParser_Unknown_Skip4(gfx);
 }
 
 void DLParser_Ucode8_0xb4(Gfx *gfx)
@@ -1214,11 +1214,11 @@ uint32 dwPC = gDlistStack[gDlistStackPointer].pc;
 #endif
 
 if(((gfx->words.w0)&0xFF) == 0x06)
-    { DLParser_Unknown_Skip3(gfx); }
+    DLParser_Unknown_Skip3(gfx);
 else if(((gfx->words.w0)&0xFF) == 0x04)
-    { DLParser_Unknown_Skip1(gfx); }
+    DLParser_Unknown_Skip1(gfx);
 else if(((gfx->words.w0)&0xFFF) == 0x600)
-    { DLParser_Unknown_Skip3(gfx); }
+    DLParser_Unknown_Skip3(gfx);
 else
     {
     #ifdef _DEBUG

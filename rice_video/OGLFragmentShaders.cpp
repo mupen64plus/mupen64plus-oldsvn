@@ -185,9 +185,9 @@ char* MuxToOC(uint8 val)
 {
 // For color channel
 if( val&MUX_ALPHAREPLICATE )
-    { return (char*)muxToFP_Maps[val&0x1F][1]; }
+    return (char*)muxToFP_Maps[val&0x1F][1];
 else
-    { return (char*)muxToFP_Maps[val&0x1F][0]; }
+    return (char*)muxToFP_Maps[val&0x1F][0];
 }
 
 char* MuxToOA(uint8 val)
