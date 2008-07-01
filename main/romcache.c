@@ -568,9 +568,9 @@ unsigned char hexconvert(const char *bigraph)
         {
         returnvalue = returnvalue << 4;
         character = *bigraph++ | 0x20;
-        if(character>='0'&&character<='9')
+        if (character >= '0' && character <= '9')
             { returnvalue += character - '0'; }
-        else if(character>='a'&&character<='f')
+        else if (character >= 'a' && character <= 'f')
             { returnvalue += character - 'a' + 10; }
         }
 

@@ -117,8 +117,7 @@ tr_load_language( const char *filename )
                 *p2 = '\n'; // replace '\\' by '\n'
                 p2++;
                 for ( i = 0; i < strlen(p2); ++i )
-                    { p2[i]=p2[i+1]; }
-                p2[i+1]='\0';
+                    p2[i] = p2[i+1];
             }
 
             p = strchr( line, '=' );    // line may have changed
