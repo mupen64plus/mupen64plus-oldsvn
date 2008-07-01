@@ -96,6 +96,7 @@ pthread_t   g_EmulationThread = 0;      // core thread handle
 pthread_t   g_RomCacheThread = 0;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
+int         g_Fullscreen = 0;           // fullscreen enabled?
 int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
 
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
@@ -113,7 +114,6 @@ static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
 
 
-static int   l_Fullscreen = 0;           // fullscreen enabled?
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter
 static int  *l_TestShotList = NULL;      // list of screenshots to take for regression test support
@@ -748,7 +748,7 @@ static void * emulationThread( void *_arg )
     romOpen_input();
 
     // switch to fullscreen if enabled
-    if (l_Fullscreen)
+    if (g_Fullscreen)
         changeWindow();
 
     if (g_OsdEnabled)
@@ -953,7 +953,7 @@ void parseCommandLine(int argc, char **argv)
     {
         {"nogui", no_argument, &l_GuiEnabled, FALSE},
         {"noosd", no_argument, &g_OsdEnabled, FALSE},
-        {"fullscreen", no_argument, &l_Fullscreen, TRUE},
+        {"fullscreen", no_argument, &g_Fullscreen, TRUE},
         {"gfx", required_argument, NULL, OPT_GFX},
         {"audio", required_argument, NULL, OPT_AUDIO},
         {"input", required_argument, NULL, OPT_INPUT},
@@ -1316,6 +1316,10 @@ int main(int argc, char *argv[])
     // if --noask was not specified at the commandline, try config file
     if(!g_NoaskParam)
         g_Noask = config_get_bool("No Ask", FALSE);
+
+    // check "always fullscreen" setting in config file
+    if(config_get_bool("AlwaysFullscreen", FALSE))
+        g_Fullscreen = 1;
 
     cheat_read_config();
     plugin_scan_installdir();

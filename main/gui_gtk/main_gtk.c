@@ -1360,7 +1360,7 @@ static int create_menuBar( void )
     viewMenuItem = gtk_menu_item_new_with_mnemonic(tr("_View"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(viewMenuItem), viewMenu );
     viewToolbar = gtk_check_menu_item_new_with_mnemonic(tr(" _Toolbar"));
-    viewFilter = gtk_check_menu_item_new_with_mnemonic(tr(" _Filer"));
+    viewFilter = gtk_check_menu_item_new_with_mnemonic(tr(" _Filter"));
     viewStatusbar = gtk_check_menu_item_new_with_mnemonic(tr(" _Statusbar"));
 
     if((i=config_get_bool("ToolbarVisible",2))==2)

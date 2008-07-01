@@ -30,6 +30,7 @@ extern int g_NoaskParam;
 extern int g_MemHasBeenBSwapped;
 extern int g_TakeScreenshot;
 extern int g_OsdEnabled;
+extern int g_Fullscreen;
 extern pthread_t g_EmulationThread;
 extern pthread_t g_RomCacheThread;
 extern char *g_GfxPlugin;

@@ -33,9 +33,10 @@ typedef struct
     GtkWidget   *coreInterpreterCheckButton;
     GtkWidget   *coreDynaRecCheckButton;
     GtkWidget   *corePureInterpCheckButton;
-    GtkWidget       *autoincSaveSlotCheckButton;
-    GtkWidget       *noaskCheckButton;
-    GtkWidget       *OsdEnabled;
+    GtkWidget   *autoincSaveSlotCheckButton;
+    GtkWidget   *noaskCheckButton;
+    GtkWidget   *OsdEnabled;
+    GtkWidget   *alwaysFullscreen;
     GList       *toolbarStyleGList;
     GtkWidget   *toolbarStyleCombo;
     GList       *toolbarSizeGList;
@@ -53,8 +54,8 @@ typedef struct
     GtkWidget   *romDirectoryList;
     GtkWidget   *romDirsScanRecCheckButton;
     GtkWidget   *romShowFullPathsCheckButton;
-    GtkWidget       *noCompiledJumpCheckButton;
-    GtkWidget       *noMemoryExpansion;
+    GtkWidget   *noCompiledJumpCheckButton;
+    GtkWidget   *noMemoryExpansion;
 } SConfigDialog;
 extern SConfigDialog g_ConfigDialog;
 
