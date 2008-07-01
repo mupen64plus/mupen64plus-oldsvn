@@ -1034,12 +1034,16 @@ static void callback_aboutMupen( GtkWidget *widget, gpointer data )
 // hide on delete
 static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-    int width, height;
+    gint width, height, xposition, yposition;
 
     gtk_window_get_size(GTK_WINDOW(g_MainWindow.window), &width, &height);
+    gtk_window_get_position(GTK_WINDOW(g_MainWindow.window), &xposition, &yposition); 
 
     config_put_number("MainWindowWidth",width);
     config_put_number("MainWindowHeight",height);
+    config_put_number("MainWindowXPosition",xposition);
+    config_put_number("MainWindowYPosition",yposition);
+
     gtk_main_quit();
     return TRUE; // undeleteable
 }
@@ -1572,15 +1576,39 @@ static int create_mainWindow( void )
     else
         { g_MainWindow.romSortColumn = i; }
 
-    int width, height;
+    gint width, height, xposition, yposition;
 
     width = config_get_number("MainWindowWidth",600);
     height = config_get_number("MainWindowHeight",400);
+    xposition = config_get_number("MainWindowXPosition",0);
+    yposition = config_get_number("MainWindowYPosition",0);
+
+    GdkDisplay *display = gdk_display_get_default();
+    GdkScreen *screen = gdk_display_get_default_screen(display);
+
+    gint screenwidth = gdk_screen_get_width(screen);
+    gint screenheight = gdk_screen_get_height(screen);
+
+    if(xposition>screenwidth)
+        { xposition = 0; }
+    if(yposition>screenheight)
+        { yposition = 0; }
+
+    if(width>screenwidth)
+        { width = 600; }
+    if(height>screenheight)
+        { height = 400; }
+
+    if((xposition+width)>screenwidth)
+        { xposition = screenwidth - width; }
+    if((yposition+height)>screenheight)
+        { yposition = screenheight - height; }
 
     // window
     g_MainWindow.window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_set_title( GTK_WINDOW(g_MainWindow.window), MUPEN_NAME " v" MUPEN_VERSION );
     gtk_window_set_default_size( GTK_WINDOW(g_MainWindow.window), width, height  );
+    gtk_window_move (GTK_WINDOW(g_MainWindow.window), xposition, yposition);
 
     gtk_signal_connect(GTK_OBJECT(g_MainWindow.window), "delete_event", GTK_SIGNAL_FUNC(callback_mainWindowDeleteEvent), (gpointer)NULL);
 
