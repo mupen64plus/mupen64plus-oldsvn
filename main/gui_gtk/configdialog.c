@@ -364,7 +364,7 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
 
     i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen) );
     g_Fullscreen = i;
-    config_put_bool( "AlwaysFullscreen", i );
+    config_put_bool( "GuiStartFullscreen", i );
 
     savestates_set_autoinc_slot(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton)));
     config_put_bool("AutoIncSaveSlot", savestates_get_autoinc_slot());
@@ -685,7 +685,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton), config_get_bool( "AutoIncSaveSlot", FALSE ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton), !g_Noask );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.OsdEnabled), g_OsdEnabled );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen), config_get_bool("AlwaysFullscreen", FALSE));
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen), config_get_bool("GuiStartFullscreen", FALSE));
     // if --noask was specified at the commandline, disable checkbox
     gtk_widget_set_sensitive( g_ConfigDialog.noaskCheckButton, !g_NoaskParam );
 

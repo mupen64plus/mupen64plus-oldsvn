@@ -1275,17 +1275,28 @@ int main(int argc, char *argv[])
     setPaths();
     config_read();
 
-    if(l_GuiEnabled)
+    if (l_GuiEnabled)
     {
         i = config_get_bool("OsdEnabled", 2);
-        if(i==2)
+        if (i == 2)
         {
-            config_put_bool("OsdEnabled", g_OsdEnabled);
+            config_put_bool("OsdEnabled", 1);
         }
-        else if(g_OsdEnabled==1)
+        else if (g_OsdEnabled == 1)
         {
-        g_OsdEnabled = i;
+            g_OsdEnabled = i;
         }
+        // check "GUI always start fullscreen" setting in config file
+        i = config_get_bool("GuiStartFullscreen", 2);
+        if (i == 2)
+        {
+            config_put_bool("GuiStartFullscreen", 0);
+        }
+        else if (g_Fullscreen == 0)
+        {
+            g_Fullscreen = i;
+        }
+
     }
 
 #ifdef VCR_SUPPORT
@@ -1316,10 +1327,6 @@ int main(int argc, char *argv[])
     // if --noask was not specified at the commandline, try config file
     if(!g_NoaskParam)
         g_Noask = config_get_bool("No Ask", FALSE);
-
-    // check "always fullscreen" setting in config file
-    if(config_get_bool("AlwaysFullscreen", FALSE))
-        g_Fullscreen = 1;
 
     cheat_read_config();
     plugin_scan_installdir();
