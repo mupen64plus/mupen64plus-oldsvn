@@ -105,6 +105,33 @@ GameEntry     *g_GameList[MAX_GAME_DESC];
 UDPsocket      g_ListenSock;
 MD5Entry      *g_MD5List = NULL;
 
+void print_md5(md5_byte_t md5[16]) {
+  int n;
+  for (n = 0; n < 16; n++) {
+     printf("%x", md5[n]);
+  }
+}
+void print_debug() {
+      int n;
+      MD5Entry      *temp_md5_entry = g_MD5List;
+      GameEntry     *temp_game_entry;
+      printf("By MD5:\n");
+      while (temp_md5_entry) {
+         print_md5(temp_md5_entry->md5_checksum);
+         printf("\n");
+         temp_game_entry = temp_md5_entry->first_game_entry->next;
+         while (temp_game_entry->next) {
+              printf("   %d.%d.%d.%d:%d\n", GET_IP(temp_game_entry->host), temp_game_entry->port);
+              temp_game_entry = temp_game_entry->next;
+         }           
+         temp_md5_entry = temp_md5_entry->next;
+      }       
+      printf("\nBy Game Descriptor:\n");
+      for (n = 0; n < MAX_GAME_DESC; n++) {
+         if (g_GameList[n]) printf("%d. %d.%d.%d.%d:%d this %p next %p prev %p\n", n, GET_IP(g_GameList[n]->host), g_GameList[n]->port, g_GameList[n], g_GameList[n]->next, g_GameList[n]->prev);
+      }
+}
+
 // ================================================================================
 // == main() and processPacket() ==================================================
 // ================================================================================
@@ -260,10 +287,9 @@ void process_packet(UDPpacket *packet) {
 
     case OPEN_GAME:
       if (packet->len == 19) {
-
           // Check to see if the host already has an open game, remove the entry if so
           if ((n = find_game_desc_by_host(packet->address.host)) != -1) {
-              printf("Multiple game entries for %d.%d.%d.%d, removing old entry.\n", GET_IP(packet->address.host));              
+              printf("Multiple game entries for %d.%d.%d.%d, removing old entry (%d).\n", GET_IP(packet->address.host), n);
               remove_game_desc(n);
           }
           if ((gameDesc = get_free_game_desc()) != -1) { // Find free game descriptor
@@ -386,8 +412,7 @@ void free_timed_out_game_desc() {
 */
 int find_game_desc_by_host(uint32_t host) {
   int n;
-  for (n = 0; n < MAX_GAME_DESC; n++)
-      if ((g_GameList[n]) && (g_GameList[n]->host == host)) break;
+  for (n = 0; n < MAX_GAME_DESC; n++) if ((g_GameList[n]) && (g_GameList[n]->host == host)) break;
   if (n == MAX_GAME_DESC) n = -1;
   return n;
 }
@@ -400,8 +425,8 @@ int find_game_desc_by_host(uint32_t host) {
 */
 void remove_game_desc(int n) {
   if ((n >= 0) && (n < MAX_GAME_DESC) && (g_GameList[n])) {
-
     // Remove node from linked list (no need to check for null we have a head and tail node)
+
     g_GameList[n]->prev->next = g_GameList[n]->next;
     g_GameList[n]->next->prev = g_GameList[n]->prev;
 
@@ -425,6 +450,7 @@ void remove_game_desc(int n) {
 
    --------------------------------------------------------------------------------
 */
+
 void interupt_pause(int value) {
     static time_t  last_interupt = 0;
 
@@ -445,6 +471,7 @@ void interupt_pause(int value) {
        printf("**                                         **\n");
        printf("**  Sigint received, press CTRL+C to quit  **\n");
        printf("*********************************************\n");
+       print_debug();
     }
 }
 
@@ -482,6 +509,7 @@ void add_game_entry_node(GameEntry *newGameEntry, md5_byte_t md5_checksum[16]) {
   }
   newGameEntry->prev = md5_entry->first_game_entry;
   newGameEntry->next = md5_entry->first_game_entry->next;
+  md5_entry->first_game_entry->next->prev = newGameEntry;
   md5_entry->first_game_entry->next = newGameEntry;
 } 
 
@@ -494,6 +522,7 @@ void add_game_entry_node(GameEntry *newGameEntry, md5_byte_t md5_checksum[16]) {
 void clean_md5_list() {
   MD5Entry *tempNode1, *tempNode2;
   tempNode1 = g_MD5List;
+
   while (tempNode1) {
       tempNode2 = tempNode1;
       tempNode1 = tempNode1->next;
