@@ -28,6 +28,8 @@
                             ((unsigned char*)&(ip))[2],((unsigned char*)&(ip))[3]
 #endif
 
+#define DEFAULT_MD5  {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF}
+
 typedef unsigned char md5_byte_t;
 
 void random_md5(md5_byte_t *md5) {
@@ -46,6 +48,7 @@ void print_md5(md5_byte_t md5[16]) {
 int main(int argc, char **argv)
 {
         md5_byte_t md5[16];
+        unsigned char default_md5[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
         uint16_t temp_port;
         int n;
 
@@ -55,7 +58,7 @@ int main(int argc, char **argv)
         int button, gameDesc = 0;
  
         srand(time(NULL));
-        random_md5((md5_byte_t *)&md5);
+        for (n = 0; n < 16; n++) md5[n] = default_md5[n];
 
 	/* Check for parameters */
 	if (argc < 3)
@@ -111,6 +114,7 @@ int main(int argc, char **argv)
             printf("2. Send KEEP_ALIVE packet.\n");
             printf("3. Send FIND_GAMES packet.\n");
             printf("4. Randomize MD5.\n");
+            printf("5. Reset md5 to DEADBEEF.\n");
             printf("> ");
             while ((button = getchar()) == 10) {}
             button -= 48;
@@ -152,6 +156,7 @@ int main(int argc, char **argv)
                      random_md5((md5_byte_t *)&md5);
                      break;
                   case 5:
+                     for (n = 0; n < 16; n++) md5[n] = default_md5[n];
                      break;
             }
         }
