@@ -185,3 +185,5 @@ void flushEventQueue(MupenClient *Client);
 int frameDelta(MupenClient *Client, Uint32 frame);
 int sourceID(int myID, int index);
 
+//int masterServerOpenGame(char *master_server, uint16_t master_port, md5_byte_t md5[16], uint16_t local_port);
+

@@ -25,14 +25,35 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "../../md5.h"
 //#include "../../romcache.h"
 #include "net_gui.h"
+#include <SDL_net.h>
 
 GtkWidget *l_CreateGameWindow, *romComboBox; // Local globals
 
+/*
+  The following function quick_message() was a demo borrowed (only slightly modified) from the gnome development website:
+      http://library.gnome.org/devel/gtk/unstable/GtkDialog.html
+
+  A big thanks to them for a lot of useful tutorials and documentation :)
+*/
+
 void callback_game_create(GtkWidget *widget, gpointer data) {
-  show_joingame_dialog();
+    md5_byte_t md5[16];
+    int        game_id;
+
+    // This is just example code, "localhost", 7000 should be retrieved from a master server list
+    game_id = masterServerOpenGame("localhost", 7000, md5, 5000);
+    if (game_id != -1) {
+       printf("[Master Server] New game ID: %d\n", game_id);
+    } else {
+       printf("[Master Server] No response.\n");
+    }  
+    // ========================================================================================
+
+    show_joingame_dialog(game_id);
 }
 
 void hide_creategame_dialog() {
@@ -171,8 +192,9 @@ void create_creategame_dialog() {
 }
 
 void show_creategame_dialog() {
-  popCreateGameCB();
-  gtk_widget_show_all(l_CreateGameWindow);
+    popCreateGameCB();
+    gtk_widget_show_all(l_CreateGameWindow);
+
 }
 
 void popCreateGameCB() {

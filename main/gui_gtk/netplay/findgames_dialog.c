@@ -133,7 +133,6 @@ static void refresh_list() {
     clear_list();
     append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", "127.0.0.1");     // For testing  
 
-
     /*       // gtk_combo_box_get_active (check if db has changed!)
              
              in /network/masterserver.c:

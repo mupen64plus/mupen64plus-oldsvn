@@ -466,7 +466,9 @@ void flushEventQueue(MupenClient *Client) {
   
 /*
     masterServerOpenGame (
+    ----------------------------------------------------------------------------
                 Address of master server,
+                port of master server,
                 MD5 of game,
                 local port hosting netplay)
 
@@ -474,12 +476,19 @@ void flushEventQueue(MupenClient *Client) {
     returns -1 on error
 */
 
-int masterServerOpenGame(IPaddress masterServer, md5_byte_t md5[16], uint16_t port) {
+int masterServerOpenGame(char *master_server, uint16_t master_port, md5_byte_t md5[16], uint16_t local_port) {
+    IPaddress serverAddy;
     UDPsocket  s;
     UDPpacket *p;
     uint16_t   gameDesc;
     time_t     currTime;
     int        recv;
+
+    // Resolve address of master server
+    if (SDLNet_ResolveHost(&serverAddy, master_server, master_port) == -1) {
+        printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+        return -1;
+    }
 
     // Allocate a packet buffer
     p = SDLNet_AllocPacket(32);
@@ -502,12 +511,12 @@ int masterServerOpenGame(IPaddress masterServer, md5_byte_t md5[16], uint16_t po
     p->data[3] = 0;
     p->data[4] = OPEN_GAME;
     memcpy(p->data+5, &md5, 16);
-    SDLNet_Write16(port, p->data + 21);
+    SDLNet_Write16(local_port, p->data + 21);
 
     // Define packet length and destination
     p->len = 23;
-    p->address.host = masterServer.host;
-    p->address.port = masterServer.port;
+    p->address.host = serverAddy.host;
+    p->address.port = serverAddy.port;
 
     if (!SDLNet_UDP_Send(s, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
@@ -522,7 +531,7 @@ int masterServerOpenGame(IPaddress masterServer, md5_byte_t md5[16], uint16_t po
         printf("SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
         return -1;
     } else if (recv == 0) {
-        printf("masterServerOpenGame(): No response from master server.\n");
+        printf("masterServerOpenGame(): No response from %s:%u.\n", master_server, master_port);
         return -1;
     }
 
@@ -534,7 +543,64 @@ int masterServerOpenGame(IPaddress masterServer, md5_byte_t md5[16], uint16_t po
     return gameDesc;
 }
 
-void masterServerKeepAlive(IPaddress masterServer, uint16_t game_id) {
+/*
+    masterServerKeepAlive (master server, master server port, game ID)
+    ------------------------------------------------------------------------------
+    sends keep alive packet to master server.  returns 0 on success. -1 on error.
+*/
+
+int masterServerKeepAlive(char *master_server, uint16_t master_port, uint16_t game_id) {
+    IPaddress serverAddy;
+    UDPsocket  s;
+    UDPpacket *p;
+    uint16_t   gameDesc;
+
+    // Resolve address of master server
+    if (SDLNet_ResolveHost(&serverAddy, master_server, master_port) == -1) {
+        printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+        return -1;
+    }
+
+    // Allocate a packet buffer
+    p = SDLNet_AllocPacket(32);
+    if (!p) {
+        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
+        return -1;
+    }
+
+    // Bind a udp socket
+    s = SDLNet_UDP_Open(0);
+    if (!s) {
+        printf("SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
+        return -1;
+    }
+
+    // Fill packet data
+    p->data[0] = 'M';
+    p->data[1] = '+';
+    p->data[2] = 1;
+    p->data[3] = 0;
+    p->data[4] = KEEP_ALIVE;
+    SDLNet_Write16(game_id, p->data + 5);
+
+    // Define packet length and destination
+    p->len = 7;
+    p->address.host = serverAddy.host;
+    p->address.port = serverAddy.port;
+
+    if (!SDLNet_UDP_Send(s, -1, p)) {
+        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+        return -1;
+    }
+    SDLNet_FreePacket(p);
+    return 0;
 }
+
+/*
+    masterServerFindGames
+    ------------------------------------------------------------------------------
+    Coming soon!
+*/
+
 
 

@@ -121,8 +121,8 @@ void create_joingame_dialog() {
 }
 
 void show_joingame_dialog() {
-  hide_creategame_dialog();
-  hide_findgames_dialog();
-  gtk_widget_show_all(l_JoinGameWindow);
+    hide_creategame_dialog();
+    hide_findgames_dialog();
+    gtk_widget_show_all(l_JoinGameWindow);
 }
 
