@@ -142,7 +142,7 @@ void clientSendFrame(MupenClient *Client) {
             chunk->input.buttons.Value = update->value & (0x8000 * Client->startEvt);
         }
         if(Client->startEvt) {
-            Client->playerEvent[(Client->frameCounter/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][Client->myID].control=1;
+            Client->playerEvent[((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK)%FRAME_BUFFER_LENGTH][Client->myID].control=1;
         }
         Client->packet->len+=sizeof(InputChunk);
 
@@ -353,6 +353,7 @@ void processEventQueue(MupenClient *Client) {
                     if(curUpdate->control==1) {
                         curUpdate->control=0; 
                         rompause=!rompause;
+                        printf("Unpause event frame %d\n",frame);
                     }
                 }
             Client->eventQueue[0]->time=Client->frameCounter+VI_PER_FRAME;
