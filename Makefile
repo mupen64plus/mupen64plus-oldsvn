@@ -146,7 +146,10 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/cheatdialog.o \
 	main/gui_gtk/configdialog.o \
 	main/gui_gtk/rombrowser.o \
-	main/gui_gtk/romproperties.o
+	main/gui_gtk/romproperties.o \
+        main/gui_gtk/netplay/creategame_dialog.o \
+	main/gui_gtk/netplay/findgames_dialog.o \
+	main/gui_gtk/netplay/joingame_dialog.o
 
 OBJ_KDE_GUI = \
 	main/gui_kde4/main.o \

@@ -71,7 +71,7 @@ typedef struct MD5Entry_t {
 // Primary Functions
 void        process_packet(UDPpacket *packet);
 void *      track_malloc(int size);
-void        track_free(void *ptr);
+void        track_free(void *ptr, int bytes);
 
 // Signal callbacks
 extern void interupt_pause(int value);
@@ -100,6 +100,7 @@ time_t         g_StartTime;
 int            g_QuitMainLoop = 0;
 int            g_GameCount = 0;
 int            g_BlocksAllocated = 0;
+uint32_t       g_BytesAllocated = 0;
 unsigned short g_ServerPort;
 GameEntry     *g_GameList[MAX_GAME_DESC];
 UDPsocket      g_ListenSock;
@@ -252,7 +253,7 @@ int main(int argc, char **argv) {
   
   // If server loop kicked due to SDLNet_UDP_Recv error, display it
   if (retValue == -1) fprintf(stderr, "SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
-  printf("Memory blocks leaked: %d\n", g_BlocksAllocated);
+  printf("Memory leaked: %d\n", g_BytesAllocated);
   printf("Goodbye.\n");
   return EXIT_SUCCESS;
 }
@@ -344,11 +345,15 @@ void process_packet(UDPpacket *packet) {
 void *track_malloc(int size) {
     void *ptr = malloc(size);
     if (!ptr) printf("malloc(): Failed to allocate memory block.\n");
-    else g_BlocksAllocated++;
+    else {
+      g_BytesAllocated += size;
+      g_BlocksAllocated++;
+    }
     return ptr;
 }
 
-void track_free(void *ptr) {
+void track_free(void *ptr, int bytes) {
+    g_BytesAllocated -= bytes;
     g_BlocksAllocated--;
     free(ptr);
 }
@@ -431,7 +436,7 @@ void remove_game_desc(int n) {
     g_GameList[n]->next->prev = g_GameList[n]->prev;
 
     // Free the node and set the pointer array element to null
-    track_free(g_GameList[n]);
+    track_free(g_GameList[n], sizeof(GameEntry));
     g_GameList[n] = NULL;
     g_GameCount--;
     clean_md5_list();
@@ -466,12 +471,12 @@ void interupt_pause(int value) {
        printf("**                                         **\n");
        printf("**      Server Uptime:      %4d:%02d:%02d     **\n", ELAPSED(last_interupt - g_StartTime)); 
        printf("**      Server Port:             %5d     **\n", g_ServerPort);
-       printf("**      Blocks Allocated:        %5d     **\n", g_BlocksAllocated);
+       printf("**      Bytes Allocated:   %11d     **\n", g_BytesAllocated);
        printf("**      Open Games:              %5d     **\n", g_GameCount);
        printf("**                                         **\n");
        printf("**  Sigint received, press CTRL+C to quit  **\n");
        printf("*********************************************\n");
-       print_debug();
+       //print_debug();
     }
 }
 
@@ -544,14 +549,14 @@ MD5Entry *add_md5_node(md5_byte_t md5_checksum[16]) {
   }
   memcpy(tempNode->md5_checksum, md5_checksum, 16);
   if (!(tempNode->first_game_entry = track_malloc(sizeof(GameEntry)))) {
-      track_free(tempNode);
+      track_free(tempNode, sizeof(MD5Entry));
       return NULL;
   }
 
   tempNode->first_game_entry->prev = NULL;
   if (!(tempNode->first_game_entry->next = track_malloc(sizeof(GameEntry)))) {
-      track_free(tempNode->first_game_entry);
-      track_free(tempNode);
+      track_free(tempNode->first_game_entry, sizeof(GameEntry));
+      track_free(tempNode, sizeof(MD5Entry));
       return NULL;
   }
 
@@ -595,7 +600,7 @@ void remove_md5_node(MD5Entry *deadNode) {
     while((tempNode) && (tempNode->next != deadNode)) {tempNode = tempNode->next;}
     if (tempNode) tempNode->next = deadNode->next;
   }
-  track_free(deadNode);
+  track_free(deadNode, sizeof(MD5Entry));
 }
 
 /* --------------------------------------------------------------------------------
@@ -611,7 +616,7 @@ void flush_game_entry_list(MD5Entry* md5_node) {
   while (temp_ge) {
       temp_ge2 = temp_ge;
       temp_ge = temp_ge->next;
-      track_free(temp_ge2);
+      track_free(temp_ge2, sizeof(GameEntry));
   }
   md5_node->first_game_entry = NULL;
 }
