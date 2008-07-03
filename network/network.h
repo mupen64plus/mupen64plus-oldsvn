@@ -47,6 +47,14 @@
 #define 	CHUNK_INPUT		16
 #define     CHUNK_WRAPPER   17
 
+
+// Master Server Defines
+#define FIND_GAMES      00
+#define GAME_LIST	01
+#define OPEN_GAME       02
+#define GAME_DESC	03
+#define KEEP_ALIVE      04 
+
 typedef struct TFrame {
     Uint16  eID;
     Uint8   peer;

@@ -30,7 +30,7 @@
 #include <time.h>
 #include <SDL_net.h>
 
-#define SERVER_VER     "0.1"
+#define SERVER_VER     "1.0"
 #define MAX_PACKET	1470  // In bytes, the largest packet permitted by the protocol
 #define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
 #define CLEAN_FREQ      60    // In seconds, how often free_timed_out_game_desc() is called
@@ -431,7 +431,6 @@ int find_game_desc_by_host(uint32_t host) {
 void remove_game_desc(int n) {
   if ((n >= 0) && (n < MAX_GAME_DESC) && (g_GameList[n])) {
     // Remove node from linked list (no need to check for null we have a head and tail node)
-
     g_GameList[n]->prev->next = g_GameList[n]->next;
     g_GameList[n]->next->prev = g_GameList[n]->prev;
 
@@ -439,7 +438,10 @@ void remove_game_desc(int n) {
     track_free(g_GameList[n], sizeof(GameEntry));
     g_GameList[n] = NULL;
     g_GameCount--;
+
+    // If we've left an empty MD5 list, remove that too
     clean_md5_list();
+
   } else {
     printf("remove_game_desc(): Invalid game descriptor %d.\n", n);
   }
@@ -548,18 +550,21 @@ MD5Entry *add_md5_node(md5_byte_t md5_checksum[16]) {
       return NULL;
   }
   memcpy(tempNode->md5_checksum, md5_checksum, 16);
+
+  // Create head gameentry node, check for malloc failure
   if (!(tempNode->first_game_entry = track_malloc(sizeof(GameEntry)))) {
       track_free(tempNode, sizeof(MD5Entry));
       return NULL;
   }
 
-  tempNode->first_game_entry->prev = NULL;
+  // Create tail gameentry node, check for malloc failure
   if (!(tempNode->first_game_entry->next = track_malloc(sizeof(GameEntry)))) {
       track_free(tempNode->first_game_entry, sizeof(GameEntry));
       track_free(tempNode, sizeof(MD5Entry));
       return NULL;
   }
 
+  tempNode->first_game_entry->prev = NULL;
   tempNode->first_game_entry->next->prev = tempNode->first_game_entry;
   tempNode->first_game_entry->next->next = NULL;
   tempNode->next = g_MD5List;
@@ -576,10 +581,9 @@ MD5Entry *add_md5_node(md5_byte_t md5_checksum[16]) {
 */
 MD5Entry *find_md5_node(md5_byte_t md5_checksum[16]) {
   MD5Entry *tempNode = g_MD5List;
+
   while (tempNode) {
-    if (memcmp(tempNode->md5_checksum, md5_checksum, 16) == 0) {
-       break;
-    }
+    if (memcmp(tempNode->md5_checksum, md5_checksum, 16) == 0) break;
     tempNode = tempNode->next;
   }
   return tempNode;
