@@ -673,6 +673,8 @@ void *masterServerFindGames(char *master_server, uint16_t master_port, md5_byte_
             for (n = 0; n < (p->len - 2) / 6; n++) {
                memcpy(&gameAddy, (p->data + (n*6+2)), 4);
                gamePort = SDLNet_Read16(p->data + (n*6+6));
+
+               // Next step will be to construct a list and return a pointer
                printf("%d.%d.%d.%d:%d\n", GET_IP(gameAddy), gamePort);
             }
         }
@@ -687,4 +689,89 @@ void find_games_test() {
   unsigned char default_md5[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
   masterServerFindGames("orbitaldecay.kicks-ass.net", 7000, default_md5);
 }
+
+/*
+    masterServerFindGames
+    ------------------------------------------------------------------------------
+*/
+void *masterServerGetMD5List(char *master_server, uint16_t master_port) {
+    IPaddress serverAddy;
+    UDPsocket  s;
+    UDPpacket *p;
+    unsigned char md5[16];
+    time_t     currTime;
+    int        recv, n, m;
+
+    // Resolve address of master server
+    if (SDLNet_ResolveHost(&serverAddy, master_server, master_port) == -1) {
+        printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+        return NULL;
+    }
+
+    // Allocate a packet buffer
+    p = SDLNet_AllocPacket(1470); // Currently max length for packet from master server
+    if (!p) {
+        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
+        return NULL;
+    }
+
+    // Bind a udp socket
+    s = SDLNet_UDP_Open(0);
+    if (!s) {
+        printf("SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
+        return NULL;
+    }
+
+    // Fill packet data
+    p->data[0] = 'M';
+    p->data[1] = '+';
+    p->data[2] = 1;
+    p->data[3] = 0;
+    p->data[4] = FIND_MD5;
+
+    // Define packet length and destination
+    p->len = 5;
+    p->address.host = serverAddy.host;
+    p->address.port = serverAddy.port;
+
+    if (!SDLNet_UDP_Send(s, -1, p)) {
+        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+        return NULL;
+    }
+
+    do {
+        currTime = time(NULL);
+        while ( ((recv = SDLNet_UDP_Recv(s, p)) == 0) && (currTime + 2 > time(NULL)) ) {}
+
+        // Subsystem error
+        if (recv == -1) {
+            printf("SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
+
+        // Timed out, no response
+        } else if (recv == 0) {
+            printf("masterServerGetMD5List(): No response from %s:%u.\n", master_server, master_port);
+
+        // Received MD5 list packet
+        } else if (p->data[0] == MD5_LIST) {
+            printf("[Master Server] Displaying MD5 list:\n");
+            for (n = 0; n < (p->len - 2) / 16; n++) {
+               memcpy(&md5, (p->data + (n * 16 + 2)), 16);
+
+               // Next step will be to contruct a list and return a pointer
+               for (m = 0; m < 16; m++) printf("%X", md5[m]);
+               printf("\n");
+
+            }
+        }
+    } while ((p->data[1]) && (recv > 0));
+
+    // Cleanup and return pointer to game linked list
+    SDLNet_FreePacket(p);
+    return NULL;
+}
+
+void get_md5_list_test() {
+  masterServerGetMD5List("orbitaldecay.kicks-ass.net", 7000);
+}
+
 

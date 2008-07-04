@@ -54,6 +54,8 @@
 #define OPEN_GAME       02
 #define GAME_DESC	03
 #define KEEP_ALIVE      04 
+#define FIND_MD5        06
+#define MD5_LIST        07
 
 typedef struct TFrame {
     Uint16  eID;

@@ -131,6 +131,7 @@ static void join_selected_game() {
 
 static void refresh_list() {
     clear_list();
+    get_md5_list_test();
     find_games_test();
     append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", "127.0.0.1");     // For testing  
 

@@ -711,9 +711,42 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
 
 /* --------------------------------------------------------------------------------
 
-    send_md5_list(UDPpacket *packet, md5_byte_t md5_checksum[16])
+    send_md5_list(uint32_t host, uint16_t port)
  
    --------------------------------------------------------------------------------
 */
 void send_md5_list(uint32_t host, uint16_t port) {
+    MD5Entry  *temp_md5_entry = g_MD5List;
+    UDPpacket *sendPacket;
+    int        packet_offset = 2;
+
+    if ((sendPacket = SDLNet_AllocPacket(MAX_PACKET)) == NULL) {
+        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
+        return;
+    }
+    sendPacket->address.host = host;
+    sendPacket->address.port = port;
+    sendPacket->data[0] = MD5_LIST;
+
+    while (temp_md5_entry != NULL) {
+        if (packet_offset + 16 > MAX_PACKET) {
+            sendPacket->len = packet_offset;
+            packet_offset = 2;
+            sendPacket->data[1] = 1; // Fragmented
+            if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
+               printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+            }    
+        }
+        memcpy(sendPacket->data + packet_offset, &(temp_md5_entry->md5_checksum), 16); // second parameter should be dereferenced???
+        packet_offset += 16;
+        temp_md5_entry = temp_md5_entry->next;
+    }
+
+
+    sendPacket->len = packet_offset;
+    sendPacket->data[1] = 0;
+    if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
+        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+    }
+    SDLNet_FreePacket(sendPacket);
 }
