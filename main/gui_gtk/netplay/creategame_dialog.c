@@ -45,7 +45,7 @@ void callback_game_create(GtkWidget *widget, gpointer data) {
     int        game_id;
 
     // This is just example code, "localhost", 7000 should be retrieved from a master server list
-    game_id = masterServerOpenGame("localhost", 7000, md5, 5000);
+    game_id = open_game_test();
     if (game_id != -1) {
        printf("[Master Server] New game ID: %d\n", game_id);
     } else {

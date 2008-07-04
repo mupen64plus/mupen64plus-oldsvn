@@ -42,6 +42,9 @@
 #define GAME_DESC	03
 #define KEEP_ALIVE      04
 
+#define FIND_MD5        06
+#define MD5_LIST        07
+
 #define ELAPSED(dt)          (int)(((dt) - ((dt) % 3600)) / 3600), (int)((((dt) - ((dt) % 60)) / 60) % 60), (int)((dt) % 60)
 // Thanks to DarkJeztr for this little biddy
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -85,6 +88,7 @@ void        free_timed_out_game_desc();
 
 // UDP Send Data Functions
 void        send_game_descriptor(uint32_t host, uint16_t port, int gameDesc);
+void        send_md5_list(uint32_t host, uint16_t port);
 void        send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]);
 
 // Linked List Functions
@@ -275,6 +279,15 @@ void process_packet(UDPpacket *packet) {
   // If buffer was too small, the packet is malformed
 
   switch (packet->data[0]) {
+
+    case FIND_MD5:
+      if (packet->len == 1) {
+        printf("FIND_MD5 for %d.%d.%d.%d\n", GET_IP(packet->address.host));
+        send_md5_list(packet->address.host, packet->address.port);
+      } else {
+        printf("Bad packet length for FIND_MD5 packet from %d.%d.%d.%d.\n", GET_IP(packet->address.host));
+      }
+      break;
 
     case FIND_GAMES:
       if (packet->len == 17) {
@@ -694,4 +707,13 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
     }
     SDLNet_FreePacket(sendPacket);
+}
+
+/* --------------------------------------------------------------------------------
+
+    send_md5_list(UDPpacket *packet, md5_byte_t md5_checksum[16])
+ 
+   --------------------------------------------------------------------------------
+*/
+void send_md5_list(uint32_t host, uint16_t port) {
 }
