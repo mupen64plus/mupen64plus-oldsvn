@@ -5,6 +5,7 @@ Mupen64Plus is licensed under the GNU General Public License version 2.  Please 
 included GPL file for the terms and conditions of the GNU General Public License.  The
 authors of Mupen64Plus are:
   * Richard Goedeken (Richard42)
+  * John Chadwick (NMN)
   * James Hood (Ebenblues)
   * Scott Gorman (okaygo)
   * Scott Knauert (Tillin9)
@@ -13,7 +14,7 @@ authors of Mupen64Plus are:
   * Bob Forder (orbitaldecay)
   * Jason Espinosa (hasone)
   * HyperHacker
-  * NMN
+  * and others.
 
 Mupen64Plus is based on GPL-licensed source code from Mupen64 v0.5, originally written by:
   * Hacktarux
@@ -36,7 +37,7 @@ The Rice Video plugin is GPL-licensed and was originally written by:
   * Rice1964
   * Mudlord
 
-The OGLFT library used for the On-Screen Display is GPL-licensed and is Copyright 2002 lignum Computing.
+The OGLFT library used for the On-Screen Display is based on GPL-licensed code Copyright 2002 lignum Computing.
 More information about this library is available at the following websites:
   - http://oglft.sourceforge.net/index.html
   - http://directory.fsf.org/project/OGLFT/
