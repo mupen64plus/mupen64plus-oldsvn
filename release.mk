@@ -75,6 +75,8 @@ bin-32: FORCE
 	cp ./*.TXT ../$(BINNAME_32)/
 	cp ./README ../$(BINNAME_32)/
 	cp ./RELEASE ../$(BINNAME_32)/
+	cp ./LICENSES ../$(BINNAME_32)/
+	cp ./GPL ../$(BINNAME_32)/
 	cp ./config/* ../$(BINNAME_32)/config
 	cp ./doc/* ../$(BINNAME_32)/doc
 	cp ./fonts/* ../$(BINNAME_32)/fonts
@@ -104,6 +106,8 @@ bin-64: FORCE
 	cp ./*.TXT ../$(BINNAME_64)/
 	cp ./README ../$(BINNAME_64)/
 	cp ./RELEASE ../$(BINNAME_64)/
+	cp ./LICENSES ../$(BINNAME_64)/
+	cp ./GPL ../$(BINNAME_64)/
 	cp ./config/* ../$(BINNAME_64)/config
 	cp ./doc/* ../$(BINNAME_64)/doc
 	cp ./fonts/* ../$(BINNAME_64)/fonts
