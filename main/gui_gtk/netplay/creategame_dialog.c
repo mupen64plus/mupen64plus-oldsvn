@@ -30,6 +30,7 @@
 //#include "../../romcache.h"
 #include "net_gui.h"
 #include <SDL_net.h>
+#include "../../../network/network.h"
 
 GtkWidget *l_CreateGameWindow, *romComboBox; // Local globals
 
@@ -41,19 +42,11 @@ GtkWidget *l_CreateGameWindow, *romComboBox; // Local globals
 */
 
 void callback_game_create(GtkWidget *widget, gpointer data) {
-    md5_byte_t md5[16];
-    int        game_id;
+    unsigned char md5[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
+    int           game_id;
 
-    // This is test code
-    game_id = open_game_test();
-    if (game_id != -1) {
-       printf("[Master Server] New game ID: %d\n", game_id);
-    } else {
-       printf("[Master Server] No response.\n");
-    }  
-    // ========================================================================================
-
-    show_joingame_dialog();
+    game_id = MasterServerCreateGame(md5, 1000);
+    if (game_id != -1) show_joingame_dialog();
 }
 
 void hide_creategame_dialog() {

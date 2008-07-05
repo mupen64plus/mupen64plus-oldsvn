@@ -73,6 +73,7 @@ OBJ_CORE = \
 	main/volume.o \
 	network/network.o \
 	network/client.o \
+        network/master.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \

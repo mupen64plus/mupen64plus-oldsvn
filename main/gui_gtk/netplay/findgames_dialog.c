@@ -132,29 +132,30 @@ static void join_selected_game() {
 
 static void refresh_list() {
     MD5ListNode  *md5_list, *md5_temp;
-    GameListNode *game_list, *game_temp;
+    HostListNode *game_list, *game_temp;
     char addy_buffer[128];
-
+    unsigned char md5[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
     clear_list();
+
 
     // This is temporary, these functions will be used to populate the dropdown box
     // and game list
-    md5_temp = (md5_list = get_md5_list_test());
-    game_temp = (game_list = find_games_test());
+    md5_temp = (md5_list = MasterServerGetMD5List());
+    game_temp = (game_list = MasterServerFindGames(md5));
     printf("[Master Server] Open Game List:\n");
     while (game_temp) {
-
        // game_temp->host will be contacted and append_list_entry will reflect it's status
        // This is code for testing
        sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), game_temp->port);
        printf("    %s\n", addy_buffer);
        append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", (gchar *)addy_buffer);     // For testing  
 
-       game_temp = game_temp->next;
+       game_temp = GetNextHost(game_temp);
     }
 
-    freeMD5List(md5_list);
-    freeGameList(game_list);
+    FreeMD5List(md5_list);
+    FreeHostList(game_list);
+
 
 
 

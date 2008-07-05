@@ -69,6 +69,7 @@
 #include "../opengl/screenshot.h"
 #include "../network/network.h"
 
+
 #ifdef DBG
 #include <glib.h>
 #include "../debugger/debugger.h"
@@ -124,6 +125,7 @@ static int              SyncStatus;
 
 MupenClient *getNetplayClient();
 MupenClient *getNetplayClient() {return &l_NetplayClient;}
+
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -1386,6 +1388,9 @@ int main(int argc, char *argv[])
     parseCommandLine(argc, argv);
     setPaths();
     config_read();
+   
+    MasterServerAddToList("orbitaldecay.kicks-ass.net:7000");
+    MasterServerAddToList("localhost:7000");
 
 #ifdef VCR_SUPPORT
     VCRComp_init();

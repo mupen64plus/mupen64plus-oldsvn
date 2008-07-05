@@ -22,6 +22,7 @@
  *
 **/
 
+#include "master.h"
 #include "../opengl/osd.h"
 #include "../main/plugin.h" // Need typdef BUTTONS, DWORD, BOOL
 #include "../main/main.h"
@@ -63,26 +64,6 @@
 
 #define 	CHUNK_INPUT		16
 #define         CHUNK_WRAPPER           17
-
-// Master Server Defines
-#define FIND_GAMES      00
-#define GAME_LIST	01
-#define OPEN_GAME       02
-#define GAME_DESC	03
-#define KEEP_ALIVE      04 
-#define FIND_MD5        06
-#define MD5_LIST        07
-
-typedef struct TMD5ListNode {
-    unsigned char    md5[16];
-    struct TMD5ListNode *next;
-} MD5ListNode;
-
-typedef struct TGameListNode {
-    uint32_t           host;
-    uint16_t           port;
-    struct TGameListNode *next;
-} GameListNode;
 
 typedef struct TFrame {
     Uint16  eID;
@@ -214,15 +195,4 @@ void flushEventQueue(MupenClient *Client);
 int frameDelta(MupenClient *Client, Uint32 frame);
 int sourceID(int myID, int index);
 
-// Functions for contacting and querying master server
-void          freeMD5List(MD5ListNode *list);
-void          freeGameList(GameListNode *list);
-int           masterServerOpenGame  (char *master_server, uint16_t master_port, unsigned char md5[16], uint16_t local_port);
-int           masterServerKeepAlive (char *master_server, uint16_t master_port, uint16_t game_id);
-MD5ListNode  *masterServerGetMD5List(char *master_server, uint16_t master_port);
-GameListNode *masterServerFindGames (char *master_server, uint16_t master_port, unsigned char md5[16]);
-
-// temporary functions (garbage)
-GameListNode *find_games_test();
-MD5ListNode *get_md5_list_test(); 
 
