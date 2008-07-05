@@ -1,5 +1,5 @@
 /**
- * Mupen64 - creategame_dialog.c
+ * Mupen64Plus - creategame_dialog.c
  * Copyright (C) 2008 orbitaldecay
  *
  * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
@@ -44,7 +44,7 @@ void callback_game_create(GtkWidget *widget, gpointer data) {
     md5_byte_t md5[16];
     int        game_id;
 
-    // This is just example code, "localhost", 7000 should be retrieved from a master server list
+    // This is test code
     game_id = open_game_test();
     if (game_id != -1) {
        printf("[Master Server] New game ID: %d\n", game_id);
@@ -53,7 +53,7 @@ void callback_game_create(GtkWidget *widget, gpointer data) {
     }  
     // ========================================================================================
 
-    show_joingame_dialog(game_id);
+    show_joingame_dialog();
 }
 
 void hide_creategame_dialog() {

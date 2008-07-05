@@ -1,20 +1,26 @@
-/* =======================================================================================
-
-	client.c
-	by orbitaldecay
-
-	Current problems (bugs that need fixing):
-
-	When playing multiplayer, all of the controllers must be enabled in the plugin
-	if input is being received over the net.  Haven't found an easy way of fixing
-	this yet.
-
-        All clients must be using the same core.
-
-        Obviously all clients must use the same rom, the server doesn't check yet.
-
-   =======================================================================================
-*/ 
+/**
+ * Mupen64Plus - client.c
+ * 2008 orbitaldecay & DarkJeztr
+ *
+ * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
+ * 
+ *
+ * This program is free software; you can redistribute it and/
+ * or modify it under the terms of the GNU General Public Li-
+ * cence as published by the Free Software Foundation; either
+ * version 2 of the Licence, or any later version.
+ *
+ * This program is distributed in the hope that it will be use-
+ * ful, but WITHOUT ANY WARRANTY; without even the implied war-
+ * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public Licence for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * Licence along with this program; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
+ * USA.
+ *
+**/
 
 #include <time.h>
 #include "network.h"
@@ -457,13 +463,33 @@ void flushEventQueue(MupenClient *Client) {
 }
 
 /*
+################################################################################
 ================================================================================
 
-  Functions for use with master server
+  Functions for contacting the master server
 
 ================================================================================
+################################################################################
 */
-  
+
+void freeMD5List(MD5ListNode *list) {
+    MD5ListNode *temp = list;
+    while (temp) {
+        list = list->next;
+        free(temp);
+        temp = list;
+    }
+}
+
+void freeGameList(GameListNode *list) {
+    GameListNode *temp = list;
+    while (temp) {
+        list = list->next;
+        free(temp);
+        temp = list;
+    }
+}
+
 /*
     masterServerOpenGame (
     ----------------------------------------------------------------------------
@@ -557,7 +583,7 @@ int open_game_test() {
 */
 
 int masterServerKeepAlive(char *master_server, uint16_t master_port, uint16_t game_id) {
-    IPaddress serverAddy;
+    IPaddress  serverAddy;
     UDPsocket  s;
     UDPpacket *p;
     uint16_t   gameDesc;
@@ -608,14 +634,15 @@ int masterServerKeepAlive(char *master_server, uint16_t master_port, uint16_t ga
     ------------------------------------------------------------------------------
 */
 
-void *masterServerFindGames(char *master_server, uint16_t master_port, md5_byte_t md5[16]) {
-    IPaddress serverAddy;
-    UDPsocket  s;
-    UDPpacket *p;
-    uint32_t   gameAddy;
-    uint16_t   gamePort;
-    time_t     currTime;
-    int        recv, n;
+GameListNode *masterServerFindGames(char *master_server, uint16_t master_port, md5_byte_t md5[16]) {
+    GameListNode *GameList = NULL, *tempList = NULL;
+    IPaddress     serverAddy;
+    UDPsocket     s;
+    UDPpacket *   p;
+    uint32_t      gameAddy;
+    uint16_t      gamePort;
+    time_t        currTime;
+    int           recv, n;
 
     // Resolve address of master server
     if (SDLNet_ResolveHost(&serverAddy, master_server, master_port) == -1) {
@@ -667,40 +694,54 @@ void *masterServerFindGames(char *master_server, uint16_t master_port, md5_byte_
         } else if (recv == 0) {
             printf("masterServerFindGames(): No response from %s:%u.\n", master_server, master_port);
 
-        // Received game list packet
+        // Received game list packet, parse it and make a list out of it
         } else if (p->data[0] == GAME_LIST) {
-            printf("[Master Server] Displaying game list:\n");
             for (n = 0; n < (p->len - 2) / 6; n++) {
                memcpy(&gameAddy, (p->data + (n*6+2)), 4);
                gamePort = SDLNet_Read16(p->data + (n*6+6));
-
-               // Next step will be to construct a list and return a pointer
-               printf("%d.%d.%d.%d:%d\n", GET_IP(gameAddy), gamePort);
+               if (GameList) {
+                   tempList->next = malloc(sizeof(GameListNode));
+                   if (!tempList->next) {
+                      printf("malloc(): Failure! Unable to allocate memory.\n");
+                      freeGameList(GameList);
+                      return NULL;
+                   }
+                   tempList->next->host = gameAddy;
+                   tempList->next->port = gamePort;
+                   tempList = tempList->next;
+               } else {
+                   GameList = malloc(sizeof(GameListNode));
+                   if (!GameList) {
+                      printf("malloc(): Failure! Unable to allocate memory.\n");
+                      freeGameList(GameList);
+                      return NULL;
+                   }
+                   GameList->host = gameAddy;
+                   GameList->port = gamePort;
+                   tempList = GameList;
+               }
             }
         }
     } while ((p->data[1]) && (recv > 0));
 
     // Cleanup and return pointer to game linked list
     SDLNet_FreePacket(p);
-    return NULL;
-}
-
-void find_games_test() {
-  unsigned char default_md5[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
-  masterServerFindGames("orbitaldecay.kicks-ass.net", 7000, default_md5);
+    if (tempList) tempList->next = NULL;
+    return GameList;
 }
 
 /*
-    masterServerFindGames
+    masterServerGetMD5List
     ------------------------------------------------------------------------------
 */
-void *masterServerGetMD5List(char *master_server, uint16_t master_port) {
-    IPaddress serverAddy;
-    UDPsocket  s;
-    UDPpacket *p;
+MD5ListNode *masterServerGetMD5List(char *master_server, uint16_t master_port) {
+    MD5ListNode * MD5List = NULL, *tempList = NULL;
+    IPaddress     serverAddy;
+    UDPsocket     s;
+    UDPpacket *   p;
     unsigned char md5[16];
-    time_t     currTime;
-    int        recv, n, m;
+    time_t        currTime;
+    int           recv, n, m;
 
     // Resolve address of master server
     if (SDLNet_ResolveHost(&serverAddy, master_server, master_port) == -1) {
@@ -751,27 +792,45 @@ void *masterServerGetMD5List(char *master_server, uint16_t master_port) {
         } else if (recv == 0) {
             printf("masterServerGetMD5List(): No response from %s:%u.\n", master_server, master_port);
 
-        // Received MD5 list packet
+        // Received MD5 list packet, parse it and make a list out of it
         } else if (p->data[0] == MD5_LIST) {
-            printf("[Master Server] Displaying MD5 list:\n");
             for (n = 0; n < (p->len - 2) / 16; n++) {
-               memcpy(&md5, (p->data + (n * 16 + 2)), 16);
-
-               // Next step will be to contruct a list and return a pointer
-               for (m = 0; m < 16; m++) printf("%X", md5[m]);
-               printf("\n");
-
+//               memcpy(&md5, (p->data + (n * 16 + 2)), 16);
+               if (MD5List) {
+                   tempList->next = malloc(sizeof(MD5ListNode));
+                   if (!tempList->next) {
+                      printf("malloc(): Failure! Unable to allocate memory.\n");
+                      freeMD5List(MD5List);
+                      return NULL;
+                   }
+                   memcpy(tempList->next->md5, (p->data + (n * 16 + 2)), 16);
+                   tempList = tempList->next;
+               } else {
+                   MD5List = malloc(sizeof(MD5ListNode));
+                   if (!MD5List) {
+                      printf("malloc(): Failure! Unable to allocate memory.\n");
+                      freeMD5List(MD5List);
+                      return NULL;
+                   }
+                   memcpy(MD5List->md5, (p->data + (n * 16 + 2)), 16);
+                   tempList = MD5List;
+               }
             }
         }
     } while ((p->data[1]) && (recv > 0));
 
     // Cleanup and return pointer to game linked list
     SDLNet_FreePacket(p);
-    return NULL;
+    if (tempList) tempList->next = NULL;
+    return MD5List;
 }
 
-void get_md5_list_test() {
-  masterServerGetMD5List("orbitaldecay.kicks-ass.net", 7000);
+// These are just some temporary functions that I'm using for testing
+MD5ListNode *get_md5_list_test() {
+  return masterServerGetMD5List("orbitaldecay.kicks-ass.net", 7000);
 }
 
-
+GameListNode *find_games_test() {
+  unsigned char default_md5[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
+  return masterServerFindGames("orbitaldecay.kicks-ass.net", 7000, default_md5);
+}

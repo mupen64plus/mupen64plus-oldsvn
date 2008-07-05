@@ -1,5 +1,5 @@
 /**
- * Mupen64 - findgames_dialog.c
+ * Mupen64Plus - findgames_dialog.c
  * Copyright (C) 2008 orbitaldecay
  *
  * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
@@ -28,6 +28,7 @@
 #include "../../md5.h"
 //#include "../../romcache.h"
 #include "net_gui.h"
+#include "../../../network/network.h"
 
 #define MAX_COL_NAME_LEN		20
 #define COL_COUNT                       6
@@ -130,12 +131,34 @@ static void join_selected_game() {
 }
 
 static void refresh_list() {
-    clear_list();
-    get_md5_list_test();
-    find_games_test();
-    append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", "127.0.0.1");     // For testing  
+    MD5ListNode  *md5_list, *md5_temp;
+    GameListNode *game_list, *game_temp;
+    char addy_buffer[128];
 
-    /*       // gtk_combo_box_get_active (check if db has changed!)
+    clear_list();
+
+    // This is temporary, these functions will be used to populate the dropdown box
+    // and game list
+    md5_temp = (md5_list = get_md5_list_test());
+    game_temp = (game_list = find_games_test());
+    printf("[Master Server] Open Game List:\n");
+    while (game_temp) {
+
+       // game_temp->host will be contacted and append_list_entry will reflect it's status
+       // This is code for testing
+       sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), game_temp->port);
+       printf("    %s\n", addy_buffer);
+       append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", (gchar *)addy_buffer);     // For testing  
+
+       game_temp = game_temp->next;
+    }
+
+    freeMD5List(md5_list);
+    freeGameList(game_list);
+
+
+
+    /*       // gtk_combo_box_get_active (check if db has changed?)
              
              in /network/masterserver.c:
                  query master server with MD5

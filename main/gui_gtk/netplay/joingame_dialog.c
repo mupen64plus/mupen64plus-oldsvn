@@ -1,5 +1,5 @@
 /**
- * Mupen64 - joingame_dialog.c
+ * Mupen64Plus - joingame_dialog.c
  * Copyright (C) 2008 orbitaldecay
  *
  * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
