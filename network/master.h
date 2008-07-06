@@ -68,6 +68,7 @@ void          FreeMD5List(MD5ListNode *list);
 
 
 // Internal Functions
+static long int      timeElapsed(unsigned char arm);
 static int           masterServerOpenGame  (uint32_t master_server, uint16_t master_port, unsigned char md5[16], uint16_t local_port);
 static int           masterServerKeepAlive (uint32_t master_server, uint16_t master_port, uint16_t game_id);
 static MD5ListNode  *masterServerGetMD5List(uint32_t master_server, uint16_t master_port, int *status);

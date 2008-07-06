@@ -33,8 +33,8 @@
 #define MAX_COL_NAME_LEN		20
 #define COL_COUNT                       6
 
-gchar l_ColumnNames[COL_COUNT][MAX_COL_NAME_LEN] = {"Created By",
-                                                    "IP",
+gchar l_ColumnNames[COL_COUNT][MAX_COL_NAME_LEN] = {"Address",
+                                                    "Created By",
                                                     "Players",
                                                     "Core",
                                                     "Password",
@@ -74,7 +74,7 @@ static void append_list_entry(gchar *creator, gchar *players, gchar *core, gchar
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(l_TreeView));
     gtk_list_store_append ((GtkListStore *)model, iter);
-    gtk_list_store_set ((GtkListStore *)model, iter, 0, creator, 1, ip, 2, players, 3, core, 4, password, 5, p2p, -1);
+    gtk_list_store_set ((GtkListStore *)model, iter, 0, ip, 1, creator, 2, players, 3, core, 4, password, 5, p2p, -1);
     free(iter);
 }
 
@@ -108,7 +108,7 @@ static void join_selected_game() {
       gtk_tree_model_get_iter (model, iter, path);
 
       // Need to change core to defined type
-      gtk_tree_model_get_value (model, iter, 1, value);
+      gtk_tree_model_get_value (model, iter, 0, value);
       g_print("Join game @ %s\n", g_value_get_string(value));
       show_joingame_dialog();
       gtk_tree_path_free(path);
@@ -130,6 +130,8 @@ static void refresh_comboBox() {
 
     // If we received an MD5 list from the master server, populate the ROM combo box
     if (md5_temp) {
+      // Make the combobox sensitive
+      gtk_widget_set_sensitive(l_ComboBox, TRUE);
       printf("[Master Server] MD5 List:\n");
       while (md5_temp) {
          sprintf(addy_buffer, "%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X", GET_MD5(md5_temp->md5));
@@ -144,36 +146,44 @@ static void refresh_comboBox() {
          md5_temp = GetNextMD5(md5_temp);
       }
       gtk_combo_box_set_active ((GtkComboBox *)l_ComboBox, 0);
+    } else {
+      // There is nothing in the combo box, make it insensitive
+      gtk_widget_set_sensitive(l_ComboBox, FALSE);
     }
 }
 
 static void refresh_list() {
-    HostListNode *game_temp;
+    HostListNode *game_temp = NULL;
     MD5ListNode *md5_temp;
     int i, n;
     char addy_buffer[128];
 
     // Retrieve MD5 from ROM combo box selection
-    i = gtk_combo_box_get_active(GTK_COMBO_BOX(l_ComboBox));
     md5_temp = l_ComboBox_MD5_List;
-    for (n = 0; n < i; n++) {
-        if (!md5_temp->next) {
-            printf("Error: Corrupted MD5 linked list!\n"); // This shouldn't ever happen
-            clear_comboBox();
-            FreeMD5List(l_ComboBox_MD5_List);            
-            return;
-        }
-        md5_temp = md5_temp->next;
+    if (md5_temp) {    
+       i = gtk_combo_box_get_active(GTK_COMBO_BOX(l_ComboBox));
+       for (n = 0; n < i; n++) {
+           if (!md5_temp->next) {
+               printf("Error: Corrupted MD5 linked list!\n"); // This shouldn't ever happen
+               clear_comboBox();
+               FreeMD5List(l_ComboBox_MD5_List);            
+               return;
+           }
+           md5_temp = md5_temp->next;
+       }
     }
-
+    
     clear_list();
     FreeHostList(l_Game_List);
-    game_temp = (l_Game_List = MasterServerFindGames(md5_temp->md5));
+    if (md5_temp) game_temp = (l_Game_List = MasterServerFindGames(md5_temp->md5));
     if (game_temp) {
       printf("[Master Server] Open Game List:\n");
       while (game_temp) {
          sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), game_temp->port);
          printf("    %s\n", addy_buffer);
+
+         // TODO: Send status queries out to all servers in the list, if they respond.. append to list
+
          append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", (gchar *)addy_buffer);     // For testing  
          game_temp = GetNextHost(game_temp);
       }
@@ -221,7 +231,7 @@ static void destroy( GtkWidget *widget, GdkEvent *event, gpointer data ) {
 
 void show_findgames_dialog() {
   refresh_comboBox();
-  refresh_list(); // If unsuccessful, don't display findgames window, display error dialog
+//  refresh_list();
   gtk_widget_show_all(l_FindgamesWindow);
 }
 
@@ -319,7 +329,7 @@ static void Callback_ShowFindGamesWindow(GtkWidget *widget, gpointer data) {
 }
 
 static void Callback_Refresh(GtkWidget *widget, gpointer data) {
-  refresh_list();
+  refresh_comboBox();
 }
 
 static void Callback_Create(GtkWidget *widget, gpointer data) {

@@ -40,29 +40,37 @@
 #define STATUS_SUBSYSTEM_ERROR -1
 #define STATUS_NO_RESPONSE     -2
 #define STATUS_OK               0
-
+#define MASTER_SERVER_TIMEOUT   500
 
 static HostListNode *l_MasterServerList = NULL;
 
 void MasterServerAddToList(char *arg) {
   static HostListNode *last_node = NULL;
   IPaddress     server_addy;
-  char          host_buffer[32], master_server[512], *ptr;
+  char          host_buffer[256], master_server[512], *ptr;
   uint16_t      host_port;
   int           n;
 
   // Copy to buffer in case arg is a string literal
   strncpy(master_server, arg, sizeof(master_server));
 
-  // Replace colon with space for scanf compatability
+  // Replace ':' with ' ' for scanf compatability
   ptr = strchr(master_server, ':');
-  if (ptr == NULL) return;
-  master_server[(int)(ptr - master_server)] = 32;
+  if (ptr == NULL) {
+     printf("[Master Server] Address format not recognized for \"%s\".\n", master_server);
+     return;
+  }
+  n = (int)(ptr - master_server);
+  if (n < sizeof(host_buffer)) master_server[n] = 32;
+  else {
+     printf("[Master Server] Hostname \"%s\" is too long.\n", master_server);
+     return;
+  }
 
   // Extract hostname and port
   sscanf(master_server, "%s %u", host_buffer, &host_port);
   if (SDLNet_ResolveHost(&server_addy, host_buffer, host_port) == -1) {
-      printf("SDLNet_ResolveHost(): %s\n", SDLNet_GetError());
+      printf("[Master Server] Unable to resolve hostname \"%s\".\n", host_buffer);
       return;
   }
 
@@ -88,6 +96,7 @@ void MasterServerAddToList(char *arg) {
      last_node->next->port = server_addy.port;
      last_node = last_node->next;
   }
+  last_node->next = NULL;
 }
 
 int MasterServerCreateGame(unsigned char md5[16], int local_port) {
@@ -242,6 +251,20 @@ MD5ListNode *GetNextMD5(MD5ListNode *node) {
 ################################################################################
 */
 
+static long int timeElapsed(unsigned char arm) {
+  static struct timeval arm_tv;
+  struct timeval curr_tv;
+  long int elapsed = 0;
+
+  if (arm) {
+      gettimeofday(&arm_tv, NULL);
+  } else {
+      gettimeofday(&curr_tv, NULL);
+      elapsed = ((curr_tv.tv_sec - arm_tv.tv_sec) * 1000) + ((curr_tv.tv_usec - curr_tv.tv_usec) / 1000);
+  }
+  return elapsed;
+}
+
 /*
     masterServerOpenGame
     ------------------------------------------------------------------------------
@@ -252,7 +275,6 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     UDPsocket  s;
     UDPpacket *p;
     uint16_t   gameDesc;
-    time_t     currTime;
     int        recv;
 
     // Allocate a packet buffer
@@ -288,8 +310,8 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
         return -1;
     }
 
-    currTime = time(NULL);
-    while (((recv = SDLNet_UDP_Recv(s, p)) == 0) && (currTime + 2 > time(NULL))) {}
+    timeElapsed(1);
+    while (((recv = SDLNet_UDP_Recv(s, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
 
     // Handle possible errors
     if (recv == -1) {
@@ -370,7 +392,6 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
     UDPpacket *   p;
     uint32_t      gameAddy;
     uint16_t      gamePort;
-    time_t        currTime;
     int           recv, n;
 
     // Resolve address of master server
@@ -413,8 +434,8 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
     }
 
     do {
-        currTime = time(NULL);
-        while ( ((recv = SDLNet_UDP_Recv(s, p)) == 0) && (currTime + 2 > time(NULL)) ) {}
+        timeElapsed(1);
+        while ( ((recv = SDLNet_UDP_Recv(s, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT) ) {}
 
         // Subsystem error
         if (recv == -1) {
@@ -472,7 +493,6 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
     UDPsocket     s;
     UDPpacket *   p;
     unsigned char md5[16];
-    time_t        currTime;
     int           recv, n, m;
 
     // Resolve address of master server
@@ -514,8 +534,8 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
     }
 
     do {
-        currTime = time(NULL);
-        while ( ((recv = SDLNet_UDP_Recv(s, p)) == 0) && (currTime + 2 > time(NULL)) ) {}
+        timeElapsed(1);
+        while ( ((recv = SDLNet_UDP_Recv(s, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT) ) {}
 
         // Subsystem error
         if (recv == -1) {
