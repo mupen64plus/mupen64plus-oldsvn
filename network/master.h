@@ -60,9 +60,12 @@ HostListNode *MasterServerFindGames(unsigned char md5[16]);
 HostListNode *GetFirstMasterServer();
 HostListNode *GetNextHost(HostListNode *node);
 HostListNode *CombineHostLists(HostListNode *list1, HostListNode *list2);
-MD5ListNode  *GetNextMD5(MD5ListNode *node);
-void          FreeMD5List(MD5ListNode *list);
 void          FreeHostList(HostListNode *list);
+
+MD5ListNode  *GetNextMD5(MD5ListNode *node);
+MD5ListNode  *CombineMD5Lists(MD5ListNode *list1, MD5ListNode *list2);
+void          FreeMD5List(MD5ListNode *list);
+
 
 // Internal Functions
 static int           masterServerOpenGame  (uint32_t master_server, uint16_t master_port, unsigned char md5[16], uint16_t local_port);

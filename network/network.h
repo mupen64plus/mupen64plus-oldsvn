@@ -174,6 +174,9 @@ typedef struct TNetPlaySettings {
 #endif
 #define GET_PORT(port) SDLNet_Read16(&port)
 
+#define GET_MD5(md5) md5[0], md5[1], md5[2], md5[3], md5[4], md5[5], md5[6], md5[7], \
+                     md5[8], md5[9], md5[10], md5[11], md5[12], md5[13], md5[14], md5[15]
+
 int netInitialize(MupenClient *mClient);
 int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings);
 void netShutdown(MupenClient *mClient);

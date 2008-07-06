@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../md5.h"
-//#include "../../romcache.h"
+#include "../../mupenIniApi.h"
 #include "net_gui.h"
 #include "../../../network/network.h"
 
@@ -43,7 +43,10 @@ gchar l_ColumnNames[COL_COUNT][MAX_COL_NAME_LEN] = {"Created By",
 static GtkWidget    *l_FindgamesWindow;
 static GtkWidget    *l_TreeView;
 static GtkWidget    *l_ComboBox;
+static MD5ListNode  *l_ComboBox_MD5_List;
+static HostListNode *l_Game_List;
 
+static void Callback_ComboBox_Changed(GtkComboBox *combobox, gpointer user_data);
 static void Callback_DoubleClick(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data);
 static void Callback_ShowFindGamesWindow(GtkWidget *widget, gpointer data);
 static void Callback_Refresh(GtkWidget *widget, gpointer data);
@@ -65,30 +68,6 @@ void quick_message (gchar *message) {
    gtk_widget_show_all (dialog);
 }
 
-void popFindGamesCB() {
-/*    int n = 0;
-    static int alreadyPopulated = 0;
-    char temp[32];
-    cache_entry* rom = g_romcache.top;
-    romdatabase_entry *romdb;
-    
-    if (!alreadyPopulated) {
-        while (rom) {
-           romdb = ini_search_by_md5(rom->md5);
-           strncpy(temp, romdb->goodname, sizeof(temp) - 1);
-           if (strlen(romdb->goodname) > sizeof(temp)) {
-               temp[29] = '.';
-               temp[30] = '.';
-               temp[31] = '.';
-           }
-           gtk_combo_box_append_text((GtkComboBox *)l_ComboBox, (gchar *)temp);
-           rom = rom->next;
-        }
-        alreadyPopulated = 1;
-    }
-    gtk_combo_box_set_active ((GtkComboBox *)l_ComboBox, 0);*/
-}
-
 static void append_list_entry(gchar *creator, gchar *players, gchar *core, gchar *password, gchar *p2p, gchar *ip) {
     GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
     GtkTreeModel *model;
@@ -102,6 +81,16 @@ static void append_list_entry(gchar *creator, gchar *players, gchar *core, gchar
 static void clear_list() {
     GtkTreeModel *model;
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(l_TreeView));
+    gtk_list_store_clear( GTK_LIST_STORE(model) );
+}
+
+static void append_combo_box(gchar *goodname, gpointer host_node) {
+   gtk_combo_box_append_text(GTK_COMBO_BOX(l_ComboBox), goodname);
+}
+
+static void clear_comboBox() {
+    GtkTreeModel *model;
+    model = gtk_combo_box_get_model(GTK_COMBO_BOX(l_ComboBox));
     gtk_list_store_clear( GTK_LIST_STORE(model) );
 }
 
@@ -130,49 +119,65 @@ static void join_selected_game() {
    free(iter);
 }
 
+static void refresh_comboBox() {
+    MD5ListNode*  md5_temp;
+    char          addy_buffer[128];
+    mupenEntry*   romdb;
+
+    clear_comboBox();
+    FreeMD5List(l_ComboBox_MD5_List);
+    md5_temp = (l_ComboBox_MD5_List = MasterServerGetMD5List());
+
+    // If we received an MD5 list from the master server, populate the ROM combo box
+    if (md5_temp) {
+      printf("[Master Server] MD5 List:\n");
+      while (md5_temp) {
+         sprintf(addy_buffer, "%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X", GET_MD5(md5_temp->md5));
+         printf("    %s\n", addy_buffer);
+
+         romdb = ini_search_by_md5(addy_buffer);
+         if (!romdb) {
+                append_combo_box("Unknown ROM", (gpointer)md5_temp);
+         } else {
+                append_combo_box((gchar *)romdb->goodname, (gpointer)md5_temp);
+         }
+         md5_temp = GetNextMD5(md5_temp);
+      }
+      gtk_combo_box_set_active ((GtkComboBox *)l_ComboBox, 0);
+    }
+}
+
 static void refresh_list() {
-    MD5ListNode  *md5_list, *md5_temp;
-    HostListNode *game_list, *game_temp;
+    HostListNode *game_temp;
+    MD5ListNode *md5_temp;
+    int i, n;
     char addy_buffer[128];
-    unsigned char md5[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
-    clear_list();
 
-
-    // This is temporary, these functions will be used to populate the dropdown box
-    // and game list
-    md5_temp = (md5_list = MasterServerGetMD5List());
-    game_temp = (game_list = MasterServerFindGames(md5));
-    printf("[Master Server] Open Game List:\n");
-    while (game_temp) {
-       // game_temp->host will be contacted and append_list_entry will reflect it's status
-       // This is code for testing
-       sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), game_temp->port);
-       printf("    %s\n", addy_buffer);
-       append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", (gchar *)addy_buffer);     // For testing  
-
-       game_temp = GetNextHost(game_temp);
+    // Retrieve MD5 from ROM combo box selection
+    i = gtk_combo_box_get_active(GTK_COMBO_BOX(l_ComboBox));
+    md5_temp = l_ComboBox_MD5_List;
+    for (n = 0; n < i; n++) {
+        if (!md5_temp->next) {
+            printf("Error: Corrupted MD5 linked list!\n"); // This shouldn't ever happen
+            clear_comboBox();
+            FreeMD5List(l_ComboBox_MD5_List);            
+            return;
+        }
+        md5_temp = md5_temp->next;
     }
 
-    FreeMD5List(md5_list);
-    FreeHostList(game_list);
-
-
-
-
-    /*       // gtk_combo_box_get_active (check if db has changed?)
-             
-             in /network/masterserver.c:
-                 query master server with MD5
-                 recv() response (wait 1s)
-
-             if no reponse, notify user, return false
-             Set window title
-
-             in /network/masterserver.c:
-                 status query each server in response list
-                 loop for 1 second, recv() server responses
-                 for each server response, append_list_entry() (if gui enabled, otherwise print to prompt)
-    */
+    clear_list();
+    FreeHostList(l_Game_List);
+    game_temp = (l_Game_List = MasterServerFindGames(md5_temp->md5));
+    if (game_temp) {
+      printf("[Master Server] Open Game List:\n");
+      while (game_temp) {
+         sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), game_temp->port);
+         printf("    %s\n", addy_buffer);
+         append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", (gchar *)addy_buffer);     // For testing  
+         game_temp = GetNextHost(game_temp);
+      }
+    } else printf("[Master Server] No open games.\n");
 }
 
 void create_new_tree_view_text_column(GtkWidget *tree, gchar *title, gint index) {
@@ -195,17 +200,27 @@ GtkWidget *setup_tree (void)
    listStore = gtk_list_store_newv (COL_COUNT, columnTypes);
    tree = gtk_tree_view_new_with_model ((GtkTreeModel *)listStore);
    for (n = 0; n < COL_COUNT; n++) create_new_tree_view_text_column(tree, l_ColumnNames[n], n);
-//   gtk_tree_view_set_grid_lines ((GtkTreeView *)tree, GTK_TREE_VIEW_GRID_LINES_VERTICAL);
    gtk_tree_view_set_headers_clickable((GtkTreeView *)tree, TRUE);
    return tree;
 }
 
+GtkWidget *setup_comboBox (void)
+{
+   GtkWidget *comboBox;
+/*
+   It would be better to manually construct the combo box but I can't find
+   sufficient documentation on it :(
+*/
+   comboBox = gtk_combo_box_new_text (); // gtk_combo_box_new_with_model((GtkTreeModel *)listStore);
+   
+   return comboBox;
+}
 
 static void destroy( GtkWidget *widget, GdkEvent *event, gpointer data ) {
 }
 
 void show_findgames_dialog() {
-  popFindGamesCB();
+  refresh_comboBox();
   refresh_list(); // If unsuccessful, don't display findgames window, display error dialog
   gtk_widget_show_all(l_FindgamesWindow);
 }
@@ -221,7 +236,7 @@ GtkWidget *create_findgames_dialog () {
     GtkWidget *romSelectBox, *romSelectFrame;
     GtkWidget *openGameBox, *openGameFrame;
 
-    l_ComboBox = gtk_combo_box_new_text();
+    l_ComboBox = setup_comboBox();
     l_TreeView = setup_tree();
 
     vbox    = gtk_vbox_new (FALSE, 1);
@@ -251,6 +266,7 @@ GtkWidget *create_findgames_dialog () {
     g_signal_connect (G_OBJECT (l_TreeView), "row-activated", G_CALLBACK (Callback_DoubleClick), NULL);
     g_signal_connect (G_OBJECT (joinButton),    "clicked", G_CALLBACK (Callback_Join), NULL);
     g_signal_connect (G_OBJECT (refreshButton), "clicked", G_CALLBACK (Callback_Refresh), NULL);
+    g_signal_connect (G_OBJECT (l_ComboBox), "changed", G_CALLBACK (Callback_ComboBox_Changed), NULL);
 
     g_signal_connect_swapped (G_OBJECT (closeButton), "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), G_OBJECT (l_FindgamesWindow));
 
@@ -282,7 +298,6 @@ GtkWidget *create_findgames_dialog () {
 
     gtk_container_set_border_width (GTK_CONTAINER (rhbox), 0);
     gtk_box_pack_start ((GtkBox *)lhbox, joinButton,    TRUE, TRUE, 5);
-//    gtk_box_pack_start ((GtkBox *)rhbox, createButton,  TRUE, TRUE, 5);
     gtk_box_pack_start ((GtkBox *)lhbox, refreshButton, TRUE, TRUE, 5);
     gtk_box_pack_start ((GtkBox *)rhbox, closeButton,   TRUE, TRUE, 5);
     
@@ -294,6 +309,10 @@ GtkWidget *create_findgames_dialog () {
 */
 static void Callback_DoubleClick(GtkTreeView *tree_view, GtkTreePath *p, GtkTreeViewColumn *c, gpointer user_data) {
   join_selected_game();
+}
+
+static void Callback_ComboBox_Changed(GtkComboBox *combobox, gpointer user_data) {
+  refresh_list();
 }
 
 static void Callback_ShowFindGamesWindow(GtkWidget *widget, gpointer data) {

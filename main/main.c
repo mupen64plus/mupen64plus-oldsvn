@@ -1390,7 +1390,6 @@ int main(int argc, char *argv[])
     config_read();
    
     MasterServerAddToList("orbitaldecay.kicks-ass.net:7000");
-    MasterServerAddToList("localhost:7000");
 
 #ifdef VCR_SUPPORT
     VCRComp_init();

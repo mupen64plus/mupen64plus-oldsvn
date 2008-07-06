@@ -285,9 +285,9 @@ mupenEntry* ini_search_by_md5(const char *md5)
    char t[3];
    int i;
    iniElem *aux;
-   
+
    if (ini.comment == NULL) return emptyEntry;
-   
+
    t[0] = md5[0];
    t[1] = md5[1];
    t[2] = 0;

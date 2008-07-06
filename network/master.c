@@ -114,10 +114,9 @@ HostListNode *MasterServerFindGames(unsigned char md5[16]) {
     HostListNode *temp_master;
 
     temp_master = GetFirstMasterServer();
-    while ((status != STATUS_OK) && (temp_master)) {
+    while (temp_master) {
         printf("[Master Server] Finding games @ %d.%d.%d.%d:%d...", GET_IP(temp_master->host), GET_PORT(temp_master->port));
-//        host_list = CombineHostLists(host_list, masterServerFindGames(temp_master->host, temp_master->port, md5, &status));
-        host_list = masterServerFindGames(temp_master->host, temp_master->port, md5, &status);
+        host_list = CombineHostLists(host_list, masterServerFindGames(temp_master->host, temp_master->port, md5, &status));
         switch (status) {
             case STATUS_SUBSYSTEM_ERROR:
                  printf("Error\n");
@@ -140,9 +139,9 @@ MD5ListNode *MasterServerGetMD5List() {
     HostListNode *temp_master;
 
     temp_master = GetFirstMasterServer();
-    while ((status != STATUS_OK) && (temp_master)) {
+    while (temp_master) {
         printf("[Master Server] Retreiving MD5 list from %d.%d.%d.%d:%d...", GET_IP(temp_master->host), GET_PORT(temp_master->port));
-        MD5_list = masterServerGetMD5List(temp_master->host, temp_master->port, &status);
+        MD5_list = CombineMD5Lists(MD5_list, masterServerGetMD5List(temp_master->host, temp_master->port, &status));
         switch (status) {
             case STATUS_SUBSYSTEM_ERROR:
                  printf("Error\n");
@@ -185,32 +184,48 @@ HostListNode *GetNextHost(HostListNode *node) {
   return node->next;
 }
 
-/*
+
 HostListNode *CombineHostLists(HostListNode *list1, HostListNode *list2) {
   int duplicate = 0;
   HostListNode *temp1 = list1;
   HostListNode *temp2 = list2;
 
-  if ((!temp1) && (temp2)) return temp2;
+  if (!temp1) return temp2;
 
-  if ((temp1) && (temp2)) {
-
-      while (temp2) {
-          duplicate = 0;
-          if ((temp1.host == temp2.host) && (temp1.port == temp2.port)) duplicate = 1;
-          while ((temp1->next) && (!duplicate)) {
-              temp1 = temp1->next;
-              if ((temp1.host == temp2.host) && (temp1.port == temp2.port)) duplicate = 1;
-          }
-          if (!duplicate) temp1->next = temp2;
-          temp1 = list1;
-          temp2 = temp2->next;
+  while (temp2) {
+      duplicate = 0;
+      if ((temp1->host == temp2->host) && (temp1->port == temp2->port)) duplicate = 1;
+      while ((GetNextHost(temp1)) && (!duplicate)) {
+          temp1 = GetNextHost(temp1);
+          if ((temp1->host == temp2->host) && (temp1->port == temp2->port)) duplicate = 1;
       }
+      if (!duplicate) temp1->next = temp2;
+      temp1 = list1;
+      temp2 = GetNextHost(temp2);
   }
-
   return list1;
 }
-*/
+
+MD5ListNode *CombineMD5Lists(MD5ListNode *list1, MD5ListNode *list2) {
+  int duplicate = 0;
+  MD5ListNode *temp1 = list1;
+  MD5ListNode *temp2 = list2;
+
+  if (!temp1) return temp2;
+
+  while (temp2) {
+      duplicate = 0;
+      if (memcmp(temp1->md5, temp2->md5, 16) == 0) duplicate = 1;
+      while ((GetNextMD5(temp1)) && (!duplicate)) {
+          temp1 = GetNextMD5(temp1);
+          if (memcmp(temp1->md5, temp2->md5, 16) == 0) duplicate = 1;
+      }
+      if (!duplicate) temp1->next = temp2;
+      temp1 = list1;
+      temp2 = GetNextMD5(temp2);
+  }
+  return list1;
+}
 
 MD5ListNode *GetNextMD5(MD5ListNode *node) {
   return node->next;
