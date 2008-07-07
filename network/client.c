@@ -230,7 +230,7 @@ void clientProcessMessages(MupenClient *Client) {
                     Client->player[remoteID].address=Client->packet->address;
 
                     Client->eventQueue[Client->numQueued]->evt=EVENT_INPUT;
-                    Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay;
+                    Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay+VI_PER_FRAME;
                     addEventToQueue(Client);
 
 
@@ -252,9 +252,9 @@ void clientProcessMessages(MupenClient *Client) {
                         Uint8 host = Client->packet->data[2];
                         char lag = Client->packet->data[3];
                         int curID = sourceID(Client->myID,0);
-                        Client->lag[host] = (((int)Client->lag[host])*7)/8 + diff;
+                        Client->lag[host] = ((((int)Client->lag[host])*7)/8) + diff;
                         Client->lag_local[host] = lag;
-                        adjust = (lag - Client->lag[host])/8;
+                        adjust = (lag - Client->lag[host])/4;
                         fprintf(stderr,"Host %d lag time local: %d remote: %d adjust: %d diff: %d\n",host,Client->lag[host],lag,adjust,diff);
                         setSpeed(100+(adjust));
                         clientProcessFrame(Client);
@@ -333,7 +333,8 @@ void clientLoadPacket(MupenClient *Client, void *data, int len) {
 */
 
 // processEventQueue() : Process the events in the queue, if necessary.
-void processEventQueue(MupenClient *Client) {
+// returns 1 if successful, or 0 if it doesn't have all the needed packets to continue
+int processEventQueue(MupenClient *Client) {
     int i;
     while((Client->numQueued > 0) && (Client->eventQueue[0]->time <= Client->frameCounter)) {
         //fprintf(stderr,"B q-%d t-%d c-%d\n",Client->numQueued,Client->eventQueue[0]->time,Client->frameCounter);
@@ -361,9 +362,11 @@ void processEventQueue(MupenClient *Client) {
                 if(curUpdate->control==1)
                     fprintf(stderr,"Unpause event frame %d, player %d, %d (%d)\n", curUpdate->timer, i, (frame/VI_PER_FRAME), (frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH);
                 if(curUpdate->timer!=frame/VI_PER_FRAME) {
-                    if(i!=Client->myID)
+                    if(i!=Client->myID) {
                        fprintf(stderr,"[NETPLAY] Out of sync at frame %d (%d) player: %d\n", frame/VI_PER_FRAME, curUpdate->timer, i);
-		}
+                        return 0;
+                    }
+                }
                 else {
                     if(curUpdate->control==1) {
                         curUpdate->control=0;
@@ -371,7 +374,7 @@ void processEventQueue(MupenClient *Client) {
                         printf("Unpause event frame %d\n",frame);
                     }
                     Client->playerKeys[i].Value=curUpdate->value;
-if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", curUpdate->value, i, Client->frameCounter);
+//if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", curUpdate->value, i, Client->frameCounter);
                 }
             Client->eventQueue[0]->time=Client->frameCounter+VI_PER_FRAME;
             heapifyEventQueue(Client,0);
@@ -382,7 +385,7 @@ if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", cu
           break;
         }
     }
-
+    return 1;
   /*if (Client->eventQueue) {
     while (Client->eventQueue->timer < Client->frameCounter) {
        printf("[Netplay] DESYNC: Missed event for frame %d (currently frame %d).\n", Client->eventQueue->timer, Client->frameCounter);

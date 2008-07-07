@@ -192,7 +192,7 @@ void clientSendButtons(MupenClient *Client, int control, DWORD value);
 void heapifyEventQueue(MupenClient *Client,unsigned int elem);
 void addEventToQueue(MupenClient *Client);
 void popEventQueue(MupenClient *Client);
-void processEventQueue(MupenClient *Client);
+int processEventQueue(MupenClient *Client);
 void flushEventQueue(MupenClient *Client);
 
 int frameDelta(MupenClient *Client, Uint32 frame);

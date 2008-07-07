@@ -64,8 +64,11 @@ void netShutdown(MupenClient *mClient) {
 int netMain(MupenClient *mClient) {
     if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0)
         clientSendFrame(mClient);
-    clientProcessMessages(mClient);
-    processEventQueue(mClient);
+
+    do {
+        clientProcessMessages(mClient);
+    } while( !processEventQueue(mClient) );
+
     mClient->frameCounter++;
 
     return 0;
