@@ -117,7 +117,7 @@ void clientProcessFrame(MupenClient *Client) {
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timer=frame;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
-            fprintf(stderr,"chunk player: %d frame: %d\n",curChunk->input.player,frame);
+            //fprintf(stderr,"chunk player: %d frame: %d data: %08x\n",curChunk->input.player,frame,curChunk->input.buttons.Value);
             len-=sizeof(InputChunk);
           break;
           default:
@@ -142,19 +142,22 @@ void clientSendFrame(MupenClient *Client) {
         chunk->input.type = CHUNK_INPUT;
         chunk->input.player = Client->myID;
         NetPlayerUpdate *update = &(Client->playerEvent[(Client->frameCounter/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][Client->myID]);
-        if(update->timer!=Client->frameCounter-1) {
+        if(update->timer!=(Client->frameCounter)/VI_PER_FRAME) {
             chunk->input.buttons.Value = (0x8000 * Client->startEvt);
-            fprintf(stderr,"[NETPLAY]Sending bad event: %08X\n",chunk->input.buttons.Value);
+            fprintf(stderr,"[NETPLAY]Sending BAD event: %08X u->timer: %d fC: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME);
         }
         else {
-            chunk->input.buttons.Value = update->value & (0x8000 * Client->startEvt);
+            chunk->input.buttons.Value = update->value | (0x8000 * Client->startEvt);
+            //fprintf(stderr,"[NETPLAY]Sending event: %08X u->timer: %d fC: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME);
         }
         if(Client->startEvt) {
             Client->playerEvent[((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK)%FRAME_BUFFER_LENGTH][Client->myID].control=1;
+            Client->playerEvent[((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK)%FRAME_BUFFER_LENGTH][Client->myID].timer=(Client->frameCounter/VI_PER_FRAME)&FRAME_MASK;
+            Client->startEvt=0;
         }
         Client->packet->len+=sizeof(InputChunk);
 
-        fprintf(stderr,"send sync %d.%d.%d.%d:%d\n",GET_IP(Client->packet->address.host), GET_PORT(Client->packet->address.port));
+//        fprintf(stderr,"send sync %d.%d.%d.%d:%d\n",GET_IP(Client->packet->address.host), GET_PORT(Client->packet->address.port));
         SDLNet_UDP_Send(Client->socket, -1, Client->packet);
     }
 
@@ -249,11 +252,11 @@ void clientProcessMessages(MupenClient *Client) {
                         Uint8 host = Client->packet->data[2];
                         char lag = Client->packet->data[3];
                         int curID = sourceID(Client->myID,0);
-                        Client->lag[host] = (((int)Client->lag[host])*3+diff)/4;
+                        Client->lag[host] = (((int)Client->lag[host])*7)/8 + diff;
                         Client->lag_local[host] = lag;
-                        adjust = ((Client->lag[host] * -1) + lag)/2;
+                        adjust = (lag - Client->lag[host])/8;
                         fprintf(stderr,"Host %d lag time local: %d remote: %d adjust: %d diff: %d\n",host,Client->lag[host],lag,adjust,diff);
-                        setSpeed(100+(adjust/2));
+                        setSpeed(100+(adjust));
                         clientProcessFrame(Client);
                     } else
                         fprintf(stderr,"[NETPLAY]Discarded packet for frame %d (it's currently frame %d)\n",
@@ -306,10 +309,10 @@ void clientProcessMessages(MupenClient *Client) {
 }
 
 void clientSendButtons(MupenClient *Client, int control, DWORD value) {
-    if(control==Client->myID) {//will only allow 1 player per host, must be changed
-        int bufInd=((Client->frameCounter+1)/VI_PER_FRAME) % FRAME_BUFFER_LENGTH;
-        Client->playerEvent[bufInd][control].timer = Client->frameCounter;
-        Client->playerEvent[bufInd][control].value = value;
+    if(control==0) {//will only allow 1 player per host, must be changed
+        int bufInd=((Client->frameCounter/VI_PER_FRAME)+1) % FRAME_BUFFER_LENGTH;
+        Client->playerEvent[bufInd][Client->myID].timer = (Client->frameCounter/VI_PER_FRAME)+1;
+        Client->playerEvent[bufInd][Client->myID].value = value;
     }
 }
 
@@ -355,14 +358,20 @@ void processEventQueue(MupenClient *Client) {
             for(i=0; i<Client->numConnected;i++) {
                 int frame=Client->frameCounter-Client->inputDelay;
                 NetPlayerUpdate *curUpdate=&(Client->playerEvent[(frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH][i]);
-                if(curUpdate->timer!=frame/VI_PER_FRAME)
-                    fprintf(stderr,"[NETPLAY] Out of sync at frame %d (%d) player: %d\n",frame/VI_PER_FRAME,curUpdate->timer,i);
+                if(curUpdate->control==1)
+                    fprintf(stderr,"Unpause event frame %d, player %d, %d (%d)\n", curUpdate->timer, i, (frame/VI_PER_FRAME), (frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH);
+                if(curUpdate->timer!=frame/VI_PER_FRAME) {
+                    if(i!=Client->myID)
+                       fprintf(stderr,"[NETPLAY] Out of sync at frame %d (%d) player: %d\n", frame/VI_PER_FRAME, curUpdate->timer, i);
+		}
                 else {
                     if(curUpdate->control==1) {
-                        curUpdate->control=0; 
+                        curUpdate->control=0;
                         rompause=!rompause;
                         printf("Unpause event frame %d\n",frame);
                     }
+                    Client->playerKeys[i].Value=curUpdate->value;
+if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", curUpdate->value, i, Client->frameCounter);
                 }
             Client->eventQueue[0]->time=Client->frameCounter+VI_PER_FRAME;
             heapifyEventQueue(Client,0);

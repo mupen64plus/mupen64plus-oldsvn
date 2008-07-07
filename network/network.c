@@ -58,7 +58,7 @@ int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings) {
 }
 
 void netShutdown(MupenClient *mClient) {
-  clientDisconnect(mClient);
+    clientDisconnect(mClient);
 }
 
 int netMain(MupenClient *mClient) {
@@ -69,42 +69,6 @@ int netMain(MupenClient *mClient) {
     mClient->frameCounter++;
 
     return 0;
-
-            //else fprintf(stderr,"Frame %d, bool %d",mClient->frameCounter,mClient->numConnected);
-		/*
-                if (mClient->frameCounter % mClient->syncFreq == 0) mClient->isWaitingForServer = TRUE;
-                if (mClient->isWaitingForServer) {
-                    sentSyncMessage = 0;
-                    while (mClient->isWaitingForServer && mClient->isConnected) {
-                        osd_render();  // Updating OSD
-                        SDL_GL_SwapBuffers();
-                        SDL_PumpEvents();
-#ifdef WITH_LIRC
-                        lircCheckInput();
-#endif //WITH_LIRC 
-                        if (mServer->isActive) {
-                            if (mServer->isAccepting) {
-                                serverAccept(mServer);
-                                serverProcessMessages(mServer);
-                            } else if (!sentSyncMessage) {
-                                serverProcessMessages(mServer);
-                                syncMsg.type = NETMSG_SYNC;
-                                syncMsg.genEvent.timer = mClient->frameCounter;
-                                serverBroadcastMessage(mServer, &syncMsg);
-                                sentSyncMessage = 1;
-                            }
-                        }
-                        clientProcessMessages(mClient);
-                        processEventQueue(mClient);
-                        if (mClient->lastSync >= mClient->frameCounter) mClient->isWaitingForServer = FALSE;
-                    }
-	        } else {
-                  //if (mServer->isActive) serverProcessMessages(mServer);
-                  clientProcessMessages(mClient);
-                  processEventQueue(mClient);
-                }
-            }*/
-
 }
 
 int frameDelta(MupenClient *Client, Uint32 frame) {

@@ -210,6 +210,7 @@ void internal_ReadController(int Control, BYTE *Command)
 {
    BUTTONS Keys;
    MupenClient *mClient = (MupenClient *)getNetplayClient();
+   static BUTTONS btnPrev[4];
 
    switch (Command[2])
      {
@@ -222,6 +223,9 @@ void internal_ReadController(int Control, BYTE *Command)
         if (mClient->isEnabled) { // Update the server if we're connected to one and if the button state has actually changed
             clientSendButtons(mClient, Control, Keys.Value);
             *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
+            if(btnPrev[Control].Value != mClient->playerKeys[Control].Value)
+                fprintf(stderr,"Control %d = %08x frame: %d\n",Control,mClient->playerKeys[Control].Value,mClient->frameCounter);
+            btnPrev[Control].Value = mClient->playerKeys[Control].Value;
         } else if (Controls[Control].Present) {
             *((unsigned int *)(Command + 3)) = Keys.Value;
 #ifdef COMPARE_CORE

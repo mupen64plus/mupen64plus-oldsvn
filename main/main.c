@@ -171,7 +171,6 @@ int gui_enabled(void)
 
 void setSpeed(unsigned int speed)
 {
-    fprintf(stderr,"speed %d\n",speed);
     l_SpeedFactor = speed;
     setSpeedFactor(l_SpeedFactor);  // call to audio plugin
 }
