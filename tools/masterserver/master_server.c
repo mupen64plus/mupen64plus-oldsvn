@@ -33,7 +33,7 @@
 #define SERVER_VER     "1.0"
 #define MAX_PACKET	1470  // In bytes, the largest packet permitted by the protocol
 #define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
-#define CLEAN_FREQ      60    // In seconds, how often free_timed_out_game_desc() is called
+#define CLEAN_FREQ      10    // In seconds, how often free_timed_out_game_desc() is called
 #define PROTOCOL_ID     "M+"
 
 #define FIND_GAMES      00
@@ -337,7 +337,7 @@ void process_packet(UDPpacket *packet) {
             // don't let anybody keep other hosts alive (potential dos)
             if (g_GameList[game]->host == packet->address.host) {
               g_GameList[game]->keep_alive = 1;
-//              printf("KEEP_ALIVE request from %d.%d.%d.%d granted.\n", GET_IP(packet->address.host));
+              printf("Game ID %d keep alive granted.\n", game);
             } else {
               // If this happens, someone is screwing around
               printf("Mismatched game descriptor in KEEP_ALIVE packet from %d.%d.%d.%d.\n", GET_IP(packet->address.host));

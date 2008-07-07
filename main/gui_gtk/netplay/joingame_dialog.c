@@ -40,6 +40,12 @@ gchar l_JoinGameColumnNames[COL_COUNT][MAX_COL_NAME_LEN] = {"Player",
 GtkWidget *l_JoinGameWindow;
 GtkWidget *l_JoinGameTreeView;
 
+
+static void Callback_CancelJoinGame(GtkWidget *widget, gpointer data) {
+  gtk_widget_hide_all(l_JoinGameWindow);
+  MasterServerCloseGame();
+}
+
 void hide_joingame_dialog() {
   gtk_widget_hide_all(l_JoinGameWindow);
 }
@@ -110,9 +116,8 @@ void create_joingame_dialog() {
   gtk_box_pack_start (GTK_BOX(bottomHBox), emptyHBox, TRUE, TRUE, 0);  
   gtk_box_pack_start (GTK_BOX(bottomHBox), quitButton, FALSE, FALSE, 0);  
 
-  g_signal_connect (G_OBJECT (l_JoinGameWindow), "delete_event", GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), NULL);
-  g_signal_connect_swapped (G_OBJECT (quitButton), "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), G_OBJECT (l_JoinGameWindow));
-
+  g_signal_connect (G_OBJECT (l_JoinGameWindow), "delete_event", G_CALLBACK (Callback_CancelJoinGame), NULL);
+  g_signal_connect (G_OBJECT (quitButton), "clicked", G_CALLBACK (Callback_CancelJoinGame), NULL);
 
   append_list_entry("1", "Bob", "No", "Ready");
   append_list_entry("2", "",    "No", "Not Connected");
@@ -121,8 +126,8 @@ void create_joingame_dialog() {
 }
 
 void show_joingame_dialog() {
-    hide_creategame_dialog();
-    hide_findgames_dialog();
+//    hide_creategame_dialog();
+//    hide_findgames_dialog();
     gtk_widget_show_all(l_JoinGameWindow);
 }
 

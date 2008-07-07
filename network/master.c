@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <SDL_net.h>
+#include <pthread.h>
 #include "network.h"
 
 #define STATUS_SUBSYSTEM_ERROR -1
@@ -43,6 +44,9 @@
 #define MASTER_SERVER_TIMEOUT   500
 
 static HostListNode *l_MasterServerList = NULL;
+static int           l_Game_ID = -1;
+static IPaddress     l_Game_Master;
+static pthread_t     l_Keep_Alive_Thread = 0;   
 
 void MasterServerAddToList(char *arg) {
   static HostListNode *last_node = NULL;
@@ -99,22 +103,49 @@ void MasterServerAddToList(char *arg) {
   last_node->next = NULL;
 }
 
+void MasterServerCloseGame() {
+  l_Game_ID = -1;
+}
+
+static void *KeepAliveThread( void *_arg ) {
+  printf("[Master Server] Keep alive thread launched.\n");
+  while(l_Game_ID != -1) {
+    masterServerKeepAlive(l_Game_Master.host, l_Game_Master.port, l_Game_ID);
+    sleep(5);
+  }
+  printf("[Master Server] Exiting keep alive thread.\n");
+}
+
 int MasterServerCreateGame(unsigned char md5[16], int local_port) {
-    int        game_id = -1;
     HostListNode *temp_master;
 
+    if (l_Game_ID != -1) {
+       // Kill old thread
+       l_Game_ID = -1;
+    }
+
     temp_master = GetFirstMasterServer();
-    while ((game_id == -1) && (temp_master)) {
+    while ((l_Game_ID == -1) && (temp_master)) {
         printf("[Master Server] Opening game @ %d.%d.%d.%d:%d...", GET_IP(temp_master->host), GET_PORT(temp_master->port));
-        game_id = masterServerOpenGame(temp_master->host, temp_master->port, md5, local_port);
-        if (game_id != -1) {
-           printf("Game ID: %d\n", game_id);
+        l_Game_ID = masterServerOpenGame(temp_master->host, temp_master->port, md5, local_port);
+        if (l_Game_ID != -1) {
+           printf("Game ID: %d\n", l_Game_ID);
+           l_Game_Master.host = temp_master->host;
+           l_Game_Master.port = temp_master->port;
+
+           // Launch keep alive thread
+           if(pthread_create(&l_Keep_Alive_Thread, NULL, KeepAliveThread, NULL) != 0)
+           {
+               l_Keep_Alive_Thread = 0;
+               alert_message(tr("[Master Server] Couldn't spawn keep alive thread!"));
+               l_Game_ID = -1;
+           }
         } else {
            printf("No response.\n");
         }
         temp_master = GetNextHost(temp_master);
     }
-    return game_id;
+    return l_Game_ID;
 }
 
 HostListNode *MasterServerFindGames(unsigned char md5[16]) {
@@ -578,4 +609,3 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
     if (tempList) tempList->next = NULL;
     return MD5List;
 }
-

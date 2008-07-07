@@ -46,7 +46,9 @@ void callback_game_create(GtkWidget *widget, gpointer data) {
     int           game_id;
 
     game_id = MasterServerCreateGame(md5, 1000);
-    if (game_id != -1) show_joingame_dialog();
+    if (game_id != -1) {
+        show_joingame_dialog();
+    }
 }
 
 void hide_creategame_dialog() {

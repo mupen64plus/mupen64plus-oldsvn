@@ -54,6 +54,7 @@ typedef struct THostListNode {
 
 void          MasterServerAddToList(char *master_server);
 int           MasterServerCreateGame(unsigned char md5[16], int local_port);
+void          MasterServerCloseGame();
 MD5ListNode  *MasterServerGetMD5List();
 HostListNode *MasterServerFindGames(unsigned char md5[16]);
 
@@ -68,6 +69,7 @@ void          FreeMD5List(MD5ListNode *list);
 
 
 // Internal Functions
+static void         *KeepAliveThread( void *_arg );
 static long int      timeElapsed(unsigned char arm);
 static int           masterServerOpenGame  (uint32_t master_server, uint16_t master_port, unsigned char md5[16], uint16_t local_port);
 static int           masterServerKeepAlive (uint32_t master_server, uint16_t master_port, uint16_t game_id);
