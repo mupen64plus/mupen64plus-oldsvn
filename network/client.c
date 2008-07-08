@@ -30,17 +30,33 @@
 int clientInitialize(MupenClient *Client) {
     int i;
     memset(Client, 0, sizeof(Client));
-    Client->socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS);
-    Client->socket=SDLNet_UDP_Open(SERVER_PORT);
-    Client->packet=SDLNet_AllocPacket(MAX_PACKET_SIZE);
-    Client->inputDelay=DEFAULT_INPUT_DELAY;
 
-    for(i=0; i<QUEUE_HEAP_LEN; i++)
-        Client->eventQueue[i]=&(Client->events[i]);
+    if (!(Client->socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS))) {
+        printf("[Netplay] clientini: failure to allocate socket set.\n");
 
-    if(Client->socket!=NULL && Client->socketSet!=NULL && Client->packet!=NULL)
-        if(SDLNet_UDP_AddSocket(Client->socketSet, Client->socket)>0)
-            Client->isListening=1;
+    } else if (!(Client->socket = SDLNet_UDP_Open(SERVER_PORT))) {
+        printf("[Netplay] clientini: failure to open UDP port %d\n", SERVER_PORT);
+        SDLNet_FreeSocketSet(Client->socketSet);
+
+    } else if (!(Client->packet = SDLNet_AllocPacket(MAX_PACKET_SIZE))) {
+        printf("[Netplay] clientini: failure to allocate packet buffer.\n");
+        SDLNet_FreeSocketSet(Client->socketSet);
+        SDLNet_UDP_Close(Client->socket);
+
+    } else if (SDLNet_UDP_AddSocket(Client->socketSet, Client->socket) <= 0) {
+        printf("[Netplay] clientini: failure to add client socket to socket set.\n");
+        SDLNet_FreeSocketSet(Client->socketSet);
+        SDLNet_UDP_Close(Client->socket);
+        SDLNet_FreePacket(Client->packet);
+
+    } else {
+        Client->isListening = 1;
+        Client->inputDelay=DEFAULT_INPUT_DELAY;
+        for(i=0; i<QUEUE_HEAP_LEN; i++)
+            Client->eventQueue[i]=&(Client->events[i]);
+        printf("[Netplay] Client successfully initialized.\n");
+    }
+
     return Client->isListening;
 }
 
@@ -110,7 +126,7 @@ void clientProcessFrame(MupenClient *Client) {
     int len=Client->packet->len-sizeof(Frame);
     int player=curChunk->header.peer;
     unsigned int frame=SDLNet_Read16(&(curChunk->header.eID));
-    curChunk=((char *)curChunk)+sizeof(Frame);
+    curChunk=((void *)curChunk)+sizeof(Frame);
     while(len>0) {
         switch(curChunk->type) {
           case CHUNK_INPUT:
@@ -144,7 +160,7 @@ void clientSendFrame(MupenClient *Client) {
         NetPlayerUpdate *update = &(Client->playerEvent[(Client->frameCounter/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][Client->myID]);
         if(update->timer!=(Client->frameCounter)/VI_PER_FRAME) {
             chunk->input.buttons.Value = (0x8000 * Client->startEvt);
-            fprintf(stderr,"[NETPLAY]Sending BAD event: %08X u->timer: %d fC: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME);
+            fprintf(stderr,"[Netplay] Sending BAD event: %08X u->timer: %d fC: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME);
         }
         else {
             chunk->input.buttons.Value = update->value | (0x8000 * Client->startEvt);
@@ -158,7 +174,10 @@ void clientSendFrame(MupenClient *Client) {
         Client->packet->len+=sizeof(InputChunk);
 
 //        fprintf(stderr,"send sync %d.%d.%d.%d:%d\n",GET_IP(Client->packet->address.host), GET_PORT(Client->packet->address.port));
-        SDLNet_UDP_Send(Client->socket, -1, Client->packet);
+        if (SDLNet_UDP_Send(Client->socket, -1, Client->packet) == 0) {
+            printf("[Netplay] clientSendFrame(): Failure on SDLNet_UDP_Send.\n");
+            clientDisconnect(Client);
+        }
     }
 
 }

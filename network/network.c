@@ -39,7 +39,7 @@ unsigned int gettimeofday_msec(void)
 int netInitialize(MupenClient *mClient) {
   SDLNet_Init();
   fprintf(stderr,"netInitialize()\n");
-  rompause=1;
+  rompause = 1;
   return clientInitialize(mClient);
 }
 

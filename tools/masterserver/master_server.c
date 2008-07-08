@@ -337,7 +337,7 @@ void process_packet(UDPpacket *packet) {
             // don't let anybody keep other hosts alive (potential dos)
             if (g_GameList[game]->host == packet->address.host) {
               g_GameList[game]->keep_alive = 1;
-              printf("Game ID %d keep alive granted.\n", game);
+//              printf("Game ID %d keep alive granted.\n", game);
             } else {
               // If this happens, someone is screwing around
               printf("Mismatched game descriptor in KEEP_ALIVE packet from %d.%d.%d.%d.\n", GET_IP(packet->address.host));

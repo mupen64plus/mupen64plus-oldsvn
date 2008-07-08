@@ -1388,7 +1388,7 @@ int main(int argc, char *argv[])
     setPaths();
     config_read();
    
-    MasterServerAddToList("orbitaldecay.kicks-ass.net:7000");
+    MasterServerAddToList("orbitaldecay.kicks-ass.net:8000");
 
 #ifdef VCR_SUPPORT
     VCRComp_init();
