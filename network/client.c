@@ -186,6 +186,10 @@ void clientProcessMessages(MupenClient *Client) {
     char osdString[64];
     int n, playerNumber, adjust;
 
+    Uint32 host;
+    Uint16 port;
+    Uint16 frame_ready_id = FRAME_PUNCH;
+
     //if (!(Client->isListening))
     //    return; // exit now if the client isnt' connected
 
@@ -200,6 +204,41 @@ void clientProcessMessages(MupenClient *Client) {
 	    if(Client->packet->len >= 2) {
             Uint16 frameID=SDLNet_Read16(Client->packet->data);
             switch(frameID) {
+
+              /*
+                  The master server will send a FRAME_PUNCHREQUEST packet to a p2p client which is
+                  running a game and waiting for other players to connect.  The FRAME_PUNCHREQUEST
+                  packet will contain the address of another peer that is trying to connect.
+                  We will send a FRAME_PUNCH packet to that peer to create a NAT entry that
+                  will allow that peer to communicate with us.
+
+                  The peer which is trying to connect will also send a FRAME_PUNCHREQUEST packet
+                  in the event that it doesn't receive the first FRAME_PUNCH packet sent in
+                  response to the FRAME_PUNCHREQUEST packet sent from the master server.
+              */
+
+              case FRAME_PUNCHREQUEST:
+                // Host address will be in network order, memcpy is ok
+                memcpy(&host, Client->packet->data + 2, 4);
+                port = SDLNet_Read16(Client->packet->data + 6);
+
+                // bad hack for converting the port to network order :(
+                SDLNet_ResolveHost(&(Client->packet->address), "localhost", port);
+                Client->packet->address.host = host;
+
+                // Send back FRAME_READY packet to specified address
+                memcpy(Client->packet->data, &frame_ready_id, 2);
+                Client->packet->len = 2;
+                if (SDLNet_UDP_Send(Client->socket, -1, Client->packet) == 0) {
+                    printf("[Netplay] FRAME_PUNCH: Error sending packet to %d.%d.%d.%d.\n", GET_IP(host));
+                }
+                break;
+
+              case FRAME_PUNCH:
+                // Should respond with status request to sender
+
+                break;
+
               case FRAME_JOINREQUEST:
                 if(Client->packet->len == sizeof(JoinRequest)) {
                     JoinRequest *packet=((JoinRequest*)Client->packet->data);
@@ -238,6 +277,7 @@ void clientProcessMessages(MupenClient *Client) {
                     fprintf(stderr,"[NETPLAY]Received invalid length JoinRequest from %08X:%d %d bytes\n",
                         Client->packet->address, Client->packet->address.port, Client->packet->len);
                 break;
+
               case FRAME_JOIN:
                 if(Client->packet->len == 16) {
                     Client->joinState.state=enabled;

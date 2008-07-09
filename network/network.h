@@ -22,6 +22,9 @@
  *
 **/
 
+#ifndef __NETWORK_H__
+#define __NETWORK_H__
+
 #include "master.h"
 #include "../opengl/osd.h"
 #include "../main/plugin.h" // Need typdef BUTTONS, DWORD, BOOL
@@ -51,6 +54,9 @@
 #define FRAME_MASK              0x7FFF
 #define	FRAME_JOINREQUEST	0xFFFF  // Sent when asking to join the network
 #define FRAME_JOIN      	0xFFFE  // Response sent to new peer (contains other clients & new node's id)
+#define FRAME_PUNCHREQUEST      0xFFFD  // Request to send packet to specified address (for NAT punching)
+#define FRAME_PUNCH             0xFFFC  // Response to punch request (ready to receive packets)
+
 
 #define 	EVENT_JOIN		0       // Check state of join in progress
 #define		EVENT_INPUT             1       // Apply input state
@@ -164,6 +170,8 @@ typedef struct TNetPlaySettings {
         char             hostname[128];
 } NetPlaySettings;
 
+extern MupenClient g_NetplayClient;
+
 //Note that the IP should always be in network byte order
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     #define GET_IP(ip)      ((unsigned char*)&(ip))[3],((unsigned char*)&(ip))[2], \
@@ -198,4 +206,4 @@ void flushEventQueue(MupenClient *Client);
 int frameDelta(MupenClient *Client, Uint32 frame);
 int sourceID(int myID, int index);
 
-
+#endif

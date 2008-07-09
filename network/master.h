@@ -31,6 +31,7 @@
 */
 
 #include <stdint.h>
+#include <SDL_net.h>
 
 // Master Server Defines (Packet Types)
 #define FIND_GAMES      00
@@ -52,6 +53,8 @@ typedef struct THostListNode {
     struct THostListNode *next;
 } HostListNode;
 
+extern IPaddress g_Game_Master;
+
 void          MasterServerAddToList(char *master_server);
 int           MasterServerCreateGame(unsigned char md5[16], int local_port);
 void          MasterServerCloseGame();
@@ -62,7 +65,6 @@ HostListNode *GetFirstMasterServer();
 HostListNode *GetNextHost(HostListNode *node);
 HostListNode *CombineHostLists(HostListNode *list1, HostListNode *list2);
 void          FreeHostList(HostListNode *list);
-
 MD5ListNode  *GetNextMD5(MD5ListNode *node);
 MD5ListNode  *CombineMD5Lists(MD5ListNode *list1, MD5ListNode *list2);
 void          FreeMD5List(MD5ListNode *list);

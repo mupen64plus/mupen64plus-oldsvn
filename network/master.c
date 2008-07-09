@@ -37,15 +37,18 @@
 #include <SDL_net.h>
 #include <pthread.h>
 #include "network.h"
+#include "../main/main.h"
 
 #define STATUS_SUBSYSTEM_ERROR -1
 #define STATUS_NO_RESPONSE     -2
 #define STATUS_OK               0
 #define MASTER_SERVER_TIMEOUT   500
 
+IPaddress            g_Game_Master;
+MupenClient          g_NetplayClient;
+
 static HostListNode *l_MasterServerList = NULL;
 static int           l_Game_ID = -1;
-static IPaddress     l_Game_Master;
 static pthread_t     l_Keep_Alive_Thread = 0;   
 
 void MasterServerAddToList(char *arg) {
@@ -109,10 +112,12 @@ void MasterServerCloseGame() {
 
 static void *KeepAliveThread( void *_arg ) {
   printf("[Master Server] Keep alive thread launched.\n");
+
   while(l_Game_ID != -1) {
-    masterServerKeepAlive(l_Game_Master.host, l_Game_Master.port, l_Game_ID);
+    masterServerKeepAlive(g_Game_Master.host, g_Game_Master.port, l_Game_ID);
     sleep(5);
   }
+
   printf("[Master Server] Exiting keep alive thread.\n");
 }
 
@@ -130,8 +135,8 @@ int MasterServerCreateGame(unsigned char md5[16], int local_port) {
         l_Game_ID = masterServerOpenGame(temp_master->host, temp_master->port, md5, local_port);
         if (l_Game_ID != -1) {
            printf("Game ID: %d\n", l_Game_ID);
-           l_Game_Master.host = temp_master->host;
-           l_Game_Master.port = temp_master->port;
+           g_Game_Master.host = temp_master->host;
+           g_Game_Master.port = temp_master->port;
 
            // Launch keep alive thread
            if(pthread_create(&l_Keep_Alive_Thread, NULL, KeepAliveThread, NULL) != 0)
@@ -302,23 +307,15 @@ static long int timeElapsed(unsigned char arm) {
 */
 
 static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, unsigned char md5[16], uint16_t local_port) {
-    IPaddress serverAddy;
-    UDPsocket  s;
-    UDPpacket *p;
-    uint16_t   gameDesc;
-    int        recv;
+    IPaddress    serverAddy;
+    UDPpacket   *p;
+    uint16_t     gameDesc;
+    int          recv;
 
     // Allocate a packet buffer
     p = SDLNet_AllocPacket(32);
     if (!p) {
         printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
-        return -1;
-    }
-
-    // Bind a udp socket
-    s = SDLNet_UDP_Open(0);
-    if (!s) {
-        printf("SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
         return -1;
     }
 
@@ -336,13 +333,22 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     p->address.host = master_server;
     p->address.port = master_port;
 
-    if (!SDLNet_UDP_Send(s, -1, p)) {
+    // We should be sending master server requests from the UDP game port
+    // (i.e. the port that the client will be accepting p2p connections on)
+    // This way, in the event of a firewall, we'll already have a NAT entry
+    // for the master server so we can receive FRAME_PUNCHREQUESTs.
+    if (!g_NetplayClient.isListening) {
+        printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
+        return -1;
+    }
+
+    if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
         return -1;
     }
 
     timeElapsed(1);
-    while (((recv = SDLNet_UDP_Recv(s, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
+    while (((recv = SDLNet_UDP_Recv(g_NetplayClient.socket, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
 
     // Handle possible errors
     if (recv == -1) {

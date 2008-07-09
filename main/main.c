@@ -99,6 +99,7 @@ char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified 
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)
 char        *g_RspPlugin = NULL;        // pointer to rsp plugin specified at commandline (if any)
+MupenClient  g_NetplayClient;
 
 #ifdef NO_GUI
 static int  l_GuiEnabled = 0;           // GUI enabled?
@@ -120,11 +121,11 @@ static int   l_SpeedFactor = 100;        // percentage of nominal game speed at 
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 
 static NetPlaySettings  l_NetSettings;
-static MupenClient      l_NetplayClient;
 static int              SyncStatus;
 
+
 MupenClient *getNetplayClient();
-MupenClient *getNetplayClient() {return &l_NetplayClient;}
+MupenClient *getNetplayClient() {return &g_NetplayClient;}
 
 
 /*********************************************************************************************************
@@ -289,7 +290,7 @@ void new_vi(void)
     }
 
     do  {
-        SyncStatus = netMain(&l_NetplayClient); //may adjust l_SpeedFactor
+        SyncStatus = netMain(&g_NetplayClient); //may adjust l_SpeedFactor
 
         double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
         int time;
@@ -557,10 +558,10 @@ int pauseContinueEmulation(void)
 void netplayReady(void)
 {
     //NetMessage netMsg;
-    l_NetplayClient.startEvt=1;
-    //if (l_NetplayEnabled && l_NetplayClient.isConnected) {
+    g_NetplayClient.startEvt=1;
+    //if (l_NetplayEnabled && g_NetplayClient.isConnected) {
     //    netMsg.type = NETMSG_READY;
-    //    clientSendMessage(&l_NetplayClient, &netMsg);
+    //    clientSendMessage(&g_NetplayClient, &netMsg);
     //}
 }
 
@@ -859,18 +860,13 @@ static void * emulationThread( void *_arg )
     // load cheats for the current rom
     cheat_load_current_rom();
 
-    if(l_NetplayClient.isEnabled)
+    if(g_NetplayClient.isEnabled)
     {
-        if(netInitialize(&l_NetplayClient))
-	    {
-            if (netStartNetplay(&l_NetplayClient, l_NetSettings))
+            if (netStartNetplay(&g_NetplayClient, l_NetSettings))
                 go();
             else
                 printf("Failed to connect to server %s.\n", l_NetSettings.hostname);
 
-        } 
-        else
-            printf("Couldn't initialize network socket\n");
     } 
     else 
     {
@@ -897,7 +893,7 @@ static void * emulationThread( void *_arg )
     // clean up
     g_EmulationThread = 0;
     SDL_Quit();
-    if (l_NetplayClient.isEnabled) netShutdown(&l_NetplayClient);
+    if (g_NetplayClient.isEnabled) netShutdown(&g_NetplayClient);
     if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is
@@ -1176,12 +1172,9 @@ void parseCommandLine(int argc, char **argv)
                 break;
             case OPT_CONNECT:
                 strncpy(l_NetSettings.hostname, optarg, 128);
-                l_NetplayClient.isEnabled = 1;
                 break;
             case OPT_SERVER:
                 strncpy(l_NetSettings.hostname, "", 128);
-                l_NetplayClient.isEnabled = 1;
-//                l_NetSettings.runServer = 1;
                 break;
 #ifdef DBG
             case OPT_DEBUGGER:
@@ -1383,12 +1376,15 @@ int main(int argc, char *argv[])
     if(l_GuiEnabled)
         gui_init(&argc, &argv);
 
+    MasterServerAddToList("orbitaldecay.kicks-ass.net:8000");
     memset(&l_NetSettings, 0, sizeof(l_NetSettings));
     parseCommandLine(argc, argv);
+    netInitialize(&g_NetplayClient);
+    g_NetplayClient.isEnabled = 1;
+
     setPaths();
     config_read();
    
-    MasterServerAddToList("orbitaldecay.kicks-ass.net:8000");
 
 #ifdef VCR_SUPPORT
     VCRComp_init();

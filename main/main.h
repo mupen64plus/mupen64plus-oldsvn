@@ -19,6 +19,7 @@ Email                : blight@Ashitaka
 #define __MAIN_H__
 
 #include <pthread.h>
+#include "../network/network.h"
 
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
@@ -34,7 +35,6 @@ extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;
 extern char *g_InputPlugin;
 extern char *g_RspPlugin;
-
 
 char *get_configpath(void);
 char *get_installpath(void);

@@ -28,10 +28,11 @@
 #include "../../md5.h"
 //#include "../../romcache.h"
 #include "net_gui.h"
-
+#include "../main_gtk.h"
 #define MAX_COL_NAME_LEN		20
 #define COL_COUNT                       4
 
+SMainWindow g_MainWindow;
 gchar l_JoinGameColumnNames[COL_COUNT][MAX_COL_NAME_LEN] = {"Player",
                                                             "Nick",
                                                             "P2P Only",
@@ -39,12 +40,20 @@ gchar l_JoinGameColumnNames[COL_COUNT][MAX_COL_NAME_LEN] = {"Player",
                                                            };
 GtkWidget *l_JoinGameWindow;
 GtkWidget *l_JoinGameTreeView;
+GtkWidget *l_StartButton;
 
 
 static void Callback_CancelJoinGame(GtkWidget *widget, gpointer data) {
   gtk_widget_hide_all(l_JoinGameWindow);
   MasterServerCloseGame();
+  gtk_widget_set_sensitive(g_MainWindow.window, TRUE);
 }
+
+static void Callback_ReadyJoinGame(GtkWidget *widget, gpointer data) {
+  gtk_button_set_label(GTK_BUTTON(l_StartButton), "Waiting");
+  gtk_widget_set_sensitive(l_StartButton, FALSE);
+}
+
 
 void hide_joingame_dialog() {
   gtk_widget_hide_all(l_JoinGameWindow);
@@ -86,7 +95,7 @@ GtkWidget *setup_join_game_tree (void)
 
 void create_joingame_dialog() {
   
-  GtkWidget *mainWindowBox, *bottomHBox, *emptyHBox, *startButton, *quitButton, *bottomSeparator, *topSeparator;
+  GtkWidget *mainWindowBox, *bottomHBox, *emptyHBox, *quitButton, *bottomSeparator, *topSeparator;
   GtkWidget *gameLabel;
 
   l_JoinGameWindow         = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -97,11 +106,11 @@ void create_joingame_dialog() {
   bottomSeparator          = gtk_hseparator_new();
   bottomHBox               = gtk_hbox_new(FALSE, 0);
   emptyHBox                = gtk_hbox_new(FALSE, 0);
-  startButton              = gtk_button_new_with_label ("Start");
-  quitButton               = gtk_button_new_with_label ("Close");
+  l_StartButton              = gtk_button_new_with_label ("Ready");
+  quitButton               = gtk_button_new_with_label ("Quit");
 
 
-  gtk_button_set_image(GTK_BUTTON(startButton), gtk_image_new_from_stock(GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_BUTTON));
+  gtk_button_set_image(GTK_BUTTON(l_StartButton), gtk_image_new_from_stock(GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_BUTTON));
   gtk_button_set_image(GTK_BUTTON(quitButton), gtk_image_new_from_stock(GTK_STOCK_QUIT, GTK_ICON_SIZE_BUTTON));
 
   gtk_window_set_title(GTK_WINDOW(l_JoinGameWindow), "Waiting For Players...");
@@ -112,12 +121,13 @@ void create_joingame_dialog() {
   gtk_box_pack_start (GTK_BOX(mainWindowBox), l_JoinGameTreeView, TRUE, TRUE, 0);  
   gtk_box_pack_start (GTK_BOX(mainWindowBox), bottomSeparator, FALSE, FALSE, 10);  
   gtk_box_pack_start (GTK_BOX(mainWindowBox), bottomHBox, FALSE, FALSE, 0);  
-  gtk_box_pack_start (GTK_BOX(bottomHBox), startButton, FALSE, FALSE, 0);  
+  gtk_box_pack_start (GTK_BOX(bottomHBox), l_StartButton, FALSE, FALSE, 0);  
   gtk_box_pack_start (GTK_BOX(bottomHBox), emptyHBox, TRUE, TRUE, 0);  
   gtk_box_pack_start (GTK_BOX(bottomHBox), quitButton, FALSE, FALSE, 0);  
 
   g_signal_connect (G_OBJECT (l_JoinGameWindow), "delete_event", G_CALLBACK (Callback_CancelJoinGame), NULL);
   g_signal_connect (G_OBJECT (quitButton), "clicked", G_CALLBACK (Callback_CancelJoinGame), NULL);
+  g_signal_connect (G_OBJECT (l_StartButton), "clicked", G_CALLBACK (Callback_ReadyJoinGame), NULL);
 
   append_list_entry("1", "Bob", "No", "Ready");
   append_list_entry("2", "",    "No", "Not Connected");
@@ -126,8 +136,11 @@ void create_joingame_dialog() {
 }
 
 void show_joingame_dialog() {
-//    hide_creategame_dialog();
-//    hide_findgames_dialog();
+    hide_creategame_dialog();
+    hide_findgames_dialog();
+    gtk_button_set_label(GTK_BUTTON(l_StartButton), "Ready");
+    gtk_widget_set_sensitive(l_StartButton, TRUE);
+    gtk_widget_set_sensitive(g_MainWindow.window, FALSE);
     gtk_widget_show_all(l_JoinGameWindow);
 }
 

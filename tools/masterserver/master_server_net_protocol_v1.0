@@ -1,14 +1,10 @@
-Mupen64Plus Master Server Network Protocol v1.0 (r03)
+Mupen64Plus Master Server Network Protocol v1.0 (r04)
 orbitaldecay
-June 30th 2008
+July 8th 2008
 
 == Changes in this revision ====================================================
 
-    * Added a header structure including protocol version information.
-    * The GAME_LIST response packet can now be fragmented.  These have the
-      potential to get very big.
-    * This revision now officially describes version 1.0 of the Mupen64Plus
-      master server communication protocol.
+    * Added description of FIND_MD5 and MD5_LIST packets.
 
 == Introduction ================================================================
 
@@ -63,13 +59,47 @@ protocol version.
   I                                   I
   =====================================
 
-II.  FIND_GAMES
+II.  FIND_MD5
 
-    There will only be one type of message that will be sent from the game
-client to the master server; a FIND_GAMES query.  The query packet will consist
-of a single byte 'type' field (set to 0) and a 16 byte md5 checksum which will
-indicate the ROM the game client will be running.  A diagram of the packet is
-provided bellow.
+There will be two types of messages that will be sent from the game client to
+the master server, the first of which will be a FIND_MD5 query.  The packet
+will consist of a single byte 'type' field (set to 06).
+
+  ==== FIND_MD5 Query =================
+  I                                   I
+  I Size (in bits)   Name             I
+  I --------------------------------  I
+  I 8                Packet Type (06) I
+  I                                   I
+  =====================================
+
+    The master server will respond with a complete list of all MD5s of all
+games it is currently tracking, called an MD5_LIST packet.  The MD5_LIST
+will begin with a single byte 'type' field (set to 07) followed by an 8 bit
+"fragmented" flag.  If the fragmented flag is set to true, then the game
+client can anticipate receiving another MD5_LIST packet.  Each MD5 entry will
+be a 16 byte MD5 checksum.  The number of entries present in a single GAME_LIST
+packet can be determined by subtracting 2 from the size of the packet and
+dividing by 16.
+
+  ==== GAME_LIST Response ==============
+  I                                    I
+  I Size (in bits) Name                I
+  I ---------------------------------- I
+  I 8              Packet Type (07)    I
+  I 8              Fragmented          I
+  I 256            MD5 Checksum 1      I
+  I 256            MD5 Checksum 2      I
+  I ...                                I
+  I                                    I
+  ======================================
+
+III.  FIND_GAMES
+
+   The second type of packet a game client may send to a master server will be
+a FIND_GAMES query.  The query packet will consist of a single byte 'type'
+field (set to 0) and a 16 byte md5 checksum which will indicate the ROM the game
+client will be running.  A diagram of the packet is provided bellow.
 
   ==== FIND_GAMES Query ===============
   I                                   I
@@ -106,7 +136,7 @@ packet and dividing by 6.
   I                                    I
   ======================================
 
-III.  OPEN_GAME
+IV.  OPEN_GAME
 
     When a game server wants to invite players from all over the internet to
 join, it will send an OPEN_GAME request to the master server.  The OPEN_GAME
@@ -141,11 +171,11 @@ will send to the master server.
   I                                   I
   =====================================
 
-IV.  KEEP_ALIVE
+V.  KEEP_ALIVE
 
     The master server will routinely purge game servers from the game list that
 have not requested to be kept alive.  The game server must send a KEEP_ALIVE 
-packet at least once every 60 seconds to prevent this from occuring.  The keep
+packet at least once every 10 seconds to prevent this from occuring.  The keep
 alive packet consists of a single byte packet type set to 04 and a 16bit game
 descriptor that should be set to the value that was sent in response to the
 OPEN_GAME request.
@@ -159,10 +189,8 @@ OPEN_GAME request.
   I                                   I
   =====================================
 
-V.  Other Considerations
+VI.  Other Considerations
 
-    I believe it would be useful to include a way of linking together multiple
-master servers, though this would be approaching a more complex topic.
 
 
 
