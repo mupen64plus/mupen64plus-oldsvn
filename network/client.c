@@ -185,9 +185,6 @@ void clientSendFrame(MupenClient *Client) {
 void clientProcessMessages(MupenClient *Client) {
     char osdString[64];
     int n, playerNumber, adjust;
-
-    Uint32 host;
-    Uint16 port;
     Uint16 frame_ready_id = FRAME_PUNCH;
 
     //if (!(Client->isListening))
@@ -218,19 +215,15 @@ void clientProcessMessages(MupenClient *Client) {
               */
 
               case FRAME_PUNCHREQUEST:
-                // Host address will be in network order, memcpy is ok
-                memcpy(&host, Client->packet->data + 2, 4);
-                port = SDLNet_Read16(Client->packet->data + 6);
-
-                // bad hack for converting the port to network order :(
-                SDLNet_ResolveHost(&(Client->packet->address), "localhost", port);
-                Client->packet->address.host = host;
+                // address will be in network order, memcpy is ok
+                memcpy(&(Client->packet->address.host), Client->packet->data + 2, 4);
+                memcpy(&(Client->packet->address.port), Client->packet->data + 6, 4);
 
                 // Send back FRAME_READY packet to specified address
                 memcpy(Client->packet->data, &frame_ready_id, 2);
                 Client->packet->len = 2;
                 if (SDLNet_UDP_Send(Client->socket, -1, Client->packet) == 0) {
-                    printf("[Netplay] FRAME_PUNCH: Error sending packet to %d.%d.%d.%d.\n", GET_IP(host));
+                    printf("[Netplay] FRAME_PUNCH: Error sending packet to %d.%d.%d.%d.\n", GET_IP(Client->packet->address.host));
                 }
                 break;
 

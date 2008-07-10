@@ -389,10 +389,12 @@ static int masterServerKeepAlive(uint32_t master_server, uint16_t master_port, u
         return -1;
     }
 
-    // Bind a udp socket
-    s = SDLNet_UDP_Open(0);
-    if (!s) {
-        printf("SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
+    // Make sure UDP socket is bound
+
+    // (sending the keep alives via the main UDP game port ensures that the NAT
+    // entry for the master server doesn't time out!)
+    if (!g_NetplayClient.isListening) {
+        printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
         return -1;
     }
 
@@ -409,7 +411,7 @@ static int masterServerKeepAlive(uint32_t master_server, uint16_t master_port, u
     p->address.host = serverAddy.host;
     p->address.port = serverAddy.port;
 
-    if (!SDLNet_UDP_Send(s, -1, p)) {
+    if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
         return -1;
     }

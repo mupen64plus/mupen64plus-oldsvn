@@ -1379,8 +1379,13 @@ int main(int argc, char *argv[])
     MasterServerAddToList("orbitaldecay.kicks-ass.net:8000");
     memset(&l_NetSettings, 0, sizeof(l_NetSettings));
     parseCommandLine(argc, argv);
-    netInitialize(&g_NetplayClient);
-    g_NetplayClient.isEnabled = 1;
+    if (netInitialize(&g_NetplayClient)) {
+    // Use isEnabled to determine whether or not to run the emu in single player mode
+    // This should only be set to true if we have netplay started
+      g_NetplayClient.isEnabled = 1;
+    } else {
+      return 0;
+    }
 
     setPaths();
     config_read();

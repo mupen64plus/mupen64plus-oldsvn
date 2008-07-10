@@ -312,7 +312,7 @@ void process_packet(UDPpacket *packet) {
               g_GameList[gameDesc] = track_malloc(sizeof(GameEntry));
               if (g_GameList[gameDesc]) {
                   g_GameList[gameDesc]->host = packet->address.host; // Network byte order
-                  g_GameList[gameDesc]->port = port;
+                  g_GameList[gameDesc]->port = packet->address.port  // port;
                   g_GameList[gameDesc]->keep_alive = 1;
                   add_game_entry_node(g_GameList[gameDesc], md5_checksum);
                   send_game_descriptor(packet->address.host, packet->address.port, gameDesc);
@@ -676,6 +676,7 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
     UDPpacket *sendPacket;
     GameEntry *temp_ge;
     int        packet_offset = 2;
+
     if ((sendPacket = SDLNet_AllocPacket(MAX_PACKET)) == NULL) {
         printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
         return;
@@ -694,6 +695,10 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
                  printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
               }    
           }
+
+          // We should send FRAME_PUNCHREQUEST packets to all servers in list
+          // on behalf of client that issued game list request.
+
           memcpy(sendPacket->data + packet_offset, &(temp_ge->host), 4);
           SDLNet_Write16(temp_ge->port, sendPacket->data + packet_offset + 4);
           packet_offset += 6;
