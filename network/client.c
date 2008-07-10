@@ -263,7 +263,6 @@ void clientProcessMessages(MupenClient *Client) {
                         Client->eventQueue[Client->numQueued]->evt=EVENT_INPUT;
                         Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay;
                         addEventToQueue(Client);
-
                     }
                 }
                 else
@@ -304,7 +303,7 @@ void clientProcessMessages(MupenClient *Client) {
                         Uint8 host = Client->packet->data[2];
                         char lag = Client->packet->data[3];
                         int curID = sourceID(Client->myID,0);
-                        Client->lag[host] = ((((int)Client->lag[host])*7)/8) + diff;
+                        Client->lag[host] = ((((int)Client->lag[host])*3)/4) + diff;
                         Client->lag_local[host] = lag;
                         adjust = (lag - Client->lag[host])/4;
                         fprintf(stderr,"Host %d lag time local: %d remote: %d adjust: %d diff: %d\n",host,Client->lag[host],lag,adjust,diff);
