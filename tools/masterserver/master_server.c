@@ -34,7 +34,7 @@
 #define MAX_PACKET	1470  // In bytes, the largest packet permitted by the protocol
 #define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
 #define CLEAN_FREQ      10    // In seconds, how often free_timed_out_game_desc() is called
-#define PROTOCOL_ID     "M+"
+#define PROTOCOL_ID     0xFFF0
 
 #define FIND_GAMES      00
 #define GAME_LIST	01
@@ -47,6 +47,8 @@
 
 #define ELAPSED(dt)          (int)(((dt) - ((dt) % 3600)) / 3600), (int)((((dt) - ((dt) % 60)) / 60) % 60), (int)((dt) % 60)
 // Thanks to DarkJeztr for this little biddy
+#define GET_PORT(port) SDLNet_Read16(&port)
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     #define GET_IP(ip)      ((unsigned char*)&(ip))[3],((unsigned char*)&(ip))[2], \
                             ((unsigned char*)&(ip))[1],((unsigned char*)&(ip))[0]
@@ -213,7 +215,7 @@ int main(int argc, char **argv) {
   retValue = SDLNet_UDP_Recv(g_ListenSock, recvPacket);
   while ((retValue != -1) && (!g_QuitMainLoop)) {
     if (retValue > 0) {
-       if (recvPacket->data[0] == 'M' && recvPacket->data[1] == '+') { // Check for protocol ID
+       if (SDLNet_Read16(recvPacket->data) == PROTOCOL_ID) { // Check for protocol ID
            // Grab version info from header
            majorVersion = recvPacket->data[2];
            minorVersion = recvPacket->data[3];
@@ -272,6 +274,7 @@ int main(int argc, char **argv) {
 void process_packet(UDPpacket *packet) {
   int             gameDesc, n;
   md5_byte_t      md5_checksum[16];
+  uint32_t        host;
   uint16_t        port;
   uint16_t        game;
 
@@ -300,24 +303,32 @@ void process_packet(UDPpacket *packet) {
       break;
 
     case OPEN_GAME:
-      if (packet->len == 19) {
+      if (packet->len == 23) {
+
           // Check to see if the host already has an open game, remove the entry if so
+          // This needs to be changed to allow multiple open games over one NAT
           if ((n = find_game_desc_by_host(packet->address.host)) != -1) {
               printf("Multiple game entries for %d.%d.%d.%d, removing old entry (%d).\n", GET_IP(packet->address.host), n);
               remove_game_desc(n);
           }
           if ((gameDesc = get_free_game_desc()) != -1) { // Find free game descriptor
               memcpy(&md5_checksum, packet->data + 1, 16);
-              port = SDLNet_Read16(packet->data + 17);
+              host = SDLNet_Read32(packet->data + 17);
+              port = SDLNet_Read16(packet->data + 21);
               g_GameList[gameDesc] = track_malloc(sizeof(GameEntry));
               if (g_GameList[gameDesc]) {
                   g_GameList[gameDesc]->host = packet->address.host; // Network byte order
-                  g_GameList[gameDesc]->port = packet->address.port  // port;
+                  g_GameList[gameDesc]->port = packet->address.port; // port;
                   g_GameList[gameDesc]->keep_alive = 1;
                   add_game_entry_node(g_GameList[gameDesc], md5_checksum);
                   send_game_descriptor(packet->address.host, packet->address.port, gameDesc);
                   g_GameCount++;
-                  printf("OPEN_GAME request for %d.%d.%d.%d:%d %X%X granted (%d).\n", GET_IP(packet->address.host), port, md5_checksum[0], md5_checksum[1], gameDesc);
+                  printf("New game created (ID %d):\n"\
+                         "  Global Address:   %d.%d.%d.%d:%d\n"\
+                         "  Private Address:  %d.%d.%d.%d:%d\n", gameDesc, 
+                                                           GET_IP(packet->address.host),
+                                                           GET_PORT(packet->address.port),
+                                                           GET_IP(host), GET_PORT(port));
               } else printf("OPEN_GAME failed, out of memory!\n");
 
           } else {
@@ -656,9 +667,10 @@ void send_game_descriptor(uint32_t host, uint16_t port, int gameDesc) {
     }
     sendPacket->address.host = host;
     sendPacket->address.port = port;
-    sendPacket->data[0] = GAME_DESC;
-    sendPacket->len     = 3;
-    SDLNet_Write16(gameDesc, sendPacket->data + 1);
+    SDLNet_Write16(PROTOCOL_ID, sendPacket->data);
+    sendPacket->data[2] = GAME_DESC;
+    SDLNet_Write16(gameDesc, sendPacket->data + 3);
+    sendPacket->len     = 5;
     if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
       printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
     }
@@ -675,7 +687,7 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
     MD5Entry  *temp_md5_entry;
     UDPpacket *sendPacket;
     GameEntry *temp_ge;
-    int        packet_offset = 2;
+    int        packet_offset = 4;
 
     if ((sendPacket = SDLNet_AllocPacket(MAX_PACKET)) == NULL) {
         printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
@@ -683,14 +695,15 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
     }
     sendPacket->address.host = host;
     sendPacket->address.port = port;
-    sendPacket->data[0] = GAME_LIST;
+    SDLNet_Write16(PROTOCOL_ID, sendPacket->data);
+    sendPacket->data[2] = GAME_LIST;
     if ((temp_md5_entry = find_md5_node(md5_checksum))) {
       temp_ge = temp_md5_entry->first_game_entry->next;
       while (temp_ge->next != NULL) {
           if (packet_offset + 6 > MAX_PACKET) {
               sendPacket->len = packet_offset;
-              packet_offset = 2;
-              sendPacket->data[1] = 1; // Fragmented
+              packet_offset = 4;
+              sendPacket->data[3] = 1; // Fragmented
               if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
                  printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
               }    
@@ -707,7 +720,7 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
     }
 
     sendPacket->len = packet_offset;
-    sendPacket->data[1] = 0;
+    sendPacket->data[3] = 0;
     if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
     }
@@ -723,7 +736,7 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
 void send_md5_list(uint32_t host, uint16_t port) {
     MD5Entry  *temp_md5_entry = g_MD5List;
     UDPpacket *sendPacket;
-    int        packet_offset = 2;
+    int        packet_offset = 4;
 
     if ((sendPacket = SDLNet_AllocPacket(MAX_PACKET)) == NULL) {
         printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
@@ -731,13 +744,13 @@ void send_md5_list(uint32_t host, uint16_t port) {
     }
     sendPacket->address.host = host;
     sendPacket->address.port = port;
-    sendPacket->data[0] = MD5_LIST;
-
+    sendPacket->data[2] = MD5_LIST;
+    SDLNet_Write16(PROTOCOL_ID, sendPacket->data);
     while (temp_md5_entry != NULL) {
         if (packet_offset + 16 > MAX_PACKET) {
             sendPacket->len = packet_offset;
-            packet_offset = 2;
-            sendPacket->data[1] = 1; // Fragmented
+            packet_offset = 4;
+            sendPacket->data[3] = 1; // Fragmented
             if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
                printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
             }    
@@ -749,7 +762,7 @@ void send_md5_list(uint32_t host, uint16_t port) {
 
 
     sendPacket->len = packet_offset;
-    sendPacket->data[1] = 0;
+    sendPacket->data[3] = 0;
     if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
     }

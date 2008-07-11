@@ -94,7 +94,6 @@ int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't s
 pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
-
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)

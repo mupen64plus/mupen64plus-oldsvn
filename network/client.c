@@ -27,6 +27,8 @@
 #include "../main/md5.h"
 #include "../r4300/r4300.h"
 
+IPaddress   g_Game_Master;
+
 int clientInitialize(MupenClient *Client) {
     int i;
     memset(Client, 0, sizeof(Client));
@@ -186,6 +188,8 @@ void clientProcessMessages(MupenClient *Client) {
     char osdString[64];
     int n, playerNumber, adjust;
     Uint16 frame_ready_id = FRAME_PUNCH;
+    Uint32 host;
+    Uint16 port;
 
     //if (!(Client->isListening))
     //    return; // exit now if the client isnt' connected
@@ -202,7 +206,14 @@ void clientProcessMessages(MupenClient *Client) {
             Uint16 frameID=SDLNet_Read16(Client->packet->data);
             switch(frameID) {
 
-              /*
+
+              case FRAME_MASTER:
+                // All master server negotiations should be complete before this function begins
+                // handling packets.
+                printf("[Netplay] Unexpected packet received from master server.\n");
+                break;
+
+                  /*
                   The master server will send a FRAME_PUNCHREQUEST packet to a p2p client which is
                   running a game and waiting for other players to connect.  The FRAME_PUNCHREQUEST
                   packet will contain the address of another peer that is trying to connect.
@@ -212,18 +223,27 @@ void clientProcessMessages(MupenClient *Client) {
                   The peer which is trying to connect will also send a FRAME_PUNCHREQUEST packet
                   in the event that it doesn't receive the first FRAME_PUNCH packet sent in
                   response to the FRAME_PUNCHREQUEST packet sent from the master server.
-              */
+                  */
 
               case FRAME_PUNCHREQUEST:
                 // address will be in network order, memcpy is ok
-                memcpy(&(Client->packet->address.host), Client->packet->data + 2, 4);
-                memcpy(&(Client->packet->address.port), Client->packet->data + 6, 4);
+                memcpy(&host, Client->packet->data + 2, 4);
+                memcpy(&port, Client->packet->data + 6, 4);
+
+                // If the packet is from a trusted host and there is an address it in
+                // then use the specified address.  Otherwise, return to sender.
+                if ((host != 0) && (Client->packet->address.host == g_Game_Master.host)) {
+                    Client->packet->address.host = host;
+                    Client->packet->address.port = port;
+                }
 
                 // Send back FRAME_READY packet to specified address
                 memcpy(Client->packet->data, &frame_ready_id, 2);
                 Client->packet->len = 2;
                 if (SDLNet_UDP_Send(Client->socket, -1, Client->packet) == 0) {
                     printf("[Netplay] FRAME_PUNCH: Error sending packet to %d.%d.%d.%d.\n", GET_IP(Client->packet->address.host));
+                } else {
+                    printf("[Netplay] NAT punch packet sent to %d.%d.%d.%d.\n", GET_IP(Client->packet->address.host));
                 }
                 break;
 

@@ -142,9 +142,9 @@ IV.  OPEN_GAME
 join, it will send an OPEN_GAME request to the master server.  The OPEN_GAME
 request will be almost identical in structure to the FIND_GAMES query, the only
 difference being that the packet type will be set to 02 and there will be an
-additional "port" field, defining the port on the game server that will be
-accepting game client connections.  The MD5 checksum will specify the type of
-game that the game server will be hosting.
+additional "port" and "address" field, defining the port on the game server
+that will be accepting game client connections.  The MD5 checksum will specify
+the type of game that the game server will be hosting.
 
   ==== OPEN_GAME Request ==============
   I                                   I
@@ -152,6 +152,7 @@ game that the game server will be hosting.
   I --------------------------------  I
   I 8                Packet Type (02) I
   I 256              Rom MD5 Checksum I
+  I 32               Host Address     I
   I 16               Listening Port   I
   I                                   I
   =====================================

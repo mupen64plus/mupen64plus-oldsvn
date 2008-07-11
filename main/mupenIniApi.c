@@ -84,6 +84,7 @@ void ini_openFile()
    if (ini.comment != NULL) return;
    
    memset( &emptyEntry,0,sizeof(emptyEntry));
+   memset( &ini, 0, sizeof(ini));
    char* pathname = get_ini_path();
    f = gzopen(pathname, "rb");
    free(pathname);
@@ -286,16 +287,21 @@ mupenEntry* ini_search_by_md5(const char *md5)
    int i;
    iniElem *aux;
 
-   if (ini.comment == NULL) return emptyEntry;
+   if (ini.comment == NULL) {
+      return NULL;
+   }
 
    t[0] = md5[0];
    t[1] = md5[1];
    t[2] = 0;
    sscanf(t, "%X", &i);
    aux = ini.MD5_lists[i];
-   while (aux != NULL && strncmp(aux->entry.MD5, md5, 32))
+   while ((aux) && (strncmp(aux->entry.MD5, md5, 32))) {
      aux = aux->next_MD5;
-   if (aux == NULL) return NULL;
+   }
+   if (aux == NULL) {
+     return NULL;
+   }
    return &(aux->entry);
 }
 

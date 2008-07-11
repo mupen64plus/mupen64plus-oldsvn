@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../md5.h"
+#include "../rombrowser.h"
+#include "../../rom.h"
 //#include "../../romcache.h"
 #include "net_gui.h"
 #include "../main_gtk.h"
@@ -33,6 +35,7 @@
 #define COL_COUNT                       4
 
 SMainWindow g_MainWindow;
+GtkWidget *gameLabel;
 gchar l_JoinGameColumnNames[COL_COUNT][MAX_COL_NAME_LEN] = {"Player",
                                                             "Nick",
                                                             "P2P Only",
@@ -46,6 +49,7 @@ GtkWidget *l_StartButton;
 static void Callback_CancelJoinGame(GtkWidget *widget, gpointer data) {
   gtk_widget_hide_all(l_JoinGameWindow);
   MasterServerCloseGame();
+  close_rom(rom);
   gtk_widget_set_sensitive(g_MainWindow.window, TRUE);
 }
 
@@ -96,7 +100,6 @@ GtkWidget *setup_join_game_tree (void)
 void create_joingame_dialog() {
   
   GtkWidget *mainWindowBox, *bottomHBox, *emptyHBox, *quitButton, *bottomSeparator, *topSeparator;
-  GtkWidget *gameLabel;
 
   l_JoinGameWindow         = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   l_JoinGameTreeView       = setup_join_game_tree();
@@ -135,10 +138,17 @@ void create_joingame_dialog() {
   append_list_entry("4", "",    "No", "Not Connected");
 }
 
-void show_joingame_dialog() {
+void show_joingame_dialog(SRomEntry *romEntry) {
+    char buffer[128];
+    if (romEntry != NULL) {
+      sprintf(buffer, "Now playing %s.", romEntry->info.cGoodName);
+      gtk_label_set_label(GTK_LABEL(gameLabel), (gchar *)buffer);
+    }
+
     hide_creategame_dialog();
     hide_findgames_dialog();
     gtk_button_set_label(GTK_BUTTON(l_StartButton), "Ready");
+
     gtk_widget_set_sensitive(l_StartButton, TRUE);
     gtk_widget_set_sensitive(g_MainWindow.window, FALSE);
     gtk_widget_show_all(l_JoinGameWindow);

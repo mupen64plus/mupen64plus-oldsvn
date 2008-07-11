@@ -39,12 +39,15 @@
 #include "network.h"
 #include "../main/main.h"
 
+#define PROTOCOL_ID	        0xFFF0
+#define MAJOR_VER               1
+#define MINOR_VER               0
+
 #define STATUS_SUBSYSTEM_ERROR -1
 #define STATUS_NO_RESPONSE     -2
 #define STATUS_OK               0
 #define MASTER_SERVER_TIMEOUT   500
 
-IPaddress            g_Game_Master;
 MupenClient          g_NetplayClient;
 
 static HostListNode *l_MasterServerList = NULL;
@@ -59,7 +62,7 @@ void MasterServerAddToList(char *arg) {
   int           n;
 
   // Copy to buffer in case arg is a string literal
-  strncpy(master_server, arg, sizeof(master_server));
+  strncpy(master_server, arg, sizeof(master_server) - 1);
 
   // Replace ':' with ' ' for scanf compatability
   ptr = strchr(master_server, ':');
@@ -308,6 +311,7 @@ static long int timeElapsed(unsigned char arm) {
 
 static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, unsigned char md5[16], uint16_t local_port) {
     IPaddress    serverAddy;
+    IPaddress   *privateAddy;
     UDPpacket   *p;
     uint16_t     gameDesc;
     int          recv;
@@ -320,16 +324,17 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     }
 
     // Fill packet data
-    p->data[0] = 'M';
-    p->data[1] = '+';
+    SDLNet_Write16(PROTOCOL_ID, p->data);
     p->data[2] = 1;
     p->data[3] = 0;
     p->data[4] = OPEN_GAME;
     memcpy(p->data+5, md5, 16);
-    SDLNet_Write16(local_port, p->data + 21);
+    privateAddy = SDLNet_UDP_GetPeerAddress(g_NetplayClient.socket, -1);
+    SDLNet_Write32(privateAddy->host, p->data + 21);
+    SDLNet_Write16(privateAddy->port, p->data + 25);
 
     // Define packet length and destination
-    p->len = 23;
+    p->len = 27;
     p->address.host = master_server;
     p->address.port = master_port;
 
@@ -359,7 +364,7 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     }
 
     // response received from master server, extract game id
-    if (p->data[0] == GAME_DESC) gameDesc = SDLNet_Read16(p->data + 1);
+    if (p->data[2] == GAME_DESC) gameDesc = SDLNet_Read16(p->data + 3);
 
     // Cleanup and return game id
     SDLNet_FreePacket(p);
@@ -399,10 +404,9 @@ static int masterServerKeepAlive(uint32_t master_server, uint16_t master_port, u
     }
 
     // Fill packet data
-    p->data[0] = 'M';
-    p->data[1] = '+';
-    p->data[2] = 1;
-    p->data[3] = 0;
+    SDLNet_Write16(PROTOCOL_ID, p->data);
+    p->data[2] = MAJOR_VER;
+    p->data[3] = MINOR_VER;
     p->data[4] = KEEP_ALIVE;
     SDLNet_Write16(game_id, p->data + 5);
 
@@ -427,8 +431,8 @@ static int masterServerKeepAlive(uint32_t master_server, uint16_t master_port, u
 static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t master_port, unsigned char md5[16], int *status) {
     HostListNode *HostList = NULL, *tempList = NULL;
     IPaddress     serverAddy;
-    UDPsocket     s;
     UDPpacket *   p;
+    UDPpacket *   out;
     uint32_t      gameAddy;
     uint16_t      gamePort;
     int           recv, n;
@@ -445,19 +449,23 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
         return NULL;
     }
 
-    // Bind a udp socket
-    s = SDLNet_UDP_Open(0);
-    if (!s) {
-        printf("SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
+    // Allocate a packet buffer
+    out = SDLNet_AllocPacket(10); // Currently max length for packet from master server
+    if (!out) {
+        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
         *status = STATUS_SUBSYSTEM_ERROR;
         return NULL;
     }
 
+    if (!g_NetplayClient.isListening) {
+        printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
+        return NULL;
+    }
+
     // Fill packet data
-    p->data[0] = 'M';
-    p->data[1] = '+';
-    p->data[2] = 1;
-    p->data[3] = 0;
+    SDLNet_Write16(PROTOCOL_ID, p->data);
+    p->data[2] = MAJOR_VER;
+    p->data[3] = MINOR_VER;
     p->data[4] = FIND_GAMES;
     memcpy(p->data+5, md5, 16);
 
@@ -466,7 +474,7 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
     p->address.host = serverAddy.host;
     p->address.port = serverAddy.port;
 
-    if (!SDLNet_UDP_Send(s, -1, p)) {
+    if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
         *status = STATUS_SUBSYSTEM_ERROR;
         return NULL;
@@ -474,7 +482,7 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
 
     do {
         timeElapsed(1);
-        while ( ((recv = SDLNet_UDP_Recv(s, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT) ) {}
+        while (((recv = SDLNet_UDP_Recv(g_NetplayClient.socket, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
 
         // Subsystem error
         if (recv == -1) {
@@ -484,11 +492,19 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
         } else if (recv == 0) {
            *status = STATUS_NO_RESPONSE;
         // Received game list packet, parse it and make a list out of it
-        } else if (p->data[0] == GAME_LIST) {
+        } else if (p->data[2] == GAME_LIST) {
            *status = STATUS_OK;
-            for (n = 0; n < (p->len - 2) / 6; n++) {
-               memcpy(&gameAddy, (p->data + (n*6+2)), 4);
-               gamePort = SDLNet_Read16(p->data + (n*6+6));
+            for (n = 0; n < (p->len - 4) / 6; n++) {
+               memcpy(&gameAddy, (p->data + (n*6+4)), 4);
+               memcpy(&gamePort, (p->data + (n*6+8)), 2);
+               out->address.host = gameAddy;
+               out->address.port = gamePort;
+               SDLNet_Write16(FRAME_PUNCHREQUEST, out->data);
+               SDLNet_Write32(0, out->data+2);
+               SDLNet_Write16(0, out->data+6);
+               out->len = 8;
+
+               // send punch to address
                if (HostList) {
                    tempList->next = malloc(sizeof(HostListNode));
                    if (!tempList->next) {
@@ -514,7 +530,7 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
                }
             }
         }
-    } while ((p->data[1]) && (recv > 0));
+    } while ((p->data[3]) && (recv > 0));
 
     // Cleanup and return pointer to game linked list
     SDLNet_FreePacket(p);
@@ -555,10 +571,9 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
     }
 
     // Fill packet data
-    p->data[0] = 'M';
-    p->data[1] = '+';
-    p->data[2] = 1;
-    p->data[3] = 0;
+    SDLNet_Write16(PROTOCOL_ID, p->data);
+    p->data[2] = MAJOR_VER;
+    p->data[3] = MINOR_VER;
     p->data[4] = FIND_MD5;
 
     // Define packet length and destination
@@ -584,9 +599,9 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
         } else if (recv == 0) {
            *status = STATUS_NO_RESPONSE;
         // Received MD5 list packet, parse it and make a list out of it
-        } else if (p->data[0] == MD5_LIST) {
+        } else if (p->data[2] == MD5_LIST) {
            *status = STATUS_OK; 
-           for (n = 0; n < (p->len - 2) / 16; n++) {
+           for (n = 0; n < (p->len - 4) / 16; n++) {
                 if (MD5List) {
                    tempList->next = malloc(sizeof(MD5ListNode));
                    if (!tempList->next) {
@@ -595,7 +610,7 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
                       *status = STATUS_SUBSYSTEM_ERROR;
                       return NULL;
                    }
-                   memcpy(tempList->next->md5, (p->data + (n * 16 + 2)), 16);
+                   memcpy(tempList->next->md5, (p->data + (n * 16 + 4)), 16);
                    tempList = tempList->next;
                } else {
                    MD5List = malloc(sizeof(MD5ListNode));
@@ -605,12 +620,12 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
                       *status = STATUS_SUBSYSTEM_ERROR; 
                       return NULL;
                    }
-                   memcpy(MD5List->md5, (p->data + (n * 16 + 2)), 16);
+                   memcpy(MD5List->md5, (p->data + (n * 16 + 4)), 16);
                    tempList = MD5List;
                }
             }
         }
-    } while ((p->data[1]) && (recv > 0));
+    } while ((p->data[3]) && (recv > 0));
 
     // Cleanup and return pointer to game linked list
     SDLNet_FreePacket(p);

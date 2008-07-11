@@ -25,10 +25,12 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
+#include "net_gui.h"
 #include "../../md5.h"
 #include "../../mupenIniApi.h"
-#include "net_gui.h"
 #include "../../../network/network.h"
+
+
 
 #define MAX_COL_NAME_LEN		20
 #define COL_COUNT                       6
@@ -97,6 +99,7 @@ static void clear_comboBox() {
 static void join_selected_game() {
    GtkTreePath *path;
    GtkTreeViewColumn *column;
+
    GtkTreeIter *iter = (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
    GValue *value = (GValue *)malloc(sizeof(GValue));
    GtkTreeModel *model;
@@ -133,18 +136,21 @@ static void refresh_comboBox() {
       // Make the combobox sensitive
       gtk_widget_set_sensitive(l_ComboBox, TRUE);
       printf("[Master Server] MD5 List:\n");
-      while (md5_temp) {
-         sprintf(addy_buffer, "%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X", GET_MD5(md5_temp->md5));
-         printf("    %s\n", addy_buffer);
 
+      ini_openFile();
+      while (md5_temp) {
+         sprintf(addy_buffer, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", GET_MD5(md5_temp->md5));
+         printf("    \"%s\"\n", addy_buffer);
          romdb = ini_search_by_md5(addy_buffer);
          if (!romdb) {
-                append_combo_box("Unknown ROM", (gpointer)md5_temp);
+                append_combo_box("Unrecognized ROM", (gpointer)md5_temp);
          } else {
                 append_combo_box((gchar *)romdb->goodname, (gpointer)md5_temp);
          }
          md5_temp = GetNextMD5(md5_temp);
       }
+      ini_closeFile();
+
       gtk_combo_box_set_active ((GtkComboBox *)l_ComboBox, 0);
     } else {
       // There is nothing in the combo box, make it insensitive
@@ -164,7 +170,7 @@ static void refresh_list() {
        i = gtk_combo_box_get_active(GTK_COMBO_BOX(l_ComboBox));
        for (n = 0; n < i; n++) {
            if (!md5_temp->next) {
-               printf("Error: Corrupted MD5 linked list!\n"); // This shouldn't ever happen
+               printf("[Master Server] Error: Corrupted MD5 linked list!\n"); // This shouldn't ever happen
                clear_comboBox();
                FreeMD5List(l_ComboBox_MD5_List);            
                return;
@@ -179,12 +185,12 @@ static void refresh_list() {
     if (game_temp) {
       printf("[Master Server] Open Game List:\n");
       while (game_temp) {
+         // game_temp->port needs to be converted from network order to host order for windows
          sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), game_temp->port);
          printf("    %s\n", addy_buffer);
 
          // TODO: Send status queries out to all servers in the list, if they respond.. append to list
-
-         append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", (gchar *)addy_buffer);     // For testing  
+         append_list_entry("Demo", "2/4", "Dynarec", "Yes", "No", (gchar *)addy_buffer); // For testing  
          game_temp = GetNextHost(game_temp);
       }
     } else printf("[Master Server] No open games.\n");

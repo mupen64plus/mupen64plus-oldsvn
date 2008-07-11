@@ -40,6 +40,7 @@ int netInitialize(MupenClient *mClient) {
   SDLNet_Init();
   fprintf(stderr,"netInitialize()\n");
   rompause = 1;
+  g_Game_Master.host = 0;
   return clientInitialize(mClient);
 }
 
