@@ -42,6 +42,9 @@
 #include "../r4300/interupt.h"
 #include "../opengl/osd.h"
 
+const char *savestate_magic = "M64+SAVE";
+const int savestate_version = 0x00010000;  // 1.0
+
 extern unsigned int interp_addr;
 
 int savestates_job = 0;
@@ -112,6 +115,7 @@ char* savestates_get_filename()
 void savestates_save()
 {
     char *filename, *file, buffer[1024];
+    unsigned char outbuf[4];
     gzFile f;
     size_t length;
     int queuelength, i;
@@ -138,6 +142,16 @@ void savestates_save()
     f = gzopen(file, "wb");
     free(file);
 
+    /* write magic number */
+    gzwrite(f, savestate_magic, 8);
+
+    /* write savestate file version in big-endian */
+    outbuf[0] = (savestate_version >> 24) & 0xff;
+    outbuf[1] = (savestate_version >> 16) & 0xff;
+    outbuf[2] = (savestate_version >>  8) & 0xff;
+    outbuf[3] = (savestate_version >>  0) & 0xff;
+    gzwrite(f, outbuf, 4);
+
     gzwrite(f, ROM_SETTINGS.MD5, 32);
 
     gzwrite(f, &rdram_register, sizeof(RDRAM_register));
@@ -159,13 +173,12 @@ void savestates_save()
     save_flashram_infos(buffer);
     gzwrite(f, buffer, 24);
 
-    gzwrite(f, tlb_LUT_r, 0x100000);
-    gzwrite(f, tlb_LUT_w, 0x100000);
+    gzwrite(f, tlb_LUT_r, 0x100000*4);
+    gzwrite(f, tlb_LUT_w, 0x100000*4);
 
     gzwrite(f, &llbit, 4);
     gzwrite(f, reg, 32*8);
-    for ( i = 0; i < 32; i++ ) 
-        { gzwrite(f, reg_cop0+i, 8); } //*8 for compatibility with older versions.
+    gzwrite(f, reg_cop0, 32*4);
     gzwrite(f, &lo, 8);
     gzwrite(f, &hi, 8);
     gzwrite(f, reg_cop1_fgr_64, 32*8);
@@ -192,6 +205,7 @@ void savestates_save()
 void savestates_load()
 {
     char *filename, *file, buffer[1024];
+    unsigned char inbuf[4];
     gzFile f;
     size_t length;
     int queuelength, i;
@@ -217,18 +231,39 @@ void savestates_load()
 
     if (f == NULL)
     {
-        osd_new_message(OSD_BOTTOM_LEFT, tr("Error: state file doesn't exist"), filename);
-        alert_message(tr("The save state you're trying to load doesn't exist"));
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: state file '%s' doesn't exist"), filename);
         free(filename);
+        return;
+    }
+
+    /* read and check magic number */
+    gzread(f, buffer, 8);
+    if (strncmp(buffer, savestate_magic, 8) != 0)
+    {
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Unrecognized savestate format"));
+        free(filename);
+        gzclose(f);
+        return;
+    }
+
+    /* read savestate file version in big-endian order */
+    gzread(f, inbuf, 4);
+    i =            inbuf[0];
+    i = (i << 8) | inbuf[1];
+    i = (i << 8) | inbuf[2];
+    i = (i << 8) | inbuf[3];
+    if (i != savestate_version)
+    {
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Savestate version (%08x) doesn't match my version (%08x)"), i, savestate_version);
+        free(filename);
+        gzclose(f);
         return;
     }
 
     gzread(f, buffer, 32);
     if(memcmp(buffer, ROM_SETTINGS.MD5, 32))
     {
-        const char *msg = tr("Load state error: Saved state ROM doesn't match current ROM");
-        osd_new_message(OSD_BOTTOM_LEFT, msg);
-        alert_message(msg);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Load state error: Saved state ROM doesn't match current ROM"));
         free(filename);
         gzclose(f);
         return;
@@ -253,16 +288,12 @@ void savestates_load()
     gzread(f, buffer, 24);
     load_flashram_infos(buffer);
 
-    gzread(f, tlb_LUT_r, 0x100000);
-    gzread(f, tlb_LUT_w, 0x100000);
+    gzread(f, tlb_LUT_r, 0x100000*4);
+    gzread(f, tlb_LUT_w, 0x100000*4);
 
     gzread(f, &llbit, 4);
     gzread(f, reg, 32*8);
-    for ( i = 0; i < 32; i++ ) 
-    {
-        gzread(f, reg_cop0+i, 4);
-        gzread(f, buffer, 4); //for compatibility with older versions.
-    }
+    gzread(f, reg_cop0, 32*4);
     gzread(f, &lo, 8);
     gzread(f, &hi, 8);
     gzread(f, reg_cop1_fgr_64, 32*8);
