@@ -571,18 +571,18 @@ int open_rom(const char* filename, unsigned int archivefile)
         }
 
     unsigned short close = 0;
-    char* s = entry->goodname;
+    char *s = entry->goodname;
     if(s!=NULL)
         {
-        for ( i = strlen(s); i > 1 && s[i-1] != '['; --i );
+        for ( i = strlen(s); i > 1; --i );
         if(i!=0)
             {
-            if(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o')
+            if(s[i-1]=='['&&(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o'))
                 {
                 if(!ask_hack())
                     close = 1;
                 }
-            else if(s[i]=='b')
+            else if(s[i-1]=='['&&s[i]=='b')
                 {
                 if(!ask_bad())
                     close = 1;
