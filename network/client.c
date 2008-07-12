@@ -230,14 +230,15 @@ void clientProcessMessages(MupenClient *Client) {
                 memcpy(&host, Client->packet->data + 2, 4);
                 memcpy(&port, Client->packet->data + 6, 4);
 
-                // If the packet is from a trusted host and there is an address it in
-                // then use the specified address.  Otherwise, return to sender.
+                // If the packet is from a trusted host (master server or connected peer) and 
+                // there is an address it in then use the specified address.  Otherwise, return
+                // to sender.
                 if ((host != 0) && (Client->packet->address.host == g_Game_Master.host)) {
                     Client->packet->address.host = host;
                     Client->packet->address.port = port;
                 }
 
-                // Send back FRAME_READY packet to specified address
+                // Send back FRAME_PUNCH packet to specified address
                 memcpy(Client->packet->data, &frame_ready_id, 2);
                 Client->packet->len = 2;
                 if (SDLNet_UDP_Send(Client->socket, -1, Client->packet) == 0) {

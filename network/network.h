@@ -39,7 +39,7 @@
     #include "unistd.h"
 #endif
 
-#define SERVER_PORT		7000
+#define SERVER_PORT         7000
 
 #define DEFAULT_INPUT_DELAY 12  // starting delay in frames
 #define MAX_PLAYERS         4

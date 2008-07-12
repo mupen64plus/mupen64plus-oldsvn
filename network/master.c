@@ -114,11 +114,21 @@ void MasterServerCloseGame() {
 }
 
 static void *KeepAliveThread( void *_arg ) {
+  int    counter = 0;
+  struct timespec ts;
+  ts.tv_sec = 0;
+  ts.tv_nsec = 1000000; // 1 ms
+
   printf("[Master Server] Keep alive thread launched.\n");
 
   while(l_Game_ID != -1) {
-    masterServerKeepAlive(g_Game_Master.host, g_Game_Master.port, l_Game_ID);
-    sleep(5);
+    counter++;
+    if (counter == 5000) {
+        masterServerKeepAlive(g_Game_Master.host, g_Game_Master.port, l_Game_ID);
+        counter = 0;
+    }
+    clientProcessMessages(&g_NetplayClient);
+    nanosleep (&ts, NULL);
   }
 
   printf("[Master Server] Exiting keep alive thread.\n");
@@ -279,6 +289,44 @@ MD5ListNode *GetNextMD5(MD5ListNode *node) {
   return node->next;
 }
 
+/*
+    sendNATPunchRequest (dest. host, dest. port, host to punch, port to punch)
+*/
+
+int sendNATPunchRequest(uint32_t dhost, uint16_t dport, uint32_t thost, uint16_t tport) {
+    UDPpacket *p;
+
+    // Allocate packet buffer
+    p = SDLNet_AllocPacket(32);
+    if (!p) {
+        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
+        return -1;
+    }
+
+    SDLNet_Write16(FRAME_PUNCHREQUEST, p->data);
+    SDLNet_Write32(thost, p->data + 2);
+    SDLNet_Write16(thost, p->data + 6);
+    p->len = 8;
+    p->address.host = dhost;
+    p->address.port = dport;
+
+    if (!g_NetplayClient.isListening) {
+        printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
+        SDLNet_FreePacket(p);
+        return -1;
+    }
+
+    if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
+        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+        SDLNet_FreePacket(p);
+        return -1;
+    }
+
+    SDLNet_FreePacket(p);
+    return 0;   
+}
+
+
 
 /*
 ################################################################################
@@ -344,27 +392,35 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     // for the master server so we can receive FRAME_PUNCHREQUESTs.
     if (!g_NetplayClient.isListening) {
         printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
+        SDLNet_FreePacket(p);
         return -1;
     }
 
     if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+        SDLNet_FreePacket(p);
         return -1;
     }
 
     timeElapsed(1);
+    memset(p->data, 0, 32);
     while (((recv = SDLNet_UDP_Recv(g_NetplayClient.socket, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
 
     // Handle possible errors
     if (recv == -1) {
         printf("SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
+        SDLNet_FreePacket(p);
         return -1;
     } else if (recv == 0) {
+        SDLNet_FreePacket(p);
+        return -1;
+    } else if ((SDLNet_Read16(p->data) != FRAME_MASTER) || (p->data[2] != GAME_DESC)) {
+        printf("Received incorrect packet ID %X type %d len %d recv %d\n", SDLNet_Read16(p->data), FRAME_MASTER, p->data[2], p->len, recv);
         return -1;
     }
 
     // response received from master server, extract game id
-    if (p->data[2] == GAME_DESC) gameDesc = SDLNet_Read16(p->data + 3);
+    gameDesc = SDLNet_Read16(p->data + 3);
 
     // Cleanup and return game id
     SDLNet_FreePacket(p);

@@ -68,7 +68,7 @@ void          FreeHostList(HostListNode *list);
 MD5ListNode  *GetNextMD5(MD5ListNode *node);
 MD5ListNode  *CombineMD5Lists(MD5ListNode *list1, MD5ListNode *list2);
 void          FreeMD5List(MD5ListNode *list);
-
+int           sendNATPunchRequest(uint32_t dhost, uint16_t dport, uint32_t thost, uint16_t tport);
 
 // Internal Functions
 static void         *KeepAliveThread( void *_arg );

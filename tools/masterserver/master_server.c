@@ -34,7 +34,9 @@
 #define MAX_PACKET	1470  // In bytes, the largest packet permitted by the protocol
 #define MAX_GAME_DESC   32768 // The highest available game descriptor (max is 65536)
 #define CLEAN_FREQ      10    // In seconds, how often free_timed_out_game_desc() is called
-#define PROTOCOL_ID     0xFFF0
+
+#define PROTOCOL_ID             0xFFF0
+#define FRAME_PUNCHREQUEST      0xFFFD  // Request to send packet to specified address (for NAT punching)
 
 #define FIND_GAMES      00
 #define GAME_LIST	01
@@ -92,6 +94,7 @@ void        free_timed_out_game_desc();
 void        send_game_descriptor(uint32_t host, uint16_t port, int gameDesc);
 void        send_md5_list(uint32_t host, uint16_t port);
 void        send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]);
+int         send_punch_request(uint32_t dhost, uint16_t dport, uint32_t thost, uint16_t tport);
 
 // Linked List Functions
 void        add_game_entry_node(GameEntry *newGameEntry, md5_byte_t md5_checksum[16]);
@@ -502,7 +505,7 @@ void interupt_pause(int value) {
        printf("**                                         **\n");
        printf("**  Sigint received, press CTRL+C to quit  **\n");
        printf("*********************************************\n");
-       //print_debug();
+       print_debug();
     }
 }
 
@@ -713,7 +716,7 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
           // on behalf of client that issued game list request.
 
           memcpy(sendPacket->data + packet_offset, &(temp_ge->host), 4);
-          SDLNet_Write16(temp_ge->port, sendPacket->data + packet_offset + 4);
+          memcpy(sendPacket->data + packet_offset + 4, &(temp_ge->port), 2);
           packet_offset += 6;
           temp_ge = temp_ge->next;
       }
@@ -724,6 +727,18 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
     if (!SDLNet_UDP_Send(g_ListenSock, -1, sendPacket)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
     }
+    if (temp_md5_entry) {
+      temp_ge = temp_md5_entry->first_game_entry->next;
+      while (temp_ge->next != NULL) {
+          if (send_punch_request(temp_ge->host, temp_ge->port, host, port) == -1) {
+            printf("Error sending NAT punch request to %d.%d.%d.%d:%u\n", GET_IP(temp_ge->host), temp_ge->port);
+          } else {
+            printf("Sending NAT punch request to %d.%d.%d.%d:%u\n", GET_IP(temp_ge->host),temp_ge->port);               
+          }
+          temp_ge = temp_ge->next;
+      }
+    }
+
     SDLNet_FreePacket(sendPacket);
 }
 
@@ -767,4 +782,37 @@ void send_md5_list(uint32_t host, uint16_t port) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
     }
     SDLNet_FreePacket(sendPacket);
+}
+
+int send_punch_request(uint32_t dhost, uint16_t dport, uint32_t thost, uint16_t tport) {
+    UDPpacket *p;
+
+    // Allocate packet buffer
+    p = SDLNet_AllocPacket(32);
+    if (!p) {
+        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
+        return -1;
+    }
+
+    SDLNet_Write16(FRAME_PUNCHREQUEST, p->data);
+    memcpy(p->data + 2, &thost, 4);
+    memcpy(p->data + 6, &tport, 2);
+    p->len = 8;
+    p->address.host = dhost;
+    p->address.port = dport;
+
+    if (!g_ListenSock) {
+        printf("Main socket not bound.\n");
+        SDLNet_FreePacket(p);
+        return -1;
+    }
+
+    if (!SDLNet_UDP_Send(g_ListenSock, -1, p)) {
+        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+        SDLNet_FreePacket(p);
+        return -1;
+    }
+
+    SDLNet_FreePacket(p);
+    return 0;   
 }

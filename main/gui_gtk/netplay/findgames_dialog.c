@@ -186,7 +186,7 @@ static void refresh_list() {
       printf("[Master Server] Open Game List:\n");
       while (game_temp) {
          // game_temp->port needs to be converted from network order to host order for windows
-         sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), game_temp->port);
+         sprintf(addy_buffer, "%d.%d.%d.%d:%d", GET_IP(game_temp->host), GET_PORT(game_temp->port));
          printf("    %s\n", addy_buffer);
 
          // TODO: Send status queries out to all servers in the list, if they respond.. append to list
