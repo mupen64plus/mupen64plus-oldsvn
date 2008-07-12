@@ -34,13 +34,14 @@
 #include <SDL_net.h>
 
 // Master Server Defines (Packet Types)
-#define FIND_GAMES      00
-#define GAME_LIST	01
-#define OPEN_GAME       02
-#define GAME_DESC	03
-#define KEEP_ALIVE      04 
-#define FIND_MD5        06
-#define MD5_LIST        07
+#define FIND_GAMES      0
+#define GAME_LIST	1
+#define OPEN_GAME       2
+#define GAME_DESC	3
+#define KEEP_ALIVE      4 
+#define FIND_MD5        6
+#define MD5_LIST        7
+#define PUNCH_REQ       8
 
 typedef struct TMD5ListNode {
     unsigned char    md5[16];
@@ -54,6 +55,7 @@ typedef struct THostListNode {
 } HostListNode;
 
 extern IPaddress g_Game_Master;
+extern int       g_Game_ID;
 
 void          MasterServerAddToList(char *master_server);
 int           MasterServerCreateGame(unsigned char md5[16], int local_port);
@@ -69,11 +71,12 @@ MD5ListNode  *GetNextMD5(MD5ListNode *node);
 MD5ListNode  *CombineMD5Lists(MD5ListNode *list1, MD5ListNode *list2);
 void          FreeMD5List(MD5ListNode *list);
 int           sendNATPunchRequest(uint32_t dhost, uint16_t dport, uint32_t thost, uint16_t tport);
+int           MasterServerKeepAlive(uint32_t master_server, uint16_t master_port, uint16_t game_id, UDPsocket s);
 
 // Internal Functions
-static void         *KeepAliveThread( void *_arg );
 static long int      timeElapsed(unsigned char arm);
+static void          flushNetplayPort();
 static int           masterServerOpenGame  (uint32_t master_server, uint16_t master_port, unsigned char md5[16], uint16_t local_port);
-static int           masterServerKeepAlive (uint32_t master_server, uint16_t master_port, uint16_t game_id);
+
 static MD5ListNode  *masterServerGetMD5List(uint32_t master_server, uint16_t master_port, int *status);
 static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t master_port, unsigned char md5[16], int *status);

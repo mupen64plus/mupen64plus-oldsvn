@@ -36,16 +36,15 @@
 #define CLEAN_FREQ      10    // In seconds, how often free_timed_out_game_desc() is called
 
 #define PROTOCOL_ID             0xFFF0
-#define FRAME_PUNCHREQUEST      0xFFFD  // Request to send packet to specified address (for NAT punching)
 
-#define FIND_GAMES      00
-#define GAME_LIST	01
-#define OPEN_GAME       02
-#define GAME_DESC	03
-#define KEEP_ALIVE      04
-
-#define FIND_MD5        06
-#define MD5_LIST        07
+#define FIND_GAMES      0
+#define GAME_LIST	1
+#define OPEN_GAME       2
+#define GAME_DESC	3
+#define KEEP_ALIVE      4
+#define FIND_MD5        6
+#define MD5_LIST        7
+#define PUNCH_REQ       8
 
 #define ELAPSED(dt)          (int)(((dt) - ((dt) % 3600)) / 3600), (int)((((dt) - ((dt) % 60)) / 60) % 60), (int)((dt) % 60)
 // Thanks to DarkJeztr for this little biddy
@@ -731,9 +730,9 @@ void send_game_list(uint32_t host, uint16_t port, md5_byte_t md5_checksum[16]) {
       temp_ge = temp_md5_entry->first_game_entry->next;
       while (temp_ge->next != NULL) {
           if (send_punch_request(temp_ge->host, temp_ge->port, host, port) == -1) {
-            printf("Error sending NAT punch request to %d.%d.%d.%d:%u\n", GET_IP(temp_ge->host), temp_ge->port);
+            printf("Error sending NAT punch request to %d.%d.%d.%d:%u\n", GET_IP(temp_ge->host), GET_PORT(temp_ge->port));
           } else {
-            printf("Sending NAT punch request to %d.%d.%d.%d:%u\n", GET_IP(temp_ge->host),temp_ge->port);               
+            printf("Sending NAT punch request to %d.%d.%d.%d:%u\n", GET_IP(temp_ge->host), GET_PORT(temp_ge->port));
           }
           temp_ge = temp_ge->next;
       }
@@ -794,10 +793,11 @@ int send_punch_request(uint32_t dhost, uint16_t dport, uint32_t thost, uint16_t 
         return -1;
     }
 
-    SDLNet_Write16(FRAME_PUNCHREQUEST, p->data);
-    memcpy(p->data + 2, &thost, 4);
-    memcpy(p->data + 6, &tport, 2);
-    p->len = 8;
+    SDLNet_Write16(PROTOCOL_ID, p->data);
+    p->data[2] = PUNCH_REQ;
+    memcpy(p->data + 3, &thost, 4);
+    memcpy(p->data + 7, &tport, 2);
+    p->len = 9;
     p->address.host = dhost;
     p->address.port = dport;
 

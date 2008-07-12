@@ -28,6 +28,7 @@
 #include "../r4300/r4300.h"
 
 IPaddress   g_Game_Master;
+int         g_Game_ID;
 
 int clientInitialize(MupenClient *Client) {
     int i;
@@ -206,13 +207,14 @@ void clientProcessMessages(MupenClient *Client) {
             Uint16 frameID=SDLNet_Read16(Client->packet->data);
             switch(frameID) {
 
-
+              // FRAME_MASTER =======================================================================
               case FRAME_MASTER:
-                // All master server negotiations should be complete before this function begins
-                // handling packets.
-                printf("[Netplay] Unexpected packet received from master server.\n");
-                break;
 
+                // ** Response to OPEN_GAME Request
+                if (Client->packet->data[2] == GAME_DESC) {
+                   g_Game_ID = SDLNet_Read16(Client->packet->data + 3);
+                   printf("[Netplay] Received response to OPEN_GAME request, gid %d\n", g_Game_ID);
+                }
                   /*
                   The master server will send a FRAME_PUNCHREQUEST packet to a p2p client which is
                   running a game and waiting for other players to connect.  The FRAME_PUNCHREQUEST
@@ -225,26 +227,27 @@ void clientProcessMessages(MupenClient *Client) {
                   response to the FRAME_PUNCHREQUEST packet sent from the master server.
                   */
 
-              case FRAME_PUNCHREQUEST:
-                // address will be in network order, memcpy is ok
-                memcpy(&host, Client->packet->data + 2, 4);
-                memcpy(&port, Client->packet->data + 6, 4);
+                // ** Need a NAT punch
+                else if (Client->packet->data[2] == PUNCH_REQ) {
+                  memcpy(&host, Client->packet->data + 3, 4);
+                  memcpy(&port, Client->packet->data + 7, 4);
 
-                // If the packet is from a trusted host (master server or connected peer) and 
-                // there is an address it in then use the specified address.  Otherwise, return
-                // to sender.
-                if ((host != 0) && (Client->packet->address.host == g_Game_Master.host)) {
+                  if ((host != 0) && (Client->packet->address.host == g_Game_Master.host)) {
                     Client->packet->address.host = host;
                     Client->packet->address.port = port;
-                }
+                  }
 
-                // Send back FRAME_PUNCH packet to specified address
-                memcpy(Client->packet->data, &frame_ready_id, 2);
-                Client->packet->len = 2;
-                if (SDLNet_UDP_Send(Client->socket, -1, Client->packet) == 0) {
-                    printf("[Netplay] FRAME_PUNCH: Error sending packet to %d.%d.%d.%d.\n", GET_IP(Client->packet->address.host));
-                } else {
+                  memcpy(Client->packet->data, &frame_ready_id, 2);
+                  Client->packet->len = 2;
+
+                  if (SDLNet_UDP_Send(Client->socket, -1, Client->packet) == 0) {
+                    printf("[Netplay] Error sending packet to %d.%d.%d.%d.\n", GET_IP(Client->packet->address.host));
+                  } else {
                     printf("[Netplay] NAT punch packet sent to %d.%d.%d.%d.\n", GET_IP(Client->packet->address.host));
+                  }
+                } 
+                else {
+                   printf("[Netplay] Unexpected packet received from master server (type %d).\n", Client->packet->data[2]);
                 }
                 break;
 
@@ -253,6 +256,7 @@ void clientProcessMessages(MupenClient *Client) {
 
                 break;
 
+              // FRAME_JOINREQUEST =================================================================
               case FRAME_JOINREQUEST:
                 if(Client->packet->len == sizeof(JoinRequest)) {
                     JoinRequest *packet=((JoinRequest*)Client->packet->data);
@@ -291,6 +295,7 @@ void clientProcessMessages(MupenClient *Client) {
                         Client->packet->address, Client->packet->address.port, Client->packet->len);
                 break;
 
+              // FRAME_JOIN ========================================================================
               case FRAME_JOIN:
                 if(Client->packet->len == 16) {
                     Client->joinState.state=enabled;

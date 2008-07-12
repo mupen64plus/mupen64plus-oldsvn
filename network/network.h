@@ -191,6 +191,8 @@ int netInitialize(MupenClient *mClient);
 int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings);
 void netShutdown(MupenClient *mClient);
 int netMain(MupenClient *mClient);
+static void *netReceiveThread( void *_arg );
+int netLaunchRecvThread();
 
 int clientInitialize(MupenClient *mClient);
 int clientSendMessage(MupenClient *Client);

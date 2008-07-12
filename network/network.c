@@ -37,11 +37,19 @@ unsigned int gettimeofday_msec(void)
 }
 
 int netInitialize(MupenClient *mClient) {
+  int retValue;
+
   SDLNet_Init();
-  fprintf(stderr,"netInitialize()\n");
   rompause = 1;
   g_Game_Master.host = 0;
-  return clientInitialize(mClient);
+  MasterServerCloseGame();
+
+ if ((!clientInitialize(mClient)) ||  (!netLaunchRecvThread())) {
+     printf("[Netplay] Network initialization failed.\n");
+     return 0;
+ } else printf("[Netplay] Network initialization sucessful.\n");
+
+ return 1;
 }
 
 int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings) {
@@ -67,12 +75,47 @@ int netMain(MupenClient *mClient) {
         clientSendFrame(mClient);
 
     do {
-        clientProcessMessages(mClient);
+
+//        Now being called from netReceiveThread() so that packets can be processed without running the core
+//        netReceiveThread() is launched from netInitialize()
+//        clientProcessMessages(mClient);
+
     } while( !processEventQueue(mClient) );
 
     mClient->frameCounter++;
 
     return 0;
+}
+
+static void *netReceiveThread( void *_arg ) {
+  unsigned short int    counter = 0;
+  struct timespec ts;
+  ts.tv_sec = 0;
+  ts.tv_nsec = 1000000; // 1 ms
+
+  printf("[Netplay] Netplay receive thread started.\n");
+
+  while(g_NetplayClient.socket) {
+      counter++;
+      if ((counter % 5000 == 0) && (g_Game_ID != -1)) {
+         MasterServerKeepAlive(g_Game_Master.host, g_Game_Master.port, g_Game_ID, g_NetplayClient.socket);
+      }
+      clientProcessMessages(&g_NetplayClient);
+      nanosleep (&ts, NULL);
+  }
+  printf("[Netplay] Exiting netplay receive thread.\n");
+}
+
+int netLaunchRecvThread() {
+    pthread_t netRecvThread;
+    if(pthread_create(&netRecvThread, NULL, netReceiveThread, NULL) != 0)
+    {
+       printf("[Netplay] Couldn't spawn recv thread.\n");
+       return 0;
+    } else {
+       printf("[Netplay] Recv thread spawned: id %d\n", netRecvThread);
+       return 1;
+    }
 }
 
 int frameDelta(MupenClient *Client, Uint32 frame) {

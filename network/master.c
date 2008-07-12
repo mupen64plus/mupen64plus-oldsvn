@@ -49,10 +49,52 @@
 #define MASTER_SERVER_TIMEOUT   500
 
 MupenClient          g_NetplayClient;
+int                  g_Game_ID;
 
 static HostListNode *l_MasterServerList = NULL;
-static int           l_Game_ID = -1;
-static pthread_t     l_Keep_Alive_Thread = 0;   
+
+/*
+    MasterServerKeepAlive (master server, master server port, game ID)
+    ------------------------------------------------------------------------------
+    sends keep alive packet to master server.  returns 0 on success. -1 on error.
+*/
+
+int MasterServerKeepAlive(uint32_t master_server, uint16_t master_port, uint16_t game_id, UDPsocket s) {
+    IPaddress  serverAddy;
+    UDPpacket *p;
+    uint16_t   gameDesc;
+
+    // Resolve address of master server
+    serverAddy.host = master_server;
+    serverAddy.port = master_port;
+
+    // Allocate a packet buffer
+    p = SDLNet_AllocPacket(32);
+    if (!p) {
+        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
+        return -1;
+    }
+
+    // Fill packet data
+    SDLNet_Write16(PROTOCOL_ID, p->data);
+    p->data[2] = MAJOR_VER;
+    p->data[3] = MINOR_VER;
+    p->data[4] = KEEP_ALIVE;
+    SDLNet_Write16(game_id, p->data + 5);
+
+    // Define packet length and destination
+    p->len = 7;
+    p->address.host = serverAddy.host;
+    p->address.port = serverAddy.port;
+
+    if (!SDLNet_UDP_Send(s, -1, p)) {
+        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
+        SDLNet_FreePacket(p);
+        return -1;
+    }
+    SDLNet_FreePacket(p);
+    return 0;
+}
 
 void MasterServerAddToList(char *arg) {
   static HostListNode *last_node = NULL;
@@ -110,60 +152,40 @@ void MasterServerAddToList(char *arg) {
 }
 
 void MasterServerCloseGame() {
-  l_Game_ID = -1;
-}
-
-static void *KeepAliveThread( void *_arg ) {
-  int    counter = 0;
-  struct timespec ts;
-  ts.tv_sec = 0;
-  ts.tv_nsec = 1000000; // 1 ms
-
-  printf("[Master Server] Keep alive thread launched.\n");
-
-  while(l_Game_ID != -1) {
-    counter++;
-    if (counter == 5000) {
-        masterServerKeepAlive(g_Game_Master.host, g_Game_Master.port, l_Game_ID);
-        counter = 0;
-    }
-    clientProcessMessages(&g_NetplayClient);
-    nanosleep (&ts, NULL);
-  }
-
-  printf("[Master Server] Exiting keep alive thread.\n");
+  g_Game_ID = -1;
 }
 
 int MasterServerCreateGame(unsigned char md5[16], int local_port) {
     HostListNode *temp_master;
 
-    if (l_Game_ID != -1) {
+    if (g_Game_ID != -1) {
        // Kill old thread
-       l_Game_ID = -1;
+       g_Game_ID = -1;
     }
 
     temp_master = GetFirstMasterServer();
-    while ((l_Game_ID == -1) && (temp_master)) {
-        printf("[Master Server] Opening game @ %d.%d.%d.%d:%d...", GET_IP(temp_master->host), GET_PORT(temp_master->port));
-        l_Game_ID = masterServerOpenGame(temp_master->host, temp_master->port, md5, local_port);
-        if (l_Game_ID != -1) {
-           printf("Game ID: %d\n", l_Game_ID);
-           g_Game_Master.host = temp_master->host;
-           g_Game_Master.port = temp_master->port;
+    printf("[Master Server] Sending open game request to %d.%d.%d.%d:%d.\n", GET_IP(temp_master->host), GET_PORT(temp_master->port));
+    masterServerOpenGame(temp_master->host, temp_master->port, md5, local_port);
+    g_Game_Master.host = temp_master->host;
+    g_Game_Master.port = temp_master->port;
 
-           // Launch keep alive thread
-           if(pthread_create(&l_Keep_Alive_Thread, NULL, KeepAliveThread, NULL) != 0)
-           {
-               l_Keep_Alive_Thread = 0;
-               alert_message(tr("[Master Server] Couldn't spawn keep alive thread!"));
-               l_Game_ID = -1;
-           }
+    /*
+    while ((g_Game_ID == -1) && (temp_master)) {
+
+        printf("[Master Server] Opening game @ %d.%d.%d.%d:%d...", GET_IP(temp_master->host), GET_PORT(temp_master->port));
+        g_Game_ID = masterServerOpenGame(temp_master->host, temp_master->port, md5, local_port);
+        if (g_Game_ID != -1) {
+           printf("Game ID: %d\n", g_Game_ID);
+
+           LaunchKeepAliveThread();
         } else {
            printf("No response.\n");
         }
+
         temp_master = GetNextHost(temp_master);
     }
-    return l_Game_ID;
+    */
+    return 0;
 }
 
 HostListNode *MasterServerFindGames(unsigned char md5[16]) {
@@ -361,6 +383,7 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     IPaddress    serverAddy;
     IPaddress   *privateAddy;
     UDPpacket   *p;
+    UDPsocket    s;
     uint16_t     gameDesc;
     int          recv;
 
@@ -370,6 +393,11 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
         printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
         return -1;
     }
+
+    // We should be sending master server requests from the UDP game port
+    // (i.e. the port that the client will be accepting p2p connections on)
+    // This way, in the event of a firewall, we'll already have a NAT entry
+    // for the master server so we can receive FRAME_PUNCHREQUESTs.
 
     // Fill packet data
     SDLNet_Write16(PROTOCOL_ID, p->data);
@@ -386,25 +414,18 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     p->address.host = master_server;
     p->address.port = master_port;
 
-    // We should be sending master server requests from the UDP game port
-    // (i.e. the port that the client will be accepting p2p connections on)
-    // This way, in the event of a firewall, we'll already have a NAT entry
-    // for the master server so we can receive FRAME_PUNCHREQUESTs.
-    if (!g_NetplayClient.isListening) {
-        printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
-        SDLNet_FreePacket(p);
-        return -1;
-    }
-
     if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
         SDLNet_FreePacket(p);
         return -1;
     }
 
+/*
+    Packet will be received by client process messages.
+
     timeElapsed(1);
     memset(p->data, 0, 32);
-    while (((recv = SDLNet_UDP_Recv(g_NetplayClient.socket, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
+    while (((recv = SDLNet_UDP_Recv(s, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
 
     // Handle possible errors
     if (recv == -1) {
@@ -423,61 +444,13 @@ static int masterServerOpenGame(uint32_t master_server, uint16_t master_port, un
     gameDesc = SDLNet_Read16(p->data + 3);
 
     // Cleanup and return game id
+    SDLNet_UDP_Close(s);
+
+*/
     SDLNet_FreePacket(p);
     return gameDesc;
 }
 
-/*
-    masterServerKeepAlive (master server, master server port, game ID)
-    ------------------------------------------------------------------------------
-    sends keep alive packet to master server.  returns 0 on success. -1 on error.
-*/
-
-static int masterServerKeepAlive(uint32_t master_server, uint16_t master_port, uint16_t game_id) {
-    IPaddress  serverAddy;
-    UDPsocket  s;
-    UDPpacket *p;
-    uint16_t   gameDesc;
-
-    // Resolve address of master server
-    serverAddy.host = master_server;
-    serverAddy.port = master_port;
-
-    // Allocate a packet buffer
-    p = SDLNet_AllocPacket(32);
-    if (!p) {
-        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
-        return -1;
-    }
-
-    // Make sure UDP socket is bound
-
-    // (sending the keep alives via the main UDP game port ensures that the NAT
-    // entry for the master server doesn't time out!)
-    if (!g_NetplayClient.isListening) {
-        printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
-        return -1;
-    }
-
-    // Fill packet data
-    SDLNet_Write16(PROTOCOL_ID, p->data);
-    p->data[2] = MAJOR_VER;
-    p->data[3] = MINOR_VER;
-    p->data[4] = KEEP_ALIVE;
-    SDLNet_Write16(game_id, p->data + 5);
-
-    // Define packet length and destination
-    p->len = 7;
-    p->address.host = serverAddy.host;
-    p->address.port = serverAddy.port;
-
-    if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
-        printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
-        return -1;
-    }
-    SDLNet_FreePacket(p);
-    return 0;
-}
 
 /*
     masterServerFindGames
@@ -488,7 +461,7 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
     HostListNode *HostList = NULL, *tempList = NULL;
     IPaddress     serverAddy;
     UDPpacket *   p;
-    UDPpacket *   out;
+    UDPsocket     s;
     uint32_t      gameAddy;
     uint16_t      gamePort;
     int           recv, n;
@@ -505,16 +478,11 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
         return NULL;
     }
 
-    // Allocate a packet buffer
-    out = SDLNet_AllocPacket(10); // Currently max length for packet from master server
-    if (!out) {
-        printf("SDLNet_AllocPacket(): %s\n", SDLNet_GetError());
+    s = SDLNet_UDP_Open(0);
+    if (!s) {
+        printf("SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
         *status = STATUS_SUBSYSTEM_ERROR;
-        return NULL;
-    }
-
-    if (!g_NetplayClient.isListening) {
-        printf("[Master Server] Client not initialized (bind g_NetplayClient.socket).\n");
+        SDLNet_FreePacket(p);
         return NULL;
     }
 
@@ -530,43 +498,43 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
     p->address.host = serverAddy.host;
     p->address.port = serverAddy.port;
 
-    if (!SDLNet_UDP_Send(g_NetplayClient.socket, -1, p)) {
+    if (!SDLNet_UDP_Send(s, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
         *status = STATUS_SUBSYSTEM_ERROR;
+        SDLNet_FreePacket(p);
+        SDLNet_UDP_Close(s);
         return NULL;
     }
 
     do {
         timeElapsed(1);
-        while (((recv = SDLNet_UDP_Recv(g_NetplayClient.socket, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
+        while (((recv = SDLNet_UDP_Recv(s, p)) == 0) && (timeElapsed(0) < MASTER_SERVER_TIMEOUT)) {}
 
         // Subsystem error
         if (recv == -1) {
             printf("SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
            *status = STATUS_SUBSYSTEM_ERROR;
+
         // Timed out, no response
         } else if (recv == 0) {
            *status = STATUS_NO_RESPONSE;
+
         // Received game list packet, parse it and make a list out of it
         } else if (p->data[2] == GAME_LIST) {
            *status = STATUS_OK;
             for (n = 0; n < (p->len - 4) / 6; n++) {
                memcpy(&gameAddy, (p->data + (n*6+4)), 4);
                memcpy(&gamePort, (p->data + (n*6+8)), 2);
-               out->address.host = gameAddy;
-               out->address.port = gamePort;
-               SDLNet_Write16(FRAME_PUNCHREQUEST, out->data);
-               SDLNet_Write32(0, out->data+2);
-               SDLNet_Write16(0, out->data+6);
-               out->len = 8;
 
-               // send punch to address
+               // TODO: send punch to address
                if (HostList) {
                    tempList->next = malloc(sizeof(HostListNode));
                    if (!tempList->next) {
                       printf("malloc(): Failure! Unable to allocate memory.\n");
                       FreeHostList(HostList);
                       *status = STATUS_SUBSYSTEM_ERROR;
+                      SDLNet_FreePacket(p);
+                      SDLNet_UDP_Close(s);
                       return NULL;
                    }
                    tempList->next->host = gameAddy;
@@ -578,6 +546,8 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
                       printf("malloc(): Failure! Unable to allocate memory.\n");
                       FreeHostList(HostList);
                       *status = STATUS_SUBSYSTEM_ERROR;
+                      SDLNet_FreePacket(p);
+                      SDLNet_UDP_Close(s);
                       return NULL;
                    }
                    HostList->host = gameAddy;
@@ -590,6 +560,8 @@ static HostListNode *masterServerFindGames(uint32_t master_server, uint16_t mast
 
     // Cleanup and return pointer to game linked list
     SDLNet_FreePacket(p);
+    SDLNet_UDP_Close(s);
+
     if (tempList) tempList->next = NULL;
     return HostList;
 }
@@ -623,6 +595,7 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
     if (!s) {
         printf("SDLNet_UDP_Open(): %s\n", SDLNet_GetError());
         *status = STATUS_SUBSYSTEM_ERROR;
+        SDLNet_FreePacket(p);
         return NULL;
     }
 
@@ -640,6 +613,8 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
     if (!SDLNet_UDP_Send(s, -1, p)) {
         printf("SDLNet_UDP_Send(): %s\n", SDLNet_GetError());
         *status = STATUS_SUBSYSTEM_ERROR;
+        SDLNet_FreePacket(p);
+        SDLNet_UDP_Close(s);
         return NULL;
     }
 
@@ -651,9 +626,11 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
         if (recv == -1) {
             printf("SDLNet_UDP_Recv(): %s\n", SDLNet_GetError());
            *status = STATUS_SUBSYSTEM_ERROR;
+
         // Timed out, no response
         } else if (recv == 0) {
            *status = STATUS_NO_RESPONSE;
+
         // Received MD5 list packet, parse it and make a list out of it
         } else if (p->data[2] == MD5_LIST) {
            *status = STATUS_OK; 
@@ -662,8 +639,10 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
                    tempList->next = malloc(sizeof(MD5ListNode));
                    if (!tempList->next) {
                       printf("malloc(): Failure! Unable to allocate memory.\n");
-                      FreeMD5List(MD5List);
                       *status = STATUS_SUBSYSTEM_ERROR;
+                      FreeMD5List(MD5List);
+                      SDLNet_FreePacket(p);
+                      SDLNet_UDP_Close(s);
                       return NULL;
                    }
                    memcpy(tempList->next->md5, (p->data + (n * 16 + 4)), 16);
@@ -674,6 +653,8 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
                       printf("malloc(): Failure! Unable to allocate memory.\n");
                       FreeMD5List(MD5List);
                       *status = STATUS_SUBSYSTEM_ERROR; 
+                      SDLNet_FreePacket(p);
+                      SDLNet_UDP_Close(s);
                       return NULL;
                    }
                    memcpy(MD5List->md5, (p->data + (n * 16 + 4)), 16);
@@ -685,6 +666,7 @@ static MD5ListNode *masterServerGetMD5List(uint32_t master_server, uint16_t mast
 
     // Cleanup and return pointer to game linked list
     SDLNet_FreePacket(p);
+    SDLNet_UDP_Close(s);
     if (tempList) tempList->next = NULL;
     return MD5List;
 }
