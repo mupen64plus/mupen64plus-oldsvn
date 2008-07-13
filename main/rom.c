@@ -78,7 +78,7 @@ int is_valid_rom(unsigned char buffer[4])
  * rom data to native .z64 before forwarding. Makes sure that data extraction
  * and MD5ing routines always deal with a .z64 image.
  */
-void swap_rom(unsigned char* localrom, unsigned short *imagetype, int loadlength)
+void swap_rom(unsigned char* localrom, unsigned char *imagetype, int loadlength)
 {
     char temp;
     int i;
@@ -116,7 +116,7 @@ void swap_rom(unsigned char* localrom, unsigned short *imagetype, int loadlength
  * rom, or gzipped rom. If so, set compressiontype and load *loadlength of the rom
  * into the returned pointer. On failure return NULL.
  */
-unsigned char* load_single_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength)
+unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char* compressiontype, int* loadlength)
 {
     int i;
     unsigned short romread = 0;
@@ -312,7 +312,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned shor
  * end of the archive is reached. Returns NULL if unable to find a rom. The large function
  * API is to allow for persistent 7zip memory space.
  */
-unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile, UInt32* blockIndex, Byte** outBuffer, size_t* outBufferSize, CFileInStream* archiveStream, CArchiveDatabaseEx* db)
+unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned char* compressiontype, int* loadlength, unsigned int* archivefile, UInt32* blockIndex, Byte** outBuffer, size_t* outBufferSize, CFileInStream* archiveStream, CArchiveDatabaseEx* db)
 {
     int status;
     unsigned int filecounter = 0;
@@ -468,7 +468,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     md5_byte_t digest[16];
     romdatabase_entry *entry;
     char buffer[PATH_MAX];
-    unsigned short compressiontype, imagetype;
+    unsigned char compressiontype, imagetype;
     int i;
 
     if(rom)

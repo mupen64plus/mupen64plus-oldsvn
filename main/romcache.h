@@ -32,10 +32,10 @@ typedef struct
    md5_byte_t* refmd5;
    unsigned int crc1;
    unsigned int crc2;
-   unsigned short status;
-   unsigned short savetype;
-   unsigned short players;
-   unsigned short rumble;
+   unsigned char status;
+   unsigned char savetype;
+   unsigned char players;
+   unsigned char rumble;
 } romdatabase_entry;
 
 typedef struct _cache_entry
@@ -45,11 +45,11 @@ typedef struct _cache_entry
     char filename[PATH_MAX];
     char usercomments[COMMENT_MAXLENGTH]; 
     char internalname[81]; //Needs to be 4 times +1 (for '\0') the stored value for UTF8 conversion. 
+    unsigned char compressiontype;
+    unsigned char imagetype;
+    unsigned char cic;
     unsigned short countrycode;
-    unsigned short compressiontype;
-    unsigned short imagetype;
-    unsigned short cic;
-    unsigned int archivefile; //Not currently used, eventually for locating file inside zip or 7zip archives.
+    unsigned int archivefile;
     unsigned int crc1;
     unsigned int crc2;
     int romsize;

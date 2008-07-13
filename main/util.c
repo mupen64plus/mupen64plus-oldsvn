@@ -599,7 +599,7 @@ void countrycodestring(unsigned short countrycode, char *string)
     }
 }
 
-void compressionstring(unsigned short compressiontype, char *string)
+void compressionstring(unsigned char compressiontype, char *string)
 {
     switch(compressiontype)
     {
@@ -626,7 +626,7 @@ void compressionstring(unsigned short compressiontype, char *string)
     }
 }
 
-void imagestring(unsigned short imagetype, char *string)
+void imagestring(unsigned char imagetype, char *string)
 {
     switch(imagetype)
     {
@@ -644,7 +644,7 @@ void imagestring(unsigned short imagetype, char *string)
     }
 }
 
-void cicstring(unsigned short cic, char *string)
+void cicstring(unsigned char cic, char *string)
 {
     switch(cic)
     {
@@ -668,7 +668,7 @@ void cicstring(unsigned short cic, char *string)
     }
 }
 
-void rumblestring(unsigned short rumble, char *string)
+void rumblestring(unsigned char rumble, char *string)
 {
     switch(rumble)
     {
@@ -683,7 +683,7 @@ void rumblestring(unsigned short rumble, char *string)
     }
 }
 
-void savestring(unsigned short savetype, char *string)
+void savestring(unsigned char savetype, char *string)
 {
     switch(savetype)
     {
@@ -710,7 +710,7 @@ void savestring(unsigned short savetype, char *string)
     }
 }
 
-void playersstring(unsigned short players, char *string)
+void playersstring(unsigned char players, char *string)
 {
     if(players>7)
         {

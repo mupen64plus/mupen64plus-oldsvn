@@ -60,7 +60,7 @@ romdatabase_entry empty_entry;
 #include "util.h"
 
 #define UPDATE_FREQUENCY 12
-#define RCS_VERSION "RCS1.0"
+#define RCS_VERSION "RCS1.1"
 
 rom_cache g_romcache;
 
@@ -100,6 +100,8 @@ static int write_cache_file(char* cache_filename)
         return 0;
         }
 
+    int i = 0;
+    gzwrite(gzfile, &i, sizeof(int));
     gzwrite(gzfile, RCS_VERSION, 6*sizeof(char));
     gzwrite(gzfile, &g_romcache.length, sizeof(unsigned int));
 
@@ -114,10 +116,10 @@ static int write_cache_file(char* cache_filename)
             gzwrite(gzfile, entry->filename, PATH_MAX*sizeof(char));
             gzwrite(gzfile, entry->usercomments, COMMENT_MAXLENGTH*sizeof(char));
             gzwrite(gzfile, &entry->internalname, 80*sizeof(char));
+            gzwrite(gzfile, &entry->compressiontype, sizeof(unsigned char));
+            gzwrite(gzfile, &entry->imagetype, sizeof(unsigned char));
+            gzwrite(gzfile, &entry->cic, sizeof(unsigned char));
             gzwrite(gzfile, &entry->countrycode, sizeof(unsigned short));
-            gzwrite(gzfile, &entry->compressiontype, sizeof(unsigned short));
-            gzwrite(gzfile, &entry->imagetype, sizeof(unsigned short));
-            gzwrite(gzfile, &entry->cic, sizeof(unsigned short));
             gzwrite(gzfile, &entry->archivefile, sizeof(unsigned int));
             gzwrite(gzfile, &entry->crc1, sizeof(unsigned int));
             gzwrite(gzfile, &entry->crc2, sizeof(unsigned int));
@@ -491,6 +493,7 @@ int load_initial_cache(char* cache_filename)
         return 0;
         }
 
+    gzread(gzfile, &header, sizeof(int));
     if(!gzread(gzfile, &header, 6*sizeof(char))||strncmp(header, RCS_VERSION,6)!=0)
         {
         printf("Rom cache corrupt or from previous version.\n");
@@ -513,10 +516,10 @@ int load_initial_cache(char* cache_filename)
         gzread(gzfile, entry->filename, PATH_MAX*sizeof(char));
         gzread(gzfile, entry->usercomments, COMMENT_MAXLENGTH*sizeof(char));
         gzread(gzfile, entry->internalname, 80*sizeof(char));
+        gzread(gzfile, &entry->compressiontype, sizeof(unsigned char));
+        gzread(gzfile, &entry->imagetype, sizeof(unsigned char));
+        gzread(gzfile, &entry->cic, sizeof(unsigned char));
         gzread(gzfile, &entry->countrycode, sizeof(unsigned short));
-        gzread(gzfile, &entry->compressiontype, sizeof(unsigned short));
-        gzread(gzfile, &entry->imagetype, sizeof(unsigned short));
-        gzread(gzfile, &entry->cic, sizeof(unsigned short));
         gzread(gzfile, &entry->archivefile, sizeof(unsigned int));
         gzread(gzfile, &entry->crc1, sizeof(unsigned int));
         gzread(gzfile, &entry->crc2, sizeof(unsigned int));
@@ -782,13 +785,13 @@ void romdatabase_open()
                     }
                 else if(!strcmp(buffer, "Status"))
                     {
-                    value = atoi(buffer+stringlength+1);
+                    value = (unsigned char)atoi(buffer+stringlength+1);
                     if(value>-1&&value<6)
                         { search->entry.status = value; }
                     }
                 else if(!strcmp(buffer, "Players"))
                     {
-                    value = atoi(buffer+stringlength+1);
+                    value = (unsigned char)atoi(buffer+stringlength+1);
                     if(value>0&&value<8)
                         { search->entry.players = value; }
                     }

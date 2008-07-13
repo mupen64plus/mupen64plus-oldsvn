@@ -34,9 +34,9 @@
 
 int open_rom(const char* filename, unsigned int archivefile);
 int close_rom(void);
-unsigned char* load_single_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength);
-unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned short* compressiontype, int* loadlength, unsigned int* archivefile, UInt32* blockIndex, Byte** outBuffer, size_t* outBufferSize, CFileInStream* archiveStream, CArchiveDatabaseEx* db);
-void swap_rom(unsigned char* localrom, unsigned short *imagetype, int loadlength);
+unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char* compressiontype, int* loadlength);
+unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned char* compressiontype, int* loadlength, unsigned int* archivefile, UInt32* blockIndex, Byte** outBuffer, size_t* outBufferSize, CFileInStream* archiveStream, CArchiveDatabaseEx* db);
+void swap_rom(unsigned char* localrom, unsigned char* imagetype, int loadlength);
 
 extern unsigned char* rom;
 extern int taille_rom;
@@ -57,7 +57,7 @@ typedef struct _rom_header
    unsigned int unknown;  //0x34
    unsigned int Manufacturer_ID; //0x38
    unsigned short Cartridge_ID;  //0x3C //Game serial number
-   unsigned short Country_code;  //0x3E //Possible byte alignment padding here???
+   unsigned short Country_code;  //0x3E
    unsigned int Boot_Code[1008]; //0x40
 } rom_header;
 

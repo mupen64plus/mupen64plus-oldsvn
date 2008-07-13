@@ -81,14 +81,6 @@ static int create_mainWindow(void);
 /** globals **/
 SMainWindow g_MainWindow;
 
-/** status bar **/
-typedef struct
-{
-    const char *name;
-    gint        id;
-    GtkWidget  *bar;
-} statusBarSection;
-
 static pthread_t g_GuiThread = 0; // main gui thread
 
 /*********************************************************************************************************
