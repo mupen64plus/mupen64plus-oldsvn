@@ -42,7 +42,7 @@
 #include "../debugger/debugger.h"
 #endif
 
-unsigned int i, dynacore = 0, interpcore = 0;
+unsigned int dynacore = 0, interpcore = 0;
 int no_compiled_jump = 0;
 int stop, llbit, rompause;
 long long int reg[32], hi, lo;
@@ -1488,79 +1488,80 @@ void init_blocks()
 #endif
 }
 
-
-void go()
+/* this hard reset function simulates the boot-up state of the R4300 CPU */
+void r4300_reset_hard()
 {
-   long long CRC = 0;
-   unsigned int j;
-   
-   j=0;
-   debug_count = 0;
-   printf("Starting r4300 emulator\n");
-   memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFBC);
-   delay_slot=0;
-   stop = 0;
-   rompause = 0;
-   for (i=0;i<32;i++)
-     {
-    reg[i]=0;
-    reg_cop0[i]=0;
-    reg_cop1_fgr_32[i]=0;
-    reg_cop1_fgr_64[i]=0;
-    
-    reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
-    reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
-    
-    // --------------tlb------------------------
-    tlb_e[i].mask=0;
-    tlb_e[i].vpn2=0;
-    tlb_e[i].g=0;
-    tlb_e[i].asid=0;
-    tlb_e[i].pfn_even=0;
-    tlb_e[i].c_even=0;
-    tlb_e[i].d_even=0;
-    tlb_e[i].v_even=0;
-    tlb_e[i].pfn_odd=0;
-    tlb_e[i].c_odd=0;
-    tlb_e[i].d_odd=0;
-    tlb_e[i].v_odd=0;
-    tlb_e[i].r=0;
-    //tlb_e[i].check_parity_mask=0x1000;
-    
-    tlb_e[i].start_even=0;
-    tlb_e[i].end_even=0;
-    tlb_e[i].phys_even=0;
-    tlb_e[i].start_odd=0;
-    tlb_e[i].end_odd=0;
-    tlb_e[i].phys_odd=0;
-     }
-   for (i=0; i<0x100000; i++)
-     {
-    tlb_LUT_r[i] = 0;
-    tlb_LUT_w[i] = 0;
-     }
-   llbit=0;
-   hi=0;
-   lo=0;
-   FCR0=0x511;
-   FCR31=0;
-   
-   /* clear instruction counters */
-#if defined(COUNT_INSTR)
-   for (i = 0; i < 131; i++)
-     instr_count[i] = 0;
-#endif
+    unsigned int i;
 
-   //--------
-   /*reg[20]=1;
-   reg[22]=0x3F;
-   reg[29]=0xFFFFFFFFA0400000LL;
-   Random=31;
-   Status=0x70400004;
-   Config=0x66463;
-   PRevID=0xb00;*/
-   //--------
+    // clear r4300 registers and TLB entries
+    for (i = 0; i < 32; i++)
+    {
+        reg[i]=0;
+        reg_cop0[i]=0;
+        reg_cop1_fgr_32[i]=0;
+        reg_cop1_fgr_64[i]=0;
+
+        reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
+        reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
+
+        // --------------tlb------------------------
+        tlb_e[i].mask=0;
+        tlb_e[i].vpn2=0;
+        tlb_e[i].g=0;
+        tlb_e[i].asid=0;
+        tlb_e[i].pfn_even=0;
+        tlb_e[i].c_even=0;
+        tlb_e[i].d_even=0;
+        tlb_e[i].v_even=0;
+        tlb_e[i].pfn_odd=0;
+        tlb_e[i].c_odd=0;
+        tlb_e[i].d_odd=0;
+        tlb_e[i].v_odd=0;
+        tlb_e[i].r=0;
+        //tlb_e[i].check_parity_mask=0x1000;
+
+        tlb_e[i].start_even=0;
+        tlb_e[i].end_even=0;
+        tlb_e[i].phys_even=0;
+        tlb_e[i].start_odd=0;
+        tlb_e[i].end_odd=0;
+        tlb_e[i].phys_odd=0;
+    }
+    for (i=0; i<0x100000; i++)
+    {
+        tlb_LUT_r[i] = 0;
+        tlb_LUT_w[i] = 0;
+    }
+    llbit=0;
+    hi=0;
+    lo=0;
+    FCR0=0x511;
+    FCR31=0;
+
+    // set COP0 registers
+    Random = 31;
+    Status= 0x34000000;
+    Config= 0x6e463;
+    PRevID = 0xb00;
+    Count = 0x5000;
+    Cause = 0x5C;
+    Context = 0x7FFFF0;
+    EPC = 0xFFFFFFFF;
+    BadVAddr = 0xFFFFFFFF;
+    ErrorEPC = 0xFFFFFFFF;
    
+    rounding_mode = 0x33F;
+}
+
+/* this soft reset function simulates the actions of the PIF ROM, which may vary by region */
+void r4300_reset_soft()
+{
+    long long CRC = 0;
+    unsigned int i;
+
+    // copy boot code from ROM to SP_DMEM
+    memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFC0);
+
    // the following values are extracted from the pj64 source code
    // thanks to Zilmar and Jabo
    
@@ -1571,17 +1572,7 @@ void go()
    reg[11]= 0xFFFFFFFFA4000040LL;
    reg[29]= 0xFFFFFFFFA4001FF0LL;
    
-   Random = 31;
-   Status= 0x34000000;
-   Config= 0x6e463;
-   PRevID = 0xb00;
-   Count = 0x5000;
-   Cause = 0x5C;
-   Context = 0x7FFFF0;
-   EPC = 0xFFFFFFFF;
-   BadVAddr = 0xFFFFFFFF;
-   ErrorEPC = 0xFFFFFFFF;
-   
+    // figure out which ROM type is loaded
    for (i = 0x40/4; i < (0x1000/4); i++)
      CRC += SP_DMEM[i];
    switch(CRC) {
@@ -1604,7 +1595,7 @@ void go()
     default:
       CIC_Chip = 2;
    }
-   
+
    switch(ROM_HEADER->Country_code&0xFF)
      {
       case 0x44:
@@ -1721,108 +1712,125 @@ void go()
       reg[25]= 0x00000000465E3F72LL;
       break;
    }
-   
-   rounding_mode = 0x33F;
 
-   last_addr = 0xa4000040;
-   next_interupt = 624999;
-   init_interupt();
-   interpcore = 0;
+}
 
-   if (dynacore == 0)
-     {
-     printf ("R4300 Core mode: Interpreter\n");
-     init_blocks();
-     last_addr = PC->addr;
-     while (!stop)
-      {
-#ifdef COMPARE_CORE
-         if (PC->ops == FIN_BLOCK && 
-         (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
-         virtual_to_physical_address(PC->addr, 2);
-         compare_core();
-#endif
-         PC->ops();
-#ifdef DBG
-         if (debugger_mode)
-           update_debugger();
-#endif
-      }
-     }
-#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
-   else if (dynacore == 1)
-     {
-     dynacore = 1;
-     printf ("R4300 Core mode: Dynamic Recompiler\n");
-     init_blocks();
-     code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
-     dyna_start(code);
-     PC++;
+void r4300_execute()
+{
+    long long CRC = 0;
+    unsigned int i;
 
-#if defined(PROFILE_R4300)
-     pfProfile = fopen("instructionaddrs.dat", "ab");
-     for (i=0; i<0x100000; i++)
-       if (invalid_code[i] == 0 && blocks[i] != NULL && blocks[i]->code != NULL && blocks[i]->block != NULL)
-         {
-         unsigned char *x86addr;
-         int mipsop;
-         // store final code length for this block
-         mipsop = -1; /* -1 == end of x86 code block */
-         x86addr = blocks[i]->code + blocks[i]->code_length;
-         fwrite(&mipsop, 1, 4, pfProfile);
-         fwrite(&x86addr, 1, sizeof(char *), pfProfile);
-         }
-     fclose(pfProfile);
-     pfProfile = NULL;
-#endif
-     }
-#endif
-   else
-     {
-     printf ("R4300 Core mode: Pure Interpreter\n");
-     dynacore = 0;
-     interpcore = 1;
-     pure_interpreter();
-     }
-   debug_count+= Count;
-   printf("R4300 core finished.\n",(unsigned int)debug_count);
-   for (i=0; i<0x100000; i++)
-   {
-     if (blocks[i])
-     {
-       if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
-       if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
-       if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }
-       if (blocks[i]->riprel_table) { free(blocks[i]->riprel_table); blocks[i]->riprel_table = NULL; }
-       free(blocks[i]);
-       blocks[i] = NULL;
-     }
-   }
-   if (!dynacore && interpcore) free(PC);
+    debug_count = 0;
+    printf("Starting r4300 emulator\n");
 
-   /* print instruction counts */
+    delay_slot=0;
+    stop = 0;
+    rompause = 0;
+
+    /* clear instruction counters */
 #if defined(COUNT_INSTR)
-   if (dynacore)
-   {
-     unsigned int iTypeCount[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-     unsigned int iTotal = 0;
-     printf("Instruction counters:\n");
-     for (i = 0; i < 131; i++)
-     {
-       printf("%8s: %08i  ", instr_name[i], instr_count[i]);
-       if (i % 5 == 4) printf("\n");
-       iTypeCount[instr_type[i]] += instr_count[i];
-       iTotal += instr_count[i];
-     }
-     printf("\nInstruction type summary (total instructions = %i)\n", iTotal);
-     for (i = 0; i < 11; i++)
-     {
-       printf("%20s: %04.1f%% (%i)\n", instr_typename[i], (float) iTypeCount[i] * 100.0 / iTotal, iTypeCount[i]);
-     }
-   }
+    for (i = 0; i < 131; i++)
+        instr_count[i] = 0;
+#endif
+   
+    last_addr = 0xa4000040;
+    next_interupt = 624999;
+    init_interupt();
+    interpcore = 0;
+
+    if (dynacore == 0)
+    {
+        printf ("R4300 Core mode: Interpreter\n");
+        init_blocks();
+        last_addr = PC->addr;
+        while (!stop)
+        {
+#ifdef COMPARE_CORE
+            if (PC->ops == FIN_BLOCK && 
+            (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
+            virtual_to_physical_address(PC->addr, 2);
+            compare_core();
+#endif
+            PC->ops();
+#ifdef DBG
+            if (debugger_mode)
+                update_debugger();
+#endif
+        }
+    }
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
+    else if (dynacore == 1)
+    {
+        dynacore = 1;
+        printf ("R4300 Core mode: Dynamic Recompiler\n");
+        init_blocks();
+        code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
+        dyna_start(code);
+        PC++;
+#if defined(PROFILE_R4300)
+        pfProfile = fopen("instructionaddrs.dat", "ab");
+        for (i=0; i<0x100000; i++)
+            if (invalid_code[i] == 0 && blocks[i] != NULL && blocks[i]->code != NULL && blocks[i]->block != NULL)
+            {
+                unsigned char *x86addr;
+                int mipsop;
+                // store final code length for this block
+                mipsop = -1; /* -1 == end of x86 code block */
+                x86addr = blocks[i]->code + blocks[i]->code_length;
+                fwrite(&mipsop, 1, 4, pfProfile);
+                fwrite(&x86addr, 1, sizeof(char *), pfProfile);
+            }
+        fclose(pfProfile);
+        pfProfile = NULL;
+#endif
+    }
+#endif
+    else
+    {
+        printf ("R4300 Core mode: Pure Interpreter\n");
+        dynacore = 0;
+        interpcore = 1;
+        pure_interpreter();
+    }
+    debug_count+= Count;
+    printf("R4300 core finished.\n",(unsigned int)debug_count);
+    for (i=0; i<0x100000; i++)
+    {
+        if (blocks[i])
+        {
+            if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
+            if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
+            if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }
+            if (blocks[i]->riprel_table) { free(blocks[i]->riprel_table); blocks[i]->riprel_table = NULL; }
+            free(blocks[i]);
+            blocks[i] = NULL;
+        }
+    }
+    if (!dynacore && interpcore) free(PC);
+
+    /* print instruction counts */
+#if defined(COUNT_INSTR)
+    if (dynacore)
+    {
+        unsigned int iTypeCount[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        unsigned int iTotal = 0;
+        printf("Instruction counters:\n");
+        for (i = 0; i < 131; i++)
+        {
+            printf("%8s: %08i  ", instr_name[i], instr_count[i]);
+            if (i % 5 == 4) printf("\n");
+            iTypeCount[instr_type[i]] += instr_count[i];
+            iTotal += instr_count[i];
+        }
+        printf("\nInstruction type summary (total instructions = %i)\n", iTotal);
+        for (i = 0; i < 11; i++)
+        {
+            printf("%20s: %04.1f%% (%i)\n", instr_typename[i], (float) iTypeCount[i] * 100.0 / iTotal, iTypeCount[i]);
+        }
+    }
 #endif
 
 #ifdef VCR_SUPPORT
-   VCR_coreStopped();
+    VCR_coreStopped();
 #endif
 }

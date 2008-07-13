@@ -63,7 +63,9 @@ extern char invalid_code[0x100000];
 extern unsigned int jump_to_address;
 extern int no_compiled_jump;
 
-void go();
+void r4300_reset_hard();
+void r4300_reset_soft();
+void r4300_execute();
 void pure_interpreter();
 void compare_core();
 void jump_to_func();

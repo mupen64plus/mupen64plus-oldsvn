@@ -780,7 +780,11 @@ static void * emulationThread( void *_arg )
     cheat_load_current_rom();
 
     osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
-    go();   /* core func */
+
+    /* call r4300 CPU core and run the game */
+    r4300_reset_hard();
+    r4300_reset_soft();
+    r4300_execute();
 
 #ifdef WITH_LIRC
     lircStop();
