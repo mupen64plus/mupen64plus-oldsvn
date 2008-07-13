@@ -1328,9 +1328,19 @@ int main(int argc, char *argv[])
     // init multi-language support
     tr_init();
 
-    // if --noask was not specified at the commandline, try config file
+    // if --noask was not specified at the commandline, default to true in nogui mode, 
+    // otherwise check the config file.
     if(!g_NoaskParam)
-        g_Noask = config_get_bool("No Ask", FALSE);
+        {
+        if(!l_GuiEnabled)
+            {
+            g_Noask = TRUE;
+            }
+        else
+            {
+            g_Noask = config_get_bool("No Ask", FALSE);
+            }
+        }
 
     cheat_read_config();
     plugin_scan_installdir();

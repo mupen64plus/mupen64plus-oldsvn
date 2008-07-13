@@ -50,28 +50,4 @@ void alert_message(const char *fmt, ...)
     va_end(ap);
 }
 
-// print message and ask for user confirmation (yes/no)
-int confirm_message(const char *fmt, ...)
-{
-    va_list ap = {0};
-    char c;
-
-    while(1)
-    {
-        va_start(ap, fmt);
-        printf(tr("Confirm"));
-        printf(": ");
-        vprintf(fmt, ap);
-        printf("(y/n) ");
-        va_end(ap);
-
-        c = fgetc(stdin);
-
-        if(tolower(c) == 'y') return 1;
-        else if(tolower(c) == 'n') return 0;
-
-        printf(tr("Please answer 'y' (%s) or 'n' (%s).\n"), tr("Yes"), tr("No"));
-    }
-}
-
 #endif // NO_GUI

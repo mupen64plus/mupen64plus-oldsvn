@@ -437,9 +437,11 @@ static int ask_bad(void)
                       "Be warned that this will probably give unexpected results.\n"));
         return 1;
     }
+#ifndef NO_GUI
     return confirm_message(tr("The rom you are trying to load is probably a bad dump!"
                            " Be warned that this will probably give unexpected results."
                            " Do you still want to run it?"));
+#endif
 }
 
 static int ask_hack(void)
@@ -450,17 +452,24 @@ static int ask_hack(void)
                   "Be warned that this will probably give unexpected results.\n"));
         return 1;
         }
+#ifndef NO_GUI
     return confirm_message(tr("The rom you are trying to load is probably a hack!"
                            " Be warned that this will probably give unexpected results."
                            " Do you still want to run it?"));
+#endif
 }
 
 int open_rom(const char* filename, unsigned int archivefile)
 {
     if(g_EmulationThread)
          {
+#ifndef NO_GUI
+    if(!g_Noask)
+         {
          if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
              return -1;
+         }
+#endif
          stopEmulation();
          }
 
@@ -574,7 +583,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     char *s = entry->goodname;
     if(s!=NULL)
         {
-        for ( i = strlen(s); i > 1; --i );
+        for ( i = strlen(s); i > 1; --i )
         if(i!=0)
             {
             if(s[i-1]=='['&&(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o'))
@@ -613,8 +622,13 @@ int close_rom(void)
 {
     if(g_EmulationThread)
         {
-        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
-            return -1;
+#ifndef NO_GUI
+        if(!g_Noask)
+            {
+            if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
+                return -1;
+            }
+#endif
         stopEmulation();
         }
 

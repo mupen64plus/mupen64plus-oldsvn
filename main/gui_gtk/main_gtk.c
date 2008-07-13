@@ -321,23 +321,6 @@ int confirm_message(const char *fmt, ...)
 
         return response == GTK_RESPONSE_ACCEPT;
     }
-    // if gui not enabled, get input from the console
-    else
-    {
-        char c;
-        while(1)
-        {
-            printf(tr("Confirm"));
-            printf(": %s(y/n) ", buf);
-
-            c = fgetc(stdin);
-
-            if(tolower(c) == 'y') return 1;
-            else if(tolower(c) == 'n') return 0;
-
-            printf(tr("Please answer 'y' (%s) or 'n' (%s).\n"), tr("Yes"), tr("No"));
-        }
-    }
 }
 
 /*********************************************************************************************************
