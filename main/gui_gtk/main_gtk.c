@@ -345,6 +345,21 @@ static void callback_closeRom(GtkWidget *widget, gpointer data)
     }
 }
 
+
+// reload windows
+void reload()
+{
+    // recreate gui
+    gtk_widget_destroy( g_MainWindow.window );
+    gtk_widget_destroy( g_AboutDialog.dialog );
+    gtk_widget_destroy( g_ConfigDialog.dialog );
+    gtk_widget_destroy( g_RomPropDialog.dialog );
+    create_mainWindow();
+    create_aboutDialog();
+    create_configDialog();
+    gtk_widget_show_all( g_MainWindow.window );
+}
+
 // language selected
 static void callback_languageSelected(GtkWidget *widget, gpointer data)
 {
@@ -359,20 +374,6 @@ static void callback_languageSelected(GtkWidget *widget, gpointer data)
 
     reload();
     g_romcache.rcstask = RCS_RESCAN;
-}
-
-// reload windows
-void reload()
-{
-    // recreate gui
-    gtk_widget_destroy( g_MainWindow.window );
-    gtk_widget_destroy( g_AboutDialog.dialog );
-    gtk_widget_destroy( g_ConfigDialog.dialog );
-    gtk_widget_destroy( g_RomPropDialog.dialog );
-    create_mainWindow();
-    create_aboutDialog();
-    create_configDialog();
-    gtk_widget_show_all( g_MainWindow.window );
 }
 
 /** emulation **/
