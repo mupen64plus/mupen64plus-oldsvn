@@ -33,7 +33,6 @@
 
 #include "savestates.h"
 #include "main.h"
-#include "guifuncs.h"
 #include "translate.h"
 #include "rom.h"
 #include "../memory/memory.h"

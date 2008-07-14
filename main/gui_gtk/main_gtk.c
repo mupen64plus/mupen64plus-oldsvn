@@ -17,7 +17,6 @@ Email                : blight@Ashitaka
 
 #include "../version.h"
 #include "../winlnxdefs.h"
-#include "../guifuncs.h"
 #include "main_gtk.h"
 #include "../main.h"
 #include "../config.h"
@@ -168,159 +167,110 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
 }
 
 // prints informational message to status bar
-void statusbar_message(const char *format, ...)
+int gui_message(unsigned char messagetype, const char *format, ...)
 {
+    if(!gui_enabled())
+        return 0;
+
     va_list ap;
     char buffer[2049];
     pthread_t self = pthread_self();
+    gint response = 0;
 
     va_start(ap, format);
     vsnprintf(buffer, 2048, format, ap);
     buffer[2048] = '\0';
     va_end(ap);
 
-    int counter;
-    for( counter = 0; counter < strlen(buffer); ++counter )
-        {
-        if(buffer[counter]=='\n')
-            {
-            buffer[counter]='\0';
-            break;
-            }
-        }
-
     // If we're calling from a thread other than the main gtk thread, take gdk lock.
     if(!pthread_equal(self, g_GuiThread))
         gdk_threads_enter();
 
-    gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
-    gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
+    if(messagetype==0)
+        {
+        int counter;
+        for( counter = 0; counter < strlen(buffer); ++counter )
+            {
+            if(buffer[counter]=='\n')
+                {
+                buffer[counter]='\0';
+                break;
+                }
+            }
 
-    GUI_PROCESS_QUEUED_EVENTS();
+        gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
+        gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
+        }
+    else if(messagetype>1)
+        {
+        GtkWidget *dialog, *hbox, *label, *icon;
 
-    if(!pthread_equal(self, g_GuiThread))
-        gdk_threads_leave();
+        hbox = gtk_hbox_new(FALSE, 5);
 
-    return;
-}
+        GtkIconTheme *theme = gtk_icon_theme_get_default();
+        GdkPixbuf *pixbuf;
 
-// pops up dialog box with error message and ok button
-void alert_message(const char *fmt, ...)
-{
-    va_list ap;
-    char buf[2049];
-    GtkWidget *dialog = NULL,
-              *hbox = NULL,
-              *label = NULL,
-              *icon = NULL;
-    pthread_t self = pthread_self();
-
-    va_start(ap, fmt);
-    vsnprintf(buf, 2048, fmt, ap);
-    va_end(ap);
-
-    if(gui_enabled())
-    {
-        // if we're calling from a thread other than the main gtk thread, take gdk lock
-        if(!pthread_equal(self, g_GuiThread))
-            gdk_threads_enter();
-
-        dialog = gtk_dialog_new_with_buttons(tr("Error"),
+        if(messagetype==1)
+            {
+            dialog = gtk_dialog_new_with_buttons(tr("Error"),
                                              GTK_WINDOW(g_MainWindow.window),
                                              GTK_DIALOG_DESTROY_WITH_PARENT,
                                              GTK_STOCK_OK, GTK_RESPONSE_NONE,
                                              NULL);
 
-        g_signal_connect_swapped(dialog, "response",
-                                 G_CALLBACK(gtk_widget_destroy), dialog);
-
-        hbox = gtk_hbox_new(FALSE, 5);
-
-        //Update with icon from theme!!!
-        GtkIconTheme *theme = gtk_icon_theme_get_default();
-        GdkPixbuf *pixbuf;
-        if(check_icon_theme())
-            {
-            pixbuf = gtk_icon_theme_load_icon(theme, "dialog-error", 32,  0, NULL);
-            icon = gtk_image_new_from_pixbuf(pixbuf); 
+            if(check_icon_theme())
+                {
+                pixbuf = gtk_icon_theme_load_icon(theme, "dialog-error", 32,  0, NULL);
+                icon = gtk_image_new_from_pixbuf(pixbuf); 
+                }
+            else
+                icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-error.png"));
             }
-        else
-            icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-error.png"));
-        gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
-
-        label = gtk_label_new(buf);
-        gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-        gtk_widget_set_size_request(label, 165, -1);
-        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 5);
-
-        gtk_widget_show_all(dialog);
-
-        if(!pthread_equal(self, g_GuiThread))
-            gdk_threads_leave();
-    }
-}
-
-// pops up dialog box with question and yes/no buttons
-int confirm_message(const char *fmt, ...)
-{
-    va_list ap;
-    char buf[2049];
-    gint response;
-    GtkWidget *dialog = NULL,
-              *hbox = NULL,
-              *label = NULL,
-              *icon = NULL;
-    pthread_t self = pthread_self();
-
-    va_start(ap, fmt);
-    vsnprintf(buf, 2048, fmt, ap);
-    va_end(ap);
-
-    if(gui_enabled())
-    {
-        // if we're calling from a thread other than the main gtk thread, take gdk lock
-        if(!pthread_equal(self, g_GuiThread))
-            gdk_threads_enter();
-
-        dialog = gtk_dialog_new_with_buttons(tr("Confirm"),
+        else if(messagetype==2)
+            {
+            dialog = gtk_dialog_new_with_buttons(tr("Confirm"),
                                              GTK_WINDOW(g_MainWindow.window),
                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                              GTK_STOCK_YES, GTK_RESPONSE_ACCEPT,
                                              GTK_STOCK_NO, GTK_RESPONSE_REJECT,
                                              NULL);
 
-        hbox = gtk_hbox_new(FALSE, 5);
-
-        //Update with icon from theme!!!
-        GtkIconTheme *theme = gtk_icon_theme_get_default();
-        GdkPixbuf *pixbuf;
-        if(check_icon_theme())
-            {
-            pixbuf = gtk_icon_theme_load_icon(theme, "dialog-question", 32,  0, NULL);
-            icon = gtk_image_new_from_pixbuf(pixbuf); 
+            if(check_icon_theme())
+                {
+                pixbuf = gtk_icon_theme_load_icon(theme, "dialog-question", 32,  0, NULL);
+                icon = gtk_image_new_from_pixbuf(pixbuf); 
+                }
+            else
+                icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-question.png"));
             }
-        else
-            icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-question.png"));
+
         gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
 
-        label = gtk_label_new(buf);
+        label = gtk_label_new(buffer);
         gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-        gtk_widget_set_size_request(label, 200, -1);
         gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 
-        gtk_widget_show_all(hbox);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 5);
 
-        response = gtk_dialog_run(GTK_DIALOG(dialog));
-        gtk_widget_destroy(dialog);
+        gtk_widget_show_all(dialog);
 
-        if(!pthread_equal(self, g_GuiThread))
-            gdk_threads_leave();
+        if(messagetype==1)
+            {
+            g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
+            }
+        else if(messagetype==2)
+            {
+            response = gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
+            }
+        }
 
-        return response == GTK_RESPONSE_ACCEPT;
-    }
+    GUI_PROCESS_QUEUED_EVENTS();
+
+    if(!pthread_equal(self, g_GuiThread))
+       gdk_threads_leave();
+
+       return response == GTK_RESPONSE_ACCEPT;
 }
 
 /*********************************************************************************************************
@@ -333,9 +283,10 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
     GtkWidget *file_chooser;
     GtkFileFilter *file_filter;
 
+    //We might not need this...
     if( g_EmulationThread )
     {
-        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
+        if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load a rom?")))
             return;
         callback_stopEmulation( NULL, NULL );
     }
@@ -440,7 +391,7 @@ static void callback_startEmulation(GtkWidget *widget, gpointer data)
 
         if(!list) //Nothing selected.
             { 
-            if(confirm_message(tr("There is no Rom loaded. Do you want to load one?")))
+            if(gui_message(2, tr("There is no Rom loaded. Do you want to load one?")))
                 callback_openRom(NULL, NULL);
             return;
             }
@@ -512,7 +463,7 @@ static void callback_SaveAs( GtkWidget *widget, gpointer data )
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -551,7 +502,7 @@ static void callback_Load( GtkWidget *widget, gpointer data )
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -592,7 +543,7 @@ static void callback_configure( GtkWidget *widget, gpointer data )
 {
     if(g_EmulationThread)
     {
-        if(!confirm_message("Cannot configure while emulator is running!\nWould you like to stop the emulator?"))
+        if(!gui_message(2, "Cannot configure while emulator is running!\nWould you like to stop the emulator?"))
             return;
 
         stopEmulation();
@@ -613,7 +564,7 @@ static void callback_configureVideo( GtkWidget *widget, gpointer data )
     }
     else
     {
-        if(confirm_message(tr("No graphics plugin selected! Do you\nwant to select one?")))
+        if(gui_message(2, tr("No graphics plugin selected! Do you\nwant to select one?")))
         {
             gtk_widget_show_all( g_ConfigDialog.dialog );
             gtk_notebook_set_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins ) );
@@ -633,7 +584,7 @@ static void callback_configureAudio( GtkWidget *widget, gpointer data )
     }
     else
     {
-        if(confirm_message(tr("No audio plugin selected! Do you\nwant to select one?")))
+        if(gui_message(2, tr("No audio plugin selected! Do you\nwant to select one?")))
         {
             gtk_widget_show_all( g_ConfigDialog.dialog );
             gtk_notebook_set_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins ) );
@@ -653,7 +604,7 @@ static void callback_configureInput( GtkWidget *widget, gpointer data )
     }
     else
     {
-        if(confirm_message(tr("No input plugin selected! Do you\nwant to select one?")))
+        if(gui_message(2, tr("No input plugin selected! Do you\nwant to select one?")))
         {
             gtk_widget_show_all( g_ConfigDialog.dialog );
             gtk_notebook_set_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins ) );
@@ -673,7 +624,7 @@ static void callback_configureRSP( GtkWidget *widget, gpointer data )
     }
     else
     {
-        if(confirm_message(tr("No RSP plugin selected! Do you\nwant to select one?")))
+        if(gui_message(2, tr("No RSP plugin selected! Do you\nwant to select one?")))
         {
             gtk_widget_show_all( g_ConfigDialog.dialog );
             gtk_notebook_set_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins ) );
@@ -719,7 +670,7 @@ static void callback_vcrStartRecord( GtkWidget *widget, gpointer data )
                 strncat(full_filename, ".rec", PATH_MAX - strlen(full_filename));
         
             if (VCR_startRecord( full_filename ) < 0)
-                alert_message(tr("Couldn't start recording."));
+                error_message(tr("Couldn't start recording."));
 
             g_free(filename);
         }
@@ -728,7 +679,7 @@ static void callback_vcrStartRecord( GtkWidget *widget, gpointer data )
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -738,11 +689,11 @@ static void callback_vcrStopRecord( GtkWidget *widget, gpointer data )
     if( g_EmulationThread )
     {
         if (VCR_stopRecord() < 0)
-            alert_message(tr("Couldn't stop recording."));
+            error_message(tr("Couldn't stop recording."));
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -782,7 +733,7 @@ static void callback_vcrStartPlayback( GtkWidget *widget, gpointer data )
             gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
         
             if (VCR_startPlayback( filename ) < 0)
-                alert_message(tr("Couldn't start playback."));
+                error_message(tr("Couldn't start playback."));
         
             g_free(filename);
         }
@@ -791,7 +742,7 @@ static void callback_vcrStartPlayback( GtkWidget *widget, gpointer data )
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -801,11 +752,11 @@ static void callback_vcrStopPlayback( GtkWidget *widget, gpointer data )
     if( g_EmulationThread )
     {
         if (VCR_stopPlayback() < 0)
-            alert_message(tr("Couldn't stop playback."));
+            error_message(tr("Couldn't stop playback."));
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -860,7 +811,7 @@ static void callback_vcrStartCapture( GtkWidget *widget, gpointer data )
                 gchar *avi_filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
 
                 if (VCR_startCapture( rec_filename, avi_filename ) < 0)
-                    alert_message(tr("Couldn't start capturing."));
+                    error_message(tr("Couldn't start capturing."));
 
                 g_free(avi_filename);
             }
@@ -872,7 +823,7 @@ static void callback_vcrStartCapture( GtkWidget *widget, gpointer data )
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -882,11 +833,11 @@ static void callback_vcrStopCapture( GtkWidget *widget, gpointer data )
     if( g_EmulationThread )
     {
         if (VCR_stopCapture() < 0)
-            alert_message(tr("Couldn't stop capturing."));
+            error_message(tr("Couldn't stop capturing."));
     }
     else
     {
-        alert_message(tr("Emulation is not running."));
+        error_message(tr("Emulation is not running."));
     }
 }
 
@@ -946,7 +897,7 @@ static void callback_debuggerEnableToggled( GtkWidget *widget, gpointer data )
 
     if( g_EmulationThread )
     {
-        if(confirm_message(tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
+        if(gui_message(2, tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
         {
             callback_stopEmulation( NULL, NULL );
         emuRestart=1;

@@ -431,7 +431,7 @@ static void on_menu_select(GtkMenuItem *menuitem, gpointer user_data)
         
         case 1: //Copy as Binary
             //TODO - not sure how to put raw binary data on clipboard <_<
-            alert_message(tr("not implemented yet"));
+            error_message(tr("not implemented yet"));
         break;
         
         case 2: //Copy as ASCII

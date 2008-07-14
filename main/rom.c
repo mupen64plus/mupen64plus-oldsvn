@@ -38,9 +38,7 @@
 #include "md5.h"
 #include "rom.h"
 #include "../memory/memory.h"
-#include "guifuncs.h"
 #include "romcache.h"
-#include "guifuncs.h"
 #include "translate.h"
 #include "main.h"
 #include "../opengl/osd.h"
@@ -438,9 +436,9 @@ static int ask_bad(void)
         return 1;
     }
 #ifndef NO_GUI
-    return confirm_message(tr("The rom you are trying to load is probably a bad dump!"
-                           " Be warned that this will probably give unexpected results."
-                           " Do you still want to run it?"));
+    return gui_message(2, tr("The rom you are trying to load is probably a bad dump!\n"
+                           "Be warned that this will probably give unexpected results.\n"
+                           "Do you still want to run it?"));
 #endif
 }
 
@@ -453,9 +451,9 @@ static int ask_hack(void)
         return 1;
         }
 #ifndef NO_GUI
-    return confirm_message(tr("The rom you are trying to load is probably a hack!"
-                           " Be warned that this will probably give unexpected results."
-                           " Do you still want to run it?"));
+    return gui_message(2, tr("The rom you are trying to load is probably a hack!\n"
+                           "Be warned that this will probably give unexpected results.\n"
+                           "Do you still want to run it?"));
 #endif
 }
 
@@ -466,7 +464,7 @@ int open_rom(const char* filename, unsigned int archivefile)
 #ifndef NO_GUI
          if(!g_Noask)
              {
-             if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
+             if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
                  return -1;
              }
 #endif
@@ -506,7 +504,7 @@ int open_rom(const char* filename, unsigned int archivefile)
         {
         if((rom=load_archive_rom(filename, &taille_rom, &compressiontype, &taille_rom, &archivefile, &blockIndex, &outBuffer, &outBufferSize, &archiveStream, &db))==NULL)
             {
-            alert_message(tr("Couldn't load Rom!")); 
+            error_message(tr("Couldn't load Rom!")); 
             return -1;
             }
         }
@@ -625,7 +623,7 @@ int close_rom(void)
 #ifndef NO_GUI
         if(!g_Noask)
             {
-            if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
+            if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load a rom?")))
                 return -1;
             }
 #endif

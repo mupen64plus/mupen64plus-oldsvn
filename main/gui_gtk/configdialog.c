@@ -22,7 +22,6 @@ Email                : blight@Ashitaka
 #include "rombrowser.h"
 #include "../romcache.h"
 #include "../config.h"
-#include "../guifuncs.h"
 #include "../translate.h"
 #include "../util.h"
 #include "../../opengl/osd.h"
@@ -228,7 +227,7 @@ static void addRomDirectory(const gchar *dirname)
     gtk_tree_model_foreach(model, callback_checkForEach, (gpointer) dirname);
     if(Match)
     {
-        alert_message(tr("The directory you selected is already in the list."));
+        error_message(tr("The directory you selected is already in the list."));
         Match = 0;
         return;
     }

@@ -39,7 +39,6 @@
 #include <errno.h>
 
 #include "volume.h"
-#include "guifuncs.h"
 #include "translate.h"
 #include "../opengl/osd.h"
 

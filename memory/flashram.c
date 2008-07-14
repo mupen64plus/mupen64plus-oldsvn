@@ -33,7 +33,6 @@
 #include "../r4300/r4300.h"
 #include "memory.h"
 #include "../main/main.h"
-#include "../main/guifuncs.h"
 
 int use_flashram;
 

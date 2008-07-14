@@ -42,7 +42,6 @@
 #include "../r4300/interupt.h"
 #include "../main/main.h"
 #include "../main/plugin.h"
-#include "../main/guifuncs.h"
 #include "../main/vcr.h"
 
 static unsigned char eeprom[0x800];

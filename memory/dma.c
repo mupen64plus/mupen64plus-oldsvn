@@ -38,7 +38,6 @@
 #include <malloc.h>
 #include "pif.h"
 #include "flashram.h"
-#include "../main/guifuncs.h"
 #include "../r4300/ops.h"
 
 static unsigned char sram[0x8000];

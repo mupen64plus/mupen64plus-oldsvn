@@ -663,7 +663,7 @@ static void import_file(char* filename)
     {
         //todo: show error message
         sprintf(line, "Cannot open file \"%s\"\n", filename);
-        alert_message(tr(line));
+        error_message(tr(line));
         return;
     }
     

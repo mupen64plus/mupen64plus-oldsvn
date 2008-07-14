@@ -59,7 +59,6 @@
 #include "../r4300/recomph.h"
 #include "../memory/memory.h"
 #include "savestates.h"
-#include "guifuncs.h" // gui-specific functions
 #include "util.h"
 #include "translate.h"
 #include "volume.h"
@@ -177,10 +176,26 @@ void main_message(unsigned int console, unsigned int statusbar, unsigned int osd
         osd_new_message(osd_corner, buffer);
 #ifndef NO_GUI
     if (l_GuiEnabled && statusbar)
-        statusbar_message(buffer);
+        gui_message(0, buffer);
 #endif
     if (console)
         printf("%s\n", buffer);
+}
+
+void error_message(const char *format, ...)
+{
+    va_list ap;
+    char buffer[2049];
+    va_start(ap, format);
+    vsnprintf(buffer, 2047, format, ap);
+    buffer[2048]='\0';
+    va_end(ap);
+
+#ifndef NO_GUI
+    if (l_GuiEnabled)
+        gui_message(1, buffer);
+#endif
+    printf("%s: %s\n", tr("Error"), buffer);
 }
 
 
@@ -382,7 +397,7 @@ void startEmulation(void)
     // make sure rom is loaded before running
     if(!rom)
     {
-        alert_message(tr("There is no Rom loaded."));
+        error_message(tr("There is no Rom loaded."));
         return;
     }
 
@@ -394,7 +409,7 @@ void startEmulation(void)
 
     if(!gfx_plugin)
     {
-        alert_message(tr("No graphics plugin specified."));
+        error_message(tr("No graphics plugin specified."));
         return;
     }
 
@@ -405,7 +420,7 @@ void startEmulation(void)
 
     if(!audio_plugin)
     {
-        alert_message(tr("No audio plugin specified."));
+        error_message(tr("No audio plugin specified."));
         return;
     }
 
@@ -416,7 +431,7 @@ void startEmulation(void)
 
     if(!input_plugin)
     {
-        alert_message(tr("No input plugin specified."));
+        error_message(tr("No input plugin specified."));
         return;
     }
 
@@ -427,7 +442,7 @@ void startEmulation(void)
 
     if(!RSP_plugin)
     {
-        alert_message(tr("No RSP plugin specified."));
+        error_message(tr("No RSP plugin specified."));
         return;
     }
 
@@ -442,7 +457,7 @@ void startEmulation(void)
         if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
         {
             g_EmulationThread = 0;
-            alert_message(tr("Couldn't spawn core thread!"));
+            error_message(tr("Couldn't spawn core thread!"));
             return;
         }
         pthread_detach(g_EmulationThread);
@@ -843,7 +858,7 @@ static void sighandler(int signal, siginfo_t *info, void *context)
         switch( signal )
         {
             case SIGSEGV:
-                alert_message(tr("The core thread recieved a SIGSEGV signal.\n"
+                error_message(tr("The core thread recieved a SIGSEGV signal.\n"
                                 "This means it tried to access protected memory.\n"
                                 "Maybe you have set a wrong ucode for one of the plugins!"));
                 printf( "SIGSEGV in core thread caught:\n" );
@@ -1394,7 +1409,7 @@ int main(int argc, char *argv[])
         if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
             {
             g_RomCacheThread = 0;
-            alert_message(tr("Couldn't spawn rom cache thread!"));
+            error_message(tr("Couldn't spawn rom cache thread!"));
             }
         else
            pthread_detach(g_RomCacheThread);
@@ -1427,7 +1442,7 @@ int main(int argc, char *argv[])
     // Rom file must be specified in nogui mode
     else if(!l_GuiEnabled)
     {
-        alert_message("Rom file must be specified in nogui mode.");
+        error_message("Rom file must be specified in nogui mode.");
         printUsage(argv[0]);
 
         // cleanup and exit

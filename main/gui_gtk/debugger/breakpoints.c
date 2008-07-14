@@ -268,7 +268,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     i = sscanf(&line[i], "%lX %lx", &newbp.address, &newbp.endaddr);
     if(!i)
     {
-        alert_message(tr("Invalid address."));
+        error_message(tr("Invalid address."));
         return FALSE;
     }
     else if(i == 1) newbp.endaddr = newbp.address;
@@ -283,7 +283,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
         printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
         if(add_breakpoint_struct(&newbp) == -1)
         {
-            alert_message(tr("Cannot add any more breakpoints."));
+            error_message(tr("Cannot add any more breakpoints."));
             return FALSE;
         }
     }

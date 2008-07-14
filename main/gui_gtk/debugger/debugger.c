@@ -70,7 +70,7 @@ void init_debugger_frontend()
     */
 
     if(dynacore!=0)
-      alert_message("You are trying to use the debugger with the dynamic-recompiler.  This is unfinished, and many features of the debugger WILL NOT WORK PROPERLY.  If you have a bug you'd like to report, try it first using the debugger with either of the interpreted cores.");
+      error_message("You are trying to use the debugger with the dynamic-recompiler.  This is unfinished, and many features of the debugger WILL NOT WORK PROPERLY.  If you have a bug you'd like to report, try it first using the debugger with either of the interpreted cores.");
 
 }
 
