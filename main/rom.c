@@ -464,11 +464,11 @@ int open_rom(const char* filename, unsigned int archivefile)
     if(g_EmulationThread)
          {
 #ifndef NO_GUI
-    if(!g_Noask)
-         {
-         if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
-             return -1;
-         }
+         if(!g_Noask)
+             {
+             if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
+                 return -1;
+             }
 #endif
          stopEmulation();
          }

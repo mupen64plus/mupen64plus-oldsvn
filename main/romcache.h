@@ -57,7 +57,7 @@ typedef struct _cache_entry
     struct _cache_entry* next;
 } cache_entry;
 
-enum RCS_TASK
+enum
 {
     RCS_INIT = 1,
     RCS_RESCAN,
@@ -70,7 +70,8 @@ enum RCS_TASK
 typedef struct
 {
     unsigned int length; 
-    enum RCS_TASK rcstask;
+    unsigned char rcstask; //enum for what rcs thread should do.
+    unsigned char rcspause; //bool for pause after last file, toggled by starting and stopping emulation.
     cache_entry* top;
     cache_entry* last;
 } rom_cache;

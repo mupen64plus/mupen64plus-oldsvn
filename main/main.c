@@ -454,12 +454,18 @@ void startEmulation(void)
         main_pause();
     }
 
+#ifndef NO_GUI
+    g_romcache.rcspause = 1;
+#endif
 }
 
 void stopEmulation(void)
 {
     if(g_EmulationThread || g_EmulatorRunning)
     {
+#ifndef NO_GUI
+        g_romcache.rcspause = 0;
+#endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Stopping emulation.\n"));
         rompause = 0;
         stop_it();
@@ -483,7 +489,9 @@ int pauseContinueEmulation(void)
 
     if (rompause)
     {
-
+#ifndef NO_GUI
+        g_romcache.rcspause = 1;
+#endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
         if(msg)
         {
@@ -493,6 +501,9 @@ int pauseContinueEmulation(void)
     }
     else
     {
+#ifndef NO_GUI
+        g_romcache.rcspause = 0;
+#endif
         if(msg)
             osd_delete_message(msg);
 

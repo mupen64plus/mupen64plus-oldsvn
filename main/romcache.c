@@ -157,6 +157,7 @@ void* rom_cache_system(void* _arg)
     char* buffer;
     struct sched_param param;
     char cache_filename[PATH_MAX];
+    g_romcache.rcspause = 0;
 
     // Setup job parser
     while (g_romcache.rcstask != RCS_SHUTDOWN)
@@ -211,7 +212,7 @@ void* rom_cache_system(void* _arg)
                 break;
             case RCS_SLEEP:
                 // Sleep to not use any CPU power.
-                usleep(1000);
+                sleep(1);
                 break;
             }
         }
@@ -474,6 +475,9 @@ static void scan_dir(const char *directoryname)
                 { fclose(archiveStream.File); }
             SzArDbExFree(&db, free);
             }
+
+        while(g_romcache.rcspause)
+            { sleep(1); }
         }
      closedir(directory);
  }
