@@ -481,8 +481,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     if(rom)
         free(rom);
 
-    // clear Byte-swapped flag, since ROM is now deleted
-    //This is (and never was) set in the code below... 
+    //Clear Byte-swapped flag, since ROM is now deleted.
     g_MemHasBeenBSwapped = 0;
 
     UInt32 blockIndex = 0xFFFFFFFF;
@@ -526,7 +525,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     printf("Rom size: %d bytes (or %d Mb or %d Megabits)\n",
     taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
 
-    // loading rom settings and checking if it's a good dump
+    //Load rom settings and check if it's a good dump
     md5_init(&state);
     md5_append(&state, (const md5_byte_t*)rom, taille_rom);
     md5_finish(&state, digest);
@@ -642,7 +641,7 @@ int close_rom(void)
         rom = NULL;
         }
 
-    // clear Byte-swapped flag, since ROM is now deleted
+    //Clear Byte-swapped flag, since ROM is now deleted
     g_MemHasBeenBSwapped = 0;
     main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed."));
 

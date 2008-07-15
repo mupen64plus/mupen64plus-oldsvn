@@ -34,12 +34,15 @@
 
 #define DEFAULT 16
 
+//Rom database necessary even in GUI=NONE due to Eeprom issue for ROM loading.
+//Possible SoftHack or other necessary compatibility settings as well.
 void romdatabase_open();
 void romdatabase_close();
 
 _romdatabase g_romdatabase;
 romdatabase_entry empty_entry;
 
+//All RCS thread and caching functions aren't needed if compiling GUI=NONE
 #ifndef NO_GUI
 #include <iconv.h>
 
@@ -53,7 +56,7 @@ romdatabase_entry empty_entry;
 #include <sys/types.h>
 
 #include "7zip/Types.h"
-#include "../memory/memory.h" //sl
+#include "../memory/memory.h" //sl() macro
 
 #include "md5.h"
 #include "main.h"
@@ -151,6 +154,10 @@ static void rebuild_cache_file(char* cache_filename)
     write_cache_file(cache_filename);
 }
 
+/* Entry point for the RCS thread. Sets up local variables and enters task loop.
+ * After initially loading and rescanning, thread sleeps unless asked to refresh
+ * cache (generally by user action in the GUI).
+ */
 
 void* rom_cache_system(void* _arg)
 {
@@ -221,6 +228,9 @@ void* rom_cache_system(void* _arg)
     pthread_join(g_RomCacheThread, NULL);
 }
 
+/* Given a pointer to the memory space of a valid ROM, and its size in entry->romsize
+ * fill md5, inientry, countrycode, crc1, crc2, internalname, and cic properties of entry. 
+ */
 void fill_entry(cache_entry* entry, unsigned char* localrom)
 {
     //Compute md5.
@@ -476,6 +486,7 @@ static void scan_dir(const char *directoryname)
             SzArDbExFree(&db, free);
             }
 
+        //Pause if user open a ROM and starts emulation. Toggled in rom.c.
         while(g_romcache.rcspause)
             { sleep(1); }
         }
@@ -565,6 +576,7 @@ int load_initial_cache(char* cache_filename)
 }
 #endif
 
+//Convert two letters representing hexidecimal to the appropriate value: 00->0 - FF->256.
 unsigned char hexconvert(const char *bigraph)
 {
     unsigned char returnvalue = 0;
@@ -584,6 +596,7 @@ unsigned char hexconvert(const char *bigraph)
     return returnvalue;
 }
 
+//Helper function, identify the space of a line before an = sign.
 static int split_property(char *string)
 {
     int counter = 0;
