@@ -67,7 +67,6 @@ OBJ_CORE = \
 	main/plugin.o \
 	main/rom.o \
 	main/savestates.o \
-	main/volume.o \
 	main/zip/ioapi.o \
 	main/zip/unzip.o \
 	main/bzip2/bzlib.o \

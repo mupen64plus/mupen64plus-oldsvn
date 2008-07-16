@@ -64,6 +64,7 @@ static void dummy_initiateControllers(CONTROL_INFO Control_Info) {}
 static void dummy_aiDacrateChanged(int SystemType) {}
 static DWORD dummy_aiReadLength() { return 0; }
 static void dummy_setSpeedFactor(int percent) {}
+static const char * dummy_volumeGetString() { return NULL; }
 //static void dummy_aiUpdate(BOOL Wait) {}
 static void dummy_controllerCommand(int Control, BYTE * Command) {}
 static void dummy_getKeys(int Control, BUTTONS *Keys) {}
@@ -103,6 +104,10 @@ void (*processAList)() = dummy_void;
 void (*romClosed_audio)() = dummy_void;
 void (*romOpen_audio)() = dummy_void;
 void (*setSpeedFactor)(int percent) = dummy_setSpeedFactor;
+void (*volumeUp)() = dummy_void;
+void (*volumeDown)() = dummy_void;
+void (*volumeMute)() = dummy_void;
+const char * (*volumeGetString)() = dummy_volumeGetString;
 
 void (*closeDLL_input)() = dummy_void;
 void (*controllerCommand)(int Control, BYTE * Command) = dummy_controllerCommand;
@@ -479,6 +484,10 @@ void plugin_load_plugins(const char *gfx_name,
     romClosed_audio = dlsym(handle_audio, "RomClosed");
     romOpen_audio = dlsym(handle_audio, "RomOpen");
     setSpeedFactor = dlsym(handle_audio, "SetSpeedFactor");
+    volumeUp = dlsym(handle_audio, "VolumeUp");
+    volumeDown = dlsym(handle_audio, "VolumeDown");
+    volumeMute = dlsym(handle_audio, "VolumeMute");
+    volumeGetString = dlsym(handle_audio, "VolumeGetString");
     
     if (aiDacrateChanged == NULL) aiDacrateChanged = dummy_aiDacrateChanged;
     if (aiLenChanged == NULL) aiLenChanged = dummy_void;
@@ -490,6 +499,10 @@ void plugin_load_plugins(const char *gfx_name,
     if (romClosed_audio == NULL) romClosed_audio = dummy_void;
     if (romOpen_audio == NULL) romOpen_audio = dummy_void;
     if (setSpeedFactor == NULL) setSpeedFactor = dummy_setSpeedFactor;
+    if (volumeUp == NULL) volumeUp = dummy_void;
+    if (volumeDown == NULL) volumeDown = dummy_void;
+    if (volumeMute == NULL) volumeMute = dummy_void;
+    if (volumeGetString == NULL) volumeGetString = dummy_volumeGetString;
     
     audio_info.MemoryBswaped = TRUE;
     audio_info.HEADER = rom;

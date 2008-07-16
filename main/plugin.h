@@ -275,6 +275,10 @@ extern void (*processAList)();
 extern void (*romClosed_audio)();
 extern void (*romOpen_audio)();
 extern void (*setSpeedFactor)(int percent);
+extern void (*volumeUp)();
+extern void (*volumeDown)();
+extern void (*volumeMute)();
+extern const char * (*volumeGetString)();
 
 extern void (*closeDLL_input)();
 extern void (*controllerCommand)(int Control, BYTE * Command);

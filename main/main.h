@@ -56,6 +56,7 @@ void main_pause(void);
 void main_advance_one(void);
 void main_speedup(int percent);
 void main_speeddown(int percent);
+void main_draw_volume_osd(void);
 
 void take_next_screenshot(void);
 void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char *format, ...);

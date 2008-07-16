@@ -220,6 +220,47 @@ EXPORT BOOL CALL PauseAudio (BOOL Pause);
 *******************************************************************/
 EXPORT void CALL SetConfigDir( char *configDir );
 
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: VolumeUp
+  Purpose:  To increase the audio volume
+  input:    none
+  output:   none
+*******************************************************************/
+EXPORT void CALL VolumeUp(void);
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: VolumeDown
+  Purpose:  To decrease the audio volume
+  input:    none
+  output:   none
+*******************************************************************/
+EXPORT void CALL VolumeDown(void);
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: VolumeMute
+  Purpose:  Toggles between muted and not muted
+  input:    none
+  output:   none
+*******************************************************************/
+EXPORT void CALL VolumeMute(void);
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: VolumeGet
+  Purpose:  Return the current volume level
+  input:    none
+  output:   string containing volume level state (percentage or mute)
+*******************************************************************/
+EXPORT const char * CALL VolumeGetString(void);
+
+
 #if defined(__cplusplus)
 }
 #endif

@@ -35,8 +35,5 @@
 
 void volSet(int);
 int volGet(void);
-void volMute(void);
-int volIsMuted(void);
-void volChange(int);
 
 #endif // __VOLUME_H__

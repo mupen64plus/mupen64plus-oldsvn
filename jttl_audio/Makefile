@@ -26,7 +26,7 @@ endif
 CFLAGS += -fpic -DPIC
 
 # list of object files to generate
-OBJECTS = main.o
+OBJECTS = main.o volume.o
 
 # build targets
 all: jttl_audio.so

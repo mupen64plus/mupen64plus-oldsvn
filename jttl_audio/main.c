@@ -97,6 +97,8 @@ KNOWN BUGS:
 #include "../main/version.h"
 #include "Audio_1.2.h"
 
+#include "../main/translate.h"
+
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
 #endif
@@ -132,6 +134,9 @@ They tend to rely on a default frequency, apparently, never the same one ;)*/
 /* Name of config file */
 #define CONFIG_FILE "jttl_audio.conf"
 
+/* volume mixer types */
+#define VOLUME_TYPE_SDL     1
+#define VOLUME_TYPE_OSS     2
 
 /*--------------- VARIABLE DEFINITIONS ----------------*/
 
@@ -141,6 +146,8 @@ static AUDIO_INFO AudioInfo;
 static SDL_AudioSpec *hardware_spec;
 /* Pointer to the primary audio buffer */
 static Uint8 *buffer = NULL;
+/* Pointer to the mixing buffer for voume control*/
+static Uint8 *mixBuffer = NULL;
 /* Position in buffer array where next audio chunk should be placed */
 static unsigned int buffer_pos = 0;
 /* Audio frequency, this is usually obtained from the game, but for compatibility we set default value */
@@ -163,6 +170,16 @@ static Uint32 LowBufferLoadLevel = LOW_BUFFER_LOAD_LEVEL;
 static Uint32 HighBufferLoadLevel = HIGH_BUFFER_LOAD_LEVEL;
 // Resample or not
 static Uint8 Resample = 1;
+// volume to scale the audio by, range of 0..100
+static int VolPercent = 80;
+// how much percent to increment/decrement volume by
+static int VolDelta = 5;
+// the actual volume passed into SDL, range of 0..SDL_MIX_MAXVOLUME
+static int VolSDL = SDL_MIX_MAXVOLUME;
+// stores the previous volume when it is muted
+static int VolMutedSave = -1;
+//which type of volume control to use
+static int VolumeControlType = VOLUME_TYPE_OSS;
 
 static int OutputFreq;
 static char configdir[PATH_MAX] = {0};
@@ -296,6 +313,12 @@ EXPORT DWORD CALL AiReadLength( void )
 
 EXPORT void CALL CloseDLL( void )
 {
+    if (mixBuffer != NULL)
+    {
+        free(mixBuffer);
+        mixBuffer = NULL;
+    }
+
 }
 
 EXPORT void CALL DllAbout( HWND hParent )
@@ -632,7 +655,15 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
     if (buffer_pos > (len * oldsamplerate) / newsamplerate)
     {
         int input_used;
-        input_used = resample(buffer, buffer_pos, oldsamplerate, stream, len, newsamplerate);
+        if (VolumeControlType == VOLUME_TYPE_SDL)
+        {
+            input_used = resample(buffer, buffer_pos, oldsamplerate, mixBuffer, len, newsamplerate);
+            SDL_MixAudio(stream, mixBuffer, len, VolSDL);
+        }
+        else
+        {
+            input_used = resample(buffer, buffer_pos, oldsamplerate, stream, len, newsamplerate);
+        }
         memmove(buffer, &buffer[input_used], buffer_pos - input_used);
         buffer_pos -= input_used;
     }
@@ -738,8 +769,15 @@ void InitializeAudio(int freq)
     if(buffer == NULL)
     {
         printf("[JttL's SDL Audio plugin] Allocating memory for audio buffer: %i bytes.\n", (int) (PrimaryBufferSize*sizeof(Uint8)));
-        buffer = (Uint8*)malloc(PrimaryBufferSize*sizeof(Uint8));
+        buffer = (Uint8*) malloc(PrimaryBufferSize);
     }
+
+    if (mixBuffer == NULL)
+    {
+        //this should be the size of the SDL audio buffer
+        mixBuffer = (Uint8*) malloc(SecondaryBufferSize * 4);
+    }
+
     memset(buffer, 0, PrimaryBufferSize * sizeof(Uint8));
 
     /* Open the audio device */
@@ -771,6 +809,16 @@ void InitializeAudio(int freq)
     printf("[JttL's SDL Audio plugin] Debug: Size: %i\n", hardware_spec->size);
 #endif
     SDL_PauseAudio(0);
+    
+    /* set playback volume */
+    if (VolumeControlType == VOLUME_TYPE_SDL)
+    {
+        VolSDL = SDL_MIX_MAXVOLUME * VolPercent / 100;
+    }
+    else
+    {
+        VolPercent = volGet();
+    }
 
 }
 EXPORT void CALL RomClosed( void )
@@ -783,7 +831,16 @@ EXPORT void CALL RomClosed( void )
     SDL_PauseAudio(1);
     
     // Delete the buffer, as we are done producing sound
-    if(buffer != NULL) free(buffer);
+    if (buffer != NULL)
+    {
+        free(buffer);
+        buffer = NULL;
+    }
+    if (mixBuffer != NULL)
+    {
+        free(mixBuffer);
+        mixBuffer = NULL;
+    }
     
     // Delete the hardware spec struct
     if(hardware_spec != NULL) free(hardware_spec);
@@ -854,8 +911,118 @@ void ReadConfig()
             if(strcasecmp(param,"LOW_BUFFER_LOAD_LEVEL") == 0) LowBufferLoadLevel = atoi(value);
             if(strcasecmp(param,"HIGH_BUFFER_LOAD_LEVEL") == 0) HighBufferLoadLevel = atoi(value);
             if(strcasecmp(param,"RESAMPLE") == 0) Resample = atoi(value);
+            if(strcasecmp(param,"VOLUME_CONTROL_TYPE") == 0) VolumeControlType = atoi(value);
+            if(strcasecmp(param,"VOLUME_ADJUST") == 0) VolDelta = atoi(value);
+            if(strcasecmp(param,"VOLUME_DEFAULT") == 0) VolPercent = atoi(value);
         }
     }
     fclose(config_file);
+}
+
+EXPORT void CALL VolumeUp(void)
+{
+    //if muted, unmute first
+    if (VolMutedSave > -1)
+        VolumeMute();
+
+    // reload volume if we're using OSS
+    if (VolumeControlType == VOLUME_TYPE_OSS)
+    {
+        VolPercent = volGet();
+    }
+
+    // adjust volume variable
+    VolPercent += VolDelta;
+    if (VolPercent > 100)
+        VolPercent = 100;
+
+    if (VolumeControlType == VOLUME_TYPE_SDL) 
+    {
+        VolSDL = SDL_MIX_MAXVOLUME * VolPercent / 100;
+    }
+    else
+    {
+        //OSS mixer volume
+        volSet(VolPercent);
+    }
+}
+
+EXPORT void CALL VolumeDown(void)
+{
+    //if muted, unmute first
+    if (VolMutedSave > -1)
+        VolumeMute();
+
+    // reload volume if we're using OSS
+    if (VolumeControlType == VOLUME_TYPE_OSS)
+    {
+        VolPercent = volGet();
+    }
+
+    // adjust volume variable
+    VolPercent -= VolDelta;
+    if (VolPercent < 0)
+        VolPercent = 0;
+
+    if (VolumeControlType == VOLUME_TYPE_SDL)
+    {
+        VolSDL = SDL_MIX_MAXVOLUME * VolPercent / 100;
+    }
+    else
+    {
+        //OSS mixer volume
+        volSet(VolPercent);
+    }
+}
+
+
+EXPORT void CALL VolumeMute(void)
+{
+    if (VolMutedSave > -1)
+    {
+        //unmute
+        VolPercent = VolMutedSave;
+        VolMutedSave = -1;
+        if (VolumeControlType == VOLUME_TYPE_SDL)
+        {
+            VolSDL = SDL_MIX_MAXVOLUME * VolPercent / 100;
+        }
+        else
+        {
+            //OSS mixer volume
+            volSet(VolPercent);
+        }
+    } 
+    else
+    {
+        //mute
+        VolMutedSave = VolPercent;
+        VolPercent = 0;
+        if (VolumeControlType == VOLUME_TYPE_SDL)
+        {
+            VolSDL = 0;
+        }
+        else
+        {
+            //OSS mixer volume
+            volSet(0);
+        }
+    }
+}
+
+static char VolumeString[32];
+
+EXPORT const char * CALL VolumeGetString(void)
+{
+    if (VolMutedSave > -1)
+    {
+        strcpy(VolumeString, "Mute");
+    }
+    else
+    {
+        sprintf(VolumeString, "%i%%", VolPercent);
+    }
+
+    return VolumeString;
 }
 

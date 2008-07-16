@@ -61,7 +61,6 @@
 #include "savestates.h"
 #include "util.h"
 #include "translate.h"
-#include "volume.h"
 #include "cheat.h"
 #include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
@@ -103,6 +102,7 @@ char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at 
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)
 char        *g_RspPlugin = NULL;        // pointer to rsp plugin specified at commandline (if any)
 
+/** static (local) variables **/
 #ifdef NO_GUI
 static int  l_GuiEnabled = 0;           // GUI enabled?
 #else
@@ -112,7 +112,6 @@ static int  l_GuiEnabled = 1;           // GUI enabled?
 static char l_ConfigDir[PATH_MAX] = {0};
 static char l_InstallDir[PATH_MAX] = {0};
 
-
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter
 static int  *l_TestShotList = NULL;      // list of screenshots to take for regression test support
@@ -120,6 +119,8 @@ static int   l_TestShotIdx = 0;          // index of next screenshot frame in li
 static char *l_Filename = NULL;          // filename to load & run at startup (if given at command line)
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
+
+static osd_message_t *l_volMsg = NULL;
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -245,12 +246,9 @@ static unsigned int gettimeofday_msec(void)
     return foo;
 }
 
-/* this function could be called as a result of a keypress, joystick/button movement,
-   LIRC command, or 'testshots' command-line option timer */
-void take_next_screenshot(void)
-{
-    g_TakeScreenshot = l_CurrentFrame + 1;
-}
+/*********************************************************************************************************
+* global functions, for adjusting the core emulator behavior
+*/
 
 void main_speeddown(int percent)
 {
@@ -284,105 +282,42 @@ void main_advance_one(void)
     rompause = 0;
 }
 
-void video_plugin_render_callback(void)
+void main_draw_volume_osd(void)
 {
-    // if the flag is set to take a screenshot, then grab it now
-    if (g_TakeScreenshot != 0)
+    char msgString[32];
+    const char *volString;
+
+    // if we had a volume message, make sure that it's still in the OSD list, or set it to NULL
+    if (l_volMsg != NULL && !osd_message_valid(l_volMsg))
+        l_volMsg = NULL;
+
+    // this calls into the audio plugin
+    volString = volumeGetString();
+    if (volString == NULL)
     {
-        TakeScreenshot(g_TakeScreenshot - 1);  // current frame number +1 is in g_TakeScreenshot
-        g_TakeScreenshot = 0; // reset flag
+        strcpy(msgString, tr("Volume Not Supported."));
+    }
+    else
+    {
+        sprintf(msgString, "%s: %s", tr("Volume"), volString);
+        if (msgString[strlen(msgString) - 1] == '%')
+            strcat(msgString, "%");
     }
 
-    // if the OSD is enabled, then draw it now
-    if (g_OsdEnabled)
-    {
-        osd_render();
-    }
+    // create a new message or update an existing one
+    if (l_volMsg != NULL)
+        osd_update_message(l_volMsg, msgString);
+    else
+        l_volMsg = osd_new_message(OSD_MIDDLE_CENTER, msgString);
 }
 
-void new_frame(void)
+/* this function could be called as a result of a keypress, joystick/button movement,
+   LIRC command, or 'testshots' command-line option timer */
+void take_next_screenshot(void)
 {
-    // take a screenshot if we need to
-    if (l_TestShotList != NULL)
-    {
-        int nextshot = l_TestShotList[l_TestShotIdx];
-        if (nextshot == l_CurrentFrame)
-        {
-            // set global variable so screenshot will be taken just before OSD is drawn at the end of frame rendering
-            take_next_screenshot();
-            // advance list index to next screenshot frame number.  If it's 0, then quit
-            l_TestShotIdx++;
-        }
-        else if (nextshot == 0)
-        {
-            stopEmulation();
-            free(l_TestShotList);
-            l_TestShotList = NULL;
-        }
-    }
-
-    // advance the current frame
-    l_CurrentFrame++;
+    g_TakeScreenshot = l_CurrentFrame + 1;
 }
 
-void new_vi(void)
-{
-    int Dif;
-    unsigned int CurrentFPSTime;
-    static unsigned int LastFPSTime = 0;
-    static unsigned int CounterTime = 0;
-    static unsigned int CalculatedTime ;
-    static int VI_Counter = 0;
-
-    double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
-    int time;
-
-    start_section(IDLE_SECTION);
-    VI_Counter++;
-    
-#ifdef DBG
-    if(debugger_mode) debugger_frontend_vi();
-#endif
-
-    if(LastFPSTime == 0)
-    {
-        LastFPSTime = gettimeofday_msec();
-        CounterTime = gettimeofday_msec();
-        return;
-    }
-    CurrentFPSTime = gettimeofday_msec();
-    
-    Dif = CurrentFPSTime - LastFPSTime;
-    
-    if (Dif < AdjustedLimit) 
-    {
-        CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
-        time = (int)(CalculatedTime - CurrentFPSTime);
-        if (time > 0)
-        {
-            usleep(time * 1000);
-        }
-        CurrentFPSTime = CurrentFPSTime + time;
-    }
-
-    if (CurrentFPSTime - CounterTime >= 1000.0 ) 
-    {
-        CounterTime = gettimeofday_msec();
-        VI_Counter = 0 ;
-    }
-    
-    LastFPSTime = CurrentFPSTime ;
-    end_section(IDLE_SECTION);
-    if (l_FrameAdvance) {
-        rompause = 1;
-        l_FrameAdvance = 0;
-    }
-}
-
-/** emulation **/
-/* startEmulation
- *  Begins emulation thread
- */
 void startEmulation(void)
 {
     VILimit = GetVILimit();
@@ -532,6 +467,105 @@ int pauseContinueEmulation(void)
 }
 
 /*********************************************************************************************************
+* global functions, callbacks from the r4300 core or from other plugins
+*/
+
+void video_plugin_render_callback(void)
+{
+    // if the flag is set to take a screenshot, then grab it now
+    if (g_TakeScreenshot != 0)
+    {
+        TakeScreenshot(g_TakeScreenshot - 1);  // current frame number +1 is in g_TakeScreenshot
+        g_TakeScreenshot = 0; // reset flag
+    }
+
+    // if the OSD is enabled, then draw it now
+    if (g_OsdEnabled)
+    {
+        osd_render();
+    }
+}
+
+void new_frame(void)
+{
+    // take a screenshot if we need to
+    if (l_TestShotList != NULL)
+    {
+        int nextshot = l_TestShotList[l_TestShotIdx];
+        if (nextshot == l_CurrentFrame)
+        {
+            // set global variable so screenshot will be taken just before OSD is drawn at the end of frame rendering
+            take_next_screenshot();
+            // advance list index to next screenshot frame number.  If it's 0, then quit
+            l_TestShotIdx++;
+        }
+        else if (nextshot == 0)
+        {
+            stopEmulation();
+            free(l_TestShotList);
+            l_TestShotList = NULL;
+        }
+    }
+
+    // advance the current frame
+    l_CurrentFrame++;
+}
+
+void new_vi(void)
+{
+    int Dif;
+    unsigned int CurrentFPSTime;
+    static unsigned int LastFPSTime = 0;
+    static unsigned int CounterTime = 0;
+    static unsigned int CalculatedTime ;
+    static int VI_Counter = 0;
+
+    double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
+    int time;
+
+    start_section(IDLE_SECTION);
+    VI_Counter++;
+    
+#ifdef DBG
+    if(debugger_mode) debugger_frontend_vi();
+#endif
+
+    if(LastFPSTime == 0)
+    {
+        LastFPSTime = gettimeofday_msec();
+        CounterTime = gettimeofday_msec();
+        return;
+    }
+    CurrentFPSTime = gettimeofday_msec();
+    
+    Dif = CurrentFPSTime - LastFPSTime;
+    
+    if (Dif < AdjustedLimit) 
+    {
+        CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
+        time = (int)(CalculatedTime - CurrentFPSTime);
+        if (time > 0)
+        {
+            usleep(time * 1000);
+        }
+        CurrentFPSTime = CurrentFPSTime + time;
+    }
+
+    if (CurrentFPSTime - CounterTime >= 1000.0 ) 
+    {
+        CounterTime = gettimeofday_msec();
+        VI_Counter = 0 ;
+    }
+    
+    LastFPSTime = CurrentFPSTime ;
+    end_section(IDLE_SECTION);
+    if (l_FrameAdvance) {
+        rompause = 1;
+        l_FrameAdvance = 0;
+    }
+}
+
+/*********************************************************************************************************
 * sdl event filter
 */
 static int sdl_event_filter( const SDL_Event *event )
@@ -600,15 +634,18 @@ static int sdl_event_filter( const SDL_Event *event )
                         // volume mute/unmute
                         case 'm':
                         case 'M':
-                            volMute();
+                            volumeMute();
+                            main_draw_volume_osd();
                             break;
                         // increase volume
                         case ']':
-                            volChange(2);
+                            volumeUp();
+                            main_draw_volume_osd();
                             break;
                         // decrease volume
                         case '[':
-                            volChange(-2);
+                            volumeDown();
+                            main_draw_volume_osd();
                             break;
                         // fast-forward
                         case 'f':
@@ -678,11 +715,20 @@ static int sdl_event_filter( const SDL_Event *event )
             else if(strcmp(event_str, config_get_string("Joy Mapping Screenshot", "")) == 0)
                 take_next_screenshot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Mute", "")) == 0)
-                volMute();
+            {
+                volumeMute();
+                main_draw_volume_osd();
+            }
             else if(strcmp(event_str, config_get_string("Joy Mapping Decrease Volume", "")) == 0)
-                volChange(-2);
+            {
+                volumeDown();
+                main_draw_volume_osd();
+            }
             else if(strcmp(event_str, config_get_string("Joy Mapping Increase Volume", "")) == 0)
-                volChange(2);
+            {
+                volumeUp;
+                main_draw_volume_osd();
+            }
 
             free(event_str);
             return 0;
