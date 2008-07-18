@@ -149,6 +149,19 @@ void clientSendFrame(MupenClient *Client) {
     int i;
     FrameChunk *chunk = (FrameChunk*) Client->packet->data;
 
+    // Get input here, this is temporary but should resolve some issues
+    BUTTONS Keys;
+#ifdef VCR_SUPPORT
+        VCR_getKeys(0, &Keys);
+#else
+        getKeys(0, &Keys);
+#endif
+
+    int bufInd=(Client->frameCounter/VI_PER_FRAME) % FRAME_BUFFER_LENGTH;
+    NetPlayerUpdate *localUpdate = &(Client->playerEvent[bufInd][Client->myID]);
+    localUpdate->timer = (Client->frameCounter/VI_PER_FRAME);
+    localUpdate->value = Keys.Value;
+
     for(i=0; i<Client->numConnected-1;i++){
         int curID=sourceID(Client->myID, i);
         Client->packet->address=Client->player[curID].address;
@@ -160,15 +173,10 @@ void clientSendFrame(MupenClient *Client) {
 
         chunk->input.type = CHUNK_INPUT;
         chunk->input.player = Client->myID;
-        NetPlayerUpdate *update = &(Client->playerEvent[(Client->frameCounter/VI_PER_FRAME)%FRAME_BUFFER_LENGTH][Client->myID]);
-        if(update->timer!=(Client->frameCounter)/VI_PER_FRAME) {
-            chunk->input.buttons.Value = (0x8000 * Client->startEvt);
-            fprintf(stderr,"[Netplay] Sending BAD event: %08X u->timer: %d fC: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME);
-        }
-        else {
-            chunk->input.buttons.Value = update->value | (0x8000 * Client->startEvt);
+
+        chunk->input.buttons.Value = localUpdate->value | (0x8000 * Client->startEvt);
             //fprintf(stderr,"[NETPLAY]Sending event: %08X u->timer: %d fC: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME);
-        }
+        
         if(Client->startEvt) {
             Client->playerEvent[((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK)%FRAME_BUFFER_LENGTH][Client->myID].control=1;
             Client->playerEvent[((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK)%FRAME_BUFFER_LENGTH][Client->myID].timer=(Client->frameCounter/VI_PER_FRAME)&FRAME_MASK;
@@ -385,13 +393,13 @@ void clientProcessMessages(MupenClient *Client) {
     }
 }
 
-void clientSendButtons(MupenClient *Client, int control, DWORD value) {
+/*void clientSendButtons(MupenClient *Client, int control, DWORD value) {
     if(control==0) {//will only allow 1 player per host, must be changed
         int bufInd=((Client->frameCounter/VI_PER_FRAME)+1) % FRAME_BUFFER_LENGTH;
         Client->playerEvent[bufInd][Client->myID].timer = (Client->frameCounter/VI_PER_FRAME)+1;
         Client->playerEvent[bufInd][Client->myID].value = value;
     }
-}
+}*/
 
 
 void clientLoadPacket(MupenClient *Client, void *data, int len) {
@@ -412,7 +420,7 @@ void clientLoadPacket(MupenClient *Client, void *data, int len) {
 // processEventQueue() : Process the events in the queue, if necessary.
 // returns 1 if successful, or 0 if it doesn't have all the needed packets to continue
 int processEventQueue(MupenClient *Client) {
-    int i;
+    int i, frame;
     while((Client->numQueued > 0) && (Client->eventQueue[0]->time <= Client->frameCounter)) {
         //fprintf(stderr,"B q-%d t-%d c-%d\n",Client->numQueued,Client->eventQueue[0]->time,Client->frameCounter);
         switch(Client->eventQueue[0]->evt) {
@@ -433,14 +441,18 @@ int processEventQueue(MupenClient *Client) {
                 popEventQueue(Client);
           break;
           case EVENT_INPUT:
+            frame=Client->frameCounter-Client->inputDelay;
+            fprintf(stderr,"Input Event frame:%d event:%d\n",Client->frameCounter,frame);
             for(i=0; i<Client->numConnected;i++) {
-                int frame=Client->frameCounter-Client->inputDelay;
                 NetPlayerUpdate *curUpdate=&(Client->playerEvent[(frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH][i]);
                 if(curUpdate->control==1)
                     fprintf(stderr,"Unpause event frame %d, player %d, %d (%d)\n", curUpdate->timer, i, (frame/VI_PER_FRAME), (frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH);
                 if(curUpdate->timer!=frame/VI_PER_FRAME) {
                     if(i!=Client->myID) {
-                       fprintf(stderr,"[NETPLAY] Out of sync at frame %d (%d) player: %d\n", frame/VI_PER_FRAME, curUpdate->timer, i);
+                        if(rompause==0) {
+                            fprintf(stderr,"[NETPLAY] Out of sync at frame %f (%d) player: %d\n", frame/(1.0f*VI_PER_FRAME), curUpdate->timer, i);
+                            rompause=1;
+                        }
                         return 0;
                     }
                 }
@@ -449,7 +461,13 @@ int processEventQueue(MupenClient *Client) {
                         curUpdate->control=0;
                         rompause=!rompause;
                         printf("Unpause event frame %d\n",frame);
+                        if(Client->emuState==paused)
+                            Client->emuState=running;
+                        else
+                            Client->emuState=paused;
                     }
+                    if(rompause==1 && Client->emuState==running)
+                        rompause=0;
                     Client->playerKeys[i].Value=curUpdate->value;
 //if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", curUpdate->value, i, Client->frameCounter);
                 }

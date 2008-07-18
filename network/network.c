@@ -71,18 +71,20 @@ void netShutdown(MupenClient *mClient) {
 }
 
 int netMain(MupenClient *mClient) {
-    if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0)
-        clientSendFrame(mClient);
+    static int lastSent;
 
-    do {
+    if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0 &&
+            lastSent!=mClient->frameCounter) {
+        clientSendFrame(mClient);
+        lastSent=mClient->frameCounter;
+    }
 
 //        Now being called from netReceiveThread() so that packets can be processed without running the core
 //        netReceiveThread() is launched from netInitialize()
 //        clientProcessMessages(mClient);
 
-    } while( !processEventQueue(mClient) );
-
-    mClient->frameCounter++;
+    if( processEventQueue(mClient) )
+        mClient->frameCounter++;
 
     return 0;
 }

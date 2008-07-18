@@ -215,18 +215,18 @@ void internal_ReadController(int Control, BYTE *Command)
    switch (Command[2])
      {
       case 1:
+        if (mClient->isEnabled) { // Update the server if we're connected to one and if the button state has actually changed
+            //clientSendButtons(mClient, Control, Keys.Value);
+            *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
+            if(btnPrev[Control].Value != mClient->playerKeys[Control].Value)
+                fprintf(stderr,"Control %d = %08x frame: %f\n",Control,mClient->playerKeys[Control].Value,mClient->frameCounter / (1.0f * VI_PER_FRAME));
+            btnPrev[Control].Value = mClient->playerKeys[Control].Value;
+        } else if (Controls[Control].Present) {
 #ifdef VCR_SUPPORT
         VCR_getKeys(Control, &Keys);
 #else
         getKeys(Control, &Keys);
 #endif
-        if (mClient->isEnabled) { // Update the server if we're connected to one and if the button state has actually changed
-            clientSendButtons(mClient, Control, Keys.Value);
-            *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
-            if(btnPrev[Control].Value != mClient->playerKeys[Control].Value)
-                fprintf(stderr,"Control %d = %08x frame: %d\n",Control,mClient->playerKeys[Control].Value,mClient->frameCounter);
-            btnPrev[Control].Value = mClient->playerKeys[Control].Value;
-        } else if (Controls[Control].Present) {
             *((unsigned int *)(Command + 3)) = Keys.Value;
 #ifdef COMPARE_CORE
             check_input_sync(Command+3);

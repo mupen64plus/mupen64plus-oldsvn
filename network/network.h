@@ -145,6 +145,11 @@ typedef struct TMupenClient {
         NetEvent        events[QUEUE_HEAP_LEN];
         unsigned int    numQueued;
 
+        enum EmuStates {
+            paused = 0,
+            running
+        }               emuState;
+
         JoinState       joinState;
 
         UDPsocket          socket;                  //listening socket
