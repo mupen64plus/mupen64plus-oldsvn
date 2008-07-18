@@ -511,8 +511,7 @@ CloseDLL( void )
             initilize controller: 01 03 00 FF FF FF
             read controller:      01 04 01 FF FF FF FF
 *******************************************************************/
-void
-ControllerCommand(int Control, BYTE *Command)
+void ControllerCommand(int Control, BYTE *Command)
 {
     BYTE *Data = &Command[5];
     struct input_event play;
@@ -533,12 +532,12 @@ ControllerCommand(int Control, BYTE *Command)
             if (controller[Control].control.Plugin == PLUGIN_RAW)
             {
                 DWORD dwAddress = (Command[3] << 8) + (Command[4] & 0xE0);
-    
+
                 if(( dwAddress >= 0x8000 ) && ( dwAddress < 0x9000 ) )
                     memset( Data, 0x80, 32 );
                 else
                     memset( Data, 0x00, 32 );
-    
+
                 Data[32] = DataCRC( Data, 32 );
                 break;
                 }
@@ -547,6 +546,10 @@ ControllerCommand(int Control, BYTE *Command)
             if (controller[Control].control.Plugin == PLUGIN_RAW)
             {
                 DWORD dwAddress = (Command[3] << 8) + (Command[4] & 0xE0);
+                /*Uncomment to test rumble on systems without necessary hardware.
+              if(dwAddress==PAK_IO_RUMBLE&&*Data)
+                    printf("Triggering rumble pack.\n");*/
+
                 if( dwAddress == PAK_IO_RUMBLE && controller[Control].event_joystick != 0)
                 {
                     if( *Data )
@@ -554,9 +557,10 @@ ControllerCommand(int Control, BYTE *Command)
                         play.type = EV_FF;
                         play.code = ffeffect[Control].id;
                         play.value = 1;
-    
+
                         if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
                             perror("Error starting rumble effect");
+
                     }
                     else
                     {
