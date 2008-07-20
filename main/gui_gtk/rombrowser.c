@@ -254,6 +254,7 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
     int arrayroms;
     GtkTreeModel *model;
 
+    //If clear flag is set, clear the GUI rombrowser.
     if(clear)
         {
         GtkTreeSelection *selection = gtk_tree_view_get_selection ( GTK_TREE_VIEW(g_MainWindow.romFullList) );
@@ -271,6 +272,7 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
     model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
     arrayroms = gtk_tree_model_iter_n_children(model, NULL); 
 
+    //If there are currently more ROMs in cache than GUi rombrowser, add them.
     if(roms>arrayroms)
         {
         gboolean fullpaths;
@@ -304,11 +306,12 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
         cache_entry *entry;
         entry = g_romcache.top;
 
+        //Advance cache pointer.
         for ( romcounter=0; romcounter < arrayroms; ++romcounter )
             {
             entry = entry->next;
             if((entry==NULL))
-                { printf("NULL\n"); return; }
+                { return; }
             }
 
         for ( romcounter=0; (romcounter<roms)&&(entry!=NULL); ++romcounter )
@@ -343,7 +346,7 @@ void rombrowser_refresh( unsigned int roms, unsigned short clear )
             cicstring(entry->cic, cicchip);
             rumblestring(entry->inientry->rumble, rumble);
 
-            //Add entries to TreeModel
+            //Actually add entries to TreeModel
             model =  gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romFullList));
             gtk_list_store_append ( GTK_LIST_STORE(model), iter);
 

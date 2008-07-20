@@ -31,6 +31,8 @@
 #include <KDebug>
 #include <KMenu>
 
+#include <qfile.h>
+
 #include "mainwindow.h"
 #include "mainwidget.h"
 #include "globals.h"
@@ -48,6 +50,8 @@ namespace core {
         #include "../main.h"
         #include "../plugin.h"
         #include "../savestates.h"
+        #include "../rom.h"
+        #include "../config.h"
     }
 }
 
@@ -61,7 +65,10 @@ MainWindow::MainWindow()
     m_mainWidget = new MainWidget(this);
     setCentralWidget(m_mainWidget);
     createActions();
-    setMinimumSize(640, 480); // hack, we should set proper size hints
+
+    //setSizePolicy(QSizePolicy::Preferred);
+    //setBaseSize(core::config_get_number("MainWindowWidth",600),core::config_get_number("MainWindowHeight",400));
+
     statusBar()->insertPermanentItem("", ItemCountField);
 
     connect(m_mainWidget, SIGNAL(itemCountChanged(int)),
@@ -69,9 +76,15 @@ MainWindow::MainWindow()
     connect(m_mainWidget, SIGNAL(romActivated(KUrl)),
              this, SLOT(romOpen(KUrl)));
 
-    QString prefix = PREFIX;
-    prefix += "/share/mupen64plus/mupen64plusui.rc";
-    setupGUI(KXmlGuiWindow::Default, prefix);
+    char resourcefilename[PATH_MAX];
+    std::sprintf(resourcefilename, "%s%s", core::get_installpath(), "mupen64plusui.rc");
+    QFile resourcefile;
+    resourcefile.setFileName(resourcefilename);
+    if(!resourcefile.open(QIODevice::ReadOnly))
+        { printf("Error, unable to open Qt4 resource file %s.\n", resourcefilename); }
+    resourcefile.close();
+
+    setupGUI(KXmlGuiWindow::Default, resourcefilename);
 }
 
 void MainWindow::showInfoMessage(const QString& msg)
@@ -112,7 +125,7 @@ void MainWindow::romOpen(const KUrl& url)
         m_actionRecentFiles->addUrl(url);
         m_actionRecentFiles->saveEntries(KGlobal::config()->group("Recent Roms"));
         KGlobal::config()->sync();
-        core::open_rom(path.toLocal8Bit());
+        core::open_rom(path.toLocal8Bit(), 0);
         core::startEmulation();
     }
 }
@@ -324,16 +337,14 @@ void MainWindow::createActions()
                           actionCollection());
 
     // "Emulation" menu
-    act = actionCollection()->addAction("emulation_start");
-    act->setText(i18n("Start"));
-    act->setIcon(KIcon("media-playback-start"));
+    act = new KAction(KIcon("media-playback-start"), i18n("Start"), this);
     connect(act, SIGNAL(triggered()), this, SLOT(emulationStart()));
-    
-    act = actionCollection()->addAction("emulation_pause_continue");
-    act->setText(i18n("Pause"));
-    act->setIcon(KIcon("media-playback-pause"));
+    actionCollection()->addAction("emulation_start", act);
+
+    act = new KAction(KIcon("media-playback-pause"), i18n("Pause"), this);
     connect(act, SIGNAL(triggered()), this, SLOT(emulationPauseContinue()));
-    
+    actionCollection()->addAction("emulation_pause_continue", act);
+
     act = actionCollection()->addAction("emulation_stop");
     act->setText(i18n("Stop"));
     act->setIcon(KIcon("media-playback-stop"));
@@ -390,6 +401,7 @@ void MainWindow::createActions()
     // Other stuff
     KStandardAction::preferences(this, SLOT(configDialogShow()),
                                   actionCollection());
+
 }
 
 #include "mainwindow.moc"

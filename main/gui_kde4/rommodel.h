@@ -51,9 +51,9 @@ class RomModel : public QAbstractItemModel
         enum Role { Sort = Qt::UserRole, FullPath };
 
         RomModel(QObject* parent = 0);
-        
+
         static RomModel* self();
-        void update();
+        void update(unsigned int roms, unsigned short clear);
 
         // Model method implementations
         virtual QModelIndex index(int row, int column,

@@ -34,8 +34,7 @@
 namespace core {
     extern "C" {
         #include "../rom.h"
-        #include "../mupenIniApi.h"
-        #include "../../memory/memory.h" // for sl()
+        #include "../romcache.h"
         #include "../main.h"
     }
 }
@@ -62,7 +61,7 @@ RomModel::RomModel(QObject* parent)
     QPixmap pusa(core::get_iconpath("usa.png"));
     QPixmap pjapanusa(core::get_iconpath("japanusa.png"));
     QPixmap pn64cart(core::get_iconpath("n64cart.xpm"));
-    
+
     QPair<QString, QPixmap> demo(i18n("Demo"), pn64cart);
     QPair<QString, QPixmap> beta(i18n("Beta"), pn64cart);
     QPair<QString, QPixmap> japanusa(i18n("Japan/USA"), pjapanusa);
@@ -75,7 +74,7 @@ RomModel::RomModel(QObject* parent)
     QPair<QString, QPixmap> australia(i18n("Australia"), paustralia);
     QPair<QString, QPixmap> europe(i18n("Europe"), peurope);
     QPair<QString, QPixmap> unknown(i18n("Unknown"), pn64cart);
-    
+
     m_countryInfo[char(0)] = demo;
     m_countryInfo['7'] = beta;
     m_countryInfo[char(0x41)] = japanusa;
@@ -94,8 +93,6 @@ RomModel::RomModel(QObject* parent)
     m_countryInfo[char(0x38)] = europe;
     m_countryInfo[char(0x70)] = europe;
     m_countryInfo['?'] = unknown;
-
-    update();
 }
 
 K_GLOBAL_STATIC(RomModel, instance);
@@ -104,46 +101,45 @@ RomModel* RomModel::self()
     return instance;
 }
 
-void RomModel::update()
+void RomModel::update(unsigned int roms, unsigned short clear)
 {
-    KUrl url;
-    QString abspath;
-    char crc[BUF_MAX];
-    
-    m_romList.clear();
+    //If clear flag is set, clear the GUI rombrowser.
+    if(clear)
+        { m_romList.clear(); }
 
-    foreach(QString directory, m_romDirectories) {
-        foreach(QString romFile, QDir(directory).entryList(RomExtensions)) {
-            url = directory;
-            url.addPath(romFile);
-            abspath = url.path();
-            int size = core::fill_header(abspath.toLocal8Bit());
-            if (size > 0) {
-                RomEntry entry;
-                entry.size = size;
-                entry.fileName = abspath;
-                std::snprintf(crc, BUF_MAX, "%08X-%08X-C%02X",
-                                sl(core::ROM_HEADER->CRC1),
-                                sl(core::ROM_HEADER->CRC2),
-                                core::ROM_HEADER->Country_code);
-                entry.country = char(core::ROM_HEADER->Country_code);
-                core::mupenEntry* iniEntry = core::ini_search_by_CRC(crc);
-                if (iniEntry) {
-                    entry.comments = iniEntry->comments;
-                    entry.goodName = iniEntry->goodname;
-                    // do we need to free inEntry? the gtk code seems to but
-                    // we crash if we attempt it...
-                    // free(iniEntry);
-                } else {
-                    entry.goodName = romFile;
-                    entry.comments = i18n("No INI Entry");
-                }
-                m_romList << entry;
+    int arrayroms = m_romList.count();
+
+    //If there are currently more ROMs in cache than GUi rombrowser, add them.
+    if(roms>arrayroms)
+        {
+        core::cache_entry *entry;
+        entry = core::g_romcache.top;
+        unsigned int romcounter;
+
+        //Advance cache pointer.
+        for ( romcounter=0; romcounter < arrayroms; ++romcounter )
+            {
+            entry = entry->next;
+            if((entry==NULL))
+                { return; }
             }
+
+        RomEntry modelentry;
+        for ( romcounter=0; (romcounter<roms)&&(entry!=NULL); ++romcounter )
+            {
+            modelentry.size = entry->romsize;
+            modelentry.goodName = entry->inientry->goodname;
+            modelentry.country = entry->countrycode;
+            modelentry.fileName = entry->filename;
+            modelentry.comments = entry->usercomments;
+
+            //Actually add entries to RomModel
+            m_romList << modelentry;
+            //printf("Added: %s\n", entry->inientry->goodname);
+            entry = entry->next;
+            }
+        reset();
         }
-    }
-    
-    reset();
 }
 
 QModelIndex RomModel::index(int row, int column,
@@ -273,9 +269,8 @@ QVariant RomModel::headerData(int section, Qt::Orientation orientation,
 void RomModel::settingsChanged()
 {
     if (Settings::romDirectories() != m_romDirectories) {
-        m_romList.clear();
         m_romDirectories = Settings::romDirectories();
-        update();
+        core::g_romcache.rcstask = core::RCS_RESCAN;
     }
     if (m_showFullPath != Settings::showFullPathsInFilenames()) {
         m_showFullPath = Settings::showFullPathsInFilenames();

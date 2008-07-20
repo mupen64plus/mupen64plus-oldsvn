@@ -20,7 +20,6 @@
 
 extern "C" {
     #include "../version.h"
-    #include "../guifuncs.h"
     #include "../main.h"
 }
 
@@ -34,19 +33,10 @@ extern "C" {
 #include <cstdio>
 #include <cstdarg>
 
+#include "rommodel.h"
 #include "mainwindow.h"
 #include "globals.h"
 #include "plugins.h"
-
-static char buf[BUF_MAX];
-
-// URGH
-#define PRINT_TO_BUFFER(fmt) do { \
-    std::va_list ap; \
-    va_start(ap, fmt); \
-    std::vsnprintf(buf, BUF_MAX, fmt, ap); \
-    va_end(ap); \
-} while(0); 
 
 static KAboutData* aboutData = 0;
 static MainWindow* mainWindow = 0;
@@ -54,8 +44,10 @@ static KApplication* application = 0;
 
 // Initializes gui subsystem. Also parses AND REMOVES any gui-specific commandline
 // arguments. This is called before mupen64plus parses any of its commandline options.
+extern "C" {
 void gui_init(int *argc, char ***argv)
 {
+
     aboutData = new KAboutData(
         "mupen64plus", 0, ki18n("Mupen64Plus"),
         MUPEN_VERSION,
@@ -66,21 +58,18 @@ void gui_init(int *argc, char ***argv)
 
     aboutData->addAuthor(ki18n("Hacktarux"), ki18n("Original Mupen64 Code"));
     aboutData->addAuthor(ki18n("Richard32"), ki18n("Developer"));
-    aboutData->addAuthor(ki18n("nmn"), ki18n("Developer"));
+    aboutData->addAuthor(ki18n("Tillin9"), ki18n("Developer"));
     aboutData->addAuthor(ki18n("Gunther"), ki18n("Glide64 port"));
     aboutData->addAuthor(ki18n("slougi"), ki18n("KDE4 Interface"));
-    aboutData->addAuthor(ki18n("Ebenblues"), ki18n("Fixes and Features"));
     aboutData->addAuthor(ki18n("DarkJezter"), ki18n("Fixes and Features"));
+    aboutData->addAuthor(ki18n("Ebenblues"), ki18n("Fixes and Features"));
+    aboutData->addAuthor(ki18n("nmn"), ki18n("Fixes and Features"));
 
     KCmdLineArgs::addStdCmdLineOptions();
     KCmdLineArgs::init(*argc, *argv, aboutData);
 
     gtk_init(argc, argv);
-}
 
-// Build GUI components, but do not display
-void gui_build(void)
-{
     // This is done here because above the mupen64 resource handling isn't
     // initialized properly yet...
     aboutData->setOtherText(ki18n("<html><img src=\"%1\"></img></html>").subs(
@@ -105,31 +94,43 @@ void gui_main_loop(void)
     KGlobal::config()->sync(); // Make sure we sync settings to disk on exit
 }
 
-// prints informational message to user
-void info_message(const char *fmt, ...)
+int gui_message(unsigned char messagetype, const char *format, ...)
 {
-    PRINT_TO_BUFFER(fmt);
-    InfoEvent* e = new InfoEvent;
-    e->message = buf;
-    application->postEvent(mainWindow, e);
+    if(!gui_enabled())
+        return 0;
+
+    va_list ap;
+    char buffer[2049];
+    pthread_t self = pthread_self();
+    gint response = 0;
+
+    va_start(ap, format);
+    vsnprintf(buffer, 2048, format, ap);
+    buffer[2048] = '\0';
+    va_end(ap);
+
+    if(messagetype==0)
+        {
+        InfoEvent* e = new InfoEvent;
+        e->message = buffer;
+        application->postEvent(mainWindow, e);
+        }
+    else if(messagetype==1)
+        {
+        AlertEvent* e = new AlertEvent;
+        e->message = buffer;
+        application->postEvent(mainWindow, e);
+        }
+    else if(messagetype==2)
+        {
+        //0 - indicates user selected no
+        //1 - indicates user selected yes
+        return mainWindow->confirmMessage(buffer);
+        }
 }
 
-// prints alert message to user (used for error messages that don't require
-// feedback from user)
-void alert_message(const char *fmt, ...)
+void updaterombrowser(unsigned int roms, unsigned short clear)
 {
-    PRINT_TO_BUFFER(fmt);
-    AlertEvent* e = new AlertEvent;
-    e->message = buf;
-    application->postEvent(mainWindow, e);
+    RomModel::self()->update(roms, clear);
 }
-
-// prints message to user that requires confirmation (yes/no)
-//  Return codes:
-//    0 - indicates user selected no
-//    1 - indicates user selected yes
-int confirm_message(const char *fmt, ...)
-{
-    PRINT_TO_BUFFER(fmt);
-    return mainWindow->confirmMessage(buf);
 }
