@@ -165,62 +165,55 @@ void Plugins::testRspPlugin()
 
 // END SUCKAGE (mostly)
 
-int Plugins::pluginIndex(char* mupenName, char* mupenConfigString,
-                    PluginList plugins)
+int Plugins::pluginIndex(char* mupenName, const char* mupenConfigString,
+                        PluginList plugins)
 {
     QString name;
     QStringList available;
     int index = 0;
 
-    if (mupenName) {
-        name = core::plugin_name_by_filename(mupenName);
-    } else {
+    if (mupenName)
+        { name = core::plugin_name_by_filename(mupenName); }
+    else 
+        {
         name = core::plugin_name_by_filename(
-            core::config_get_string(mupenConfigString, "")
-        );
-    }
-    
-    if (!name.isEmpty()) {
-        index = plugins.names().indexOf(name);
-    }
+               core::config_get_string(mupenConfigString, "")
+               );
+        }
+    if (!name.isEmpty()) 
+        { index = plugins.names().indexOf(name); }
 
     return index;
 }
 
-void Plugins::writePlugin(char* mupenConfigString, char* filename,
-                    char* mupenName)
+void Plugins::writePlugin(const char* mupenConfigString, char* filename, char* mupenName)
 {
-    if (!mupenName) {
-        core::config_put_string(mupenConfigString, filename);
-    }
+    if (!mupenName)
+        { core::config_put_string(mupenConfigString, filename); }
 }
 
 void Plugins::usrReadConfig()
 {
-    graphicsPluginIndex = pluginIndex(core::g_GfxPlugin, "Gfx Plugin",
-                                        graphicsPlugins);
-    audioPluginIndex = pluginIndex(core::g_AudioPlugin, "Audio Plugin",
-                                    audioPlugins);
-    inputPluginIndex = pluginIndex(core::g_InputPlugin, "Input Plugin",
-                                    inputPlugins);
-    rspPluginIndex = pluginIndex(core::g_RspPlugin, "RSP Plugin",
-                                    rspPlugins);
+    graphicsPluginIndex = pluginIndex(core::g_GfxPlugin, "Gfx Plugin", graphicsPlugins);
+    audioPluginIndex = pluginIndex(core::g_AudioPlugin, "Audio Plugin", audioPlugins);
+    inputPluginIndex = pluginIndex(core::g_InputPlugin, "Input Plugin", inputPlugins);
+    rspPluginIndex = pluginIndex(core::g_RspPlugin, "RSP Plugin", rspPlugins);
 }
 
 void Plugins::usrWriteConfig()
 {
-    writePlugin("Gfx Plugin",
-                    graphicsPlugins[graphicsPluginIndex]->file_name,
-                    core::g_GfxPlugin);
+    writePlugin("Gfx Plugin", 
+               graphicsPlugins[graphicsPluginIndex]->file_name,
+               core::g_GfxPlugin);
     writePlugin("Audio Plugin", 
-                    audioPlugins[audioPluginIndex]->file_name,
-                    core::g_AudioPlugin);
+               audioPlugins[audioPluginIndex]->file_name,
+               core::g_AudioPlugin);
     writePlugin("Input Plugin",
-                    inputPlugins[inputPluginIndex]->file_name,
-                    core::g_InputPlugin);
+               inputPlugins[inputPluginIndex]->file_name,
+               core::g_InputPlugin);
     writePlugin("RSP Plugin",
-                    rspPlugins[rspPluginIndex]->file_name,
-                    core::g_RspPlugin);
+               rspPlugins[rspPluginIndex]->file_name,
+               core::g_RspPlugin);
     core::config_write();
 }
 

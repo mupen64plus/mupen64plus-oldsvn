@@ -58,10 +58,10 @@ void gui_init(int *argc, char ***argv)
 
     aboutData->addAuthor(ki18n("Hacktarux"), ki18n("Original Mupen64 Code"));
     aboutData->addAuthor(ki18n("Richard32"), ki18n("Developer"));
+    aboutData->addAuthor(ki18n("DarkJezter"), ki18n("Developer"));
     aboutData->addAuthor(ki18n("Tillin9"), ki18n("Developer"));
     aboutData->addAuthor(ki18n("Gunther"), ki18n("Glide64 port"));
     aboutData->addAuthor(ki18n("slougi"), ki18n("KDE4 Interface"));
-    aboutData->addAuthor(ki18n("DarkJezter"), ki18n("Fixes and Features"));
     aboutData->addAuthor(ki18n("Ebenblues"), ki18n("Fixes and Features"));
     aboutData->addAuthor(ki18n("nmn"), ki18n("Fixes and Features"));
 
@@ -70,11 +70,11 @@ void gui_init(int *argc, char ***argv)
 
     gtk_init(argc, argv);
 
+    QString file;
+    char* iconpath = get_iconspath();
     // This is done here because above the mupen64 resource handling isn't
     // initialized properly yet...
-    aboutData->setOtherText(ki18n("<html><img src=\"%1\"></img></html>").subs(
-        get_iconpath("logo.png")
-    ));
+    aboutData->setOtherText(ki18n("<html><img src=\"%1\"></img></html>").subs(file.sprintf("%s%s", iconpath, "logo.png")));
     application = new KApplication;
     mainWindow = new MainWindow;
 }

@@ -39,11 +39,11 @@ class MainWidget : public QWidget
         void resizeHeaderSections();
         void lineEditTextChanged();
         void filter();
-        void treeViewActivated(const QModelIndex& index);
+        void treeViewDoubleClicked(const QModelIndex& index);
 
     signals:
         void itemCountChanged(int count);
-        void romActivated(const KUrl& filename);
+        void romDoubleClicked(const KUrl& filename);
 
     protected:
         virtual bool eventFilter(QObject* obj, QEvent* event);

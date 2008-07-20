@@ -75,6 +75,7 @@ class MainWindow : public KXmlGuiWindow
 
     protected:
         bool event(QEvent* event);
+        void closeEvent(QCloseEvent* event);
 
     private:
         void createActions();

@@ -68,16 +68,16 @@ class Plugins : public KConfigSkeleton
         virtual void usrWriteConfig();
 
     private:
-        int pluginIndex(char* mupenName, char* mupenConfigString,
-                         PluginList plugins);
-        void writePlugin(char* mupenConfigString, char* filename,
-                          char* mupenName);
+        int pluginIndex(char* mupenName, const char* mupenConfigString,
+                       PluginList plugins);
+        void writePlugin(const char* mupenConfigString, char* filename,
+                        char* mupenName);
 
         int graphicsPluginIndex;
         int audioPluginIndex;
         int inputPluginIndex;
         int rspPluginIndex;
-        
+
         PluginList graphicsPlugins;
         PluginList audioPlugins;
         PluginList inputPlugins;

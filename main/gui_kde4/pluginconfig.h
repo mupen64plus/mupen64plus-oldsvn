@@ -62,10 +62,10 @@ class PluginConfig : public KConfigSkeleton
         PluginList rspPlugins;
 
     protected:
-        int pluginIndex(char* mupenName, char* mupenConfigString,
+        int pluginIndex(char* mupenName, const char* mupenConfigString,
                             PluginList plugins);
 
-        void writePlugin(char* mupenConfigString, char* filename,
+        void writePlugin(const char* mupenConfigString, char* filename,
                           char* mupenName);
 
         virtual void usrReadConfig();

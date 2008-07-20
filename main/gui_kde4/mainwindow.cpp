@@ -32,6 +32,7 @@
 #include <KMenu>
 
 #include <qfile.h>
+#include <qdesktopwidget.h>
 
 #include "mainwindow.h"
 #include "mainwidget.h"
@@ -66,14 +67,11 @@ MainWindow::MainWindow()
     setCentralWidget(m_mainWidget);
     createActions();
 
-    //setSizePolicy(QSizePolicy::Preferred);
-    //setBaseSize(core::config_get_number("MainWindowWidth",600),core::config_get_number("MainWindowHeight",400));
-
     statusBar()->insertPermanentItem("", ItemCountField);
 
     connect(m_mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(updateItemCount(int)));
-    connect(m_mainWidget, SIGNAL(romActivated(KUrl)),
+    connect(m_mainWidget, SIGNAL(romDoubleClicked(KUrl)),
              this, SLOT(romOpen(KUrl)));
 
     char resourcefilename[PATH_MAX];
@@ -85,6 +83,38 @@ MainWindow::MainWindow()
     resourcefile.close();
 
     setupGUI(KXmlGuiWindow::Default, resourcefilename);
+
+    QSize size(core::config_get_number("MainWindowWidth",600),core::config_get_number("MainWindowHeight",400));
+    QPoint position(core::config_get_number("MainWindowXPosition",0),core::config_get_number("MainWindowYPosition",0));
+
+    QDesktopWidget *d = QApplication::desktop();
+    QSize desktop(d->width(),d->height());
+
+    if(position.x()>desktop.width())
+        position.setX(0);
+    if(position.y()>desktop.height())
+        position.setY(0);
+
+    if(size.width()>desktop.width())
+        size.setWidth(600);
+    if(size.height()>desktop.height())
+        size.setHeight(400);
+
+    if((position.x()+size.width())>desktop.width())
+        position.setX(desktop.width() - size.width());
+    if((position.y()+size.height())>desktop.height())
+        position.setY(desktop.height() - size.height());
+
+    resize(size);
+    move(position);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    core::config_put_number("MainWindowWidth",width());
+    core::config_put_number("MainWindowHeight",height());
+    core::config_put_number("MainWindowXPosition",x());
+    core::config_put_number("MainWindowYPosition",y());
 }
 
 void MainWindow::showInfoMessage(const QString& msg)
@@ -113,9 +143,8 @@ void MainWindow::romOpen()
 {
     QString filter = RomExtensions.join(" ");
     QString filename = KFileDialog::getOpenFileName(KUrl(), filter);
-    if (!filename.isNull()) {
-        romOpen(filename);
-    }
+    if (!filename.isNull())
+        { romOpen(filename); }
 }
 
 void MainWindow::romOpen(const KUrl& url)
@@ -397,11 +426,10 @@ void MainWindow::createActions()
     act->setMenu(m);
     connect(ag, SIGNAL(triggered(QAction*)),
             this, SLOT(saveStateSetCurrent(QAction*)));
-    
+
     // Other stuff
     KStandardAction::preferences(this, SLOT(configDialogShow()),
                                   actionCollection());
-
 }
 
 #include "mainwindow.moc"

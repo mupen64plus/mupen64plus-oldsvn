@@ -51,16 +51,18 @@ RomModel::RomModel(QObject* parent)
                     << i18n("Comments")
                     << i18n("File Name");
 
-    QPixmap paustralia(core::get_iconpath("australia.png"));
-    QPixmap peurope(core::get_iconpath("europe.png"));
-    QPixmap pfrance(core::get_iconpath("france.png"));
-    QPixmap pgermany(core::get_iconpath("germany.png"));
-    QPixmap pitaly(core::get_iconpath("italy.png"));
-    QPixmap pjapan(core::get_iconpath("japan.png"));
-    QPixmap pspain(core::get_iconpath("spain.png"));
-    QPixmap pusa(core::get_iconpath("usa.png"));
-    QPixmap pjapanusa(core::get_iconpath("japanusa.png"));
-    QPixmap pn64cart(core::get_iconpath("n64cart.xpm"));
+    QString file;
+    char* iconpath = core::get_iconspath();
+    QPixmap paustralia(file.sprintf("%s%s", iconpath, "australia.png"));
+    QPixmap peurope(file.sprintf("%s%s", iconpath, "europe.png"));
+    QPixmap pfrance(file.sprintf("%s%s", iconpath, "france.png"));
+    QPixmap pgermany(file.sprintf("%s%s", iconpath, "germany.png"));
+    QPixmap pitaly(file.sprintf("%s%s", iconpath, "italy.png"));
+    QPixmap pjapan(file.sprintf("%s%s", iconpath, "japan.png"));
+    QPixmap pspain(file.sprintf("%s%s", iconpath, "spain.png"));
+    QPixmap pusa(file.sprintf("%s%s", iconpath, "usa.png"));
+    QPixmap pjapanusa(file.sprintf("%s%s", iconpath, "japanusa.png"));
+    QPixmap pn64cart(file.sprintf("%s%s", iconpath, "n64cart.xpm"));
 
     QPair<QString, QPixmap> demo(i18n("Demo"), pn64cart);
     QPair<QString, QPixmap> beta(i18n("Beta"), pn64cart);

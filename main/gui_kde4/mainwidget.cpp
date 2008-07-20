@@ -75,8 +75,8 @@ MainWidget::MainWidget(QWidget* parent)
              this, SLOT(resizeHeaderSections()));
     connect(m_proxyModel, SIGNAL(layoutChanged()),
              this, SLOT(resizeHeaderSections()));
-    connect(m_treeView, SIGNAL(activated(QModelIndex)),
-             this, SLOT(treeViewActivated(QModelIndex)));
+    connect(m_treeView, SIGNAL(doubleClicked(QModelIndex)),
+             this, SLOT(treeViewDoubleClicked(QModelIndex)));
 
     QLabel* filterLabel = new QLabel(i18n("Filter:"), this);
     filterLabel->setBuddy(m_lineEdit);
@@ -84,12 +84,12 @@ MainWidget::MainWidget(QWidget* parent)
     filterLayout->addWidget(filterLabel);
     filterLayout->addWidget(m_lineEdit);
     filterLayout->setMargin(0);
-    
+
     QVBoxLayout* layout = new QVBoxLayout;
     layout->addLayout(filterLayout);
     layout->addWidget(m_treeView);
     setLayout(layout);
-    
+
     m_lineEdit->setFocus();
     QTimer::singleShot(0, this, SLOT(filter())); // so we emit the base item count
 }
@@ -117,12 +117,11 @@ void MainWidget::filter()
     emit itemCountChanged(m_proxyModel->rowCount());
 }
 
-void MainWidget::treeViewActivated(const QModelIndex& index)
+void MainWidget::treeViewDoubleClicked(const QModelIndex& index)
 {
     QString filename = index.data(RomModel::FullPath).toString();
-    if (!filename.isEmpty()) {
-        emit romActivated(filename);
-    }
+    if(!filename.isEmpty())
+       { emit romDoubleClicked(filename); }
 }
 
 bool MainWidget::eventFilter(QObject* obj, QEvent* event)
