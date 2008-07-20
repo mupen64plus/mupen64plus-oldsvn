@@ -68,7 +68,7 @@ $INSTALL -m 0644 lang/* "${INSTALLDIR}/lang" || exit $?
 $INSTALL -d -v "${INSTALLDIR}/plugins" || exit $?
 $INSTALL -m 0755 plugins/* "${INSTALLDIR}/plugins" || exit $?
 if [ "${GUI}" == "KDE4" ]; then
-    $INSTALL -m 0644 main/gui_kde4/mupen64plusui.rc "${INSTALLDIR}" || exit $?
+    $INSTALL -m 0644 mupen64plusui.rc "${INSTALLDIR}" || exit $?
 fi
 echo "Done."
 
