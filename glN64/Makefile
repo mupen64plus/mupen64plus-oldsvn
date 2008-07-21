@@ -5,7 +5,7 @@ USES_KDE4 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -Wall 
+CFLAGS += -fpic -DPIC -D__LINUX__ -Wall 
 
 ifeq ($(GUI), KDE4)
   LDFLAGS += $(KDE_LIBS) $(GTHREAD_LIBS)
@@ -81,3 +81,4 @@ Config_gtk2.o: Config_gtk2.cpp
 
 GBI.o: GBI.cpp
 	$(CXX) $(CFLAGS) -DUSE_GTK $(GTK_FLAGS) $(SDL_FLAGS) -c -o $@ $<
+
