@@ -386,7 +386,8 @@ main/gui_kde4/mupen64plus.h: main/gui_kde4/mupen64plus.kcfg main/gui_kde4/settin
 main/gui_kde4/%.moc: main/gui_kde4/%.h
 	$(MOC) -i $< -o $@
 
-#$(OBJ_KDE_GUI): $(OBJ_KDE_MOC) $(OBJ_KDE_HEADERS)
+$(OBJ_KDE_GUI): $(OBJ_KDE_MOC) $(OBJ_KDE_HEADERS)
 
-#Required by Blight input.
+# This is used to force the plugin builds
 FORCE:
+
