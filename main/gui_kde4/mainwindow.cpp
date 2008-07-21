@@ -154,8 +154,8 @@ void MainWindow::romOpen(const KUrl& url)
         m_actionRecentFiles->addUrl(url);
         m_actionRecentFiles->saveEntries(KGlobal::config()->group("Recent Roms"));
         KGlobal::config()->sync();
-        core::open_rom(path.toLocal8Bit(), 0);
-        core::startEmulation();
+        if(core::open_rom(path.toLocal8Bit(), 0)==0)
+            { core::startEmulation(); }
     }
 }
 
@@ -166,6 +166,9 @@ void MainWindow::romClose()
 
 void MainWindow::emulationStart()
 {
+    if(!core::rom)
+        { return; }
+
     core::startEmulation();
 }
 

@@ -376,8 +376,6 @@ plugins/mupen64_input.so: FORCE
 	$(MAKE) -C mupen64_input all
 	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
 
-FORCE:
-
 # KDE4 build rules
 main/gui_kde4/ui_%.h: main/gui_kde4/%.ui
 	$(UIC) $< -o $@
@@ -385,7 +383,10 @@ main/gui_kde4/ui_%.h: main/gui_kde4/%.ui
 main/gui_kde4/mupen64plus.h: main/gui_kde4/mupen64plus.kcfg main/gui_kde4/settings.kcfgc
 	cd main/gui_kde4; $(KCONFIG_COMPILER) mupen64plus.kcfg settings.kcfgc
 
-$(OBJ_KDE_GUI): $(OBJ_KDE_MOC) $(OBJ_KDE_HEADERS)
-
 main/gui_kde4/%.moc: main/gui_kde4/%.h
 	$(MOC) -i $< -o $@
+
+#$(OBJ_KDE_GUI): $(OBJ_KDE_MOC) $(OBJ_KDE_HEADERS)
+
+#Required by Blight input.
+FORCE:
