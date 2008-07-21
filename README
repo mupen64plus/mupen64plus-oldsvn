@@ -151,6 +151,7 @@ The keys or joystick/mouse inputs which will be mapped to the N64 controller for
       0-9 == Select virtual 'slot' for save/load state (F5 and F7) commands
        F5 == Save emulator state
        F7 == Load emulator state
+       F9 == Reset emulator
       F10 == slow down emulator by 5%
       F11 == speed up emulator by 5%
       F12 == take screenshot

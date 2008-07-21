@@ -35,6 +35,8 @@
 #include "../ops.h"
 #include "../recomph.h"
 
+extern int dynarec_stack_initialized;  /* in gr4300.c */
+
 void dyna_jump()
 {
     if (stop == 1)
@@ -95,10 +97,13 @@ void dyna_start(void (*code)())
        );
 #endif
 
-   /* clear the registers so we don't return here a second time; that would be a bug */
-   save_ebp=0;
-   save_esp=0;
-   save_eip=0;
+    /* clear flag; stack is back to normal */
+    dynarec_stack_initialized = 0;
+
+    /* clear the registers so we don't return here a second time; that would be a bug */
+    save_ebp=0;
+    save_esp=0;
+    save_eip=0;
 }
 
 void dyna_stop()

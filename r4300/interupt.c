@@ -43,6 +43,7 @@
 #include "r4300.h"
 #include "macros.h"
 #include "exception.h"
+#include "../main/rom.h"
 #include "../main/main.h"
 #include "../main/plugin.h"
 #include "../main/savestates.h"
@@ -536,6 +537,71 @@ void gen_interupt()
             if ((Status & 7) != 1) return;
             if (!(Status & Cause & 0xFF00)) return;
             break;
+
+        case HW2_INT:
+            // Hardware Interrupt 2 -- remove interrupt event from queue
+            remove_interupt_event();
+            // setup r4300 Status flags: reset TS, and SR, set IM2
+            Status = (Status & ~0x00380000) | 0x1000;
+            Cause = (Cause | 0x1000) & 0xFFFFFF83;
+            /* the exception_general() call below will jump to the interrupt vector (0x80000180) and setup the
+             * interpreter or dynarec
+             */
+            break;
+
+        case NMI_INT:
+            // Non Maskable Interrupt -- remove interrupt event from queue
+            remove_interupt_event();
+            // setup r4300 Status flags: reset TS and SR, set BEV, ERL, and SR
+            Status = (Status & ~0x00380000) | 0x00500004;
+            Cause  = 0x00000000;
+            // simulate the soft reset code which would run from the PIF ROM
+            r4300_reset_soft();
+            // clear all interrupts, reset interrupt counters back to 0
+            Count = 0;
+            vi_counter = 0;
+            init_interupt();
+            // clear the audio status register so that subsequent write_ai() calls will work properly
+            ai_register.ai_status = 0;
+            // reset the r4300 internal state
+            if (interpcore) /* pure interpreter only */
+            {
+                // set ErrorEPC with last instruction address and set next instruction address to reset vector
+                ErrorEPC = interp_addr;
+                interp_addr = 0xa4000040;
+                last_addr = interp_addr;
+            }
+            else  /* decode-cached interpreter or dynamic recompiler */
+            {
+                int i;
+                // clear all the compiled instruction blocks
+                for (i=0; i<0x100000; i++)
+                {
+                    if (blocks[i])
+                    {
+                        if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
+                        if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
+                        if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }
+                        if (blocks[i]->riprel_table) { free(blocks[i]->riprel_table); blocks[i]->riprel_table = NULL; }
+                        free(blocks[i]);
+                        blocks[i] = NULL;
+                    }
+                }
+                // re-initialize
+                init_blocks();
+                // jump to the start
+                ErrorEPC = PC->addr;
+                jump_to(0xa4000040);
+                last_addr = PC->addr;
+            }
+            // adjust ErrorEPC if we were in a delay slot, and clear the delay_slot and dyna_interp flags
+            if(delay_slot==1 || delay_slot==3)
+            {
+                ErrorEPC-=4;
+            }
+            delay_slot = 0;
+            dyna_interp = 0;
+            return;
 
         default:
             remove_interupt_event();

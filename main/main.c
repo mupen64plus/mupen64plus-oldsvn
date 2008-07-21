@@ -57,6 +57,7 @@
 #include "romcache.h"
 #include "../r4300/r4300.h"
 #include "../r4300/recomph.h"
+#include "../r4300/interupt.h"
 #include "../memory/memory.h"
 #include "savestates.h"
 #include "util.h"
@@ -583,22 +584,23 @@ static int sdl_event_filter( const SDL_Event *event )
         case SDL_KEYDOWN:
             switch( event->key.keysym.sym )
             {
-                case SDLK_F5:
-                    savestates_job |= SAVESTATE;
-                    break;
-
-                case SDLK_F7:
-                    savestates_job |= LOADSTATE;
-                    break;
-
                 case SDLK_ESCAPE:
                     stopEmulation();
                     break;
-
                 case SDLK_RETURN:
                     // Alt+Enter toggles fullscreen
                     if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
                         changeWindow();
+                    break;
+                case SDLK_F5:
+                    savestates_job |= SAVESTATE;
+                    break;
+                case SDLK_F7:
+                    savestates_job |= LOADSTATE;
+                    break;
+                case SDLK_F9:
+                    add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                    add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
                     break;
                 case SDLK_F10:
                     main_speeddown(5);
