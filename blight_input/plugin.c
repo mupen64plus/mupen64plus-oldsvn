@@ -492,7 +492,6 @@ void
 CloseDLL( void )
 {
     printf( "["PLUGIN_NAME"]: Closing...\n" );
-    write_configuration();
 }
 
 /******************************************************************
@@ -821,6 +820,7 @@ DllConfig( HWND hParent )
 #elif defined( GUI_GTK )
         configure_gtk( controller );
 #endif
+        write_configuration();
     }
 }
 
@@ -1090,24 +1090,21 @@ GetKeys( int Control, BUTTONS *Keys )
 #endif
     *(int *)Keys = *(int *)&controller[Control].buttons;
 
-    /* handle mempack / rumblepak switching */
-    if (controller[Control].buttons.button & button_bits[14])
+    /* handle mempack / rumblepak switching (only if rumble is active on joystick) */
+    if (controller[Control].event_joystick != 0)
     {
-        controller[Control].control.Plugin = PLUGIN_MEMPAK;
-        if (controller[Control].event_joystick != 0)
+        if (controller[Control].buttons.button & button_bits[14])
         {
+            controller[Control].control.Plugin = PLUGIN_MEMPAK;
             play.type = EV_FF;
             play.code = ffweak[Control].id;
             play.value = 1;
             if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
                 perror("Error starting rumble effect");
         }
-    }
-    if (controller[Control].buttons.button & button_bits[15])
-    {
-        controller[Control].control.Plugin = PLUGIN_RAW;
-        if (controller[Control].event_joystick != 0)
+        if (controller[Control].buttons.button & button_bits[15])
         {
+            controller[Control].control.Plugin = PLUGIN_RAW;
             play.type = EV_FF;
             play.code = ffstrong[Control].id;
             play.value = 1;
@@ -1236,8 +1233,13 @@ InitiateControllers( CONTROL_INFO ControlInfo )
 
     for( i = 0; i < 4; i++ )
     {
-        memcpy( ControlInfo.Controls + i, &controller[i].control, sizeof( CONTROL ) );
+        // test for rumble support for this joystick
         InitiateRumble(i);
+        // if rumble not supported, switch to mempack
+        if (controller[i].control.Plugin == PLUGIN_RAW && controller[i].event_joystick == 0)
+            controller[i].control.Plugin = PLUGIN_MEMPAK;
+        // copy control data struct to the core
+        memcpy( ControlInfo.Controls + i, &controller[i].control, sizeof( CONTROL ) );
     }
 
     printf( "["PLUGIN_NAME"]: version "PLUGIN_VERSION" initialized.\n" );
@@ -1376,3 +1378,4 @@ SetConfigDir( char *configDir )
 {
     strncpy(configdir, configDir, PATH_MAX);
 }
+
