@@ -49,20 +49,24 @@
  */
 char *trim(char *str)
 {
+    int i;
     char *p = str;
 
     while (isspace(*p))
         p++;
 
-    if(str != p)
-        strcpy(str, p);
+    if (str != p)
+        {
+        for (i = 0; i <= strlen(p); ++i)
+            str[i]=p[i];
+        }
 
     p = str + strlen(str) - 1;
     if (p > str)
     {
         while (isspace(*p))
             p--;
-        *(++p) = '\0';
+        p[1] = '\0';
     }
 
     return str;

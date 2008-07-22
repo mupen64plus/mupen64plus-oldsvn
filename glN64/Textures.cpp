@@ -643,6 +643,12 @@ void TextureCache_Load( CachedTexture *texInfo )
     if (((texInfo->tMem << 3) + (texInfo->width * texInfo->height << texInfo->size >> 1)) > 4096)
         texInfo->tMem = 0;
 
+    // limit clamp values to min-0 (Perfect Dark has height=0 textures, making negative clamps)
+    if (clampTClamp & 0x8000)
+        clampTClamp = 0;
+    if (clampSClamp & 0x8000)
+        clampSClamp = 0;
+
     j = 0;
     for (y = 0; y < texInfo->realHeight; y++)
     {
@@ -651,7 +657,7 @@ void TextureCache_Load( CachedTexture *texInfo )
         if (y & mirrorTBit)
             ty ^= maskTMask;
 
-        src = &TMEM[texInfo->tMem] + line * ty;
+        src = &TMEM[(texInfo->tMem + line * ty) & 511];
 
         i = (ty & 1) << 1;
         for (x = 0; x < texInfo->realWidth; x++)
@@ -699,7 +705,6 @@ u32 TextureCache_CalculateCRC( u32 t, u32 width, u32 height )
     u32 y, /*i,*/ bpl, lineBytes, line;
     u64 *src;
 
-    src = (u64*)&TMEM[gSP.textureTile[t]->tmem];
     bpl = width << gSP.textureTile[t]->size >> 1;
     lineBytes = gSP.textureTile[t]->line << 3;
 
@@ -710,9 +715,8 @@ u32 TextureCache_CalculateCRC( u32 t, u32 width, u32 height )
     crc = 0xFFFFFFFF;
     for (y = 0; y < height; y++)
     {
+        src = (u64*) &TMEM[(gSP.textureTile[t]->tmem + (y * line)) & 511];
         crc = CRC_Calculate( crc, src, bpl );
-
-        src += line;
     }
 
     if (gSP.textureTile[t]->format == G_IM_FMT_CI)

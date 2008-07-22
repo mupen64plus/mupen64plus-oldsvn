@@ -263,8 +263,8 @@ void genj_idle()
    cmp_reg32_imm8(EAX, 3);
    jbe_rj(11);
    
-   and_eax_imm32(0xFFFFFFFC);
-   add_m32_reg32((unsigned int *)(&Count), EAX);
+   and_eax_imm32(0xFFFFFFFC);  // 5
+   add_m32_reg32((unsigned int *)(&Count), EAX); // 6
   
    genj();
 #endif

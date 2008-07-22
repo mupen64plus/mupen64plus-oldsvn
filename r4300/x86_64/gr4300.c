@@ -331,10 +331,10 @@ void genj_idle()
    mov_reg32_m32abs(EAX, (unsigned int *)(&next_interupt));
    sub_reg32_m32abs(EAX, (unsigned int *)(&Count));
    cmp_reg32_imm8(EAX, 3);
-   jbe_rj(11);
+   jbe_rj(12);
 
-   and_eax_imm32(0xFFFFFFFC);
-   add_m32abs_reg32((unsigned int *)(&Count), EAX);
+   and_eax_imm32(0xFFFFFFFC);  // 5
+   add_m32abs_reg32((unsigned int *)(&Count), EAX); // 7
 
    genj();
 #endif
@@ -428,10 +428,10 @@ void genjal_idle()
    mov_reg32_m32abs(EAX, (unsigned int *)(&next_interupt));
    sub_reg32_m32abs(EAX, (unsigned int *)(&Count));
    cmp_reg32_imm8(EAX, 3);
-   jbe_rj(11);
+   jbe_rj(12);
    
-   and_eax_imm32(0xFFFFFFFC);
-   add_m32abs_reg32((unsigned int *)(&Count), EAX);
+   and_eax_imm32(0xFFFFFFFC);  // 5
+   add_m32abs_reg32((unsigned int *)(&Count), EAX); // 7
   
    genjal();
 #endif

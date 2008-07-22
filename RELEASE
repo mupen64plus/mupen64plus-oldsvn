@@ -15,7 +15,13 @@ Mupen64Plus v1.4-branch development
  - r684: OGLFT measuring functions were taking a huge chunk of CPU time.  Refactored code to measure only once and store the line size and the message sizes instead of re-measuring all the time.  This eliminated nearly all of the OSD overhead on my PC
  - r686: fixed OSD crash bug after running a game, disabling OSD, then running another game
  - r694: require bash shell scripting for install.sh
-
+ - r700: set ScreenUpdateSetting=1 in rice video ini file for Conkers BFD
+ - r715: Bugfixes thanks to Valgrind. Two using strcpy with source and destination overlay, i.e. strcpy(p,p+1)
+ - r748: Fixed 64-bit dynarec crash in genj_idle() and genjal_idle()
+ - r784: 64-bit problem causing GUI crashes - gotta save/restore all the callee-saved registers around the dynarec
+ - r788: rice video: add checks for uint32 height/width parameters which can be negative, causing segfault on 64-bit systems
+ - r789: 3 glN64 bugfixes (segfaults on a 64-bit system in Perfect Dark): prevent clamp values from being negative, handle TMEM wrap-arounds from wacky height/line values in texture cache load and texture CRC functions
+ - r798: small bugfixes in blight_input: 1. only save config file after running config dialog, not every time DLL is closed.  2. If rumble is not available on a controller, don't allow user to switch between rumble and mempack.  3. If rumble is selected in config file but not available on a controller, select mempack instead.
 
 Mupen64Plus v1.4 - June 14, 2008
 -----------------------------------

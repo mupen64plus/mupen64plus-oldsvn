@@ -46,7 +46,6 @@ void dyna_jump()
         *return_address = (unsigned long) (actual->code + PC->local_addr);
 }
 
-static long save_rbp = 0;
 static long save_rsp = 0;
 static long save_rip = 0;
 
@@ -59,8 +58,13 @@ void dyna_start(void (*code)())
   /* It will jump to label 2, restore the base and stack pointers, and exit this function */
   printf("R4300 core: starting 64-bit dynamic recompiler at: 0x%lx.\n", (unsigned long) code);
 #if defined(__GNUC__) && defined(__x86_64__)
-   asm volatile 
-      (" mov  %%rbp, save_rbp \n"
+   asm volatile
+      (" push %%rbx           \n"  /* we must push an even # of registers to keep stack 16-byte aligned */
+       " push %%r12           \n"
+       " push %%r13           \n"
+       " push %%r14           \n"
+       " push %%r15           \n"
+       " push %%rbp           \n"
        " mov  %%rsp, save_rsp \n"
        " call 1f              \n"
        " jmp 2f               \n"
@@ -69,8 +73,13 @@ void dyna_start(void (*code)())
        " mov  %%rax, save_rip \n"
        " call *%%rbx          \n"
        "2:                    \n"
-       " mov  save_rbp, %%rbp \n"
        " mov  save_rsp, %%rsp \n"
+       " pop  %%rbp           \n"
+       " pop  %%r15           \n"
+       " pop  %%r14           \n"
+       " pop  %%r13           \n"
+       " pop  %%r12           \n"
+       " pop  %%rbx           \n"
        :
        : "b" (code)
        : "%rax", "memory"
@@ -78,7 +87,6 @@ void dyna_start(void (*code)())
 #endif
 
    /* clear the registers so we don't return here a second time; that would be a bug */
-   save_rbp=0;
    save_rsp=0;
    save_rip=0;
 }
