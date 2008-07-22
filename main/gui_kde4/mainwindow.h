@@ -23,6 +23,7 @@
 
 #include <KXmlGuiWindow>
 #include <QEvent>
+#include <QActionGroup>
 
 class MainWidget;
 class KRecentFilesAction;
@@ -60,6 +61,7 @@ class MainWindow : public KXmlGuiWindow
     private slots:
         void romOpen();
         void romOpen(const KUrl& url);
+        void romOpen(const KUrl& url, unsigned int archivefile);
         void romClose();
         void emulationStart();
         void emulationPauseContinue();
@@ -69,7 +71,8 @@ class MainWindow : public KXmlGuiWindow
         void saveStateSaveAs();
         void saveStateRestore();
         void saveStateLoad();
-        void saveStateSetCurrent(QAction* a);
+        void savestateCheckSlot();
+        void savestateSelectSlot(QAction* a);
         void configDialogShow();
         void updateItemCount(int count);
 
@@ -81,6 +84,7 @@ class MainWindow : public KXmlGuiWindow
         void createActions();
         MainWidget* m_mainWidget;
         KRecentFilesAction* m_actionRecentFiles;
+        QList<QAction*> slotActions;
 };
 
 #endif // MUPEN_KDE4_MAINWINDOW_H

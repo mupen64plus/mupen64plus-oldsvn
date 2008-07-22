@@ -134,6 +134,7 @@ void RomModel::update(unsigned int roms, unsigned short clear)
             modelentry.country = entry->countrycode;
             modelentry.fileName = entry->filename;
             modelentry.comments = entry->usercomments;
+            modelentry.archivefile = entry->archivefile;
 
             //Actually add entries to RomModel
             m_romList << modelentry;
@@ -253,6 +254,8 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
         //Assign Role enums here to retrive information.
         else if (role == FullPath) 
             { data = entry.fileName; }
+        else if (role == ArchiveFile) 
+            { data = entry.archivefile; }
     }
     return data;
 }

@@ -44,7 +44,7 @@ class MainWidget : public QWidget
 
     signals:
         void itemCountChanged(int count);
-        void romDoubleClicked(const KUrl& filename);
+        void romDoubleClicked(const KUrl& filename, unsigned int archivefile);
 
     protected:
         virtual bool eventFilter(QObject* obj, QEvent* event);

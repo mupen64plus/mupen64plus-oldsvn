@@ -37,6 +37,7 @@ struct RomEntry
     QString fileName;
     QString comments;
     QString crc;
+    unsigned int archivefile;
 };
 
 namespace ThreadWeaver {
@@ -48,7 +49,7 @@ class RomModel : public QAbstractItemModel
     Q_OBJECT
     public:
         enum Columns { Flag = 0, GoodName, Country, Size, Comments, FileName };
-        enum Role { Sort = Qt::UserRole, FullPath };
+        enum Role { Sort = Qt::UserRole, FullPath, ArchiveFile };
 
         RomModel(QObject* parent = 0);
 

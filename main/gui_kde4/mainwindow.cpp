@@ -73,8 +73,8 @@ MainWindow::MainWindow()
 
     connect(m_mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(updateItemCount(int)));
-    connect(m_mainWidget, SIGNAL(romDoubleClicked(KUrl)),
-             this, SLOT(romOpen(KUrl)));
+    connect(m_mainWidget, SIGNAL(romDoubleClicked(KUrl, unsigned int)),
+             this, SLOT(romOpen(KUrl, unsigned int)));
 
     char resourcefilename[PATH_MAX];
     std::sprintf(resourcefilename, "%s%s", core::get_installpath(), "mupen64plusui.rc");
@@ -146,17 +146,22 @@ void MainWindow::romOpen()
     QString filter = RomExtensions.join(" ");
     QString filename = KFileDialog::getOpenFileName(KUrl(), filter);
     if (!filename.isEmpty())
-        { romOpen(filename); }
+        { romOpen(filename, 0); }
 }
 
 void MainWindow::romOpen(const KUrl& url)
+{
+    romOpen(url, 0);
+}
+
+void MainWindow::romOpen(const KUrl& url, unsigned int archivefile)
 {
     QString path = url.path();
     if (url.isLocalFile()) {
         m_actionRecentFiles->addUrl(url);
         m_actionRecentFiles->saveEntries(KGlobal::config()->group("Recent Roms"));
         KGlobal::config()->sync();
-        if(core::open_rom(path.toLocal8Bit(), 0)==0)
+        if(core::open_rom(path.toLocal8Bit(), archivefile)==0)
             { core::startEmulation(); }
     }
 }
@@ -178,7 +183,6 @@ void MainWindow::emulationStart()
                 { romOpen(); }
             return;
             }
-        romOpen(filename);
         }
     else
         { core::startEmulation(); }
@@ -239,14 +243,19 @@ void MainWindow::saveStateLoad()
     }
 }
 
-void MainWindow::saveStateSetCurrent(QAction* a)
+void MainWindow::savestateCheckSlot()
+{
+    int slot = core::savestates_get_slot();
+    QAction* a = slotActions.at(slot);
+    a->setChecked(true);
+}
+
+void MainWindow::savestateSelectSlot(QAction* a)
 {
     bool ok = false;
     int slot = a->data().toInt(&ok);
-    if (ok) {
-        core::savestates_select_slot(slot);
-    }
-    kDebug() << "Selected slot" << slot;
+    if (ok) 
+        { core::savestates_select_slot(slot); }
 }
 
 void MainWindow::configDialogShow()
@@ -371,78 +380,89 @@ void MainWindow::createActions()
 {
     KAction *act = 0;
 
-    // "Rom" menu
-    KStandardAction::open(this, SLOT(romOpen()), actionCollection());
+    //"File" menu
+    act = actionCollection()->addAction("rom_open");
+    act->setText(i18n("&Open Rom..."));
+    act->setIcon(KIcon("document-open"));
+    connect(act, SIGNAL(triggered()), this, SLOT(romOpen()));
+
     m_actionRecentFiles = KStandardAction::openRecent(this, SLOT(romOpen(KUrl)),
                                                        actionCollection());
     m_actionRecentFiles->loadEntries(KGlobal::config()->group("Recent Roms"));
-    KStandardAction::close(this, SLOT(romClose()), actionCollection());
+
+    act = actionCollection()->addAction("rom_close");
+    act->setText(i18n("&Close Rom"));
+    act->setIcon(KIcon("dialog-close"));
+    connect(act, SIGNAL(triggered()), this, SLOT(romClose()));
+
     KStandardAction::quit(KApplication::instance(), SLOT(quit()),
                           actionCollection());
 
-    // "Emulation" menu
-    act = new KAction(KIcon("media-playback-start"), i18n("Start"), this);
+    //"Emulation" menu
+    act = actionCollection()->addAction("emulation_start");
+    act->setText(i18n("&Start"));
+    act->setIcon(KIcon("media-playback-start"));
     connect(act, SIGNAL(triggered()), this, SLOT(emulationStart()));
-    actionCollection()->addAction("emulation_start", act);
 
-    act = new KAction(KIcon("media-playback-pause"), i18n("Pause"), this);
+    act = actionCollection()->addAction("emulation_pause_continue");
+    act->setText(i18n("&Pause"));
+    act->setIcon(KIcon("media-playback-pause"));
+    act->setShortcut(Qt::Key_Pause);
     connect(act, SIGNAL(triggered()), this, SLOT(emulationPauseContinue()));
-    actionCollection()->addAction("emulation_pause_continue", act);
 
     act = actionCollection()->addAction("emulation_stop");
-    act->setText(i18n("Stop"));
+    act->setText(i18n("S&top"));
     act->setIcon(KIcon("media-playback-stop"));
+    act->setShortcut(Qt::Key_Escape);
     connect(act, SIGNAL(triggered()), this, SLOT(emulationStop()));
 
     act = actionCollection()->addAction("fullscreen");
-    act->setText(i18n("Full Screen"));
+    act->setText(i18n("&Full Screen"));
     act->setIcon(KIcon("view-fullscreen"));
+    act->setShortcut(Qt::AltModifier+Qt::Key_Return);
     connect(act, SIGNAL(triggered()), this, SLOT(viewFullScreen()));
 
     act = actionCollection()->addAction("save_state_save_as");
-    act->setText(i18n("Save State as..."));
+    act->setText(i18n("Save State &as..."));
     act->setIcon(KIcon("document-save-as"));
     connect(act, SIGNAL(triggered()), this, SLOT(saveStateSaveAs()));
-    
+
     act = actionCollection()->addAction("save_state_load");
-    act->setText(i18n("Load State from..."));
+    act->setText(i18n("&Load State from..."));
     act->setIcon(KIcon("document-open"));
     connect(act, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
 
     act = actionCollection()->addAction("save_state_save");
-    act->setText(i18n("Save State to current Slot"));
+    act->setText(i18n("Sa&ve State"));
     act->setIcon(KIcon("document-save"));
+    act->setShortcut(Qt::Key_F5);
     connect(act, SIGNAL(triggered()), this, SLOT(saveStateSave()));
 
     act = actionCollection()->addAction("save_state_restore");
-    act->setText(i18n("Restore State from current Slot"));
+    act->setText(i18n("&Restore State"));
     act->setIcon(KIcon("document-revert"));
+    act->setShortcut(Qt::Key_F7);
     connect(act, SIGNAL(triggered()), this, SLOT(saveStateRestore()));
 
     act = actionCollection()->addAction("save_state_current");
-    act->setText(i18n("Current Save State Slot"));
-    KMenu* m = new KMenu(this);
+    act->setText(i18n("&Current Save State Slot"));
+    QMenu* m = new QMenu(this);
     QActionGroup* ag = new QActionGroup(act);
-    for (int i = 0; i < 10; i++) {
-        QAction* a = 0;
-        if (i == 0) {
-            a = m->addAction(i18n("Default slot"));
-        } else {
-            a = m->addAction(i18n("Slot &%1", i));
-        }
+    for (int i = 0; i < 10; i++)
+        {
+        QAction* a = m->addAction(i18n("Slot &%1", i)); 
         a->setCheckable(true);
         a->setData(i);
         ag->addAction(a);
-        if (i == 0) {
-            m->addSeparator();
-            a->setChecked(true);
         }
-    }
     act->setMenu(m);
+    slotActions = ag->actions();
+    connect(m, SIGNAL(aboutToShow()),
+            this, SLOT(savestateCheckSlot()));
     connect(ag, SIGNAL(triggered(QAction*)),
-            this, SLOT(saveStateSetCurrent(QAction*)));
+            this, SLOT(savestateSelectSlot(QAction*)));
 
-    // Other stuff
+    //Other stuff
     KStandardAction::preferences(this, SLOT(configDialogShow()),
                                   actionCollection());
 }

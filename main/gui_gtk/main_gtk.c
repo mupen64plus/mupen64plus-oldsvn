@@ -1089,9 +1089,11 @@ static int create_menuBar( void )
                                GDK_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     fileCloseRomItem = gtk_menu_item_new_with_mnemonic(tr("_Close Rom"));
     fileSeparator1 = gtk_menu_item_new();
+    gtk_widget_add_accelerator(fileCloseRomItem, "activate", g_MainWindow.accelGroup,
+                               GDK_w, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     fileLanguageItem = gtk_menu_item_new_with_mnemonic(tr("_Language"));
     fileSeparator2 = gtk_menu_item_new();
-    fileExitItem = gtk_menu_item_new_with_mnemonic(tr("_Exit"));
+    fileExitItem = gtk_menu_item_new_with_mnemonic(tr("_Quit"));
     gtk_widget_add_accelerator(fileExitItem, "activate", g_MainWindow.accelGroup,
                                GDK_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     gtk_menu_append( GTK_MENU(fileMenu), fileLoadRomItem );
@@ -1161,16 +1163,16 @@ static int create_menuBar( void )
     gtk_widget_add_accelerator(emulationStopItem, "activate", g_MainWindow.accelGroup,
                                GDK_Escape, 0, GTK_ACCEL_VISIBLE);
     emulationSeparator1 = gtk_menu_item_new();
-    emulationSaveItem = gtk_menu_item_new_with_mnemonic(tr("Save State"));
+    emulationSaveItem = gtk_menu_item_new_with_mnemonic(tr("Sa_ve State"));
     gtk_widget_add_accelerator(emulationSaveItem, "activate", g_MainWindow.accelGroup,
                                GDK_F5, 0, GTK_ACCEL_VISIBLE);
-    emulationSaveAsItem = gtk_menu_item_new_with_mnemonic(tr("Save State As"));
-    emulationRestoreItem = gtk_menu_item_new_with_mnemonic(tr("Restore State"));
+    emulationSaveAsItem = gtk_menu_item_new_with_mnemonic(tr("Save State _as..."));
+    emulationRestoreItem = gtk_menu_item_new_with_mnemonic(tr("_Restore State"));
     gtk_widget_add_accelerator(emulationRestoreItem, "activate", g_MainWindow.accelGroup,
                                GDK_F7, 0, GTK_ACCEL_VISIBLE);
-    emulationLoadItem = gtk_menu_item_new_with_mnemonic(tr("Load State"));
+    emulationLoadItem = gtk_menu_item_new_with_mnemonic(tr("_Load State from..."));
     emulationSeparator2 = gtk_menu_item_new();
-    emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("_Current save slot"));
+    emulationSlotItem = gtk_menu_item_new_with_mnemonic(tr("_Current Save State Slot"));
 
     gtk_menu_append( GTK_MENU(emulationMenu), emulationStartItem );
     gtk_menu_append( GTK_MENU(emulationMenu), emulationPauseContinueItem );
