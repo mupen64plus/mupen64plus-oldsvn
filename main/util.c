@@ -60,10 +60,8 @@ char *trim(char *str)
 
     if (str != p)
         {
-        for (i = 0; i < strlen(p); ++i)
+        for (i = 0; i <= strlen(p); ++i)
             str[i]=p[i];
-        for (; i < strlen(str); ++i)
-            str[i]='\0';
         }
 
     p = str + strlen(str) - 1;
@@ -71,7 +69,7 @@ char *trim(char *str)
     {
         while (isspace(*p))
             p--;
-        *(++p) = '\0';
+        p[1] = '\0';
     }
 
     return str;
