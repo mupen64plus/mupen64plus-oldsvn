@@ -94,6 +94,11 @@ MainWidget::MainWidget(QWidget* parent)
     QTimer::singleShot(0, this, SLOT(filter())); // so we emit the base item count
 }
 
+QModelIndex MainWidget::getRomBrowserIndex()
+{
+    return m_treeView->currentIndex();
+}
+
 void MainWidget::resizeHeaderSections()
 {
     QString filter = m_lineEdit->text();

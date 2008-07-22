@@ -34,6 +34,7 @@ class MainWidget : public QWidget
     Q_OBJECT
     public:
         MainWidget(QWidget* parent = 0);
+        QModelIndex getRomBrowserIndex();
 
     private slots:
         void resizeHeaderSections();
@@ -47,7 +48,7 @@ class MainWidget : public QWidget
 
     protected:
         virtual bool eventFilter(QObject* obj, QEvent* event);
-    
+
     private:
         QTreeView* m_treeView;
         KLineEdit* m_lineEdit;

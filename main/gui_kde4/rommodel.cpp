@@ -111,7 +111,7 @@ void RomModel::update(unsigned int roms, unsigned short clear)
 
     int arrayroms = m_romList.count();
 
-    //If there are currently more ROMs in cache than GUi rombrowser, add them.
+    //If there are currently more ROMs in cache than GUI rombrowser, add them.
     if(roms>arrayroms)
         {
         core::cache_entry *entry;
@@ -249,9 +249,10 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     }
                     break;
             }
-        } else if (role == FullPath) {
-            data = entry.fileName;
         }
+        //Assign Role enums here to retrive information.
+        else if (role == FullPath) 
+            { data = entry.fileName; }
     }
     return data;
 }

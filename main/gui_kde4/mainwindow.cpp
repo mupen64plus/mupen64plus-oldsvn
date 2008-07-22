@@ -31,6 +31,8 @@
 #include <KDebug>
 #include <KMenu>
 
+#include <QItemSelectionModel>
+
 #include <qfile.h>
 #include <qdesktopwidget.h>
 
@@ -143,7 +145,7 @@ void MainWindow::romOpen()
 {
     QString filter = RomExtensions.join(" ");
     QString filename = KFileDialog::getOpenFileName(KUrl(), filter);
-    if (!filename.isNull())
+    if (!filename.isEmpty())
         { romOpen(filename); }
 }
 
@@ -167,9 +169,19 @@ void MainWindow::romClose()
 void MainWindow::emulationStart()
 {
     if(!core::rom)
-        { return; }
-
-    core::startEmulation();
+        {
+        QModelIndex index = m_mainWidget->getRomBrowserIndex();
+        QString filename = index.data(RomModel::FullPath).toString();
+        if(filename.isEmpty())
+            { 
+            if(confirmMessage(i18n("There is no Rom loaded. Do you want to load one?")))
+                { romOpen(); }
+            return;
+            }
+        romOpen(filename);
+        }
+    else
+        { core::startEmulation(); }
 }
 
 void MainWindow::emulationPauseContinue()
