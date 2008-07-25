@@ -26,6 +26,7 @@
 #include "network.h"
 #include "../main/md5.h"
 #include "../r4300/r4300.h"
+#include "../r4300/macros.h"
 
 int         g_Game_ID;
 
@@ -135,7 +136,7 @@ void clientProcessFrame(MupenClient *Client) {
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timer=frame;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
-            //fprintf(stderr,"chunk player: %d frame: %d data: %08x\n",curChunk->input.player,frame,curChunk->input.buttons.Value);
+            //fprintf(stderr,"chunk player: %d frame: %d data: %08x control %d\n", curChunk->input.player,frame,curChunk->input.buttons.Value,curChunk->input.player);
             len-=sizeof(InputChunk);
           break;
           default:
@@ -313,6 +314,7 @@ void clientProcessMessages(MupenClient *Client) {
 
                     Client->player[remoteID].address=Client->packet->address;
 
+                    flushEventQueue(Client);
                     Client->eventQueue[Client->numQueued]->evt=EVENT_INPUT;
                     Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay+VI_PER_FRAME;
                     addEventToQueue(Client);
@@ -420,6 +422,9 @@ void clientLoadPacket(MupenClient *Client, void *data, int len) {
 // returns 1 if successful, or 0 if it doesn't have all the needed packets to continue
 int processEventQueue(MupenClient *Client) {
     int i, frame;
+//    for(i=0; i<Client->numQueued; i++)
+//        fprintf(stderr,"%d ",Client->eventQueue[i]->time);
+//    fprintf(stderr,"\n");
     while((Client->numQueued > 0) && (Client->eventQueue[0]->time <= Client->frameCounter)) {
         //fprintf(stderr,"B q-%d t-%d c-%d\n",Client->numQueued,Client->eventQueue[0]->time,Client->frameCounter);
         switch(Client->eventQueue[0]->evt) {
@@ -441,7 +446,7 @@ int processEventQueue(MupenClient *Client) {
           break;
           case EVENT_INPUT:
             frame=Client->frameCounter-Client->inputDelay;
-            fprintf(stderr,"Input Event frame:%d event:%d\n",Client->frameCounter,frame);
+fprintf(stderr,"Input Event frame:%d event:%d cpu: %d\n",Client->frameCounter,frame,Count);
             for(i=0; i<Client->numConnected;i++) {
                 NetPlayerUpdate *curUpdate=&(Client->playerEvent[(frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH][i]);
                 if(curUpdate->control==1)
@@ -510,6 +515,9 @@ void swapQueueItems(MupenClient *Client, int a, int b) {
 }
 
 void heapifyEventQueue(MupenClient *Client,unsigned int elem){
+//  note this function heapifies queue by bubbling down events due to come later
+//    fprintf(stderr,"EQ:down %d\n",elem);
+
     int left=elem*2+1;
     int right=elem*2+2;
     if(right < Client->numQueued) {
@@ -536,21 +544,25 @@ void heapifyEventQueue(MupenClient *Client,unsigned int elem){
 
 // addEventToQueue() : Add a new button event to the button event queue.
 void addEventToQueue(MupenClient *Client) {
+    //fprintf(stderr,"EQ:add\n");
 
-    swapQueueItems(Client,0,Client->numQueued);
-
-    Client->numQueued++;
-
-    heapifyEventQueue(Client,0);
+    int elem=Client->numQueued++;
 
     if(Client->numQueued>QUEUE_HEAP_LEN) {
         fprintf(stderr,"[NETPLAY] Queue Overflow!\n");
         exit(1);
     }
+
+    while(elem>0 && 
+        Client->eventQueue[elem]->time > Client->eventQueue[(elem-1)/2]->time) {
+        swapQueueItems(Client,elem,(elem-1)/2);
+        elem=(elem-1)/2;
+    }
 }
 
 // popEventQueue() : Remove the event in the front of the queue.
 void popEventQueue(MupenClient *Client) {
+//    fprintf(stderr,"EQ:pop\n");
 
     if((--Client->numQueued)>0) {
         swapQueueItems(Client,0,Client->numQueued);
