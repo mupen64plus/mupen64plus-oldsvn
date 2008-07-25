@@ -96,7 +96,6 @@ OBJ_CORE = \
 	r4300/special.o \
 	r4300/regimm.o \
 	r4300/tlb.o
-#	network/server.o \
 
 # handle dynamic recompiler objects
 ifneq ($(NO_ASM), 1)

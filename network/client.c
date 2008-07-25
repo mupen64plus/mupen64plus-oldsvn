@@ -130,6 +130,8 @@ void clientProcessFrame(MupenClient *Client) {
     int player=curChunk->header.peer;
     unsigned int frame=SDLNet_Read16(&(curChunk->header.eID));
     curChunk=((void *)curChunk)+sizeof(Frame);
+    fprintf(stderr,"Host %d-%d lag time local: %d remote: %d\n", player, frame, Client->lag[player], Client->lag_local[player]);
+
     while(len>0) {
         switch(curChunk->type) {
           case CHUNK_INPUT:
@@ -270,7 +272,7 @@ void clientProcessMessages(MupenClient *Client) {
                     JoinRequest *packet=((JoinRequest*)Client->packet->data);
                     Uint16 port=packet->client.port;
                     Uint32 address=packet->client.host;
-                    fprintf(stderr,"[NETPLAY]Received JoinRequest from %d.%d.%d.%d:%d (%d.%d.%d.%d:%d)", GET_IP(address),GET_PORT(port),
+                    fprintf(stderr,"[NETPLAY] Received JoinRequest from %d.%d.%d.%d:%d\n",
                          GET_IP(Client->packet->address.host), GET_PORT(Client->packet->address.port));
                     /*if(Client->joinState.state!=enabled)
                         fprintf(stderr,"... Ignoring\n");
@@ -294,7 +296,7 @@ void clientProcessMessages(MupenClient *Client) {
                         SDLNet_UDP_Send(Client->socket, -1, Client->packet);
 
                         Client->eventQueue[Client->numQueued]->evt=EVENT_INPUT;
-                        Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay;
+                        Client->eventQueue[Client->numQueued]->time=Client->frameCounter+Client->inputDelay+VI_PER_FRAME;
                         addEventToQueue(Client);
                     }
                 }
@@ -341,7 +343,6 @@ void clientProcessMessages(MupenClient *Client) {
                         Client->lag[host] = ((((int)Client->lag[host])*3)/4) + diff;
                         Client->lag_local[host] = lag;
                         adjust = (lag - Client->lag[host])/4;
-                        fprintf(stderr,"Host %d lag time local: %d remote: %d adjust: %d diff: %d\n",host,Client->lag[host],lag,adjust,diff);
                         setSpeed(100+(adjust));
                         clientProcessFrame(Client);
                     } else
@@ -446,18 +447,19 @@ int processEventQueue(MupenClient *Client) {
           break;
           case EVENT_INPUT:
             frame=Client->frameCounter-Client->inputDelay;
-fprintf(stderr,"Input Event frame:%d event:%d cpu: %d\n",Client->frameCounter,frame,Count);
+fprintf(stderr,"Input Event frame:%f event:%f cpu: %d\n",Client->frameCounter/(1.0f*VI_PER_FRAME),frame/(1.0f*VI_PER_FRAME),Count);
 
             for(i=0; i<Client->numConnected;i++) {
                 NetPlayerUpdate *curUpdate=&(Client->playerEvent[(frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH][i]);
                 if(curUpdate->control==1)
-                    fprintf(stderr,"Unpause event frame %d, player %d, %d (%d)\n", curUpdate->timer, i, (frame/VI_PER_FRAME), (frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH);
+                    fprintf(stderr,"Unpause event frame %d, player %d\n", frame, i);
                 if(curUpdate->timer!=frame/VI_PER_FRAME) {
                     if(i!=Client->myID) {
                         if(rompause==0) {
                             fprintf(stderr,"[NETPLAY] Out of sync at frame %f (%d) player: %d\n", frame/(1.0f*VI_PER_FRAME), curUpdate->timer, i);
                             rompause=1;
                         }
+                        fprintf(stderr,"[NETPLAY] Skip cycle %d != %d\n", curUpdate->timer,frame/VI_PER_FRAME);
                         return 0;
                     }
                 }

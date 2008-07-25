@@ -810,6 +810,9 @@ static void * emulationThread( void *_arg )
     else
         RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
 
+    if(g_NetplayClient.isEnabled)
+        new_vi();//do this only to ensure we run netplay core before loading rom-specifics
+
     // initialize memory, and do byte-swapping if it's not been done yet
     if (g_MemHasBeenBSwapped == 0)
     {
