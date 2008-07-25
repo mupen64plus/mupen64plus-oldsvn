@@ -41,13 +41,13 @@ int netInitialize(MupenClient *mClient) {
 
   SDLNet_Init();
   rompause = 1;
-  g_Game_Master.host = 0;
-  MasterServerCloseGame();
 
- if ((!clientInitialize(mClient)) ||  (!netLaunchRecvThread())) {
+ if ((!clientInitialize(mClient))) {
      printf("[Netplay] Network initialization failed.\n");
      return 0;
  } else printf("[Netplay] Network initialization sucessful.\n");
+
+  MasterServerCloseGame();
 
  return 1;
 }
@@ -79,9 +79,12 @@ int netMain(MupenClient *mClient) {
         lastSent=mClient->frameCounter;
     }
 
+    if (mClient->masterServer != NULL && (mClient->frameCounter % VI_PER_MSSYNC)==0)
+        MasterServerKeepAlive(mClient->masterServer->host,mClient->masterServer->port,g_Game_ID,mClient->socket);
+
 //        Now being called from netReceiveThread() so that packets can be processed without running the core
 //        netReceiveThread() is launched from netInitialize()
-//        clientProcessMessages(mClient);
+    clientProcessMessages(mClient);
 
     if( processEventQueue(mClient) )
         mClient->frameCounter++;
@@ -89,7 +92,7 @@ int netMain(MupenClient *mClient) {
     return 0;
 }
 
-static void *netReceiveThread( void *_arg ) {
+/*static void *netReceiveThread( void *_arg ) {
   unsigned short int    counter = 0;
   struct timespec ts;
   ts.tv_sec = 0;
@@ -119,7 +122,7 @@ int netLaunchRecvThread() {
        return 1;
     }
 }
-
+*/
 int frameDelta(MupenClient *Client, Uint32 frame) {
   int result=Client->frameCounter-frame;
   while (result > (FRAME_MASK*VI_PER_FRAME)/2)

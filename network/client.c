@@ -27,7 +27,6 @@
 #include "../main/md5.h"
 #include "../r4300/r4300.h"
 
-IPaddress   g_Game_Master;
 int         g_Game_ID;
 
 int clientInitialize(MupenClient *Client) {
@@ -240,7 +239,7 @@ void clientProcessMessages(MupenClient *Client) {
                   memcpy(&host, Client->packet->data + 3, 4);
                   memcpy(&port, Client->packet->data + 7, 4);
 
-                  if ((host != 0) && (Client->packet->address.host == g_Game_Master.host)) {
+                  if ((host != 0) && (Client->packet->address.host == Client->masterServer->host)) {
                     Client->packet->address.host = host;
                     Client->packet->address.port = port;
                   }

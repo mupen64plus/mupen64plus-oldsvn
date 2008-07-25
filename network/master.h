@@ -54,7 +54,6 @@ typedef struct THostListNode {
     struct THostListNode *next;
 } HostListNode;
 
-extern IPaddress g_Game_Master;
 extern int       g_Game_ID;
 
 void          MasterServerAddToList(char *master_server);

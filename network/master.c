@@ -48,7 +48,6 @@
 #define STATUS_OK               0
 #define MASTER_SERVER_TIMEOUT   500
 
-MupenClient          g_NetplayClient;
 int                  g_Game_ID;
 
 static HostListNode *l_MasterServerList = NULL;
@@ -166,8 +165,11 @@ int MasterServerCreateGame(unsigned char md5[16], int local_port) {
     temp_master = GetFirstMasterServer();
     printf("[Master Server] Sending open game request to %d.%d.%d.%d:%d.\n", GET_IP(temp_master->host), GET_PORT(temp_master->port));
     masterServerOpenGame(temp_master->host, temp_master->port, md5, local_port);
-    g_Game_Master.host = temp_master->host;
-    g_Game_Master.port = temp_master->port;
+    if(g_NetplayClient.masterServer!=NULL) {
+        g_NetplayClient.masterServer->host = temp_master->host;
+        g_NetplayClient.masterServer->port = temp_master->port;
+    }
+    else fprintf(stderr,"Trying to assign master-server without allocating one first\n");
 
     /*
     while ((g_Game_ID == -1) && (temp_master)) {

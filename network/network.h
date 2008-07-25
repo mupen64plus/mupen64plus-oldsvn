@@ -46,6 +46,7 @@
 #define MAX_CLIENTS         10
 #define MAX_PACKET_SIZE     1024
 #define VI_PER_FRAME        4
+#define VI_PER_MSSYNC       300  // number of VI's before sending sync to master server (5sec)
 #define FRAME_BUFFER_LENGTH 64  // should be nearly double max frame latency
 #define QUEUE_HEAP_LEN      64  // number of items in priority queue
 
@@ -152,6 +153,8 @@ typedef struct TMupenClient {
 
         JoinState       joinState;
 
+        IPaddress       *masterServer;
+
         UDPsocket          socket;                  //listening socket
         SDLNet_SocketSet   socketSet;               // Set for client connection to ms
         UDPpacket          *packet;
@@ -177,7 +180,6 @@ typedef struct TNetPlaySettings {
 } NetPlaySettings;
 
 extern MupenClient g_NetplayClient;
-extern IPaddress   g_Game_Master;
 
 //Note that the IP should always be in network byte order
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -196,8 +198,6 @@ int netInitialize(MupenClient *mClient);
 int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings);
 void netShutdown(MupenClient *mClient);
 int netMain(MupenClient *mClient);
-static void *netReceiveThread( void *_arg );
-int netLaunchRecvThread();
 
 int clientInitialize(MupenClient *mClient);
 int clientSendMessage(MupenClient *Client);
