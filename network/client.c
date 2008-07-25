@@ -447,6 +447,7 @@ int processEventQueue(MupenClient *Client) {
           case EVENT_INPUT:
             frame=Client->frameCounter-Client->inputDelay;
 fprintf(stderr,"Input Event frame:%d event:%d cpu: %d\n",Client->frameCounter,frame,Count);
+
             for(i=0; i<Client->numConnected;i++) {
                 NetPlayerUpdate *curUpdate=&(Client->playerEvent[(frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH][i]);
                 if(curUpdate->control==1)
@@ -475,9 +476,9 @@ fprintf(stderr,"Input Event frame:%d event:%d cpu: %d\n",Client->frameCounter,fr
                     Client->playerKeys[i].Value=curUpdate->value;
 //if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", curUpdate->value, i, Client->frameCounter);
                 }
+            }
             Client->eventQueue[0]->time=Client->frameCounter+VI_PER_FRAME;
             heapifyEventQueue(Client,0);
-            }
           break;
           default:
             fprintf(stderr,"[NETPLAY] Unexpected Event popped off of queue ID:%02x\n", Client->eventQueue[0]->evt);

@@ -82,8 +82,6 @@ int netMain(MupenClient *mClient) {
     if (mClient->masterServer != NULL && (mClient->frameCounter % VI_PER_MSSYNC)==0)
         MasterServerKeepAlive(mClient->masterServer->host,mClient->masterServer->port,g_Game_ID,mClient->socket);
 
-//        Now being called from netReceiveThread() so that packets can be processed without running the core
-//        netReceiveThread() is launched from netInitialize()
     clientProcessMessages(mClient);
 
     if( processEventQueue(mClient) )

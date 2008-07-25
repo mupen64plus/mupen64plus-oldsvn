@@ -41,7 +41,7 @@
 
 #define SERVER_PORT         7000
 
-#define DEFAULT_INPUT_DELAY 12  // starting delay in frames
+#define DEFAULT_INPUT_DELAY 4  // starting delay in frames
 #define MAX_PLAYERS         4
 #define MAX_CLIENTS         10
 #define MAX_PACKET_SIZE     1024
