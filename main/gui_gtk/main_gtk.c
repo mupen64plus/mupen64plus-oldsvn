@@ -70,12 +70,26 @@ Email                : blight@Ashitaka
 #ifdef CONFIG_PATH
 #include <dirent.h>
 #endif
+#include "netplay/net_gui.h"
 
 /** function prototypes **/
 static void callback_startEmulation(GtkWidget *widget, gpointer data);
 static void callback_stopEmulation(GtkWidget *widget, gpointer data);
 static void callback_openRom(GtkWidget *widget, gpointer data);
 static int create_mainWindow(void);
+
+static void callback_netplayFindGamesShow( GtkWidget *widget, gpointer window ) {
+  show_findgames_dialog();
+}
+
+static void callback_netplayCreateGameShow( GtkWidget *widget, gpointer window ) {
+  show_creategame_dialog();
+
+}
+
+static void callback_netplayJoinGameShow( GtkWidget *widget, gpointer window ) {
+  show_joingame_dialog();
+}
 
 /** globals **/
 SMainWindow g_MainWindow;
@@ -108,6 +122,11 @@ void gui_init(int *argc, char ***argv)
     create_vcrCompDialog();
 #endif
     create_aboutDialog();
+   
+    // Netplay dialogs
+    create_findgames_dialog();
+    create_creategame_dialog();
+    create_joingame_dialog();
 }
 
 /* gui_display
@@ -1059,6 +1078,11 @@ static int create_menuBar( void )
     GtkWidget   *vcrSeparator3;
     GtkWidget   *vcrSetupItem;
 #endif
+    GtkWidget   *netplayMenu;
+    GtkWidget   *netplayMenuItem;
+    GtkWidget   *netplayFindGames;
+    GtkWidget   *netplayCreateGame;
+    GtkWidget   *netplayJoinGame;
 
     GtkWidget   *helpAboutItem;
 
@@ -1364,6 +1388,23 @@ static int create_menuBar( void )
     gtk_signal_connect( GTK_OBJECT(debuggerVariablesShow), "activate", GTK_SIGNAL_FUNC(callback_debuggerWindowShow), (gpointer)5 );
 #endif // DBG
 
+    //netplay menu
+    netplayMenu = gtk_menu_new();
+    netplayMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Netplay"));
+    gtk_menu_item_set_submenu( GTK_MENU_ITEM(netplayMenuItem), netplayMenu );
+    netplayFindGames = gtk_menu_item_new_with_mnemonic(tr("_Find Games..."));
+    netplayCreateGame = gtk_menu_item_new_with_mnemonic(tr("_Host New Game..."));
+    netplayJoinGame = gtk_menu_item_new_with_mnemonic(tr("_Join Game..."));
+    gtk_widget_add_accelerator(netplayFindGames, "activate", g_MainWindow.accelGroup, GDK_F9, 0, GTK_ACCEL_VISIBLE);
+    gtk_menu_append( GTK_MENU(netplayMenu), netplayFindGames);
+    gtk_menu_append( GTK_MENU(netplayMenu), netplayCreateGame);
+    gtk_menu_append( GTK_MENU(netplayMenu), netplayJoinGame);
+
+
+    gtk_signal_connect( GTK_OBJECT(netplayFindGames), "activate", GTK_SIGNAL_FUNC(callback_netplayFindGamesShow), (gpointer) NULL );
+    gtk_signal_connect( GTK_OBJECT(netplayCreateGame), "activate", GTK_SIGNAL_FUNC(callback_netplayCreateGameShow), (gpointer) NULL );
+    gtk_signal_connect( GTK_OBJECT(netplayJoinGame), "activate", GTK_SIGNAL_FUNC(callback_netplayJoinGameShow), (gpointer) NULL );
+
     // help menu
     helpMenu = gtk_menu_new();
     helpMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Help"));
@@ -1376,6 +1417,7 @@ static int create_menuBar( void )
     // add menus to menubar
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), fileMenuItem );
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), emulationMenuItem );
+    gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), netplayMenuItem);
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), optionsMenuItem );
 #ifdef VCR_SUPPORT
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), vcrMenuItem );
@@ -1385,7 +1427,6 @@ static int create_menuBar( void )
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), debuggerMenuItem );
 #endif
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), helpMenuItem );
-
     return 0;
 }
 

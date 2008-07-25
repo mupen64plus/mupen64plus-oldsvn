@@ -323,7 +323,6 @@ void check_interupt()
 
 void gen_interupt()
 {
-
     if (stop == 1)
     {
         vi_counter = 0; // debug
@@ -389,12 +388,13 @@ void gen_interupt()
             SDL_PumpEvents();
             refresh_stat();
 #endif
-
+/*
             // if paused, poll for input events
             if(rompause)
             {
-                osd_render();  // draw Paused message in case updateScreen didn't do it
-                SDL_GL_SwapBuffers();
+               osd_render();  // draw Paused message in case updateScreen didn't do it
+               SDL_GL_SwapBuffers();
+
                 while(rompause)
                 {
                     struct timespec ts;
@@ -407,7 +407,7 @@ void gen_interupt()
 #endif //WITH_LIRC
                 }
             }
-
+*/
             new_vi();
             if (vi_register.vi_v_sync == 0) vi_register.vi_delay = 500000;
             else vi_register.vi_delay = ((vi_register.vi_v_sync + 1)*1500);
@@ -537,7 +537,6 @@ void gen_interupt()
             if ((Status & 7) != 1) return;
             if (!(Status & Cause & 0xFF00)) return;
             break;
-
         case HW2_INT:
             // Hardware Interrupt 2 -- remove interrupt event from queue
             remove_interupt_event();

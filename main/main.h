@@ -19,6 +19,7 @@ Email                : blight@Ashitaka
 #define __MAIN_H__
 
 #include <pthread.h>
+#include "../network/network.h"
 
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
@@ -44,6 +45,7 @@ char *get_savespath(void);
 char *get_iconspath(void);
 char *get_iconpath(char *iconfile);
 int   gui_enabled(void);
+void setSpeed(unsigned int);
 
 void new_frame();
 void new_vi();
@@ -61,5 +63,7 @@ void main_draw_volume_osd(void);
 void take_next_screenshot(void);
 void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char *format, ...);
 void error_message(const char *format, ...);
+
+void netplayReady(void);
 
 #endif // __MAIN_H__

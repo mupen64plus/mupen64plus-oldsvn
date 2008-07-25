@@ -65,6 +65,8 @@
 #include "cheat.h"
 #include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
+#include "../network/network.h"
+
 
 #ifdef DBG
 #include <glib.h>
@@ -97,11 +99,11 @@ int         g_EmulatorRunning = 0;      // need separate boolean to tell if emul
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_Fullscreen = 0;           // fullscreen enabled?
 int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
-
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)
 char        *g_RspPlugin = NULL;        // pointer to rsp plugin specified at commandline (if any)
+MupenClient  g_NetplayClient;
 
 /** static (local) variables **/
 #ifdef NO_GUI
@@ -122,6 +124,13 @@ static int   l_SpeedFactor = 100;        // percentage of nominal game speed at 
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 
 static osd_message_t *l_volMsg = NULL;
+
+static NetPlaySettings  l_NetSettings;
+static int              SyncStatus;
+
+MupenClient *getNetplayClient();
+MupenClient *getNetplayClient() {return &g_NetplayClient;}
+
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -198,6 +207,13 @@ void error_message(const char *format, ...)
         gui_message(1, buffer);
 #endif
     printf("%s: %s\n", tr("Error"), buffer);
+}
+
+
+void setSpeed(unsigned int speed)
+{
+    l_SpeedFactor = speed;
+    setSpeedFactor(l_SpeedFactor);  // call to audio plugin
 }
 
 
@@ -282,7 +298,78 @@ void main_advance_one(void)
     l_FrameAdvance = 1;
     rompause = 0;
 }
+/*
+=======
+    int Dif;
+    unsigned int CurrentFPSTime;
+    static unsigned int LastFPSTime = 0;
+    static unsigned int CounterTime = 0;
+    static unsigned int CalculatedTime ;
+    static int VI_Counter = 0;
 
+#ifdef DBG
+    if(debugger_mode) debugger_frontend_vi();
+#endif
+
+    // if paused, poll for input events
+    if(rompause) {
+        osd_render();  // draw Paused message in case updateScreen didn't do it
+        SDL_GL_SwapBuffers();
+    }
+
+    do  {
+        SyncStatus = netMain(&g_NetplayClient); //may adjust l_SpeedFactor
+
+        double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
+        int time;
+
+        SDL_PumpEvents();
+#ifdef WITH_LIRC
+        lircCheckInput();
+#endif //WITH_LIRC
+
+
+        start_section(IDLE_SECTION);
+        VI_Counter++;
+
+        if(LastFPSTime == 0)
+        {
+            LastFPSTime = gettimeofday_msec();
+            CounterTime = gettimeofday_msec();
+            return;
+        }
+        CurrentFPSTime = gettimeofday_msec();
+
+        Dif = CurrentFPSTime - LastFPSTime;
+
+        if (Dif < AdjustedLimit) 
+        {
+            CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
+            time = (int)(CalculatedTime - CurrentFPSTime);
+            if (time > 0)
+            {
+                usleep(time * 1000);
+            }
+        CurrentFPSTime = CurrentFPSTime + time;
+        }
+
+        if (CurrentFPSTime - CounterTime >= 1000.0 ) 
+        {
+            CounterTime = gettimeofday_msec();
+            VI_Counter = 0 ;
+        }
+
+        LastFPSTime = CurrentFPSTime ;
+        end_section(IDLE_SECTION);
+    } while (rompause);
+
+    if (l_FrameAdvance) {
+        rompause = 1;
+        l_FrameAdvance = 0;
+    }
+>>>>>>> .merge-right.r807
+}
+*/
 void main_draw_volume_osd(void)
 {
     char msgString[32];
@@ -381,7 +468,7 @@ void startEmulation(void)
         error_message(tr("No RSP plugin specified."));
         return;
     }
-
+    
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
     {
@@ -466,6 +553,18 @@ int pauseContinueEmulation(void)
     rompause = !rompause;
     return rompause;
 }
+
+
+void netplayReady(void)
+{
+    //NetMessage netMsg;
+    g_NetplayClient.startEvt=1;
+    //if (l_NetplayEnabled && g_NetplayClient.isConnected) {
+    //    netMsg.type = NETMSG_READY;
+    //    clientSendMessage(&g_NetplayClient, &netMsg);
+    //}
+}
+
 
 /*********************************************************************************************************
 * global functions, callbacks from the r4300 core or from other plugins
@@ -584,6 +683,10 @@ static int sdl_event_filter( const SDL_Event *event )
         case SDL_KEYDOWN:
             switch( event->key.keysym.sym )
             {
+                case SDLK_F8:
+                    netplayReady();
+                    break;
+
                 case SDLK_ESCAPE:
                     stopEmulation();
                     break;
@@ -783,7 +886,7 @@ static void * emulationThread( void *_arg )
     /* Determine which plugins to use:
      *  -If valid plugin was specified at the commandline, use it
      *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
-     */
+     */  
     if(g_GfxPlugin)
         gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
     else
@@ -803,6 +906,9 @@ static void * emulationThread( void *_arg )
         RSP_plugin = plugin_name_by_filename(g_RspPlugin);
     else
         RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
+
+    if(g_NetplayClient.isEnabled)
+        new_vi();//do this only to ensure we run netplay core before loading rom-specifics
 
     // initialize memory, and do byte-swapping if it's not been done yet
     if (g_MemHasBeenBSwapped == 0)
@@ -855,10 +961,25 @@ static void * emulationThread( void *_arg )
 
     osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
 
+    if(g_NetplayClient.isEnabled)
+    {
+            if (netStartNetplay(&g_NetplayClient, l_NetSettings)) {
+                /* call r4300 CPU core and run the game */
+                r4300_reset_hard();
+                r4300_reset_soft();
+                r4300_execute();
+            }
+            else
+                printf("Failed to connect to server %s.\n", l_NetSettings.hostname);
+
+    } 
+    else 
+    {
     /* call r4300 CPU core and run the game */
-    r4300_reset_hard();
-    r4300_reset_soft();
-    r4300_execute();
+        r4300_reset_hard();
+        r4300_reset_soft();
+        r4300_execute();
+    }
 
 #ifdef WITH_LIRC
     lircStop();
@@ -881,9 +1002,8 @@ static void * emulationThread( void *_arg )
 
     // clean up
     g_EmulationThread = 0;
-
     SDL_Quit();
-
+    if (g_NetplayClient.isEnabled) netShutdown(&g_NetplayClient);
     if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is
@@ -993,6 +1113,8 @@ static void printUsage(const char *progname)
 #ifdef DBG
            "    --debugger          : start with debugger enabled\n"
 #endif 
+           "    --connect (host)    : connect to server for netplay\n"
+           "    --server            : start server\n"
            "    -h, --help          : see this help message\n"
            "\n", basename(str));
 
@@ -1025,7 +1147,9 @@ void parseCommandLine(int argc, char **argv)
     OPT_DEBUGGER,
 #endif
         OPT_NOASK,
-        OPT_TESTSHOTS
+        OPT_TESTSHOTS,
+        OPT_CONNECT,
+        OPT_SERVER
     };
     struct option long_options[] =
     {
@@ -1045,6 +1169,8 @@ void parseCommandLine(int argc, char **argv)
 #endif
         {"noask", no_argument, NULL, OPT_NOASK},
         {"testshots", required_argument, NULL, OPT_TESTSHOTS},
+        {"connect", required_argument, NULL, OPT_CONNECT}, 
+        {"server", no_argument, NULL, OPT_SERVER}, 
         {"help", no_argument, NULL, 'h'},
         {0, 0, 0, 0}    // last opt must be empty
     };
@@ -1154,6 +1280,12 @@ void parseCommandLine(int argc, char **argv)
                     }
                     l_TestShotList[idx] = 0;
                 }
+                break;
+            case OPT_CONNECT:
+                strncpy(l_NetSettings.hostname, optarg, 128);
+                break;
+            case OPT_SERVER:
+                strncpy(l_NetSettings.hostname, "", 128);
                 break;
 #ifdef DBG
             case OPT_DEBUGGER:
@@ -1349,9 +1481,20 @@ int main(int argc, char *argv[])
     printf("             |_|         http://code.google.com/p/mupen64plus/  \n");
     printf("Version %s\n\n",MUPEN_VERSION);
 
+    MasterServerAddToList("orbitaldecay.kicks-ass.net:8000");
+    memset(&l_NetSettings, 0, sizeof(l_NetSettings));
     parseCommandLine(argc, argv);
+    if (netInitialize(&g_NetplayClient)) {
+    // Use isEnabled to determine whether or not to run the emu in single player mode
+    // This should only be set to true if we have netplay started
+      g_NetplayClient.isEnabled = 1;
+    } else {
+      return 0;
+    }
+
     setPaths();
     config_read();
+   
 
     if (l_GuiEnabled)
     {

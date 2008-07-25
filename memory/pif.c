@@ -43,6 +43,8 @@
 #include "../main/main.h"
 #include "../main/plugin.h"
 #include "../main/vcr.h"
+#include "../network/network.h"
+#include "../opengl/osd.h"
 
 static unsigned char eeprom[0x800];
 static unsigned char mempack[4][0x8000];
@@ -195,23 +197,32 @@ unsigned char mempack_crc(unsigned char *data)
 
 void internal_ReadController(int Control, BYTE *Command)
 {
+   BUTTONS Keys;
+   MupenClient *mClient = (MupenClient *)getNetplayClient();
+   static BUTTONS btnPrev[4];
+
    switch (Command[2])
      {
       case 1:
-    if (Controls[Control].Present)
-      {
-         BUTTONS Keys;
+        if (mClient->isEnabled) { // Update the server if we're connected to one and if the button state has actually changed
+            //clientSendButtons(mClient, Control, Keys.Value);
+            *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
+            if(btnPrev[Control].Value != mClient->playerKeys[Control].Value)
+                fprintf(stderr,"Control %d = %08x frame: %f\n",Control,mClient->playerKeys[Control].Value,mClient->frameCounter / (1.0f * VI_PER_FRAME));
+            btnPrev[Control].Value = mClient->playerKeys[Control].Value;
+        } else if (Controls[Control].Present) {
 #ifdef VCR_SUPPORT
-         VCR_getKeys(Control, &Keys);
+        VCR_getKeys(Control, &Keys);
 #else
-         getKeys(Control, &Keys);
+        getKeys(Control, &Keys);
 #endif
-         *((unsigned int *)(Command + 3)) = Keys.Value;
+            *((unsigned int *)(Command + 3)) = Keys.Value;
 #ifdef COMPARE_CORE
-         check_input_sync(Command+3);
+            check_input_sync(Command+3);
 #endif
-      }
+        }
     break;
+	// TODO: IMPORTANT! Make sure save packs are syncrhonized over network!
       case 2: // read controller pack
     if (Controls[Control].Present)
       {

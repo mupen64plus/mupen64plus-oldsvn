@@ -34,10 +34,16 @@ Copyright            : (C) 2002 by blight, 2008 by Tillin9
 /*********************************************************************************************************
 * globals
 */
-GtkWidget *playRomItem;
-GtkWidget *romPropertiesItem;
-GtkWidget *refreshRomBrowserItem;
+GList *g_RomList = NULL;
+static GList *g_RomListCache = NULL; // roms in cache
 GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
+static GtkWidget *playRomItem;
+static GtkWidget *romPropertiesItem;
+static GtkWidget *refreshRomBrowserItem;
+static GtkWidget *startNetGameItem;
+static int g_iNumRoms = 0;
+static int g_iSortColumn = 0; // sort column
+static GtkSortType g_SortType = GTK_SORT_ASCENDING; // sort type (ascending/descending)
 
 char *column_names[16] =
     {
@@ -473,6 +479,12 @@ gboolean callback_rombrowser_context( GtkWidget *widget, GdkEventButton *event, 
     return FALSE;
 }
 
+
+static void callback_netplayCreateGameShow( GtkWidget *widget, gpointer window ) {
+  show_creategame_dialog();
+
+}
+
 // activate filter widget -> filter and resort.
 static void callback_apply_filter( GtkWidget *widget, gpointer data )
 {
@@ -870,22 +882,27 @@ int create_romBrowser( void )
     //Setup right-click menu.
     rightClickMenu = gtk_menu_new();
     playRomItem = gtk_menu_item_new_with_label( tr("Play Rom") );
+    startNetGameItem = gtk_menu_item_new_with_label( tr("Start Net Game...") );
     romPropertiesItem = gtk_menu_item_new_with_label( tr("Rom Properties") );
     separatorItem = gtk_menu_item_new();
     refreshRomBrowserItem = gtk_menu_item_new_with_label( tr("Refresh") );
 
     gtk_menu_append ( GTK_MENU(rightClickMenu), playRomItem );
+    gtk_menu_append ( GTK_MENU(rightClickMenu), startNetGameItem );
     gtk_menu_append ( GTK_MENU(rightClickMenu), romPropertiesItem );
     gtk_menu_append ( GTK_MENU(rightClickMenu), separatorItem );
     gtk_menu_append ( GTK_MENU(rightClickMenu), refreshRomBrowserItem );
 
+    
     gtk_widget_show ( rightClickMenu );
     gtk_widget_show ( playRomItem );
+    gtk_widget_show ( startNetGameItem );
     gtk_widget_show ( romPropertiesItem );
     gtk_widget_show ( separatorItem );
     gtk_widget_show ( refreshRomBrowserItem );
 
     gtk_signal_connect ( GTK_OBJECT(playRomItem), "activate", GTK_SIGNAL_FUNC(callback_playRom), (gpointer)NULL );
+    gtk_signal_connect ( GTK_OBJECT(startNetGameItem), "activate", GTK_SIGNAL_FUNC(callback_netplayCreateGameShow), (gpointer)NULL );
     gtk_signal_connect ( GTK_OBJECT(romPropertiesItem), "activate", GTK_SIGNAL_FUNC(callback_romProperties), (gpointer)NULL );
     gtk_signal_connect ( GTK_OBJECT(refreshRomBrowserItem), "activate", GTK_SIGNAL_FUNC(call_rcs), (gpointer)NULL );
 

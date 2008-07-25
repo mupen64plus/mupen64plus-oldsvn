@@ -565,6 +565,12 @@ void plugin_load_plugins(const char *gfx_name,
          Controls[i].Plugin = PLUGIN_NONE;
       }
     initiateControllers(control_info);
+    for (i=0; i<4; i++)
+      {
+         Controls[i].Present = TRUE;
+         Controls[i].RawData = FALSE;
+         Controls[i].Plugin = PLUGIN_NONE;
+      }
      }
    else
      {

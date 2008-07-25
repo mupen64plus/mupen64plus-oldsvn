@@ -92,6 +92,9 @@ OBJ_CORE = \
         main/7zip/LzmaDecode.o \
         main/7zip/BranchX86.o \
         main/7zip/BranchX86_2.o \
+	network/network.o \
+	network/client.o \
+        network/master.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
@@ -164,7 +167,10 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/cheatdialog.o \
 	main/gui_gtk/configdialog.o \
 	main/gui_gtk/rombrowser.o \
-	main/gui_gtk/romproperties.o
+	main/gui_gtk/romproperties.o \
+        main/gui_gtk/netplay/creategame_dialog.o \
+	main/gui_gtk/netplay/findgames_dialog.o \
+	main/gui_gtk/netplay/joingame_dialog.o
 
 OBJ_KDE_GUI = \
 	main/gui_kde4/main.o \
@@ -298,7 +304,7 @@ targets:
 all: $(ALL)
 
 mupen64plus: $(OBJECTS)
-	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
+	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -lSDL_net -o $@
 	$(STRIP) $@
 
 install:
@@ -317,7 +323,7 @@ clean:
 	$(MAKE) -C jttl_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
-	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
+	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o ./network/*.o
 	$(RM) -f ./main/*.o ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
 	$(RM) -f mupen64plus
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so

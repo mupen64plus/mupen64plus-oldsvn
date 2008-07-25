@@ -121,6 +121,8 @@ void lircCheckInput(void)
                     main_advance_one();
                 else if(strcmp(c, "PAUSE") == 0)
                     main_pause();
+		else if(strcmp(c, "NETPLAYREADY") == 0)
+                      netplayReady();
                 else
                 {
                     int val = ((int)c[0])-((int) '0');
