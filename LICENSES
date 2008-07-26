@@ -42,4 +42,17 @@ More information about this library is available at the following websites:
   - http://oglft.sourceforge.net/index.html
   - http://directory.fsf.org/project/OGLFT/
 
+Additionally, mupen includes a number of other libraries licensed under OSI approved licenses:
 
+The GPL-licensed:
+   * libbzip2 by Julian Seward
+   * LZMA decoder by Igor Pavlov and Lasse Collin
+   * 7zip SDK simple C decoder by Igor Pavlov
+
+The BSD-licensed minizip by Gilles Vollant and others,
+   - ftp://ftp.info-zip.org/pub/infozip/license.html
+
+The zlib/libpng licensed:
+   * Adler-32 by Mark Adler
+   * libpng by Glenn Randers-Pehrson, Peter Deutsch, and Guy Eric Schalnat
+   * MD5 hasing code by Peter Deutsch
