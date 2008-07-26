@@ -22,58 +22,60 @@
  *
 **/
 
-#include "../../rom.h"
-#include "../rombrowser.h"
-#include "../main_gtk.h"
-#include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-#include "../../md5.h"
-//#include "../../romcache.h"
-#include "net_gui.h"
+
+#include <gtk/gtk.h>
 #include <SDL_net.h>
+
+#include "net_gui.h"
+
+#include "../rombrowser.h"
+#include "../main_gtk.h"
+
+#include "../../rom.h"
+#include "../../romcache.h"
+#include "../../translate.h"
+
 #include "../../../network/network.h"
 
+/* NOTE this is bad practice. We need a structure for the newgame widget with a cache_entry.
+ * Doing so will save repeat code for looking up these items from the rombrowser.
+ */
 static GtkWidget *l_CreateGameWindow, *romComboBox, *masterCheck;
-static SRomEntry *romEntry;
 
-//extern rom_settings ROM_SETTINGS;
-//extern unsigned char *rom;
+void callback_game_create(GtkWidget *widget, gpointer data)
+{
+    GList *list = NULL, *llist = NULL;
+    cache_entry *entry;
 
-/*
-  The following function quick_message() was a demo borrowed (only slightly modified) from the gnome development website:
-      http://library.gnome.org/devel/gtk/unstable/GtkDialog.html
+    GtkTreeIter iter;
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
 
-  A big thanks to them for a lot of useful tutorials and documentation :)
-*/
+    list = gtk_tree_selection_get_selected_rows (selection, &model);
 
-void callback_game_create(GtkWidget *widget, gpointer data) {
-    // This md5 should be gotten from the rom selection box!
-    unsigned char md5[16];
-    unsigned char temp[3];
-    int           game_id, n, t;
-    unsigned char checked;
+    if(!list) //technically shouldn't happen since we trap for this in calling function.
+        { return; }
 
-    open_rom(romEntry->cFilename);
-    // Very crappy hack, couldn't figure out an easier way to do it :*(
-    temp[2] = 0;
-    for (n = 0; n < 16; n++) {
-       strncpy(temp, ROM_SETTINGS.MD5+(n*2), 2);
-       sscanf(temp, "%X", &t);
-       md5[n] = t;
-    }
+    gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
+    gtk_tree_model_get(model, &iter, 22, &entry, -1);
 
-    checked = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(masterCheck));
-    if (checked) {
-      game_id = MasterServerCreateGame(md5, 1000);
-      show_joingame_dialog(romEntry);
-      if (game_id == -1) {
-          alert_message(tr("Unable to contact master server."));
-      }
-    } else {
-      show_joingame_dialog(romEntry);
-    }
+    g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (list);
+
+    if(open_rom(entry->filename, entry->archivefile)==0);
+
+    unsigned char checked = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(masterCheck));
+    if (checked)
+        {
+        int game_id = MasterServerCreateGame(entry->md5, 1000);
+        show_joingame_dialog(entry);
+        if (game_id == -1)
+            { gui_message(1, tr("Unable to contact master server.")); }
+        else
+            { show_joingame_dialog(entry); }
+        }
 }
 
 void hide_creategame_dialog() {
@@ -216,31 +218,36 @@ void create_creategame_dialog() {
   gtk_entry_set_visibility(GTK_ENTRY(pswdEntry), FALSE);
 }
 
-void show_creategame_dialog() {
-    if(!rom) {
+void show_creategame_dialog()
+{
+    GList *list = NULL, *llist = NULL;
+    cache_entry *entry;
+    GtkTreeIter iter;
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
 
-        GList *list = NULL, *llist = NULL;
-        GtkTreeIter iter;
-        GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
-        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
-        list = gtk_tree_selection_get_selected_rows (selection, &model);
+    list = gtk_tree_selection_get_selected_rows (selection, &model);
 
-        if( !list ) {//Nothing selected.
-            alert_message(tr("Select a ROM first."));
-            return; // Should be displaying error dialog
-        } else {
-            llist = g_list_first (list);
-            gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
-            gtk_tree_model_get(model, &iter, 5, &romEntry, -1);
-            g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
-            g_list_free (list);
-
-            clear_comboBox();         
-            gtk_combo_box_append_text(GTK_COMBO_BOX(romComboBox), romEntry->info.cGoodName);
-            gtk_combo_box_set_active (GTK_COMBO_BOX(romComboBox), 0);
-            gtk_widget_show_all(l_CreateGameWindow);
+    if(!list)
+        {
+        gui_message(1, tr("Please select a ROM first."));
+        return;
         }
-    }
+
+    llist = g_list_first (list);
+
+    gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
+    gtk_tree_model_get(model, &iter, 22, &entry, -1);
+
+    g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (list);
+
+    clear_comboBox();
+    gtk_combo_box_append_text(GTK_COMBO_BOX(romComboBox), entry->inientry->goodname);
+    gtk_combo_box_set_active (GTK_COMBO_BOX(romComboBox), 0);
+    gtk_widget_show_all(l_CreateGameWindow);
+
 }
+
 
 

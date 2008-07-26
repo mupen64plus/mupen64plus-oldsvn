@@ -78,19 +78,6 @@ static void callback_stopEmulation(GtkWidget *widget, gpointer data);
 static void callback_openRom(GtkWidget *widget, gpointer data);
 static int create_mainWindow(void);
 
-static void callback_netplayFindGamesShow( GtkWidget *widget, gpointer window ) {
-  show_findgames_dialog();
-}
-
-static void callback_netplayCreateGameShow( GtkWidget *widget, gpointer window ) {
-  show_creategame_dialog();
-
-}
-
-static void callback_netplayJoinGameShow( GtkWidget *widget, gpointer window ) {
-  show_joingame_dialog();
-}
-
 /** globals **/
 SMainWindow g_MainWindow;
 
@@ -555,6 +542,22 @@ static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
             break;
             }
         }
+}
+
+/** Netplay **/
+static void callback_netplayFindGamesShow( GtkWidget *widget, gpointer window )
+{
+    show_findgames_dialog();
+}
+
+static void callback_netplayCreateGameShow( GtkWidget *widget, gpointer window )
+{
+    show_creategame_dialog();
+}
+
+static void callback_netplayJoinGameShow( GtkWidget *widget, gpointer window )
+{
+   show_joingame_dialog();
 }
 
 /** configuration **/
@@ -1395,7 +1398,6 @@ static int create_menuBar( void )
     netplayFindGames = gtk_menu_item_new_with_mnemonic(tr("_Find Games..."));
     netplayCreateGame = gtk_menu_item_new_with_mnemonic(tr("_Host New Game..."));
     netplayJoinGame = gtk_menu_item_new_with_mnemonic(tr("_Join Game..."));
-    gtk_widget_add_accelerator(netplayFindGames, "activate", g_MainWindow.accelGroup, GDK_F9, 0, GTK_ACCEL_VISIBLE);
     gtk_menu_append( GTK_MENU(netplayMenu), netplayFindGames);
     gtk_menu_append( GTK_MENU(netplayMenu), netplayCreateGame);
     gtk_menu_append( GTK_MENU(netplayMenu), netplayJoinGame);

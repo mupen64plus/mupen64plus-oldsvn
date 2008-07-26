@@ -22,15 +22,16 @@
  *
 **/
 
-#include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <gtk/gtk.h>
+
 #include "net_gui.h"
-#include "../../md5.h"
-#include "../../mupenIniApi.h"
+
+#include "../../romcache.h"
+
 #include "../../../network/network.h"
-
-
 
 #define MAX_COL_NAME_LEN		20
 #define COL_COUNT                       6
@@ -125,7 +126,7 @@ static void join_selected_game() {
 static void refresh_comboBox() {
     MD5ListNode*  md5_temp;
     char          addy_buffer[128];
-    mupenEntry*   romdb;
+    romdatabase_entry*   romdb;
 
     clear_comboBox();
     FreeMD5List(l_ComboBox_MD5_List);
@@ -137,7 +138,6 @@ static void refresh_comboBox() {
       gtk_widget_set_sensitive(l_ComboBox, TRUE);
       printf("[Master Server] MD5 List:\n");
 
-      ini_openFile();
       while (md5_temp) {
          sprintf(addy_buffer, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", GET_MD5(md5_temp->md5));
          printf("    \"%s\"\n", addy_buffer);
@@ -149,7 +149,7 @@ static void refresh_comboBox() {
          }
          md5_temp = GetNextMD5(md5_temp);
       }
-      ini_closeFile();
+
 
       gtk_combo_box_set_active ((GtkComboBox *)l_ComboBox, 0);
     } else {

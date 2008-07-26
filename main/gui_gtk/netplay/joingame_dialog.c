@@ -22,17 +22,23 @@
  *
 **/
 
-#include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../md5.h"
-#include "../rombrowser.h"
-#include "../../rom.h"
-//#include "../../romcache.h"
+
+#include <gtk/gtk.h>
+
 #include "net_gui.h"
+
+#include "../rombrowser.h"
 #include "../main_gtk.h"
-#define MAX_COL_NAME_LEN		20
-#define COL_COUNT                       4
+
+#include "../../md5.h"
+#include "../../rom.h"
+#include "../../romcache.h"
+#include "../../translate.h"
+
+#define MAX_COL_NAME_LEN 20
+#define COL_COUNT 4
 
 SMainWindow g_MainWindow;
 GtkWidget *gameLabel;
@@ -49,7 +55,7 @@ GtkWidget *l_StartButton;
 static void Callback_CancelJoinGame(GtkWidget *widget, gpointer data) {
   gtk_widget_hide_all(l_JoinGameWindow);
   MasterServerCloseGame();
-  close_rom(rom);
+  close_rom();
   gtk_widget_set_sensitive(g_MainWindow.window, TRUE);
 }
 
@@ -138,12 +144,35 @@ void create_joingame_dialog() {
   append_list_entry("4", "",    "No", "Not Connected");
 }
 
-void show_joingame_dialog(SRomEntry *romEntry) {
+/* NOTE: This needs to be changes to be passed an entry for the selected or running rom.
+ */
+void show_joingame_dialog()
+{
+    GList *list = NULL, *llist = NULL;
+    cache_entry *entry;
+    GtkTreeIter iter;
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+
+    list = gtk_tree_selection_get_selected_rows (selection, &model);
+
+    if(!list)
+        {
+        gui_message(1, tr("Please select a ROM first."));
+        return;
+        }
+
+    llist = g_list_first (list);
+
+    gtk_tree_model_get_iter (model, &iter,(GtkTreePath *) llist->data);
+    gtk_tree_model_get(model, &iter, 22, &entry, -1);
+
+    g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (list);
+
     char buffer[128];
-    if (romEntry != NULL) {
-      sprintf(buffer, "Now playing %s.", romEntry->info.cGoodName);
-      gtk_label_set_label(GTK_LABEL(gameLabel), (gchar *)buffer);
-    }
+    sprintf(buffer, "Now playing %s.", entry->inientry->goodname);
+    gtk_label_set_label(GTK_LABEL(gameLabel), (gchar*)buffer);
 
     hide_creategame_dialog();
     hide_findgames_dialog();
