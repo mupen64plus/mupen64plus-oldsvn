@@ -118,6 +118,7 @@ static int   l_CurrentFrame = 0;         // frame counter
 static int  *l_TestShotList = NULL;      // list of screenshots to take for regression test support
 static int   l_TestShotIdx = 0;          // index of next screenshot frame in list
 static char *l_Filename = NULL;          // filename to load & run at startup (if given at command line)
+static int   l_RomNumber = 0;            // rom number in archive (if given at command line)
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
 
@@ -974,26 +975,27 @@ static void printUsage(const char *progname)
 {
     char *str = strdup(progname);
 
-    printf("Usage: %s [parameter(s)] rom\n"
+    printf("Usage: %s [parameter(s)] romfile\n"
            "\n"
            "Parameters:\n"
-           "    --nogui             : do not display GUI.\n"
-           "    --fullscreen        : turn fullscreen mode on.\n"
-           "    --noosd             : disable onscreen display.\n"
-           "    --gfx (path)        : use gfx plugin given by (path)\n"
-           "    --audio (path)      : use audio plugin given by (path)\n"
-           "    --input (path)      : use input plugin given by (path)\n"
-           "    --rsp (path)        : use rsp plugin given by (path)\n"
-           "    --emumode (number)  : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter\n"
-           "    --sshotdir (dir)    : set screenshot directory to (dir)\n"
-           "    --configdir (dir)   : force config dir (must contain mupen64plus.conf)\n"
-           "    --installdir (dir)  : force install dir (place to look for plugins, icons, lang, etc)\n"
-           "    --noask             : don't ask to force load on bad dumps.\n"
-           "    --testshots (list)  : take screenshots at frames given in comma-separated list, then quit\n"
+           "    --nogui              : do not display GUI.\n"
+           "    --noask              : don't ask to force load on bad dumps.\n"
+           "    --noosd              : disable onscreen display.\n"
+           "    --fullscreen         : turn fullscreen mode on.\n"
+           "    --romnumber (number) : specify which rom in romfile, if multirom archive.\n"
+           "    --gfx (path)         : use gfx plugin given by (path)\n"
+           "    --audio (path)       : use audio plugin given by (path)\n"
+           "    --input (path)       : use input plugin given by (path)\n"
+           "    --rsp (path)         : use rsp plugin given by (path)\n"
+           "    --emumode (number)   : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter\n"
+           "    --sshotdir (dir)     : set screenshot directory to (dir)\n"
+           "    --configdir (dir)    : force config dir (must contain mupen64plus.conf)\n"
+           "    --installdir (dir)   : force install dir (place to look for plugins, icons, lang, etc)\n"
+           "    --testshots (list)   : take screenshots at frames given in comma-separated list, then quit\n"
 #ifdef DBG
-           "    --debugger          : start with debugger enabled\n"
+           "    --debugger           : start with debugger enabled\n"
 #endif 
-           "    -h, --help          : see this help message\n"
+           "    -h, --help           : see this help message\n"
            "\n", basename(str));
 
     free(str);
@@ -1025,13 +1027,15 @@ void parseCommandLine(int argc, char **argv)
     OPT_DEBUGGER,
 #endif
         OPT_NOASK,
-        OPT_TESTSHOTS
+        OPT_TESTSHOTS,
+        OPT_ROMNUMBER
     };
     struct option long_options[] =
     {
         {"nogui", no_argument, &l_GuiEnabled, FALSE},
         {"noosd", no_argument, &g_OsdEnabled, FALSE},
         {"fullscreen", no_argument, &g_Fullscreen, TRUE},
+        {"romnumber", required_argument, NULL, OPT_ROMNUMBER},
         {"gfx", required_argument, NULL, OPT_GFX},
         {"audio", required_argument, NULL, OPT_AUDIO},
         {"input", required_argument, NULL, OPT_INPUT},
@@ -1160,6 +1164,9 @@ void parseCommandLine(int argc, char **argv)
                 g_DebuggerEnabled = TRUE;
                 break;
 #endif
+            case OPT_ROMNUMBER:
+                l_RomNumber = atoi(optarg);
+                break;
             // print help
             case 'h':
             case '?':
@@ -1471,7 +1478,7 @@ int main(int argc, char *argv[])
     // if rom file was specified, run it
     if (l_Filename)
     {
-        if(open_rom(l_Filename, 0) < 0 && !l_GuiEnabled)
+        if(open_rom(l_Filename, l_RomNumber) < 0 && !l_GuiEnabled)
         {
             // cleanup and exit
             cheat_delete_all();

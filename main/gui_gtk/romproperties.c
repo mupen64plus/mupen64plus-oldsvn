@@ -347,7 +347,7 @@ int create_romPropDialog( void )
     gtk_widget_set_size_request(g_RomPropDialog.cicchipEntry, 110, -1);
     gtk_table_attach_defaults( GTK_TABLE(table), g_RomPropDialog.cicchipEntry, 1, 2, 11, 12 );
 
-   snprintf(buffer,31,"%s:",tr(column_names[3]));
+    snprintf(buffer,31,"%s",tr(column_names[3]));
     buffer[31]='\0';
     frame = gtk_frame_new(buffer);
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->vbox), frame, TRUE, TRUE, 0 );
