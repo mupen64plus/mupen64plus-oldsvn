@@ -207,7 +207,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
         gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
         gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
         }
-    else if(messagetype>1)
+    else if(messagetype>0)
         {
         GtkWidget *dialog, *hbox, *label, *icon;
 
