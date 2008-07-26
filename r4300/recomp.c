@@ -27,14 +27,14 @@
  *
 **/
 
-#include <malloc.h>
+#include <stdlib.h>
 
 #include "recomp.h"
 #include "macros.h"
 #include "r4300.h"
 #include "ops.h"
+
 #include "../memory/memory.h"
-#include "recomph.h"
 
 // global variables :
 precomp_instr *dst; // destination structure for the recompiled instruction

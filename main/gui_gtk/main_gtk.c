@@ -15,60 +15,46 @@ Email                : blight@Ashitaka
 *                                                                         *
 ***************************************************************************/
 
-#include "../version.h"
-#include "../winlnxdefs.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include <pthread.h>    // POSIX Thread library
+
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+
 #include "main_gtk.h"
-#include "../main.h"
-#include "../config.h"
-#include "../util.h"
 #include "aboutdialog.h"
 #include "cheatdialog.h"
 #include "configdialog.h"
 #include "rombrowser.h"
 #include "romproperties.h"
-#include "../translate.h"
-#include "vcrcomp_dialog.h"
 
+#include "../version.h"
+#include "../main.h"
+#include "../config.h"
+#include "../util.h"
+#include "../translate.h"
+#include "../savestates.h"
 #include "../plugin.h"
 #include "../rom.h"
-#include "../../r4300/r4300.h"
-#include "../../r4300/recomph.h"
-#include "../../memory/memory.h"
-#include "../savestates.h"
-#include "../vcr.h"
-#include "../vcr_compress.h"
 
 #ifdef DBG
-#include "../../debugger/debugger.h"
-
 #include "debugger/registers.h"     //temporary includes for the debugger menu
 #include "debugger/breakpoints.h"   //these can be removed when the main gui
 #include "debugger/regTLB.h"        //window no longer needs to know if each
 #include "debugger/memedit.h"       //debugger window is open
-#include "debugger/varlist.h"       //
+#include "debugger/varlist.h"
+
+#include "../../debugger/debugger.h"
 #endif
 
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
+#ifdef VCR
+#include "vcrcomp_dialog.h"
 
-#include <SDL.h>
-
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <malloc.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <time.h>
-#include <pthread.h>    // POSIX Thread library
-#include <signal.h> // signals
-#include <sys/stat.h>
-
-#ifdef CONFIG_PATH
-#include <dirent.h>
+#include "../vcr.h"
+#include "../vcr_compress.h"
 #endif
 
 /** function prototypes **/
@@ -83,7 +69,7 @@ SMainWindow g_MainWindow;
 static pthread_t g_GuiThread = 0; // main gui thread
 
 /*********************************************************************************************************
-* GUI interfaces (declared in ../guifuncs.h)
+* GUI interfaces
 */
 
 /** gui_init
@@ -147,7 +133,9 @@ void gui_main_loop(void)
     gdk_threads_leave();
 }
 
-//External pulic function to update rombrowser.
+/* updaterombrowser() accesses g_romcahce.length and adds upto roms to the rombrowser. The clear
+ * flag tells the GUI to clear the rombrowser.
+ */
 void updaterombrowser( unsigned int roms, unsigned short clear )
 {
     pthread_t self = pthread_self();
@@ -165,8 +153,10 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
 
     return;
 }
-
-// prints informational message to status bar
+ 
+/* gui_message() uses messagetype to display either an informational message, for example to the 
+ * status bar, a yes / no confirmation dialogue, or an error dialogue.
+ */
 int gui_message(unsigned char messagetype, const char *format, ...)
 {
     if(!gui_enabled())
@@ -201,7 +191,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
         gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
         gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
         }
-    else if(messagetype>1)
+    else if(messagetype>0)
         {
         GtkWidget *dialog, *hbox, *label, *icon;
 

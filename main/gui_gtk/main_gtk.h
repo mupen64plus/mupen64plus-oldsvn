@@ -47,13 +47,10 @@ typedef struct
 extern SMainWindow g_MainWindow;
 extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
 
-/* The two functons which all GUIs must implement.
- * updaterombrowser() accesses g_romcahce.length and adds upto roms to the rombrowser. The clear
- * flag tells the GUI to clear the rombrowser.
- * gui_message() uses messagetype to display either an informational message, for example to the 
- * status bar, a yes / no confirmation dialogue, or an error dialogue.
- */
-
+//The functons which all GUIs must implement.
+void gui_init(int *argc, char ***argv);
+void gui_display(void);
+void gui_main_loop(void);
 int gui_message(unsigned char messagetype, const char *format, ...);
 void updaterombrowser(unsigned int roms, unsigned short clear);
 
@@ -67,4 +64,4 @@ gboolean check_icon_theme();
     gdk_threads_enter(); \
 }
 
-#endif // __MAIN_GTK_H__
+#endif

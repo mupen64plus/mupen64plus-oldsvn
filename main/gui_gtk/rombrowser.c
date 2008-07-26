@@ -224,10 +224,12 @@ gint rombrowser_compare( GtkTreeModel *model, GtkTreeIter *ptr1, GtkTreeIter *pt
 
 char* filefrompath(const char *string)
 {
-    int counter;
+    int stringlength, bufferlength, counter;
     char* buffer;
 
-    for ( counter = strlen(string); counter > 0; --counter )
+    stringlength = strlen(string);
+
+    for ( counter = stringlength; counter > 0; --counter )
         {
         if(string[counter]=='/')
             {
@@ -236,9 +238,11 @@ char* filefrompath(const char *string)
             }
         }
 
-    buffer = (char*)malloc((counter+1)*sizeof(char));
-    strncpy(buffer,string+counter,counter);
-    buffer[counter] = '\0';
+    bufferlength = stringlength-counter;
+
+    buffer = (char*)malloc((bufferlength+1)*sizeof(char));
+    strncpy(buffer,string+counter,bufferlength);
+    buffer[bufferlength] = '\0';
 
     return buffer;
 }

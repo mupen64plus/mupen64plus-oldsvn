@@ -25,7 +25,7 @@
 // POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <malloc.h>
+#include <stdlib.h>
 #include "BMGUtils.h"
 
 #ifndef _WIN32

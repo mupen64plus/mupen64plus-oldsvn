@@ -27,18 +27,21 @@
  *
 **/
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "dma.h"
 #include "memory.h"
-#include "../main/main.h"
-#include "../main/rom.h"
-#include <stdio.h>
+#include "pif.h"
+#include "flashram.h"
+
 #include "../r4300/r4300.h"
 #include "../r4300/interupt.h"
 #include "../r4300/macros.h"
-#include <malloc.h>
-#include "pif.h"
-#include "flashram.h"
 #include "../r4300/ops.h"
+
+#include "../main/main.h"
+#include "../main/rom.h"
 
 static unsigned char sram[0x8000];
 
