@@ -126,8 +126,9 @@ void MainWidget::treeViewDoubleClicked(const QModelIndex& index)
 {
     QString filename = index.data(RomModel::FullPath).toString();
     unsigned int archivefile = index.data(RomModel::ArchiveFile).toUInt();
-    if(!filename.isEmpty())
-       { emit romDoubleClicked(filename, archivefile); }
+    if (!filename.isEmpty()) {
+        emit romDoubleClicked(filename, archivefile);
+    }
 }
 
 bool MainWidget::eventFilter(QObject* obj, QEvent* event)

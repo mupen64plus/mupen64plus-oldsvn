@@ -88,26 +88,34 @@ MainWindow::MainWindow()
     resourcefile.close();
     */
 
-    QSize size(core::config_get_number("MainWindowWidth",600),core::config_get_number("MainWindowHeight",400));
-    QPoint position(core::config_get_number("MainWindowXPosition",0),core::config_get_number("MainWindowYPosition",0));
+    QSize size(core::config_get_number("MainWindowWidth",600),
+               core::config_get_number("MainWindowHeight",400));
+    QPoint position(core::config_get_number("MainWindowXPosition",0),
+                    core::config_get_number("MainWindowYPosition",0));
 
     QDesktopWidget *d = QApplication::desktop();
-    QSize desktop(d->width(),d->height());
+    QSize desktop(d->width(), d->height());
 
-    if(position.x()>desktop.width())
+    if (position.x() > desktop.width()) {
         position.setX(0);
-    if(position.y()>desktop.height())
+    }
+    if (position.y() > desktop.height()) {
         position.setY(0);
+    }
 
-    if(size.width()>desktop.width())
+    if (size.width() > desktop.width()) {
         size.setWidth(600);
-    if(size.height()>desktop.height())
+    }
+    if (size.height() > desktop.height()) {
         size.setHeight(400);
+    }
 
-    if((position.x()+size.width())>desktop.width())
+    if ((position.x() + size.width()) > desktop.width()) {
         position.setX(desktop.width() - size.width());
-    if((position.y()+size.height())>desktop.height())
+    }
+    if ((position.y()+size.height())>desktop.height()) {
         position.setY(desktop.height() - size.height());
+    }
 
     resize(size);
     move(position);
@@ -115,10 +123,10 @@ MainWindow::MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    core::config_put_number("MainWindowWidth",width());
-    core::config_put_number("MainWindowHeight",height());
-    core::config_put_number("MainWindowXPosition",x());
-    core::config_put_number("MainWindowYPosition",y());
+    core::config_put_number("MainWindowWidth", width());
+    core::config_put_number("MainWindowHeight", height());
+    core::config_put_number("MainWindowXPosition", x());
+    core::config_put_number("MainWindowYPosition", y());
 }
 
 void MainWindow::showInfoMessage(const QString& msg)
@@ -147,8 +155,9 @@ void MainWindow::romOpen()
 {
     QString filter = RomExtensions.join(" ");
     QString filename = KFileDialog::getOpenFileName(KUrl(), filter);
-    if (!filename.isEmpty())
-        { romOpen(filename, 0); }
+    if (!filename.isEmpty()) {
+        romOpen(filename, 0);
+    }
 }
 
 void MainWindow::romOpen(const KUrl& url)
@@ -163,8 +172,9 @@ void MainWindow::romOpen(const KUrl& url, unsigned int archivefile)
        // m_actionRecentFiles->addUrl(url);
        // m_actionRecentFiles->saveEntries(KGlobal::config()->group("Recent Roms"));
        // KGlobal::config()->sync();
-        if(core::open_rom(path.toLocal8Bit(), archivefile)==0)
-            { core::startEmulation(); }
+    if (core::open_rom(path.toLocal8Bit(), archivefile) == 0) {
+        core::startEmulation();
+    }
 }
 
 void MainWindow::romClose()
@@ -174,19 +184,19 @@ void MainWindow::romClose()
 
 void MainWindow::emulationStart()
 {
-    if(!core::rom)
-        {
+    if(!core::rom) {
         QModelIndex index = m_mainWidget->getRomBrowserIndex();
         QString filename = index.data(RomModel::FullPath).toString();
-        if(filename.isEmpty())
-            { 
-            if(confirmMessage(i18n("There is no Rom loaded. Do you want to load one?")))
-                { romOpen(); }
-            return;
+        if (filename.isEmpty()) {
+            const char* m = "There is no Rom loaded. Do you want to load one?";
+            if (confirmMessage(i18n(m)))) {
+                romOpen();
             }
+            return;
         }
-    else
-        { core::startEmulation(); }
+    } else {
+        core::startEmulation();
+    }
 }
 
 void MainWindow::emulationPauseContinue()
@@ -255,8 +265,9 @@ void MainWindow::savestateSelectSlot(QAction* a)
 {
     bool ok = false;
     int slot = a->data().toInt(&ok);
-    if (ok) 
-        { core::savestates_select_slot(slot); }
+    if (ok) {
+        core::savestates_select_slot(slot);
+    }
 }
 
 void MainWindow::configDialogShow()
