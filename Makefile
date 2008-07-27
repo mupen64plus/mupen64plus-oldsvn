@@ -47,12 +47,29 @@ else
   CFLAGS += $(GTK_FLAGS)
   endif
 endif
-ifndef PREFIX
+
+# set installation options
+ifeq ($(PREFIX),)
   PREFIX := /usr/local
 endif
+ifeq ($(SHAREDIR),)
+  SHAREDIR := $(PREFIX)/share/mupen64plus
+endif
+ifeq ($(BINDIR),)
+  BINDIR := $(PREFIX)/bin
+endif
+ifeq ($(LIBDIR),)
+  LIBDIR := $(SHAREDIR)/plugins
+endif
+ifeq ($(MANDIR),)
+  MANDIR := $(PREFIX)/man/man1
+endif
 
+INSTALLOPTS := $(PREFIX) $(SHAREDIR) $(BINDIR) $(LIBDIR) $(MANDIR)
+
+# set Freetype flags
 FREETYPEINC = $(shell pkg-config --cflags freetype2)
-CFLAGS += -DPREFIX=\"$(PREFIX)\" $(FREETYPEINC)
+CFLAGS += $(FREETYPEINC)
 
 # list of object files to generate
 OBJ_CORE = \
@@ -79,19 +96,19 @@ OBJ_CORE = \
 	main/lzma/buffer.o \
 	main/lzma/io.o \
 	main/lzma/main.o \
-        main/7zip/7zAlloc.o \
-        main/7zip/7zBuffer.o \
-        main/7zip/7zCrc.o \
-        main/7zip/7zDecode.o \
-        main/7zip/7zExtract.o \
-        main/7zip/7zHeader.o \
-        main/7zip/7zIn.o \
-        main/7zip/7zItem.o \
-        main/7zip/7zMain.o \
-        main/7zip/7zMethodID.o \
-        main/7zip/LzmaDecode.o \
-        main/7zip/BranchX86.o \
-        main/7zip/BranchX86_2.o \
+	main/7zip/7zAlloc.o \
+	main/7zip/7zBuffer.o \
+	main/7zip/7zCrc.o \
+	main/7zip/7zDecode.o \
+	main/7zip/7zExtract.o \
+	main/7zip/7zHeader.o \
+	main/7zip/7zIn.o \
+	main/7zip/7zItem.o \
+	main/7zip/7zMain.o \
+	main/7zip/7zMethodID.o \
+	main/7zip/LzmaDecode.o \
+	main/7zip/BranchX86.o \
+	main/7zip/BranchX86_2.o \
 	memory/dma.o \
 	memory/flashram.o \
 	memory/memory.o \
@@ -282,7 +299,12 @@ targets:
 	@echo "    GUI=NONE      == build without GUI support"
 	@echo "    GUI=GTK2      == build with GTK2 GUI support (default)"
 	@echo "    GUI=KDE4      == build with KDE4 GUI support"
-	@echo "    PREFIX=path   == specify install/uninstall prefix (default: /usr/local)"
+	@echo "  Install Options:"
+	@echo "    PREFIX=path   == install/uninstall prefix (default: /usr/local/)"
+	@echo "    SHAREDIR=path == path to install shared data (default: PREFIX/share/mupen64plus/)"
+	@echo "    BINDIR=path   == path to install mupen64plus binary (default: PREFIX/bin/)"
+	@echo "    LIBDIR=path   == path to install plugin libraries (default: SHAREDIR/plugins/)"
+	@echo "    MANDIR=path   == path to install manual files (default: PREFIX/man/man1/)"
 	@echo "  Debugging Options:"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
 	@echo "    DBGSYM=1      == add debugging symbols to binaries"
@@ -302,10 +324,10 @@ mupen64plus: $(OBJECTS)
 	$(STRIP) $@
 
 install:
-	./install.sh $(PREFIX)
+	./install.sh $(INSTALLOPTS)
 
 uninstall:
-	./uninstall.sh $(PREFIX)
+	./uninstall.sh $(INSTALLOPTS)
 
 clean:
 	$(MAKE) -C blight_input clean

@@ -46,6 +46,8 @@
 
 CONTROL Controls[4];
 
+static char l_PluginDir[PATH_MAX] = {0};
+
 static GFX_INFO gfx_info;
 static AUDIO_INFO audio_info;
 static CONTROL_INFO control_info;
@@ -168,12 +170,13 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
     else
         strncpy(filepath, file_name, PATH_MAX);
 
-    // if this is not an absolute path, assume plugin file is in install dir
-    if(filepath[0] != '/')
+    // if this is not an absolute path, assume plugin file is in plugin dir
+    if (filepath[0] != '/')
     {
         bname = strdup(filepath);
         basename(bname);
-        snprintf(filepath, PATH_MAX, "%splugins/%s", get_installpath(), bname);
+        snprintf(filepath, PATH_MAX, "%s%s", l_PluginDir, bname);
+        filepath[PATH_MAX-1] = '\0';
     }
 
     handle = dlopen(filepath, RTLD_NOW);
@@ -222,26 +225,30 @@ int plugin_scan_file(const char *file_name, WORD plugin_type)
     return TRUE;
 }
 
-/* plugin_scan_installdir
+/* plugin_scan_directory
+ *
  *  Populates plugin list with any valid plugins found in the "plugins" folder
- *  of the install directory
  */
-void plugin_scan_installdir(void)
+void plugin_scan_directory(const char *plugindir)
 {
     DIR *dir;
-    char cwd[PATH_MAX];
     struct dirent *entry;
 
-    strncpy(cwd, get_installpath(), PATH_MAX);
-    strncat(cwd, "plugins", PATH_MAX - strlen(cwd));
-    dir = opendir(cwd);
-
+    // open the plugins directory and if it's valid, copy it to the static l_PluginDir char array
+    dir = opendir(plugindir);
     if(dir == NULL)
     {
-        perror(cwd);
+        perror(plugindir);
         return;
     }
+    strncpy(l_PluginDir, plugindir, PATH_MAX-2);
+    l_PluginDir[PATH_MAX-2] = 0;
 
+    // make sure plugin dir has a '/' on the end.
+    if (l_PluginDir[strlen(l_PluginDir)-1] != '/')
+        strcat(l_PluginDir, "/");
+
+    // look for any shared libraries in this folder, and scan them
     while((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name + strlen(entry->d_name) - 3, ".so") != 0)

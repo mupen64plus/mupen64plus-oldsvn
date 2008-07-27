@@ -1246,34 +1246,35 @@ static void setPaths(void)
     if(l_ConfigDir[strlen(l_ConfigDir)-1] != '/')
         strncat(l_ConfigDir, "/", PATH_MAX - strlen(l_ConfigDir));
 
-    // if install dir was not specified at the commandline, look for it in the default location
-    if(strlen(l_InstallDir) == 0)
+    // if install dir was not specified at the commandline, look for it in the executable's directory
+    if (strlen(l_InstallDir) == 0)
     {
-        strncpy(l_InstallDir, PREFIX, PATH_MAX);
-        strncat(l_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(l_InstallDir));
-
-        // if install dir is not in the default location, try the same dir as the binary
-        if(!isdir(l_InstallDir))
+        buf[0] = '\0';
+        int n = readlink("/proc/self/exe", buf, PATH_MAX);
+        if (n > 0)
         {
-            int n = readlink("/proc/self/exe", buf, PATH_MAX);
-
-            if(n > 0)
+            buf[n] = '\0';
+            dirname(buf);
+            strncpy(l_InstallDir, buf, PATH_MAX);
+            strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
+        }
+        // if it's not in the executable's directory, try a couple of default locations
+        if (buf[0] == '\0' || !isfile(buf))
+        {
+            strcpy(l_InstallDir, "/usr/local/share/mupen64plus");
+            strcpy(buf, l_InstallDir);
+            strcat(buf, "/config/mupen64plus.conf");
+            if (!isfile(buf))
             {
-                buf[n] = '\0';
-                dirname(buf);
-                strncpy(l_InstallDir, buf, PATH_MAX);
-
-                strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
-                if(!isfile(buf))
+                strcpy(l_InstallDir, "/usr/share/mupen64plus");
+                strcpy(buf, l_InstallDir);
+                strcat(buf, "/config/mupen64plus.conf");
+                // if install dir is not in the default locations, try the same dir as the binary
+                if (!isfile(buf))
                 {
                     // try cwd as last resort
                     getcwd(l_InstallDir, PATH_MAX);
                 }
-            }
-            else
-            {
-                // try cwd as last resort
-                getcwd(l_InstallDir, PATH_MAX);
             }
         }
     }
@@ -1347,6 +1348,7 @@ static void setPaths(void)
 */
 int main(int argc, char *argv[])
 {
+    char dirpath[PATH_MAX];
     int i;
     printf(" __  __                         __   _  _   ____  _             \n");  
     printf("|  \\/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \\| |_   _ ___ \n");
@@ -1424,7 +1426,19 @@ int main(int argc, char *argv[])
         }
 
     cheat_read_config();
-    plugin_scan_installdir();
+
+    // try to get plugin folder path from the mupen64plus config file
+    strncpy(dirpath, config_get_string("PluginDirectory", ""), PATH_MAX-1);
+    dirpath[PATH_MAX-1] = '\0';
+    // if it's not set in the config file, use the /plugins/ sub-folder of the installation directory
+    if (strlen(dirpath) < 2)
+    {
+        strncpy(dirpath, l_InstallDir, PATH_MAX);
+        strncat(dirpath, "plugins/", PATH_MAX - strlen(dirpath));
+        dirpath[PATH_MAX-1] = '\0';
+    }
+    // scan the plugin directory and set the config dir for the plugins
+    plugin_scan_directory(dirpath);
     plugin_set_configdir(l_ConfigDir);
 
 #ifndef NO_GUI
@@ -1444,7 +1458,8 @@ int main(int argc, char *argv[])
         config_put_number("CurrentSaveSlot",0);
     }
 
-    main_message(1, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
+    main_message(1, 0, 0, 0, tr("Config Dir:  %s\nInstall Dir: %s\nPlugin Dir:  %s\n"), l_ConfigDir, l_InstallDir, dirpath);
+    main_message(0, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\", Plugin Dir:  \"%s\""), l_ConfigDir, l_InstallDir, dirpath);
 
     //The database needs to be opened regardless of GUI mode.
     romdatabase_open();
