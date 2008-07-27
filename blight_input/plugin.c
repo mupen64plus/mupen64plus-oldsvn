@@ -1236,6 +1236,7 @@ InitiateControllers( CONTROL_INFO ControlInfo )
         // test for rumble support for this joystick
         InitiateRumble(i);
         // if rumble not supported, switch to mempack
+        // Comment out if statement to test rumble on systems without necessary hardware.
         if (controller[i].control.Plugin == PLUGIN_RAW && controller[i].event_joystick == 0)
             controller[i].control.Plugin = PLUGIN_MEMPAK;
         // copy control data struct to the core
