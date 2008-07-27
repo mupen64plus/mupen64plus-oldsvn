@@ -189,7 +189,7 @@ void MainWindow::emulationStart()
         QString filename = index.data(RomModel::FullPath).toString();
         if (filename.isEmpty()) {
             const char* m = "There is no Rom loaded. Do you want to load one?";
-            if (confirmMessage(i18n(m)))) {
+            if (confirmMessage(i18n(m))) {
                 romOpen();
             }
             return;
