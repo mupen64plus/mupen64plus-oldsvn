@@ -39,14 +39,14 @@ MainWidget::MainWidget(QWidget* parent)
     , m_treeView(0)
     , m_lineEdit(0)
     , m_proxyModel(0)
-{   
+{
     m_treeView = new QTreeView(this);
     m_lineEdit = new KLineEdit(this);
     m_proxyModel = new QSortFilterProxyModel(this);
-    
+
     m_lineEdit->setClearButtonShown(true);
     m_lineEdit->installEventFilter(this);
-    
+
     m_proxyModel->setSourceModel(RomModel::self());
     m_proxyModel->setFilterKeyColumn(-1); // search all columns
     m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -60,9 +60,9 @@ MainWidget::MainWidget(QWidget* parent)
     m_treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
     m_treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     m_treeView->setFocusProxy(m_lineEdit);
-    
+
     m_timer.setSingleShot(true);
-    
+
     connect(m_lineEdit, SIGNAL(textChanged(QString)),
              this, SLOT(lineEditTextChanged()));
     connect(&m_timer, SIGNAL(timeout()),
@@ -90,7 +90,7 @@ MainWidget::MainWidget(QWidget* parent)
     layout->addWidget(m_treeView);
     setLayout(layout);
 
-    m_lineEdit->setFocus();
+    //m_lineEdit->setFocus();
     QTimer::singleShot(0, this, SLOT(filter())); // so we emit the base item count
 }
 

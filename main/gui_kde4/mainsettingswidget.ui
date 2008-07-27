@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>291</width>
-    <height>369</height>
+    <width>318</width>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -50,16 +50,16 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout" >
       <item>
-       <widget class="QCheckBox" name="kcfg_DisableAudioSynchronization" >
+       <widget class="QCheckBox" name="kcfg_DisableCompiledJump" >
         <property name="text" >
-         <string>Disable audio synchronization</string>
+         <string>Disable compiled jump</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="kcfg_DisableCompiledJump" >
+       <widget class="QCheckBox" name="kcfg_DisableAudioSynchronization" >
         <property name="text" >
-         <string>Disable compiled jump</string>
+         <string>Disable Memory Expansion</string>
         </property>
        </widget>
       </item>
@@ -83,6 +83,20 @@
        <widget class="QCheckBox" name="kcfg_AskBeforeLoadingBadDump" >
         <property name="text" >
          <string>Ask before loading bad dump/hacked rom</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox" >
+        <property name="text" >
+         <string>On Screen Display Enabled</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_2" >
+        <property name="text" >
+         <string>Always Start in Full Screen Mode</string>
         </property>
        </widget>
       </item>

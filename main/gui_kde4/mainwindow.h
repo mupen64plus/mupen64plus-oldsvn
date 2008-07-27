@@ -21,9 +21,10 @@
 #ifndef MUPEN_KDE4_MAINWINDOW_H
 #define MUPEN_KDE4_MAINWINDOW_H
 
-#include <KXmlGuiWindow>
+#include <KMainWindow>
 #include <QEvent>
 #include <QActionGroup>
+#include <QtGui>
 
 class MainWidget;
 class KRecentFilesAction;
@@ -48,7 +49,7 @@ class AlertEvent : public QEvent
         QString message;
 };
 
-class MainWindow : public KXmlGuiWindow
+class MainWindow : public KMainWindow
 {
     Q_OBJECT
     public:
@@ -69,12 +70,18 @@ class MainWindow : public KXmlGuiWindow
         void viewFullScreen();
         void saveStateSave();
         void saveStateSaveAs();
-        void saveStateRestore();
         void saveStateLoad();
+        void saveStateLoadAs();
         void savestateCheckSlot();
         void savestateSelectSlot(QAction* a);
         void configDialogShow();
         void updateItemCount(int count);
+
+        //test junk
+        void toolbarIconOnly();
+        void toolbarTextOnly();
+        void toolbarTextBeside();
+        void toolbarTextUnder();
 
     protected:
         bool event(QEvent* event);
@@ -82,9 +89,39 @@ class MainWindow : public KXmlGuiWindow
 
     private:
         void createActions();
+        void createMenus();
+        void createToolBars();
         MainWidget* m_mainWidget;
         KRecentFilesAction* m_actionRecentFiles;
+
+        //Menus
+        QMenu* fileMenu;
+        QMenu* emulationMenu;
+        QMenu* settingsMenu;
+
+        //Toolbar
+        QToolBar* mainToolBar;
+
+        //Actions
+        QAction* rom_open;
+        QAction* rom_close;
+        QAction* application_close;
+        QAction* emulation_start;
+        QAction* emulation_pause;
+        QAction* emulation_stop;
+        QAction* emulation_load_state;
+        QAction* emulation_save_state;
+        QAction* emulation_load_state_as;
+        QAction* emulation_save_state_as;
+        QAction* emulation_current_slot;
+
         QList<QAction*> slotActions;
+
+        //Test junk
+        QAction* toolbar_icon_only;
+        QAction* toolbar_text_only;
+        QAction* toolbar_text_beside;
+        QAction* toolbar_text_under;
 };
 
 #endif // MUPEN_KDE4_MAINWINDOW_H
