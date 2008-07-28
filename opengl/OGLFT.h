@@ -42,14 +42,12 @@ namespace OGLFT
     {
         X, Y, Z, W
     };
-    
+
     enum ColorSpace 
     {
         R, G, B, A
     };
 
-    typedef void (*GLUTessCallback)();
-    
     class Library 
     {
         public:
@@ -239,7 +237,7 @@ namespace OGLFT
             {
                 vertical_justification_ = vertical_justification;
             }
-            
+
             enum VerticalJustification verticaljustification ( void ) const { return vertical_justification_; }
             void setCharacterDisplayLists ( const DisplayLists& character_display_lists ) { character_display_lists_ = character_display_lists; }
             DisplayLists& characterDisplayLists ( void ) { return character_display_lists_; }
@@ -282,7 +280,7 @@ namespace OGLFT
         private:
             void init ( void );
     };
-    
+
     class Raster : public Face 
     {
         protected:
@@ -312,7 +310,7 @@ namespace OGLFT
             Monochrome ( const char* filename, float point_size = 12, FT_UInt resolution = 100 );
             Monochrome ( FT_Face face, float point_size = 12, FT_UInt resolution = 100 );
             ~Monochrome ( void );
-            
+
         private:
             GLubyte* invertBitmap ( const FT_Bitmap& bitmap );
             void renderGlyph ( FT_Face face, FT_UInt glyph_index );
