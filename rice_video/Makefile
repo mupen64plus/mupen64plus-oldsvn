@@ -5,7 +5,7 @@ include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC -Wall
-LDFLAGS	+= -L/usr/X11R6/lib `sdl-config --libs` -lGL -shared -Wl,-Bsymbolic
+LDFLAGS	+= $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
 # set options
 

@@ -14,7 +14,7 @@ endif
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS = -O3 -Wall -g -DGCC -DUSE_GTK $(SDL_CFLAGS) $(GTK_FLAGS) -Iwrapper/ -ffast-math -funroll-loops
-LDFLAGS	= -shared -Wl,-Bsymbolic -lGL -lGLU -L/usr/X11R6/lib $(SDL_LIBS)
+LDFLAGS	= $(PLUGIN_LDFLAGS) $(LIBGL_LIBS) $(SDL_LIBS)
 
 # set special flags per-system
 ifeq ($(CPU), X86)

@@ -27,16 +27,18 @@
  *
 **/
 
-#include "../main/vcr.h"
+#include <stdlib.h>
+
 #include "r4300.h"
 #include "ops.h"
-#include "../memory/memory.h"
 #include "exception.h"
 #include "interupt.h"
 #include "macros.h"
 #include "recomp.h"
 #include "recomph.h"
-#include <malloc.h>
+
+#include "../main/vcr.h"
+#include "../memory/memory.h"
 
 #ifdef DBG
 #include "../debugger/debugger.h"

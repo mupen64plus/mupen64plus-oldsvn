@@ -33,19 +33,19 @@
  * if you want to implement an interface, you should look here
  */
 
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/stat.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <pthread.h> // POSIX Thread library
+#include <unistd.h>  // POSIX macros and standard types.
+#include <pthread.h> // POSIX thread library
 #include <signal.h> // signals
+#include <ucontext.h> // extra signal types (for portability)
 #include <getopt.h> // getopt_long
 #include <libgen.h> // basename, dirname
+#include <dirent.h>
+
 #include <png.h>    // for writing screenshot PNG files
+
 #include <SDL.h>
 
 #include "main.h"
@@ -55,14 +55,17 @@
 #include "plugin.h"
 #include "rom.h"
 #include "romcache.h"
-#include "../r4300/r4300.h"
-#include "../r4300/recomph.h"
-#include "../r4300/interupt.h"
-#include "../memory/memory.h"
 #include "savestates.h"
 #include "util.h"
 #include "translate.h"
 #include "cheat.h"
+
+#include "../r4300/r4300.h"
+#include "../r4300/recomph.h"
+#include "../r4300/interupt.h"
+
+#include "../memory/memory.h"
+
 #include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
 

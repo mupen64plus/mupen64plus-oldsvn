@@ -51,8 +51,8 @@ romdatabase_entry empty_entry;
 
 #include <limits.h> //PATH_MAX //There is a more standards compliant way of doing this.
 #include <dirent.h> //Directory support.
-//Includes for POSIX file status.
-#include <sys/stat.h>
+
+#include <sys/stat.h> //Includes for POSIX file status.
 #include <sys/types.h>
 
 #include "7zip/Types.h"

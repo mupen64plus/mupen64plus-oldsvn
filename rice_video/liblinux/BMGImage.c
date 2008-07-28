@@ -3,9 +3,11 @@
 //
 // Copyright (C) 2001 Michael S. Heiman
 */
-#include <malloc.h>
+
 #include <memory.h>
 #include <setjmp.h>
+#include <stdlib.h>
+
 #include "BMGUtils.h"
 
 /* initializes a BMGImage to default values */

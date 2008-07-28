@@ -19,6 +19,8 @@ Email                : blight@Ashitaka
 #include <string.h>
 #include <stdlib.h>
 
+#include <signal.h>
+
 #include <pthread.h>    // POSIX Thread library
 
 #include <gtk/gtk.h>
@@ -273,8 +275,7 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
     GtkWidget *file_chooser;
     GtkFileFilter *file_filter;
 
-    //We might not need this...
-    if( g_EmulationThread )
+    if(g_EmulationThread)
     {
         if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load a rom?")))
             return;

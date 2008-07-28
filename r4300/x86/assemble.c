@@ -27,10 +27,12 @@
  *
 **/
 
-#include "assemble.h"
-#include "../recomph.h"
-#include <malloc.h>
+#include <stdlib.h>
 #include <stdio.h>
+
+#include "assemble.h"
+
+#include "../recomph.h"
 #include "../r4300.h"
 
 typedef struct _jump_table

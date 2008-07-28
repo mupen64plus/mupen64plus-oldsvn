@@ -1,18 +1,19 @@
-#include <features.h>
-#include <dlfcn.h>
-#include <unistd.h>
-#include "../main/winlnxdefs.h"
-#include "SDL.h"
 #include <errno.h>
-#include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
+#include <dlfcn.h>
+#include <unistd.h>
 
+#include <gtk/gtk.h>
+
+#include "SDL.h" //Why not <SDL.h>
 #include "Config.h"
 #include "glN64.h"
 #include "RSP.h"
 #include "Textures.h"
 #include "OpenGL.h"
+
+#include "../main/winlnxdefs.h"
 
 static GtkWidget *configWindow = NULL;
 //static GtkWidget *bitdepthCombo[2], *resolutionCombo[2];
