@@ -846,8 +846,6 @@ static void callback_toggle_toolbar( GtkWidget *widget, gpointer data )
         gtk_widget_hide(g_MainWindow.toolBar);
     else
         gtk_widget_show(g_MainWindow.toolBar);
-
-    config_put_bool("ToolbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
 }
 
 static void callback_toggle_filter( GtkWidget *widget, gpointer data )
@@ -859,8 +857,6 @@ static void callback_toggle_filter( GtkWidget *widget, gpointer data )
         }
     else
         gtk_widget_show(g_MainWindow.filterBar);
-
-    config_put_bool("FilterVisible",GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
 }
 
 static void callback_toggle_statusbar( GtkWidget *widget, gpointer data )
@@ -869,8 +865,6 @@ static void callback_toggle_statusbar( GtkWidget *widget, gpointer data )
         gtk_widget_hide(g_MainWindow.statusBarHBox);
     else
         gtk_widget_show(g_MainWindow.statusBarHBox);
-
-    config_put_bool("StatusbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
 }
 
 
@@ -969,6 +963,10 @@ static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, g
     config_put_number("MainWindowHeight",height);
     config_put_number("MainWindowXPosition",xposition);
     config_put_number("MainWindowYPosition",yposition);
+
+    config_put_bool("ToolbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
+    config_put_bool("FilterVisible",GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
+    config_put_bool("StatusbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
 
     gtk_main_quit();
     return TRUE; // undeleteable
@@ -1284,26 +1282,17 @@ static int create_menuBar( void )
     viewStatusbar = gtk_check_menu_item_new_with_mnemonic(tr(" _Statusbar"));
 
     if((i=config_get_bool("ToolbarVisible",2))==2)
-        {
-        config_put_bool("ToolbarVisible",TRUE);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewToolbar),TRUE); 
-        }
     else
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewToolbar),i);
 
     if((i=config_get_bool("FilterVisible",2))==2)
-        {
-        config_put_bool("FilterVisible",TRUE);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewFilter),TRUE); 
-        }
     else
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewFilter),i);
 
     if((i=config_get_bool("StatusBarVisible",2))==2)
-        {
-        config_put_bool("StatusBarVisible",TRUE);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewStatusbar),TRUE); 
-        }
     else
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(viewStatusbar),i);
 

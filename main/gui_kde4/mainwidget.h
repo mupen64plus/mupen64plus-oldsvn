@@ -35,6 +35,11 @@ class MainWidget : public QWidget
     public:
         MainWidget(QWidget* parent = 0);
         QModelIndex getRomBrowserIndex();
+        QLabel* filterLabel;
+        KLineEdit* m_lineEdit;
+
+    public slots:
+        void toggleFilter();
 
     private slots:
         void resizeHeaderSections();
@@ -51,7 +56,6 @@ class MainWidget : public QWidget
 
     private:
         QTreeView* m_treeView;
-        KLineEdit* m_lineEdit;
         QSortFilterProxyModel* m_proxyModel;
         QTimer m_timer;
 };

@@ -64,17 +64,23 @@ class MainWindow : public KMainWindow
         void romOpen(const KUrl& url);
         void romOpen(const KUrl& url, unsigned int archivefile);
         void romClose();
+
         void emulationStart();
         void emulationPauseContinue();
         void emulationStop();
-        void viewFullScreen();
         void saveStateSave();
         void saveStateSaveAs();
         void saveStateLoad();
         void saveStateLoadAs();
         void savestateCheckSlot();
         void savestateSelectSlot(QAction* a);
+
+        void viewFullScreen();
+        void toggleCheckViewable();
+        void toggleToolBar();
+        void toggleStatusBar();
         void configDialogShow();
+        //name change...
         void updateItemCount(int count);
 
         //test junk
@@ -98,6 +104,7 @@ class MainWindow : public KMainWindow
         QMenu* fileMenu;
         QMenu* emulationMenu;
         QMenu* settingsMenu;
+        QMenu* helpMenu;
 
         //Toolbar
         QToolBar* mainToolBar;
@@ -116,6 +123,17 @@ class MainWindow : public KMainWindow
         QAction* emulation_current_slot;
 
         QList<QAction*> slotActions;
+
+        //Settings
+        QAction* settings_show_toolbar;
+        QAction* settings_show_filter;
+        QAction* settings_show_statusbar;
+        QAction* settings_fullscreen;
+        QAction* settings_configure_graphics;
+        QAction* settings_configure_audio;
+        QAction* settings_configure_input;
+        QAction* settings_configure_rsp;
+        QAction* settings_configure_mupen;
 
         //Test junk
         QAction* toolbar_icon_only;

@@ -32,6 +32,7 @@
 #include <KMenu>
 #include <KMainWindow>
 #include <KMenuBar>
+#include <KLineEdit>
 
 #include <QItemSelectionModel>
 #include <QtGui>
@@ -88,6 +89,37 @@ MainWindow::MainWindow()
     resourcefile.close();
     */
 
+   int i;
+
+   if((i=core::config_get_bool("ToolbarVisible",2))==2)
+        i = true;
+
+    if(i)
+        mainToolBar->show();
+    else
+        mainToolBar->hide();
+
+    if((i=core::config_get_bool("FilterVisible",2))==2)
+        i = true;
+
+    if(i) {
+        m_mainWidget->filterLabel->show();
+        m_mainWidget->m_lineEdit->show();
+    }
+    else {
+        m_mainWidget->filterLabel->hide();
+        m_mainWidget->m_lineEdit->hide();
+    }
+
+    if((i=core::config_get_bool("StatusBarVisible",2))==2)
+        i = true;
+
+    if(i)
+        statusBar()->show();
+    else
+        statusBar()->hide();
+
+
     QSize size(core::config_get_number("MainWindowWidth",600),
                core::config_get_number("MainWindowHeight",400));
     QPoint position(core::config_get_number("MainWindowXPosition",0),
@@ -127,6 +159,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_number("MainWindowHeight", height());
     core::config_put_number("MainWindowXPosition", x());
     core::config_put_number("MainWindowYPosition", y());
+    core::config_put_bool("ToolbarVisible", mainToolBar->isVisible());
+    core::config_put_bool("FilterVisible", m_mainWidget->filterLabel->isVisible());
+    core::config_put_bool("StatusbarVisible", statusBar()->isVisible());
 }
 
 void MainWindow::showInfoMessage(const QString& msg)
@@ -187,6 +222,7 @@ void MainWindow::emulationStart()
     if(!core::rom) {
         QModelIndex index = m_mainWidget->getRomBrowserIndex();
         QString filename = index.data(RomModel::FullPath).toString();
+        unsigned int archivefile = index.data(RomModel::ArchiveFile).toUInt();
         if (filename.isEmpty()) {
             const char* m = "There is no Rom loaded. Do you want to load one?";
             if (confirmMessage(i18n(m))) {
@@ -194,9 +230,11 @@ void MainWindow::emulationStart()
             }
             return;
         }
-    } else {
-        core::startEmulation();
+        else
+            romOpen(filename, archivefile);
     }
+
+    core::startEmulation();
 }
 
 void MainWindow::emulationPauseContinue()
@@ -261,6 +299,24 @@ void MainWindow::savestateCheckSlot()
     a->setChecked(true);
 }
 
+void MainWindow::toggleCheckViewable()
+{
+    if(mainToolBar->isVisible())
+        settings_show_toolbar->setChecked(true);
+    else
+        settings_show_toolbar->setChecked(false);
+
+    if(m_mainWidget->filterLabel->isVisible())
+        settings_show_filter->setChecked(true);
+    else
+        settings_show_filter->setChecked(false);
+
+    if(statusBar()->isVisible())
+        settings_show_statusbar->setChecked(true);
+    else
+        settings_show_statusbar->setChecked(false);
+}
+
 void MainWindow::savestateSelectSlot(QAction* a)
 {
     bool ok = false;
@@ -270,6 +326,7 @@ void MainWindow::savestateSelectSlot(QAction* a)
     }
 }
 
+//Slot should be renamed.
 void MainWindow::configDialogShow()
 {
     if (KConfigDialog::showDialog("settings")) {
@@ -312,7 +369,7 @@ void MainWindow::configDialogShow()
         plugins->plugins(Plugins::Audio)
     );
     pluginsSettingsUi.audioPluginIconLabel->setPixmap(
-        KIcon("audio-headset").pixmap(labelIconSize)
+        KIcon("audio-card").pixmap(labelIconSize)
     );
     connect(pluginsSettingsUi.aboutAudioPluginButton, SIGNAL(clicked()),
              plugins, SLOT(aboutAudioPlugin()));
@@ -408,6 +465,22 @@ void MainWindow::toolbarTextUnder()
     mainToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 }
 
+void MainWindow::toggleToolBar()
+{
+    if(mainToolBar->isVisible())
+        mainToolBar->hide();
+    else
+        mainToolBar->show();
+}
+
+void MainWindow::toggleStatusBar()
+{
+    if(statusBar()->isVisible())
+        statusBar()->hide();
+    else
+        statusBar()->show();
+}
+
 void MainWindow::createMenus()
 {
      fileMenu = menuBar()->addMenu(i18n("&File"));
@@ -428,28 +501,58 @@ void MainWindow::createMenus()
      emulationMenu->addSeparator();
      emulationMenu->addAction(emulation_current_slot);
 
-      /*
      settingsMenu = menuBar()->addMenu(i18n("&Settings"));
-     settingsMenu->addAction(toolbar_icon_only);
-     settingsMenu->addAction(toolbar_text_only);
-     settingsMenu->addAction(toolbar_text_beside);
-     settingsMenu->addAction(toolbar_text_under);
-     */
+     connect(settingsMenu, SIGNAL(aboutToShow()), this, SLOT(toggleCheckViewable()));
+     settingsMenu->addAction(settings_show_toolbar);
+     settingsMenu->addAction(settings_show_filter);
+     settingsMenu->addAction(settings_show_statusbar);
+     settingsMenu->addSeparator();
+     settingsMenu->addAction(settings_fullscreen);
+     settingsMenu->addSeparator();
+     settingsMenu->addAction(settings_configure_graphics);
+     settingsMenu->addAction(settings_configure_audio);
+     settingsMenu->addAction(settings_configure_input);
+     settingsMenu->addAction(settings_configure_rsp);
+     settingsMenu->addSeparator();
+     settingsMenu->addAction(settings_configure_mupen);
 }
 
 void MainWindow::createToolBars()
 {
-     mainToolBar = addToolBar(i18n("Show Toolbar"));
-     mainToolBar->addAction(rom_open);
-     mainToolBar->addSeparator();
-     mainToolBar->addAction(emulation_start);
-     mainToolBar->addAction(emulation_pause);
-     mainToolBar->addAction(emulation_stop);
-     mainToolBar->addSeparator();
+    mainToolBar = addToolBar(i18n("Show Toolbar"));
+    mainToolBar->addAction(rom_open);
+    mainToolBar->addSeparator();
+    mainToolBar->addAction(emulation_start);
+    mainToolBar->addAction(emulation_pause);
+    mainToolBar->addAction(emulation_stop);
+    mainToolBar->addSeparator();
+    mainToolBar->addAction(settings_configure_mupen);
+    mainToolBar->addAction(settings_fullscreen);
+
+    //Get toolbar edge size in pixels
+    int edgeSize = core::config_get_number("ToolbarSize",0);
+    QSize toolBarSize(edgeSize, edgeSize);
+    mainToolBar->setIconSize(toolBarSize);
+
+    //Get toolbar style.
+    //Key: 0 = icons only. 1 = text only. 2 = text under icons. 3 = text besides icons.
+    //Note: Gtk GUI can't support style 3.
+    int style = core::config_get_number("ToolbarStyle",0);
+
+    switch(style)
+        {
+        case 0: mainToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly); break;
+        case 1: mainToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly); break;
+        case 2: mainToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon); break; 
+        case 3: mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
+        default: mainToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        }
 }
 
 void MainWindow::createActions()
 {
+    int i;
+
     //File Actions
     rom_open = new QAction(KIcon("document-open"), i18n("&Open Rom..."), this);
     rom_open->setShortcut(Qt::ControlModifier+Qt::Key_O);
@@ -499,7 +602,7 @@ void MainWindow::createActions()
     emulation_current_slot->setText(i18n("&Current Save State Slot"));
     QMenu* slotMenu = new QMenu(this);
     QActionGroup* slotActionGroup = new QActionGroup(emulation_current_slot);
-    for (int i = 0; i < 10; i++)
+    for (i = 0; i < 10; i++)
         {
         QAction* slot = slotMenu->addAction(i18n("Slot &%1", i)); 
         slot->setCheckable(true);
@@ -511,6 +614,44 @@ void MainWindow::createActions()
     connect(slotMenu, SIGNAL(aboutToShow()), this, SLOT(savestateCheckSlot()));
     connect(slotActionGroup, SIGNAL(triggered(QAction*)), this, SLOT(savestateSelectSlot(QAction*)));
 
+    //Settings Actions
+    settings_show_toolbar = new QAction(this);
+    settings_show_toolbar->setText(i18n("Show &Toolbar"));
+    settings_show_toolbar->setCheckable(true);
+    connect(settings_show_toolbar, SIGNAL(triggered()), this, SLOT(toggleToolBar()));
+
+    settings_show_filter = new QAction(this);
+    settings_show_filter->setText(i18n("Show F&ilter"));
+    settings_show_filter->setCheckable(true);
+    connect(settings_show_filter, SIGNAL(triggered()), m_mainWidget, SLOT(toggleFilter()));
+
+    settings_show_statusbar = new QAction(this);
+    settings_show_statusbar->setText(i18n("Show &Statusbar"));
+    settings_show_statusbar->setCheckable(true);
+    connect(settings_show_statusbar, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
+
+    settings_fullscreen = new QAction(KIcon("view-fullscreen"), i18n("&Full Screen"), this);
+    settings_fullscreen->setShortcut(Qt::AltModifier+Qt::Key_Return);
+    connect(settings_fullscreen, SIGNAL(triggered()), this, SLOT(viewFullScreen()));
+
+    //This handle should be a mainwindow class member, no?
+    Plugins* plugins = Plugins::self();
+    settings_configure_graphics = new QAction(KIcon("video-display"), i18n("Configure &Graphics Plugin..."), this);
+    connect(settings_configure_graphics, SIGNAL(triggered()), plugins, SLOT(configureGraphicsPlugin()));
+
+    settings_configure_audio = new QAction(KIcon("audio-card"), i18n("Configure &Audio Plugin..."), this);
+    connect(settings_configure_audio, SIGNAL(triggered()), plugins, SLOT(configureAudioPlugin()));
+
+    settings_configure_input = new QAction(KIcon("input-gaming"), i18n("Configure &Input Plugin..."), this);
+    connect(settings_configure_input, SIGNAL(triggered()), plugins, SLOT(configureInputPlugin()));
+
+    settings_configure_rsp = new QAction(KIcon("cpu"), i18n("Configure &RSP Plugin..."), this);
+    connect(settings_configure_rsp, SIGNAL(triggered()), plugins, SLOT(configureRspPlugin()));
+
+    settings_configure_mupen = new QAction(KIcon("preferences-system"), i18n("Configure &Mupen64plus..."), this);
+    connect(settings_configure_mupen, SIGNAL(triggered()), this, SLOT(configDialogShow()));
+
+    //Toolbar stuff for later...
     toolbar_icon_only = new QAction(this);
     toolbar_icon_only->setText(i18n("Icons only"));
     connect(toolbar_icon_only, SIGNAL(triggered()), this, SLOT(toolbarIconOnly()));
@@ -526,19 +667,6 @@ void MainWindow::createActions()
     toolbar_text_under = new QAction(this);
     toolbar_text_under->setText(i18n("Text under icons"));
     connect(toolbar_text_under, SIGNAL(triggered()), this, SLOT(toolbarTextUnder()));
-
-/*
-    act = actionCollection()->addAction("fullscreen");
-    act->setText(i18n("&Full Screen"));
-    act->setIcon(KIcon("view-fullscreen"));
-    act->setShortcut(Qt::AltModifier+Qt::Key_Return);
-    connect(act, SIGNAL(triggered()), this, SLOT(viewFullScreen()));
-
-
-    //Other stuff
-    KStandardAction::preferences(this, SLOT(configDialogShow()),
-                                  actionCollection());
-*/
 }
 
 #include "mainwindow.moc"

@@ -78,7 +78,7 @@ MainWidget::MainWidget(QWidget* parent)
     connect(m_treeView, SIGNAL(doubleClicked(QModelIndex)),
              this, SLOT(treeViewDoubleClicked(QModelIndex)));
 
-    QLabel* filterLabel = new QLabel(i18n("Filter:"), this);
+    filterLabel = new QLabel(i18n("F&ilter:"), this);
     filterLabel->setBuddy(m_lineEdit);
     QHBoxLayout* filterLayout = new QHBoxLayout;
     filterLayout->addWidget(filterLabel);
@@ -97,6 +97,19 @@ MainWidget::MainWidget(QWidget* parent)
 QModelIndex MainWidget::getRomBrowserIndex()
 {
     return m_treeView->currentIndex();
+}
+
+void MainWidget::toggleFilter()
+{
+    if(filterLabel->isVisible()) {
+        filterLabel->hide();
+        m_lineEdit->clear();
+        m_lineEdit->hide();
+        }
+    else {
+        filterLabel->show();
+        m_lineEdit->show();
+        }
 }
 
 void MainWidget::resizeHeaderSections()

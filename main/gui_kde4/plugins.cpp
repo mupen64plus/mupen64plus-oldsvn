@@ -39,7 +39,7 @@ QStringList PluginList::names() const
     foreach(core::plugin* p, *this) {
         result << p->plugin_name;
     }
-    return result;       
+    return result;
 }
 
 Plugins::Plugins() : KConfigSkeleton()
