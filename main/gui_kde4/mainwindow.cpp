@@ -233,8 +233,8 @@ void MainWindow::emulationStart()
         else
             romOpen(filename, archivefile);
     }
-
-    core::startEmulation();
+    else
+        core::startEmulation();
 }
 
 void MainWindow::emulationPauseContinue()
