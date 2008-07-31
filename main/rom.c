@@ -583,7 +583,7 @@ int open_rom(const char* filename, unsigned int archivefile)
         for ( i = strlen(s); i > 1; --i )
         if(i!=0)
             {
-            if(s[i-1]=='['&&(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'||s[i]=='o'))
+            if(s[i-1]=='['&&(s[i]=='T'||s[i]=='t'||s[i]=='h'||s[i]=='f'))
                 {
                 if(!ask_hack())
                     close = 1;

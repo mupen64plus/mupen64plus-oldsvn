@@ -576,7 +576,7 @@ int load_initial_cache(char* cache_filename)
 }
 #endif
 
-//Convert two letters representing hexidecimal to the appropriate value: 00->0 - FF->256.
+//Convert two letters representing hexidecimal to the appropriate value: 00->0 - FF->255.
 unsigned char hexconvert(const char *bigraph)
 {
     unsigned char returnvalue = 0;
