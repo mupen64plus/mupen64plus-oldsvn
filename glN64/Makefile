@@ -5,7 +5,7 @@ USES_KDE4 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -D__LINUX__ -Wall #THIS needs to be changed...
+CFLAGS += -fpic -DPIC -D__LINUX__ -Wall
 
 ifeq ($(GUI), NONE)
   OBJECTS = Config_nogui.o
@@ -14,10 +14,8 @@ else
     LDFLAGS += $(KDE_LIBS) $(GTHREAD_LIBS)
     OBJECTS = Config_kde4.o gln64settings.o
   else
-    ifeq ($(GUI), GTK2)
-      LDFLAGS += $(GTK_LIBS) $(GTHREAD_LIBS)
-      OBJECTS = Config_gtk2.o
-    endif
+    LDFLAGS += $(GTK_LIBS) $(GTHREAD_LIBS)
+    OBJECTS = Config_gtk2.o
   endif
 endif
 
