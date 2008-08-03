@@ -381,33 +381,7 @@ void gen_interupt()
 #else
             updateScreen();
 #endif
-#ifdef WITH_LIRC
-            lircCheckInput();
-#endif
-#ifndef __WIN32__
-            SDL_PumpEvents();
-            refresh_stat();
-#endif
-/*
-            // if paused, poll for input events
-            if(rompause)
-            {
-               osd_render();  // draw Paused message in case updateScreen didn't do it
-               SDL_GL_SwapBuffers();
 
-                while(rompause)
-                {
-                    struct timespec ts;
-                    ts.tv_sec = 0;
-                    ts.tv_nsec = 10000000;
-                    nanosleep(&ts, NULL); // sleep for 10 milliseconds
-                    SDL_PumpEvents();
-#ifdef WITH_LIRC
-                    lircCheckInput();
-#endif //WITH_LIRC
-                }
-            }
-*/
             new_vi();
             if (vi_register.vi_v_sync == 0) vi_register.vi_delay = 500000;
             else vi_register.vi_delay = ((vi_register.vi_v_sync + 1)*1500);

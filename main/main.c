@@ -298,78 +298,7 @@ void main_advance_one(void)
     l_FrameAdvance = 1;
     rompause = 0;
 }
-/*
-=======
-    int Dif;
-    unsigned int CurrentFPSTime;
-    static unsigned int LastFPSTime = 0;
-    static unsigned int CounterTime = 0;
-    static unsigned int CalculatedTime ;
-    static int VI_Counter = 0;
 
-#ifdef DBG
-    if(debugger_mode) debugger_frontend_vi();
-#endif
-
-    // if paused, poll for input events
-    if(rompause) {
-        osd_render();  // draw Paused message in case updateScreen didn't do it
-        SDL_GL_SwapBuffers();
-    }
-
-    do  {
-        SyncStatus = netMain(&g_NetplayClient); //may adjust l_SpeedFactor
-
-        double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
-        int time;
-
-        SDL_PumpEvents();
-#ifdef WITH_LIRC
-        lircCheckInput();
-#endif //WITH_LIRC
-
-
-        start_section(IDLE_SECTION);
-        VI_Counter++;
-
-        if(LastFPSTime == 0)
-        {
-            LastFPSTime = gettimeofday_msec();
-            CounterTime = gettimeofday_msec();
-            return;
-        }
-        CurrentFPSTime = gettimeofday_msec();
-
-        Dif = CurrentFPSTime - LastFPSTime;
-
-        if (Dif < AdjustedLimit) 
-        {
-            CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
-            time = (int)(CalculatedTime - CurrentFPSTime);
-            if (time > 0)
-            {
-                usleep(time * 1000);
-            }
-        CurrentFPSTime = CurrentFPSTime + time;
-        }
-
-        if (CurrentFPSTime - CounterTime >= 1000.0 ) 
-        {
-            CounterTime = gettimeofday_msec();
-            VI_Counter = 0 ;
-        }
-
-        LastFPSTime = CurrentFPSTime ;
-        end_section(IDLE_SECTION);
-    } while (rompause);
-
-    if (l_FrameAdvance) {
-        rompause = 1;
-        l_FrameAdvance = 0;
-    }
->>>>>>> .merge-right.r807
-}
-*/
 void main_draw_volume_osd(void)
 {
     char msgString[32];
@@ -620,45 +549,57 @@ void new_vi(void)
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
 
-    double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
-    int time;
-
-    start_section(IDLE_SECTION);
-    VI_Counter++;
-    
 #ifdef DBG
     if(debugger_mode) debugger_frontend_vi();
 #endif
 
-    if(LastFPSTime == 0)
-    {
-        LastFPSTime = gettimeofday_msec();
-        CounterTime = gettimeofday_msec();
-        return;
-    }
-    CurrentFPSTime = gettimeofday_msec();
-    
-    Dif = CurrentFPSTime - LastFPSTime;
-    
-    if (Dif < AdjustedLimit) 
-    {
-        CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
-        time = (int)(CalculatedTime - CurrentFPSTime);
-        if (time > 0)
-        {
-            usleep(time * 1000);
-        }
-        CurrentFPSTime = CurrentFPSTime + time;
-    }
+    start_section(IDLE_SECTION);
 
-    if (CurrentFPSTime - CounterTime >= 1000.0 ) 
-    {
-        CounterTime = gettimeofday_msec();
-        VI_Counter = 0 ;
-    }
-    
-    LastFPSTime = CurrentFPSTime ;
+    do {
+        netMain(&g_NetplayClient); //may adjust l_SpeedFactor
+
+        double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
+        int time;
+        VI_Counter++;
+
+#ifdef WITH_LIRC
+        lircCheckInput();
+#endif
+#ifndef __WIN32__
+        SDL_PumpEvents();
+        refresh_stat();
+#endif
+
+        if(LastFPSTime == 0)
+        {
+            LastFPSTime = gettimeofday_msec();
+            CounterTime = gettimeofday_msec();
+            return;
+        }
+        CurrentFPSTime = gettimeofday_msec();
+
+        Dif = CurrentFPSTime - LastFPSTime;
+
+        if (Dif < AdjustedLimit) 
+        {
+            CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
+            time = (int)(CalculatedTime - CurrentFPSTime);
+            if (time > 0)
+            {
+                usleep(time * 1000);
+            }
+            CurrentFPSTime = CurrentFPSTime + time;
+        }
+        if (CurrentFPSTime - CounterTime >= 1000.0 ) 
+        {
+            CounterTime = gettimeofday_msec();
+            VI_Counter = 0 ;
+        }
+        LastFPSTime = CurrentFPSTime ;
+    } while (rompause);
+
     end_section(IDLE_SECTION);
+
     if (l_FrameAdvance) {
         rompause = 1;
         l_FrameAdvance = 0;
