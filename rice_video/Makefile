@@ -1,10 +1,11 @@
 # Makefile for RiceVideoLinux, in Mupen64Plus
 
 # include pre-make file with a bunch of definitions
+USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC -Wall
+CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DUSE_GTK -fpic -DPIC -Wall
 LDFLAGS	+= $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
 # set options

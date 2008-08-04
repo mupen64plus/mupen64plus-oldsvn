@@ -1,6 +1,7 @@
-# Makefile for Mupen64
+# Makefile for JTTL SDL Audio plugin in Mupen64plus
 
 # include pre-make file with a bunch of definitions
+USES_GTK2 = true
 include ../pre.mk
 
 # test for presence of libsamplerate
@@ -25,6 +26,11 @@ endif
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC
 
+ifeq ($(GUI),GTK2)
+  CFLAGS += $(GTK_FLAGS) -DUSE_GTK
+  PLUGIN_LDFLAGS += $(GTK_LIBS)
+endif
+
 # list of object files to generate
 OBJECTS = main.o volume.o
 
@@ -36,9 +42,9 @@ clean:
 
 # build rules
 .c.o:
-	$(CC) $(CFLAGS) $(SDL_FLAGS) $(GTK_FLAGS) $(SRC_FLAGS) -DUSE_GTK -c -o $@ $<
+	$(CC) $(CFLAGS) $(SDL_FLAGS) $(SRC_FLAGS) -c -o $@ $<
 
 jttl_audio.so: $(OBJECTS)
-	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(GTK_LIBS) $(SRC_LIBS) -o $@
+	$(CC) $^ $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SRC_LIBS) -o $@
 	$(STRIP) $@
 

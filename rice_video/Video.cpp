@@ -123,9 +123,9 @@ void GetPluginDir( char * Directory )
 FUNC_TYPE(void) NAME_DEFINE(GetDllInfo) ( PLUGIN_INFO * PluginInfo )
 {
 #ifdef _DEBUG
-    sprintf(PluginInfo->Name, "%s %s Debug",project_name, MUPEN_VERSION);
+    sprintf(PluginInfo->Name, "%s %s Debug",project_name, PLUGIN_VERSION);
 #else
-    sprintf(PluginInfo->Name, "%s %s",project_name, MUPEN_VERSION);
+    sprintf(PluginInfo->Name, "%s %s",project_name, PLUGIN_VERSION);
 #endif
     PluginInfo->Version        = 0x0103;
     PluginInfo->Type           = PLUGIN_TYPE_GFX;
@@ -138,7 +138,7 @@ FUNC_TYPE(void) NAME_DEFINE(GetDllInfo) ( PLUGIN_INFO * PluginInfo )
 FUNC_TYPE(void) NAME_DEFINE(DllAbout) ( HWND hParent )
 {
     char temp[300];
-    sprintf(temp,"%s %s \nOpenGL 1.1-1.4/ATI/Nvidia TNT/Geforce Extension\n", project_name, MUPEN_VERSION);
+    sprintf(temp,"%s %s \nOpenGL 1.1-1.4/ATI/Nvidia TNT/Geforce Extension\n", project_name, PLUGIN_VERSION);
     MsgInfo(temp);
 }
 
@@ -677,7 +677,7 @@ FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void)
         if(lastTick + 5000 <= nowTick)
         {
             char caption[200];
-            sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", MUPEN_VERSION, frames/5.0);
+            sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", PLUGIN_VERSION, frames/5.0);
             SDL_WM_SetCaption(caption, caption);
             frames = 0;
             lastTick = nowTick;
@@ -764,7 +764,7 @@ void __cdecl MsgInfo (char * Message, ...)
     vsprintf( Msg, Message, ap );
     va_end( ap );
 
-    sprintf(generalText, "%s %s",project_name, MUPEN_VERSION);
+    sprintf(generalText, "%s %s",project_name, PLUGIN_VERSION);
    messagebox(generalText, MB_OK|MB_ICONINFORMATION, Msg);
 }
 
@@ -777,7 +777,7 @@ void __cdecl ErrorMsg (const char* Message, ...)
     vsprintf( Msg, Message, ap );
     va_end( ap );
     
-    sprintf(generalText, "%s %s",project_name, MUPEN_VERSION);
+    sprintf(generalText, "%s %s",project_name, PLUGIN_VERSION);
    messagebox(generalText, MB_OK|MB_ICONERROR, Msg);
 }
 

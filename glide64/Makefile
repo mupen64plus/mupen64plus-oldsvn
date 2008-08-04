@@ -1,6 +1,7 @@
 # Makefile for Glide64, in Mupen64Plus
 
 # include pre-make file with a bunch of definitions
+USES_GTK2 = true
 include ../pre.mk
 
 # set BITS

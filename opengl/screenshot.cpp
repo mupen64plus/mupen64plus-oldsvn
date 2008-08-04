@@ -28,15 +28,16 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#include <GL/gl.h>
+#include <SDL_opengl.h>
 #include <SDL.h>
 #include <png.h>
+
+#include "osd.h"
 
 #include "../main/main.h"
 #include "../main/util.h"
 #include "../main/rom.h"
 #include "../main/translate.h"
-#include "osd.h"
 
 static char  l_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline
 

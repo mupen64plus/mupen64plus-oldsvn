@@ -26,9 +26,10 @@
 #include <map>
 #include <list>
 #include <vector>
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <wchar.h>
+
+#define GL_GLEXT_PROTOTYPES //Do we need this?
+#include <SDL_opengl.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

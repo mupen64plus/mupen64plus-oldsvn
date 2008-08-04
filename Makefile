@@ -2,14 +2,21 @@
 
 # include pre-make file with a bunch of definitions
 USES_KDE4 = true
+USES_GTK2 = true
 include ./pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
 LDFLAGS += -lz -lm -lpng -lfreetype
 
+ifeq ($(OS), LINUX)
+  LDFLAGS += -Wl,-export-dynamic
+endif
+
 # set executable stack as a linker option for X86 architecture, for dynamic recompiler
 ifeq ($(CPU), X86)
-  LDFLAGS += -z execstack
+  ifeq ($(OS), LINUX)
+    LDFLAGS += -z execstack
+  endif
 endif
 
 # set options
@@ -44,7 +51,9 @@ else
       CFLAGS += $(GTK_FLAGS)
     endif
   else
-  CFLAGS += $(GTK_FLAGS)
+    ifeq ($(GUI), GTK2)
+      CFLAGS += $(GTK_FLAGS)
+    endif
   endif
 endif
 
@@ -320,7 +329,7 @@ targets:
 all: $(ALL)
 
 mupen64plus: $(OBJECTS)
-	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -Wl,-export-dynamic -lpthread -ldl -o $@
+	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -lpthread -ldl -lstdc++ -o $@
 	$(STRIP) $@
 
 install:

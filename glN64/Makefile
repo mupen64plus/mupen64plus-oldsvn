@@ -1,20 +1,24 @@
-# Makefile for Mupen64
+# Makefile for glN64 in Mupen64plus.
 
 # include pre-make file with a bunch of definitions
 USES_KDE4 = true
+USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC -D__LINUX__ -Wall
+LDFLAGS += $(GTHREAD_LIBS)
 
 ifeq ($(GUI), NONE)
   OBJECTS = Config_nogui.o
 else
   ifeq ($(GUI), KDE4)
-    LDFLAGS += $(KDE_LIBS) $(GTHREAD_LIBS)
+    LDFLAGS += $(KDE_LIBS)
+    CFLAGS += $(KDE_FLAGS)
     OBJECTS = Config_kde4.o gln64settings.o
   else
-    LDFLAGS += $(GTK_LIBS) $(GTHREAD_LIBS)
+    LDFLAGS += $(GTK_LIBS) 
+    CFLAGS += -DUSE_GTK $(GTK_FLAGS)
     OBJECTS = Config_gtk2.o
   endif
 endif
@@ -78,11 +82,11 @@ glN64.o: glN64.cpp
 	$(CXX) $(CFLAGS) $(SDL_FLAGS) -DMAINDEF -c -o $@ $<
 
 Config_kde4.o: Config_kde4.cpp gln64settings.h ui_gln64config.h
-	$(CXX) $(CFLAGS) $(SDL_FLAGS) $(KDE_FLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(SDL_FLAGS) -c -o $@ $<
 
 Config_gtk2.o: Config_gtk2.cpp
-	$(CXX) $(CFLAGS) $(GTK_FLAGS) $(SDL_FLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(SDL_FLAGS) -c -o $@ $<
 
 GBI.o: GBI.cpp
-	$(CXX) $(CFLAGS) -DUSE_GTK $(GTK_FLAGS) $(SDL_FLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(SDL_FLAGS) -c -o $@ $<
 

@@ -23,10 +23,6 @@
 **/
 
 // On-screen Display
-
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
 #include <limits.h>
 
 #include "OGLFT.h"

@@ -23,61 +23,93 @@ ifeq ("$(UNAME)","ppc64")
   NO_ASM = 1
 endif
 
+# detect operation system. Currently just linux and OSX.
+UNAME = $(shell uname -s)
+ifeq ("$(UNAME)","Linux")
+  OS = LINUX
+endif
+ifeq ("$(UNAME)","linux")
+  OS = LINUX
+endif
+ifeq ("$(UNAME)","Darwin")
+  OS = OSX
+endif
+
+ifeq ($(OS),)
+   $(warning OS not supported or detected, using default linux options.)
+   OS = LINUX
+endif
 
 # test for presence of SDL
 ifeq ($(shell which sdl-config 2>/dev/null),)
-  # throw error
   $(error No SDL development libraries found!)
 endif
+SDL_FLAGS	= $(shell sdl-config --cflags)
+SDL_LIBS	= $(shell sdl-config --libs)
+
+# test for presence of FreeType
+ifeq ($(shell which freetype-config 2>/dev/null),)
+   $(error freetype-config not installed!)
+endif
+FREETYPE_LIBS	= $(shell freetype-config --libs)
+FREETYPE_FLAGS	= $(shell freetype-config --cflags)
+
+# detect GUI options
+ifeq ($(GUI),)
+  GUI = GTK2
+endif
+
+# set GTK2 flags and libraries
+# ideally we don't always do this, only when using the Gtk GUI,
+# but too many plugins require it...
 
 # test for presence of GTK 2.0
 ifeq ($(shell which pkg-config 2>/dev/null),)
-  # throw error
   $(error pkg-config not installed!)
 endif
 ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
-  # throw error
   $(error No GTK 2.x development libraries found!)
 endif
-
 # set GTK flags and libraries
 GTK_FLAGS	= $(shell pkg-config gtk+-2.0 --cflags) -D_GTK2
 GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
-GTHREAD_LIBS	= $(shell pkg-config gthread-2.0 --libs)
+GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
 
 # set KDE flags and libraries
 ifeq ($(GUI), KDE4)
-  ifneq ($(USES_KDE4),)
+   ifneq ($(USES_KDE4),)
     KDE_CONFIG=$(shell which kde4-config 2>/dev/null)
     ifeq ($(KDE_CONFIG),)
-      $(error kde4-config not found, try the GTK2 GUI!)
+      $(error kde4-config not found!)
     endif
-
     KCONFIG_COMPILER = $(shell $(KDE_CONFIG) --prefix)/bin/kconfig_compiler
     MOC         = $(shell which moc 2>/dev/null)
-    UIC         = $(shell which uic 2>/dev/null)
     ifeq ($(MOC),)
-      $(error moc from Qt not found, make sure the Qt binaries are in your PATH)
+      $(error moc from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
+    UIC         = $(shell which uic 2>/dev/null)
     ifeq ($(UIC),)
-      $(error uic from Qt not found, make sure the Qt binaries are in your PATH)
+      $(error uic from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
     QT_FLAGS    = $(shell pkg-config QtCore QtGui --cflags)
     KDE_FLAGS   = -I$(shell $(KDE_CONFIG) --path include) -I$(shell $(KDE_CONFIG) --path include)/KDE $(QT_FLAGS)
     QT_LIBS     = $(shell pkg-config QtCore QtGui --libs)
     KDE_LIBRARY_PATHS = $(shell kde4-config --path lib | sed s/:/" -L"/g | sed s:^:-L:)
     KDE_LIBS    = -lkdecore -lkdeui -lkio $(KDE_LIBRARY_PATHS)
+    # define Gtk flags when using KDE4 gui so it can load plugins, etc.
   endif
-endif # end KDE4 GUI
-
-
-
+endif
 
 # set base program pointers and flags
 CC      = gcc
 CXX     = g++
 LD      = g++
-STRIP   = strip --strip-all
+ifeq ($(OS),LINUX)
+STRIP	= strip -s
+endif
+ifeq ($(OS),OSX)
+STRIP	= strip 
+endif
 RM      = rm
 MV      = mv
 CP      = cp
@@ -110,6 +142,34 @@ ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
 endif
 
+# create SVN version defines
+ifneq ($(RELEASE),)
+    CFLAGS += -DRELEASE_BUILD
+  else
+    ifneq ($(shell svn info ./ 2>/dev/null),)
+      CFLAGS += -DSVN_REVISION="\"$(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')\""
+      CFLAGS += -DSVN_BRANCH="\"$(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')\""
+      CFLAGS += -DSVN_DIFFHASH="\"$(shell svn diff ./ 2>/dev/null | md5sum | sed '/.*/s/  -//;/^d41d8cd98f00b204e9800998ecf8427e/d')\""
+    endif
+endif
+
+# set CFLAGS, LIBS, and LDFLAGS for external dependencies
+ifeq ($(OS),LINUX)
+  PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
+endif
+ifeq ($(OS),OSX)
+  PLUGIN_LDFLAGS	= -bundle
+endif
+
+ifeq ($(OS),LINUX)
+  LIBGL_LIBS	= -L/usr/X11R6/lib -lGL -lGLU
+endif
+ifeq ($(OS),OSX)
+  LIBGL_LIBS	= -framework OpenGL
+endif
+
+# set flags for compile options.
+
 # set CFLAGS macro for no assembly language if required
 ifeq ($(NO_ASM), 1)
   CFLAGS += -DNO_ASM
@@ -127,22 +187,6 @@ else   # set variables for debugging symbols
   endif
 endif
 
-# create SVN version defines
-ifneq ($(RELEASE),)
-    CFLAGS += -DRELEASE_BUILD
-  else
-    ifneq ($(shell svn info ./ 2>/dev/null),)
-      CFLAGS += -DSVN_REVISION="\"$(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')\""
-      CFLAGS += -DSVN_BRANCH="\"$(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')\""
-      CFLAGS += -DSVN_DIFFHASH="\"$(shell svn diff ./ 2>/dev/null | md5sum | sed '/.*/s/  -//;/^d41d8cd98f00b204e9800998ecf8427e/d')\""
-    endif
-endif
-
-# set CFLAGS, LIBS, and LDFLAGS for external dependencies
-
-SDL_FLAGS	= $(shell sdl-config --cflags)
-SDL_LIBS	= $(shell sdl-config --libs)
-
 ifeq ($(VCR), 1)
   # test for presence of avifile
   ifneq ($(shell avifile-config --version), 0)
@@ -153,11 +197,4 @@ ifeq ($(VCR), 1)
     AVIFILE_LIBS	= $(shell avifile-config --libs)
   endif
 endif
-
-FREETYPE_LIBS	= $(shell freetype-config --libs)
-FREETYPE_FLAGS	= $(shell freetype-config --cflags)
-
-PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
-
-LIBGL_LIBS	= -L/usr/X11R6/lib -lGL -lGLU
 
