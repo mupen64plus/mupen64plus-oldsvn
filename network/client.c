@@ -32,7 +32,7 @@ int         g_Game_ID;
 
 int clientInitialize(MupenClient *Client) {
     int i;
-    memset(Client, 0, sizeof(Client));
+    memset(Client, 0, sizeof(MupenClient));
 
     if (!(Client->socketSet = SDLNet_AllocSocketSet(MAX_CLIENTS))) {
         printf("[Netplay] clientini: failure to allocate socket set.\n");
@@ -138,7 +138,7 @@ void clientProcessFrame(MupenClient *Client) {
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timer=frame;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
-            //fprintf(stderr,"chunk player: %d frame: %d data: %08x control %d\n", curChunk->input.player,frame,curChunk->input.buttons.Value,curChunk->input.player);
+            fprintf(stderr,"chunk player: %d frame: %d data: %08x control %d\n", curChunk->input.player,frame,curChunk->input.buttons.Value,curChunk->input.player);
             len-=sizeof(InputChunk);
           break;
           default:
@@ -176,8 +176,8 @@ void clientSendFrame(MupenClient *Client) {
         chunk->input.type = CHUNK_INPUT;
         chunk->input.player = Client->myID;
 
-        chunk->input.buttons.Value = localUpdate->value | (0x8000 * Client->startEvt);
-            //fprintf(stderr,"[NETPLAY]Sending event: %08X u->timer: %d fC: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME);
+        chunk->input.buttons.Value = (localUpdate->value & 0xFFFF7FFF) | (0x8000 * Client->startEvt);
+        //fprintf(stderr,"[NETPLAY]Sending event: %08X u->timer: %d fC: %d sE: %d\n",chunk->input.buttons.Value,update->timer,(Client->frameCounter)/VI_PER_FRAME,Client-);
         
         if(Client->startEvt) {
             Client->playerEvent[((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK)%FRAME_BUFFER_LENGTH][Client->myID].control=1;

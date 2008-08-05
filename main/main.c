@@ -1116,7 +1116,7 @@ void parseCommandLine(int argc, char **argv)
         {0, 0, 0, 0}    // last opt must be empty
     };
     char opt_str[] = "h";
-
+    option_index=0;
     /* parse commandline options */
     while((opt = getopt_long(argc, argv, opt_str,
                  long_options, &option_index)) != -1)
