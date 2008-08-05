@@ -162,7 +162,7 @@ void clientSendFrame(MupenClient *Client) {
     int bufInd=(Client->frameCounter/VI_PER_FRAME) % FRAME_BUFFER_LENGTH;
     NetPlayerUpdate *localUpdate = &(Client->playerEvent[bufInd][Client->myID]);
     localUpdate->timer = (Client->frameCounter/VI_PER_FRAME);
-    localUpdate->value = Keys.Value;
+    localUpdate->value = Keys.Value & 0xFFFF7FFF;
 
     for(i=0; i<Client->numConnected-1;i++){
         int curID=sourceID(Client->myID, i);
