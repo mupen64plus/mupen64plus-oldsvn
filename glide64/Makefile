@@ -5,7 +5,7 @@ USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DGCC -DUSE_GTK -Iwrapper/ 
+CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DGCC -fPIC -DUSE_GTK -Iwrapper/ 
 LDFLAGS	= $(PLUGIN_LDFLAGS) $(LIBGL_LIBS) $(SDL_LIBS)
 
 # list of object files to generate
