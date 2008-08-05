@@ -26,13 +26,14 @@ endif
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC
 
+# list of object files to generate
+OBJECTS = main.o volume.o
+
 ifeq ($(GUI),GTK2)
   CFLAGS += $(GTK_FLAGS) -DUSE_GTK
   PLUGIN_LDFLAGS += $(GTK_LIBS)
+  OBJECTS += config_gtk2.o
 endif
-
-# list of object files to generate
-OBJECTS = main.o volume.o
 
 # build targets
 all: jttl_audio.so

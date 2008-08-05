@@ -77,7 +77,6 @@ TODO:
 KNOWN BUGS:
 
 ***************************************************************************/
-
 #ifdef USE_GTK
 #include <gtk/gtk.h>
 #endif
@@ -102,6 +101,13 @@ KNOWN BUGS:
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
 #endif
+
+
+#ifdef USE_GTK
+//show gui function from config_gtk2.c
+extern void Config_DoConfig();
+#endif
+
 
 /* Size of primary buffer in bytes. This is the buffer where audio is loaded
 after it's extracted from n64's memory. */
@@ -151,7 +157,7 @@ static Uint8 *mixBuffer = NULL;
 /* Position in buffer array where next audio chunk should be placed */
 static unsigned int buffer_pos = 0;
 /* Audio frequency, this is usually obtained from the game, but for compatibility we set default value */
-static int GameFreq = DEFAULT_FREQUENCY;
+int GameFreq = DEFAULT_FREQUENCY;
 /* This is for syncronization, it's ticks saved just before AiLenChanged() returns. */
 static Uint32 last_ticks = 0;
 /* SpeedFactor is used to increase/decrease game playback speed */
@@ -159,27 +165,27 @@ static Uint32 speed_factor = 100;
 // AI_LEN_REG at previous round */
 static DWORD prev_len_reg = 0;
 // If this is true then left and right channels are swapped */
-static BOOL SwapChannels = FALSE;
+BOOL SwapChannels = FALSE;
 // Size of Primary audio buffer
-static Uint32 PrimaryBufferSize = PRIMARY_BUFFER_SIZE;
+Uint32 PrimaryBufferSize = PRIMARY_BUFFER_SIZE;
 // Size of Secondary audio buffer
-static Uint32 SecondaryBufferSize = SECONDARY_BUFFER_SIZE;
+Uint32 SecondaryBufferSize = SECONDARY_BUFFER_SIZE;
 // Lowest buffer load before we need to speed things up
-static Uint32 LowBufferLoadLevel = LOW_BUFFER_LOAD_LEVEL;
+Uint32 LowBufferLoadLevel = LOW_BUFFER_LOAD_LEVEL;
 // Highest buffer load before we need to slow things down
-static Uint32 HighBufferLoadLevel = HIGH_BUFFER_LOAD_LEVEL;
+Uint32 HighBufferLoadLevel = HIGH_BUFFER_LOAD_LEVEL;
 // Resample or not
-static Uint8 Resample = 1;
+Uint8 Resample = 1;
 // volume to scale the audio by, range of 0..100
-static int VolPercent = 80;
+int VolPercent = 80;
 // how much percent to increment/decrement volume by
-static int VolDelta = 5;
+int VolDelta = 5;
 // the actual volume passed into SDL, range of 0..SDL_MIX_MAXVOLUME
 static int VolSDL = SDL_MIX_MAXVOLUME;
 // stores the previous volume when it is muted
 static int VolMutedSave = -1;
 //which type of volume control to use
-static int VolumeControlType = VOLUME_TYPE_OSS;
+int VolumeControlType = VOLUME_TYPE_OSS;
 
 static int OutputFreq;
 static char configdir[PATH_MAX] = {0};
@@ -348,7 +354,8 @@ EXPORT void CALL DllAbout( HWND hParent )
 EXPORT void CALL DllConfig ( HWND hParent )
 {
 #ifdef USE_GTK
-    GtkWidget *dialog, *label, *okay_button;
+    ReadConfig();
+    Config_DoConfig();
 #else
 #endif
 }
@@ -868,6 +875,77 @@ EXPORT void CALL SetSpeedFactor(int percentage)
 {
     if (percentage >= 10 && percentage <= 300)
         speed_factor = percentage;
+}
+
+void SaveConfig()
+{
+    FILE *config_file;
+    char path[PATH_MAX];
+
+    if(strlen(configdir) > 0) strncpy(path, configdir, PATH_MAX);
+
+    // Ensure that there's a trailing '/' 
+    if(path[strlen(path)-1] != '/') strncat(path, "/", PATH_MAX - strlen(path));
+
+    strncat(path, CONFIG_FILE, PATH_MAX - strlen(path));
+    if ((config_file = fopen(path, "w")) == NULL)
+    {
+        fprintf(stderr, "[JttL's SDL Audio plugin] Error: Cannot open config file for saving.\n");
+        return;
+    }
+    fprintf(config_file, "# SDL sound plugin's config-file\n\n"
+                         "# This sets default frequency which is used if rom doesn't want to change it.\n"
+                         "# Probably only game that needs this is Zelda: Ocarina Of Time Master Quest\n");
+    fprintf(config_file, "DEFAULT_FREQUENCY %d\n\n", GameFreq);
+
+    fprintf(config_file, "# Swaps left and right channels ( 0 = no, 1 = yes )\n");
+    fprintf(config_file, "SWAP_CHANNELS %d\n\n", SwapChannels);
+
+    fprintf(config_file, "# Size of primary buffer in bytes. This is the buffer where audio is loaded\n"
+                         "# after it's extracted from n64's memory.\n");
+    fprintf(config_file, "PRIMARY_BUFFER_SIZE %d\n\n", PrimaryBufferSize);
+
+    fprintf(config_file, "# If buffer load goes under LOW_BUFFER_LOAD_LEVEL then game is speeded up to\n"
+                         "# fill the buffer. If buffer load exeeds HIGH_BUFFER_LOAD_LEVEL then some\n"
+                         "# extra slowdown is added to prevent buffer overflow (which is not supposed\n"
+                         "# to happen in any circumstanses if syncronization is working but because\n"
+                         "# computer's clock is such inaccurate (10ms) that might happen. I'm planning\n"
+                         "# to add support for Real Time Clock for greater accuracy but we will see.\n\n"
+                         "# The plugin tries to keep the buffer's load always between these values.\n"
+                         "# So if you change only PRIMARY_BUFFER_SIZE, nothing changes. You have to\n"
+                         "# adjust these values instead. You probably want to play with\n"
+                         "# LOW_BUFFER_LOAD_LEVEL if you get dropouts.\n\n");
+    fprintf(config_file, "LOW_BUFFER_LOAD_LEVEL %d\n", LowBufferLoadLevel);
+    fprintf(config_file, "HIGH_BUFFER_LOAD_LEVEL %d\n\n", HighBufferLoadLevel);
+
+    fprintf(config_file, "# Size of secondary buffer. This is actually SDL's hardware buffer. This is\n"
+                         "# amount of samples, so final buffer size is four times this.\n\n");
+    fprintf(config_file, "SECONDARY_BUFFER_SIZE %d\n\n", SecondaryBufferSize);
+
+    fprintf(config_file, "# Enable Linear Resampling.\n"
+                         "# Possible values:\n"
+                         "#  1. Unfiltered resampling (very fast, okay quality)\n"
+                         "#  2. SINC resampling (Best Quality, requires libsamplerate)\n");
+    fprintf(config_file, "RESAMPLE %d\n\n", Resample);
+
+    fprintf(config_file, "# Select volume control type\n"
+                         "# Possible values:\n"
+                         "#  1. Use internal SDL volume control.  Changing the volume will only affect\n"
+                         "#     the volume of mupen64plus and works independently of the hardware mixer.\n"
+                         "#  2. Use the OSS mixer.  This directly controls the OSS mixer, adjusting the\n"
+                         "#     master volume for PC\n");
+    fprintf(config_file, "VOLUME_CONTROL_TYPE %d\n\n", VolumeControlType);
+
+    fprintf(config_file, "# Default Volume (0-100%)\n"
+                         "# Only used if you set VOLUME_CONTROL_TYPE to 1.  Otherwise the default volume\n"
+                         "# is the volume that the harware mixer is set to when mupen64plus loads.\n");
+    fprintf(config_file, "VOLUME_DEFAULT %d\n\n", VolPercent);
+
+    fprintf(config_file, "# Volume increment/decrement\n"
+                         "# Set the percentage change each time the volume is increased or decreased.\n");
+    fprintf(config_file, "VOLUME_ADJUST %d\n\n", VolDelta);
+    
+    fclose(config_file);
 }
 
 void ReadConfig()
