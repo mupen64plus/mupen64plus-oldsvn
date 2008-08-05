@@ -283,13 +283,6 @@ else
   endif
 endif
 
-# select proper compiler for final mupen64plus linking
-ifeq ($(GUI), KDE4)
-  MUPENCC = $(CXX)
-else
-  MUPENCC = $(CC)
-endif
-
 # build targets
 targets:
 	@echo "Mupen64Plus makefile. "
@@ -329,7 +322,7 @@ targets:
 all: $(ALL)
 
 mupen64plus: $(OBJECTS)
-	$(MUPENCC) $^ $(LDFLAGS) $(LIBS) -lpthread -ldl -lstdc++ -o $@
+	$(CXX) $^ $(LDFLAGS) $(LIBS) -lpthread -ldl -o $@
 	$(STRIP) $@
 
 install:

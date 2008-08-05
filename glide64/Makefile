@@ -4,66 +4,9 @@
 USES_GTK2 = true
 include ../pre.mk
 
-# set BITS
-ifeq ("$(ARCH)","64BITS")
-  BITS=64
-  MOPT=-m amd64
-else
-  BITS=32
-  MOPT=
-endif
-
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS = -O3 -Wall -g -DGCC -DUSE_GTK $(SDL_CFLAGS) $(GTK_FLAGS) -Iwrapper/ -ffast-math -funroll-loops
+CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DGCC -DUSE_GTK -Iwrapper/ 
 LDFLAGS	= $(PLUGIN_LDFLAGS) $(LIBGL_LIBS) $(SDL_LIBS)
-
-# set special flags per-system
-ifeq ($(CPU), X86)
-  ifeq ($(ARCH), 64BITS)
-    CFLAGS += -march=athlon64 -fPIC
-  else
-    CFLAGS += -march=i686 -mtune=pentium-m -mmmx -msse
-    ifneq ($(PROFILE), 1)
-    ifneq ($(VPDEBUG), 1)
-      CFLAGS += -fomit-frame-pointer
-    endif
-    endif
-  endif
-  # tweak flags for 32-bit build on 64-bit system
-  ifeq ($(ARCH), 64BITS_32)
-    CFLAGS += -m32
-    LDFLAGS += -m32 -m elf_i386
-  endif
-endif
-ifeq ($(CPU), PPC)
-  CFLAGS += -mcpu=powerpc
-endif
-
-# set options
-ifeq ($(PROFILE), 1)
-  CFLAGS += -pg -g
-  LDFLAGS += -pg
-  STRIP = true
-else
-  ifeq ($(DBGSYM), 1)
-    CFLAGS += -g
-    STRIP = true
-  endif
-endif
-ifeq ($(NO_ASM), 1)
-  CFLAGS += -DNO_ASM
-endif
-ifeq ($(VPDEBUG), 1)
-  CFLAGS  += -DVPDEBUG
-  LDFLAGS += -lIL
-endif
-ifeq ($(RDP_LOG_ERR), 1)
-  CFLAGS += -DRDP_LOGGING -DRDP_ERROR_LOG
-else
-  ifeq ($(RDP_LOG), 1)
-    CFLAGS += -DRDP_LOGGING
-  endif
-endif
 
 # list of object files to generate
 OBJECTS = \
@@ -124,7 +67,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
-	$(STRIP) --strip-all $@
+	$(STRIP) $@
 
 Main.o: font.h cursor.h
 font.h:	compiletex

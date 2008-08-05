@@ -1,10 +1,10 @@
 #include <windows.h>
-//#include <gl/gl.h>
-#include "main.h"
 
 #ifdef GCC
 #include <stdio.h>
 #endif
+
+#include "main.h"
 
 static HDC          hDC=NULL;       // Private GDI Device Context
 static HGLRC        hRC=NULL;       // Permanent Rendering Context

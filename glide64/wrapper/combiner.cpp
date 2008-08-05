@@ -1,14 +1,13 @@
-
-#include "../winlnxdefs.h"
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
+
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "glide.h"
 #include "main.h"
-#include <stdio.h>
 
 static int fct[4], source0[4], operand0[4], source1[4], operand1[4], source2[4], operand2[4];
 static int fcta[4],sourcea0[4],operanda0[4],sourcea1[4],operanda1[4],sourcea2[4],operanda2[4];

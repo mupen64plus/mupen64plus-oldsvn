@@ -1,17 +1,17 @@
-#define SAVE_CBUFFER
-
-#include "../winlnxdefs.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
+
 #include <SDL/SDL.h>
 #define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
+#include <SDL_opengl.h>
 
 #include "glide.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include "main.h"
+
+#define SAVE_CBUFFER
 
 #ifdef VPDEBUG
 #include <IL/il.h>

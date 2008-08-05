@@ -16,14 +16,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-#include <GL/gl.h>
-#include "stdafx.h"
-#include "../main/version.h"
 
 #include <dirent.h>
 #include <stdarg.h>
 #include <limits.h> // PATH_MAX
+
+#include <SDL_opengl.h>
+
+#include "stdafx.h"
 #include "messagebox.h"
+
+#include "../main/version.h"
 
 PluginStatus status;
 char generalText[256];

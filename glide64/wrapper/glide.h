@@ -37,6 +37,8 @@
 #include <glidesys.h>
 #include <sst1vid.h>
 
+#include "../winlnxdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

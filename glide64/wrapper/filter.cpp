@@ -8,7 +8,6 @@
 #include "main.h"
 #include "2xsai.h"
 
-
 // this filter is crap, it's just some stuffs i tried to see what they're doing
 // it's blurring texture edges which is good for some textures, bad for some others.
 unsigned char *blur_edges(unsigned char *source, int width, int height, int *width2, int *height2)

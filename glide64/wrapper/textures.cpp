@@ -1,12 +1,11 @@
-
-#include "../winlnxdefs.h"
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
 #include <stdlib.h>
+#include <stdio.h>
+
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "glide.h"
 #include "main.h"
-#include <stdio.h>
 
 /* Napalm extensions to GrTextureFormat_t */
 #define GR_TEXFMT_ARGB_CMP_FXT1           0x11

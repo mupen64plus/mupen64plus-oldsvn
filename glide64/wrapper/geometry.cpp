@@ -1,8 +1,8 @@
 #include <stdio.h>
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
 
-#include "../winlnxdefs.h"
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "glide.h"
 #include "main.h"
 

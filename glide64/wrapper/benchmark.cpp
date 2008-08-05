@@ -1,22 +1,19 @@
-#ifndef _WIN32
-#include "../winlnxdefs.h"
-#include <stdarg.h>
-#include <string.h>
-#include <SDL/SDL.h>
-#endif
-#include "glide.h"
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef _WIN32
+
+#include "glide.h"
+#include "main.h"
+
+#ifndef _WIN32
+#include <stdarg.h>
+#include <string.h>
 #include <windows.h>
 #include <commctrl.h>
-#endif // _WIN32
-#include "main.h"
-#ifdef _WIN32
-#include "wglext.h"
-#endif // _WIN32
 
-#ifndef WIN32
+#include <SDL/SDL.h>
+
+#include "wglext.h"
+
 BOOL WINAPI QueryPerformanceCounter(PLARGE_INTEGER counter);
 #endif
 

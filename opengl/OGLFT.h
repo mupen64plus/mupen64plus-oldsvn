@@ -28,7 +28,6 @@
 #include <vector>
 #include <wchar.h>
 
-#define GL_GLEXT_PROTOTYPES //Do we need this?
 #include <SDL_opengl.h>
 
 #include <ft2build.h>
