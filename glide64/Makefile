@@ -8,6 +8,18 @@ include ../pre.mk
 CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DGCC -fPIC -DUSE_GTK -Iwrapper/ 
 LDFLAGS	= $(PLUGIN_LDFLAGS) $(LIBGL_LIBS) $(SDL_LIBS)
 
+ifeq ($(VPDEBUG), 1)
+  CFLAGS  += -DVPDEBUG
+  LDFLAGS += -lIL
+endif
+ifeq ($(RDP_LOG_ERR), 1)
+  CFLAGS += -DRDP_LOGGING -DRDP_ERROR_LOG
+else
+  ifeq ($(RDP_LOG), 1)
+    CFLAGS += -DRDP_LOGGING
+  endif
+endif
+
 # list of object files to generate
 OBJECTS = \
 	Main.o \
