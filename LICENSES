@@ -45,7 +45,6 @@ More information about this library is available at the following websites:
 Additionally, mupen includes a number of other libraries licensed under OSI approved licenses:
 
 The GPL-licensed:
-   * libbzip2 by Julian Seward
    * LZMA decoder by Igor Pavlov and Lasse Collin
    * 7zip SDK simple C decoder by Igor Pavlov
 
@@ -57,3 +56,5 @@ The zlib/libpng-licensed:
    * libpng by Glenn Randers-Pehrson, Peter Deutsch, and Guy Eric Schalnat
    * MD5 hasing code by Peter Deutsch
 
+The (zlib-like) bzip2-licensed: (a copy of the license is provided in main/bzip2/LICENSE)
+   * libbzip2 by Julian R Seward.
