@@ -1,13 +1,21 @@
-JttL's SDL sound plugin for mupen64
+JttL's SDL Audio plugin for mupen64plus.
 
 Quick Install:
-type "make" (without quotes) and copy jttl_audio.so to mupen's plugin directory.
-Then copy jttl_audio.conf to mupen's root directory.
-
-
+Usually built from master project build script. To make seperately, type "make"
+(without quotes) and copy jttl_audio.so to mupen64plus's plugin directory.
+Then copy jttl_audio.conf to your mupen64plus config directory.
 
 /***************************************************************************
  CHANGELOG:
+
+ Mupen64plus 1.5:
+ +Additional SDL modulation option for volume control.
+ +New Gtk GUI for plugin configuration.
+ +Improved no GUI support.
+
+ Mupen64plus 1.4:
+ +Extended plugin API to allow all for runtime volume changes via OSS.
+
   1.4:
  +Use only standard frequency for higher compatibility
  +Fast resample algorithm (use only integers)
@@ -55,8 +63,8 @@ Then copy jttl_audio.conf to mupen's root directory.
 
  ***************************************************************************/
 /***************************************************************************
- TODO:
- +GUI for adjusting config file settings ;)
+ TODO: KDE4 / QT GUI
+       Make testign information easier to use in GUI mode.
 
  ***************************************************************************/
 /***************************************************************************

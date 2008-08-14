@@ -1,12 +1,26 @@
-/**********************************************************************************
-Common Audio plugin spec, version #1.1 maintained by zilmar (zilmar@emulation64.com)
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - Audio_1.2.h                                             *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2007-2008 Richard42 Ebenblues                           *
+ *   Copyright (C) 2002 Zilmar                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-All questions or suggestions should go through the mailing list.
-http://www.egroups.com/group/Plugin64-Dev
-**********************************************************************************
-This file has unoffical extension for pausing audio which should not affect
-to plugin when it's not implemented in emulator.
-**********************************************************************************
+/**********************************************************************************
 Notes:
 ------
 
