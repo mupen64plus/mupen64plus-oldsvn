@@ -978,27 +978,27 @@ static void printUsage(const char *progname)
 {
     char *str = strdup(progname);
 
-    printf("Usage: %s [parameter(s)] romfile\n"
+    printf("Usage: %s [parameter(s)] [romfile]\n"
            "\n"
            "Parameters:\n"
-           "    --nogui              : do not display GUI.\n"
-           "    --noask              : don't ask to force load on bad dumps.\n"
-           "    --noosd              : disable onscreen display.\n"
-           "    --fullscreen         : turn fullscreen mode on.\n"
-           "    --romnumber (number) : specify which rom in romfile, if multirom archive.\n"
-           "    --gfx (path)         : use gfx plugin given by (path)\n"
-           "    --audio (path)       : use audio plugin given by (path)\n"
-           "    --input (path)       : use input plugin given by (path)\n"
-           "    --rsp (path)         : use rsp plugin given by (path)\n"
-           "    --emumode (number)   : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter\n"
-           "    --sshotdir (dir)     : set screenshot directory to (dir)\n"
-           "    --configdir (dir)    : force config dir (must contain mupen64plus.conf)\n"
-           "    --installdir (dir)   : force install dir (place to look for plugins, icons, lang, etc)\n"
-           "    --testshots (list)   : take screenshots at frames given in comma-separated list, then quit\n"
+           "    --nogui               : do not display GUI.\n"
+           "    --noask               : do not prompt user if rom file is hacked or a bad dump.\n"
+           "    --noosd               : disable onscreen display.\n"
+           "    --fullscreen          : turn fullscreen mode on.\n"
+           "    --romnumber (number)  : specify which rom in romfile, if multirom archive.\n"
+           "    --gfx (plugin-file)   : use gfx plugin given by (path)\n"
+           "    --audio (plugin-file) : use audio plugin given by (path)\n"
+           "    --input (plugin-file) : use input plugin given by (path)\n"
+           "    --rsp (plugin-file)   : use rsp plugin given by (path)\n"
+           "    --emumode (mode)      : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter\n"
+           "    --sshotdir (dir)      : set screenshot directory to (dir)\n"
+           "    --configdir (dir)     : force config dir (must contain mupen64plus.conf)\n"
+           "    --installdir (dir)    : force install dir (place to look for plugins, icons, lang, etc)\n"
+           "    --testshots (list)    : take screenshots at frames given in comma-separated (list), then quit\n"
 #ifdef DBG
-           "    --debugger           : start with debugger enabled\n"
+           "    --debugger            : start with debugger enabled\n"
 #endif 
-           "    -h, --help           : see this help message\n"
+           "    -h, --help            : see this help message\n"
            "\n", basename(str));
 
     free(str);

@@ -129,25 +129,24 @@ By default, the mupen64plus program will look for plugins, icons, and language t
 Run 'mupen64plus --help' for a complete list of commandline options:
 
  $ mupen64plus --help
-Usage: mupen64plus [parameter(s)] romfile
+Usage: mupen64plus [parameter(s)] [romfile]
 
 Parameters:
-    --nogui              : do not display GUI.
-    --noask              : don't ask to force load on bad dumps.
-    --noosd              : disable onscreen display.
-    --fullscreen         : turn fullscreen mode on.
-    --romnumber (number) : specify which rom in romfile, if multirom archive.
-    --gfx (path)         : use gfx plugin given by (path)
-    --audio (path)       : use audio plugin given by (path)
-    --input (path)       : use input plugin given by (path)
-    --rsp (path)         : use rsp plugin given by (path)
-    --emumode (number)   : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter
-    --sshotdir (dir)     : set screenshot directory to (dir)
-    --configdir (dir)    : force config dir (must contain mupen64plus.conf)
-    --installdir (dir)   : force install dir (place to look for plugins, icons, lang, etc)
-    --testshots (list)   : take screenshots at frames given in comma-separated list, then quit
-    -h, --help           : see this help message
-
+    --nogui               : do not display GUI.
+    --noask               : do not prompt user if rom file is hacked or a bad dump.
+    --noosd               : disable onscreen display.
+    --fullscreen          : turn fullscreen mode on.
+    --romnumber (number)  : specify which rom in romfile, if multirom archive.
+    --gfx (plugin-file)   : use gfx plugin given by (path)
+    --audio (plugin-file) : use audio plugin given by (path)
+    --input (plugin-file) : use input plugin given by (path)
+    --rsp (plugin-file)   : use rsp plugin given by (path)
+    --emumode (mode)      : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter
+    --sshotdir (dir)      : set screenshot directory to (dir)
+    --configdir (dir)     : force config dir (must contain mupen64plus.conf)
+    --installdir (dir)    : force install dir (place to look for plugins, icons, lang, etc)
+    --testshots (list)    : take screenshots at frames given in comma-separated (list), then quit
+    -h, --help            : see this help message
 
 5. Key Commands In Emulator
 ---------------------------
