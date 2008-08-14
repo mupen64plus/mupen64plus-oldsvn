@@ -6,7 +6,7 @@
   http://www.7-zip.org/
 
   LZMA SDK is licensed under two licenses:
-  1) GNU Lesser General Public License (GNU LGPL)
+  1) GNU Lesser General Public License (GNU LGPL 2.1+)
   2) Common Public License (CPL)
   It means that you can select one of these two licenses and 
   follow rules of that license.
