@@ -17,7 +17,6 @@
   interfaces of this file without subjecting your linked code to the 
   terms of the CPL or GNU LGPL. Any modifications or additions 
   to this file, however, are subject to the LGPL or CPL terms.
-*/
 
   SPECIAL EXCEPTION:
   Igor Pavlov, as the author of this code, expressly permits you to 
