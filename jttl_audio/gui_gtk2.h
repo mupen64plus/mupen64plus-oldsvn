@@ -36,3 +36,4 @@ typedef struct
 } SConfigureDialog;
 
 static char *itoa(int num);
+

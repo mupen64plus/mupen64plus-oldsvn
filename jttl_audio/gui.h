@@ -25,3 +25,4 @@
 EXPORT void CALL DllAbout(HWND hParent);
 EXPORT void CALL DllConfig(HWND hParent);
 void display_test(const char *tMsg);
+
