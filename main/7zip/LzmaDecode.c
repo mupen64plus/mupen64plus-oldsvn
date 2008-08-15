@@ -1,7 +1,7 @@
 /*
   LzmaDecode.c
   LZMA Decoder (optimized for Speed version)
-  
+
   LZMA SDK 4.40 Copyright (c) 1999-2006 Igor Pavlov (2006-05-01)
   http://www.7-zip.org/
 
