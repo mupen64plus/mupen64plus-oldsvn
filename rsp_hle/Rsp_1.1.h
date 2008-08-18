@@ -33,7 +33,8 @@ extern "C" {
 #define PLUGIN_TYPE_AUDIO           3
 #define PLUGIN_TYPE_CONTROLLER      4
 
-#ifdef NOTDEF
+#ifndef __PLUGIN_INFO__
+#define __PLUGIN_INFO__
 typedef struct {
     WORD Version;        /* Should be set to 0x0101 */
     WORD Type;           /* Set to PLUGIN_TYPE_RSP */
@@ -45,7 +46,7 @@ typedef struct {
     BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
                               bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
-#endif
+#endif //__PLUGIN_INFO__
 
 typedef struct {
     HINSTANCE hInst;

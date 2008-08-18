@@ -1,33 +1,108 @@
-/***************************************************************************
-                          messagebox.c  -  description
-                             -------------------
-    begin                : Tue Nov 12 2002
-    copyright            : (C) 2002 by blight
-    email                : blight@Ashitaka
- ***************************************************************************/
-
-/***************************************************************************
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - messagebox.c                                            *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- ***************************************************************************/
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <libgen.h> 
+#include <sys/stat.h>
+
+#include <gtk/gtk.h>
 
 #include "messagebox.h"
 #include "support.h"
 
-#include <gtk/gtk.h>
+static char l_IconDir[PATH_MAX] = {'\0'};
 
-#include <stdarg.h>
-#include <stdio.h>
+int isfile(char *path)
+{
+    struct stat sbuf;
+    return (stat(path, &sbuf) == 0) && S_ISREG(sbuf.st_mode);
+}
 
-// include icons
-#include "icons/messagebox-error.xpm"
-#include "icons/messagebox-info.xpm"
-#include "icons/messagebox-quest.xpm"
-#include "icons/messagebox-warn.xpm"
+static void get_icondir()
+{
+    char buf[2048];
+    //Try to find mupen64plus' icon directory.
+    int n = readlink("/proc/self/exe", buf, PATH_MAX);
+    if (n > 0)
+        {
+        buf[n] = '\0';
+        dirname(buf);
+        strncpy(l_IconDir, buf, PATH_MAX);
+        strncat(buf, "/icons/32x32/mupen64plus.png", PATH_MAX - strlen(buf));
+        }
+    //If it's not in the executable's directory, try a couple of default locations
+    if (buf[0] == '\0' || !isfile(buf))
+        {
+        strcpy(l_IconDir, "/usr/local/share/mupen64plus");
+        strcpy(buf, l_IconDir);
+        strcat(buf, "/config/mupen64plus.conf");
+        if(!isfile(buf))
+            {
+            strcpy(l_IconDir, "/usr/share/mupen64plus");
+            strcpy(buf, l_IconDir);
+            strcat(buf, "/icons/32x32/mupen64plus.png");
+            // if install dir is not in the default locations, try the same dir as the binary
+            if (!isfile(buf))
+                {
+                //try cwd as last resort
+                getcwd(l_IconDir, PATH_MAX);
+                }
+            }
+        }
+
+    strcat(l_IconDir, "/icons/");
+}
+
+char* get_iconpath(char* iconfile)
+{
+    static char path[PATH_MAX];
+    strncpy(path, l_IconDir, PATH_MAX-strlen(iconfile));
+    strcat(path, iconfile);
+    return path;
+}
+
+//Check for Gtk icons here.
+gboolean check_icon_theme()
+{
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+
+    if(gtk_icon_theme_has_icon(theme, "document-open")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-start")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-pause")&&
+       gtk_icon_theme_has_icon(theme, "media-playback-stop")&&
+       gtk_icon_theme_has_icon(theme, "view-fullscreen")&&
+       gtk_icon_theme_has_icon(theme, "preferences-system")&& 
+       gtk_icon_theme_has_icon(theme, "video-display")&& 
+       gtk_icon_theme_has_icon(theme, "audio-card")&& 
+       gtk_icon_theme_has_icon(theme, "input-gaming")&&
+       gtk_icon_theme_has_icon(theme, "dialog-warning")&&
+       gtk_icon_theme_has_icon(theme, "dialog-error")&&
+       gtk_icon_theme_has_icon(theme, "dialog-question"))
+        return TRUE;
+    else
+        return FALSE;
+}
 
 static gint delete_question_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
@@ -62,7 +137,7 @@ int
 messagebox( const char *title, int flags, const char *fmt, ... )
 {
     va_list ap;
-    char buf[2049];
+    char buf[2048];
     int ret = 0;
 
     GtkWidget *dialog;
@@ -128,22 +203,41 @@ messagebox( const char *title, int flags, const char *fmt, ... )
     gtk_widget_show( hbox );
 
     // icon
+    get_icondir();
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+    GdkPixbuf *pixbuf;
+
     switch( flags & 0x00000F00 )
     {
     case MB_ICONWARNING:
-        icon = create_pixmap_d( dialog, messagebox_warn_xpm );
-        break;
-
-    case MB_ICONINFORMATION:
-        icon = create_pixmap_d( dialog, messagebox_info_xpm );
+        if(check_icon_theme())
+            {
+            pixbuf = gtk_icon_theme_load_icon(theme, "dialog-warning", 32,  0, NULL);
+            icon = gtk_image_new_from_pixbuf(pixbuf); 
+            }
+        else
+            icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-warning.png"));
         break;
 
     case MB_ICONQUESTION:
-        icon = create_pixmap_d( dialog, messagebox_quest_xpm );
+    case MB_ICONINFORMATION:
+       if(check_icon_theme())
+            {
+            pixbuf = gtk_icon_theme_load_icon(theme, "dialog-question", 32,  0, NULL);
+            icon = gtk_image_new_from_pixbuf(pixbuf); 
+            }
+        else
+            icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-question.png"));
         break;
 
     case MB_ICONERROR:
-        icon = create_pixmap_d( dialog, messagebox_error_xpm );
+        if(check_icon_theme())
+            {
+            pixbuf = gtk_icon_theme_load_icon(theme, "dialog-error", 32,  0, NULL);
+            icon = gtk_image_new_from_pixbuf(pixbuf); 
+            }
+        else
+            icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-error.png"));
         break;
     }
 

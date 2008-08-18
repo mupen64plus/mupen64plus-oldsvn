@@ -49,6 +49,8 @@ extern "C" {
 #define EXPORT                      __declspec(dllexport)
 #define CALL                        _cdecl
 
+#ifndef __PLUGIN_INFO__
+#define __PLUGIN_INFO__
 /***** Structures *****/
 typedef struct {
     WORD Version;        /* Should be set to 0x0101 */
@@ -57,6 +59,7 @@ typedef struct {
     BOOL Reserved1;
     BOOL Reserved2;
 } PLUGIN_INFO;
+#endif //__PLUGIN_INFO__
 
 typedef struct {
     BOOL Present;

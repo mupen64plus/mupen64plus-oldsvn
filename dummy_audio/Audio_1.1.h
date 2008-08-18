@@ -46,6 +46,8 @@ extern "C" {
 #define SYSTEM_PAL                  1
 #define SYSTEM_MPAL                 2
 
+#ifndef __PLUGIN_INFO__
+#define __PLUGIN_INFO__
 /***** Structures *****/
 typedef struct {
     WORD Version;        /* Should be set to 0x0101 */
@@ -58,6 +60,7 @@ typedef struct {
     BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
                               bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
+#endif //__PLUGIN_INFO__
 
 typedef struct {
     HWND hwnd;

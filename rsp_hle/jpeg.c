@@ -28,7 +28,6 @@
 #endif
 #include <stdio.h>
 
-#define NOTDEF
 #include "Rsp_1.1.h"
 #include "hle.h"
 

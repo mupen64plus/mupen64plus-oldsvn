@@ -123,7 +123,7 @@ void GetPluginDir( char * Directory )
 }
 
 //-------------------------------------------------------------------------------------
-FUNC_TYPE(void) NAME_DEFINE(GetDllInfo) ( PLUGIN_INFO * PluginInfo )
+EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 {
 #ifdef _DEBUG
     sprintf(PluginInfo->Name, "%s %s Debug",project_name, PLUGIN_VERSION);
@@ -138,7 +138,7 @@ FUNC_TYPE(void) NAME_DEFINE(GetDllInfo) ( PLUGIN_INFO * PluginInfo )
 
 //---------------------------------------------------------------------------------------
 
-FUNC_TYPE(void) NAME_DEFINE(DllAbout) ( HWND hParent )
+EXPORT void CALL DllAbout ( HWND hParent )
 {
     char temp[300];
     sprintf(temp,"%s %s \nOpenGL 1.1-1.4/ATI/Nvidia TNT/Geforce Extension\n", project_name, PLUGIN_VERSION);
@@ -148,12 +148,12 @@ FUNC_TYPE(void) NAME_DEFINE(DllAbout) ( HWND hParent )
 
 //---------------------------------------------------------------------------------------
 
-FUNC_TYPE(void) NAME_DEFINE(DllTest) ( HWND hParent )
+EXPORT void CALL DllTest ( HWND hParent )
 {
     MsgInfo((char*)"TODO: Test");
 }
 
-FUNC_TYPE(void) NAME_DEFINE(DllConfig) ( HWND hParent )
+EXPORT void CALL DllConfig ( HWND hParent )
 {
    ShowConfigBox();
 }
@@ -176,7 +176,7 @@ void ChangeWindowStep2()
     status.ToToggleFullScreen = FALSE;
 }
 
-FUNC_TYPE(void) NAME_DEFINE(ChangeWindow) ()
+EXPORT void CALL ChangeWindow (void)
 {
     if( status.ToToggleFullScreen )
         status.ToToggleFullScreen = FALSE;
@@ -186,13 +186,13 @@ FUNC_TYPE(void) NAME_DEFINE(ChangeWindow) ()
 
 //---------------------------------------------------------------------------------------
 
-FUNC_TYPE(void) NAME_DEFINE(DrawScreen) (void)
+EXPORT void CALL DrawScreen (void)
 {
 }
 
 //---------------------------------------------------------------------------------------
 
-FUNC_TYPE(void) NAME_DEFINE(MoveScreen) (int xpos, int ypos)
+EXPORT void CALL MoveScreen (int xpos, int ypos)
 { 
 }
 
@@ -347,7 +347,7 @@ uint32 VideoThreadProc( LPVOID lpParameter )
 #endif
 
 //---------------------------------------------------------------------------------------
-FUNC_TYPE(void) NAME_DEFINE(RomClosed) (void)
+EXPORT void CALL RomClosed(void)
 {
     TRACE0("To stop video");
     Ini_StoreRomOptions(&g_curRomInfo);
@@ -370,7 +370,7 @@ FUNC_TYPE(void) NAME_DEFINE(RomClosed) (void)
     TRACE0("Video is stopped");
 }
 
-FUNC_TYPE(void) NAME_DEFINE(RomOpen) (void)
+EXPORT void CALL RomOpen(void)
 {
    InitConfiguration();
 
@@ -669,7 +669,7 @@ void UpdateScreenStep2 (void)
     g_CritialSection.Unlock();
 }
 
-FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void)
+EXPORT void CALL UpdateScreen(void)
 {
     if(options.bShowFPS)
     {
@@ -699,7 +699,7 @@ FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void)
 
 //---------------------------------------------------------------------------------------
 
-FUNC_TYPE(void) NAME_DEFINE(ViStatusChanged) (void)
+EXPORT void CALL ViStatusChanged(void)
 {
     g_CritialSection.Lock();
     SetVIScales();
@@ -708,22 +708,23 @@ FUNC_TYPE(void) NAME_DEFINE(ViStatusChanged) (void)
 }
 
 //---------------------------------------------------------------------------------------
-FUNC_TYPE(void) NAME_DEFINE(ViWidthChanged) (void)
+EXPORT void CALL ViWidthChanged(void)
 {
     g_CritialSection.Lock();
     SetVIScales();
     CRender::g_pRender->UpdateClipRectangle();
     g_CritialSection.Unlock();
 }
+
 EXPORT BOOL CALL GetFullScreenStatus(void);
-__declspec(dllexport) void CALL SetOnScreenText (char *msg)
+EXPORT void CALL SetOnScreenText(char *msg)
 {
     status.CPUCoreMsgIsSet = true;
     memset(&status.CPUCoreMsgToDisplay, 0, 256);
     strncpy(status.CPUCoreMsgToDisplay, msg, 255);
 }
 
-__declspec(dllexport) BOOL CALL GetFullScreenStatus(void)
+EXPORT BOOL CALL GetFullScreenStatus(void)
 {
     if( CGraphicsContext::g_pGraphicsContext )
     {
@@ -735,7 +736,7 @@ __declspec(dllexport) BOOL CALL GetFullScreenStatus(void)
     }
 }
 
-FUNC_TYPE(BOOL) NAME_DEFINE(InitiateGFX)(GFX_INFO Gfx_Info)
+EXPORT BOOL CALL InitiateGFX(GFX_INFO Gfx_Info)
 {
     memset(&status, 0, sizeof(status));
     windowSetting.bDisplayFullscreen = FALSE;
@@ -786,7 +787,7 @@ void __cdecl ErrorMsg (const char* Message, ...)
 
 //---------------------------------------------------------------------------------------
 
-FUNC_TYPE(void) NAME_DEFINE(CloseDLL) (void)
+EXPORT void CALL CloseDLL(void)
 { 
     if( status.bGameIsRunning )
     {
@@ -823,7 +824,7 @@ void ProcessDListStep2(void)
     g_CritialSection.Unlock();
 }   
 
-FUNC_TYPE(uint32) NAME_DEFINE(ProcessDListCountCycles)(void)
+EXPORT uint32 CALL ProcessDListCountCycles(void)
 {
 #ifdef USING_THREAD
     if (videoThread)
@@ -859,7 +860,7 @@ FUNC_TYPE(uint32) NAME_DEFINE(ProcessDListCountCycles)(void)
 #endif
 }   
 
-FUNC_TYPE(void) NAME_DEFINE(ProcessRDPList)(void)
+EXPORT void CALL ProcessRDPList(void)
 {
 #ifdef USING_THREAD
     if (videoThread)
@@ -881,7 +882,7 @@ FUNC_TYPE(void) NAME_DEFINE(ProcessRDPList)(void)
 #endif
 }   
 
-FUNC_TYPE(void) NAME_DEFINE(ProcessDList)(void)
+EXPORT void CALL ProcessDList(void)
 {
 #ifdef USING_THREAD
     if (videoThread)
@@ -909,18 +910,6 @@ void TriggerSPInterrupt(void)
 }
 
 /******************************************************************
-  Function: FrameBufferWriteList
-  Purpose:  This function is called to notify the dll that the
-            frame buffer has been modified by CPU at the given address.
-  input:    FrameBufferModifyEntry *plist
-            size = size of the plist, max = 1024
-  output:   none
-*******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(FBWList)(FrameBufferModifyEntry *plist, uint32 size)
-{
-}
-
-/******************************************************************
   Function: FrameBufferRead
   Purpose:  This function is called to notify the dll that the
             frame buffer memory is beening read at the given address.
@@ -939,7 +928,7 @@ FUNC_TYPE(void) NAME_DEFINE(FBWList)(FrameBufferModifyEntry *plist, uint32 size)
   output:   none
 *******************************************************************/ 
 
-FUNC_TYPE(void) NAME_DEFINE(FBRead)(uint32 addr)
+EXPORT void CALL FBRead(uint32 addr)
 {
     g_pFrameBufferManager->FrameBufferReadByCPU(addr);
 }
@@ -959,7 +948,7 @@ FUNC_TYPE(void) NAME_DEFINE(FBRead)(uint32 addr)
   output:   none
 *******************************************************************/ 
 
-FUNC_TYPE(void) NAME_DEFINE(FBWrite)(uint32 addr, uint32 size)
+EXPORT void CALL FBWrite(uint32 addr, uint32 size)
 {
     g_pFrameBufferManager->FrameBufferWriteByCPU(addr, size);
 }
@@ -996,7 +985,8 @@ typedef struct
     uint32  width;
     uint32  height;
 } FrameBufferInfo;
-__declspec(dllexport) void CALL FBGetFrameBufferInfo(void *p)
+
+EXPORT void CALL FBGetFrameBufferInfo(void *p)
 {
     FrameBufferInfo * pinfo = (FrameBufferInfo *)p;
     memset(pinfo,0,sizeof(FrameBufferInfo)*6);
@@ -1033,12 +1023,12 @@ __declspec(dllexport) void CALL FBGetFrameBufferInfo(void *p)
 }
 
 // Plugin spec 1.3 functions
-FUNC_TYPE(void) NAME_DEFINE(ShowCFB) (void)
+EXPORT void CALL ShowCFB(void)
 {
     status.toShowCFB = true;
 }
 
-FUNC_TYPE(void) NAME_DEFINE(CaptureScreen) ( char * Directory )
+EXPORT void CALL CaptureScreen( char * Directory )
 {
     // start by getting the base file path
     char filepath[2048], filename[2048];
@@ -1065,7 +1055,7 @@ FUNC_TYPE(void) NAME_DEFINE(CaptureScreen) ( char * Directory )
 }
 
 //void ReadScreen( void **dest, int *width, int *height )
-FUNC_TYPE(void) NAME_DEFINE(ReadScreen)(void **dest, int *width, int *height)
+EXPORT void CALL ReadScreen(void **dest, int *width, int *height)
 {
    *width = windowSetting.uDisplayWidth;
    *height = windowSetting.uDisplayHeight;
@@ -1092,7 +1082,7 @@ FUNC_TYPE(void) NAME_DEFINE(ReadScreen)(void **dest, int *width, int *height)
   input:    path to config directory
   output:   none
 *******************************************************************/
-FUNC_TYPE(void) NAME_DEFINE(SetConfigDir)(char *configDir)
+EXPORT void CALL SetConfigDir(char *configDir)
 {
     strncpy(g_ConfigDir, configDir, PATH_MAX);
 }

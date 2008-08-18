@@ -22,7 +22,6 @@
 #ifndef HLE_H
 #define HLE_H
 
-#define NOTDEF
 #include "Rsp_1.1.h"
 
 #ifdef _BIG_ENDIAN

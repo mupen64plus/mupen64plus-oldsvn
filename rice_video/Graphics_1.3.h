@@ -1,9 +1,25 @@
-/**********************************************************************************
-Common gfx plugin spec, version #1.3 maintained by zilmar (zilmar@emulation64.com)
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - Graphics_1.3.h                                          *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Zilmar                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-All questions or suggestions should go through the mailing list.
-http://www.egroups.com/group/Plugin64-Dev
-***********************************************************************************
+/***********************************************************************************
 
 Notes:
 ------
@@ -26,24 +42,24 @@ extern "C" {
 /* Plugin types */
 #define PLUGIN_TYPE_GFX             2
 
-#ifndef EXPORT
 #define EXPORT                      __declspec(dllexport)
-#endif
-
 #define CALL                        _cdecl
 
+#ifndef __PLUGIN_INFO__
+#define __PLUGIN_INFO__
 /***** Structures *****/
 typedef struct {
-    uint16 Version;        /* Set to 0x0103 */
-    uint16 Type;           /* Set to PLUGIN_TYPE_GFX */
+    WORD Version;        /* Set to 0x0103 */
+    WORD Type;           /* Set to PLUGIN_TYPE_GFX */
     char Name[100];      /* Name of the DLL */
 
     /* If DLL supports memory these memory options then set them to TRUE or FALSE
        if it does not support it */
-    BOOL NormalMemory;    /* a normal uint8 array */ 
-    BOOL MemoryBswaped;  /* a normal uint8 array where the memory has been pre
+    BOOL NormalMemory;    /* a normal BYTE array */ 
+    BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
                               bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
+#endif //__PLUGIN_INFO
 
 typedef struct {
     HWND hWnd;          /* Render window */
@@ -54,58 +70,48 @@ typedef struct {
                            //   eg. the first 8 bytes are stored like this:
                            //        4 3 2 1   8 7 6 5
 
-    uint8 * HEADER; // This is the rom header (first 40h bytes of the rom
+    BYTE * HEADER;  // This is the rom header (first 40h bytes of the rom
                     // This will be in the same memory format as the rest of the memory.
-    uint8 * RDRAM;
-    uint8 * DMEM;
-    uint8 * IMEM;
+    BYTE * RDRAM;
+    BYTE * DMEM;
+    BYTE * IMEM;
 
-    uint32 * MI_INTR_REG;
+    DWORD * MI_INTR_REG;
 
-    uint32 * DPC_START_REG;
-    uint32 * DPC_END_REG;
-    uint32 * DPC_CURRENT_REG;
-    uint32 * DPC_STATUS_REG;
-    uint32 * DPC_CLOCK_REG;
-    uint32 * DPC_BUFBUSY_REG;
-    uint32 * DPC_PIPEBUSY_REG;
-    uint32 * DPC_TMEM_REG;
+    DWORD * DPC_START_REG;
+    DWORD * DPC_END_REG;
+    DWORD * DPC_CURRENT_REG;
+    DWORD * DPC_STATUS_REG;
+    DWORD * DPC_CLOCK_REG;
+    DWORD * DPC_BUFBUSY_REG;
+    DWORD * DPC_PIPEBUSY_REG;
+    DWORD * DPC_TMEM_REG;
 
-    uint32 * VI_STATUS_REG;
-    uint32 * VI_ORIGIN_REG;
-    uint32 * VI_WIDTH_REG;
-    uint32 * VI_INTR_REG;
-    uint32 * VI_V_CURRENT_LINE_REG;
-    uint32 * VI_TIMING_REG;
-    uint32 * VI_V_SYNC_REG;
-    uint32 * VI_H_SYNC_REG;
-    uint32 * VI_LEAP_REG;
-    uint32 * VI_H_START_REG;
-    uint32 * VI_V_START_REG;
-    uint32 * VI_V_BURST_REG;
-    uint32 * VI_X_SCALE_REG;
-    uint32 * VI_Y_SCALE_REG;
+    DWORD * VI_STATUS_REG;
+    DWORD * VI_ORIGIN_REG;
+    DWORD * VI_WIDTH_REG;
+    DWORD * VI_INTR_REG;
+    DWORD * VI_V_CURRENT_LINE_REG;
+    DWORD * VI_TIMING_REG;
+    DWORD * VI_V_SYNC_REG;
+    DWORD * VI_H_SYNC_REG;
+    DWORD * VI_LEAP_REG;
+    DWORD * VI_H_START_REG;
+    DWORD * VI_V_START_REG;
+    DWORD * VI_V_BURST_REG;
+    DWORD * VI_X_SCALE_REG;
+    DWORD * VI_Y_SCALE_REG;
 
     void (*CheckInterrupts)( void );
 } GFX_INFO;
 
-
-typedef struct
-{
-    uint32 addr;
-    uint32 val;
-    uint32 size;                // 1 = uint8, 2 = uint16, 4=uint32
-} FrameBufferModifyEntry;
-
-#define NAME_DEFINE(name)  CALL name
-#define FUNC_TYPE(type) EXPORT type
 /******************************************************************
   Function: CaptureScreen
   Purpose:  This function dumps the current frame to a file
   input:    pointer to the directory to save the file to
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(CaptureScreen) ( char * Directory );
+EXPORT void CALL CaptureScreen ( char * Directory );
 
 /******************************************************************
   Function: ChangeWindow
@@ -115,7 +121,7 @@ FUNC_TYPE(void) NAME_DEFINE(CaptureScreen) ( char * Directory );
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(ChangeWindow) (void);
+EXPORT void CALL ChangeWindow (void);
 
 /******************************************************************
   Function: CloseDLL
@@ -124,7 +130,7 @@ FUNC_TYPE(void) NAME_DEFINE(ChangeWindow) (void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(CloseDLL) (void);
+EXPORT void CALL CloseDLL (void);
 
 /******************************************************************
   Function: DllAbout
@@ -133,7 +139,7 @@ FUNC_TYPE(void) NAME_DEFINE(CloseDLL) (void);
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(DllAbout) ( HWND hParent );
+EXPORT void CALL DllAbout ( HWND hParent );
 
 /******************************************************************
   Function: DllConfig
@@ -142,7 +148,7 @@ FUNC_TYPE(void) NAME_DEFINE(DllAbout) ( HWND hParent );
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(DllConfig) ( HWND hParent );
+EXPORT void CALL DllConfig ( HWND hParent );
 
 /******************************************************************
   Function: DllTest
@@ -151,7 +157,7 @@ FUNC_TYPE(void) NAME_DEFINE(DllConfig) ( HWND hParent );
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(DllTest) ( HWND hParent );
+EXPORT void CALL DllTest ( HWND hParent );
 
 /******************************************************************
   Function: DrawScreen
@@ -161,7 +167,7 @@ FUNC_TYPE(void) NAME_DEFINE(DllTest) ( HWND hParent );
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(DrawScreen) (void);
+EXPORT void CALL DrawScreen (void);
 
 /******************************************************************
   Function: GetDllInfo
@@ -171,7 +177,7 @@ FUNC_TYPE(void) NAME_DEFINE(DrawScreen) (void);
             filled by the function. (see def above)
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(GetDllInfo) ( PLUGIN_INFO * PluginInfo );
+EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
 
 /******************************************************************
   Function: InitiateGFX
@@ -188,7 +194,7 @@ FUNC_TYPE(void) NAME_DEFINE(GetDllInfo) ( PLUGIN_INFO * PluginInfo );
   and then call the function CheckInterrupts to tell the emulator
   that there is a waiting interrupt.
 *******************************************************************/ 
-FUNC_TYPE(BOOL) NAME_DEFINE(InitiateGFX) (GFX_INFO Gfx_Info);
+EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info);
 
 /******************************************************************
   Function: MoveScreen
@@ -201,7 +207,7 @@ FUNC_TYPE(BOOL) NAME_DEFINE(InitiateGFX) (GFX_INFO Gfx_Info);
             client area of the window. 
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(MoveScreen) (int xpos, int ypos);
+EXPORT void CALL MoveScreen (int xpos, int ypos);
 
 /******************************************************************
   Function: ProcessDList
@@ -210,8 +216,7 @@ FUNC_TYPE(void) NAME_DEFINE(MoveScreen) (int xpos, int ypos);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(ProcessDList)(void);
-FUNC_TYPE(uint32) NAME_DEFINE(ProcessDListCountCycles)(void);
+EXPORT void CALL ProcessDList(void);
 
 /******************************************************************
   Function: ProcessRDPList
@@ -220,7 +225,7 @@ FUNC_TYPE(uint32) NAME_DEFINE(ProcessDListCountCycles)(void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(ProcessRDPList)(void);
+EXPORT void CALL ProcessRDPList(void);
 
 /******************************************************************
   Function: RomClosed
@@ -228,7 +233,7 @@ FUNC_TYPE(void) NAME_DEFINE(ProcessRDPList)(void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(RomClosed) (void);
+EXPORT void CALL RomClosed (void);
 
 /******************************************************************
   Function: RomOpen
@@ -237,7 +242,7 @@ FUNC_TYPE(void) NAME_DEFINE(RomClosed) (void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(RomOpen) (void);
+EXPORT void CALL RomOpen (void);
 
 /******************************************************************
   Function: ShowCFB
@@ -247,7 +252,7 @@ FUNC_TYPE(void) NAME_DEFINE(RomOpen) (void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(ShowCFB) (void);
+EXPORT void CALL ShowCFB (void);
 
 /******************************************************************
   Function: UpdateScreen
@@ -257,7 +262,7 @@ FUNC_TYPE(void) NAME_DEFINE(ShowCFB) (void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void);
+EXPORT void CALL UpdateScreen (void);
 
 /******************************************************************
   Function: ViStatusChanged
@@ -266,7 +271,7 @@ FUNC_TYPE(void) NAME_DEFINE(UpdateScreen) (void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(ViStatusChanged) (void);
+EXPORT void CALL ViStatusChanged (void);
 
 /******************************************************************
   Function: ViWidthChanged
@@ -275,99 +280,17 @@ FUNC_TYPE(void) NAME_DEFINE(ViStatusChanged) (void);
   input:    none
   output:   none
 *******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(ViWidthChanged) (void);
-
-
+EXPORT void CALL ViWidthChanged (void);
 
 /******************************************************************
-  Function: FrameBufferWrite
-  Purpose:  This function is called to notify the dll that the
-            frame buffer has been modified by CPU at the given address.
-  input:    addr        rdram address
-            val         val
-            size        1 = uint8, 2 = uint16, 4 = uint32
-  output:   none
-*******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(FBWrite)(uint32, uint32);
-
-/******************************************************************
-  Function: FrameBufferWriteList
-  Purpose:  This function is called to notify the dll that the
-            frame buffer has been modified by CPU at the given address.
-  input:    FrameBufferModifyEntry *plist
-            size = size of the plist, max = 1024
-  output:   none
-*******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(FBWList)(FrameBufferModifyEntry *plist, uint32 size);
-
-/******************************************************************
-  Function: FrameBufferRead
-  Purpose:  This function is called to notify the dll that the
-            frame buffer memory is beening read at the given address.
-            DLL should copy content from its render buffer to the frame buffer
-            in N64 RDRAM
-            DLL is responsible to maintain its own frame buffer memory addr list
-            DLL should copy 4KB block content back to RDRAM frame buffer.
-            Emulator should not call this function again if other memory
-            is read within the same 4KB range
-  input:    addr        rdram address
-            val         val
-            size        1 = uint8, 2 = uint16, 4 = uint32
-  output:   none
-*******************************************************************/ 
-FUNC_TYPE(void) NAME_DEFINE(FBRead)(uint32 addr);
-
-
-
-
-/************************************************************************
-Function: FBGetFrameBufferInfo
-Purpose:  This function is called by the emulator core to retrieve depth
-buffer information from the video plugin in order to be able
-to notify the video plugin about CPU depth buffer read/write
-operations
-
-size:
-= 1     byte
-= 2     word (16 bit) <-- this is N64 default depth buffer format
-= 4     dword (32 bit)
-
-when depth buffer information is not available yet, set all values
-in the FrameBufferInfo structure to 0
-
-input:    FrameBufferInfo *pinfo
-pinfo is pointed to a FrameBufferInfo structure which to be
-filled in by this function
-output:   Values are return in the FrameBufferInfo structure
-************************************************************************/
-FUNC_TYPE(void) NAME_DEFINE(FBGetFrameBufferInfo)(void *pinfo);
-
-
-/******************************************************************
-  Function: GetFullScreenStatus
-  Purpose:  
-  Input:    
-  Output:   TRUE if current display is in full screen
-            FALSE if current display is in windowed mode
-
-  Attention: After the CPU core call the ChangeWindow function to request
-             the video plugin to switch between full screen and window mode,
-             the plugin may not carry out the request at the function call.
-             The video plugin may want to delay and do the screen switching later.
-             
-*******************************************************************/ 
-EXPORT BOOL CALL GetFullScreenStatus(void);
-
-/******************************************************************
-  Function: SetOnScreenText
-  Purpose:  
-  Input:    char *msg
-  Output:   
-             
-*******************************************************************/ 
-EXPORT void CALL SetOnScreenText(char *msg);
-
-EXPORT void CALL ReadScreen(void **dest, int *width, int *height);
+  Function: ReadScreen
+  Purpose:  Capture the current screen
+  Input:    none
+  Output:   dest - 24-bit RGB data
+            width - width of image
+            height - height of image
+ ******************************************************************/
+EXPORT void CALL ReadScreen (void **dest, int *width, int *height);
 
 /******************************************************************
    NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
@@ -378,24 +301,7 @@ EXPORT void CALL ReadScreen(void **dest, int *width, int *height);
   input:    path to config directory
   output:   none
 *******************************************************************/
-EXPORT void CALL SetConfigDir(char *configDir);
-
-/******************************************************************
-   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
-         ORIGINAL SPEC
-  Function: SetRenderingCallback
-  Purpose:  Allows emulator to register a callback function that will
-            be called by the graphics plugin just before the the
-            frame buffers are swapped.
-            This was added as a way for the emulator to draw emulator-
-            specific things to the screen, e.g. On-screen display.
-  input:    pointer to callback function. The function expects
-            to receive the current window width and height.
-  output:   none
-*******************************************************************/
-EXPORT void CALL SetRenderingCallback(void (*callback)());
-
-FUNC_TYPE(void) NAME_DEFINE(SetMaxTextureMem)(DWORD mem);
+EXPORT void CALL SetConfigDir( char *configDir );
 
 #if defined(__cplusplus)
 }

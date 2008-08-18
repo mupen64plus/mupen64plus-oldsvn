@@ -113,8 +113,8 @@ static int  l_GuiEnabled = 0;           // GUI enabled?
 static int  l_GuiEnabled = 1;           // GUI enabled?
 #endif
 
-static char l_ConfigDir[PATH_MAX] = {0};
-static char l_InstallDir[PATH_MAX] = {0};
+static char l_ConfigDir[PATH_MAX] = {'\0'};
+static char l_InstallDir[PATH_MAX] = {'\0'};
 
 static int   l_EmuMode = 0;              // emumode specified at commandline?
 static int   l_CurrentFrame = 0;         // frame counter

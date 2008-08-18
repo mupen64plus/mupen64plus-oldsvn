@@ -1575,7 +1575,6 @@ static int create_mainWindow( void )
     return 0;
 }
 
-//Add a check for all Gtk icons here.
 gboolean check_icon_theme()
 {
     GtkIconTheme *theme = gtk_icon_theme_get_default();
@@ -1589,6 +1588,7 @@ gboolean check_icon_theme()
        gtk_icon_theme_has_icon(theme, "video-display")&& 
        gtk_icon_theme_has_icon(theme, "audio-card")&& 
        gtk_icon_theme_has_icon(theme, "input-gaming")&&
+       gtk_icon_theme_has_icon(theme, "dialog-warning")&&
        gtk_icon_theme_has_icon(theme, "dialog-error")&&
        gtk_icon_theme_has_icon(theme, "dialog-question"))
         return TRUE;

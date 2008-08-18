@@ -45,6 +45,8 @@ extern "C" {
 #define EXPORT                      __declspec(dllexport)
 #define CALL                        _cdecl
 
+#ifndef __PLUGIN_INFO__
+#define __PLUGIN_INFO__
 /***** Structures *****/
 typedef struct {
     WORD Version;        /* Set to 0x0103 */
@@ -57,6 +59,7 @@ typedef struct {
     BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
                               bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
+#endif //__PLUGIN_INFO
 
 typedef struct {
     HWND hWnd;          /* Render window */
