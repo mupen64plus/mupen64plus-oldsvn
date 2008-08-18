@@ -68,12 +68,12 @@ create_aboutDialog( void )
                 "Gtk GUI by blight\n"
                 "Mupen and RiceVideo 64-bit port by Richard42 and nmn\n"
                 "Glide64 port by Gunther\n"
-                "Fixes and features by Ebenblues, DarkJezter, nmn, Richard42, and others\n"
+                "Fixes and features by Richard42, DarkJezter, Tillin9, ebenblues, nmn, and others\n"
                 "\n") );
     gtk_misc_set_padding( GTK_MISC(label), 10, 10 );
     gtk_container_add( GTK_CONTAINER(frame), label );
 
-    mupenImage = gtk_image_new_from_file( get_iconpath("logo.png") );
+    mupenImage = gtk_image_new_from_file( get_iconpath("mupen64logo.png") );
     gtk_box_pack_start( GTK_BOX(hbox), mupenImage, FALSE, FALSE, 0 );
 
     button = gtk_button_new_from_stock(GTK_STOCK_OK);
