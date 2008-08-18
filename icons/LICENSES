@@ -24,6 +24,7 @@ The following icons:
 32x32/media-playback-stop.png
 32x32/video-display.png
 32x32/cpu.png
+32x32/input-gaming.png
 32x32/dialog-question.png
 32x32/media-playback-start.png
 32x32/preferences-system.png
@@ -39,7 +40,7 @@ are Copyright: The Oxygen Icon Theme
   |
   | and others.
   |
-  | You may copy it under the Creative Common Attribution-ShareAlike 3.0
+  | You may copy them under the Creative Common Attribution-ShareAlike 3.0
   | license, as found here:
   |
   |     http://creativecommons.org/licenses/by-sa/3.0/
@@ -84,18 +85,44 @@ are Copyright: The Oxygen Icon Theme
   |   The exception in section 6 of the GNU Lesser General Public License covers
   |   the use of elements of this art library in a GUI.
 
-32x32/input-gaming.png
+32x32/mupen64plus.png
+32x32/mupen64cart.png
+16x16/mupen64plus.png
+australia.png
+europe.png
+france.png
+germany.png
+italy.png
+japan.png
+japanusa.png
+spain.png
+usa.png
+mupen64cart.png
 
-are Copyright: Tango Desktop Project
-  |     Copyright (C) 2007 Hylke Bons, Lapo Calamandrei, Olivier Charavel, Ryan Collier, 
-  |     Rodney Dawes, Vinicius Depizzol,  Steven Garrity, Tuomas Kuosmanen, Garrett LeSage,
-  |     Niko Mirthes, jEsuSdA (Jesús David Navarro), Andreas Nilsson, Kalle Persson, 
-  |     Jakub Steiner, Josef Vybíral.
+are Copyright: The Mupen64plus Team
+  | Copyright (C) 2008 Tillin9
   |
-  | and others.
-  |
-  | You may copy it under the Creative Common Attribution-ShareAlike 2.5
+  | You may copy them under the Creative Common Attribution-ShareAlike 3.0
   | license, as found here:
   |
-  |     http://creativecommons.org/licenses/by-sa/2.5/
+  |     http://creativecommons.org/licenses/by-sa/3.0/
 
+mupen64plus.svg
+mupen64cart.svg
+
+are Copyright: The Mupen64plus Team
+  | Copyright (C) 2008 Tillin9
+  |
+  | You may copy them under the Creative Common Attribution-ShareAlike 3.0
+  | license, as found here:
+  |
+  |     http://creativecommons.org/licenses/by-sa/3.0/
+  |
+  | or under the terms of the GNU General Public License as published by
+  | the Free Software Foundation; either version 2 of the License, or
+  | (at your option) any later version.
+  |
+  | You should have received a copy of the GNU General Public License
+  | along with this program; if not, write to the
+  | Free Software Foundation, Inc.,
+  | 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.

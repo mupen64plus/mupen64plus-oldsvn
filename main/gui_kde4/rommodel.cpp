@@ -62,7 +62,7 @@ RomModel::RomModel(QObject* parent)
     QPixmap pspain(file.sprintf("%s%s", iconpath, "spain.png"));
     QPixmap pusa(file.sprintf("%s%s", iconpath, "usa.png"));
     QPixmap pjapanusa(file.sprintf("%s%s", iconpath, "japanusa.png"));
-    QPixmap pn64cart(file.sprintf("%s%s", iconpath, "n64cart.xpm"));
+    QPixmap pn64cart(file.sprintf("%s%s", iconpath, "mupen64cart.png"));
 
     QPair<QString, QPixmap> demo(i18n("Demo"), pn64cart);
     QPair<QString, QPixmap> beta(i18n("Beta"), pn64cart);

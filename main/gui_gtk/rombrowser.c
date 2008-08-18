@@ -869,7 +869,7 @@ int create_romBrowser( void )
     spain = gdk_pixbuf_new_from_file( get_iconpath("spain.png"), NULL);
     usa = gdk_pixbuf_new_from_file( get_iconpath("usa.png"), NULL);
     japanusa = gdk_pixbuf_new_from_file( get_iconpath("japanusa.png"), NULL);
-    n64cart = gdk_pixbuf_new_from_file( get_iconpath("n64cart.xpm"), NULL);
+    n64cart = gdk_pixbuf_new_from_file( get_iconpath("mupen64cart.png"), NULL);
 
     //Setup right-click menu.
     rightClickMenu = gtk_menu_new();

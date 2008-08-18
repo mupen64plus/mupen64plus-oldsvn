@@ -1524,8 +1524,18 @@ static int create_mainWindow( void )
     // window
     g_MainWindow.window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_set_title( GTK_WINDOW(g_MainWindow.window), MUPEN_NAME " v" MUPEN_VERSION );
-    gtk_window_set_default_size( GTK_WINDOW(g_MainWindow.window), width, height  );
-    gtk_window_move (GTK_WINDOW(g_MainWindow.window), xposition, yposition);
+    gtk_window_set_default_size( GTK_WINDOW(g_MainWindow.window), width, height );
+    gtk_window_move( GTK_WINDOW(g_MainWindow.window), xposition, yposition );
+
+    GdkPixbuf *mupen64plus16, *mupen64plus32;
+    mupen64plus16 = gdk_pixbuf_new_from_file( get_iconpath("16x16/mupen64plus.png"), NULL );
+    mupen64plus32 = gdk_pixbuf_new_from_file( get_iconpath("32x32/mupen64plus.png"), NULL );
+
+    GList *iconlist = NULL;
+    iconlist = g_list_append( iconlist, mupen64plus16 );
+    iconlist = g_list_append( iconlist, mupen64plus16 );
+
+    gtk_window_set_icon_list( GTK_WINDOW(g_MainWindow.window), iconlist );
 
     gtk_signal_connect(GTK_OBJECT(g_MainWindow.window), "delete_event", GTK_SIGNAL_FUNC(callback_mainWindowDeleteEvent), (gpointer)NULL);
 
