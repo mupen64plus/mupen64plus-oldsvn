@@ -20,8 +20,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Sound volume functions.
- */
+/* Sound volume functions. */
 
 #include <sys/soundcard.h>
 #include <sys/types.h>

@@ -1,19 +1,26 @@
-/***************************************************************************
- main_gtk.c - Handles the main window and 'glues' it with other windows
-----------------------------------------------------------------------------
-Began                : Fri Nov 8 2002
-Copyright            : (C) 2002 by blight
-Email                : blight@Ashitaka
-***************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - main_gtk.c                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Tillin9                                            *
+ *   Copyright (C) 2002 Blight                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************/
+/* main_gtk.c - Handles the main window and 'glues' it with other windows */
 
 #include <stdio.h>
 #include <string.h>
@@ -148,7 +155,9 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
 
     rombrowser_refresh(roms, clear);
 
-    GUI_PROCESS_QUEUED_EVENTS();
+    gdk_threads_leave();
+    while(g_main_context_iteration(NULL, FALSE));
+    gdk_threads_enter();
 
     if (!pthread_equal(self, g_GuiThread))
         gdk_threads_leave();
@@ -257,7 +266,9 @@ int gui_message(unsigned char messagetype, const char *format, ...)
             }
         }
 
-    GUI_PROCESS_QUEUED_EVENTS();
+    gdk_threads_leave();
+    while(g_main_context_iteration(NULL, FALSE));
+    gdk_threads_enter();
 
     if(!pthread_equal(self, g_GuiThread))
        gdk_threads_leave();
