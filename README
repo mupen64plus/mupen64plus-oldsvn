@@ -63,7 +63,6 @@ Type 'make' by itself to view all available build options:
      uninstall     == Uninstall Mupen64Plus and all plugins
    Options:
      BITS=32       == build 32-bit binaries on 64-bit machine
-     VCR=1         == enable video recording
      LIRC=1        == enable LIRC support
      NO_RESAMP=1   == disable libsamplerate support in jttl_audio
      NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)

@@ -21,17 +21,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "memory.h"
-#include "pif.h"
-#include "flashram.h"
-#include "dma.h"
-
 #ifndef __WIN32__
 #include "../main/winlnxdefs.h"
 #else
 #include <windows.h>
 #endif
+
+#include "memory.h"
+#include "dma.h"
+#include "pif.h"
+#include "flashram.h"
 
 #include "../r4300/r4300.h"
 #include "../r4300/macros.h"
@@ -2771,6 +2770,7 @@ void write_ai()
      {
       case 0x4:
     ai_register.ai_len = word;
+    aiLenChanged();
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2825,6 +2825,25 @@ void write_ai()
     if (ai_register.ai_dacrate != word)
       {
          ai_register.ai_dacrate = word;
+         switch(ROM_HEADER->Country_code&0xFF)
+           {
+        case 0x44:
+        case 0x46:
+        case 0x49:
+        case 0x50:
+        case 0x53:
+        case 0x55:
+        case 0x58:
+        case 0x59:
+          aiDacrateChanged(SYSTEM_PAL);
+          break;
+        case 0x37:
+        case 0x41:
+        case 0x45:
+        case 0x4a:
+          aiDacrateChanged(SYSTEM_NTSC);
+          break;
+           }
       }
     return;
     break;
@@ -2849,6 +2868,7 @@ void write_aib()
     *((unsigned char*)&temp
       + ((*address_low&3)^S8) ) = byte;
     ai_register.ai_len = temp;
+    aiLenChanged();
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2905,6 +2925,25 @@ void write_aib()
     if (ai_register.ai_dacrate != temp)
       {
          ai_register.ai_dacrate = temp;
+         switch(ROM_HEADER->Country_code&0xFF)
+           {
+        case 0x44:
+        case 0x46:
+        case 0x49:
+        case 0x50:
+        case 0x53:
+        case 0x55:
+        case 0x58:
+        case 0x59:
+          aiDacrateChanged(SYSTEM_PAL);
+          break;
+        case 0x37:
+        case 0x41:
+        case 0x45:
+        case 0x4a:
+          aiDacrateChanged(SYSTEM_NTSC);
+          break;
+           }
       }
     return;
     break;
@@ -2928,6 +2967,7 @@ void write_aih()
     *((unsigned short*)((unsigned char*)&temp
                 + ((*address_low&3)^S16) )) = hword;
     ai_register.ai_len = temp;
+    aiLenChanged();
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2979,6 +3019,25 @@ void write_aih()
     if (ai_register.ai_dacrate != temp)
       {
          ai_register.ai_dacrate = temp;
+         switch(ROM_HEADER->Country_code&0xFF)
+           {
+        case 0x44:
+        case 0x46:
+        case 0x49:
+        case 0x50:
+        case 0x53:
+        case 0x55:
+        case 0x58:
+        case 0x59:
+          aiDacrateChanged(SYSTEM_PAL);
+          break;
+        case 0x37:
+        case 0x41:
+        case 0x45:
+        case 0x4a:
+          aiDacrateChanged(SYSTEM_NTSC);
+          break;
+           }
       }
     return;
     break;
@@ -2998,6 +3057,7 @@ void write_aid()
       case 0x0:
     ai_register.ai_dram_addr = dword >> 32;
     ai_register.ai_len = dword & 0xFFFFFFFF;
+    aiLenChanged();
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -3045,6 +3105,25 @@ void write_aid()
     if (ai_register.ai_dacrate != dword >> 32)
       {
          ai_register.ai_dacrate = dword >> 32;
+         switch(ROM_HEADER->Country_code&0xFF)
+           {
+        case 0x44:
+        case 0x46:
+        case 0x49:
+        case 0x50:
+        case 0x53:
+        case 0x55:
+        case 0x58:
+        case 0x59:
+          aiDacrateChanged(SYSTEM_PAL);
+          break;
+        case 0x37:
+        case 0x41:
+        case 0x45:
+        case 0x4a:
+          aiDacrateChanged(SYSTEM_NTSC);
+          break;
+           }
       }
     ai_register.ai_bitrate = dword & 0xFFFFFFFF;
     return;
