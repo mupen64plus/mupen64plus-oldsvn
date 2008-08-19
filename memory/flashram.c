@@ -30,8 +30,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../r4300/r4300.h"
 #include "memory.h"
+
+#include "../r4300/r4300.h"
+
 #include "../main/main.h"
 
 int use_flashram;

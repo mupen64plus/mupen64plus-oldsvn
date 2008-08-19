@@ -54,9 +54,6 @@ endif
 ifeq ($(DBG_PROFILE), 1)
   CFLAGS += -DPROFILE_R4300
 endif
-ifeq ($(VCR), 1)
-  CFLAGS += -DVCR_SUPPORT
-endif
 ifeq ($(LIRC), 1)
   CFLAGS += -DWITH_LIRC
 endif
@@ -188,12 +185,6 @@ else
   OBJ_DYNAREC = r4300/empty_dynarec.o
 endif
 
-OBJ_VCR	= \
-	main/vcr.o \
-	main/vcr_compress.o \
-	main/vcr_resample.o \
-	main/gui_gtk/vcrcomp_dialog.o
-
 OBJ_LIRC = \
 	main/lirc.o
 
@@ -283,10 +274,6 @@ ifeq ($(DBG), 1)
   OBJECTS +=  $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
   LIBS += -lopcodes -lbfd
 endif
-ifeq ($(VCR), 1)
-  OBJECTS += $(OBJ_VCR)
-  LIBS += $(AVIFILE_LIBS)
-endif
 ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
@@ -312,7 +299,6 @@ targets:
 	@echo "    uninstall     == Uninstall Mupen64Plus and all plugins"
 	@echo "  Options:"
 	@echo "    BITS=32       == build 32-bit binaries on 64-bit machine"
-	@echo "    VCR=1         == enable video recording"
 	@echo "    LIRC=1        == enable LIRC support"
 	@echo "    NO_RESAMP=1   == disable libsamplerate support in jttl_audio"
 	@echo "    NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)"
@@ -378,9 +364,6 @@ main/gui_kde4/settings.o: main/gui_kde4/settings.cpp
 
 .c.o:
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
-
-main/vcr_compress.o: main/vcr_compress.cpp
-	$(CXX) -o $@ $(CFLAGS) $(AVIFILE_FLAGS) -c $<
 
 plugins/blight_input.so: FORCE
 	$(MAKE) -C blight_input all

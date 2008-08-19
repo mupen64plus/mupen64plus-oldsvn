@@ -1,52 +1,46 @@
-/*
- * Mupen64 - memory.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - memory.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "memory.h"
+#include "pif.h"
+#include "flashram.h"
+#include "dma.h"
+
 #ifndef __WIN32__
 #include "../main/winlnxdefs.h"
 #else
 #include <windows.h>
 #endif
 
-#include "memory.h"
-#include "dma.h"
 #include "../r4300/r4300.h"
 #include "../r4300/macros.h"
 #include "../r4300/interupt.h"
 #include "../r4300/recomph.h"
 #include "../r4300/ops.h"
-#include "pif.h"
-#include "flashram.h"
+
 #include "../main/main.h"
 #include "../main/plugin.h"
-#include "../main/vcr.h"
 
 #ifdef DBG
 #include "../debugger/breakpoints.h"
@@ -2777,11 +2771,6 @@ void write_ai()
      {
       case 0x4:
     ai_register.ai_len = word;
-#ifndef VCR_SUPPORT
-    aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2836,33 +2825,6 @@ void write_ai()
     if (ai_register.ai_dacrate != word)
       {
          ai_register.ai_dacrate = word;
-         switch(ROM_HEADER->Country_code&0xFF)
-           {
-        case 0x44:
-        case 0x46:
-        case 0x49:
-        case 0x50:
-        case 0x53:
-        case 0x55:
-        case 0x58:
-        case 0x59:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
-          break;
-        case 0x37:
-        case 0x41:
-        case 0x45:
-        case 0x4a:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
-          break;
-           }
       }
     return;
     break;
@@ -2887,11 +2849,6 @@ void write_aib()
     *((unsigned char*)&temp
       + ((*address_low&3)^S8) ) = byte;
     ai_register.ai_len = temp;
-#ifndef VCR_SUPPORT
-    aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2948,33 +2905,6 @@ void write_aib()
     if (ai_register.ai_dacrate != temp)
       {
          ai_register.ai_dacrate = temp;
-         switch(ROM_HEADER->Country_code&0xFF)
-           {
-        case 0x44:
-        case 0x46:
-        case 0x49:
-        case 0x50:
-        case 0x53:
-        case 0x55:
-        case 0x58:
-        case 0x59:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
-          break;
-        case 0x37:
-        case 0x41:
-        case 0x45:
-        case 0x4a:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
-          break;
-           }
       }
     return;
     break;
@@ -2998,11 +2928,6 @@ void write_aih()
     *((unsigned short*)((unsigned char*)&temp
                 + ((*address_low&3)^S16) )) = hword;
     ai_register.ai_len = temp;
-#ifndef VCR_SUPPORT
-    aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -3054,33 +2979,6 @@ void write_aih()
     if (ai_register.ai_dacrate != temp)
       {
          ai_register.ai_dacrate = temp;
-         switch(ROM_HEADER->Country_code&0xFF)
-           {
-        case 0x44:
-        case 0x46:
-        case 0x49:
-        case 0x50:
-        case 0x53:
-        case 0x55:
-        case 0x58:
-        case 0x59:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
-          break;
-        case 0x37:
-        case 0x41:
-        case 0x45:
-        case 0x4a:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
-          break;
-           }
       }
     return;
     break;
@@ -3100,11 +2998,6 @@ void write_aid()
       case 0x0:
     ai_register.ai_dram_addr = dword >> 32;
     ai_register.ai_len = dword & 0xFFFFFFFF;
-#ifndef VCR_SUPPORT
-    aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -3152,33 +3045,6 @@ void write_aid()
     if (ai_register.ai_dacrate != dword >> 32)
       {
          ai_register.ai_dacrate = dword >> 32;
-         switch(ROM_HEADER->Country_code&0xFF)
-           {
-        case 0x44:
-        case 0x46:
-        case 0x49:
-        case 0x50:
-        case 0x53:
-        case 0x55:
-        case 0x58:
-        case 0x59:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
-          break;
-        case 0x37:
-        case 0x41:
-        case 0x45:
-        case 0x4a:
-#ifndef VCR_SUPPORT
-          aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
-          break;
-           }
       }
     ai_register.ai_bitrate = dword & 0xFFFFFFFF;
     return;

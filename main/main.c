@@ -78,11 +78,6 @@
 #include "lirc.h"
 #endif //WITH_LIRC
 
-#ifdef VCR_SUPPORT
-#include "vcr.h"
-#include "vcr_compress.h"
-#endif
-
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
 static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
@@ -1388,28 +1383,6 @@ int main(int argc, char *argv[])
         }
 
     }
-
-#ifdef VCR_SUPPORT
-    VCRComp_init();
-    const char *p = config_get_string( "VCR Video Codec", "XviD" );
-    for (i = 0; i < VCRComp_numVideoCodecs(); i++)
-    {
-        if (!strcasecmp( VCRComp_videoCodecName( i ), p ))
-        {
-            VCRComp_selectVideoCodec( i );
-            break;
-        }
-    }
-    p = config_get_string( "VCR Audio Codec", VCRComp_audioCodecName( 0 ) );
-    for (i = 0; i < VCRComp_numAudioCodecs(); i++)
-    {
-        if (!strcasecmp( VCRComp_audioCodecName( i ), p ))
-        {
-            VCRComp_selectAudioCodec( i );
-            break;
-        }
-    }
-#endif
 
     // init multi-language support
     tr_init();

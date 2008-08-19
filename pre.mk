@@ -207,15 +207,3 @@ else   # set variables for debugging symbols
     STRIP = true
   endif
 endif
-
-ifeq ($(VCR), 1)
-  # test for presence of avifile
-  ifneq ($(shell avifile-config --version), 0)
-    # throw error
-    $(error VCR support requires avifile library)
-  else
-    AVIFILE_FLAGS	= $(shell avifile-config --cflags)
-    AVIFILE_LIBS	= $(shell avifile-config --libs)
-  endif
-endif
-

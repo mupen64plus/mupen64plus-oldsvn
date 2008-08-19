@@ -59,13 +59,6 @@
 #include "../../debugger/debugger.h"
 #endif
 
-#ifdef VCR
-#include "vcrcomp_dialog.h"
-
-#include "../vcr.h"
-#include "../vcr_compress.h"
-#endif
-
 /** function prototypes **/
 static void callback_startEmulation(GtkWidget *widget, gpointer data);
 static void callback_stopEmulation(GtkWidget *widget, gpointer data);
@@ -99,9 +92,6 @@ void gui_init(int *argc, char ***argv)
 
     create_mainWindow();
     create_configDialog();
-#ifdef VCR_SUPPORT
-    create_vcrCompDialog();
-#endif
     create_aboutDialog();
 }
 
@@ -644,213 +634,6 @@ static void callback_fullScreen( GtkWidget *widget, gpointer data )
     }
 }
 
-
-/** VCR **/
-#ifdef VCR_SUPPORT
-static void callback_vcrStartRecord( GtkWidget *widget, gpointer data )
-{
-    if( g_EmulationThread )
-    {
-        GtkWidget *file_chooser;
-
-        // get save file from user
-        file_chooser = gtk_file_chooser_dialog_new(tr("Save Recording"),
-                                                   GTK_WINDOW(g_MainWindow.window),
-                                                   GTK_FILE_CHOOSER_ACTION_SAVE,
-                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                                   GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                                                   NULL);
-        
-        if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
-        {
-            gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
-            char full_filename[PATH_MAX];
-
-            strncpy(full_filename, filename, PATH_MAX);
-
-            // if user didn't provide suffix, append .rec
-            if(!strstr(filename, "."))
-                strncat(full_filename, ".rec", PATH_MAX - strlen(full_filename));
-        
-            if (VCR_startRecord( full_filename ) < 0)
-                error_message(tr("Couldn't start recording."));
-
-            g_free(filename);
-        }
-        
-        gtk_widget_destroy (file_chooser);
-    }
-    else
-    {
-        error_message(tr("Emulation is not running."));
-    }
-}
-
-
-static void callback_vcrStopRecord( GtkWidget *widget, gpointer data )
-{
-    if( g_EmulationThread )
-    {
-        if (VCR_stopRecord() < 0)
-            error_message(tr("Couldn't stop recording."));
-    }
-    else
-    {
-        error_message(tr("Emulation is not running."));
-    }
-}
-
-static void callback_vcrStartPlayback( GtkWidget *widget, gpointer data )
-{
-    if( g_EmulationThread )
-    {
-        GtkWidget *file_chooser;
-        GtkFileFilter *file_filter;
-
-        // get recording file from user to playback
-        file_chooser = gtk_file_chooser_dialog_new(tr("Load Recording"),
-                                                   GTK_WINDOW(g_MainWindow.window),
-                                                   GTK_FILE_CHOOSER_ACTION_OPEN,
-                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                                   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                                                   NULL);
-        
-        // add filter for recording file types
-        file_filter = gtk_file_filter_new();
-        gtk_file_filter_set_name(file_filter, "Recording file (*.rec)");
-        gtk_file_filter_add_pattern(file_filter, "*.[rR][eE][cC]");
-        
-        gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
-                                    file_filter);
-        
-        // add filter for "all files"
-        file_filter = gtk_file_filter_new();
-        gtk_file_filter_set_name(file_filter, "All files (*.*)");
-        gtk_file_filter_add_pattern(file_filter, "*");
-        
-        gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
-                                    file_filter);
-
-        if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
-        {
-            gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
-        
-            if (VCR_startPlayback( filename ) < 0)
-                error_message(tr("Couldn't start playback."));
-        
-            g_free(filename);
-        }
-        
-        gtk_widget_destroy (file_chooser);
-    }
-    else
-    {
-        error_message(tr("Emulation is not running."));
-    }
-}
-
-
-static void callback_vcrStopPlayback( GtkWidget *widget, gpointer data )
-{
-    if( g_EmulationThread )
-    {
-        if (VCR_stopPlayback() < 0)
-            error_message(tr("Couldn't stop playback."));
-    }
-    else
-    {
-        error_message(tr("Emulation is not running."));
-    }
-}
-
-
-static void callback_vcrStartCapture( GtkWidget *widget, gpointer data )
-{
-    if( g_EmulationThread )
-    {
-        GtkWidget *file_chooser;
-        GtkFileFilter *file_filter;
-
-        // load recording file to capture
-        file_chooser = gtk_file_chooser_dialog_new(tr("Load Recording"),
-                                                   GTK_WINDOW(g_MainWindow.window),
-                                                   GTK_FILE_CHOOSER_ACTION_OPEN,
-                                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                                   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                                                   NULL);
-        
-        // add filter for recording file types
-        file_filter = gtk_file_filter_new();
-        gtk_file_filter_set_name(file_filter, "Recording file (*.rec)");
-        gtk_file_filter_add_pattern(file_filter, "*.[rR][eE][cC]");
-        
-        gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
-                                    file_filter);
-        
-        // add filter for "all files"
-        file_filter = gtk_file_filter_new();
-        gtk_file_filter_set_name(file_filter, "All files (*.*)");
-        gtk_file_filter_add_pattern(file_filter, "*");
-        
-        gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_chooser),
-                                    file_filter);
-
-        if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
-        {
-            gchar *rec_filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
-
-            gtk_widget_destroy(file_chooser);
-
-            // get avi filename from user to save recording to.
-            file_chooser = gtk_file_chooser_dialog_new(tr("Save as..."),
-                                                       GTK_WINDOW(g_MainWindow.window),
-                                                       GTK_FILE_CHOOSER_ACTION_SAVE,
-                                                       GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                                       GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                                                       NULL);
-
-            if(gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT)
-            {
-                gchar *avi_filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
-
-                if (VCR_startCapture( rec_filename, avi_filename ) < 0)
-                    error_message(tr("Couldn't start capturing."));
-
-                g_free(avi_filename);
-            }
-        
-            g_free(rec_filename);
-        }
-        
-        gtk_widget_destroy (file_chooser);
-    }
-    else
-    {
-        error_message(tr("Emulation is not running."));
-    }
-}
-
-
-static void callback_vcrStopCapture( GtkWidget *widget, gpointer data )
-{
-    if( g_EmulationThread )
-    {
-        if (VCR_stopCapture() < 0)
-            error_message(tr("Couldn't stop capturing."));
-    }
-    else
-    {
-        error_message(tr("Emulation is not running."));
-    }
-}
-
-
-static void callback_vcrSetup( GtkWidget *widget, gpointer data )
-{
-    gtk_widget_show_all( g_VcrCompDialog.dialog );
-}
-#endif // VCR_SUPPORT
-
 static void callback_toggle_toolbar( GtkWidget *widget, gpointer data )
 {
     if(GTK_WIDGET_VISIBLE(g_MainWindow.toolBar))
@@ -999,10 +782,6 @@ static int create_menuBar( void )
     GtkWidget   *emulationMenuItem;
     GtkWidget   *optionsMenu;
     GtkWidget   *optionsMenuItem;
-#ifdef VCR_SUPPORT
-    GtkWidget   *vcrMenu;
-    GtkWidget   *vcrMenuItem;
-#endif
     GtkWidget   *viewMenu;
     GtkWidget   *viewMenuItem;
     GtkWidget   *viewToolbar;
@@ -1046,19 +825,6 @@ static int create_menuBar( void )
     GtkWidget   *optionsSeparator2;
     GtkWidget   *optionsCheatsItem;
     GtkWidget   *optionsFullScreenItem;
-
-#ifdef VCR_SUPPORT
-    GtkWidget   *vcrStartRecordItem;
-    GtkWidget   *vcrStopRecordItem;
-    GtkWidget   *vcrSeparator1;
-    GtkWidget   *vcrStartPlaybackItem;
-    GtkWidget   *vcrStopPlaybackItem;
-    GtkWidget   *vcrSeparator2;
-    GtkWidget   *vcrStartCaptureItem;
-    GtkWidget   *vcrStopCaptureItem;
-    GtkWidget   *vcrSeparator3;
-    GtkWidget   *vcrSetupItem;
-#endif
 
     GtkWidget   *helpAboutItem;
 
@@ -1249,42 +1015,6 @@ static int create_menuBar( void )
     g_signal_connect(optionsCheatsItem, "activate", G_CALLBACK(cb_cheatDialog), NULL );
     g_signal_connect(optionsFullScreenItem, "activate", G_CALLBACK(callback_fullScreen), NULL );
 
-    // vcr menu
-#ifdef VCR_SUPPORT
-    vcrMenu = gtk_menu_new();
-    vcrMenuItem = gtk_menu_item_new_with_mnemonic(tr("_VCR"));
-    gtk_menu_item_set_submenu( GTK_MENU_ITEM(vcrMenuItem), vcrMenu );
-    vcrStartRecordItem = gtk_menu_item_new_with_mnemonic(tr("Start _Record..."));
-    vcrStopRecordItem = gtk_menu_item_new_with_mnemonic(tr("Stop Record"));
-    vcrSeparator1 = gtk_menu_item_new();
-    vcrStartPlaybackItem = gtk_menu_item_new_with_mnemonic(tr("Start _Playback..."));
-    vcrStopPlaybackItem = gtk_menu_item_new_with_mnemonic(tr("Stop Playback"));
-    vcrSeparator2 = gtk_menu_item_new();
-    vcrStartCaptureItem = gtk_menu_item_new_with_mnemonic(tr("Start _Capture..."));
-    vcrStopCaptureItem = gtk_menu_item_new_with_mnemonic(tr("Stop Capture"));
-    vcrSeparator3 = gtk_menu_item_new();
-    vcrSetupItem = gtk_menu_item_new_with_mnemonic(tr("Configure Codec..."));
-
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrStartRecordItem );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrStopRecordItem );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrSeparator1 );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrStartPlaybackItem );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrStopPlaybackItem );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrSeparator2 );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrStartCaptureItem );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrStopCaptureItem );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrSeparator3 );
-    gtk_menu_append( GTK_MENU(vcrMenu), vcrSetupItem );
-
-    gtk_signal_connect_object( GTK_OBJECT(vcrStartRecordItem), "activate", GTK_SIGNAL_FUNC(callback_vcrStartRecord), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(vcrStopRecordItem), "activate", GTK_SIGNAL_FUNC(callback_vcrStopRecord), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(vcrStartPlaybackItem), "activate", GTK_SIGNAL_FUNC(callback_vcrStartPlayback), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(vcrStopPlaybackItem), "activate", GTK_SIGNAL_FUNC(callback_vcrStopPlayback), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(vcrStartCaptureItem), "activate", GTK_SIGNAL_FUNC(callback_vcrStartCapture), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(vcrStopCaptureItem), "activate", GTK_SIGNAL_FUNC(callback_vcrStopCapture), (gpointer)NULL );
-    gtk_signal_connect_object( GTK_OBJECT(vcrSetupItem), "activate", GTK_SIGNAL_FUNC(callback_vcrSetup), (gpointer)NULL );
-#endif // VCR_SUPPORT
-
     viewMenu = gtk_menu_new();
     viewMenuItem = gtk_menu_item_new_with_mnemonic(tr("_View"));
     gtk_menu_item_set_submenu( GTK_MENU_ITEM(viewMenuItem), viewMenu );
@@ -1368,9 +1098,6 @@ static int create_menuBar( void )
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), fileMenuItem );
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), emulationMenuItem );
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), optionsMenuItem );
-#ifdef VCR_SUPPORT
-    gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), vcrMenuItem );
-#endif
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), viewMenuItem );
 #ifdef DBG
     gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), debuggerMenuItem );
