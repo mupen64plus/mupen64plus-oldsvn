@@ -60,12 +60,17 @@ ifeq ($(GUI),NONE)
 endif
 
 # build targets
-all: jttl_audio.so
+all: version.h jttl_audio.so
 
 clean:
 	rm -f *.o *.so
 
 # build rules
+version.h: .svn/entries
+	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
+        ../main/version.template > version.h
+	@$(MV) version.h ../main/version.h
+
 .c.o:
 	$(CC) $(CFLAGS) $(SDL_FLAGS) $(SRC_FLAGS) -c -o $@ $<
 

@@ -36,12 +36,17 @@ endif
 OBJECTS = main.o disasm.o jpeg.o ucode3.o ucode2.o ucode1.o ucode3mp3.o
 
 # build targets
-all: mupen64_hle_rsp_azimer.so
+all: version.h mupen64_hle_rsp_azimer.so
 
 clean:
 	rm -f *.o *.so
 
 # build rules
+version.h: .svn/entries
+	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
+        ../main/version.template > version.h
+	@$(MV) version.h ../main/version.h
+
 .c.o:
 	$(CC) -o $@ $(CFLAGS) -c $<
 .cpp.o:

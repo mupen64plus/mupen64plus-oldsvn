@@ -92,7 +92,7 @@ targets:
 	@echo "    RDP_LOG=1     == Dump out RDP instruction data"
 	@echo "    RDP_LOG_ERR=1 == Dump out RDP instruction data + errors"
 
-all: $(TARGET)
+all: version.h $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
@@ -120,6 +120,10 @@ rebuild: clean $(TARGET)
 
 
 # build rules
+version.h: .svn/entries
+	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
+        ../main/version.template > version.h
+	@$(MV) version.h ../main/version.h
 
 .SUFFIXES: .o .cpp .c
 .cpp.o:

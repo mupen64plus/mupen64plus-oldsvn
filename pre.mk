@@ -92,7 +92,7 @@ ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
   $(error No GTK 2.x development libraries found!)
 endif
 # set GTK flags and libraries
-GTK_FLAGS	= $(shell pkg-config gtk+-2.0 --cflags) -D_GTK2
+GTK_FLAGS	= $(shell pkg-config gtk+-2.0 --cflags)
 GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
 GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
 
@@ -139,6 +139,25 @@ FIND    = find
 PROF    = gprof
 INSTALL = ginstall
 
+# create SVN version defines
+MUPEN_RELEASE = 1.4
+
+ifneq ($(RELEASE),)
+  MUPEN_VERSION = $(MUPEN_RELEASE)
+  PLUGIN_VERSION = $(MUPEN_RELEASE)
+else 
+  ifeq ($(shell svn info ./ 2>/dev/null),)
+    MUPEN_VERSION = $(MUPEN_RELEASE)"-development"
+    PLUGIN_VERSION = $(MUPEN_RELEASE)"-development"
+  else
+    SVN_REVISION = $(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')
+    SVN_BRANCH = $(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')
+    SVN_DIFFHASH = $(shell svn diff ./ 2>/dev/null | md5sum | sed '/.*/s/ -//;/^d41d8cd98f00b204e9800998ecf8427e/d')
+    MUPEN_VERSION = $(MUPEN_RELEASE)-$(SVN_BRANCH)-r$(SVN_REVISION) $(SVN_DIFFHASH)
+    PLUGIN_VERSION = $(MUPEN_RELEASE)-$(SVN_BRANCH)-r$(SVN_REVISION)
+  endif
+endif
+
 # set base CFLAGS and LDFLAGS for all systems
 CFLAGS = -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing 
 LDFLAGS =
@@ -161,17 +180,6 @@ ifeq ($(CPU), X86)
 endif
 ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
-endif
-
-# create SVN version defines
-ifneq ($(RELEASE),)
-    CFLAGS += -DRELEASE_BUILD
-  else
-    ifneq ($(shell svn info ./ 2>/dev/null),)
-      CFLAGS += -DSVN_REVISION="\"$(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')\""
-      CFLAGS += -DSVN_BRANCH="\"$(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')\""
-      CFLAGS += -DSVN_DIFFHASH="\"$(shell svn diff ./ 2>/dev/null | md5sum | sed '/.*/s/  -//;/^d41d8cd98f00b204e9800998ecf8427e/d')\""
-    endif
 endif
 
 # set CFLAGS, LIBS, and LDFLAGS for external dependencies

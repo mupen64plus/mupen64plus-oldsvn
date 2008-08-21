@@ -119,7 +119,7 @@ targets:
 	@echo "    DBG=1      == turn on debugging functions"
 	@echo "    DBGSYM=1   == add debugging symbols to binaries"
 
-all: ricevideo.so
+all: version.h ricevideo.so
 
 ricevideo.so: $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
@@ -131,6 +131,10 @@ clean:
 rebuild: clean all
 
 # build rules
+version.h: .svn/entries
+	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
+        ../main/version.template > version.h
+	@$(MV) version.h ../main/version.h
 
 .cpp.o:
 	$(CXX) -o $*.o $(CFLAGS) -c $<

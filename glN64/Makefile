@@ -75,12 +75,17 @@ OBJECTS += glN64.o \
 	F3DWRUS.o
 
 # build targets
-all: glN64.so
+all: version.h glN64.so
 
 clean:
 	rm -f *.o *.so gln64settings.cpp gln64settings.h* ui_gln64config.*
 
 # build rules
+version.h: .svn/entries
+	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
+        ../main/version.template > version.h
+	@$(MV) version.h ../main/version.h
+
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 

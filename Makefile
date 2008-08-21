@@ -323,7 +323,7 @@ targets:
 # The RELEASE flag is hidden from view as it should only be used internally.  It only affects
 # the version strings
 
-all: $(ALL)
+all: version.h $(ALL)
 
 mupen64plus: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) -lpthread -ldl -o $@
@@ -355,6 +355,11 @@ clean:
 rebuild: clean all
 
 # build rules
+version.h: .svn/entries
+	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
+        main/version.template > version.h
+	@$(MV) version.h main/version.h
+
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 

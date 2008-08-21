@@ -1,34 +1,34 @@
-/**
- * Mupen64Plus - version.h
- * Copyright (C) 2008 Richard Goedeken
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*   Mupen64plus - version.h                                               *
+*   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+*   Copyright (C) 2008 Richard42 DarkJeztr Tillin9                        *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define MUPEN_NAME    "Mupen64Plus"
-#define MUPEN_RELEASE "1.4"
+/* Version macros automatically replaced by Makefiles. */
 
-#if defined(RELEASE_BUILD)
-  #define MUPEN_VERSION MUPEN_RELEASE
-#elif !defined(SVN_BRANCH)
-  #define MUPEN_VERSION MUPEN_RELEASE "-development"
-#else
-  #define MUPEN_VERSION MUPEN_RELEASE "-" SVN_BRANCH "-r" SVN_REVISION " " SVN_DIFFHASH
-  #define PLUGIN_VERSION MUPEN_RELEASE "-" SVN_BRANCH "-r" SVN_REVISION
-#endif
+#ifndef __VERSION_H__
+#define __VERSION_H__
+
+#define MUPEN_NAME "Mupen64Plus"
+
+#define MUPEN_VERSION "1.4-trunk/mupen64_input-r860 86c154423274e05788aee39d4f1414f5 "
+#define PLUGIN_VERSION "1.4-trunk/mupen64_input-r860"
+
+#endif /* __VERSION_H__ */
+
+
