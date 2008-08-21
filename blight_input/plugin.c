@@ -15,12 +15,15 @@
  *                                                                         *
  ***************************************************************************/
 
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
+#ifdef __linux__
 #include <linux/input.h>
+#endif //__linux__
 
 #include "plugin.h"
 
@@ -43,11 +46,13 @@
 #include <string.h>
 
 /* defines for the force feedback rumble support */
+#ifdef __linux__
 #define BITS_PER_LONG (sizeof(long) * 8)
 #define OFF(x)  ((x)%BITS_PER_LONG)
 #define BIT(x)  (1UL<<OFF(x))
 #define LONG(x) ((x)/BITS_PER_LONG)
 #define test_bit(bit, array)    ((array[LONG(bit)] >> OFF(bit)) & 1)
+#endif //__linux__
 
 static unsigned short button_bits[] = {
     0x0001,  // R_DPAD
@@ -453,10 +458,13 @@ write_configuration( void )
 
 BYTE lastCommand[6];
 
+#ifdef __linux__
+
 struct ff_effect ffeffect[3];
 struct ff_effect ffstrong[3];
 struct ff_effect ffweak[3];
 
+#endif //__linux__
 BYTE DataCRC( BYTE *Data, int iLenght )
 {
     register BYTE Remainder = Data[0];
@@ -513,7 +521,6 @@ CloseDLL( void )
 void ControllerCommand(int Control, BYTE *Command)
 {
     BYTE *Data = &Command[5];
-    struct input_event play;
 
     if (Control == -1)
         return;
@@ -549,6 +556,8 @@ void ControllerCommand(int Control, BYTE *Command)
               if(dwAddress==PAK_IO_RUMBLE&&*Data)
                     printf("Triggering rumble pack.\n");*/
 
+#ifdef __linux__
+                struct input_event play;
                 if( dwAddress == PAK_IO_RUMBLE && controller[Control].event_joystick != 0)
                 {
                     if( *Data )
@@ -571,6 +580,7 @@ void ControllerCommand(int Control, BYTE *Command)
                             perror("Error stopping rumble effect");
                     }
                 }
+#endif //__linux__
                 Data[32] = DataCRC( Data, 32 );
             }
             break;
@@ -864,7 +874,6 @@ GetDllInfo( PLUGIN_INFO *PluginInfo )
 void
 GetKeys( int Control, BUTTONS *Keys )
 {
-    struct input_event play;
     int b, axis_val, axis_max_val, axis_val_tmp;
     SDL_Event event;
     Uint8 *keystate = SDL_GetKeyState( NULL );
@@ -1091,8 +1100,10 @@ GetKeys( int Control, BUTTONS *Keys )
     *(int *)Keys = *(int *)&controller[Control].buttons;
 
     /* handle mempack / rumblepak switching (only if rumble is active on joystick) */
+#ifdef __linux__
     if (controller[Control].event_joystick != 0)
     {
+        struct input_event play;
         if (controller[Control].buttons.button & button_bits[14])
         {
             controller[Control].control.Plugin = PLUGIN_MEMPAK;
@@ -1112,6 +1123,7 @@ GetKeys( int Control, BUTTONS *Keys )
                 perror("Error starting rumble effect");
         }
     }
+#endif //__linux__
 }
 
 int InitiateRumble(int cntrl)
@@ -1124,7 +1136,7 @@ int InitiateRumble(int cntrl)
     int iFound = 0;
 
     controller[cntrl].event_joystick = 0;
-
+#ifdef __linux__
     sprintf(temp,"/sys/class/input/js%d/device", controller[cntrl].device);
     dp = opendir(temp);
 
@@ -1209,6 +1221,8 @@ int InitiateRumble(int cntrl)
     ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffweak[cntrl]);
 
     printf("["PLUGIN_NAME"]: Rumble activated on N64 joystick #%i\n", cntrl + 1);
+#endif //__linux__
+
 }
 
 /******************************************************************
