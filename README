@@ -20,7 +20,7 @@ README Sections
 
 *Binary Package Requirements*
 
-  - GTK2 libraries (unless built from source with GUI=NONE)
+  - GTK2 libraries (unless built from source with GUI=NONE - see note)
   - SDL 1.2
   - SDL_ttf
   - Mesa / OpenGL libraries
@@ -89,6 +89,8 @@ Previous to version 1.3, building mupen64 built two programs: mupen64 and mupen6
 NOTE: If you want to build a nogui-only version of mupen64plus, i.e. without gtk+ dependencies, pass the GUI=NONE option to make, like this:
 
  $ make GUI=NONE all
+
+Also note, that this only disables gtk+ dependencies where avaliable. Currently (August, 2008) some plugins such as rice video and glide64 must be built with gtk. This is a known issue and being addressed.
 
 3. Installation
 ---------------
