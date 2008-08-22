@@ -12,6 +12,8 @@ The following icons:
 16x16/star.png (renamed from bookmarks.png)
 16x16/view-fullscreen.png
 16x16/edit-delete.png
+16x16/document-revert.png
+16x16/document-save-as.png
 22x22/document-open.png
 22x22/document-save.png
 22x22/media-playback-pause.png
@@ -21,6 +23,8 @@ The following icons:
 22x22/star.png (renamed from bookmarks.png)
 22x22/view-fullscreen.png
 22x22/edit-delete.png
+22x22/document-revert.png
+22x22/document-save-as.png
 32x32/audio-card.png
 32x32/dialog-error.png
 32x32/dialog-question.png
@@ -37,6 +41,8 @@ The following icons:
 32x32/star.png (renamed from bookmarks.png)
 32x32/view-fullscreen.png
 32x32/edit-delete.png
+32x32/document-revert.png
+32x32/document-save-as.png
 
 are Copyright: The Oxygen Icon Theme
   |     Copyright (C) 2007 David Vignoni <david@icon-king.com>

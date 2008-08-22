@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>MainWindow</string>
+   <string>Mupen64Plus</string>
   </property>
   <widget class="QWidget" name="centralwidget" >
    <layout class="QVBoxLayout" name="verticalLayout" >
@@ -56,7 +56,10 @@
     <property name="title" >
      <string>&amp;Settings</string>
     </property>
+    <addaction name="actionShowToolbar" />
+    <addaction name="actionShowStatusbar" />
     <addaction name="actionFullScreen" />
+    <addaction name="separator" />
     <addaction name="actionConfigureMupen64Plus" />
    </widget>
    <widget class="QMenu" name="menu_Help" >
@@ -74,7 +77,7 @@
   <widget class="QStatusBar" name="statusbar" />
   <widget class="QToolBar" name="toolBar" >
    <property name="windowTitle" >
-    <string>toolBar</string>
+    <string>Toolbar</string>
    </property>
    <property name="iconSize" >
     <size>
@@ -205,6 +208,28 @@
     <string>About &amp;Qt</string>
    </property>
   </action>
+  <action name="actionShowToolbar" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Show &amp;Toolbar</string>
+   </property>
+  </action>
+  <action name="actionShowStatusbar" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Show &amp;Statusbar</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -215,5 +240,38 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionShowToolbar</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>toolBar</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>399</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowStatusbar</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>statusbar</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>399</x>
+     <y>587</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

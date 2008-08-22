@@ -257,7 +257,7 @@ void MainWindow::configDialogShow()
 
 void MainWindow::itemCountUpdate(int count)
 {
-    m_statusBarLabel->setText(tr("%0 roms").arg(count));
+    m_statusBarLabel->setText(tr("%n rom(s)", "", count));
 }
 
 void MainWindow::aboutDialogShow()
@@ -305,10 +305,12 @@ void MainWindow::setupActions()
     actionSaveState->setIcon(icon("document-save.png"));
     connect(actionSaveState, SIGNAL(triggered()),
             this, SLOT(saveStateSave()));
-    actionLoadState->setIcon(icon("document-open.png"));
+    actionLoadState->setIcon(icon("document-revert.png"));
     connect(actionLoadState, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
+    actionSaveStateAs->setIcon(icon("document-save-as.png"));
     connect(actionSaveStateAs, SIGNAL(triggered()),
             this, SLOT(saveStateSaveAs()));
+    actionLoadStateFrom->setIcon(icon("document-open.png"));
     connect(actionLoadStateFrom, SIGNAL(triggered()),
             this, SLOT(saveStateLoadFrom()));
 
