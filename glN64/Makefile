@@ -21,7 +21,7 @@
 # Makefile for glN64 in Mupen64plus.
 
 # include pre-make file with a bunch of definitions
-USES_KDE4 = true
+USES_QT4 = true
 USES_GTK2 = true
 include ../pre.mk
 
@@ -32,10 +32,10 @@ LDFLAGS += $(GTHREAD_LIBS)
 ifeq ($(GUI), NONE)
   OBJECTS = Config_nogui.o
 else
-  ifeq ($(GUI), KDE4)
-    LDFLAGS += $(KDE_LIBS)
-    CFLAGS += $(KDE_FLAGS)
-    OBJECTS = Config_kde4.o gln64settings.o
+  ifeq ($(GUI), QT4)
+    LDFLAGS += $(QT_LIBS)
+    CFLAGS += $(QT_FLAGS)
+    OBJECTS = Config_qt4.o
   else
     LDFLAGS += $(GTK_LIBS) 
     CFLAGS += -DUSE_GTK $(GTK_FLAGS)
@@ -78,7 +78,7 @@ OBJECTS += glN64.o \
 all: version.h glN64.so
 
 clean:
-	rm -f *.o *.so gln64settings.cpp gln64settings.h* ui_gln64config.*
+	rm -f *.o *.so ui_gln64config.*
 
 # build rules
 version.h: .svn/entries
@@ -89,15 +89,8 @@ version.h: .svn/entries
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
-gln64settings.o: gln64settings.cpp
-	$(CXX) -o $@ $(CFLAGS) ${KDE_FLAGS} $(SDL_FLAGS) -c $<
-
-
 ui_gln64config.h: gln64config.ui
 	$(UIC) $< -o $@
-
-gln64settings.h: gln64.kcfg gln64settings.kcfgc
-	$(KCONFIG_COMPILER) gln64.kcfg gln64settings.kcfgc
 
 glN64.so: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -o $@
@@ -106,7 +99,7 @@ glN64.so: $(OBJECTS)
 glN64.o: glN64.cpp
 	$(CXX) $(CFLAGS) $(SDL_FLAGS) -DMAINDEF -c -o $@ $<
 
-Config_kde4.o: Config_kde4.cpp gln64settings.h ui_gln64config.h
+Config_qt4.o: Config_qt4.cpp ui_gln64config.h
 	$(CXX) $(CFLAGS) $(SDL_FLAGS) -c -o $@ $<
 
 Config_gtk2.o: Config_gtk2.cpp
