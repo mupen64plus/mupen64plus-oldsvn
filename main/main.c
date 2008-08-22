@@ -151,7 +151,7 @@ char *get_iconspath()
     return path;
 }
 
-char *get_iconpath(char *iconfile)
+char *get_iconpath(const char *iconfile)
 {
     static char path[PATH_MAX];
     strncpy(path, get_iconspath(), PATH_MAX-strlen(iconfile));

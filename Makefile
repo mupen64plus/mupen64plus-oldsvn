@@ -219,7 +219,8 @@ OBJ_KDE_MOC = \
 
 OBJ_KDE_HEADERS = \
 	main/gui_kde4/ui_romdirectorieslistwidget.h \
-	main/gui_kde4/ui_settingsdialog.h
+	main/gui_kde4/ui_settingsdialog.h \
+    main/gui_kde4/ui_mainwindow.h
 
 OBJ_DBG = \
 	debugger/debugger.o \
@@ -250,7 +251,7 @@ OBJ_GTK_DBG_GUI = \
 PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
           plugins/dummyvideo.so \
-          plugins/glN64.so \
+#           plugins/glN64.so \
           plugins/ricevideo.so \
           plugins/glide64.so \
           plugins/jttl_audio.so \
@@ -334,7 +335,7 @@ clean:
 	$(MAKE) -C blight_input clean
 	$(MAKE) -C dummy_audio clean
 	$(MAKE) -C dummy_video clean
-	$(MAKE) -C glN64 clean
+# 	$(MAKE) -C glN64 clean
 	$(MAKE) -C rice_video clean
 	$(MAKE) -C glide64 clean
 	$(MAKE) -C jttl_audio clean
@@ -377,9 +378,9 @@ plugins/dummyvideo.so: FORCE
 	$(MAKE) -C dummy_video all
 	@$(CP) ./dummy_video/dummyvideo.so ./plugins/dummyvideo.so
 
-plugins/glN64.so: FORCE
-	$(MAKE) -C glN64 all
-	@$(CP) ./glN64/glN64.so ./plugins/glN64.so
+# plugins/glN64.so: FORCE
+# 	$(MAKE) -C glN64 all
+# 	@$(CP) ./glN64/glN64.so ./plugins/glN64.so
 
 plugins/ricevideo.so: FORCE
 	$(MAKE) -C rice_video all
