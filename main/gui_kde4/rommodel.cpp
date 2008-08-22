@@ -20,7 +20,9 @@
 
 #include <QStringList>
 #include <QDir>
+#include <QFont>
 
+#include <KUrl>
 #include <KGlobal>
 #include <KLocale>
 #include <KGlobalSettings>
@@ -29,20 +31,20 @@
 
 #include "rommodel.h"
 #include "globals.h"
-#include "settings.h"
 
 namespace core {
     extern "C" {
         #include "../rom.h"
         #include "../romcache.h"
         #include "../main.h"
+        #include "../config.h"
     }
 }
 
 RomModel::RomModel(QObject* parent)
     : QAbstractItemModel(parent)
-    , m_showFullPath(Settings::showFullPathsInFilenames())
-    , m_romDirectories(Settings::romDirectories())
+    , m_showFullPath(core::config_get_bool("RomBrowserShowFullPaths", FALSE))
+    , m_romDirectories(romDirectories())
 {
     m_columnHeaders << i18n("Flag")
                     << i18n("Good Name")
@@ -198,7 +200,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     break;
                 case FileName:
                     {
-                        if (Settings::showFullPathsInFilenames())
+                        if (core::config_get_bool("RomBrowserShowFullPaths", FALSE))
                             data = entry.fileName;
                         else
                             data = KUrl(entry.fileName).fileName();
@@ -243,7 +245,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     break;
                 case FileName:
                     {
-                        if (Settings::showFullPathsInFilenames())
+                        if (core::config_get_bool("RomBrowserShowFullPaths", FALSE))
                             data = entry.fileName;
                         else
                             data = KUrl(entry.fileName).fileName();
@@ -274,12 +276,12 @@ QVariant RomModel::headerData(int section, Qt::Orientation orientation,
 
 void RomModel::settingsChanged()
 {
-    if (Settings::romDirectories() != m_romDirectories) {
-        m_romDirectories = Settings::romDirectories();
+    if (romDirectories() != m_romDirectories) {
+        m_romDirectories = romDirectories();
         core::g_romcache.rcstask = core::RCS_RESCAN;
     }
-    if (m_showFullPath != Settings::showFullPathsInFilenames()) {
-        m_showFullPath = Settings::showFullPathsInFilenames();
+    if (m_showFullPath != core::config_get_bool("RomBrowserShowFullPaths", FALSE)) {
+        m_showFullPath = core::config_get_bool("RomBrowserShowFullPaths", FALSE);
         emit dataChanged(
             createIndex(0, FileName),
             createIndex(columnCount() - 1, FileName)

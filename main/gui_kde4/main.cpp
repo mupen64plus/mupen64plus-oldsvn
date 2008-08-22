@@ -36,7 +36,6 @@ extern "C" {
 #include "rommodel.h"
 #include "mainwindow.h"
 #include "globals.h"
-#include "plugins.h"
 
 static KAboutData* aboutData = 0;
 static MainWindow* mainWindow = 0;

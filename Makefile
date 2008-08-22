@@ -205,26 +205,21 @@ OBJ_KDE_GUI = \
 	main/gui_kde4/main.o \
 	main/gui_kde4/mainwidget.o \
 	main/gui_kde4/mainwindow.o \
-	main/gui_kde4/pluginconfig.o \
-	main/gui_kde4/plugins.o \
 	main/gui_kde4/romdirectorieslistwidget.o \
 	main/gui_kde4/rommodel.o \
-	main/gui_kde4/settings.o
+	main/gui_kde4/settingsdialog.o \
+    main/gui_kde4/globals.o
 
 OBJ_KDE_MOC = \
 	main/gui_kde4/mainwidget.moc \
 	main/gui_kde4/mainwindow.moc \
-	main/gui_kde4/pluginconfig.moc \
-	main/gui_kde4/plugins.moc \
 	main/gui_kde4/romdirectorieslistwidget.moc \
-	main/gui_kde4/rommodel.moc
+	main/gui_kde4/settingsdialog.moc \
+    main/gui_kde4/rommodel.moc
 
 OBJ_KDE_HEADERS = \
-	main/gui_kde4/mupen64plus.h \
 	main/gui_kde4/ui_romdirectorieslistwidget.h \
-	main/gui_kde4/ui_pluginssettingswidget.h \
-	main/gui_kde4/ui_mainsettingswidget.h \
-	main/gui_kde4/ui_rombrowsersettingswidget.h
+	main/gui_kde4/ui_settingsdialog.h
 
 OBJ_DBG = \
 	debugger/debugger.o \
@@ -409,9 +404,6 @@ plugins/mupen64_input.so: FORCE
 # KDE4 build rules
 main/gui_kde4/ui_%.h: main/gui_kde4/%.ui
 	$(UIC) $< -o $@
-
-main/gui_kde4/mupen64plus.h: main/gui_kde4/mupen64plus.kcfg main/gui_kde4/settings.kcfgc
-	cd main/gui_kde4; $(KCONFIG_COMPILER) mupen64plus.kcfg settings.kcfgc
 
 main/gui_kde4/%.moc: main/gui_kde4/%.h
 	$(MOC) -i $< -o $@

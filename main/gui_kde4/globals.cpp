@@ -18,18 +18,22 @@
 *
 */
 
-#ifndef MUPEN64_KDE4_GLOBALS_H
-#define MUPEN64_KDE4_GLOBALS_H
+#include "globals.h"
 
-#include <QStringList>
+namespace core {
+    extern "C" {
+        #include "../config.h"
+    }
+}
 
-const int BUF_MAX = 512;
-const QStringList RomExtensions = QStringList() << "*.rom"
-                                                << "*.v64"
-                                                << "*.z64"
-                                                << "*.gz"
-                                                << "*.zip"
-                                                << "*.n64";
-QStringList romDirectories();
-
-#endif // MUPEN64_KDE4_GLOBALS_H
+QStringList romDirectories()
+{
+    QStringList dirs;
+    for(int i = 0; i < core::config_get_number("NumRomDirs", 0); i++) {
+        char buf[30];
+        sprintf(buf, "RomDirectory[%d]", i);
+        dirs << core::config_get_string(buf, "");
+    }
+    dirs.removeAll("");
+    return dirs;
+}

@@ -18,17 +18,13 @@
 *
 */
 
-#include <KFileDialog>
-#include <KConfigDialogManager>
+#include <QFileDialog>
 #include "romdirectorieslistwidget.h"
 
 RomDirectoriesListWidget::RomDirectoriesListWidget(QWidget* parent)
     : QWidget(parent)
 {
     setupUi(this);
-    KConfigDialogManager::changedMap()->insert(
-        "RomDirectoriesListWidget", SIGNAL(changed(QStringList))
-    );
     connect(addButton, SIGNAL(clicked()),
              this, SLOT(add()));
     connect(removeButton, SIGNAL(clicked()),
@@ -41,7 +37,7 @@ const QStringList& RomDirectoriesListWidget::directories() const
 {
     return m_directories;
 }
-   
+
 void RomDirectoriesListWidget::setDirectories(QStringList list)
 {
     if (m_directories != list) {
@@ -53,7 +49,7 @@ void RomDirectoriesListWidget::setDirectories(QStringList list)
 
 void RomDirectoriesListWidget::add()
 {
-    QString dir = KFileDialog::getExistingDirectory();
+    QString dir = QFileDialog::getExistingDirectory();
     if (!dir.isEmpty() && !m_directories.contains(dir)) {
         m_directories << dir;
         updateListWidget();

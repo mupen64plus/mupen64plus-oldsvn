@@ -40,10 +40,6 @@ struct RomEntry
     unsigned int archivefile;
 };
 
-namespace ThreadWeaver {
-    class Job;
-}
-
 class RomModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -66,8 +62,6 @@ class RomModel : public QAbstractItemModel
                                int role = Qt::DisplayRole) const;
         virtual QVariant headerData(int section, Qt::Orientation orientation,
                                      int role = Qt::DisplayRole) const;
-
-    public slots:
         void settingsChanged();
 
     private:
