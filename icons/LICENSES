@@ -9,7 +9,7 @@ The following icons:
 16x16/media-playback-start.png
 16x16/media-playback-stop.png
 16x16/preferences-system.png
-16x16/star.png
+16x16/star.png (renamed from bookmarks.png)
 16x16/view-fullscreen.png
 22x22/document-open.png
 22x22/document-save.png
@@ -17,7 +17,7 @@ The following icons:
 22x22/media-playback-start.png
 22x22/media-playback-stop.png
 22x22/preferences-system.png
-22x22/star.png
+22x22/star.png (renamed from bookmarks.png)
 22x22/view-fullscreen.png
 32x32/audio-card.png
 32x32/dialog-error.png
@@ -32,7 +32,7 @@ The following icons:
 32x32/input-gaming.png
 32x32/media-playback-start.png
 32x32/preferences-system.png
-32x32/star.png
+32x32/star.png (renamed from bookmarks.png)
 32x32/view-fullscreen.png
 
 are Copyright: The Oxygen Icon Theme
