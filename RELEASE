@@ -5,7 +5,7 @@ Mupen64Plus v1.4 - June 14, 2008
  - New feature: KDE4 GUI (experimental)
  - New feature: cheat system with Gameshark codes
  - New feature: search/filter box in GTK GUI
- - New feature: single frame advance
+ - New feature: Single frame advance
  - New feature: adjust emulator playback speed up or down in 5% increments
  - New feature: Rumble Pak support with force feedback
  - New feature: Map emulator functions (fullscreen, stop emulation, etc) to joystick buttons or axis movements.
