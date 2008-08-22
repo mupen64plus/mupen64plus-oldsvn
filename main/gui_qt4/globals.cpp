@@ -18,11 +18,16 @@
 *
 */
 
+#include <QIcon>
+#include <QString>
+#include <QFile>
+
 #include "globals.h"
 
 namespace core {
     extern "C" {
         #include "../config.h"
+        #include "../main.h"
     }
 }
 
@@ -36,4 +41,19 @@ QStringList romDirectories()
     }
     dirs.removeAll("");
     return dirs;
+}
+
+QIcon icon(const char* iconName)
+{
+    QIcon icon;
+    QStringList sizes;
+    sizes << "16x16" << "22x22" << "32x32" << "";
+    foreach (QString size, sizes) {
+        QString name = QString("%1/%2").arg(size).arg(iconName);
+        QString filename = core::get_iconpath(qPrintable(name));
+        if (QFile::exists(filename)) {
+            icon.addFile(filename);
+        }
+    }
+    return icon;
 }

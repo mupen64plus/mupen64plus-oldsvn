@@ -45,6 +45,7 @@ void gui_init(int *argc, char ***argv)
 {
     gtk_init(argc, argv);
     application = new QApplication(*argc, *argv);
+    application->setWindowIcon(icon("mupen64plus.png"));
     mainWindow = new MainWindow;
 }
 

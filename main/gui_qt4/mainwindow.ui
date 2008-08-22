@@ -63,8 +63,8 @@
     <property name="title" >
      <string>&amp;Help</string>
     </property>
-    <addaction name="action_About" />
-    <addaction name="actionAbout_Qt" />
+    <addaction name="actionAbout" />
+    <addaction name="actionAboutQt" />
    </widget>
    <addaction name="menu_File" />
    <addaction name="menu_Emulation" />
@@ -195,12 +195,12 @@
     <string>&amp;Configure Mupen64Plus</string>
    </property>
   </action>
-  <action name="action_About" >
+  <action name="actionAbout" >
    <property name="text" >
     <string>&amp;About</string>
    </property>
   </action>
-  <action name="actionAbout_Qt" >
+  <action name="actionAboutQt" >
    <property name="text" >
     <string>About &amp;Qt</string>
    </property>

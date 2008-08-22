@@ -78,6 +78,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void fullScreenToggle();
         void configDialogShow();
         void itemCountUpdate(int count);
+        void aboutDialogShow();
 
     protected:
         void customEvent(QEvent* event);

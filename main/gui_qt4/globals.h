@@ -31,5 +31,6 @@ const QStringList RomExtensions = QStringList() << "*.rom"
                                                 << "*.zip"
                                                 << "*.n64";
 QStringList romDirectories();
+QIcon icon(const char* iconName);
 
 #endif // MUPEN64_KDE4_GLOBALS_H

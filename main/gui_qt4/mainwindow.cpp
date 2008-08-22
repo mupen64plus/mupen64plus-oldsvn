@@ -260,6 +260,15 @@ void MainWindow::itemCountUpdate(int count)
     m_statusBarLabel->setText(tr("%0 roms").arg(count));
 }
 
+void MainWindow::aboutDialogShow()
+{
+    QMessageBox::about(this,
+        tr("About Mupen64Plus"),
+        tr("<html><b>Mupen64Plus N64 Emulator</b><br/>\
+            <a href=\"http://code.google.com/p/mupen64plus/\">Home...</a>\
+            </html>"));
+}
+
 void MainWindow::customEvent(QEvent* event)
 {
     switch (event->type()) {
@@ -275,26 +284,12 @@ void MainWindow::customEvent(QEvent* event)
     }
 }
 
-static QIcon icon(const char* iconName)
-{
-    QIcon icon;
-    QStringList sizes;
-    sizes << "16x16" << "22x22" << "32x32";
-    foreach (QString size, sizes) {
-        QString name = QString("%1/%2").arg(size).arg(iconName);
-        QString filename = core::get_iconpath(qPrintable(name));
-        if (QFile::exists(filename)) {
-            icon.addFile(filename);
-        }
-    }
-    return icon;
-}
-
 void MainWindow::setupActions()
 {
     //File Actions
     actionOpenRom->setIcon(icon("mupen64cart.png"));
     connect(actionOpenRom, SIGNAL(triggered()), this, SLOT(romOpen()));
+    actionCloseRom->setIcon(icon("edit-delete.png"));
     connect(actionCloseRom, SIGNAL(triggered()), this, SLOT(romClose()));
     actionQuit->setIcon(icon("dialog-error.png"));
     connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
@@ -340,6 +335,11 @@ void MainWindow::setupActions()
     actionConfigureMupen64Plus->setIcon(icon("preferences-system.png"));
     connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
             this, SLOT(configDialogShow()));
+
+    actionAbout->setIcon(icon("mupen64plus.png"));
+    connect(actionAbout, SIGNAL(triggered()), this, SLOT(aboutDialogShow()));
+    connect(actionAboutQt, SIGNAL(triggered()),
+            QApplication::instance(), SLOT(aboutQt()));
 }
 
 #include "mainwindow.moc"
