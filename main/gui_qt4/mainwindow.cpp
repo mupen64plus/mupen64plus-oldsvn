@@ -297,7 +297,7 @@ static QIcon icon(const char* iconName)
 void MainWindow::setupActions()
 {
     //File Actions
-    actionOpenRom->setIcon(icon("document-open.png"));
+    actionOpenRom->setIcon(icon("mupen64cart.png"));
     connect(actionOpenRom, SIGNAL(triggered()), this, SLOT(romOpen()));
     connect(actionCloseRom, SIGNAL(triggered()), this, SLOT(romClose()));
     actionQuit->setIcon(icon("dialog-error.png"));
@@ -311,13 +311,17 @@ void MainWindow::setupActions()
             this, SLOT(emulationPauseContinue()));
     actionStop->setIcon(icon("media-playback-stop.png"));
     connect(actionStop, SIGNAL(triggered()), this, SLOT(emulationStop()));
+    actionSaveState->setIcon(icon("document-save.png"));
     connect(actionSaveState, SIGNAL(triggered()),
             this, SLOT(saveStateSave()));
+    actionLoadState->setIcon(icon("document-open.png"));
     connect(actionLoadState, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
     connect(actionSaveStateAs, SIGNAL(triggered()),
             this, SLOT(saveStateSaveAs()));
     connect(actionLoadStateFrom, SIGNAL(triggered()),
             this, SLOT(saveStateLoadFrom()));
+
+    actionCurrentSaveStateSlot->setIcon(icon("star.png"));
 
     QMenu* slotMenu = new QMenu(this);
     QActionGroup* slotActionGroup = new QActionGroup(actionCurrentSaveStateSlot);
@@ -326,6 +330,7 @@ void MainWindow::setupActions()
         slot->setCheckable(true);
         slot->setData(i);
         slotActionGroup->addAction(slot);
+        slotActions << slot;
     }
     actionCurrentSaveStateSlot->setMenu(slotMenu);
     connect(slotMenu, SIGNAL(aboutToShow()), this, SLOT(savestateCheckSlot()));

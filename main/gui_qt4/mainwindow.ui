@@ -76,6 +76,15 @@
    <property name="windowTitle" >
     <string>toolBar</string>
    </property>
+   <property name="iconSize" >
+    <size>
+     <width>22</width>
+     <height>22</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle" >
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
    <attribute name="toolBarArea" >
     <enum>TopToolBarArea</enum>
    </attribute>
