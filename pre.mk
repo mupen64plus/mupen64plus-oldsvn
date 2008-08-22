@@ -96,9 +96,9 @@ GTK_FLAGS	= $(shell pkg-config gtk+-2.0 --cflags)
 GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
 GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
 
-# set KDE flags and libraries
-ifeq ($(GUI), KDE4)
-   ifneq ($(USES_KDE4),)
+# set Qt flags and libraries
+ifeq ($(GUI), QT4)
+   ifneq ($(USES_QT4),)
     MOC         = $(shell which moc 2>/dev/null)
     ifeq ($(MOC),)
       $(error moc from Qt not found! Make sure the Qt binaries are in your PATH)
@@ -108,11 +108,8 @@ ifeq ($(GUI), KDE4)
       $(error uic from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
     QT_FLAGS    = $(shell pkg-config QtCore QtGui --cflags)
-    KDE_FLAGS   = $(QT_FLAGS)
     QT_LIBS     = $(shell pkg-config QtCore QtGui --libs)
-    KDE_LIBRARY_PATHS = 
-    KDE_LIBS    = ${QT_LIBS}
-    # define Gtk flags when using KDE4 gui so it can load plugins, etc.
+    # define Gtk flags when using Qt4 gui so it can load plugins, etc.
   endif
 endif
 

@@ -20,7 +20,7 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 # include pre-make file with a bunch of definitions
-USES_KDE4 = true
+USES_QT4 = true
 USES_GTK2 = true
 include ./pre.mk
 
@@ -60,9 +60,9 @@ endif
 ifeq ($(GUI), NONE)
   CFLAGS += -DNO_GUI
 else
-  ifeq ($(GUI), KDE4)
-  CFLAGS += $(KDE_FLAGS) $(GTK_FLAGS)
-  LDFLAGS += $(KDE_LIBS)
+  ifeq ($(GUI), QT4)
+  CFLAGS += $(QT_FLAGS) $(GTK_FLAGS)
+  LDFLAGS += $(QT_LIBS)
     ifeq ($(DBG), 1)
       CFLAGS += $(GTK_FLAGS)
     endif
@@ -201,26 +201,26 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/rombrowser.o \
 	main/gui_gtk/romproperties.o
 
-OBJ_KDE_GUI = \
-	main/gui_kde4/main.o \
-	main/gui_kde4/mainwidget.o \
-	main/gui_kde4/mainwindow.o \
-	main/gui_kde4/romdirectorieslistwidget.o \
-	main/gui_kde4/rommodel.o \
-	main/gui_kde4/settingsdialog.o \
-    main/gui_kde4/globals.o
+OBJ_QT_GUI = \
+	main/gui_qt4/main.o \
+	main/gui_qt4/mainwidget.o \
+	main/gui_qt4/mainwindow.o \
+	main/gui_qt4/romdirectorieslistwidget.o \
+	main/gui_qt4/rommodel.o \
+	main/gui_qt4/settingsdialog.o \
+    main/gui_qt4/globals.o
 
-OBJ_KDE_MOC = \
-	main/gui_kde4/mainwidget.moc \
-	main/gui_kde4/mainwindow.moc \
-	main/gui_kde4/romdirectorieslistwidget.moc \
-	main/gui_kde4/settingsdialog.moc \
-    main/gui_kde4/rommodel.moc
+OBJ_QT_MOC = \
+	main/gui_qt4/mainwidget.moc \
+	main/gui_qt4/mainwindow.moc \
+	main/gui_qt4/romdirectorieslistwidget.moc \
+	main/gui_qt4/settingsdialog.moc \
+    main/gui_qt4/rommodel.moc
 
-OBJ_KDE_HEADERS = \
-	main/gui_kde4/ui_romdirectorieslistwidget.h \
-	main/gui_kde4/ui_settingsdialog.h \
-    main/gui_kde4/ui_mainwindow.h
+OBJ_QT_HEADERS = \
+	main/gui_qt4/ui_romdirectorieslistwidget.h \
+	main/gui_qt4/ui_settingsdialog.h \
+    main/gui_qt4/ui_mainwindow.h
 
 OBJ_DBG = \
 	debugger/debugger.o \
@@ -251,7 +251,7 @@ OBJ_GTK_DBG_GUI = \
 PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
           plugins/dummyvideo.so \
-#           plugins/glN64.so \
+          plugins/glN64.so \
           plugins/ricevideo.so \
           plugins/glide64.so \
           plugins/jttl_audio.so \
@@ -274,9 +274,9 @@ ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
 endif
-ifeq ($(GUI), KDE4)
-  OBJECTS += $(OBJ_KDE_GUI)
-  LIBS += $(KDE_LIBS) $(GTK_LIBS)
+ifeq ($(GUI), QT4)
+  OBJECTS += $(OBJ_QT_GUI)
+  LIBS += $(QT_LIBS) $(GTK_LIBS)
 else
   ifneq ($(GUI), NONE)
     OBJECTS += $(OBJ_GTK_GUI)
@@ -300,7 +300,7 @@ targets:
 	@echo "    NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)"
 	@echo "    GUI=NONE      == build without GUI support"
 	@echo "    GUI=GTK2      == build with GTK2 GUI support (default)"
-	@echo "    GUI=KDE4      == build with KDE4 GUI support"
+	@echo "    GUI=QT4       == build with QT4 GUI support"
 	@echo "  Install Options:"
 	@echo "    PREFIX=path   == install/uninstall prefix (default: /usr/local/)"
 	@echo "    SHAREDIR=path == path to install shared data (default: PREFIX/share/mupen64plus/)"
@@ -335,7 +335,7 @@ clean:
 	$(MAKE) -C blight_input clean
 	$(MAKE) -C dummy_audio clean
 	$(MAKE) -C dummy_video clean
-# 	$(MAKE) -C glN64 clean
+	$(MAKE) -C glN64 clean
 	$(MAKE) -C rice_video clean
 	$(MAKE) -C glide64 clean
 	$(MAKE) -C jttl_audio clean
@@ -346,7 +346,7 @@ clean:
 	$(RM) -f mupen64plus
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
-	$(RM) -f main/gui_kde4/settings.cpp main/gui_kde4/settings.h main/gui_kde4/*.moc main/gui_kde4/ui_*.h main/gui_kde4/*.o
+	$(RM) -f main/gui_qt4/settings.cpp main/gui_qt4/settings.h main/gui_qt4/*.moc main/gui_qt4/ui_*.h main/gui_qt4/*.o
 
 rebuild: clean all
 
@@ -360,7 +360,7 @@ version.h: .svn/entries
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 # I have no idea why this is needed, but apparently it is.
-main/gui_kde4/settings.o: main/gui_kde4/settings.cpp
+main/gui_qt4/settings.o: main/gui_qt4/settings.cpp
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 .c.o:
@@ -378,9 +378,9 @@ plugins/dummyvideo.so: FORCE
 	$(MAKE) -C dummy_video all
 	@$(CP) ./dummy_video/dummyvideo.so ./plugins/dummyvideo.so
 
-# plugins/glN64.so: FORCE
-# 	$(MAKE) -C glN64 all
-# 	@$(CP) ./glN64/glN64.so ./plugins/glN64.so
+plugins/glN64.so: FORCE
+	$(MAKE) -C glN64 all
+	@$(CP) ./glN64/glN64.so ./plugins/glN64.so
 
 plugins/ricevideo.so: FORCE
 	$(MAKE) -C rice_video all
@@ -402,14 +402,14 @@ plugins/mupen64_input.so: FORCE
 	$(MAKE) -C mupen64_input all
 	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
 
-# KDE4 build rules
-main/gui_kde4/ui_%.h: main/gui_kde4/%.ui
+# QT4 build rules
+main/gui_qt4/ui_%.h: main/gui_qt4/%.ui
 	$(UIC) $< -o $@
 
-main/gui_kde4/%.moc: main/gui_kde4/%.h
+main/gui_qt4/%.moc: main/gui_qt4/%.h
 	$(MOC) -i $< -o $@
 
-$(OBJ_KDE_GUI): $(OBJ_KDE_MOC) $(OBJ_KDE_HEADERS)
+$(OBJ_QT_GUI): $(OBJ_QT_MOC) $(OBJ_QT_HEADERS)
 
 # This is used to force the plugin builds
 FORCE:
