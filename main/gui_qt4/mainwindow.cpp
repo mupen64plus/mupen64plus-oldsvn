@@ -47,7 +47,7 @@ MainWindow::MainWindow()
     statusBar()->addPermanentWidget(m_statusBarLabel);
 
     connect(mainWidget, SIGNAL(itemCountChanged(int)),
-             this, SLOT(updateItemCount(int)));
+             this, SLOT(itemCountUpdate(int)));
     connect(mainWidget, SIGNAL(romDoubleClicked(QUrl, unsigned int)),
              this, SLOT(romOpen(QUrl, unsigned int)));
 
@@ -180,7 +180,7 @@ void MainWindow::emulationStop()
     core::stopEmulation();
 }
 
-void MainWindow::viewFullScreen()
+void MainWindow::fullScreenToggle()
 {
     core::changeWindow();
 }
@@ -255,7 +255,7 @@ void MainWindow::configDialogShow()
     d->show();
 }
 
-void MainWindow::updateItemCount(int count)
+void MainWindow::itemCountUpdate(int count)
 {
     m_statusBarLabel->setText(tr("%0 roms").arg(count));
 }
@@ -335,7 +335,8 @@ void MainWindow::setupActions()
 
     //Settings Actions
     actionFullScreen->setIcon(icon("view-fullscreen.png"));
-    connect(actionFullScreen, SIGNAL(triggered()), this, SLOT(viewFullScreen()));
+    connect(actionFullScreen, SIGNAL(triggered()),
+            this, SLOT(fullScreenToggle()));
     actionConfigureMupen64Plus->setIcon(icon("preferences-system.png"));
     connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
             this, SLOT(configDialogShow()));

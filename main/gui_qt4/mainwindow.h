@@ -75,9 +75,9 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void savestateCheckSlot();
         void savestateSelectSlot(QAction* a);
 
-        void viewFullScreen();
+        void fullScreenToggle();
         void configDialogShow();
-        void updateItemCount(int count);
+        void itemCountUpdate(int count);
 
     protected:
         void customEvent(QEvent* event);
