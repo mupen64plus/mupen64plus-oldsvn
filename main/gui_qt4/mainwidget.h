@@ -41,7 +41,7 @@ class MainWidget : public QWidget, public Ui_MainWidget
         QModelIndex getRomBrowserIndex();
 
     public slots:
-        void toggleFilter();
+        void showFilter(bool show);
 
     private slots:
         void resizeHeaderSections();

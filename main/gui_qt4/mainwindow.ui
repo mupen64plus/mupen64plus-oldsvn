@@ -58,6 +58,8 @@
     </property>
     <addaction name="actionShowToolbar" />
     <addaction name="actionShowStatusbar" />
+    <addaction name="actionShowFilter" />
+    <addaction name="separator" />
     <addaction name="actionFullScreen" />
     <addaction name="separator" />
     <addaction name="actionConfigureMupen64Plus" />
@@ -228,6 +230,17 @@
    </property>
    <property name="text" >
     <string>Show &amp;Statusbar</string>
+   </property>
+  </action>
+  <action name="actionShowFilter" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Show F&amp;ilter</string>
    </property>
   </action>
  </widget>

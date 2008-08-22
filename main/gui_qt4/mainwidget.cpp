@@ -81,17 +81,11 @@ QModelIndex MainWidget::getRomBrowserIndex()
     return treeView->currentIndex();
 }
 
-void MainWidget::toggleFilter()
+void MainWidget::showFilter(bool show)
 {
-    if(label->isVisible()) {
-        label->hide();
-        lineEdit->clear();
-        lineEdit->hide();
-        }
-    else {
-        label->show();
-        lineEdit->show();
-        }
+    label->setVisible(show);
+    lineEdit->setVisible(show);
+    lineEdit->clear();
 }
 
 void MainWidget::resizeHeaderSections()

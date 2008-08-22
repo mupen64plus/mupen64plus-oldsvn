@@ -331,6 +331,8 @@ void MainWindow::setupActions()
             this, SLOT(savestateSelectSlot(QAction*)));
 
     //Settings Actions
+    connect(actionShowFilter, SIGNAL(toggled(bool)),
+            mainWidget, SLOT(showFilter(bool)));
     actionFullScreen->setIcon(icon("view-fullscreen.png"));
     connect(actionFullScreen, SIGNAL(triggered()),
             this, SLOT(fullScreenToggle()));
@@ -338,6 +340,7 @@ void MainWindow::setupActions()
     connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
             this, SLOT(configDialogShow()));
 
+    // Help menu actions
     actionAbout->setIcon(icon("mupen64plus.png"));
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(aboutDialogShow()));
     connect(actionAboutQt, SIGNAL(triggered()),
