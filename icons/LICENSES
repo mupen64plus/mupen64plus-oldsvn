@@ -4,6 +4,7 @@ Mupen64plus provides a number of open source licensed icons and artwork resource
 The following icons:
 
 16x16/document-open.png
+16x16/document-save.png
 16x16/media-playback-pause.png
 16x16/media-playback-start.png
 16x16/media-playback-stop.png
@@ -11,6 +12,7 @@ The following icons:
 16x16/star.png
 16x16/view-fullscreen.png
 22x22/document-open.png
+22x22/document-save.png
 22x22/media-playback-pause.png
 22x22/media-playback-start.png
 22x22/media-playback-stop.png
@@ -22,6 +24,7 @@ The following icons:
 32x32/dialog-question.png
 32x32/dialog-warning.png
 32x32/document-open.png
+32x32/document-save.png
 32x32/media-playback-pause.png
 32x32/media-playback-stop.png
 32x32/video-display.png
@@ -29,6 +32,7 @@ The following icons:
 32x32/input-gaming.png
 32x32/media-playback-start.png
 32x32/preferences-system.png
+32x32/star.png
 32x32/view-fullscreen.png
 
 are Copyright: The Oxygen Icon Theme
