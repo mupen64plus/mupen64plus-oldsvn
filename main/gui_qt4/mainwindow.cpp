@@ -260,23 +260,19 @@ void MainWindow::updateItemCount(int count)
     m_statusBarLabel->setText(tr("%0 roms").arg(count));
 }
 
-bool MainWindow::event(QEvent* event)
+void MainWindow::customEvent(QEvent* event)
 {
-    bool retval = false;
     switch (event->type()) {
         case InfoEventType:
             showInfoMessage(static_cast<InfoEvent*>(event)->message);
-            retval = true;
             break;
         case AlertEventType:
             showAlertMessage(static_cast<AlertEvent*>(event)->message);
-            retval = true;
             break;
         default:
-            retval = QMainWindow::event(event);
+            qDebug("Got unknown custom event of type %d!", event->type());
             break;
     }
-    return retval;
 }
 
 static QIcon icon(const char* iconName)

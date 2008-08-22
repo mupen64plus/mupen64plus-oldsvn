@@ -80,7 +80,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void updateItemCount(int count);
 
     protected:
-        bool event(QEvent* event);
+        void customEvent(QEvent* event);
         void closeEvent(QCloseEvent* event);
 
     private:
