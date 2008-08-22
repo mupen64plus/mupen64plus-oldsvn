@@ -90,7 +90,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_number("MainWindowHeight", height());
     core::config_put_number("MainWindowXPosition", x());
     core::config_put_number("MainWindowYPosition", y());
-    core::config_put_bool("StatusbarVisible", statusBar()->isVisible());
+    core::config_put_bool("StatusBarVisible", actionShowStatusbar->isChecked());
+    core::config_put_bool("ToolBarVisible", actionShowToolbar->isChecked());
+    core::config_put_bool("FilterVisible", actionShowFilter->isChecked());
 }
 
 void MainWindow::showInfoMessage(const QString& msg)
@@ -345,6 +347,16 @@ void MainWindow::setupActions()
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(aboutDialogShow()));
     connect(actionAboutQt, SIGNAL(triggered()),
             QApplication::instance(), SLOT(aboutQt()));
+
+    actionShowToolbar->setChecked(
+        core::config_get_bool("ToolBarVisible", TRUE)
+    );
+    actionShowFilter->setChecked(
+        core::config_get_bool("FilterVisible", TRUE)
+    );
+    actionShowStatusbar->setChecked(
+        core::config_get_bool("StatusBarVisible", TRUE)
+    );
 }
 
 #include "mainwindow.moc"
