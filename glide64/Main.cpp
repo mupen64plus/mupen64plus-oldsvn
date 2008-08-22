@@ -96,8 +96,8 @@ int dumping;
 BOOL evoodoo = 0;
 BOOL ev_fullscreen = 0;
 
-long num_tmu;
-long max_tex_size;
+int num_tmu;
+int max_tex_size;
 long sup_mirroring;
 BOOL sup_32bit_tex = FALSE;
 
@@ -805,10 +805,10 @@ BOOL InitGfx (BOOL evoodoo_using_window)
   }
   
   // get the # of TMUs available
-  grGet (GR_NUM_TMU, 4, &num_tmu);
+  grGet (GR_NUM_TMU, 4, (FxI32 *) &num_tmu);
   printf("num_tmu %ld\n", num_tmu);
   // get maximal texture size
-  grGet (GR_MAX_TEXTURE_SIZE, 4, &max_tex_size);
+  grGet (GR_MAX_TEXTURE_SIZE, 4, (FxI32 *) &max_tex_size);
   //num_tmu = 1;
   
   // Is mirroring allowed?

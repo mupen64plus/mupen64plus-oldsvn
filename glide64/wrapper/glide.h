@@ -1,18 +1,21 @@
 /*
-** Copyright (c) 1995, 3Dfx Interactive, Inc.
-** All Rights Reserved.
-**
-** This is UNPUBLISHED PROPRIETARY SOURCE CODE of 3Dfx Interactive, Inc.;
-** the contents of this file may not be disclosed to third parties, copied or
-** duplicated in any form, in whole or in part, without the prior written
-** permission of 3Dfx Interactive, Inc.
-**
-** RESTRICTED RIGHTS LEGEND:
-** Use, duplication or disclosure by the Government is subject to restrictions
-** as set forth in subdivision (c)(1)(ii) of the Rights in Technical Data
-** and Computer Software clause at DFARS 252.227-7013, and/or in similar or
-** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished -
-** rights reserved under the Copyright Laws of the United States.
+** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
+** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
+** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
+** 
+** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
+** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
+** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
+** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
+** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
+** THE UNITED STATES.  
+** 
+** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 */
 
 /*
@@ -27,6 +30,9 @@
 **            __WIN32__         Defined for 32-bit Windows applications
 **            __sparc__         Defined for Sun Solaris/SunOS
 **            __linux__         Defined for Linux applications
+**            __FreeBSD__       Defined for FreeBSD applications
+**            __NetBSD__        Defined for NetBSD applications
+**            __OpenBSD__       Defined for OpenBSD applications
 **            __IRIX__          Defined for SGI Irix applications
 **
 */
@@ -36,8 +42,6 @@
 #include <3dfx.h>
 #include <glidesys.h>
 #include <sst1vid.h>
-
-#include "../winlnxdefs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,9 +55,10 @@ extern "C" {
 typedef FxU32 GrColor_t;
 typedef FxU8  GrAlpha_t;
 typedef FxU32 GrMipMapId_t;
+typedef FxU32 GrStipplePattern_t;
 typedef FxU8  GrFog_t;
 typedef FxU32 GrContext_t;
-typedef int (__stdcall *GrProc)();
+typedef int (FX_CALL *GrProc)();
 
 /*
 ** -----------------------------------------------------------------------
@@ -239,12 +244,18 @@ typedef FxI32 GrDitherMode_t;
 #define GR_DITHER_2x2           0x1
 #define GR_DITHER_4x4           0x2
 
+typedef FxI32 GrStippleMode_t;
+#define GR_STIPPLE_DISABLE  0x0
+#define GR_STIPPLE_PATTERN  0x1
+#define GR_STIPPLE_ROTATE   0x2
+
 typedef FxI32 GrFogMode_t;
 #define GR_FOG_DISABLE                     0x0
 #define GR_FOG_WITH_TABLE_ON_FOGCOORD_EXT  0x1
 #define GR_FOG_WITH_TABLE_ON_Q             0x2
 #define GR_FOG_WITH_TABLE_ON_W             GR_FOG_WITH_TABLE_ON_Q
 #define GR_FOG_WITH_ITERATED_Z             0x3
+#define GR_FOG_WITH_ITERATED_ALPHA_EXT     0x4
 #define GR_FOG_MULT2                       0x100
 #define GR_FOG_ADD2                        0x200
 
@@ -253,6 +264,8 @@ typedef FxU32 GrLock_t;
 #define GR_LFB_WRITE_ONLY 0x01
 #define GR_LFB_IDLE       0x00
 #define GR_LFB_NOIDLE     0x10
+
+#define GR_LFB_WRITE_ONLY_EXPLICIT_EXT  0x02 /* explicitly not allow reading from the lfb pointer */
 
 typedef FxI32 GrLfbBypassMode_t;
 #define GR_LFBBYPASS_DISABLE    0x0
@@ -334,17 +347,20 @@ typedef FxI32 GrTextureFilterMode_t;
 #define GR_TEXTUREFILTER_BILINEAR       0x1
 
 typedef FxI32 GrTextureFormat_t;
+/* KoolSmoky - */
 #define GR_TEXFMT_8BIT                  0x0
-#define GR_TEXFMT_RGB_332 GR_TEXFMT_8BIT
+#define GR_TEXFMT_RGB_332               GR_TEXFMT_8BIT
 #define GR_TEXFMT_YIQ_422               0x1
 #define GR_TEXFMT_ALPHA_8               0x2 /* (0..0xFF) alpha     */
 #define GR_TEXFMT_INTENSITY_8           0x3 /* (0..0xFF) intensity */
 #define GR_TEXFMT_ALPHA_INTENSITY_44    0x4
 #define GR_TEXFMT_P_8                   0x5 /* 8-bit palette */
-#define GR_TEXFMT_RSVD0                 0x6
+#define GR_TEXFMT_RSVD0                 0x6 /* GR_TEXFMT_P_8_RGBA */
+#define GR_TEXFMT_P_8_6666              GR_TEXFMT_RSVD0
+#define GR_TEXFMT_P_8_6666_EXT          GR_TEXFMT_RSVD0
 #define GR_TEXFMT_RSVD1                 0x7
 #define GR_TEXFMT_16BIT                 0x8
-#define GR_TEXFMT_ARGB_8332 GR_TEXFMT_16BIT
+#define GR_TEXFMT_ARGB_8332             GR_TEXFMT_16BIT
 #define GR_TEXFMT_AYIQ_8422             0x9
 #define GR_TEXFMT_RGB_565               0xa
 #define GR_TEXFMT_ARGB_1555             0xb
@@ -352,6 +368,7 @@ typedef FxI32 GrTextureFormat_t;
 #define GR_TEXFMT_ALPHA_INTENSITY_88    0xd
 #define GR_TEXFMT_AP_88                 0xe /* 8-bit alpha 8-bit palette */
 #define GR_TEXFMT_RSVD2                 0xf
+#define GR_TEXFMT_RSVD4                 GR_TEXFMT_RSVD2
 
 typedef FxU32 GrTexTable_t;
 #define GR_TEXTABLE_NCC0                 0x0
@@ -383,13 +400,6 @@ typedef FxU32 GrEnableMode_t;
 typedef FxU32 GrCoordinateSpaceMode_t;
 #define GR_WINDOW_COORDS    0x00
 #define GR_CLIP_COORDS      0x01
-
-typedef FxU32 GrStipplePattern_t;
-typedef FxI32 GrStippleMode_t;
-
-#define GR_STIPPLE_DISABLE  0x0
-#define GR_STIPPLE_PATTERN  0x1
-#define GR_STIPPLE_ROTATE   0x2
 
 /* Types of data in strips */
 #define GR_FLOAT        0
@@ -477,6 +487,7 @@ typedef FxI32 GrStippleMode_t;
 #define GR_ZDEPTH_MIN_MAX               0x28
 #define GR_VERTEX_PARAMETER             0x29
 #define GR_BITS_GAMMA                   0x2a
+#define GR_GET_RESERVED_1               0x1000
 
 /*
 ** grGetString types
@@ -518,7 +529,7 @@ typedef struct {
 
 typedef GrResolution GlideResolution;
 
-#define GR_QUERY_ANY  ((FxU32)(0xffffffff))
+#define GR_QUERY_ANY  ((FxU32)(~0))
 
 typedef FxU32 GrLfbSrcFmt_t;
 #define GR_LFB_SRC_FMT_565          0x00
@@ -616,6 +627,9 @@ grSstWinOpen(
 
 FX_ENTRY FxBool FX_CALL
 grSstWinClose( GrContext_t context );
+
+FX_ENTRY void FX_CALL
+grSetNumPendingBuffers(FxI32 NumPendingBuffers);
 
 FX_ENTRY FxBool FX_CALL
 grSelectContext( GrContext_t context );
@@ -721,7 +735,7 @@ FX_ENTRY FxBool FX_CALL
 grReset( FxU32 what );
 
 FX_ENTRY GrProc FX_CALL
-grGetProcAddress( const char *procName );
+grGetProcAddress( char *procName );
 
 FX_ENTRY void FX_CALL 
 grEnable( GrEnableMode_t mode );
@@ -734,6 +748,12 @@ grCoordinateSpace( GrCoordinateSpaceMode_t mode );
 
 FX_ENTRY void FX_CALL 
 grDepthRange( FxFloat n, FxFloat f );
+
+FX_ENTRY void FX_CALL 
+grStippleMode( GrStippleMode_t mode );
+
+FX_ENTRY void FX_CALL 
+grStipplePattern( GrStipplePattern_t mode );
 
 FX_ENTRY void FX_CALL 
 grViewport( FxI32 x, FxI32 y, FxI32 width, FxI32 height );
@@ -914,15 +934,6 @@ grGlideGetVertexLayout( void *layout );
 
 FX_ENTRY void FX_CALL
 grGlideSetVertexLayout( const void *layout );
-
-/*
-** stipple functions
-*/
-FX_ENTRY void FX_CALL
-grStipplePattern( GrStipplePattern_t stipple );
-
-FX_ENTRY void FX_CALL
-grStippleMode( GrStippleMode_t mode );
 
 #endif /* FX_GLIDE_NO_FUNC_PROTO */
 

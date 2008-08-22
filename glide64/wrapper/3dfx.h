@@ -1,29 +1,27 @@
 /*
-** Copyright (c) 1995, 3Dfx Interactive, Inc.
-** All Rights Reserved.
+** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
+** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
+** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
+** 
+** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
+** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
+** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
+** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
+** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
+** THE UNITED STATES.  
+** 
+** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** This is UNPUBLISHED PROPRIETARY SOURCE CODE of 3Dfx Interactive, Inc.;
-** the contents of this file may not be disclosed to third parties, copied or
-** duplicated in any form, in whole or in part, without the prior written
-** permission of 3Dfx Interactive, Inc.
-**
-** RESTRICTED RIGHTS LEGEND:
-** Use, duplication or disclosure by the Government is subject to restrictions
-** as set forth in subdivision (c)(1)(ii) of the Rights in Technical Data
-** and Computer Software clause at DFARS 252.227-7013, and/or in similar or
-** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished  -
-** rights reserved under the Copyright Laws of the United States.
-**
-** $Revision: 9 $
-** $Date: 12/23/97 9:57a $
+** $Revision: 1.3.4.2 $
+** $Date: 2003/05/05 06:50:41 $
 */
 #ifndef __3DFX_H__
 #define __3DFX_H__
-
-#if defined(WIN32) && defined(GCC)
-// ZIGGY ARRRRGG what a pain in the #$@$
-# include "3dfx-mangling.h"
-#endif
 
 /*
 ** basic data types
@@ -32,8 +30,14 @@ typedef unsigned char   FxU8;
 typedef signed   char   FxI8;
 typedef unsigned short  FxU16;
 typedef signed   short  FxI16;
+#if defined(__alpha__) || defined (__LP64__)
+typedef signed   int    FxI32;
+typedef unsigned int    FxU32;
+#else
 typedef signed   long   FxI32;
 typedef unsigned long   FxU32;
+#endif
+typedef unsigned long   AnyPtr;
 typedef int             FxBool;
 typedef float           FxFloat;
 typedef double          FxDouble;
@@ -60,12 +64,12 @@ typedef struct { float r, g, b, a; } FxColor4;
 ** export macros
 */
 
-#if defined(__MSC__)
+#if defined(__MSC__) || defined(_MSC_VER)
 #  if defined (MSVC16)
 #    define FX_ENTRY 
 #    define FX_CALL
 #  else
-#    define FX_ENTRY __declspec(dllexport) extern
+#    define FX_ENTRY extern
 #    define FX_CALL  __stdcall
 #  endif
 #elif defined(__WATCOMC__)
@@ -78,17 +82,12 @@ typedef struct { float r, g, b, a; } FxColor4;
 #elif defined(__DJGPP__)
 #  define FX_ENTRY extern
 #  define FX_CALL
+#elif defined(__MINGW32__)
+#  define FX_ENTRY extern
+#  define FX_CALL  __stdcall
 #elif defined(__unix__)
 #  define FX_ENTRY extern
 #  define FX_CALL
-#elif defined(WIN32)
-# ifdef GLIDEXPORT
-#  define FX_ENTRY __declspec(dllexport) extern
-#  define FX_CALL  __stdcall
-# else
-#  define FX_ENTRY __declspec(dllimport) extern
-#  define FX_CALL  __stdcall
-# endif
 #elif defined(__MWERKS__)
 #  if macintosh
 #    define FX_ENTRY extern

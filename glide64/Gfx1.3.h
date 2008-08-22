@@ -212,8 +212,8 @@ extern unsigned long BMASK;
 #define WMASK   0x3FFFFF
 #define DMASK   0x1FFFFF
 
-extern long num_tmu;
-extern long max_tex_size;
+extern int num_tmu;
+extern int max_tex_size;
 extern long sup_mirroring;
 extern BOOL sup_32bit_tex;
 extern DWORD update_screen_count;

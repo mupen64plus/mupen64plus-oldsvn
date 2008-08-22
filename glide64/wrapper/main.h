@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #ifndef _WIN32
+  #include "../winlnxdefs.h"
 //#define VPDEBUG
 #endif
 #ifdef VPDEBUG
