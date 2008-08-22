@@ -68,7 +68,7 @@ Type 'make' by itself to view all available build options:
      NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)
      GUI=NONE      == build without GUI support
      GUI=GTK2      == build GTK2 GUI support (default)
-     GUI=KDE4      == build KDE4 GUI support
+     GUI=QT4       == build QT4 GUI support
    Install Options:
      PREFIX=path   == install/uninstall prefix (default: /usr/local/)
      SHAREDIR=path == path to install shared data (default: PREFIX/share/mupen64plus/)
