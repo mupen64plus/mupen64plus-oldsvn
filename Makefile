@@ -220,7 +220,8 @@ OBJ_QT_MOC = \
 OBJ_QT_HEADERS = \
 	main/gui_qt4/ui_romdirectorieslistwidget.h \
 	main/gui_qt4/ui_settingsdialog.h \
-	main/gui_qt4/ui_mainwindow.h
+	main/gui_qt4/ui_mainwindow.h \
+    main/gui_qt4/ui_mainwidget.h
 
 OBJ_DBG = \
 	debugger/debugger.o \

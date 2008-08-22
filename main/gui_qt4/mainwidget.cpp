@@ -34,16 +34,13 @@
 
 MainWidget::MainWidget(QWidget* parent)
     : QWidget(parent)
-    , m_treeView(0)
-    , m_lineEdit(0)
     , m_proxyModel(0)
 {
-    m_treeView = new QTreeView(this);
-    m_lineEdit = new QLineEdit(this);
+    setupUi(this);
+
+    lineEdit->installEventFilter(this);
+
     m_proxyModel = new QSortFilterProxyModel(this);
-
-    m_lineEdit->installEventFilter(this);
-
     m_proxyModel->setSourceModel(RomModel::self());
     m_proxyModel->setFilterKeyColumn(-1); // search all columns
     m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -51,16 +48,16 @@ MainWidget::MainWidget(QWidget* parent)
     m_proxyModel->setDynamicSortFilter(true);
     m_proxyModel->setSortRole(RomModel::Sort);
 
-    m_treeView->setRootIsDecorated(false);
-    m_treeView->setSortingEnabled(true);
-    m_treeView->setModel(m_proxyModel);
-    m_treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
-    m_treeView->header()->resizeSections(QHeaderView::ResizeToContents);
-    m_treeView->setFocusProxy(m_lineEdit);
+    treeView->setRootIsDecorated(false);
+    treeView->setSortingEnabled(true);
+    treeView->setModel(m_proxyModel);
+    treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
+    treeView->header()->resizeSections(QHeaderView::ResizeToContents);
+    treeView->setFocusProxy(lineEdit);
 
     m_timer.setSingleShot(true);
 
-    connect(m_lineEdit, SIGNAL(textChanged(QString)),
+    connect(lineEdit, SIGNAL(textChanged(QString)),
              this, SLOT(lineEditTextChanged()));
     connect(&m_timer, SIGNAL(timeout()),
              this, SLOT(filter()));
@@ -72,48 +69,36 @@ MainWidget::MainWidget(QWidget* parent)
              this, SLOT(resizeHeaderSections()));
     connect(m_proxyModel, SIGNAL(layoutChanged()),
              this, SLOT(resizeHeaderSections()));
-    connect(m_treeView, SIGNAL(doubleClicked(QModelIndex)),
+    connect(treeView, SIGNAL(doubleClicked(QModelIndex)),
              this, SLOT(treeViewDoubleClicked(QModelIndex)));
 
-    filterLabel = new QLabel(tr("F&ilter:"), this);
-    filterLabel->setBuddy(m_lineEdit);
-    QHBoxLayout* filterLayout = new QHBoxLayout;
-    filterLayout->addWidget(filterLabel);
-    filterLayout->addWidget(m_lineEdit);
-    filterLayout->setMargin(0);
-
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->addLayout(filterLayout);
-    layout->addWidget(m_treeView);
-    setLayout(layout);
-
-    //m_lineEdit->setFocus();
+    //lineEdit->setFocus();
     QTimer::singleShot(0, this, SLOT(filter())); // so we emit the base item count
 }
 
 QModelIndex MainWidget::getRomBrowserIndex()
 {
-    return m_treeView->currentIndex();
+    return treeView->currentIndex();
 }
 
 void MainWidget::toggleFilter()
 {
-    if(filterLabel->isVisible()) {
-        filterLabel->hide();
-        m_lineEdit->clear();
-        m_lineEdit->hide();
+    if(label->isVisible()) {
+        label->hide();
+        lineEdit->clear();
+        lineEdit->hide();
         }
     else {
-        filterLabel->show();
-        m_lineEdit->show();
+        label->show();
+        lineEdit->show();
         }
 }
 
 void MainWidget::resizeHeaderSections()
 {
-    QString filter = m_lineEdit->text();
+    QString filter = lineEdit->text();
     m_proxyModel->setFilterFixedString("");
-    m_treeView->header()->resizeSections(QHeaderView::ResizeToContents);
+    treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     m_proxyModel->setFilterFixedString(filter);
     emit itemCountChanged(m_proxyModel->rowCount());
 }
@@ -128,7 +113,7 @@ void MainWidget::lineEditTextChanged()
 
 void MainWidget::filter()
 {
-    m_proxyModel->setFilterFixedString(m_lineEdit->text());
+    m_proxyModel->setFilterFixedString(lineEdit->text());
     emit itemCountChanged(m_proxyModel->rowCount());
 }
 
@@ -141,7 +126,7 @@ bool MainWidget::eventFilter(QObject* obj, QEvent* event)
 {
     bool filtered = false;
 
-    if (obj == m_lineEdit) {
+    if (obj == lineEdit) {
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
             switch(keyEvent->key()) {
@@ -149,12 +134,12 @@ bool MainWidget::eventFilter(QObject* obj, QEvent* event)
                 case Qt::Key_Down:
                 case Qt::Key_PageUp:
                 case Qt::Key_PageDown:
-                    QApplication::sendEvent(m_treeView, keyEvent);
+                    QApplication::sendEvent(treeView, keyEvent);
                     filtered = true;
                     break;
                 case Qt::Key_Enter:
                 case Qt::Key_Return:
-                    load(m_treeView->currentIndex());
+                    load(treeView->currentIndex());
                     filtered = true;
                     break;
             }

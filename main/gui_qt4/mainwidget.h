@@ -31,14 +31,14 @@ class QTreeView;
 class QSortFilterProxyModel;
 class QLineEdit;
 
-class MainWidget : public QWidget
+#include "ui_mainwidget.h"
+
+class MainWidget : public QWidget, public Ui_MainWidget
 {
     Q_OBJECT
     public:
         MainWidget(QWidget* parent = 0);
         QModelIndex getRomBrowserIndex();
-        QLabel* filterLabel;
-        QLineEdit* m_lineEdit;
 
     public slots:
         void toggleFilter();
@@ -57,7 +57,6 @@ class MainWidget : public QWidget
         virtual bool eventFilter(QObject* obj, QEvent* event);
 
     private:
-        QTreeView* m_treeView;
         QSortFilterProxyModel* m_proxyModel;
         QTimer m_timer;
 
