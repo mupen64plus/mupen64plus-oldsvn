@@ -49,7 +49,7 @@ CFLAGS += -fpic -DPIC
 # list of object files to generate
 OBJECTS = main.o volume.o
 
-ifeq ($(GUI),GTK2)
+ifneq ($(findstring $(GUI), GTK2 QT4),)
   CFLAGS += $(GTK_FLAGS) -DUSE_GTK
   PLUGIN_LDFLAGS += $(GTK_LIBS)
   OBJECTS += gui_gtk2.o
