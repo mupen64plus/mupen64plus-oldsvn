@@ -26,10 +26,8 @@
 #include <QKeyEvent>
 #include <QApplication>
 #include <Qt>
-
-#include <KLineEdit>
-#include <KLocale>
-#include <KUrl>
+#include <QLabel>
+#include <QLineEdit>
 
 #include "mainwidget.h"
 #include "rommodel.h"
@@ -41,10 +39,9 @@ MainWidget::MainWidget(QWidget* parent)
     , m_proxyModel(0)
 {
     m_treeView = new QTreeView(this);
-    m_lineEdit = new KLineEdit(this);
+    m_lineEdit = new QLineEdit(this);
     m_proxyModel = new QSortFilterProxyModel(this);
 
-    m_lineEdit->setClearButtonShown(true);
     m_lineEdit->installEventFilter(this);
 
     m_proxyModel->setSourceModel(RomModel::self());
@@ -78,7 +75,7 @@ MainWidget::MainWidget(QWidget* parent)
     connect(m_treeView, SIGNAL(doubleClicked(QModelIndex)),
              this, SLOT(treeViewDoubleClicked(QModelIndex)));
 
-    filterLabel = new QLabel(i18n("F&ilter:"), this);
+    filterLabel = new QLabel(tr("F&ilter:"), this);
     filterLabel->setBuddy(m_lineEdit);
     QHBoxLayout* filterLayout = new QHBoxLayout;
     filterLayout->addWidget(filterLabel);
@@ -137,11 +134,7 @@ void MainWidget::filter()
 
 void MainWidget::treeViewDoubleClicked(const QModelIndex& index)
 {
-    QString filename = index.data(RomModel::FullPath).toString();
-    unsigned int archivefile = index.data(RomModel::ArchiveFile).toUInt();
-    if (!filename.isEmpty()) {
-        emit romDoubleClicked(filename, archivefile);
-    }
+    load(index);
 }
 
 bool MainWidget::eventFilter(QObject* obj, QEvent* event)
@@ -152,8 +145,6 @@ bool MainWidget::eventFilter(QObject* obj, QEvent* event)
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
             switch(keyEvent->key()) {
-                case Qt::Key_Enter:
-                case Qt::Key_Return:
                 case Qt::Key_Up:
                 case Qt::Key_Down:
                 case Qt::Key_PageUp:
@@ -161,11 +152,25 @@ bool MainWidget::eventFilter(QObject* obj, QEvent* event)
                     QApplication::sendEvent(m_treeView, keyEvent);
                     filtered = true;
                     break;
+                case Qt::Key_Enter:
+                case Qt::Key_Return:
+                    load(m_treeView->currentIndex());
+                    filtered = true;
+                    break;
             }
         }
     }
 
     return filtered;
+}
+
+void MainWidget::load(const QModelIndex& index)
+{
+    QString filename = index.data(RomModel::FullPath).toString();
+    unsigned int archivefile = index.data(RomModel::ArchiveFile).toUInt();
+    if (!filename.isEmpty()) {
+        emit romDoubleClicked(filename, archivefile);
+    }
 }
 
 #include "mainwidget.moc"

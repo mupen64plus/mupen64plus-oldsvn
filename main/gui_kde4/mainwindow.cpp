@@ -18,25 +18,7 @@
 *
 */
 
-#include <KApplication>
-#include <KStandardAction>
-#include <KActionCollection>
-#include <KAction>
-#include <KLocale>
-#include <KStatusBar>
-#include <KFileDialog>
-#include <KMessageBox>
-#include <KRecentFilesAction>
-#include <KConfigDialog>
-#include <KDebug>
-#include <KMenu>
-#include <KMainWindow>
-#include <KMenuBar>
-#include <KLineEdit>
-
-#include <QItemSelectionModel>
 #include <QtGui>
-#include <qdesktopwidget.h>
 
 #include "mainwindow.h"
 #include "mainwidget.h"
@@ -55,65 +37,19 @@ namespace core {
     }
 }
 
-enum StatusBarFields { ItemCountField };
-
 MainWindow::MainWindow() 
-    : KMainWindow(0)
-    , m_mainWidget(0)
-    , m_actionRecentFiles(0)
+: QMainWindow(0)
+, m_statusBarLabel(0)
 {
-    m_mainWidget = new MainWidget(this);
-    setCentralWidget(m_mainWidget);
-    createActions();
-    createMenus();
-    createToolBars();
+    setupUi(this);
+    setupActions();
+    m_statusBarLabel = new QLabel;
+    statusBar()->addPermanentWidget(m_statusBarLabel);
 
-    statusBar()->insertPermanentItem("", ItemCountField);
-
-    connect(m_mainWidget, SIGNAL(itemCountChanged(int)),
+    connect(mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(updateItemCount(int)));
-    connect(m_mainWidget, SIGNAL(romDoubleClicked(KUrl, unsigned int)),
-             this, SLOT(romOpen(KUrl, unsigned int)));
-
-    /*char resourcefilename[PATH_MAX];
-    std::sprintf(resourcefilename, "%s%s", core::get_installpath(), "mupen64plusui.rc");
-    QFile resourcefile;
-    resourcefile.setFileName(resourcefilename);
-    if(!resourcefile.open(QIODevice::ReadOnly))
-        { printf("Error, unable to open Qt4 resource file %s.\n", resourcefilename); }
-    resourcefile.close();
-    */
-
-   int i;
-
-   if((i=core::config_get_bool("ToolbarVisible",2))==2)
-        i = true;
-
-    if(i)
-        mainToolBar->show();
-    else
-        mainToolBar->hide();
-
-    if((i=core::config_get_bool("FilterVisible",2))==2)
-        i = true;
-
-    if(i) {
-        m_mainWidget->filterLabel->show();
-        m_mainWidget->m_lineEdit->show();
-    }
-    else {
-        m_mainWidget->filterLabel->hide();
-        m_mainWidget->m_lineEdit->hide();
-    }
-
-    if((i=core::config_get_bool("StatusBarVisible",2))==2)
-        i = true;
-
-    if(i)
-        statusBar()->show();
-    else
-        statusBar()->hide();
-
+    connect(mainWidget, SIGNAL(romDoubleClicked(QUrl, unsigned int)),
+             this, SLOT(romOpen(QUrl, unsigned int)));
 
     QSize size(core::config_get_number("MainWindowWidth",600),
                core::config_get_number("MainWindowHeight",400));
@@ -121,7 +57,7 @@ MainWindow::MainWindow()
                     core::config_get_number("MainWindowYPosition",0));
 
     QDesktopWidget *d = QApplication::desktop();
-    QSize desktop(d->width(), d->height());
+    QSize desktop = d->size();
 
     if (position.x() > desktop.width()) {
         position.setX(0);
@@ -154,8 +90,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_number("MainWindowHeight", height());
     core::config_put_number("MainWindowXPosition", x());
     core::config_put_number("MainWindowYPosition", y());
-    core::config_put_bool("ToolbarVisible", mainToolBar->isVisible());
-    core::config_put_bool("FilterVisible", m_mainWidget->filterLabel->isVisible());
     core::config_put_bool("StatusbarVisible", statusBar()->isVisible());
 }
 
@@ -166,13 +100,18 @@ void MainWindow::showInfoMessage(const QString& msg)
 
 void MainWindow::showAlertMessage(const QString& msg)
 {
-    KMessageBox::error(this, msg);
+    QMessageBox::critical(this, "Alert", msg);
 }
 
 bool MainWindow::confirmMessage(const QString& msg)
 {
-    switch(KMessageBox::questionYesNo(this, msg)) {
-        case KMessageBox::Yes:
+    QMessageBox::StandardButton res;
+    res = QMessageBox::question(this,
+                                 tr("Confirm"),
+                                 msg,
+                                 QMessageBox::Yes | QMessageBox::No);
+    switch (res) {
+        case QMessageBox::Yes:
             return true;
             break;
         default:
@@ -184,24 +123,23 @@ bool MainWindow::confirmMessage(const QString& msg)
 void MainWindow::romOpen()
 {
     QString filter = RomExtensions.join(" ");
-    QString filename = KFileDialog::getOpenFileName(KUrl(), filter);
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                     tr("Select Rom"),
+                                                     QString(),
+                                                     filter);
     if (!filename.isEmpty()) {
         romOpen(filename, 0);
     }
 }
 
-void MainWindow::romOpen(const KUrl& url)
+void MainWindow::romOpen(const QUrl& url)
 {
     romOpen(url, 0);
 }
 
-void MainWindow::romOpen(const KUrl& url, unsigned int archivefile)
+void MainWindow::romOpen(const QUrl& url, unsigned int archivefile)
 {
     QString path = url.path();
-    //if (url.isLocalFile()) {
-       // m_actionRecentFiles->addUrl(url);
-       // m_actionRecentFiles->saveEntries(KGlobal::config()->group("Recent Roms"));
-       // KGlobal::config()->sync();
     if (core::open_rom(path.toLocal8Bit(), archivefile) == 0) {
         core::startEmulation();
     }
@@ -215,18 +153,18 @@ void MainWindow::romClose()
 void MainWindow::emulationStart()
 {
     if(!core::rom) {
-        QModelIndex index = m_mainWidget->getRomBrowserIndex();
+        QModelIndex index = mainWidget->getRomBrowserIndex();
         QString filename = index.data(RomModel::FullPath).toString();
         unsigned int archivefile = index.data(RomModel::ArchiveFile).toUInt();
         if (filename.isEmpty()) {
-            const char* m = "There is no Rom loaded. Do you want to load one?";
-            if (confirmMessage(i18n(m))) {
+            if (confirmMessage(tr("There is no Rom loaded." \
+                                  " Do you want to load one?"))) {
                 romOpen();
             }
             return;
-        }
-        else
+        } else {
             romOpen(filename, archivefile);
+        }
     }
     else
         core::startEmulation();
@@ -257,13 +195,13 @@ void MainWindow::saveStateSave()
 void MainWindow::saveStateSaveAs()
 {
     if (core::g_EmulationThread) {
-        QString filename = KFileDialog::getSaveFileName();
+        QString filename = QFileDialog::getSaveFileName(this);
         if (!filename.isEmpty()) {
             core::savestates_select_filename(filename.toLocal8Bit());
             core::savestates_job |= SAVESTATE;
         }
     } else {
-        showAlertMessage(i18n("Emulation not running!"));
+        showAlertMessage(tr("Emulation not running!"));
     }
 }
 
@@ -274,42 +212,31 @@ void MainWindow::saveStateLoad()
     }
 }
 
-void MainWindow::saveStateLoadAs()
+void MainWindow::saveStateLoadFrom()
 {
     if (core::g_EmulationThread) {
-        QString filename = KFileDialog::getOpenFileName();
+        QString filename = QFileDialog::getOpenFileName(this);
         if (!filename.isEmpty()) {
             core::savestates_select_filename(filename.toLocal8Bit());
             core::savestates_job |= LOADSTATE;
         }
     } else {
-        showAlertMessage(i18n("Emulation not running!"));
+        showAlertMessage(tr("Emulation not running!"));
     }
 }
 
 void MainWindow::savestateCheckSlot()
 {
     int slot = core::savestates_get_slot();
-    QAction* a = slotActions.at(slot);
-    a->setChecked(true);
-}
 
-void MainWindow::toggleCheckViewable()
-{
-    if(mainToolBar->isVisible())
-        settings_show_toolbar->setChecked(true);
-    else
-        settings_show_toolbar->setChecked(false);
+    foreach(QAction* a, slotActions) {
+        a->setChecked(false);
+    }
 
-    if(m_mainWidget->filterLabel->isVisible())
-        settings_show_filter->setChecked(true);
-    else
-        settings_show_filter->setChecked(false);
-
-    if(statusBar()->isVisible())
-        settings_show_statusbar->setChecked(true);
-    else
-        settings_show_statusbar->setChecked(false);
+    if (slot >= 0 && slot < slotActions.count()) {
+        QAction* a = slotActions.at(slot);
+        a->setChecked(true);
+    }
 }
 
 void MainWindow::savestateSelectSlot(QAction* a)
@@ -330,7 +257,7 @@ void MainWindow::configDialogShow()
 
 void MainWindow::updateItemCount(int count)
 {
-    statusBar()->changeItem(i18n("%0 roms").arg(count), ItemCountField);
+    m_statusBarLabel->setText(tr("%0 roms").arg(count));
 }
 
 bool MainWindow::event(QEvent* event)
@@ -346,234 +273,71 @@ bool MainWindow::event(QEvent* event)
             retval = true;
             break;
         default:
-            retval = KMainWindow::event(event);
+            retval = QMainWindow::event(event);
             break;
     }
     return retval;
 }
 
-void MainWindow::toolbarIconOnly()
+static QIcon icon(const char* iconName)
 {
-    mainToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-}
-
-void MainWindow::toolbarTextOnly()
-{
-    mainToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly);
-}
-
-void MainWindow::toolbarTextBeside()
-{
-    mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-}
-
-void MainWindow::toolbarTextUnder()
-{
-    mainToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-}
-
-void MainWindow::toggleToolBar()
-{
-    if(mainToolBar->isVisible())
-        mainToolBar->hide();
-    else
-        mainToolBar->show();
-}
-
-void MainWindow::toggleStatusBar()
-{
-    if(statusBar()->isVisible())
-        statusBar()->hide();
-    else
-        statusBar()->show();
-}
-
-void MainWindow::createMenus()
-{
-     fileMenu = menuBar()->addMenu(i18n("&File"));
-     fileMenu->addAction(rom_open);
-     fileMenu->addAction(rom_close);
-     fileMenu->addSeparator();
-     fileMenu->addAction(application_close);
-
-     emulationMenu = menuBar()->addMenu(i18n("&Emulation"));
-     emulationMenu->addAction(emulation_start);
-     emulationMenu->addAction(emulation_pause);
-     emulationMenu->addAction(emulation_stop);
-     emulationMenu->addSeparator();
-     emulationMenu->addAction(emulation_save_state);
-     emulationMenu->addAction(emulation_save_state_as);
-     emulationMenu->addAction(emulation_load_state);
-     emulationMenu->addAction(emulation_load_state_as);
-     emulationMenu->addSeparator();
-     emulationMenu->addAction(emulation_current_slot);
-
-     settingsMenu = menuBar()->addMenu(i18n("&Settings"));
-     connect(settingsMenu, SIGNAL(aboutToShow()), this, SLOT(toggleCheckViewable()));
-     settingsMenu->addAction(settings_show_toolbar);
-     settingsMenu->addAction(settings_show_filter);
-     settingsMenu->addAction(settings_show_statusbar);
-     settingsMenu->addSeparator();
-     settingsMenu->addAction(settings_fullscreen);
-     settingsMenu->addSeparator();
-//      settingsMenu->addAction(settings_configure_graphics);
-//      settingsMenu->addAction(settings_configure_audio);
-//      settingsMenu->addAction(settings_configure_input);
-//      settingsMenu->addAction(settings_configure_rsp);
-     settingsMenu->addSeparator();
-     settingsMenu->addAction(settings_configure_mupen);
-}
-
-void MainWindow::createToolBars()
-{
-    mainToolBar = addToolBar(i18n("Show Toolbar"));
-    mainToolBar->addAction(rom_open);
-    mainToolBar->addSeparator();
-    mainToolBar->addAction(emulation_start);
-    mainToolBar->addAction(emulation_pause);
-    mainToolBar->addAction(emulation_stop);
-    mainToolBar->addSeparator();
-    mainToolBar->addAction(settings_configure_mupen);
-    mainToolBar->addAction(settings_fullscreen);
-
-    //Get toolbar edge size in pixels
-    int edgeSize = core::config_get_number("ToolbarSize",0);
-    QSize toolBarSize(edgeSize, edgeSize);
-    mainToolBar->setIconSize(toolBarSize);
-
-    //Get toolbar style.
-    //Key: 0 = icons only. 1 = text only. 2 = text under icons. 3 = text besides icons.
-    //Note: Gtk GUI can't support style 3.
-    int style = core::config_get_number("ToolbarStyle",0);
-
-    switch(style)
-        {
-        case 0: mainToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly); break;
-        case 1: mainToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly); break;
-        case 2: mainToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon); break; 
-        case 3: mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
-        default: mainToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    QIcon icon;
+    QStringList sizes;
+    sizes << "16x16" << "22x22" << "32x32";
+    foreach (QString size, sizes) {
+        QString name = QString("%1/%2").arg(size).arg(iconName);
+        QString filename = core::get_iconpath(qPrintable(name));
+        if (QFile::exists(filename)) {
+            icon.addFile(filename);
         }
+    }
+    return icon;
 }
 
-void MainWindow::createActions()
+void MainWindow::setupActions()
 {
-    int i;
-
     //File Actions
-    rom_open = new QAction(KIcon("document-open"), i18n("&Open Rom..."), this);
-    rom_open->setShortcut(Qt::ControlModifier+Qt::Key_O);
-    connect(rom_open, SIGNAL(triggered()), this, SLOT(romOpen()));
-
-/*
-   // m_actionRecentFiles = KStandardAction::openRecent(this, SLOT(romOpen(KUrl)),
-                                                       actionCollection());
-    //m_actionRecentFiles->loadEntries(KGlobal::config()->group("Recent Roms"));
-*/
-
-    rom_close = new QAction(KIcon("dialog-close"), i18n("&Close Rom"), this);
-    rom_close->setShortcut(  Qt::ControlModifier+Qt::Key_W);
-    connect(rom_close, SIGNAL(triggered()), this, SLOT(romClose()));
-
-    application_close = new QAction(KIcon("application-exit"), i18n("&Quit"), this);
-    application_close->setShortcut(  Qt::ControlModifier+Qt::Key_Q);
-    connect(application_close, SIGNAL(triggered()), this, SLOT(close()));
+    actionOpenRom->setIcon(icon("document-open.png"));
+    connect(actionOpenRom, SIGNAL(triggered()), this, SLOT(romOpen()));
+    connect(actionCloseRom, SIGNAL(triggered()), this, SLOT(romClose()));
+    actionQuit->setIcon(icon("dialog-error.png"));
+    connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
     //Emulation Actions
-    emulation_start = new QAction(KIcon("media-playback-start"), i18n("&Start"), this);
-    connect(emulation_start, SIGNAL(triggered()), this, SLOT(emulationStart()));
+    actionStart->setIcon(icon("media-playback-start.png"));
+    connect(actionStart, SIGNAL(triggered()), this, SLOT(emulationStart()));
+    actionPause->setIcon(icon("media-playback-pause.png"));
+    connect(actionPause, SIGNAL(triggered()),
+            this, SLOT(emulationPauseContinue()));
+    actionStop->setIcon(icon("media-playback-stop.png"));
+    connect(actionStop, SIGNAL(triggered()), this, SLOT(emulationStop()));
+    connect(actionSaveState, SIGNAL(triggered()),
+            this, SLOT(saveStateSave()));
+    connect(actionLoadState, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
+    connect(actionSaveStateAs, SIGNAL(triggered()),
+            this, SLOT(saveStateSaveAs()));
+    connect(actionLoadStateFrom, SIGNAL(triggered()),
+            this, SLOT(saveStateLoadFrom()));
 
-    emulation_pause = new QAction(KIcon("media-playback-pause"), i18n("&Pause"), this);
-    emulation_pause->setShortcut(Qt::Key_Pause);
-    connect(emulation_pause, SIGNAL(triggered()), this, SLOT(emulationPauseContinue()));
-
-    emulation_stop = new QAction(KIcon("media-playback-stop"), i18n("S&top"), this);
-    emulation_stop->setShortcut(Qt::Key_Escape);
-    connect(emulation_stop, SIGNAL(triggered()), this, SLOT(emulationStop()));
-
-    emulation_load_state = new QAction(KIcon("document-revert"), i18n("&Load State"), this);
-    emulation_load_state->setShortcut(Qt::Key_F5);
-    connect(emulation_load_state, SIGNAL(triggered()), this, SLOT(saveStateSave()));
-
-    emulation_save_state = new QAction(KIcon("document-save"), i18n("Sa&ve State"), this);
-    emulation_save_state->setShortcut(Qt::Key_F7);
-    connect(emulation_save_state, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
-
-    emulation_load_state_as = new QAction(KIcon("document-open"), i18n("L&oad State from..."), this);
-    connect(emulation_load_state_as, SIGNAL(triggered()), this, SLOT(saveStateSaveAs()));
-
-    emulation_save_state_as = new QAction(KIcon("document-save-as"), i18n("Save State &as..."), this);
-    connect(emulation_save_state_as, SIGNAL(triggered()), this, SLOT(saveStateLoadAs()));
-
-    emulation_current_slot =  new QAction(this);
-    emulation_current_slot->setText(i18n("&Current Save State Slot"));
     QMenu* slotMenu = new QMenu(this);
-    QActionGroup* slotActionGroup = new QActionGroup(emulation_current_slot);
-    for (i = 0; i < 10; i++)
-        {
-        QAction* slot = slotMenu->addAction(i18n("Slot &%1", i)); 
+    QActionGroup* slotActionGroup = new QActionGroup(actionCurrentSaveStateSlot);
+    for(int i = 0; i < 10; i++) {
+        QAction* slot = slotMenu->addAction(tr("Slot &%1").arg(i));
         slot->setCheckable(true);
         slot->setData(i);
         slotActionGroup->addAction(slot);
-        }
-    emulation_current_slot->setMenu(slotMenu);
-    slotActions = slotActionGroup->actions();
+    }
+    actionCurrentSaveStateSlot->setMenu(slotMenu);
     connect(slotMenu, SIGNAL(aboutToShow()), this, SLOT(savestateCheckSlot()));
-    connect(slotActionGroup, SIGNAL(triggered(QAction*)), this, SLOT(savestateSelectSlot(QAction*)));
+    connect(slotActionGroup, SIGNAL(triggered(QAction*)),
+            this, SLOT(savestateSelectSlot(QAction*)));
 
     //Settings Actions
-    settings_show_toolbar = new QAction(this);
-    settings_show_toolbar->setText(i18n("Show &Toolbar"));
-    settings_show_toolbar->setCheckable(true);
-    connect(settings_show_toolbar, SIGNAL(triggered()), this, SLOT(toggleToolBar()));
-
-    settings_show_filter = new QAction(this);
-    settings_show_filter->setText(i18n("Show F&ilter"));
-    settings_show_filter->setCheckable(true);
-    connect(settings_show_filter, SIGNAL(triggered()), m_mainWidget, SLOT(toggleFilter()));
-
-    settings_show_statusbar = new QAction(this);
-    settings_show_statusbar->setText(i18n("Show &Statusbar"));
-    settings_show_statusbar->setCheckable(true);
-    connect(settings_show_statusbar, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
-
-    settings_fullscreen = new QAction(KIcon("view-fullscreen"), i18n("&Full Screen"), this);
-    settings_fullscreen->setShortcut(Qt::AltModifier+Qt::Key_Return);
-    connect(settings_fullscreen, SIGNAL(triggered()), this, SLOT(viewFullScreen()));
-
-//     //This handle should be a mainwindow class member, no?
-//     Plugins* plugins = Plugins::self();
-//     settings_configure_graphics = new QAction(KIcon("video-display"), i18n("Configure &Graphics Plugin..."), this);
-//     connect(settings_configure_graphics, SIGNAL(triggered()), plugins, SLOT(configureGraphicsPlugin()));
-// 
-//     settings_configure_audio = new QAction(KIcon("audio-card"), i18n("Configure &Audio Plugin..."), this);
-//     connect(settings_configure_audio, SIGNAL(triggered()), plugins, SLOT(configureAudioPlugin()));
-// 
-//     settings_configure_input = new QAction(KIcon("input-gaming"), i18n("Configure &Input Plugin..."), this);
-//     connect(settings_configure_input, SIGNAL(triggered()), plugins, SLOT(configureInputPlugin()));
-// 
-//     settings_configure_rsp = new QAction(KIcon("cpu"), i18n("Configure &RSP Plugin..."), this);
-//     connect(settings_configure_rsp, SIGNAL(triggered()), plugins, SLOT(configureRspPlugin()));
-
-    settings_configure_mupen = new QAction(KIcon("preferences-system"), i18n("Configure &Mupen64plus..."), this);
-    connect(settings_configure_mupen, SIGNAL(triggered()), this, SLOT(configDialogShow()));
-
-    //Toolbar stuff for later...
-    toolbar_icon_only = new QAction(this);
-    toolbar_icon_only->setText(i18n("Icons only"));
-    connect(toolbar_icon_only, SIGNAL(triggered()), this, SLOT(toolbarIconOnly()));
-
-    toolbar_text_only = new QAction(this);
-    toolbar_text_only->setText(i18n("Text only"));
-    connect(toolbar_text_only, SIGNAL(triggered()), this, SLOT(toolbarTextOnly()));
-
-    toolbar_text_beside = new QAction(this);
-    toolbar_text_beside->setText(i18n("Text beside icons"));
-    connect(toolbar_text_beside, SIGNAL(triggered()), this, SLOT(toolbarTextBeside()));
-
-    toolbar_text_under = new QAction(this);
-    toolbar_text_under->setText(i18n("Text under icons"));
-    connect(toolbar_text_under, SIGNAL(triggered()), this, SLOT(toolbarTextUnder()));
+    actionFullScreen->setIcon(icon("view-fullscreen.png"));
+    connect(actionFullScreen, SIGNAL(triggered()), this, SLOT(viewFullScreen()));
+    actionConfigureMupen64Plus->setIcon(icon("preferences-system.png"));
+    connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
+            this, SLOT(configDialogShow()));
 }
 
 #include "mainwindow.moc"

@@ -21,11 +21,7 @@
 #include <QStringList>
 #include <QDir>
 #include <QFont>
-
-#include <KUrl>
-#include <KGlobal>
-#include <KLocale>
-#include <KGlobalSettings>
+#include <QUrl>
 
 #include <cstdio>
 
@@ -46,12 +42,12 @@ RomModel::RomModel(QObject* parent)
     , m_showFullPath(core::config_get_bool("RomBrowserShowFullPaths", FALSE))
     , m_romDirectories(romDirectories())
 {
-    m_columnHeaders << i18n("Flag")
-                    << i18n("Good Name")
-                    << i18n("Country")
-                    << i18n("Size")
-                    << i18n("Comments")
-                    << i18n("File Name");
+    m_columnHeaders << tr("Flag")
+                    << tr("Good Name")
+                    << tr("Country")
+                    << tr("Size")
+                    << tr("Comments")
+                    << tr("File Name");
 
     QString file;
     char* iconpath = core::get_iconspath();
@@ -66,18 +62,18 @@ RomModel::RomModel(QObject* parent)
     QPixmap pjapanusa(file.sprintf("%s%s", iconpath, "japanusa.png"));
     QPixmap pn64cart(file.sprintf("%s%s", iconpath, "mupen64cart.png"));
 
-    QPair<QString, QPixmap> demo(i18n("Demo"), pn64cart);
-    QPair<QString, QPixmap> beta(i18n("Beta"), pn64cart);
-    QPair<QString, QPixmap> japanusa(i18n("Japan/USA"), pjapanusa);
-    QPair<QString, QPixmap> usa(i18n("USA"), pusa);
-    QPair<QString, QPixmap> germany(i18n("Germany"), pgermany);
-    QPair<QString, QPixmap> france(i18n("France"), pfrance);
-    QPair<QString, QPixmap> italy(i18n("Italy"), pitaly);
-    QPair<QString, QPixmap> japan(i18n("Japan"), pjapan);
-    QPair<QString, QPixmap> spain(i18n("Spain"), pspain);
-    QPair<QString, QPixmap> australia(i18n("Australia"), paustralia);
-    QPair<QString, QPixmap> europe(i18n("Europe"), peurope);
-    QPair<QString, QPixmap> unknown(i18n("Unknown"), pn64cart);
+    QPair<QString, QPixmap> demo(tr("Demo"), pn64cart);
+    QPair<QString, QPixmap> beta(tr("Beta"), pn64cart);
+    QPair<QString, QPixmap> japanusa(tr("Japan/USA"), pjapanusa);
+    QPair<QString, QPixmap> usa(tr("USA"), pusa);
+    QPair<QString, QPixmap> germany(tr("Germany"), pgermany);
+    QPair<QString, QPixmap> france(tr("France"), pfrance);
+    QPair<QString, QPixmap> italy(tr("Italy"), pitaly);
+    QPair<QString, QPixmap> japan(tr("Japan"), pjapan);
+    QPair<QString, QPixmap> spain(tr("Spain"), pspain);
+    QPair<QString, QPixmap> australia(tr("Australia"), paustralia);
+    QPair<QString, QPixmap> europe(tr("Europe"), peurope);
+    QPair<QString, QPixmap> unknown(tr("Unknown"), pn64cart);
 
     m_countryInfo[char(0)] = demo;
     m_countryInfo['7'] = beta;
@@ -99,9 +95,9 @@ RomModel::RomModel(QObject* parent)
     m_countryInfo['?'] = unknown;
 }
 
-K_GLOBAL_STATIC(RomModel, instance);
 RomModel* RomModel::self()
 {
+    static RomModel* instance = new RomModel;
     return instance;
 }
 
@@ -193,27 +189,28 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = countryName(entry.country);
                     break;
                 case Size:
-                    data = i18n("%0 Mbit").arg((entry.size * 8) / 1024 / 1024);
+                    data = tr("%0 Mbit").arg((entry.size * 8) / 1024 / 1024);
                     break;
                 case Comments:
                     data = entry.comments;
                     break;
                 case FileName:
                     {
-                        if (core::config_get_bool("RomBrowserShowFullPaths", FALSE))
+                        if (core::config_get_bool("RomBrowserShowFullPaths", FALSE)) {
                             data = entry.fileName;
-                        else
-                            data = KUrl(entry.fileName).fileName();
+                        } else {
+                            data = QFileInfo(entry.fileName).fileName();
+                        }
                     }
                     break;
                 default:
-                    data = i18n("Internal error");
+                    data = tr("Internal error");
                     break;
             }
         } else if (role == Qt::FontRole) {
             switch(index.column()) {
                 case Size:
-                    data = KGlobalSettings::fixedFont();
+                    data = QFont("monospace");
                     break;
             }
         } else if (role == Qt::TextAlignmentRole) {
@@ -248,7 +245,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                         if (core::config_get_bool("RomBrowserShowFullPaths", FALSE))
                             data = entry.fileName;
                         else
-                            data = KUrl(entry.fileName).fileName();
+                            data = QFileInfo(entry.fileName).fileName();
                     }
                     break;
             }

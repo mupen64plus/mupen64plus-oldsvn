@@ -23,11 +23,13 @@
 
 #include <QWidget>
 #include <QTimer>
+#include <QUrl>
 
+class QLabel;
 class QVBoxLayout;
 class QTreeView;
-class KLineEdit;
 class QSortFilterProxyModel;
+class QLineEdit;
 
 class MainWidget : public QWidget
 {
@@ -36,7 +38,7 @@ class MainWidget : public QWidget
         MainWidget(QWidget* parent = 0);
         QModelIndex getRomBrowserIndex();
         QLabel* filterLabel;
-        KLineEdit* m_lineEdit;
+        QLineEdit* m_lineEdit;
 
     public slots:
         void toggleFilter();
@@ -49,7 +51,7 @@ class MainWidget : public QWidget
 
     signals:
         void itemCountChanged(int count);
-        void romDoubleClicked(const KUrl& filename, unsigned int archivefile);
+        void romDoubleClicked(const QUrl& filename, unsigned int archivefile);
 
     protected:
         virtual bool eventFilter(QObject* obj, QEvent* event);
@@ -58,6 +60,8 @@ class MainWidget : public QWidget
         QTreeView* m_treeView;
         QSortFilterProxyModel* m_proxyModel;
         QTimer m_timer;
+
+        void load(const QModelIndex& index);
 };
 
 #endif // MUPEN_KDE4_MAINWIDGET_H

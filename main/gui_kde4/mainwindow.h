@@ -21,13 +21,13 @@
 #ifndef MUPEN_KDE4_MAINWINDOW_H
 #define MUPEN_KDE4_MAINWINDOW_H
 
-#include <KMainWindow>
+#include <QMainWindow>
 #include <QEvent>
 #include <QActionGroup>
-#include <QtGui>
 
-class MainWidget;
-class KRecentFilesAction;
+#include "ui_mainwindow.h"
+
+class QLabel;
 
 enum CustomEventTypes
 {
@@ -49,7 +49,7 @@ class AlertEvent : public QEvent
         QString message;
 };
 
-class MainWindow : public KMainWindow
+class MainWindow : public QMainWindow, public Ui_MainWindow
 {
     Q_OBJECT
     public:
@@ -61,8 +61,8 @@ class MainWindow : public KMainWindow
 
     private slots:
         void romOpen();
-        void romOpen(const KUrl& url);
-        void romOpen(const KUrl& url, unsigned int archivefile);
+        void romOpen(const QUrl& url);
+        void romOpen(const QUrl& url, unsigned int archivefile);
         void romClose();
 
         void emulationStart();
@@ -71,75 +71,22 @@ class MainWindow : public KMainWindow
         void saveStateSave();
         void saveStateSaveAs();
         void saveStateLoad();
-        void saveStateLoadAs();
+        void saveStateLoadFrom();
         void savestateCheckSlot();
         void savestateSelectSlot(QAction* a);
 
         void viewFullScreen();
-        void toggleCheckViewable();
-        void toggleToolBar();
-        void toggleStatusBar();
         void configDialogShow();
-        //name change...
         void updateItemCount(int count);
-
-        //test junk
-        void toolbarIconOnly();
-        void toolbarTextOnly();
-        void toolbarTextBeside();
-        void toolbarTextUnder();
 
     protected:
         bool event(QEvent* event);
         void closeEvent(QCloseEvent* event);
 
     private:
-        void createActions();
-        void createMenus();
-        void createToolBars();
-        MainWidget* m_mainWidget;
-        KRecentFilesAction* m_actionRecentFiles;
-
-        //Menus
-        QMenu* fileMenu;
-        QMenu* emulationMenu;
-        QMenu* settingsMenu;
-        QMenu* helpMenu;
-
-        //Toolbar
-        QToolBar* mainToolBar;
-
-        //Actions
-        QAction* rom_open;
-        QAction* rom_close;
-        QAction* application_close;
-        QAction* emulation_start;
-        QAction* emulation_pause;
-        QAction* emulation_stop;
-        QAction* emulation_load_state;
-        QAction* emulation_save_state;
-        QAction* emulation_load_state_as;
-        QAction* emulation_save_state_as;
-        QAction* emulation_current_slot;
-
+        void setupActions();
         QList<QAction*> slotActions;
-
-        //Settings
-        QAction* settings_show_toolbar;
-        QAction* settings_show_filter;
-        QAction* settings_show_statusbar;
-        QAction* settings_fullscreen;
-        QAction* settings_configure_graphics;
-        QAction* settings_configure_audio;
-        QAction* settings_configure_input;
-        QAction* settings_configure_rsp;
-        QAction* settings_configure_mupen;
-
-        //Test junk
-        QAction* toolbar_icon_only;
-        QAction* toolbar_text_only;
-        QAction* toolbar_text_beside;
-        QAction* toolbar_text_under;
+        QLabel* m_statusBarLabel;
 };
 
 #endif // MUPEN_KDE4_MAINWINDOW_H
