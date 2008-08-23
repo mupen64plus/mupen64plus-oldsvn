@@ -48,10 +48,10 @@
     <addaction name="actionPause" />
     <addaction name="actionStop" />
     <addaction name="separator" />
-    <addaction name="actionSaveState" />
-    <addaction name="actionSaveStateAs" />
     <addaction name="actionLoadState" />
     <addaction name="actionLoadStateFrom" />
+    <addaction name="actionSaveState" />
+    <addaction name="actionSaveStateAs" />
     <addaction name="separator" />
     <addaction name="actionCurrentSaveStateSlot" />
    </widget>
