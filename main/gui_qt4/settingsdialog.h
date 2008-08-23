@@ -56,6 +56,7 @@ class SettingsDialog : public QDialog, public Ui_SettingsDialog
         void on_showFullPathsInFilenamesCheck_toggled(bool checked);
 
         void accept();
+        void pageChanged(int);
 };
 
 #endif // MUPEN_KDE4_SETTINGS_DIALOG_H

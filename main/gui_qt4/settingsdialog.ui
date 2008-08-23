@@ -5,20 +5,50 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>511</width>
-    <height>504</height>
+    <width>547</width>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout_13" >
+   <property name="margin" >
+    <number>0</number>
+   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout_6" >
      <item>
       <widget class="QListWidget" name="listWidget" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="horizontalScrollBarPolicy" >
         <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="showDropIndicator" stdset="0" >
+        <bool>false</bool>
+       </property>
+       <property name="dragDropMode" >
+        <enum>QAbstractItemView::NoDragDrop</enum>
+       </property>
+       <property name="textElideMode" >
+        <enum>Qt::ElideNone</enum>
+       </property>
+       <property name="movement" >
+        <enum>QListView::Static</enum>
+       </property>
+       <property name="flow" >
+        <enum>QListView::TopToBottom</enum>
+       </property>
+       <property name="resizeMode" >
+        <enum>QListView::Adjust</enum>
+       </property>
+       <property name="currentRow" >
+        <number>0</number>
        </property>
        <item>
         <property name="text" >
@@ -38,300 +68,337 @@
       </widget>
      </item>
      <item>
-      <widget class="QStackedWidget" name="stackedWidget" >
-       <property name="currentIndex" >
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="page" >
-        <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <layout class="QVBoxLayout" name="verticalLayout" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout" >
          <item>
-          <widget class="QGroupBox" name="groupBox" >
-           <property name="title" >
-            <string>CPU Core</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3" >
-            <item>
-             <widget class="QRadioButton" name="interpreterRadio" >
-              <property name="text" >
-               <string>&amp;Interpreter</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="dynamicRecompilerRadio" >
-              <property name="text" >
-               <string>Dynamic &amp;Recompiler</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="pureInterpreterRadio" >
-              <property name="text" >
-               <string>&amp;Pure Interpreter</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_2" >
-           <property name="title" >
-            <string>Compatibility</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_4" >
-            <item>
-             <widget class="QCheckBox" name="disableCompiledJumpCheck" >
-              <property name="text" >
-               <string>Disable compiled &amp;jump</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="disableMemoryExpansionCheck" >
-              <property name="text" >
-               <string>&amp;Disable Memory Expansion</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_3" >
-           <property name="title" >
-            <string>Miscellaneous</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_5" >
-            <item>
-             <widget class="QCheckBox" name="autoIncrementSaveSlotCheck" >
-              <property name="text" >
-               <string>A&amp;uto-increment save slot</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="askBeforeLoadingBadRomCheck" >
-              <property name="text" >
-               <string>Ask &amp;before loading bad dump/hacked rom</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="osdEnabledCheck" >
-              <property name="text" >
-               <string>On &amp;screen display enabled</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="alwaysStartInFullScreenModeCheck" >
-              <property name="text" >
-               <string>Always start in &amp;full screen mode</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer" >
-           <property name="orientation" >
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="page_2" >
-        <layout class="QVBoxLayout" name="verticalLayout_6" >
-         <item>
-          <widget class="QGroupBox" name="groupBox_7" >
-           <property name="title" >
-            <string>Graphics Plugin</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_7" >
-            <item>
-             <widget class="QComboBox" name="graphicsPluginCombo" />
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_2" >
-              <item>
-               <widget class="QPushButton" name="configGraphicsPluginButton" >
-                <property name="text" >
-                 <string>Config</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="testGraphicsPluginButton" >
-                <property name="text" >
-                 <string>Test</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="aboutGraphicsPluginButton" >
-                <property name="text" >
-                 <string>About</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_4" >
-           <property name="title" >
-            <string>Audio Plugin</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_8" >
-            <item>
-             <widget class="QComboBox" name="audioPluginCombo" />
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3" >
-              <item>
-               <widget class="QPushButton" name="configAudioPluginButton" >
-                <property name="text" >
-                 <string>Config</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="testAudioPluginButton" >
-                <property name="text" >
-                 <string>Test</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="aboutAudioPluginButton" >
-                <property name="text" >
-                 <string>About</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_5" >
-           <property name="title" >
-            <string>Input Plugin</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_9" >
-            <item>
-             <widget class="QComboBox" name="inputPluginCombo" />
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4" >
-              <item>
-               <widget class="QPushButton" name="configInputPluginButton" >
-                <property name="text" >
-                 <string>Config</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="testInputPluginButton" >
-                <property name="text" >
-                 <string>Test</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="aboutInputPluginButton" >
-                <property name="text" >
-                 <string>About</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_6" >
-           <property name="title" >
-            <string>RSP Plugin</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_10" >
-            <item>
-             <widget class="QComboBox" name="rspPluginCombo" />
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_5" >
-              <item>
-               <widget class="QPushButton" name="configRspPluginButton" >
-                <property name="text" >
-                 <string>Config</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="testRspPluginButton" >
-                <property name="text" >
-                 <string>Test</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="aboutRspPluginButton" >
-                <property name="text" >
-                 <string>About</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="page_3" >
-        <layout class="QVBoxLayout" name="verticalLayout_11" >
-         <item>
-          <widget class="QGroupBox" name="groupBox_8" >
-           <property name="title" >
-            <string>GroupBox</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_12" >
-            <item>
-             <widget class="RomDirectoriesListWidget" native="1" name="romDirectoriesListWidget" />
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="scanDirectoriesRecursivelyCheck" >
+          <widget class="QLabel" name="imageLabel" >
            <property name="text" >
-            <string>&amp;Scan directories recursively</string>
+            <string/>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="showFullPathsInFilenamesCheck" >
+          <widget class="QLabel" name="textLabel" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text" >
-            <string>Show &amp;full paths in filenames</string>
+            <string/>
            </property>
           </widget>
          </item>
         </layout>
-       </widget>
-      </widget>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="stackedWidget" >
+         <property name="currentIndex" >
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="page" >
+          <layout class="QVBoxLayout" name="verticalLayout_2" >
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QGroupBox" name="groupBox" >
+             <property name="title" >
+              <string>CPU Core</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_3" >
+              <item>
+               <widget class="QRadioButton" name="interpreterRadio" >
+                <property name="text" >
+                 <string>&amp;Interpreter</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="dynamicRecompilerRadio" >
+                <property name="text" >
+                 <string>Dynamic &amp;Recompiler</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="pureInterpreterRadio" >
+                <property name="text" >
+                 <string>&amp;Pure Interpreter</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_2" >
+             <property name="title" >
+              <string>Compatibility</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4" >
+              <item>
+               <widget class="QCheckBox" name="disableCompiledJumpCheck" >
+                <property name="text" >
+                 <string>Disable compiled &amp;jump</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="disableMemoryExpansionCheck" >
+                <property name="text" >
+                 <string>&amp;Disable Memory Expansion</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_3" >
+             <property name="title" >
+              <string>Miscellaneous</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_5" >
+              <item>
+               <widget class="QCheckBox" name="autoIncrementSaveSlotCheck" >
+                <property name="text" >
+                 <string>A&amp;uto-increment save slot</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="askBeforeLoadingBadRomCheck" >
+                <property name="text" >
+                 <string>Ask &amp;before loading bad dump/hacked rom</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="osdEnabledCheck" >
+                <property name="text" >
+                 <string>On &amp;screen display enabled</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="alwaysStartInFullScreenModeCheck" >
+                <property name="text" >
+                 <string>Always start in &amp;full screen mode</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_2" >
+          <layout class="QVBoxLayout" name="verticalLayout_6" >
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QGroupBox" name="groupBox_7" >
+             <property name="title" >
+              <string>Graphics Plugin</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_7" >
+              <item>
+               <widget class="QComboBox" name="graphicsPluginCombo" />
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_2" >
+                <item>
+                 <widget class="QPushButton" name="configGraphicsPluginButton" >
+                  <property name="text" >
+                   <string>Config</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="testGraphicsPluginButton" >
+                  <property name="text" >
+                   <string>Test</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="aboutGraphicsPluginButton" >
+                  <property name="text" >
+                   <string>About</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_4" >
+             <property name="title" >
+              <string>Audio Plugin</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_8" >
+              <item>
+               <widget class="QComboBox" name="audioPluginCombo" />
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_3" >
+                <item>
+                 <widget class="QPushButton" name="configAudioPluginButton" >
+                  <property name="text" >
+                   <string>Config</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="testAudioPluginButton" >
+                  <property name="text" >
+                   <string>Test</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="aboutAudioPluginButton" >
+                  <property name="text" >
+                   <string>About</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_5" >
+             <property name="title" >
+              <string>Input Plugin</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_9" >
+              <item>
+               <widget class="QComboBox" name="inputPluginCombo" />
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4" >
+                <item>
+                 <widget class="QPushButton" name="configInputPluginButton" >
+                  <property name="text" >
+                   <string>Config</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="testInputPluginButton" >
+                  <property name="text" >
+                   <string>Test</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="aboutInputPluginButton" >
+                  <property name="text" >
+                   <string>About</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_6" >
+             <property name="title" >
+              <string>RSP Plugin</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_10" >
+              <item>
+               <widget class="QComboBox" name="rspPluginCombo" />
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5" >
+                <item>
+                 <widget class="QPushButton" name="configRspPluginButton" >
+                  <property name="text" >
+                   <string>Config</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="testRspPluginButton" >
+                  <property name="text" >
+                   <string>Test</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="aboutRspPluginButton" >
+                  <property name="text" >
+                   <string>About</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_3" >
+          <layout class="QVBoxLayout" name="verticalLayout_11" >
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QGroupBox" name="groupBox_8" >
+             <property name="title" >
+              <string>GroupBox</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_12" >
+              <item>
+               <widget class="RomDirectoriesListWidget" native="1" name="romDirectoriesListWidget" />
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="scanDirectoriesRecursivelyCheck" >
+             <property name="text" >
+              <string>&amp;Scan directories recursively</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="showFullPathsInFilenamesCheck" >
+             <property name="text" >
+              <string>Show &amp;full paths in filenames</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

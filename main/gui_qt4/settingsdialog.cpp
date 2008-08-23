@@ -18,7 +18,8 @@
 *
 */
 
-#include <QMetaObject>
+#include <QSize>
+#include <QListWidgetItem>
 
 #include "rommodel.h"
 #include "settingsdialog.h"
@@ -37,6 +38,14 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 : QDialog(parent)
 {
     setupUi(this);
+
+    listWidget->item(0)->setIcon(icon("preferences-system.png"));
+    listWidget->item(1)->setIcon(icon("applications-utilities.png"));
+    listWidget->item(2)->setIcon(icon("preferences-system-network.png"));
+    pageChanged(listWidget->currentRow());
+
+    connect(listWidget, SIGNAL(currentRowChanged(int)),
+            this, SLOT(pageChanged(int)));
 
     int core = core::config_get_number("Core", CORE_DYNAREC);
     switch(core) {
@@ -266,6 +275,13 @@ void SettingsDialog::accept()
     }
     RomModel::self()->settingsChanged();
     QDialog::accept();
+}
+
+void SettingsDialog::pageChanged(int page)
+{
+    QListWidgetItem* i = listWidget->item(page);
+    imageLabel->setPixmap(i->icon().pixmap(32, 32));
+    textLabel->setText(QString("<b>%1</b>").arg(i->text()));
 }
 
 #include "settingsdialog.moc"
