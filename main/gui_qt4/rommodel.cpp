@@ -176,7 +176,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
     QVariant data;
     if (index.isValid()) {
         const RomEntry& entry = m_romList[index.row()];
-        if (role == Qt::DisplayRole) {
+        if (role == Qt::DisplayRole || role == Sort) {
             switch(index.column()) {
                 case Country:
                     data = countryName(entry.country);
@@ -221,35 +221,12 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = countryFlag(entry.country);
                     break;
             }
-        } else if (role == Sort) {
-            switch(index.column()) {
-                case GoodName:
-                    data = entry.goodName;
-                    break;
-                case Country:
-                    data = countryName(entry.country);
-                    break;
-                case Size:
-                    data = entry.size;
-                    break;
-                case Comments:
-                    data = entry.comments;
-                    break;
-                case FileName:
-                    {
-                        if (core::config_get_bool("RomBrowserShowFullPaths", FALSE))
-                            data = entry.fileName;
-                        else
-                            data = QFileInfo(entry.fileName).fileName();
-                    }
-                    break;
-            }
-        }
         //Assign Role enums here to retrive information.
-        else if (role == FullPath) 
-            { data = entry.fileName; }
-        else if (role == ArchiveFile) 
-            { data = entry.archivefile; }
+        } else if (role == FullPath) {
+            data = entry.fileName;
+        } else if (role == ArchiveFile) {
+            data = entry.archivefile;
+        }
     }
     return data;
 }
