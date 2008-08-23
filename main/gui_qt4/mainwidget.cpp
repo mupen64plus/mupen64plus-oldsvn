@@ -28,6 +28,7 @@
 #include <Qt>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSettings>
 
 #include "mainwidget.h"
 #include "rommodel.h"
@@ -37,6 +38,12 @@ MainWidget::MainWidget(QWidget* parent)
     , m_proxyModel(0)
 {
     setupUi(this);
+
+    QSettings s;
+    QByteArray headerState = s.value("RomBrowserHeadersState").toByteArray();
+    if (!headerState.isEmpty()) {
+        treeView->header()->restoreState(headerState);
+    }
 
     lineEdit->installEventFilter(this);
 
@@ -74,6 +81,13 @@ MainWidget::MainWidget(QWidget* parent)
 
     //lineEdit->setFocus();
     QTimer::singleShot(0, this, SLOT(filter())); // so we emit the base item count
+}
+
+MainWidget::~MainWidget()
+{
+    QSettings s;
+    QByteArray headerState = treeView->header()->saveState();
+    s.setValue("RomBrowserHeadersState", headerState);
 }
 
 QModelIndex MainWidget::getRomBrowserIndex()

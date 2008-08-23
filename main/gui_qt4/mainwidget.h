@@ -38,6 +38,7 @@ class MainWidget : public QWidget, public Ui_MainWidget
     Q_OBJECT
     public:
         MainWidget(QWidget* parent = 0);
+        virtual ~MainWidget();
         QModelIndex getRomBrowserIndex();
 
     public slots:

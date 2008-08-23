@@ -45,6 +45,8 @@ void gui_init(int *argc, char ***argv)
 {
     gtk_init(argc, argv);
     application = new QApplication(*argc, *argv);
+    application->setOrganizationName("mupen64plus");
+    application->setApplicationName("mupen64plus");
     application->setWindowIcon(icon("mupen64plus.png"));
     mainWindow = new MainWindow;
 }
@@ -61,6 +63,10 @@ void gui_display(void)
 void gui_main_loop(void)
 {
     application->exec();
+    delete mainWindow;
+    mainWindow = 0;
+    delete application;
+    application = 0;
 }
 
 int gui_message(unsigned char messagetype, const char *format, ...)
