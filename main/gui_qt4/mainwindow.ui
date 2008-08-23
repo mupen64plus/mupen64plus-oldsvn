@@ -9,6 +9,9 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="contextMenuPolicy" >
+   <enum>Qt::NoContextMenu</enum>
+  </property>
   <property name="windowTitle" >
    <string>Mupen64Plus</string>
   </property>

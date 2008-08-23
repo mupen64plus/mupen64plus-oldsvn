@@ -44,11 +44,17 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     listWidget->item(2)->setIcon(icon("preferences-system-network.png"));
     pageChanged(listWidget->currentRow());
 
+    QSize labelPixmapSize(32, 32);
+    rspPluginLabel->setPixmap(icon("cpu.png").pixmap(labelPixmapSize));
+    inputPluginLabel->setPixmap(icon("input-gaming.png").pixmap(labelPixmapSize));
+    audioPluginLabel->setPixmap(icon("audio-card.png").pixmap(labelPixmapSize));
+    graphicsPluginLabel->setPixmap(icon("video-display.png").pixmap(labelPixmapSize));
+
     connect(listWidget, SIGNAL(currentRowChanged(int)),
             this, SLOT(pageChanged(int)));
 
     int core = core::config_get_number("Core", CORE_DYNAREC);
-    switch(core) {
+    switch (core) {
         case CORE_DYNAREC:
             dynamicRecompilerRadio->setChecked(true);
             break;

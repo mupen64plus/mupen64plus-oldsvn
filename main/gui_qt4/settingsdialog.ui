@@ -13,9 +13,6 @@
    <string>Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_13" >
-   <property name="margin" >
-    <number>0</number>
-   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6" >
      <item>
@@ -72,6 +69,19 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout" >
          <item>
+          <spacer name="horizontalSpacer_2" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QLabel" name="imageLabel" >
            <property name="text" >
             <string/>
@@ -80,16 +90,23 @@
          </item>
          <item>
           <widget class="QLabel" name="textLabel" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-             <horstretch>1</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="text" >
             <string/>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -218,12 +235,30 @@
              <property name="title" >
               <string>Graphics Plugin</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_7" >
-              <item>
-               <widget class="QComboBox" name="graphicsPluginCombo" />
-              </item>
+             <layout class="QVBoxLayout" name="verticalLayout_10" >
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_2" >
+                <item>
+                 <widget class="QLabel" name="graphicsPluginLabel" >
+                  <property name="text" >
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="graphicsPluginCombo" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_3" >
                 <item>
                  <widget class="QPushButton" name="configGraphicsPluginButton" >
                   <property name="text" >
@@ -255,12 +290,30 @@
              <property name="title" >
               <string>Audio Plugin</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_8" >
+             <layout class="QVBoxLayout" name="verticalLayout_9" >
               <item>
-               <widget class="QComboBox" name="audioPluginCombo" />
+               <layout class="QHBoxLayout" name="horizontalLayout_4" >
+                <item>
+                 <widget class="QLabel" name="audioPluginLabel" >
+                  <property name="text" >
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="audioPluginCombo" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_3" >
+               <layout class="QHBoxLayout" name="horizontalLayout_5" >
                 <item>
                  <widget class="QPushButton" name="configAudioPluginButton" >
                   <property name="text" >
@@ -292,12 +345,30 @@
              <property name="title" >
               <string>Input Plugin</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_9" >
+             <layout class="QVBoxLayout" name="verticalLayout_8" >
               <item>
-               <widget class="QComboBox" name="inputPluginCombo" />
+               <layout class="QHBoxLayout" name="horizontalLayout_7" >
+                <item>
+                 <widget class="QLabel" name="inputPluginLabel" >
+                  <property name="text" >
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="inputPluginCombo" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_4" >
+               <layout class="QHBoxLayout" name="horizontalLayout_8" >
                 <item>
                  <widget class="QPushButton" name="configInputPluginButton" >
                   <property name="text" >
@@ -329,12 +400,30 @@
              <property name="title" >
               <string>RSP Plugin</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_10" >
+             <layout class="QVBoxLayout" name="verticalLayout_7" >
               <item>
-               <widget class="QComboBox" name="rspPluginCombo" />
+               <layout class="QHBoxLayout" name="horizontalLayout_9" >
+                <item>
+                 <widget class="QLabel" name="rspPluginLabel" >
+                  <property name="text" >
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="rspPluginCombo" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_5" >
+               <layout class="QHBoxLayout" name="horizontalLayout_10" >
                 <item>
                  <widget class="QPushButton" name="configRspPluginButton" >
                   <property name="text" >
@@ -371,7 +460,7 @@
            <item>
             <widget class="QGroupBox" name="groupBox_8" >
              <property name="title" >
-              <string>GroupBox</string>
+              <string>Rom Browser</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_12" >
               <item>
