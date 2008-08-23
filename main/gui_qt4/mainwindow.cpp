@@ -322,6 +322,7 @@ void MainWindow::setupActions()
     QActionGroup* slotActionGroup = new QActionGroup(actionCurrentSaveStateSlot);
     for(int i = 0; i < 10; i++) {
         QAction* slot = slotMenu->addAction(tr("Slot &%1").arg(i));
+        slot->setShortcut(QString("Ctrl+%1").arg(i));
         slot->setCheckable(true);
         slot->setData(i);
         slotActionGroup->addAction(slot);
