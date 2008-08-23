@@ -44,7 +44,7 @@ class RomModel : public QAbstractItemModel
 {
     Q_OBJECT
     public:
-        enum Columns { Flag = 0, GoodName, Country, Size, Comments, FileName };
+        enum Columns { Country = 0, GoodName, Size, Comments, FileName };
         enum Role { Sort = Qt::UserRole, FullPath, ArchiveFile };
 
         RomModel(QObject* parent = 0);

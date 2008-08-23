@@ -42,9 +42,8 @@ RomModel::RomModel(QObject* parent)
     , m_showFullPath(core::config_get_bool("RomBrowserShowFullPaths", FALSE))
     , m_romDirectories(romDirectories())
 {
-    m_columnHeaders << tr("Flag")
+    m_columnHeaders << tr("Country")
                     << tr("Good Name")
-                    << tr("Country")
                     << tr("Size")
                     << tr("Comments")
                     << tr("File Name");
@@ -179,14 +178,11 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
         const RomEntry& entry = m_romList[index.row()];
         if (role == Qt::DisplayRole) {
             switch(index.column()) {
-                case Flag:
-                    // Country flag only
+                case Country:
+                    data = countryName(entry.country);
                     break;
                 case GoodName:
                     data = entry.goodName;
-                    break;
-                case Country:
-                    data = countryName(entry.country);
                     break;
                 case Size:
                     data = tr("%0 Mbit").arg((entry.size * 8) / 1024 / 1024);
@@ -221,7 +217,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
             }
         } else if (role == Qt::DecorationRole) {
             switch(index.column()) {
-                case Flag:
+                case Country:
                     data = countryFlag(entry.country);
                     break;
             }
@@ -230,7 +226,6 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                 case GoodName:
                     data = entry.goodName;
                     break;
-                case Flag:
                 case Country:
                     data = countryName(entry.country);
                     break;
