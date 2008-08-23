@@ -189,14 +189,14 @@ void MainWindow::fullScreenToggle()
 
 void MainWindow::saveStateSave()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         core::savestates_job |= SAVESTATE;
     }
 }
 
 void MainWindow::saveStateSaveAs()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         QString filename = QFileDialog::getSaveFileName(this);
         if (!filename.isEmpty()) {
             core::savestates_select_filename(filename.toLocal8Bit());
@@ -209,14 +209,14 @@ void MainWindow::saveStateSaveAs()
 
 void MainWindow::saveStateLoad()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         core::savestates_job |= LOADSTATE;
     }
 }
 
 void MainWindow::saveStateLoadFrom()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         QString filename = QFileDialog::getOpenFileName(this);
         if (!filename.isEmpty()) {
             core::savestates_select_filename(filename.toLocal8Bit());

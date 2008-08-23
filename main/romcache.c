@@ -330,15 +330,12 @@ static void scan_dir(const char *directoryname)
         {
         if( directoryentry->d_name[0] == '.' ) // .., . or hidden file
             { continue; }
-        snprintf(filename, PATH_MAX-1, "%s%s", directoryname, directoryentry->d_name);
+        snprintf(filename, PATH_MAX-1, "%s/%s", directoryname, directoryentry->d_name);
         filename[PATH_MAX-1] = '\0';
-
-        //Use real path (maybe it's a link)
-        if(realpath(filename,fullpath))
-            {
-            strncpy(filename,fullpath,PATH_MAX-1); 
-            filename[PATH_MAX-1] = '\0';
-            }
+        
+        strcpy(fullpath, filename);
+        puts(fullpath);
+        puts(filename);
 
         //If we can't get information, move to next file.
         if(stat(fullpath,&filestatus)==-1)

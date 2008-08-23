@@ -24,7 +24,11 @@
 #define __7Z_BUFFER_H
 
 #include <stddef.h>
-#include "Types.h"
+
+#ifndef _7ZIP_BYTE_DEFINED
+#define _7ZIP_BYTE_DEFINED
+typedef unsigned char Byte;
+#endif 
 
 typedef struct _CSzByteBuffer
 {

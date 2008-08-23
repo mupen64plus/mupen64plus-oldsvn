@@ -23,9 +23,11 @@
 #ifndef __7Z_HEADER_H
 #define __7Z_HEADER_H
 
-#include "Types.h"
-
 #define k7zSignatureSize 6
+#ifndef _7ZIP_BYTE_DEFINED
+#define _7ZIP_BYTE_DEFINED
+typedef unsigned char Byte;
+#endif 
 extern Byte k7zSignature[k7zSignatureSize];
 
 #define k7zMajorVersion 0

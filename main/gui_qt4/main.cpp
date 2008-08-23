@@ -23,7 +23,7 @@ extern "C" {
     #include "../main.h"
 }
 
-#include <gtk/gtk.h>
+//#include <gtk/gtk.h>
 
 #include <QApplication>
 
@@ -43,7 +43,7 @@ extern "C" {
 // arguments. This is called before mupen64plus parses any of its commandline options.
 void gui_init(int *argc, char ***argv)
 {
-    gtk_init(argc, argv);
+//    gtk_init(argc, argv);
     application = new QApplication(*argc, *argv);
     application->setOrganizationName("mupen64plus");
     application->setApplicationName("mupen64plus");
@@ -77,7 +77,6 @@ int gui_message(unsigned char messagetype, const char *format, ...)
     va_list ap;
     char buffer[2049];
     pthread_t self = pthread_self();
-    gint response = 0;
 
     va_start(ap, format);
     vsnprintf(buffer, 2048, format, ap);

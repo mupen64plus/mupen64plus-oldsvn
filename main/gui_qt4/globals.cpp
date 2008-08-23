@@ -21,6 +21,7 @@
 #include <QIcon>
 #include <QString>
 #include <QFile>
+#include <QDebug>
 
 #include "globals.h"
 

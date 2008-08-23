@@ -33,15 +33,16 @@
  * if you want to implement an interface, you should look here
  */
 
+#include <sys/time.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>  // POSIX macros and standard types.
 #include <pthread.h> // POSIX thread library
 #include <signal.h> // signals
-#include <ucontext.h> // extra signal types (for portability)
+/*#include <ucontext.h> // extra signal types (for portability)*/
 #include <getopt.h> // getopt_long
-#include <libgen.h> // basename, dirname
+/*#include <libgen.h> // basename, dirname*/
 #include <dirent.h>
 
 #include <png.h>    // for writing screenshot PNG files
@@ -50,7 +51,7 @@
 
 #include "main.h"
 #include "version.h"
-#include "winlnxdefs.h"
+//#include "winlnxdefs.h"
 #include "config.h"
 #include "plugin.h"
 #include "rom.h"
@@ -82,15 +83,15 @@
 static void parseCommandLine(int argc, char **argv);
 static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
 static void *emulationThread( void *_arg );
-static void sighandler( int signal, siginfo_t *info, void *context ); // signal handler
+static void sighandler( int signal ); // siginfo_t *info, void *context ); // signal handler
 extern void *rom_cache_system(void *_arg);
 
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
-pthread_t   g_EmulationThread = 0;      // core thread handle
-pthread_t   g_RomCacheThread = 0;       // rom cache thread handle
+pthread_t   g_EmulationThread;      // core thread handle
+pthread_t   g_RomCacheThread;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_Fullscreen = 0;           // fullscreen enabled?
@@ -386,12 +387,12 @@ void startEmulation(void)
     {
         emulationThread(NULL);
     }
-    else if(!g_EmulationThread)
+    else if(!g_EmulatorRunning)
     {
         // spawn emulation thread
         if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
         {
-            g_EmulationThread = 0;
+            //g_EmulationThread = 0;
             error_message(tr("Couldn't spawn core thread!"));
             return;
         }
@@ -411,7 +412,7 @@ void startEmulation(void)
 
 void stopEmulation(void)
 {
-    if(g_EmulationThread || g_EmulatorRunning)
+    if(g_EmulatorRunning)
     {
 #ifndef NO_GUI
         g_romcache.rcspause = 0;
@@ -421,7 +422,7 @@ void stopEmulation(void)
         stop_it();
 
         // wait until emulation thread is done before continuing
-        if(g_EmulationThread)
+        if(g_EmulatorRunning)
             pthread_join(g_EmulationThread, NULL);
 
         g_EmulatorRunning = 0;
@@ -546,7 +547,7 @@ void new_vi(void)
         time = (int)(CalculatedTime - CurrentFPSTime);
         if (time > 0)
         {
-            usleep(time * 1000);
+            sleep(time);
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }
@@ -748,19 +749,14 @@ static void * emulationThread( void *_arg )
                *audio_plugin = NULL,
            *input_plugin = NULL,
            *RSP_plugin = NULL;
-    struct sigaction sa;
 
     // install signal handler, but only if we're running in GUI mode
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
     if (l_GuiEnabled)
     {
-        memset( &sa, 0, sizeof( struct sigaction ) );
-        sa.sa_sigaction = sighandler;
-        sa.sa_flags = SA_SIGINFO;
-        sigaction( SIGSEGV, &sa, NULL );
-        sigaction( SIGILL, &sa, NULL );
-        sigaction( SIGFPE, &sa, NULL );
-        sigaction( SIGCHLD, &sa, NULL );
+        signal( SIGSEGV, sighandler );
+        signal( SIGILL, sighandler );
+        signal( SIGFPE, sighandler );
     }
 
     g_EmulatorRunning = 1;
@@ -879,7 +875,7 @@ static void * emulationThread( void *_arg )
     free_memory();
 
     // clean up
-    g_EmulationThread = 0;
+    g_EmulatorRunning = 0;
 
     SDL_Quit();
 
@@ -898,82 +894,17 @@ static void * emulationThread( void *_arg )
 /*********************************************************************************************************
 * signal handler
 */
-static void sighandler(int signal, siginfo_t *info, void *context)
+static void sighandler(int signal)
 {
-    if( info->si_pid == g_EmulationThread )
-    {
-        switch( signal )
-        {
-            case SIGSEGV:
-                error_message(tr("The core thread recieved a SIGSEGV signal.\n"
-                                "This means it tried to access protected memory.\n"
-                                "Maybe you have set a wrong ucode for one of the plugins!"));
-                printf( "SIGSEGV in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-#ifdef SEGV_MAPERR
-                switch( info->si_code )
-                {
-                    case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
-                    case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
-                }
-#endif
-                break;
-            case SIGILL:
-                printf( "SIGILL in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-#ifdef ILL_ILLOPC
-                switch( info->si_code )
-                {
-                    case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
-                    case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
-                    case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
-                    case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
-                    case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
-                    case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
-                    case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
-                    case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
-                }
-#endif
-                break;
-            case SIGFPE:
-                printf( "SIGFPE in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-                switch( info->si_code )
-                {
-                    case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
-                    case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
-                    case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
-                    case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
-                    case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
-                    case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
-                    case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
-                    case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
-                }
-                break;
-            default:
-                printf( "Signal number %d in core thread caught:\n", signal );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        }
-        pthread_cancel(g_EmulationThread);
-        g_EmulationThread = 0;
-        g_EmulatorRunning = 0;
-    }
-    else
-    {
         printf( "Signal number %d caught:\n", signal );
-        printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
         exit( EXIT_FAILURE );
-    }
 }
 
 static void printUsage(const char *progname)
 {
     char *str = strdup(progname);
 
-    printf("Usage: %s [parameter(s)] [romfile]\n"
+    printf("Usage: [parameter(s)] [romfile]\n"
            "\n"
            "Parameters:\n"
            "    --nogui               : do not display GUI.\n"
@@ -994,7 +925,7 @@ static void printUsage(const char *progname)
            "    --debugger            : start with debugger enabled\n"
 #endif 
            "    -h, --help            : see this help message\n"
-           "\n", basename(str));
+           "\n");
 
     free(str);
 
@@ -1006,6 +937,7 @@ static void printUsage(const char *progname)
  */
 void parseCommandLine(int argc, char **argv)
 {
+	return;
     int i, shots;
     char *str = NULL;
 
@@ -1185,7 +1117,6 @@ void parseCommandLine(int argc, char **argv)
     // This allows creation of a mupen64plus_nogui symlink to mupen64plus instead of passing --nogui
     // for backwards compatability with old mupen64_nogui program name.
     str = strdup(argv[0]);
-    basename(str);
     if(strstr(str, "_nogui") != NULL)
     {
         l_GuiEnabled = FALSE;
@@ -1201,6 +1132,9 @@ void parseCommandLine(int argc, char **argv)
  */
 static void setPaths(void)
 {
+	strcpy(l_ConfigDir, "C:/mupen64plus/");
+	strcpy(l_InstallDir, "C:/mupen64plus/");
+	return;
     char buf[PATH_MAX], buf2[PATH_MAX];
 
     // if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
@@ -1213,7 +1147,7 @@ static void setPaths(void)
         if(!isdir(l_ConfigDir))
         {
             printf("Creating %s to store user data\n", l_ConfigDir);
-            if(mkdir(l_ConfigDir, (mode_t)0755) != 0)
+            if(mkdir(l_ConfigDir) != 0)
             {
                 printf("Error: Could not create %s: ", l_ConfigDir);
                 perror(NULL);
@@ -1223,7 +1157,7 @@ static void setPaths(void)
             // create save subdir
             strncpy(buf, l_ConfigDir, PATH_MAX);
             strncat(buf, "/save", PATH_MAX - strlen(buf));
-            if(mkdir(buf, (mode_t)0755) != 0)
+            if(mkdir(buf) != 0)
             {
                 // report error, but don't exit
                 printf("Warning: Could not create %s: %s", buf, strerror(errno));
@@ -1232,7 +1166,7 @@ static void setPaths(void)
             // create screenshots subdir
             strncpy(buf, l_ConfigDir, PATH_MAX);
             strncat(buf, "/screenshots", PATH_MAX - strlen(buf));
-            if(mkdir(buf, (mode_t)0755) != 0)
+            if(mkdir(buf) != 0)
             {
                 // report error, but don't exit
                 printf("Warning: Could not create %s: %s", buf, strerror(errno));
@@ -1248,14 +1182,13 @@ static void setPaths(void)
     if (strlen(l_InstallDir) == 0)
     {
         buf[0] = '\0';
-        int n = readlink("/proc/self/exe", buf, PATH_MAX);
+        /*int n = readlink("/proc/self/exe", buf, PATH_MAX);
         if (n > 0)
         {
             buf[n] = '\0';
-            dirname(buf);
             strncpy(l_InstallDir, buf, PATH_MAX);
             strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
-        }
+        }*/
         // if it's not in the executable's directory, try a couple of default locations
         if (buf[0] == '\0' || !isfile(buf))
         {
@@ -1356,8 +1289,11 @@ int main(int argc, char *argv[])
     printf("             |_|         http://code.google.com/p/mupen64plus/  \n");
     printf("Version %s\n\n",MUPEN_VERSION);
 
+    puts("parse");
     parseCommandLine(argc, argv);
+    puts("paths");
     setPaths();
+    puts("read conf");
     config_read();
 
     if (l_GuiEnabled)
@@ -1454,7 +1390,6 @@ int main(int argc, char *argv[])
         g_romcache.rcstask = RCS_INIT;
         if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
             {
-            g_RomCacheThread = 0;
             error_message(tr("Couldn't spawn rom cache thread!"));
             }
         else
@@ -1522,3 +1457,11 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+
+int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParamarg, int cmdShow)
+{
+	int argc = 1;
+	char *argv[2] = { "mupen64plus.exe", 0 };
+	puts("main");
+	return main(0, 0);	
+}

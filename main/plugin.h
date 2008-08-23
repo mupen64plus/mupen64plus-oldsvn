@@ -30,7 +30,12 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
+#ifndef __WIN32__
 #include "winlnxdefs.h"
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 #include "util.h" // list_t type
 
 //--------------------- plugin storage type ----------------

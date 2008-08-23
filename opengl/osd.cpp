@@ -285,7 +285,7 @@ void osd_render()
     glGetIntegerv(GL_ACTIVE_TEXTURE_ARB, &iActiveTex);
     for (i = 0; i < 8; i++)
     {
-        glActiveTexture(GL_TEXTURE0_ARB + i);
+        //glActiveTexture(GL_TEXTURE0_ARB + i);
         bTexture2D[i] = glIsEnabled(GL_TEXTURE_2D);
         glDisable(GL_TEXTURE_2D);
     }
@@ -393,13 +393,13 @@ void osd_render()
     // restore the attributes
     for (int i = 0; i < 8; i++)
     {
-        glActiveTexture(GL_TEXTURE0_ARB + i);
+        //glActiveTexture(GL_TEXTURE0_ARB + i);
         if (bTexture2D[i])
             glEnable(GL_TEXTURE_2D);
         else
             glDisable(GL_TEXTURE_2D);
     }
-    glActiveTexture(iActiveTex);
+    //glActiveTexture(iActiveTex);
     glPopAttrib();
     if (bFragmentProg)
         glEnable(GL_FRAGMENT_PROGRAM_ARB);

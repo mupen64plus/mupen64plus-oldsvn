@@ -25,18 +25,19 @@ USES_GTK2 = true
 include ./pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-LDFLAGS += -lz -lm -lpng -lfreetype
+CFLAGS += -DQT_NEEDS_QMAIN -IC:\libpng-1.2.24\include\libpng12 -IC:\libpng-1.2.24\include -IC:\pthread\include -IC:\zlib-1.2.3\include -I. -IC:\libiconv-1.9.2-1\include -IC:\dlfcn-win32-static-r8\include -D__WIN32__ ${FREETYPE_FLAGS}
+LDFLAGS += -lz -lm -lpng -lfreetype -LC:\libpng-1.2.24\lib -LC:\pthread\lib -LC:\zlib-1.2.3\lib -LC:\libiconv-1.9.2-1\lib ${FREETYPE_LIBS} -LC:\dlfcn-win32-static-r8\lib ${SDL_LIBS} -lglu32 -SDLmain -lopengl32 -liconv -LC:\libiconv-1.9.2-1\lib
 
 ifeq ($(OS), LINUX)
   LDFLAGS += -Wl,-export-dynamic
 endif
 
 # set executable stack as a linker option for X86 architecture, for dynamic recompiler
-ifeq ($(CPU), X86)
-  ifeq ($(OS), LINUX)
-    LDFLAGS += -z execstack
-  endif
-endif
+#ifeq ($(CPU), X86)
+#  ifeq ($(OS), LINUX)
+#    LDFLAGS += -z execstack
+#  endif
+#endif
 
 # set options
 ifeq ($(DBG), 1)
@@ -154,7 +155,8 @@ OBJ_CORE = \
 	r4300/recomp.o \
 	r4300/special.o \
 	r4300/regimm.o \
-	r4300/tlb.o
+	r4300/tlb.o \
+	main/gettimeofday.o
 
 # handle dynamic recompiler objects
 ifneq ($(NO_ASM), 1)
@@ -249,20 +251,20 @@ OBJ_GTK_DBG_GUI = \
 	main/gui_gtk/debugger/ui_clist_edit.o \
 	main/gui_gtk/debugger/ui_disasm_list.o
 
-PLUGINS	= plugins/blight_input.so \
-          plugins/dummyaudio.so \
+PLUGINS	= plugins/dummyaudio.so \
+          #plugins/blight_input.so \
           plugins/dummyvideo.so \
-          plugins/glN64.so \
-          plugins/ricevideo.so \
-          plugins/glide64.so \
-          plugins/jttl_audio.so \
+          #plugins/glN64.so \
+          #plugins/ricevideo.so \
+          #plugins/glide64.so \
+          #plugins/jttl_audio.so \
           plugins/mupen64_hle_rsp_azimer.so \
           plugins/mupen64_input.so
 
-SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
+SHARE = C:\mupen64plus\trunk # $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
-ALL = mupen64plus $(PLUGINS)
+ALL = mupen64plus
 OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
@@ -323,7 +325,7 @@ targets:
 all: version.h $(ALL)
 
 mupen64plus: $(OBJECTS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) -lpthread -ldl -o $@
+	$(CXX) $^ $(LDFLAGS) $(LIBS) -lpthreadGC2 -ldl -o $@
 	$(STRIP) $@
 
 install:
@@ -350,12 +352,6 @@ clean:
 	$(RM) -f main/gui_qt4/settings.cpp main/gui_qt4/settings.h main/gui_qt4/*.moc main/gui_qt4/ui_*.h main/gui_qt4/*.o
 
 rebuild: clean all
-
-# build rules
-version.h: .svn/entries
-	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
-        main/version.template > version.h
-	@$(MV) version.h main/version.h
 
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<

@@ -24,7 +24,12 @@
 #include "r4300.h"
 
 #include "../memory/memory.h"
+#ifndef __WIN32__
 #include "../main/winlnxdefs.h"
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 #include "../main/plugin.h"
 #include "../r4300/recomph.h"
 
@@ -94,7 +99,7 @@ void check_input_sync(unsigned char *value)
 }
 
 void compare_core()
-{   
+{   /*
    static int comparecnt = 0;
    int iFirst = 1;
    char errHead[128];
@@ -144,13 +149,13 @@ void compare_core()
     {
       if (iFirst) { printf(errHead); iFirst = 0; }
       display_error("cop1");
-    }
+    }*/
     /*fread(comp_reg, 1, sizeof(int), f);
     if (memcmp(&rdram[0x31280/4], comp_reg, sizeof(int)))
       display_error("mem");*/
     /*fread (comp_reg, 4, 1, f);
     if (memcmp(&FCR31, comp_reg, 4))
-      display_error();*/
+      display_error();*/ /*
     old_op = op;
      }
    else
@@ -165,8 +170,8 @@ void compare_core()
     fwrite(&PC->addr, 4, sizeof(int), f);
     fwrite(reg, 32, sizeof(long long int), f);
     fwrite(reg_cop0, 32, sizeof(int), f);
-    fwrite(reg_cop1_fgr_64, 32, sizeof(long long int), f);
+    fwrite(reg_cop1_fgr_64, 32, sizeof(long long int), f);*/
     //fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
     /*fwrite(&FCR31, 4, 1, f);*/
-     }
+     //}
 }

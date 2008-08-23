@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#define _POSIX_C_SOURCE 199309
+#include <time.h>
 #include <time.h>
 
 #ifndef __WIN32__
@@ -392,7 +394,7 @@ void gen_interupt()
                     struct timespec ts;
                     ts.tv_sec = 0;
                     ts.tv_nsec = 10000000;
-                    nanosleep(&ts, NULL); // sleep for 10 milliseconds
+                    //nanosleep(&ts, NULL); // sleep for 10 milliseconds
                     SDL_PumpEvents();
 #ifdef WITH_LIRC
                     lircCheckInput();

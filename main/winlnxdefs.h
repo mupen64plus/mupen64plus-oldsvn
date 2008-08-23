@@ -25,13 +25,14 @@
 typedef unsigned int BOOL;
 typedef unsigned int DWORD;
 typedef unsigned short WORD;
+#define _7ZIP_BYTE_DEFINED
 typedef unsigned char BYTE;
 typedef unsigned int UINT;
 typedef unsigned long long DWORD64;
 
 typedef short SHORT;
 
-typedef int __int32;
+//typedef int __int32;
 
 typedef int HINSTANCE;
 typedef int HWND;
@@ -39,9 +40,9 @@ typedef int WPARAM;
 typedef int LPARAM;
 typedef void* LPVOID;
 
-#define __declspec(dllexport) __attribute__((visibility("default")))
-#define _cdecl
-#define __stdcall
+//#define __declspec(dllexport) __attribute__((visibility("default")))
+//#define _cdecl
+//#define __stdcall
 #define WINAPI
 
 #ifndef FALSE
