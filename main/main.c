@@ -32,6 +32,15 @@
  * gui subdirectories for the gui-specific code.
  * if you want to implement an interface, you should look here
  */
+ 
+#ifdef __WIN32__
+# define WIN32_MEAN_AND_LEAN
+# include <windows.h>
+# include <winbase.h>
+#else
+# include <ucontext.h> // extra signal types (for portability)
+# include <libgen.h> // basename, dirname
+#endif
 
 #include <sys/time.h>
 #include <errno.h>
@@ -40,9 +49,7 @@
 #include <unistd.h>  // POSIX macros and standard types.
 #include <pthread.h> // POSIX thread library
 #include <signal.h> // signals
-/*#include <ucontext.h> // extra signal types (for portability)*/
 #include <getopt.h> // getopt_long
-/*#include <libgen.h> // basename, dirname*/
 #include <dirent.h>
 
 #include <png.h>    // for writing screenshot PNG files
@@ -51,7 +58,6 @@
 
 #include "main.h"
 #include "version.h"
-//#include "winlnxdefs.h"
 #include "config.h"
 #include "plugin.h"
 #include "rom.h"
@@ -83,8 +89,14 @@
 static void parseCommandLine(int argc, char **argv);
 static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
 static void *emulationThread( void *_arg );
-static void sighandler( int signal ); // siginfo_t *info, void *context ); // signal handler
 extern void *rom_cache_system(void *_arg);
+
+
+#ifdef __WIN32__
+static void sighandler( int signal );
+#else
+static void sighandler( int signal, siginfo_t *info, void *context )
+#endif
 
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
@@ -350,7 +362,6 @@ void startEmulation(void)
     // make sure all plugins are specified before running
     if(g_GfxPlugin)
     {
-        puts("1");
         gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
     }
     else
@@ -407,7 +418,6 @@ void startEmulation(void)
         // spawn emulation thread
         if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
         {
-            //g_EmulationThread = 0;
             error_message(tr("Couldn't spawn core thread!"));
             return;
         }
@@ -562,7 +572,11 @@ void new_vi(void)
         time = (int)(CalculatedTime - CurrentFPSTime);
         if (time > 0)
         {
-            sleep(time);
+#ifdef __WIN32__
+            Sleep(time);
+#else
+            usleep(time * 1000);
+#endif
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }
@@ -760,6 +774,9 @@ static int sdl_event_filter( const SDL_Event *event )
 */
 static void * emulationThread( void *_arg )
 {
+#ifndef __WIN32__
+    struct sigaction sa;
+#endif
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
            *input_plugin = NULL,
@@ -769,9 +786,19 @@ static void * emulationThread( void *_arg )
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
     if (l_GuiEnabled)
     {
+#ifdef __WIN32__
         signal( SIGSEGV, sighandler );
         signal( SIGILL, sighandler );
         signal( SIGFPE, sighandler );
+#else
+        memset( &sa, 0, sizeof( struct sigaction ) );
+        sa.sa_sigaction = sighandler;
+        sa.sa_flags = SA_SIGINFO;
+        sigaction( SIGSEGV, &sa, NULL );
+        sigaction( SIGILL, &sa, NULL );
+        sigaction( SIGFPE, &sa, NULL );
+        sigaction( SIGCHLD, &sa, NULL );
+#endif
     }
 
     g_EmulatorRunning = 1;
@@ -909,17 +936,90 @@ static void * emulationThread( void *_arg )
 /*********************************************************************************************************
 * signal handler
 */
+#ifdef __WIN32__
 static void sighandler(int signal)
 {
         printf( "Signal number %d caught:\n", signal );
         exit( EXIT_FAILURE );
 }
+#else
+static void sighandler(int signal, siginfo_t *info, void *context)
+{
+    if( info->si_pid == g_EmulationThread )
+    {
+        switch( signal )
+        {
+            case SIGSEGV:
+                error_message(tr("The core thread recieved a SIGSEGV signal.\n"
+                                "This means it tried to access protected memory.\n"
+                                "Maybe you have set a wrong ucode for one of the plugins!"));
+                printf( "SIGSEGV in core thread caught:\n" );
+                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+#ifdef SEGV_MAPERR
+                switch( info->si_code )
+                {
+                    case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
+                    case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
+                }
+#endif
+                break;
+            case SIGILL:
+                printf( "SIGILL in core thread caught:\n" );
+                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+#ifdef ILL_ILLOPC
+                switch( info->si_code )
+                {
+                    case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
+                    case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
+                    case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
+                    case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
+                    case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
+                    case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
+                    case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
+                    case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
+                }
+#endif
+                break;
+            case SIGFPE:
+                printf( "SIGFPE in core thread caught:\n" );
+                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+                switch( info->si_code )
+                {
+                    case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
+                    case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
+                    case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
+                    case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
+                    case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
+                    case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
+                    case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
+                    case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
+                }
+                break;
+            default:
+                printf( "Signal number %d in core thread caught:\n", signal );
+                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+        }
+        pthread_cancel(g_EmulationThread);
+        g_EmulationThread = 0;
+        g_EmulatorRunning = 0;
+    }
+    else
+    {
+        printf( "Signal number %d caught:\n", signal );
+        printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+        exit( EXIT_FAILURE );
+    }
+}
+#endif /* __WIN32__ */
 
 static void printUsage(const char *progname)
 {
     char *str = strdup(progname);
 
-    printf("Usage: [parameter(s)] [romfile]\n"
+    printf("Usage: %s [parameter(s)] [romfile]\n"
            "\n"
            "Parameters:\n"
            "    --nogui               : do not display GUI.\n"
@@ -940,7 +1040,7 @@ static void printUsage(const char *progname)
            "    --debugger            : start with debugger enabled\n"
 #endif 
            "    -h, --help            : see this help message\n"
-           "\n");
+           "\n", str);
 
     free(str);
 
@@ -952,7 +1052,6 @@ static void printUsage(const char *progname)
  */
 void parseCommandLine(int argc, char **argv)
 {
-	return;
     int i, shots;
     char *str = NULL;
 
@@ -1147,9 +1246,11 @@ void parseCommandLine(int argc, char **argv)
  */
 static void setPaths(void)
 {
-	strcpy(l_ConfigDir, "C:/mupen64plus/");
-	strcpy(l_InstallDir, "C:/mupen64plus/");
+#ifdef __WIN32__
+	strncpy(l_ConfigDir, "./", PATH_MAX);
+	strncpy(l_InstallDir, "./", PATH_MAX);
 	return;
+#else
     char buf[PATH_MAX], buf2[PATH_MAX];
 
     // if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
@@ -1162,7 +1263,7 @@ static void setPaths(void)
         if(!isdir(l_ConfigDir))
         {
             printf("Creating %s to store user data\n", l_ConfigDir);
-            if(mkdir(l_ConfigDir) != 0)
+            if(mkdir(l_ConfigDir, (mode_t)0755) != 0)
             {
                 printf("Error: Could not create %s: ", l_ConfigDir);
                 perror(NULL);
@@ -1172,7 +1273,7 @@ static void setPaths(void)
             // create save subdir
             strncpy(buf, l_ConfigDir, PATH_MAX);
             strncat(buf, "/save", PATH_MAX - strlen(buf));
-            if(mkdir(buf) != 0)
+            if(mkdir(buf, (mode_t)0755) != 0)
             {
                 // report error, but don't exit
                 printf("Warning: Could not create %s: %s", buf, strerror(errno));
@@ -1181,7 +1282,7 @@ static void setPaths(void)
             // create screenshots subdir
             strncpy(buf, l_ConfigDir, PATH_MAX);
             strncat(buf, "/screenshots", PATH_MAX - strlen(buf));
-            if(mkdir(buf) != 0)
+            if(mkdir(buf, (mode_t)0755) != 0)
             {
                 // report error, but don't exit
                 printf("Warning: Could not create %s: %s", buf, strerror(errno));
@@ -1197,13 +1298,14 @@ static void setPaths(void)
     if (strlen(l_InstallDir) == 0)
     {
         buf[0] = '\0';
-        /*int n = readlink("/proc/self/exe", buf, PATH_MAX);
+        int n = readlink("/proc/self/exe", buf, PATH_MAX);
         if (n > 0)
         {
             buf[n] = '\0';
+            dirname(buf);
             strncpy(l_InstallDir, buf, PATH_MAX);
             strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
-        }*/
+        }
         // if it's not in the executable's directory, try a couple of default locations
         if (buf[0] == '\0' || !isfile(buf))
         {
@@ -1286,7 +1388,7 @@ static void setPaths(void)
         snprintf(chDefaultDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
         SetScreenshotDir(chDefaultDir);
     }
-
+#endif /* __WIN32__ */
 }
 
 /*********************************************************************************************************
@@ -1304,11 +1406,8 @@ int main(int argc, char *argv[])
     printf("             |_|         http://code.google.com/p/mupen64plus/  \n");
     printf("Version %s\n\n",MUPEN_VERSION);
 
-    puts("parse");
     parseCommandLine(argc, argv);
-    puts("paths");
     setPaths();
-    puts("read conf");
     config_read();
 
     if (l_GuiEnabled)
@@ -1472,11 +1571,11 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-
+#ifdef __WIN32__
 int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParamarg, int cmdShow)
 {
 	int argc = 1;
-	char *argv[2] = { "mupen64plus.exe", 0 };
-	puts("main");
-	return main(0, 0);	
+	char *argv[] = { "mupen64plus.exe" };
+	return main(argc, argv);	
 }
+#endif

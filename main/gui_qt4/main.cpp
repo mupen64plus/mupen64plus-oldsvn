@@ -23,7 +23,9 @@ extern "C" {
     #include "../main.h"
 }
 
-//#include <gtk/gtk.h>
+#ifndef __WIN32__
+# include <gtk/gtk.h>
+#endif
 
 #include <QApplication>
 
@@ -43,7 +45,9 @@ extern "C" {
 // arguments. This is called before mupen64plus parses any of its commandline options.
 void gui_init(int *argc, char ***argv)
 {
-//    gtk_init(argc, argv);
+#ifndef __WIN32__
+    gtk_init(argc, argv);
+#endif
     application = new QApplication(*argc, *argv);
     application->setOrganizationName("mupen64plus");
     application->setApplicationName("mupen64plus");

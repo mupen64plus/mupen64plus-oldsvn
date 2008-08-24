@@ -22,6 +22,10 @@
 #ifndef WINLNXDEFS_H
 #define WINLNXDEFS_H
 
+#ifdef __WIN32__
+# define WIN32_LEAN_AND_MEAN
+# include <windows.h>
+#else
 typedef unsigned int BOOL;
 typedef unsigned int DWORD;
 typedef unsigned short WORD;
@@ -32,7 +36,7 @@ typedef unsigned long long DWORD64;
 
 typedef short SHORT;
 
-//typedef int __int32;
+typedef int __int32;
 
 typedef int HINSTANCE;
 typedef int HWND;
@@ -40,9 +44,9 @@ typedef int WPARAM;
 typedef int LPARAM;
 typedef void* LPVOID;
 
-//#define __declspec(dllexport) __attribute__((visibility("default")))
-//#define _cdecl
-//#define __stdcall
+#define __declspec(dllexport) __attribute__((visibility("default")))
+#define _cdecl
+#define __stdcall
 #define WINAPI
 
 #ifndef FALSE
@@ -52,5 +56,7 @@ typedef void* LPVOID;
 #ifndef TRUE
 #define TRUE 1
 #endif
+
+#endif // __WIN32__
 
 #endif

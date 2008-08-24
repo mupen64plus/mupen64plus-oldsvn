@@ -35,7 +35,6 @@
 #include <unistd.h>
 #include <limits.h>
 
-//#include "winlnxdefs.h"
 #include "plugin.h"
 #include "main.h"
 #include "util.h"
@@ -159,22 +158,29 @@ void plugin_delete_list(void)
  */
 int plugin_scan_file(const char *file_name, WORD plugin_type)
 {
-	puts(file_name);
     PLUGIN_INFO pluginInfo;
     void *handle;
     plugin *p;
     char *bname = NULL;
     char filepath[PATH_MAX];
 
-    strncpy(filepath, file_name, PATH_MAX);
+#ifdef __WIN32__
+    snprintf(filepath, PATH_MAX, "%s%s", l_PluginDir, file_name);
+#else
+    if(strstr(file_name, "/"))
+        realpath(file_name, filepath);
+    else
+        strncpy(filepath, file_name, PATH_MAX);
 
     // if this is not an absolute path, assume plugin file is in plugin dir
     if (filepath[0] != '/')
     {
         bname = strdup(filepath);
+        basename(bname);
         snprintf(filepath, PATH_MAX, "%s%s", l_PluginDir, bname);
         filepath[PATH_MAX-1] = '\0';
     }
+#endif
 
     handle = dlopen(filepath, RTLD_NOW);
     if(handle)
@@ -308,9 +314,23 @@ char *plugin_name_by_filename(const char *filename)
     list_node_t *node;
     char real_filename1[PATH_MAX], real_filename2[PATH_MAX];
 
+#ifdef __WIN32__
+    strncpy(real_filename1, filename, PATH_MAX);
+#else
+    if (!realpath(filename, real_filename1))
+        strcpy(real_filename1, filename);
+#endif
+
     list_foreach(g_PluginList, node)
     {
         p = (plugin *)node->data;
+
+#ifdef __WIN32__
+        strncpy(real_filename2, p->file_name, PATH_MAX);
+#else    
+        if (!realpath(p->file_name, real_filename2))
+            strcpy(real_filename2, p->file_name);
+#endif
 
         if (!strcmp(real_filename1, real_filename2))
             return p->plugin_name;
