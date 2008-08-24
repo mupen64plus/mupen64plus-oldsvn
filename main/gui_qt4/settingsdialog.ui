@@ -5,12 +5,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>547</width>
-    <height>532</height>
+    <width>589</width>
+    <height>556</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Dialog</string>
+   <string>Mupen64Plus Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_13" >
    <item>
@@ -18,19 +18,25 @@
      <item>
       <widget class="QListWidget" name="listWidget" >
        <property name="sizePolicy" >
-        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-         <horstretch>1</horstretch>
+        <sizepolicy vsizetype="Minimum" hsizetype="Fixed" >
+         <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>120</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="horizontalScrollBarPolicy" >
         <enum>Qt::ScrollBarAlwaysOff</enum>
        </property>
-       <property name="showDropIndicator" stdset="0" >
-        <bool>false</bool>
-       </property>
        <property name="dragDropMode" >
         <enum>QAbstractItemView::NoDragDrop</enum>
+       </property>
+       <property name="selectionBehavior" >
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
        <property name="textElideMode" >
         <enum>Qt::ElideNone</enum>
@@ -41,27 +47,21 @@
        <property name="flow" >
         <enum>QListView::TopToBottom</enum>
        </property>
-       <property name="resizeMode" >
-        <enum>QListView::Adjust</enum>
+       <property name="isWrapping" stdset="0" >
+        <bool>false</bool>
+       </property>
+       <property name="spacing" >
+        <number>2</number>
+       </property>
+       <property name="viewMode" >
+        <enum>QListView::IconMode</enum>
+       </property>
+       <property name="uniformItemSizes" >
+        <bool>true</bool>
        </property>
        <property name="currentRow" >
-        <number>0</number>
+        <number>-1</number>
        </property>
-       <item>
-        <property name="text" >
-         <string>Main Settings</string>
-        </property>
-       </item>
-       <item>
-        <property name="text" >
-         <string>Plugins</string>
-        </property>
-       </item>
-       <item>
-        <property name="text" >
-         <string>Rom Browser</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -112,6 +112,12 @@
        </item>
        <item>
         <widget class="QStackedWidget" name="stackedWidget" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Preferred" hsizetype="MinimumExpanding" >
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="currentIndex" >
           <number>0</number>
          </property>

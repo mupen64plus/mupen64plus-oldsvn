@@ -39,10 +39,23 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 {
     setupUi(this);
 
-    listWidget->item(0)->setIcon(icon("preferences-system.png"));
-    listWidget->item(1)->setIcon(icon("applications-utilities.png"));
-    listWidget->item(2)->setIcon(icon("preferences-system-network.png"));
-    pageChanged(listWidget->currentRow());
+    QList<QListWidgetItem*> items;
+    items << new QListWidgetItem(QIcon(icon("preferences-system.png")),
+                                 tr("Main Settings"),
+                                 listWidget);
+    items << new QListWidgetItem(QIcon(icon("applications-utilities.png")),
+                                 tr("Plugins"),
+                                 listWidget);
+    items << new QListWidgetItem(QIcon(icon("preferences-system-network.png")),
+                                 tr("Rom Browser"),
+                                 listWidget);
+    int i = 0;
+    foreach (QListWidgetItem* item, items) {
+        item->setTextAlignment(Qt::AlignHCenter);
+        item->setSizeHint(QSize(110, 55));
+        listWidget->insertItem(i, item);
+    }
+    listWidget->setCurrentRow(0);
 
     QSize labelPixmapSize(32, 32);
     rspPluginLabel->setPixmap(icon("cpu.png").pixmap(labelPixmapSize));
