@@ -239,11 +239,21 @@ static int GetVILimit(void)
 
 static unsigned int gettimeofday_msec(void)
 {
-    struct timeval tv;
     unsigned int foo;
+#if defined(__WIN32__)
+    FILETIME ft;
+    unsigned __int64 tmpres = 0;
+    GetSystemTimeAsFileTime(&ft);
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+    foo = (((tmpres / 1000000UL) % 1000000) * 1000) + (tmpres % 1000000UL / 1000);
+#else
+    struct timeval tv;
 
     gettimeofday(&tv, NULL);
     foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
+#endif
     return foo;
 }
 
@@ -339,9 +349,14 @@ void startEmulation(void)
 
     // make sure all plugins are specified before running
     if(g_GfxPlugin)
+    {
+        puts("1");
         gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
+    }
     else
+    {
         gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
+    }   
 
     if(!gfx_plugin)
     {

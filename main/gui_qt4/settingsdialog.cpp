@@ -186,6 +186,12 @@ void SettingsDialog::on_osdEnabledCheck_toggled(bool checked)
     core::config_put_bool("OsdEnabled", checked);
 }
 
+void SettingsDialog::on_audioPluginCombo_currentIndexChanged(const QString& text)
+{
+    char* filename = core::plugin_filename_by_name(qPrintable(text));
+    core::config_put_string("Audio Plugin", filename);
+}
+
 void SettingsDialog::on_aboutAudioPluginButton_clicked()
 {
     QString text = audioPluginCombo->currentText();
@@ -202,6 +208,12 @@ void SettingsDialog::on_testAudioPluginButton_clicked()
 {
     QString text = audioPluginCombo->currentText();
     core::plugin_exec_test(qPrintable(text));
+}
+
+void SettingsDialog::on_graphicsPluginCombo_currentIndexChanged(const QString& text)
+{
+    char* filename = core::plugin_filename_by_name(qPrintable(text));
+    core::config_put_string("Gfx Plugin", filename);
 }
 
 void SettingsDialog::on_aboutGraphicsPluginButton_clicked()
@@ -222,6 +234,12 @@ void SettingsDialog::on_testGraphicsPluginButton_clicked()
     core::plugin_exec_test(qPrintable(text));
 }
 
+void SettingsDialog::on_rspPluginCombo_currentIndexChanged(const QString& text)
+{
+    char* filename = core::plugin_filename_by_name(qPrintable(text));
+    core::config_put_string("RSP Plugin", filename);
+}
+
 void SettingsDialog::on_aboutRspPluginButton_clicked()
 {
     QString text = rspPluginCombo->currentText();
@@ -238,6 +256,12 @@ void SettingsDialog::on_testRspPluginButton_clicked()
 {
     QString text = rspPluginCombo->currentText();
     core::plugin_exec_test(qPrintable(text));
+}
+
+void SettingsDialog::on_inputPluginCombo_currentIndexChanged(const QString& text)
+{
+    char* filename = core::plugin_filename_by_name(qPrintable(text));
+    core::config_put_string("Input Plugin", filename);
 }
 
 void SettingsDialog::on_aboutInputPluginButton_clicked()
