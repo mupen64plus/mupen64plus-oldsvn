@@ -51,9 +51,15 @@ void dyna_jump()
         *return_address = (unsigned long) (actual->code + PC->local_addr);
 }
 
-static long save_ebp = 0;
-static long save_esp = 0;
-static long save_eip = 0;
+#ifdef __GNUC__
+# define ASM_NAME(name) asm(name)
+#else
+# define ASM_NAME(name)
+#endif
+
+static long save_ebp ASM_NAME("save_ebp") = 0;
+static long save_esp ASM_NAME("save_esp") = 0;
+static long save_eip ASM_NAME("save_eip") = 0;
 
 void dyna_start(void (*code)())
 {
@@ -80,17 +86,17 @@ void dyna_start(void (*code)())
    }
 #elif defined(__GNUC__) && defined(__i386__)
    asm volatile 
-      (" movl %%ebp, _save_ebp \n"
-       " movl %%esp, _save_esp \n"
+      (" movl %%ebp, save_ebp \n"
+       " movl %%esp, save_esp \n"
        " call 1f              \n"
        " jmp 2f               \n"
        "1:                    \n"
        " popl %%eax           \n"
-       " movl %%eax, _save_eip \n"
+       " movl %%eax, save_eip \n"
        " call *%%ebx          \n"
        "2:                    \n"
-       " movl _save_ebp, %%ebp \n"
-       " movl _save_esp, %%esp \n"
+       " movl save_ebp, %%ebp \n"
+       " movl save_esp, %%esp \n"
        :
        : "b" (code)
        : "%eax", "memory"

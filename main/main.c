@@ -95,7 +95,7 @@ extern void *rom_cache_system(void *_arg);
 #ifdef __WIN32__
 static void sighandler( int signal );
 #else
-static void sighandler( int signal, siginfo_t *info, void *context )
+static void sighandler( int signal, siginfo_t *info, void *context );
 #endif
 
 /** globals **/

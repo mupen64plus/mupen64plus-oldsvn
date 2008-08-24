@@ -334,10 +334,10 @@ targets:
 # The RELEASE flag is hidden from view as it should only be used internally.  It only affects
 # the version strings
 
-all: version.h $(ALL)
+all: main/version.h $(ALL)
 
-version.h: version.win32.h
-	${CP} version.win32.h version.h
+main/version.h: version.win32.h
+	${CP} version.win32.h main/version.h
 
 mupen64plus: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) -o $@

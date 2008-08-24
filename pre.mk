@@ -19,15 +19,61 @@
 # *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-ARCH = 32BITS
-CPU = X86
-OS = LINUX
+# detect system architecture: i386, x86_64, or PPC/PPC64
+UNAME = $(shell uname -m)
+ifeq ("$(UNAME)","x86_64")
+  CPU = X86
+  ifeq ("$(BITS)", "32")
+    ARCH = 64BITS_32
+  else
+    ARCH = 64BITS
+  endif
+endif
+ifneq ("$(filter i%86,$(UNAME))","")
+  CPU = X86
+  ARCH = 32BITS
+endif
+ifeq ("$(UNAME)","ppc")
+  CPU = PPC
+  ARCH = 32BITS
+  NO_ASM = 1
+endif
+ifeq ("$(UNAME)","ppc64")
+  CPU = PPC
+  ARCH = 64BITS
+  NO_ASM = 1
+endif
 
-SDL_FLAGS	= -IC:\SDL-1.2.13\include\SDL -IC:\SDL-1.2.13\include
-SDL_LIBS	= -LC:\SDL-1.2.13\lib -lSDL
+# detect operation system. Currently just linux and OSX.
+UNAME = $(shell uname -s)
+ifeq ("$(UNAME)","Linux")
+  OS = LINUX
+endif
+ifeq ("$(UNAME)","linux")
+  OS = LINUX
+endif
+ifeq ("$(UNAME)","Darwin")
+  OS = OSX
+endif
 
-FREETYPE_LIBS	= -LC:\freetype-2.3.5-1\lib -lfreetype
-FREETYPE_FLAGS	= -IC:\freetype-2.3.5-1\include -IC:\freetype-2.3.5-1\include\freetype2
+ifeq ($(OS),)
+   $(warning OS not supported or detected, using default linux options.)
+   OS = LINUX
+endif
+
+# test for presence of SDL
+ifeq ($(shell which sdl-config 2>/dev/null),)
+  $(error No SDL development libraries found!)
+endif
+SDL_FLAGS	= $(shell sdl-config --cflags)
+SDL_LIBS	= $(shell sdl-config --libs)
+
+# test for presence of FreeType
+ifeq ($(shell which freetype-config 2>/dev/null),)
+   $(error freetype-config not installed!)
+endif
+FREETYPE_LIBS	= $(shell freetype-config --libs)
+FREETYPE_FLAGS	= $(shell freetype-config --cflags)
 
 # detect GUI options
 ifeq ($(GUI),)
@@ -39,30 +85,30 @@ endif
 # but too many plugins require it...
 
 # test for presence of GTK 2.0
-#ifeq ($(shell which pkg-config 2>/dev/null),)
-  #$(error pkg-config not installed!)
-#endif
-#ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
-  #$(error No GTK 2.x development libraries found!)
-#endif
+ifeq ($(shell which pkg-config 2>/dev/null),)
+  $(error pkg-config not installed!)
+endif
+ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
+  $(error No GTK 2.x development libraries found!)
+endif
 # set GTK flags and libraries
-#GTK_FLAGS	= $(shell pkg-config gtk+-2.0 --cflags)
-#GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
-#GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
+GTK_FLAGS	= $(shell pkg-config gtk+-2.0 --cflags)
+GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
+GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
 
 # set Qt flags and libraries
 ifeq ($(GUI), QT4)
    ifneq ($(USES_QT4),)
-    MOC         = moc #$(shell which moc 2>/dev/null)
+    MOC         = $(shell which moc 2>/dev/null)
     ifeq ($(MOC),)
       $(error moc from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    UIC         = uic #$(shell which uic 2>/dev/null)
+    UIC         = $(shell which uic 2>/dev/null)
     ifeq ($(UIC),)
       $(error uic from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    QT_FLAGS    = -IC:\Qt\4.4.1\include -IC:\Qt\4.4.1\include\QtCore -IC:\Qt\4.4.1\include\QtGui #$(shell pkg-config QtCore QtGui --cflags)
-    QT_LIBS     = -LC:\Qt\4.4.1\lib -lQtGui4 -lQtCore4 $(shell pkg-config QtCore QtGui --libs)
+    QT_FLAGS    = $(shell pkg-config QtCore QtGui --cflags)
+    QT_LIBS     = $(shell pkg-config QtCore QtGui --libs)
     # define Gtk flags when using Qt4 gui so it can load plugins, etc.
   endif
 endif
@@ -77,9 +123,9 @@ endif
 ifeq ($(OS),OSX)
 STRIP	= strip 
 endif
-RM      = del
-MV      = move
-CP      = copy
+RM      = rm
+MV      = mv
+CP      = cp
 MD      = mkdir
 FIND    = find
 PROF    = gprof
@@ -87,7 +133,6 @@ INSTALL = ginstall
 
 # create SVN version defines
 MUPEN_RELEASE = 1.4
-RELEASE = 0.1
 
 ifneq ($(RELEASE),)
   MUPEN_VERSION = $(MUPEN_RELEASE)
@@ -138,7 +183,7 @@ ifeq ($(OS),OSX)
 endif
 
 ifeq ($(OS),LINUX)
-  LIBGL_LIBS	= # -L/usr/X11R6/lib -lGL -lGLU
+  LIBGL_LIBS	= -L/usr/X11R6/lib -lGL -lGLU
 endif
 ifeq ($(OS),OSX)
   LIBGL_LIBS	= -framework OpenGL

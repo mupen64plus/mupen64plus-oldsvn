@@ -19,7 +19,7 @@
 */
 
 extern "C" {
-    #include "../../version.h"
+    #include "../version.h"
     #include "../main.h"
 }
 
