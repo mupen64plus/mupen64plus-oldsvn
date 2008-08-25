@@ -21,6 +21,10 @@
  * USA.
  *
 **/
+
+#ifndef __ROMCACHE_H__
+#define __ROMCACHE_H__
+
 #include <limits.h> //PATH_MAX
 #define COMMENT_MAXLENGTH 256
 #include "md5.h"
@@ -103,3 +107,5 @@ void romdatabase_close();
 //Should be used by current cheat system (isn't), when cheat system is 
 //migrated to md5s, will be fully depreciated.
 romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);
+
+#endif // __ROMCACHE_H__
