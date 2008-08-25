@@ -36,9 +36,35 @@ extern "C" {
 class RomModel : public QAbstractItemModel
 {
     Q_OBJECT
+    Q_ENUMS(Columns)
+    Q_ENUMS(Role)
     public:
-        enum Columns { Country = 0, GoodName, Size, Comments, FileName };
-        enum Role { Sort = Qt::UserRole, FullPath, ArchiveFile };
+        enum Columns {
+            Country = 0,
+            GoodName,
+            Size,
+            Comments,
+            FileName,
+            InternalName,
+            Status,
+            MD5,
+            CRC1,
+            CRC2,
+            SaveType,
+            Players,
+            Rumble,
+            CompressionType,
+            ImageType,
+            CIC,
+            TimeStamp,
+            COLUMNS_SENTINEL, // keep this as the last entry
+            LAST_VISIBLE_COLUMN = FileName // except this one may come after!
+        };
+        enum Role {
+            Sort = Qt::UserRole,
+            FullPath,
+            ArchiveFile
+        };
 
         RomModel(QObject* parent = 0);
 

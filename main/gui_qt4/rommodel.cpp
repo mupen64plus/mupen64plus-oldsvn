@@ -22,6 +22,8 @@
 #include <QDir>
 #include <QFont>
 #include <QUrl>
+#include <QMetaEnum>
+#include <QDateTime>
 
 #include <cstdio>
 
@@ -42,11 +44,11 @@ RomModel::RomModel(QObject* parent)
     , m_showFullPath(core::config_get_bool("RomBrowserShowFullPaths", FALSE))
     , m_romDirectories(romDirectories())
 {
-    m_columnHeaders << tr("Country")
-                    << tr("Good Name")
-                    << tr("Size")
-                    << tr("Comments")
-                    << tr("File Name");
+    int index = metaObject()->indexOfEnumerator("Columns");
+    QMetaEnum columns = metaObject()->enumerator(index);
+    for (int i = 0; i < COLUMNS_SENTINEL; i++) {
+        m_columnHeaders << tr(columns.key(i));
+    }
 
     QString file;
     char* iconpath = core::get_iconspath();
@@ -149,8 +151,9 @@ int RomModel::rowCount(const QModelIndex& parent) const
 {
     int retval = 0;
 
-    if (!parent.isValid())
-        return m_romList.count();
+    if (!parent.isValid()) {
+        retval = m_romList.count();
+    }
 
     return retval;
 }
@@ -189,6 +192,45 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                         }
                     }
                     break;
+                case InternalName:
+                    data = QString(entry->internalname);
+                    break;
+                case Status:
+                    data = entry->inientry->status;
+                    break;
+                case MD5:
+                    data = int(entry->md5);
+                    break;
+                case CRC1:
+                    data = entry->crc1;
+                    break;
+                case CRC2:
+                    data = entry->crc2;
+                    break;
+                case SaveType:
+                    data = entry->inientry->savetype;
+                    break;
+                case Players:
+                    data = entry->inientry->players;
+                    break;
+                case Rumble:
+                    data = bool(entry->inientry->rumble);
+                    break;
+                case CompressionType:
+                    data = entry->compressiontype;
+                    break;
+                case ImageType:
+                    data = entry->imagetype;
+                    break;
+                case CIC:
+                    data = entry->cic;
+                    break;
+                case TimeStamp:
+                    {
+                        QDateTime d = QDateTime::fromTime_t(entry->timestamp);
+                        data = d.toString();
+                    }
+                    break;
                 default:
                     data = tr("Internal error");
                     break;
@@ -196,12 +238,20 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
         } else if (role == Qt::FontRole) {
             switch(index.column()) {
                 case Size:
+                case InternalName:
+                case MD5:
+                case CRC1:
+                case CRC2:
+                case TimeStamp:
                     data = QFont("monospace");
                     break;
             }
         } else if (role == Qt::TextAlignmentRole) {
             switch(index.column()) {
                 case Size:
+                case MD5:
+                case CRC1:
+                case CRC2:
                     data = Qt::AlignRight;
                     break;
             }
