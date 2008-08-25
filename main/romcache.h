@@ -1,34 +1,42 @@
-/**
- * Mupen64 - romcache.h
- * Copyright (C) 2008 okaygo
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- * 
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - romcache.h                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Tillin9                                            *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __ROMCACHE_H__
 #define __ROMCACHE_H__
 
-#include <limits.h> //PATH_MAX
-#define COMMENT_MAXLENGTH 256
+#include <limits.h> 
 #include "md5.h"
 
+#define COMMENT_MAXLENGTH 256
+
+/* The romdatabase contains the items mupen64plus indexes for each rom. These
+ * include the goodname (from the GoodN64 project), the current status of the rom
+ * in mupen, the N64 savetype used in the original cartridge (often necessary for
+ * booting the rom in mupen), the number of players (including netplay options),
+ * and whether the rom can make use of the N64's rumble feature. Md5, crc1, and
+ * crc2 used for rom lookup. Md5s are unique hashes of the ENTIRE rom. Crcs are not
+ * unique and read from the rom header, meaning corrupt crcs are also a problem.
+ * Crcs were widely used (mainly in the cheat system). Refmd5s allows for a smaller
+ * database file and need not be used outside database loading.
+ */
 typedef struct
 {
    char* goodname;
@@ -36,28 +44,29 @@ typedef struct
    md5_byte_t* refmd5;
    unsigned int crc1;
    unsigned int crc2;
-   unsigned char status;
-   unsigned char savetype;
-   unsigned char players;
-   unsigned char rumble;
+   unsigned char status; /* Rom status on a scale from 0-5. */
+   unsigned char savetype; 
+   unsigned char players; /* Local players 0-4, 2/3/4 way Netplay indicated by 5/6/7. */
+   unsigned char rumble; /* 0 - No, 1 - Yes boolean for rumble support. */
 } romdatabase_entry;
 
+/* See http://code.google.com/p/mupen64plus/wiki/RomBrowserColumns for details. */
 typedef struct _cache_entry
 {
     md5_byte_t md5[16];
     time_t timestamp;
     char filename[PATH_MAX];
     char usercomments[COMMENT_MAXLENGTH]; 
-    char internalname[81]; //Needs to be 4 times +1 (for '\0') the stored value for UTF8 conversion. 
-    unsigned char compressiontype;
-    unsigned char imagetype;
-    unsigned char cic;
-    unsigned short countrycode;
-    unsigned int archivefile;
+    char internalname[81]; /* Needs to be 4 times +1 (for '\0') for UTF8 conversion. */
+    unsigned char compressiontype; /* Enum for compression type. */
+    unsigned char imagetype; /* Enum for original rom image type. */
+    unsigned char cic; /* N64 boot chip, determined from rom. */
+    unsigned short countrycode; /* Found in rom header. */
+    unsigned int archivefile; /* 0 indexed file number in multirom archive. */
     unsigned int crc1;
     unsigned int crc2;
     int romsize;
-    romdatabase_entry* inientry;
+    romdatabase_entry* inientry; /* Persistent pointer to romdatabase.  */
     struct _cache_entry* next;
 } cache_entry;
 
@@ -68,14 +77,14 @@ enum
     RCS_SLEEP,
     RCS_BUSY,
     RCS_SHUTDOWN,
-    RCS_WRITE_CACHE //For quickly saving user comments from the frontend.
+    RCS_WRITE_CACHE /* For quickly saving user comments from GUI frontend. */
 };
 
 typedef struct
 {
     unsigned int length; 
-    unsigned char rcstask; //enum for what rcs thread should do.
-    unsigned char rcspause; //bool for pause after last file, toggled by starting and stopping emulation.
+    unsigned char rcstask;  /* Enum for what rcs thread should do. */
+    unsigned char rcspause; /* Bool for pausing after last file, toggled by start/stopping emulation. */
     cache_entry* top;
     cache_entry* last;
 } rom_cache;
@@ -104,8 +113,10 @@ romdatabase_entry* ini_search_by_md5(md5_byte_t* md5);
 void romdatabase_open();
 void romdatabase_close();
 
-//Should be used by current cheat system (isn't), when cheat system is 
-//migrated to md5s, will be fully depreciated.
+/* Should be used by current cheat system (isn't), when cheat system is
+ * migrated to md5s, will be fully depreciated.
+ */
 romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);
 
-#endif // __ROMCACHE_H__
+#endif /* __ROMCACHE_H__ */
+
