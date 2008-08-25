@@ -55,6 +55,9 @@ SettingsDialog::SettingsDialog(QWidget* parent)
         item->setSizeHint(QSize(110, 55));
         listWidget->insertItem(i, item);
     }
+
+    connect(listWidget, SIGNAL(currentRowChanged(int)),
+            this, SLOT(pageChanged(int)));
     listWidget->setCurrentRow(0);
 
     QSize labelPixmapSize(32, 32);
@@ -62,9 +65,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     inputPluginLabel->setPixmap(icon("input-gaming.png").pixmap(labelPixmapSize));
     audioPluginLabel->setPixmap(icon("audio-card.png").pixmap(labelPixmapSize));
     graphicsPluginLabel->setPixmap(icon("video-display.png").pixmap(labelPixmapSize));
-
-    connect(listWidget, SIGNAL(currentRowChanged(int)),
-            this, SLOT(pageChanged(int)));
 
     int core = core::config_get_number("Core", CORE_DYNAREC);
     switch (core) {
