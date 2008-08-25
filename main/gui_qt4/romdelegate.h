@@ -22,6 +22,7 @@
 #define MUPEN64_QT4_GUI_ROM_DELEGATE_H
 
 #include <QItemDelegate>
+#include <QPixmap>
 
 class RomDelegate : public QItemDelegate
 {
@@ -32,6 +33,12 @@ class RomDelegate : public QItemDelegate
         virtual void paint(QPainter* painter,
                            const QStyleOptionViewItem& option,
                            const QModelIndex& index) const;
+        virtual QSize sizeHint(const QStyleOptionViewItem& option,
+                               const QModelIndex& index) const;
+
+    private:
+        void drawStars(QPainter* painter, const QRect& rect, int n) const;
+        QPixmap m_star;
 };
 
 #endif // MUPEN64_QT4_GUI_ROM_DELEGATE_H

@@ -22,6 +22,7 @@
 #define MUPEN64_KDE4_GLOBALS_H
 
 #include <QStringList>
+#include <QIcon>
 
 const int BUF_MAX = 512;
 const QStringList RomExtensions = QStringList() << "*.rom"
