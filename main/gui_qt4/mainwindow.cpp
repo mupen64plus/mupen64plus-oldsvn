@@ -333,10 +333,8 @@ void MainWindow::setupActions()
     connect(slotActionGroup, SIGNAL(triggered(QAction*)),
             this, SLOT(savestateSelectSlot(QAction*)));
 
-    QWidget* w = toolBar->widgetForAction(actionCurrentSaveStateSlot);
-    if (w) {
-        QToolButton* tb = qobject_cast<QToolButton*>(w);
-        if (tb) {
+    if (QWidget* w = toolBar->widgetForAction(actionCurrentSaveStateSlot)) {
+        if (QToolButton* tb = qobject_cast<QToolButton*>(w)) {
             tb->setPopupMode(QToolButton::InstantPopup);
         }
     }
