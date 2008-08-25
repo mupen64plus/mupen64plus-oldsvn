@@ -809,7 +809,7 @@ void romdatabase_open()
                 else if(!strcmp(buffer, "Players"))
                     {
                     value = (unsigned char)atoi(buffer+stringlength+1);
-                    if(value>0&&value<8)
+                    if(value>-1&&value<8)
                         { search->entry.players = value; }
                     }
                 else if(!strcmp(buffer, "Rumble"))
