@@ -40,6 +40,12 @@
 
 #include "ui_rominfodialog.h"
 
+namespace core {
+    extern "C" {
+        #include "../romcache.h"
+    }
+}
+
 MainWidget::MainWidget(QWidget* parent)
     : QWidget(parent)
     , m_proxyModel(0)
@@ -193,10 +199,18 @@ void MainWidget::treeViewContextMenuRequested(const QPoint& pos)
     }
 
     QMenu m;
+    QAction* loadAction = m.addAction(tr("Load"));
+    loadAction->setIcon(icon("media-playback-start.png"));
     QAction* propertiesAction = m.addAction(tr("Properties..."));
-    propertiesAction->setIcon(icon("mupen64cart.png"));
-    QAction* a = m.exec(treeView->mapToGlobal(pos));
-    if (a == propertiesAction) {
+    propertiesAction->setIcon(icon("document-properties.png"));
+    m.addSeparator();
+    QAction* refreshAction = m.addAction(tr("Refresh Rom List"));
+    refreshAction->setIcon(icon("view-refresh.png"));
+
+    QAction* a = m.exec(QCursor::pos());
+    if (a == loadAction) {
+        load(index);
+    } else if (a == propertiesAction) {
         int row = index.row();
         QDialog* d = new QDialog(this);
         Ui_RomInfoDialog ui;
@@ -222,6 +236,8 @@ void MainWidget::treeViewContextMenuRequested(const QPoint& pos)
         ui.imageTypeLabel->setText(index.sibling(row, RomModel::ImageType).data().toString());
         ui.rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
         d->show();
+    } else if (a == refreshAction) {
+        core::g_romcache.rcstask = core::RCS_RESCAN;
     }
 }
 
