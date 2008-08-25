@@ -26,6 +26,8 @@ extern "C" {
 #include <gtk/gtk.h>
 
 #include <QApplication>
+#include <QAbstractEventDispatcher>
+#include <QMessageBox>
 
 #include <cstdio>
 #include <cstdarg>
@@ -37,18 +39,33 @@ extern "C" {
 static MainWindow* mainWindow = 0;
 static QApplication* application = 0;
 
+#include <QDebug>
+
 extern "C" {
 
 // Initializes gui subsystem. Also parses AND REMOVES any gui-specific commandline
 // arguments. This is called before mupen64plus parses any of its commandline options.
 void gui_init(int *argc, char ***argv)
 {
-    gtk_init(argc, argv);
     application = new QApplication(*argc, *argv);
     application->setOrganizationName("mupen64plus");
     application->setApplicationName("mupen64plus");
     application->setWindowIcon(icon("mupen64plus.png"));
     mainWindow = new MainWindow;
+
+#ifndef __WIN32__
+    if (QAbstractEventDispatcher::instance()->inherits("QEventDispatcherGlib"))
+        gtk_init(argc, argv);
+    else
+        QMessageBox::warning(0,
+            QObject::tr("No Glib Integration"),
+            QObject::tr("<html><p>Your Qt library was compiled without glib \
+                         mainloop integration. Plugins that use Gtk+ \
+                         <b>will</b> crash the emulator!</p>\
+                         <p>To fix this, install a Qt version with glib \
+                         main loop support. Most distributions provide this \
+                         by default.</p>"));
+#endif
 }
 
 // display GUI components to the screen
