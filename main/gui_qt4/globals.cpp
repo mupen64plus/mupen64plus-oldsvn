@@ -43,17 +43,28 @@ QStringList romDirectories()
     return dirs;
 }
 
-QIcon icon(const char* iconName)
+QIcon icon(QString name)
 {
     QIcon icon;
     QStringList sizes;
     sizes << "16x16" << "22x22" << "32x32" << "";
     foreach (QString size, sizes) {
-        QString name = QString("%1/%2").arg(size).arg(iconName);
-        QString filename = core::get_iconpath(qPrintable(name));
-        if (QFile::exists(filename)) {
-            icon.addFile(filename);
+        QPixmap p = pixmap(name, size);
+        if (!p.isNull()) {
+            icon.addPixmap(p);
         }
     }
     return icon;
+}
+
+QPixmap pixmap(QString name, QString subdirectory)
+{
+    QString s;
+    if (subdirectory.isEmpty()) {
+        s = name;
+    } else {
+        s = QString("%1/%2").arg(subdirectory).arg(name);
+    }
+    QString filename = core::get_iconpath(qPrintable(s));
+    return QPixmap(filename);
 }

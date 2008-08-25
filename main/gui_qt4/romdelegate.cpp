@@ -29,7 +29,7 @@ static const int MAX_STATUS = 5;
 RomDelegate::RomDelegate(QObject* parent)
 : QItemDelegate(parent)
 {
-    m_star = icon("star.png").pixmap(16, 16);
+    m_star = pixmap("star.png", "16x16");
 }
 
 void RomDelegate::paint(QPainter* painter,
