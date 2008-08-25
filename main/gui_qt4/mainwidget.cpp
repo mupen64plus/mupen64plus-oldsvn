@@ -232,6 +232,7 @@ void MainWidget::treeViewContextMenuRequested(const QPoint& pos)
         d->compressionLabel->setText(index.sibling(row, RomModel::CompressionType).data().toString());
         d->imageTypeLabel->setText(index.sibling(row, RomModel::ImageType).data().toString());
         d->rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
+        d->timestampLabel->setText(index.sibling(row, RomModel::TimeStamp).data().toString());
         d->lineEdit->setText(index.sibling(row, RomModel::Comments).data().toString());
         d->index = m_proxyModel->mapToSource(index);
         d->show();
