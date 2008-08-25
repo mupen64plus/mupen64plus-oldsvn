@@ -43,19 +43,19 @@ class RomModel : public QAbstractItemModel
             Country = 0,
             GoodName,
             Status,
-            Size,
+            UserComments,
             FileName,
+            MD5Hash,
             InternalName,
-            Comments,
-            MD5,
             CRC1,
             CRC2,
             SaveType,
             Players,
-            Rumble,
+            Size,
             CompressionType,
             ImageType,
-            CIC,
+            CICChip,
+            Rumble,
             TimeStamp,
             COLUMNS_SENTINEL, // keep this as the last entry
             LAST_VISIBLE_COLUMN = FileName // except this one may come after!
@@ -90,7 +90,6 @@ class RomModel : public QAbstractItemModel
         QPixmap countryFlag(QChar c) const;
         QString countryName(QChar c) const;
 
-        QStringList m_columnHeaders;
         QList<core::cache_entry*> m_romList;
 
         bool m_showFullPath;

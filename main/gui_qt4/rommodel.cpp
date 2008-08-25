@@ -46,12 +46,6 @@ RomModel::RomModel(QObject* parent)
     , m_showFullPath(core::config_get_bool("RomBrowserShowFullPaths", FALSE))
     , m_romDirectories(romDirectories())
 {
-    int index = metaObject()->indexOfEnumerator("Columns");
-    QMetaEnum columns = metaObject()->enumerator(index);
-    for (int i = 0; i < COLUMNS_SENTINEL; i++) {
-        m_columnHeaders << tr(columns.key(i));
-    }
-
     QString file;
     char* iconpath = core::get_iconspath();
     QPixmap paustralia(file.sprintf("%s%s", iconpath, "australia.png"));
@@ -163,7 +157,7 @@ int RomModel::rowCount(const QModelIndex& parent) const
 int RomModel::columnCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return m_columnHeaders.count();
+    return 16;
 }
 
 QVariant RomModel::data(const QModelIndex& index, int role) const
@@ -180,10 +174,10 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                 case GoodName:
                     data = QString(entry->inientry->goodname);
                     break;
-                case Size:
-                    data = tr("%0 Mbit").arg((entry->romsize*8) / 1024 / 1024);
+                case Status:
+                    data = entry->inientry->status;
                     break;
-                case Comments:
+                case UserComments:
                     data = QString(entry->usercomments);
                     break;
                 case FileName:
@@ -195,19 +189,16 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                         }
                     }
                     break;
-                case InternalName:
-                    data = QString(entry->internalname);
-                    break;
-                case Status:
-                    data = entry->inientry->status;
-                    break;
-                case MD5:
+                case MD5Hash:
                     int counter;
                     buffer = (char*)calloc(33,sizeof(char));
                     for ( counter = 0; counter < 16; ++counter ) 
                         std::sprintf(buffer+counter*2, "%02X", entry->md5[counter]);
                     data = QString(buffer);
                     free(buffer);
+                    break;
+                case InternalName:
+                    data = QString(entry->internalname);
                     break;
                 case CRC1:
                     data = QString().sprintf("%08X", entry->crc1);
@@ -227,11 +218,8 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = QString(buffer);
                     free(buffer);
                     break;
-                case Rumble:
-                    buffer = (char*)calloc(16,sizeof(char));
-                    core::rumblestring(entry->inientry->rumble, buffer);
-                    data = QString(buffer);
-                    free(buffer);
+                case Size:
+                    data = tr("%0 Mbit").arg((entry->romsize*8) / 1024 / 1024);
                     break;
                 case CompressionType:
                     buffer = (char*)calloc(16,sizeof(char));
@@ -245,9 +233,15 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = QString(buffer);
                     free(buffer);
                     break;
-                case CIC:
+                case CICChip:
                     buffer = (char*)calloc(16,sizeof(char));
                     core::cicstring(entry->cic, buffer);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                case Rumble:
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::rumblestring(entry->inientry->rumble, buffer);
                     data = QString(buffer);
                     free(buffer);
                     break;
@@ -265,7 +259,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
             switch(index.column()) {
                 case Size:
                 case InternalName:
-                case MD5:
+                case MD5Hash:
                 case CRC1:
                 case CRC2:
                 case TimeStamp:
@@ -275,7 +269,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
         } else if (role == Qt::TextAlignmentRole) {
             switch(index.column()) {
                 case Size:
-                case MD5:
+                case MD5Hash:
                 case CRC1:
                 case CRC2:
                     data = Qt::AlignRight;
@@ -305,7 +299,7 @@ bool RomModel::setData(const QModelIndex& index, const QVariant& value,
         index.row() >= 0 &&
         index.row() < m_romList.count()) {
         switch (index.column()) {
-            case Comments:
+            case UserComments:
                 result = true;
                 qstrncpy(m_romList.at(index.row())->usercomments,
                          qPrintable(value.toString()),
@@ -322,12 +316,28 @@ QVariant RomModel::headerData(int section, Qt::Orientation orientation,
                                int role) const
 {
     QVariant data;
-    if (orientation == Qt::Horizontal) {
-        if (role == Qt::DisplayRole) {
-            data = m_columnHeaders[section];
-        }
+    if (role != Qt::DisplayRole || orientation != Qt::Horizontal)
+        return QVariant();
+
+    switch (section) {
+        case Country: return tr("Country");
+        case GoodName: return tr("Good Name");
+        case Status: return tr("Status");
+        case UserComments: return tr("User Comments");
+        case FileName: return tr("File Name");
+        case MD5Hash: return tr("MD5 Hash");
+        case InternalName: return tr("Internal Name");
+        case CRC1: return tr("CRC1");
+        case CRC2: return tr("CRC2");
+        case SaveType: return tr("Save Type");
+        case Players: return tr("Players");
+        case Size: return tr("Size");
+        case CompressionType: return tr("Compression Type");
+        case ImageType: return tr("Image Type");
+        case CICChip: return tr("CIC Chip");
+        case Rumble: return tr("Rumble");
+        default: return QVariant();
     }
-    return data;
 }
 
 void RomModel::settingsChanged()

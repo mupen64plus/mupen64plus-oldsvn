@@ -31,7 +31,7 @@ RomInfoDialog::RomInfoDialog(QWidget* parent)
 void RomInfoDialog::accept()
 {
     if (index.isValid()) {
-        QModelIndex commentIdx = index.sibling(index.row(), RomModel::Comments);
+        QModelIndex commentIdx = index.sibling(index.row(), RomModel::UserComments);
         RomModel::self()->setData(commentIdx, lineEdit->text());
     }
     QDialog::accept();
