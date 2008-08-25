@@ -232,7 +232,6 @@ void MainWidget::treeViewContextMenuRequested(const QPoint& pos)
         d->cicChipLabel->setText(index.sibling(row, RomModel::CICChip).data().toString());
         d->rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
         d->fullPathLabel->setText(index.data(RomModel::FullPath).toString());
-        d->timestampLabel->setText(index.sibling(row, RomModel::TimeStamp).data().toString());
         d->index = m_proxyModel->mapToSource(index);
         d->show();
     } else if (a == refreshAction) {

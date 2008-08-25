@@ -56,7 +56,6 @@ class RomModel : public QAbstractItemModel
             ImageType,
             CICChip,
             Rumble,
-            TimeStamp,
             COLUMNS_SENTINEL, // keep this as the last entry
             LAST_VISIBLE_COLUMN = FileName // except this one may come after!
         };

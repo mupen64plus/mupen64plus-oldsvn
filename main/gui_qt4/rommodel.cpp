@@ -245,12 +245,6 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = QString(buffer);
                     free(buffer);
                     break;
-                case TimeStamp:
-                    {
-                        QDateTime d = QDateTime::fromTime_t(entry->timestamp);
-                        data = d.toString();
-                    }
-                    break;
                 default:
                     data = tr("Internal error");
                     break;
@@ -262,7 +256,6 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                 case MD5Hash:
                 case CRC1:
                 case CRC2:
-                case TimeStamp:
                     data = QFont("monospace");
                     break;
             }
