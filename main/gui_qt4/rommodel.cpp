@@ -103,43 +103,33 @@ RomModel* RomModel::self()
 void RomModel::update(unsigned int roms, unsigned short clear)
 {
     //If clear flag is set, clear the GUI rombrowser.
-    if(clear)
-        { m_romList.clear(); }
+    if (clear) {
+        m_romList.clear();
+    }
 
     int arrayroms = m_romList.count();
 
     //If there are currently more ROMs in cache than GUI rombrowser, add them.
-    if(roms>arrayroms)
-        {
+    if (roms > arrayroms) {
         core::cache_entry *entry;
         entry = core::g_romcache.top;
         unsigned int romcounter;
 
         //Advance cache pointer.
-        for ( romcounter=0; romcounter < arrayroms; ++romcounter )
-            {
+        for (romcounter=0; romcounter < arrayroms; romcounter++) {
             entry = entry->next;
             if((entry==NULL))
                 { return; }
-            }
+        }
 
-        RomEntry modelentry;
-        for ( romcounter=0; (romcounter<roms)&&(entry!=NULL); ++romcounter )
-            {
-            modelentry.size = entry->romsize;
-            modelentry.goodName = entry->inientry->goodname;
-            modelentry.country = entry->countrycode;
-            modelentry.fileName = entry->filename;
-            modelentry.comments = entry->usercomments;
-            modelentry.archivefile = entry->archivefile;
-
+        for (romcounter = 0; (romcounter<roms) && (entry!=NULL); romcounter++) {
             //Actually add entries to RomModel
-            m_romList << modelentry;
+            m_romList << entry;
             //printf("Added: %s\n", entry->inientry->goodname);
             entry = entry->next;
-            }
-        reset();
         }
+        reset();
+    }
 }
 
 QModelIndex RomModel::index(int row, int column,
@@ -175,27 +165,27 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
 {
     QVariant data;
     if (index.isValid()) {
-        const RomEntry& entry = m_romList[index.row()];
+        const core::cache_entry* entry = m_romList[index.row()];
         if (role == Qt::DisplayRole || role == Sort) {
             switch(index.column()) {
                 case Country:
-                    data = countryName(entry.country);
+                    data = countryName(entry->countrycode);
                     break;
                 case GoodName:
-                    data = entry.goodName;
+                    data = QString(entry->inientry->goodname);
                     break;
                 case Size:
-                    data = tr("%0 Mbit").arg((entry.size * 8) / 1024 / 1024);
+                    data = tr("%0 Mbit").arg((entry->romsize*8) / 1024 / 1024);
                     break;
                 case Comments:
-                    data = entry.comments;
+                    data = QString(entry->usercomments);
                     break;
                 case FileName:
                     {
                         if (core::config_get_bool("RomBrowserShowFullPaths", FALSE)) {
-                            data = entry.fileName;
+                            data = entry->filename;
                         } else {
-                            data = QFileInfo(entry.fileName).fileName();
+                            data = QFileInfo(entry->filename).fileName();
                         }
                     }
                     break;
@@ -218,14 +208,14 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
         } else if (role == Qt::DecorationRole) {
             switch(index.column()) {
                 case Country:
-                    data = countryFlag(entry.country);
+                    data = countryFlag(entry->countrycode);
                     break;
             }
         //Assign Role enums here to retrive information.
         } else if (role == FullPath) {
-            data = entry.fileName;
+            data = entry->filename;
         } else if (role == ArchiveFile) {
-            data = entry.archivefile;
+            data = entry->archivefile;
         }
     }
     return data;

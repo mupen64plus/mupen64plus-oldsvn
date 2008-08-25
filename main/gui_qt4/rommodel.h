@@ -27,18 +27,11 @@
 #include <QPair>
 #include <QChar>
 
-struct RomEntry
-{
-    RomEntry() : size(-1), country('?') {}
-
-    int size;
-    QString goodName;
-    QChar country;
-    QString fileName;
-    QString comments;
-    QString crc;
-    unsigned int archivefile;
-};
+extern "C" {
+    namespace core {
+        #include "../romcache.h"
+    }
+}
 
 class RomModel : public QAbstractItemModel
 {
@@ -69,7 +62,7 @@ class RomModel : public QAbstractItemModel
         QString countryName(QChar c) const;
 
         QStringList m_columnHeaders;
-        QList<RomEntry> m_romList;
+        QList<core::cache_entry*> m_romList;
 
         bool m_showFullPath;
         QStringList m_romDirectories;
