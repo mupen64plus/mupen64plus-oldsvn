@@ -24,6 +24,7 @@
 #include <QUrl>
 #include <QMetaEnum>
 #include <QDateTime>
+#include <QWidget>
 
 #include <cstdio>
 
@@ -36,6 +37,100 @@ namespace core {
         #include "../romcache.h"
         #include "../main.h"
         #include "../config.h"
+    }
+}
+
+#define TRANS(t) QWidget::tr(t)
+
+static QString compressionType(int type) {
+    switch (type) {
+        case core::UNCOMPRESSED:
+            return TRANS("uncompressed");
+            break;
+        case core::ZIP_COMPRESSION:
+            return TRANS("zip");
+            break;
+        case core::GZIP_COMPRESSION:
+            return TRANS("gzip");
+            break;
+        case core::BZIP2_COMPRESSION:
+            return TRANS("bzip2");
+            break;
+        case core::LZMA_COMPRESSION:
+            return TRANS("lzma");
+            break;
+        case core::SZIP_COMPRESSION:
+            return TRANS("7z");
+            break;
+        default:
+            return QString::number(type);
+            break;
+    }
+}
+
+static QString imageType(int type) {
+    switch (type) {
+        case core::Z64IMAGE:
+            return TRANS("Z64");
+            break;
+        case core::V64IMAGE:
+            return TRANS("V64");
+            break;
+        case core::N64IMAGE:
+            return TRANS("N64");
+            break;
+        default:
+            return QString::number(type);
+            break;
+    }
+}
+
+static QString cicType(int type) {
+    switch (type) {
+        case core::CIC_NUS_6101:
+            return TRANS("CIC_NUS_6101");
+            break;
+        case core::CIC_NUS_6102:
+            return TRANS("CIC_NUS_6102");
+            break;
+        case core::CIC_NUS_6103:
+            return TRANS("CIC_NUS_6103");
+            break;
+        case core::CIC_NUS_6105:
+            return TRANS("CIC_NUS_6105");
+            break;
+        case core::CIC_NUS_6106:
+            return TRANS("CIC_NUS_6106");
+            break;
+        default:
+            return QString::number(type);
+            break;
+    }
+}
+
+static QString saveType(int type) {
+    switch (type) {
+        case core::EEPROM_4KB:
+            return TRANS("4KiB EEPROM");
+            break;
+        case core::EEPROM_16KB:
+            return TRANS("16KiB EEPROM");
+            break;
+        case core::SRAM:
+            return TRANS("SRAM");
+            break;
+        case core::FLASH_RAM:
+            return TRANS("Flash RAM");
+            break;
+        case core::CONTROLLER_PACK:
+            return TRANS("Controller Pack");
+            break;
+        case core::NONE:
+            return TRANS("None");
+            break;
+        default:
+            return QString::number(type);
+            break;
     }
 }
 
@@ -208,22 +303,22 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = entry->crc2;
                     break;
                 case SaveType:
-                    data = entry->inientry->savetype;
+                    data = saveType(entry->inientry->savetype);
                     break;
                 case Players:
                     data = entry->inientry->players;
                     break;
                 case Rumble:
-                    data = bool(entry->inientry->rumble);
+                    data = entry->inientry->rumble ? tr("Yes") : tr("No");
                     break;
                 case CompressionType:
-                    data = entry->compressiontype;
+                    data = compressionType(entry->compressiontype);
                     break;
                 case ImageType:
-                    data = entry->imagetype;
+                    data = imageType(entry->imagetype);
                     break;
                 case CIC:
-                    data = entry->cic;
+                    data = cicType(entry->cic);
                     break;
                 case TimeStamp:
                     {
