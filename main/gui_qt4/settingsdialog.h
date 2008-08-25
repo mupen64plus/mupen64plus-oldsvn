@@ -30,6 +30,9 @@ class SettingsDialog : public QDialog, public Ui_SettingsDialog
     public:
         SettingsDialog(QWidget* parent = 0);
 
+    public slots:
+        void accept();
+
     private slots:
         void on_dynamicRecompilerRadio_toggled(bool checked);
         void on_interpreterRadio_toggled(bool checked);
@@ -55,7 +58,6 @@ class SettingsDialog : public QDialog, public Ui_SettingsDialog
         void on_scanDirectoriesRecursivelyCheck_toggled(bool checked);
         void on_showFullPathsInFilenamesCheck_toggled(bool checked);
 
-        void accept();
         void pageChanged(int);
 };
 

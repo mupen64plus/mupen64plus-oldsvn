@@ -37,8 +37,7 @@
 #include "rommodel.h"
 #include "romdelegate.h"
 #include "globals.h"
-
-#include "ui_rominfodialog.h"
+#include "rominfodialog.h"
 
 namespace core {
     extern "C" {
@@ -212,29 +211,29 @@ void MainWidget::treeViewContextMenuRequested(const QPoint& pos)
         load(index);
     } else if (a == propertiesAction) {
         int row = index.row();
-        QDialog* d = new QDialog(this);
-        Ui_RomInfoDialog ui;
-        ui.setupUi(d);
-        ui.statusLabel->setMax(5);
-        ui.flagLabel->setPixmap(index.sibling(row, RomModel::Country).data(Qt::DecorationRole).value<QPixmap>());
-        ui.goodNameLabel->setText(index.sibling(row, RomModel::GoodName).data().toString());
-        ui.statusLabel->setText(index.sibling(row, RomModel::Status).data().toString());
-        ui.countryLabel->setText(index.sibling(row, RomModel::Country).data().toString());
-        ui.sizeLabel->setText(index.sibling(row, RomModel::Size).data().toString());
-        ui.fileNameLabel->setText(index.sibling(row, RomModel::FileName).data().toString());
-        ui.fullPathLabel->setText(index.data(RomModel::FullPath).toString());
-        ui.internalNameLabel->setText(index.sibling(row, RomModel::InternalName).data().toString());
-        ui.md5HashLabel->setText(index.sibling(row, RomModel::MD5).data().toString());
-        ui.crc1Label->setText(index.sibling(row, RomModel::CRC1).data().toString());
-        ui.crc2Label->setText(index.sibling(row, RomModel::CRC2).data().toString());
-        ui.playersLabel->setText(index.sibling(row, RomModel::Players).data().toString());
-        ui.rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
-        ui.saveTypeLabel->setText(index.sibling(row, RomModel::SaveType).data().toString());
-        ui.sizeLabel->setText(index.sibling(row, RomModel::Size).data().toString());
-        ui.cicChipLabel->setText(index.sibling(row, RomModel::CIC).data().toString());
-        ui.compressionLabel->setText(index.sibling(row, RomModel::CompressionType).data().toString());
-        ui.imageTypeLabel->setText(index.sibling(row, RomModel::ImageType).data().toString());
-        ui.rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
+        RomInfoDialog* d = new RomInfoDialog(this);
+        d->statusLabel->setMax(5);
+        d->flagLabel->setPixmap(index.sibling(row, RomModel::Country).data(Qt::DecorationRole).value<QPixmap>());
+        d->goodNameLabel->setText(index.sibling(row, RomModel::GoodName).data().toString());
+        d->statusLabel->setText(index.sibling(row, RomModel::Status).data().toString());
+        d->countryLabel->setText(index.sibling(row, RomModel::Country).data().toString());
+        d->sizeLabel->setText(index.sibling(row, RomModel::Size).data().toString());
+        d->fileNameLabel->setText(index.sibling(row, RomModel::FileName).data().toString());
+        d->fullPathLabel->setText(index.data(RomModel::FullPath).toString());
+        d->internalNameLabel->setText(index.sibling(row, RomModel::InternalName).data().toString());
+        d->md5HashLabel->setText(index.sibling(row, RomModel::MD5).data().toString());
+        d->crc1Label->setText(index.sibling(row, RomModel::CRC1).data().toString());
+        d->crc2Label->setText(index.sibling(row, RomModel::CRC2).data().toString());
+        d->playersLabel->setText(index.sibling(row, RomModel::Players).data().toString());
+        d->rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
+        d->saveTypeLabel->setText(index.sibling(row, RomModel::SaveType).data().toString());
+        d->sizeLabel->setText(index.sibling(row, RomModel::Size).data().toString());
+        d->cicChipLabel->setText(index.sibling(row, RomModel::CIC).data().toString());
+        d->compressionLabel->setText(index.sibling(row, RomModel::CompressionType).data().toString());
+        d->imageTypeLabel->setText(index.sibling(row, RomModel::ImageType).data().toString());
+        d->rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
+        d->lineEdit->setText(index.sibling(row, RomModel::Comments).data().toString());
+        d->index = m_proxyModel->mapToSource(index);
         d->show();
     } else if (a == refreshAction) {
         core::g_romcache.rcstask = core::RCS_RESCAN;

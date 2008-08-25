@@ -297,6 +297,27 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
     return data;
 }
 
+bool RomModel::setData(const QModelIndex& index, const QVariant& value,
+                        int role)
+{
+    bool result = false;
+    if (index.isValid() &&
+        index.row() >= 0 &&
+        index.row() < m_romList.count()) {
+        switch (index.column()) {
+            case Comments:
+                result = true;
+                qstrncpy(m_romList.at(index.row())->usercomments,
+                         qPrintable(value.toString()),
+                         COMMENT_MAXLENGTH);
+                core::g_romcache.rcstask = core::RCS_WRITE_CACHE;
+                emit dataChanged(index, index);
+                break;
+        }
+    }
+    return result;
+}
+
 QVariant RomModel::headerData(int section, Qt::Orientation orientation,
                                int role) const
 {

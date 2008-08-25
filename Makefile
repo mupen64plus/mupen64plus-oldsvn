@@ -210,7 +210,8 @@ OBJ_QT_GUI = \
 	main/gui_qt4/settingsdialog.o \
 	main/gui_qt4/globals.o \
 	main/gui_qt4/romdelegate.o \
-    main/gui_qt4/starlabel.o
+    main/gui_qt4/starlabel.o \
+    main/gui_qt4/rominfodialog.o
 
 OBJ_QT_MOC = \
 	main/gui_qt4/mainwidget.moc \
@@ -219,7 +220,8 @@ OBJ_QT_MOC = \
 	main/gui_qt4/settingsdialog.moc \
 	main/gui_qt4/rommodel.moc \
 	main/gui_qt4/romdelegate.moc \
-    main/gui_qt4/starlabel.moc
+    main/gui_qt4/starlabel.moc \
+    main/gui_qt4/rominfodialog.moc
 
 OBJ_QT_HEADERS = \
 	main/gui_qt4/ui_romdirectorieslistwidget.h \

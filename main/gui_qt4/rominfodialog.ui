@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>282</width>
-    <height>544</height>
+    <width>200</width>
+    <height>547</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -181,6 +181,11 @@
       </item>
       <item row="5" column="1" >
        <widget class="QLabel" name="internalNameLabel" >
+        <property name="font" >
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
         <property name="text" >
          <string/>
         </property>
@@ -204,6 +209,11 @@
       </item>
       <item row="6" column="1" >
        <widget class="QLabel" name="md5HashLabel" >
+        <property name="font" >
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
         <property name="text" >
          <string/>
         </property>
@@ -227,6 +237,11 @@
       </item>
       <item row="7" column="1" >
        <widget class="QLabel" name="crc1Label" >
+        <property name="font" >
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
         <property name="text" >
          <string/>
         </property>
@@ -250,6 +265,11 @@
       </item>
       <item row="8" column="1" >
        <widget class="QLabel" name="crc2Label" >
+        <property name="font" >
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
         <property name="text" >
          <string/>
         </property>
@@ -273,6 +293,11 @@
       </item>
       <item row="9" column="1" >
        <widget class="QLabel" name="sizeLabel" >
+        <property name="font" >
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
         <property name="text" >
          <string/>
         </property>
@@ -426,20 +451,20 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout" >
       <item>
-       <widget class="QTextEdit" name="textEdit" >
-        <property name="html" >
-         <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Calibri'; font-size:8pt; font-weight:400; font-style:normal;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:10pt;">&lt;/p>&lt;/body>&lt;/html></string>
-        </property>
-        <property name="acceptRichText" >
-         <bool>false</bool>
+       <widget class="QLineEdit" name="lineEdit" >
+        <property name="maxLength" >
+         <number>255</number>
         </property>
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Ok</set>
+     </property>
     </widget>
    </item>
   </layout>
@@ -452,5 +477,38 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RomInfoDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>208</x>
+     <y>555</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>282</x>
+     <y>519</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>RomInfoDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>149</x>
+     <y>562</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>239</x>
+     <y>538</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
