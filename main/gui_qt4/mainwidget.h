@@ -51,6 +51,7 @@ class MainWidget : public QWidget, public Ui_MainWidget
         void treeViewDoubleClicked(const QModelIndex& index);
         void headerContextMenuRequested(const QPoint& pos);
         void hideHeaderSection(QAction* a);
+        void treeViewContextMenuRequested(const QPoint& pos);
 
     signals:
         void itemCountChanged(int count);

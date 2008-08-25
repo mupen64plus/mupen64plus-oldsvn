@@ -31,10 +31,12 @@
 #include <QSettings>
 #include <QMenu>
 #include <QActionGroup>
+#include <QDialog>
 
 #include "mainwidget.h"
 #include "rommodel.h"
 #include "romdelegate.h"
+#include "ui_rominfodialog.h"
 
 MainWidget::MainWidget(QWidget* parent)
     : QWidget(parent)
@@ -59,6 +61,9 @@ MainWidget::MainWidget(QWidget* parent)
     treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     treeView->setFocusProxy(lineEdit);
     treeView->setItemDelegate(new RomDelegate(this));
+
+    connect(treeView, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(treeViewContextMenuRequested(QPoint)));
 
     QSettings s;
     QByteArray headerState = s.value("RomBrowserHeadersState").toByteArray();
@@ -176,6 +181,44 @@ void MainWidget::hideHeaderSection(QAction* a)
     int section = a->data().toInt();
     treeView->header()->setSectionHidden(section, !a->isChecked());
     resizeHeaderSections();
+}
+
+void MainWidget::treeViewContextMenuRequested(const QPoint& pos)
+{
+    QModelIndex index = treeView->indexAt(pos);
+    if (!index.isValid()) {
+        return;
+    }
+
+    QMenu m;
+    QAction* propertiesAction = m.addAction(tr("Properties..."));
+    QAction* a = m.exec(treeView->mapToGlobal(pos));
+    if (a == propertiesAction) {
+        int row = index.row();
+        QDialog* d = new QDialog(this);
+        Ui_RomInfoDialog ui;
+        ui.setupUi(d);
+        ui.flagLabel->setPixmap(index.sibling(row, RomModel::Country).data(Qt::DecorationRole).value<QPixmap>());
+        ui.goodNameLabel->setText(index.sibling(row, RomModel::GoodName).data().toString());
+        ui.statusLabel->setText(index.sibling(row, RomModel::Status).data().toString());
+        ui.countryLabel->setText(index.sibling(row, RomModel::Country).data().toString());
+        ui.sizeLabel->setText(index.sibling(row, RomModel::Size).data().toString());
+        ui.fileNameLabel->setText(index.sibling(row, RomModel::FileName).data().toString());
+        ui.fullPathLabel->setText(index.data(RomModel::FullPath).toString());
+        ui.internalNameLabel->setText(index.sibling(row, RomModel::InternalName).data().toString());
+        ui.md5HashLabel->setText(index.sibling(row, RomModel::MD5).data().toString());
+        ui.crc1Label->setText(index.sibling(row, RomModel::CRC1).data().toString());
+        ui.crc2Label->setText(index.sibling(row, RomModel::CRC2).data().toString());
+        ui.playersLabel->setText(index.sibling(row, RomModel::Players).data().toString());
+        ui.rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
+        ui.saveTypeLabel->setText(index.sibling(row, RomModel::SaveType).data().toString());
+        ui.sizeLabel->setText(index.sibling(row, RomModel::Size).data().toString());
+        ui.cicChipLabel->setText(index.sibling(row, RomModel::CIC).data().toString());
+        ui.compressionLabel->setText(index.sibling(row, RomModel::CompressionType).data().toString());
+        ui.imageTypeLabel->setText(index.sibling(row, RomModel::ImageType).data().toString());
+        ui.rumbleLabel->setText(index.sibling(row, RomModel::Rumble).data().toString());
+        d->show();
+    }
 }
 
 bool MainWidget::eventFilter(QObject* obj, QEvent* event)
