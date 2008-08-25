@@ -17,6 +17,8 @@ preferences-system.png
 16x16/edit-delete.png
 16x16/document-revert.png
 16x16/document-save-as.png
+16x16/document-properties.png
+16x16/view-refresh.png
 22x22/document-open.png
 22x22/document-save.png
 22x22/media-playback-pause.png
@@ -28,6 +30,8 @@ preferences-system.png
 22x22/edit-delete.png
 22x22/document-revert.png
 22x22/document-save-as.png
+22x22/document-properties.png
+22x22/view-refresh.png
 32x32/audio-card.png
 32x32/dialog-error.png
 32x32/dialog-question.png
@@ -46,6 +50,8 @@ preferences-system.png
 32x32/edit-delete.png
 32x32/document-revert.png
 32x32/document-save-as.png
+32x32/document-properties.png
+32x32/view-refresh.png
 
 are Copyright: The Oxygen Icon Theme
   |     Copyright (C) 2007 David Vignoni <david@icon-king.com>
