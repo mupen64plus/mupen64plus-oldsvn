@@ -29,7 +29,10 @@ const QStringList RomExtensions = QStringList() << "*.rom"
                                                 << "*.z64"
                                                 << "*.gz"
                                                 << "*.zip"
-                                                << "*.n64";
+                                                << "*.n64"
+                                                << "*.bz2"
+                                                << "*.lzma"
+                                                << "*.7z";
 QStringList romDirectories();
 QIcon icon(const char* iconName);
 
