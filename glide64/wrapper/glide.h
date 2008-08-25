@@ -735,7 +735,7 @@ FX_ENTRY FxBool FX_CALL
 grReset( FxU32 what );
 
 FX_ENTRY GrProc FX_CALL
-grGetProcAddress( char *procName );
+grGetProcAddress( const char *procName );
 
 FX_ENTRY void FX_CALL 
 grEnable( GrEnableMode_t mode );
