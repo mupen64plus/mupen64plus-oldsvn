@@ -208,14 +208,16 @@ OBJ_QT_GUI = \
 	main/gui_qt4/romdirectorieslistwidget.o \
 	main/gui_qt4/rommodel.o \
 	main/gui_qt4/settingsdialog.o \
-	main/gui_qt4/globals.o
+	main/gui_qt4/globals.o \
+	main/gui_qt4/romdelegate.o
 
 OBJ_QT_MOC = \
 	main/gui_qt4/mainwidget.moc \
 	main/gui_qt4/mainwindow.moc \
 	main/gui_qt4/romdirectorieslistwidget.moc \
 	main/gui_qt4/settingsdialog.moc \
-	main/gui_qt4/rommodel.moc
+	main/gui_qt4/rommodel.moc \
+	main/gui_qt4/romdelegate.moc
 
 OBJ_QT_HEADERS = \
 	main/gui_qt4/ui_romdirectorieslistwidget.h \
@@ -358,10 +360,6 @@ version.h: .svn/entries
 	@$(MV) version.h main/version.h
 
 .cpp.o:
-	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
-
-# I have no idea why this is needed, but apparently it is.
-main/gui_qt4/settings.o: main/gui_qt4/settings.cpp
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 .c.o:

@@ -233,7 +233,7 @@ QModelIndex RomModel::index(int row, int column,
                              const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return createIndex(row, column);
+    return createIndex(row, column, m_romList.at(row));
 }
  
 QModelIndex RomModel::parent(const QModelIndex& index) const
@@ -387,8 +387,8 @@ void RomModel::settingsChanged()
     if (m_showFullPath != core::config_get_bool("RomBrowserShowFullPaths", FALSE)) {
         m_showFullPath = core::config_get_bool("RomBrowserShowFullPaths", FALSE);
         emit dataChanged(
-            createIndex(0, FileName),
-            createIndex(columnCount() - 1, FileName)
+            index(0, FileName),
+            index(columnCount() - 1, FileName)
         );
     }
 }

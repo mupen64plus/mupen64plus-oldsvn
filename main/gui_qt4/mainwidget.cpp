@@ -34,6 +34,7 @@
 
 #include "mainwidget.h"
 #include "rommodel.h"
+#include "romdelegate.h"
 
 MainWidget::MainWidget(QWidget* parent)
     : QWidget(parent)
@@ -57,6 +58,7 @@ MainWidget::MainWidget(QWidget* parent)
     treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
     treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     treeView->setFocusProxy(lineEdit);
+    treeView->setItemDelegate(new RomDelegate(this));
 
     QSettings s;
     QByteArray headerState = s.value("RomBrowserHeadersState").toByteArray();
