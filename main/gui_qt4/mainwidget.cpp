@@ -29,6 +29,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QSettings>
+#include <QMenu>
+#include <QActionGroup>
 
 #include "mainwidget.h"
 #include "rommodel.h"
@@ -38,12 +40,6 @@ MainWidget::MainWidget(QWidget* parent)
     , m_proxyModel(0)
 {
     setupUi(this);
-
-    QSettings s;
-    QByteArray headerState = s.value("RomBrowserHeadersState").toByteArray();
-    if (!headerState.isEmpty()) {
-        treeView->header()->restoreState(headerState);
-    }
 
     lineEdit->installEventFilter(this);
 
@@ -61,6 +57,16 @@ MainWidget::MainWidget(QWidget* parent)
     treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
     treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     treeView->setFocusProxy(lineEdit);
+
+    QSettings s;
+    QByteArray headerState = s.value("RomBrowserHeadersState").toByteArray();
+    if (!headerState.isEmpty()) {
+        treeView->header()->restoreState(headerState);
+    }
+
+    treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(treeView->header(), SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(headerContextMenuRequested(QPoint)));
 
     m_timer.setSingleShot(true);
 
@@ -128,6 +134,38 @@ void MainWidget::filter()
 void MainWidget::treeViewDoubleClicked(const QModelIndex& index)
 {
     load(index);
+}
+
+void MainWidget::headerContextMenuRequested(const QPoint& pos)
+{
+    QHeaderView* header = treeView->header();
+    QAbstractItemModel* model = header->model();
+    Qt::Orientation o = header->orientation();
+
+    QMenu menu;
+    QActionGroup group(this);
+
+    group.setExclusive(false);
+    connect(&group, SIGNAL(triggered(QAction*)),
+            this, SLOT(hideHeaderSection(QAction*)));
+
+    for (int i = 0; i < header->count(); i++) {
+        QString title = model->headerData(i, o, Qt::DisplayRole).toString();
+        QAction* a = menu.addAction(title);
+        a->setCheckable(true);
+        a->setChecked(!header->isSectionHidden(i));
+        a->setData(i);
+        group.addAction(a);
+    }
+
+    menu.exec(header->mapToGlobal(pos));
+}
+
+void MainWidget::hideHeaderSection(QAction* a)
+{
+    int section = a->data().toInt();
+    treeView->header()->setSectionHidden(section, !a->isChecked());
+    resizeHeaderSections();
 }
 
 bool MainWidget::eventFilter(QObject* obj, QEvent* event)

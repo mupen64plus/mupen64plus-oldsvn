@@ -49,6 +49,8 @@ class MainWidget : public QWidget, public Ui_MainWidget
         void lineEditTextChanged();
         void filter();
         void treeViewDoubleClicked(const QModelIndex& index);
+        void headerContextMenuRequested(const QPoint& pos);
+        void hideHeaderSection(QAction* a);
 
     signals:
         void itemCountChanged(int count);
