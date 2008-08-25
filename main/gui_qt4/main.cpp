@@ -66,7 +66,7 @@ void gui_init(int *argc, char ***argv)
                          <b>will</b> crash the emulator!</p>\
                          <p>To fix this, install a Qt version with glib \
                          main loop support. Most distributions provide this \
-                         by default.</p>"));
+                         by default.</p></html>"));
 #endif
 }
 
