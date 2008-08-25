@@ -333,6 +333,14 @@ void MainWindow::setupActions()
     connect(slotActionGroup, SIGNAL(triggered(QAction*)),
             this, SLOT(savestateSelectSlot(QAction*)));
 
+    QWidget* w = toolBar->widgetForAction(actionCurrentSaveStateSlot);
+    if (w) {
+        QToolButton* tb = qobject_cast<QToolButton*>(w);
+        if (tb) {
+            tb->setPopupMode(QToolButton::InstantPopup);
+        }
+    }
+
     //Settings Actions
     connect(actionShowFilter, SIGNAL(toggled(bool)),
             mainWidget, SLOT(showFilter(bool)));
