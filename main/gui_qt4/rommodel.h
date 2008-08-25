@@ -42,11 +42,11 @@ class RomModel : public QAbstractItemModel
         enum Columns {
             Country = 0,
             GoodName,
+            Status,
             Size,
-            Comments,
             FileName,
             InternalName,
-            Status,
+            Comments,
             MD5,
             CRC1,
             CRC2,

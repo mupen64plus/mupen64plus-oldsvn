@@ -64,6 +64,14 @@ MainWidget::MainWidget(QWidget* parent)
     QByteArray headerState = s.value("RomBrowserHeadersState").toByteArray();
     if (!headerState.isEmpty()) {
         treeView->header()->restoreState(headerState);
+    } else {
+        for (int i = 0; i < treeView->header()->count(); i++) {
+            treeView->header()->hideSection(i);
+        }
+        for (int i = 0; i <= RomModel::LAST_VISIBLE_COLUMN; i++) {
+            treeView->header()->showSection(i);
+        }
+        resizeHeaderSections();
     }
 
     treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
