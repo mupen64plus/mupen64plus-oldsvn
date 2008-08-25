@@ -37,100 +37,7 @@ namespace core {
         #include "../romcache.h"
         #include "../main.h"
         #include "../config.h"
-    }
-}
-
-#define TRANS(t) QWidget::tr(t)
-
-static QString compressionType(int type) {
-    switch (type) {
-        case core::UNCOMPRESSED:
-            return TRANS("uncompressed");
-            break;
-        case core::ZIP_COMPRESSION:
-            return TRANS("zip");
-            break;
-        case core::GZIP_COMPRESSION:
-            return TRANS("gzip");
-            break;
-        case core::BZIP2_COMPRESSION:
-            return TRANS("bzip2");
-            break;
-        case core::LZMA_COMPRESSION:
-            return TRANS("lzma");
-            break;
-        case core::SZIP_COMPRESSION:
-            return TRANS("7z");
-            break;
-        default:
-            return QString::number(type);
-            break;
-    }
-}
-
-static QString imageType(int type) {
-    switch (type) {
-        case core::Z64IMAGE:
-            return TRANS("Z64");
-            break;
-        case core::V64IMAGE:
-            return TRANS("V64");
-            break;
-        case core::N64IMAGE:
-            return TRANS("N64");
-            break;
-        default:
-            return QString::number(type);
-            break;
-    }
-}
-
-static QString cicType(int type) {
-    switch (type) {
-        case core::CIC_NUS_6101:
-            return TRANS("CIC_NUS_6101");
-            break;
-        case core::CIC_NUS_6102:
-            return TRANS("CIC_NUS_6102");
-            break;
-        case core::CIC_NUS_6103:
-            return TRANS("CIC_NUS_6103");
-            break;
-        case core::CIC_NUS_6105:
-            return TRANS("CIC_NUS_6105");
-            break;
-        case core::CIC_NUS_6106:
-            return TRANS("CIC_NUS_6106");
-            break;
-        default:
-            return QString::number(type);
-            break;
-    }
-}
-
-static QString saveType(int type) {
-    switch (type) {
-        case core::EEPROM_4KB:
-            return TRANS("4KiB EEPROM");
-            break;
-        case core::EEPROM_16KB:
-            return TRANS("16KiB EEPROM");
-            break;
-        case core::SRAM:
-            return TRANS("SRAM");
-            break;
-        case core::FLASH_RAM:
-            return TRANS("Flash RAM");
-            break;
-        case core::CONTROLLER_PACK:
-            return TRANS("Controller Pack");
-            break;
-        case core::NONE:
-            return TRANS("None");
-            break;
-        default:
-            return QString::number(type);
-            break;
+        #include "../util.h"
     }
 }
 
@@ -265,6 +172,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
     if (index.isValid()) {
         const core::cache_entry* entry = m_romList[index.row()];
         if (role == Qt::DisplayRole || role == Sort) {
+            char* buffer;
             switch(index.column()) {
                 case Country:
                     data = countryName(entry->countrycode);
@@ -294,31 +202,54 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = entry->inientry->status;
                     break;
                 case MD5:
-                    data = int(entry->md5);
+                    int counter;
+                    buffer = (char*)calloc(33,sizeof(char));
+                    for ( counter = 0; counter < 16; ++counter ) 
+                        std::sprintf(buffer+counter*2, "%02X", entry->md5[counter]);
+                    data = QString(buffer);
+                    free(buffer);
                     break;
                 case CRC1:
-                    data = entry->crc1;
+                    data = QString().sprintf("%08X", entry->crc1);
                     break;
                 case CRC2:
-                    data = entry->crc2;
+                    data = QString().sprintf("%08X", entry->crc1);
                     break;
                 case SaveType:
-                    data = saveType(entry->inientry->savetype);
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::savestring(entry->inientry->savetype, buffer);
+                    data = QString(buffer);
+                    free(buffer);
                     break;
                 case Players:
-                    data = entry->inientry->players;
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::playersstring(entry->inientry->players, buffer);
+                    data = QString(buffer);
+                    free(buffer);
                     break;
                 case Rumble:
-                    data = entry->inientry->rumble ? tr("Yes") : tr("No");
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::rumblestring(entry->inientry->rumble, buffer);
+                    data = QString(buffer);
+                    free(buffer);
                     break;
                 case CompressionType:
-                    data = compressionType(entry->compressiontype);
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::compressionstring(entry->compressiontype, buffer);
+                    data = QString(buffer);
+                    free(buffer);
                     break;
                 case ImageType:
-                    data = imageType(entry->imagetype);
+                    buffer = (char*)calloc(32,sizeof(char));
+                    core::imagestring(entry->imagetype, buffer);
+                    data = QString(buffer);
+                    free(buffer);
                     break;
                 case CIC:
-                    data = cicType(entry->cic);
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::cicstring(entry->cic, buffer);
+                    data = QString(buffer);
+                    free(buffer);
                     break;
                 case TimeStamp:
                     {

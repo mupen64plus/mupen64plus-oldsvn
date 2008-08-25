@@ -77,6 +77,15 @@ int inline list_empty(list_t list);
 int list_length(list_t list);
 list_node_t *list_find_node(list_t list, void *data);
 
+/* GUI utilities */
+void countrycodestring(unsigned short countrycode, char *string);
+void compressionstring(unsigned char compressiontype, char *string);
+void imagestring(unsigned char imagetype, char *string);
+void cicstring(unsigned char cic, char *string);
+void rumblestring(unsigned char rumble, char *string);
+void savestring(unsigned char savetype, char *string);
+void playersstring(unsigned char players, char *string);
+
 // cycles through each listnode in list setting curr_node to current node.
 #define list_foreach(list, curr_node) \
     for((curr_node) = (list); (curr_node) != NULL; (curr_node) = (curr_node)->next)
