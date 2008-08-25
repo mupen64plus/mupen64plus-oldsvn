@@ -18,23 +18,39 @@
 *
 */
 
-#ifndef MUPEN64_QT4_GUI_ROM_DELEGATE_H
-#define MUPEN64_QT4_GUI_ROM_DELEGATE_H
+#include <QPaintEvent>
+#include <QPainter>
 
-#include <QItemDelegate>
-#include <QPixmap>
+#include "starlabel.h"
+#include "globals.h"
 
-class RomDelegate : public QItemDelegate
+StarLabel::StarLabel(QWidget* parent)
+: QLabel(parent), m_max(-1)
+{}
+
+int StarLabel::max() const
 {
-    Q_OBJECT
-    public:
-        RomDelegate(QObject* parent = 0);
+    return m_max;
+}
 
-        virtual void paint(QPainter* painter,
-                           const QStyleOptionViewItem& option,
-                           const QModelIndex& index) const;
-        virtual QSize sizeHint(const QStyleOptionViewItem& option,
-                               const QModelIndex& index) const;
-};
+void StarLabel::setMax(int max)
+{
+    if (max != m_max) {
+        m_max = max;
+        update();
+    }
+}
 
-#endif // MUPEN64_QT4_GUI_ROM_DELEGATE_H
+void StarLabel::paintEvent(QPaintEvent* event)
+{
+    bool ok;
+    int n = text().toInt(&ok);
+    if (ok) {
+        QPainter p(this);
+        drawStars(&p, event->rect(), n, qMax(0, m_max));
+    } else {
+        QLabel::paintEvent(event);
+    }
+}
+
+#include "starlabel.moc"

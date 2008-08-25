@@ -28,9 +28,7 @@ static const int MAX_STATUS = 5;
 
 RomDelegate::RomDelegate(QObject* parent)
 : QItemDelegate(parent)
-{
-    m_star = pixmap("star.png", "16x16");
-}
+{}
 
 void RomDelegate::paint(QPainter* painter,
                      const QStyleOptionViewItem& option,
@@ -43,12 +41,7 @@ void RomDelegate::paint(QPainter* painter,
                 int n = index.data(Qt::DisplayRole).toInt();
                 const QRect& r = option.rect;
 
-                painter->save();
-                painter->setCompositionMode(QPainter::CompositionMode_Xor);
-                painter->setOpacity(0.2);
-                drawStars(painter, r, MAX_STATUS);
-                painter->restore();
-                drawStars(painter, r, n);
+                drawStars(painter, r, n, MAX_STATUS);
             }
             break;
         default:
@@ -62,20 +55,11 @@ QSize RomDelegate::sizeHint(const QStyleOptionViewItem& option,
 {
     switch (index.column()) {
         case RomModel::Status:
-            return QSize((m_star.width() + 2) * MAX_STATUS,m_star.height() + 2);
+            return QSize((16 + 2) * MAX_STATUS, 16 + 2);
             break;
         default:
             return QItemDelegate::sizeHint(option, index);
             break;
-    }
-}
-
-void RomDelegate::drawStars(QPainter* painter, const QRect& r, int n) const
-{
-    for (int i = 0; i < n; i++) {
-        QPoint p = r.topLeft();
-        p += QPoint(i * (m_star.width() + 2), 1);
-        painter->drawPixmap(p, m_star);
     }
 }
 

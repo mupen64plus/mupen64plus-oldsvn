@@ -37,5 +37,9 @@ const QStringList RomExtensions = QStringList() << "*.rom"
 QStringList romDirectories();
 QIcon icon(QString iconName);
 QPixmap pixmap(QString name, QString subdirectory = QString());
+void drawStars(QPainter* painter,
+               const QRect& rect,
+               int n,
+               int m);
 
 #endif // MUPEN64_KDE4_GLOBALS_H

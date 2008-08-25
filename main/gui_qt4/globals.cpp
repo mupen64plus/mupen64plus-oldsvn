@@ -21,6 +21,7 @@
 #include <QIcon>
 #include <QString>
 #include <QFile>
+#include <QPainter>
 
 #include "globals.h"
 
@@ -67,4 +68,26 @@ QPixmap pixmap(QString name, QString subdirectory)
     }
     QString filename = core::get_iconpath(qPrintable(s));
     return QPixmap(filename);
+}
+
+void drawStars(QPainter* painter,
+               const QRect& r,
+               int n,
+               int max)
+{
+    static QPixmap star = pixmap("star.png", "16x16");
+    painter->save();
+    painter->setCompositionMode(QPainter::CompositionMode_Xor);
+    painter->setOpacity(0.2);
+    for (int i = 0; i < max; i++) {
+        QPoint p = r.topLeft();
+        p += QPoint(i * (star.width() + 2), 1);
+        painter->drawPixmap(p, star);
+    }
+    painter->restore();
+    for (int i = 0; i < n; i++) {
+        QPoint p = r.topLeft();
+        p += QPoint(i * (star.width() + 2), 1);
+        painter->drawPixmap(p, star);
+    }
 }

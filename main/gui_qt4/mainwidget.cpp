@@ -36,6 +36,8 @@
 #include "mainwidget.h"
 #include "rommodel.h"
 #include "romdelegate.h"
+#include "globals.h"
+
 #include "ui_rominfodialog.h"
 
 MainWidget::MainWidget(QWidget* parent)
@@ -192,12 +194,14 @@ void MainWidget::treeViewContextMenuRequested(const QPoint& pos)
 
     QMenu m;
     QAction* propertiesAction = m.addAction(tr("Properties..."));
+    propertiesAction->setIcon(icon("mupen64cart.png"));
     QAction* a = m.exec(treeView->mapToGlobal(pos));
     if (a == propertiesAction) {
         int row = index.row();
         QDialog* d = new QDialog(this);
         Ui_RomInfoDialog ui;
         ui.setupUi(d);
+        ui.statusLabel->setMax(5);
         ui.flagLabel->setPixmap(index.sibling(row, RomModel::Country).data(Qt::DecorationRole).value<QPixmap>());
         ui.goodNameLabel->setText(index.sibling(row, RomModel::GoodName).data().toString());
         ui.statusLabel->setText(index.sibling(row, RomModel::Status).data().toString());

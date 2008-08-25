@@ -18,23 +18,26 @@
 *
 */
 
-#ifndef MUPEN64_QT4_GUI_ROM_DELEGATE_H
-#define MUPEN64_QT4_GUI_ROM_DELEGATE_H
+#ifndef MUPEN64_STAR_LABEL_H
+#define MUPEN64_STAR_LABEL_H
 
-#include <QItemDelegate>
-#include <QPixmap>
+#include <QLabel>
 
-class RomDelegate : public QItemDelegate
+class StarLabel : public QLabel
 {
     Q_OBJECT
+    Q_PROPERTY(int max READ max WRITE setMax)
     public:
-        RomDelegate(QObject* parent = 0);
+        StarLabel(QWidget* parent = 0);
 
-        virtual void paint(QPainter* painter,
-                           const QStyleOptionViewItem& option,
-                           const QModelIndex& index) const;
-        virtual QSize sizeHint(const QStyleOptionViewItem& option,
-                               const QModelIndex& index) const;
+        int max() const;
+        void setMax(int max);
+
+    protected:
+        void paintEvent(QPaintEvent* event);
+
+    private:
+        int m_max;
 };
 
-#endif // MUPEN64_QT4_GUI_ROM_DELEGATE_H
+#endif // MUPEN64_STAR_LABEL_H
