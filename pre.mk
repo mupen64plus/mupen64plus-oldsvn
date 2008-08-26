@@ -99,6 +99,10 @@ GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
 # set Qt flags and libraries
 ifeq ($(GUI), QT4)
    ifneq ($(USES_QT4),)
+    QMAKE       = ${shell which qmake 2>/dev/null}
+    ifeq ($(QMAKE),)
+      $(error qmake from Qt not found! Make sure the Qt binaries are in your PATH)
+    endif
     MOC         = $(shell which moc 2>/dev/null)
     ifeq ($(MOC),)
       $(error moc from Qt not found! Make sure the Qt binaries are in your PATH)

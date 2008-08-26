@@ -201,35 +201,6 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/rombrowser.o \
 	main/gui_gtk/romproperties.o
 
-OBJ_QT_GUI = \
-	main/gui_qt4/main.o \
-	main/gui_qt4/mainwidget.o \
-	main/gui_qt4/mainwindow.o \
-	main/gui_qt4/romdirectorieslistwidget.o \
-	main/gui_qt4/rommodel.o \
-	main/gui_qt4/settingsdialog.o \
-	main/gui_qt4/globals.o \
-	main/gui_qt4/romdelegate.o \
-    main/gui_qt4/starlabel.o \
-    main/gui_qt4/rominfodialog.o
-
-OBJ_QT_MOC = \
-	main/gui_qt4/mainwidget.moc \
-	main/gui_qt4/mainwindow.moc \
-	main/gui_qt4/romdirectorieslistwidget.moc \
-	main/gui_qt4/settingsdialog.moc \
-	main/gui_qt4/rommodel.moc \
-	main/gui_qt4/romdelegate.moc \
-    main/gui_qt4/starlabel.moc \
-    main/gui_qt4/rominfodialog.moc
-
-OBJ_QT_HEADERS = \
-	main/gui_qt4/ui_romdirectorieslistwidget.h \
-	main/gui_qt4/ui_settingsdialog.h \
-	main/gui_qt4/ui_mainwindow.h \
-    main/gui_qt4/ui_mainwidget.h \
-    main/gui_qt4/ui_rominfodialog.h
-
 OBJ_DBG = \
 	debugger/debugger.o \
 	debugger/decoder.o \
@@ -255,6 +226,8 @@ OBJ_GTK_DBG_GUI = \
 	main/gui_gtk/debugger/regTLB.o \
 	main/gui_gtk/debugger/ui_clist_edit.o \
 	main/gui_gtk/debugger/ui_disasm_list.o
+
+OBJ_QT4_GUI = main/gui_qt4/libgui_qt4.a
 
 PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
@@ -283,7 +256,7 @@ ifeq ($(LIRC), 1)
   LDFLAGS += -llirc_client
 endif
 ifeq ($(GUI), QT4)
-  OBJECTS += $(OBJ_QT_GUI)
+  OBJECTS += $(OBJ_QT4_GUI)
   LIBS += $(QT_LIBS) $(GTK_LIBS)
 else
   ifneq ($(GUI), NONE)
@@ -354,7 +327,7 @@ clean:
 	$(RM) -f mupen64plus
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
-	$(RM) -f main/gui_qt4/settings.cpp main/gui_qt4/settings.h main/gui_qt4/*.moc main/gui_qt4/ui_*.h main/gui_qt4/*.o
+	$(RM) -f main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
 
 rebuild: clean all
 
@@ -369,6 +342,12 @@ version.h: .svn/entries
 
 .c.o:
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
+
+main/gui_qt4/Makefile:
+	${QMAKE} main/gui_qt4/gui_qt4.pro -o main/gui_qt4/Makefile
+
+main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
+	${MAKE} -C main/gui_qt4
 
 plugins/blight_input.so: FORCE
 	$(MAKE) -C blight_input all
@@ -405,15 +384,6 @@ plugins/mupen64_hle_rsp_azimer.so: FORCE
 plugins/mupen64_input.so: FORCE
 	$(MAKE) -C mupen64_input all
 	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
-
-# QT4 build rules
-main/gui_qt4/ui_%.h: main/gui_qt4/%.ui
-	$(UIC) $< -o $@
-
-main/gui_qt4/%.moc: main/gui_qt4/%.h
-	$(MOC) -i $< -o $@
-
-$(OBJ_QT_GUI): $(OBJ_QT_MOC) $(OBJ_QT_HEADERS)
 
 # This is used to force the plugin builds
 FORCE:

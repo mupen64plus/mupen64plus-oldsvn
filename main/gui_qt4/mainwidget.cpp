@@ -32,6 +32,7 @@
 #include <QMenu>
 #include <QActionGroup>
 #include <QDialog>
+#include <QPushButton>
 
 #include "mainwidget.h"
 #include "rommodel.h"
@@ -274,5 +275,3 @@ void MainWidget::load(const QModelIndex& index)
         emit romDoubleClicked(filename, archivefile);
     }
 }
-
-#include "mainwidget.moc"

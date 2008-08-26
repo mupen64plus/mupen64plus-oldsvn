@@ -36,5 +36,3 @@ void RomInfoDialog::accept()
     }
     QDialog::accept();
 }
-
-#include "rominfodialog.moc"

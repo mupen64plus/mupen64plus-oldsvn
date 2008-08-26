@@ -302,5 +302,3 @@ void SettingsDialog::pageChanged(int page)
     imageLabel->setPixmap(i->icon().pixmap(32, 32));
     textLabel->setText(QString("<b>%1</b>").arg(i->text()));
 }
-
-#include "settingsdialog.moc"

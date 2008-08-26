@@ -363,5 +363,3 @@ QString RomModel::countryName(QChar c) const
     }
     return m_countryInfo[c].first;
 }
-
-#include "rommodel.moc"

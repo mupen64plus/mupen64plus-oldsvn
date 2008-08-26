@@ -86,6 +86,7 @@ MainWindow::MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event);
     core::config_put_number("MainWindowWidth", width());
     core::config_put_number("MainWindowHeight", height());
     core::config_put_number("MainWindowXPosition", x());
@@ -365,5 +366,3 @@ void MainWindow::setupActions()
         core::config_get_bool("StatusBarVisible", TRUE)
     );
 }
-
-#include "mainwindow.moc"

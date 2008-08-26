@@ -62,5 +62,3 @@ QSize RomDelegate::sizeHint(const QStyleOptionViewItem& option,
             break;
     }
 }
-
-#include "romdelegate.moc"

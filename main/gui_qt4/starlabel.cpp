@@ -52,5 +52,3 @@ void StarLabel::paintEvent(QPaintEvent* event)
         QLabel::paintEvent(event);
     }
 }
-
-#include "starlabel.moc"

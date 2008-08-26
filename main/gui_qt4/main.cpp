@@ -95,8 +95,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
 
     va_list ap;
     char buffer[2049];
-    pthread_t self = pthread_self();
-    gint response = 0;
+    int response = 0;
 
     va_start(ap, format);
     vsnprintf(buffer, 2048, format, ap);
@@ -114,8 +113,10 @@ int gui_message(unsigned char messagetype, const char *format, ...)
     } else if (messagetype == 2) {
         //0 - indicates user selected no
         //1 - indicates user selected yes
-        return mainWindow->confirmMessage(buffer);
+        response = mainWindow->confirmMessage(buffer);
     }
+
+    return response;
 }
 
 void updaterombrowser(unsigned int roms, unsigned short clear)
