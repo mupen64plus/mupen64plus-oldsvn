@@ -31,6 +31,7 @@ typedef struct
     GtkWidget *volumedefaultSlider, *volumedefaultSpin;
     GtkWidget *volumedeltaSpin;
     GtkWidget *swapchannelsCheck;
+    GtkWidget *okButton;
 
     GtkWidget *dialog;
 } SConfigureDialog;

@@ -33,37 +33,24 @@
 #include <stdio.h>
 #include <string.h>
 
-/*********************************************************************************************************
- * globals
- */
 SRomPropertiesDialog g_RomPropDialog;
 
-/*********************************************************************************************************
+/********************************************************************************************************
  * callbacks
  */
+
+/* Apply / Ok Button. */
 static void callback_apply_changes(GtkWidget *widget, gpointer data)
 {
-    gtk_widget_hide(g_RomPropDialog.dialog);
-
+    /* Update rombrowser. */
     strncpy(g_RomPropDialog.entry->usercomments, gtk_entry_get_text(GTK_ENTRY(g_RomPropDialog.commentsEntry)),255);
 
-    // update rombrowser
     g_romcache.rcstask = RCS_WRITE_CACHE;
     gtk_list_store_set (GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(g_MainWindow.romDisplay))),&g_RomPropDialog.iter,3,g_RomPropDialog.entry->usercomments,-1);
-}
 
-static void callback_cancel_clicked(GtkWidget *widget, gpointer data)
-{
-    gtk_widget_hide(g_RomPropDialog.dialog);
-}
-
-// hide on delete
-static gint delete_question_event(GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-    gtk_widget_hide(widget);
-    gtk_grab_remove(g_RomPropDialog.dialog);
-
-    return TRUE;
+    /* Hide dialog. */
+    if(data)
+        { gtk_widget_hide(g_RomPropDialog.dialog); }
 }
 
 /*********************************************************************************************************
@@ -86,6 +73,7 @@ void show_romPropDialog()
     int counter;
     GdkPixbuf *flag;
 
+    /* Load info. from entry. */
     filename = filefrompath(g_RomPropDialog.entry->filename); 
     countrycodeflag(g_RomPropDialog.entry->countrycode, &flag);
     countrycodestring(g_RomPropDialog.entry->countrycode, country);
@@ -101,7 +89,7 @@ void show_romPropDialog()
     cicstring(g_RomPropDialog.entry->cic, cicchip);
     rumblestring(g_RomPropDialog.entry->inientry->rumble, rumble);
 
-    // fill dialog
+    /* Fill dialog. */
     gtk_entry_set_text(GTK_ENTRY(g_RomPropDialog.filenameEntry), filename);
     free(filename);
     gtk_entry_set_text(GTK_ENTRY(g_RomPropDialog.goodnameEntry), g_RomPropDialog.entry->inientry->goodname);
@@ -126,10 +114,10 @@ void show_romPropDialog()
     gtk_entry_set_text(GTK_ENTRY(g_RomPropDialog.imagetypeEntry), imagetype);
     gtk_entry_set_text(GTK_ENTRY(g_RomPropDialog.cicchipEntry), cicchip);
     gtk_entry_set_text(GTK_ENTRY(g_RomPropDialog.rumbleEntry), rumble);
-
     gtk_entry_set_text(GTK_ENTRY(g_RomPropDialog.commentsEntry), g_RomPropDialog.entry->usercomments);
 
-    // show dialog
+    /* Show dialog. */
+    gtk_window_set_focus(GTK_WINDOW(g_RomPropDialog.dialog), g_RomPropDialog.okButton);
     gtk_widget_show_all(g_RomPropDialog.dialog);
 }
 
@@ -147,9 +135,10 @@ int create_romPropDialog()
     char buffer[32];
 
     g_RomPropDialog.dialog = gtk_dialog_new();
+    gtk_window_set_transient_for(GTK_WINDOW(g_RomPropDialog.dialog), GTK_WINDOW(g_MainWindow.window));
     gtk_container_set_border_width( GTK_CONTAINER(g_RomPropDialog.dialog), 10 );
     gtk_window_set_title(GTK_WINDOW(g_RomPropDialog.dialog), tr("Rom Properties"));
-    gtk_signal_connect(GTK_OBJECT(g_RomPropDialog.dialog), "delete_event",                GTK_SIGNAL_FUNC(delete_question_event), (gpointer)NULL);
+    gtk_signal_connect(GTK_OBJECT(g_RomPropDialog.dialog), "delete_event",                GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), (gpointer)NULL);
     gtk_widget_set_size_request( g_RomPropDialog.dialog, 500, -1);
 
     frame = gtk_frame_new(tr("Rom Info"));
@@ -337,18 +326,23 @@ int create_romPropDialog()
     gtk_table_attach_defaults( GTK_TABLE(table), g_RomPropDialog.commentsEntry, 0, 1, 0, 1 );
     gtk_container_add( GTK_CONTAINER(frame), table );
 
-    /* Ok/ Cancel buttons. */
+    /* Apply / Ok / Cancel buttons. */
     GtkWidget *button;
+
+    button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), button, TRUE, TRUE, 0);
+    gtk_signal_connect(GTK_OBJECT(button), "clicked",
+                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)FALSE);
 
     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(callback_cancel_clicked), (gpointer)NULL);
+    gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
+                       GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), GTK_OBJECT(g_RomPropDialog.dialog));
 
-    button = gtk_button_new_from_stock(GTK_STOCK_OK);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)NULL);
+    g_RomPropDialog.okButton = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), g_RomPropDialog.okButton, TRUE, TRUE, 0);
+    gtk_signal_connect(GTK_OBJECT(g_RomPropDialog.okButton), "clicked",
+                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)TRUE);
 
     return 0;
 }

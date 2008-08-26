@@ -1,6 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - configdialog.c                                          *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Tillin9                                            *
  *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,32 +22,36 @@
 
 /* configdialog.c - Handles the configuration dialog */
 
-#include "configdialog.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 
-#include "../main.h"
+#include <gtk/gtk.h>
+
+#include <SDL.h>
+
+#include "configdialog.h"
 #include "main_gtk.h"
 #include "rombrowser.h"
+
+#include "../main.h"
 #include "../romcache.h"
 #include "../config.h"
 #include "../translate.h"
 #include "../util.h"
-#include "../../opengl/osd.h"
-
 #include "../winlnxdefs.h"
 #include "../plugin.h"
 
-#include <gtk/gtk.h>
-#include <SDL.h>
+#include "../../opengl/osd.h"
 
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "../../r4300/r4300.h"
 
 /** globals **/
 SConfigDialog g_ConfigDialog;
 
-struct input_mapping {
+struct input_mapping
+{
     char *name;                     // human-readable name of emulation special function
     char *key_mapping;              // keyboard mapping of function
     char *joy_config_name;          // name of joystick mapping in config file
@@ -210,7 +215,9 @@ gboolean callback_deleteForEach (GtkTreeModel *model, GtkTreePath *path, GtkTree
         gtk_list_store_remove(GTK_LIST_STORE(model), iter);
     return 0;
 }
-gboolean Match = 0;
+
+gboolean Match = 0; //What?
+
 gboolean callback_checkForEach (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer userdata)
 {
     Match = 0;
@@ -318,169 +325,162 @@ static void callback_romDirectoryRemoveAll( GtkWidget *widget, gpointer data )
     }
 }
 
-// OK/Cancel Button
-static void callback_okClicked( GtkWidget *widget, gpointer data )
+/* Apply / Ok Button. */
+static void callback_apply_changes(GtkWidget *widget, gpointer data)
 {
+    static unsigned char reloadgui = FALSE;
+    static unsigned char rcsrescan = FALSE;
     const char *filename, *name;
-    int i;
+    int guivalue, currentvalue, i;
 
-    // save configuration
-    // for plugins, don't automatically save plugin to config if user specified it at the commandline
-    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.gfxCombo) );
-    if( !g_GfxPlugin && name )
-    {
-        filename = plugin_filename_by_name( name );
-        if( filename ) config_put_string( "Gfx Plugin", filename );
-    }
-    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.audioCombo) );
-    if( !g_AudioPlugin && name )
-    {
-        filename = plugin_filename_by_name( name );
-        if( filename ) config_put_string( "Audio Plugin", filename );
-    }
-    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.inputCombo) );
-    if( !g_InputPlugin && name )
-    {
-        filename = plugin_filename_by_name( name );
-        if( filename ) config_put_string( "Input Plugin", filename );
-    }
-    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.RSPCombo) );
-    if( !g_RspPlugin && name )
-    {
-        filename = plugin_filename_by_name( name );
-        if( filename ) config_put_string( "RSP Plugin", filename );
-    }
+    /* General Tab */ 
 
-    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton) );
-    config_put_bool( "RomDirsScanRecursive", i );
+    /* CPU Core */
+    if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)))
+        config_put_number("Core", CORE_INTERPRETER); 
+#ifndef NO_ASM
+    else if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreDynaRecCheckButton)))
+        config_put_number("Core", CORE_DYNAREC);
+#endif
+    else
+        config_put_number("Core", CORE_PURE_INTERPRETER);
 
-    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton) );
-    config_put_bool( "RomBrowserShowFullPaths", i );
+    /* Compatibility */
+    guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton));
+    config_put_bool( "NoCompiledJump", guivalue);
 
-    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton) );
-    config_put_bool( "NoCompiledJump", i );
+    guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion));
+    config_put_bool("NoMemoryExpansion", guivalue);
 
-    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion) );
-    config_put_bool( "NoMemoryExpansion", i );
+    /* Miscellaneous */
+    guivalue = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo));
+    currentvalue = config_get_number("ToolbarSize", -1);
 
-    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.OsdEnabled) );
-    g_OsdEnabled = i;
-    config_put_bool( "OsdEnabled", i );
+    switch(guivalue)
+        {
+        case 2:
+            if(currentvalue!=22)
+                {
+                config_put_number("ToolbarSize", 22);
+                reloadgui = TRUE;
+                }
+            break;
+        case 0:
+            if(currentvalue!=16)
+                {
+                config_put_number("ToolbarSize", 16);
+                reloadgui = TRUE;
+                }
+            break;
+        default:
+            if(currentvalue!=22)
+                {
+                config_put_number("ToolbarSize", 22);
+                reloadgui = TRUE;
+                }
+        }
 
-    i = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen) );
-    g_Fullscreen = i;
-    config_put_bool( "GuiStartFullscreen", i );
+    guivalue = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo));
+    currentvalue = config_get_number("ToolbarStyle", -1);
+
+    if(currentvalue==-1||currentvalue!=guivalue)
+        {
+        reloadgui = TRUE;
+        switch(guivalue)
+            {
+            case 1:
+                config_put_number("ToolbarStyle", 1);
+                break;
+            case 2:
+                config_put_number("ToolbarStyle", 2);
+                break;
+            default:
+                config_put_number("ToolbarStyle", 0);
+            }
+        }
 
     savestates_set_autoinc_slot(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton)));
     config_put_bool("AutoIncSaveSlot", savestates_get_autoinc_slot());
 
-    // if --noask was specified at the commandline, don't modify config
+    /* If --noask was specified at the commandline, don't modify config. */
     if(!g_NoaskParam)
-    {
-        g_Noask = !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton) );
-                config_put_bool( "No Ask", g_Noask );
-    }
+        {
+        g_Noask = !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton));
+        config_put_bool("NoAsk",g_Noask);
+        }
 
-    i = 0;
+    g_OsdEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.OsdEnabled));
+    config_put_bool("OsdEnabled", g_OsdEnabled);
+
+    g_Fullscreen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen));
+    config_put_bool("GuiStartFullscreen", g_Fullscreen);
+
+    /* Plugins Tab */
+
+    /* Don't automatically save plugin to config if user specified it at the commandline. */
+    name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo));
+    if(!g_GfxPlugin&&name)
+        {
+        filename = plugin_filename_by_name(name);
+        if(filename)
+            config_put_string("Gfx Plugin", filename);
+        }
+    name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
+    if(!g_AudioPlugin&&name)
+        {
+        filename = plugin_filename_by_name(name);
+        if(filename)
+            config_put_string("Audio Plugin", filename);
+        }
+    name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
+    if(!g_InputPlugin&&name)
+        {
+        filename = plugin_filename_by_name(name);
+        if(filename)
+            config_put_string("Input Plugin", filename);
+        }
+    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.RSPCombo));
+    if(!g_RspPlugin&&name)
+        {
+        filename = plugin_filename_by_name(name);
+        if(filename) config_put_string("RSP Plugin", filename);
+        }
+
+    /* Rom Browser Tab */
 
     GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW ( g_ConfigDialog.romDirectoryList ));
-    GtkTreeIter iter; //= (GtkTreeIter *)malloc(sizeof(GtkTreeIter));
+    GtkTreeIter iter;
 
-    // Get the first item
+    /* Get the first item. */
     gboolean keepGoing = gtk_tree_model_get_iter_first(model, &iter);
 
-    // Iterate through the directory list and add each to the configuration
-    while( keepGoing )
-    {
+    /* Iterate through the directory list and add each to the configuration. */
+    while(keepGoing)
+        {
         // Get the text
         gchar *text = NULL;
         gtk_tree_model_get(model, &iter, 0, &text, -1);
 
         // Add the directory to the configuration
         if( text != NULL )
-        {
+            {
             char buf[30];
             sprintf( buf, "RomDirectory[%d]", i++ );
             config_put_string( buf, text );
-        }
+            }
 
         // Get the next item
         keepGoing = gtk_tree_model_iter_next(model, &iter);
-    }
-    config_put_number( "NumRomDirs", i );
+        }
+
+    config_put_number("NumRomDirs", i);
     g_romcache.rcstask = RCS_RESCAN;
 
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton) ) )
-        config_put_number( "Core", CORE_INTERPRETER );
-    else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreDynaRecCheckButton) ) )
-        config_put_number( "Core", CORE_DYNAREC );
-    else
-        config_put_number( "Core", CORE_PURE_INTERPRETER );
+    guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton));
+    config_put_bool("RomDirsScanRecursive", guivalue);
 
-    // hide dialog
-    gtk_widget_hide( g_ConfigDialog.dialog );
-
-    switch(gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo)))
-    {
-        case 2:
-            if(config_get_number("ToolbarSize",0)!=32)
-            {
-                config_put_number("ToolbarSize",32);
-                gtk_toolbar_set_icon_size( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ICON_SIZE_SMALL_TOOLBAR);
-                reload();
-            }
-        break;
-        case 0:
-            if(config_get_number("ToolbarSize",0)!=16)
-            {
-                config_put_number("ToolbarSize",16);
-                gtk_toolbar_set_icon_size( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ICON_SIZE_SMALL_TOOLBAR);
-                reload();
-            }
-        break;
-        default:
-            if(config_get_number("ToolbarSize",0)!=22)
-            {
-                config_put_number("ToolbarSize",22);
-                gtk_toolbar_set_icon_size( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_ICON_SIZE_SMALL_TOOLBAR);
-                reload();
-            }
-    }
-
-    switch(gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo)))
-    {
-        case 0:
-            if(config_get_number( "ToolbarStyle", 0 ) != 0)
-            {
-                config_put_number( "ToolbarStyle", 0 );
-                gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
-                reload();
-            }
-        break;
-        case 1:
-            if(config_get_number( "ToolbarStyle", 0 ) != 1)
-            {
-                config_put_number( "ToolbarStyle", 1 );
-                gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_TEXT );
-                reload();
-            }
-        break;
-        case 2:
-            if(config_get_number( "ToolbarStyle", 0 ) != 2)
-            {
-                config_put_number( "ToolbarStyle", 2 );
-                gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_BOTH );
-                reload();
-            }
-        break;
-        default:
-            if(config_get_number( "ToolbarStyle", 0 ) != 0)
-            {
-                config_put_number( "ToolbarStyle", 0 );
-                gtk_toolbar_set_style( GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS );
-                reload();
-            }
-    }
+    guivalue = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton));
+    config_put_bool("RomBrowserShowFullPaths", guivalue);
 
     struct input_mapping *mapping;
     gchar *text;
@@ -497,14 +497,17 @@ static void callback_okClicked( GtkWidget *widget, gpointer data )
         }
     }
 
-    // write configuration
-    config_write();
-}
+    /* If ToolbarStye or ToolbarSize was changed, reload GUI on Apply / Ok. */
+    if(reloadgui)
+        {
+        reload(); 
+        gtk_widget_show_all(g_ConfigDialog.dialog);
+        reloadgui = FALSE;
+        }
 
-static void callback_cancelClicked( GtkWidget *widget, gpointer data )
-{
-    // hide dialog
-    gtk_widget_hide( g_ConfigDialog.dialog );
+    /* Hide dialog. */
+    if(data)
+        { gtk_widget_hide(g_ConfigDialog.dialog); }
 }
 
 // Initalize configuration dialog
@@ -639,22 +642,27 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
             }
         }
     }
-    switch (config_get_number( "Core", CORE_DYNAREC ))
-    {
+
+#ifdef NO_ASM
+    switch(config_get_number("Core", CORE_INTERPRETER))
+#else
+    switch(config_get_number("Core", CORE_DYNAREC))
+#endif
+        {
         case CORE_INTERPRETER:
-            gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton), 1 );
-        break;
-    
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton), 1);
+            break;
+#ifndef NO_ASM
         case CORE_DYNAREC:
-            gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreDynaRecCheckButton), 1 );
-        break;
-    
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.coreDynaRecCheckButton), 1);
+            break;
+#endif
         case CORE_PURE_INTERPRETER:
-            gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.corePureInterpCheckButton), 1 );
-        break;
-    }
-    
-    switch(config_get_number( "ToolbarStyle", 0 ))
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.corePureInterpCheckButton), 1);
+            break;
+        }
+
+    switch(config_get_number("ToolbarStyle", 0))
     {
         case 0:
             gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), 0);
@@ -670,7 +678,7 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
         break;
     }
 
-    switch(config_get_number( "ToolbarSize", 22))
+    switch(config_get_number("ToolbarSize", 22))
     {
         case 32:
             gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), 2);
@@ -708,15 +716,6 @@ static void callback_dialogShow( GtkWidget *widget, gpointer data )
                                      &i);
         }
     }
-}
-
-/** hide on delete **/
-static gint delete_question_event(GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-    gtk_widget_hide( widget );
-
-    // Can not be deleted.
-    return TRUE;
 }
 
 /** create treeview store **/
@@ -938,106 +937,110 @@ int create_configDialog( void )
     // set main window as parent of config dialog window
     gtk_window_set_transient_for(GTK_WINDOW(g_ConfigDialog.dialog), GTK_WINDOW(g_MainWindow.window));
     gtk_signal_connect( GTK_OBJECT(g_ConfigDialog.dialog), "show", GTK_SIGNAL_FUNC(callback_dialogShow), (gpointer)NULL );
-    gtk_signal_connect(GTK_OBJECT(g_ConfigDialog.dialog), "delete_event", GTK_SIGNAL_FUNC(delete_question_event), (gpointer)NULL );
+    gtk_signal_connect(GTK_OBJECT(g_ConfigDialog.dialog), "delete_event", GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), (gpointer)NULL );
 
     // Create Notebook
     g_ConfigDialog.notebook = gtk_notebook_new();
     gtk_notebook_set_tab_pos( GTK_NOTEBOOK(g_ConfigDialog.notebook), GTK_POS_TOP );
     gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->vbox), g_ConfigDialog.notebook, TRUE, TRUE, 0 );
 
-    // Create OK/Cancel button
+    /* Apply / Ok / Cancel buttons. */
+    button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0);
+    gtk_signal_connect(GTK_OBJECT(button), "clicked",
+                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)FALSE);
+
     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_cancelClicked), (gpointer)NULL );
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0);
+    gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
+                       GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), GTK_OBJECT(g_ConfigDialog.dialog));
 
-    button = gtk_button_new_from_stock(GTK_STOCK_OK);
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0 );
-    gtk_signal_connect( GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_okClicked), (gpointer)NULL );
+    g_ConfigDialog.okButton = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), g_ConfigDialog.okButton, TRUE, TRUE, 0);
+    gtk_signal_connect(GTK_OBJECT(g_ConfigDialog.okButton), "clicked",
+                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)TRUE);
 
-    // Create Mupen64 configuration page
-    {
-        label = gtk_label_new( tr("General") );
-        g_ConfigDialog.configMupen = gtk_vbox_new( FALSE, 6 );
-        gtk_container_set_border_width( GTK_CONTAINER(g_ConfigDialog.configMupen), 10 );
-        gtk_notebook_append_page( GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configMupen, label );
-    
-        // Create a frame for CPU core options
-        {
-            frame = gtk_frame_new( tr("Emulation Settings") );
-            gtk_box_pack_start( GTK_BOX(g_ConfigDialog.configMupen), frame, FALSE, FALSE, 0 );
-            vbox = gtk_vbox_new( TRUE, 6 );
-            gtk_container_set_border_width( GTK_CONTAINER(vbox), 10 );
-            gtk_container_add( GTK_CONTAINER(frame), vbox );
+    /* Create main settings configuration page. */
 
-            g_ConfigDialog.coreInterpreterCheckButton = gtk_radio_button_new_with_label( NULL, tr("Interpreter") );
-            g_ConfigDialog.coreDynaRecCheckButton = gtk_radio_button_new_with_label( gtk_radio_button_group( GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton) ), tr("Dynamic Recompiler") );
-            g_ConfigDialog.corePureInterpCheckButton = gtk_radio_button_new_with_label( gtk_radio_button_group( GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton) ), tr("Pure Interpreter") );
-            gtk_box_pack_start( GTK_BOX(vbox), g_ConfigDialog.coreInterpreterCheckButton, FALSE, FALSE, 0 );
-            gtk_box_pack_start( GTK_BOX(vbox), g_ConfigDialog.coreDynaRecCheckButton, FALSE, FALSE, 0 );
-            gtk_box_pack_start( GTK_BOX(vbox), g_ConfigDialog.corePureInterpCheckButton, FALSE, FALSE, 0 );
+    label = gtk_label_new(tr("Main Settings"));
+    g_ConfigDialog.configMupen = gtk_vbox_new(FALSE, 6);
+    gtk_container_set_border_width(GTK_CONTAINER(g_ConfigDialog.configMupen), 10);
+    gtk_notebook_append_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configMupen, label);
 
-            gtk_box_pack_start( GTK_BOX(vbox), gtk_hseparator_new(), FALSE, FALSE, 0 );
+    /* Create frame and CPU core options. */
+    frame = gtk_frame_new( tr("CPU Core") );
+    gtk_box_pack_start(GTK_BOX(g_ConfigDialog.configMupen), frame, FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(TRUE, 6);
+    gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
+    gtk_container_add(GTK_CONTAINER(frame), vbox);
 
-            g_ConfigDialog.noCompiledJumpCheckButton = gtk_check_button_new_with_label("Disable compiled jump (For compatibility)");
-            g_ConfigDialog.noMemoryExpansion = gtk_check_button_new_with_label("Disable Memory Expansion");
-            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noCompiledJumpCheckButton, FALSE, FALSE, 0);
-            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noMemoryExpansion, FALSE, FALSE, 0);
-        }
+    g_ConfigDialog.coreInterpreterCheckButton = gtk_radio_button_new_with_mnemonic(NULL, tr("_Interpreter"));
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.coreInterpreterCheckButton, FALSE, FALSE, 0);
+#ifndef NO_ASM
+    g_ConfigDialog.coreDynaRecCheckButton = gtk_radio_button_new_with_mnemonic(gtk_radio_button_group( GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)), tr("_Dynamic recompiler"));
+     gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.coreDynaRecCheckButton, FALSE, FALSE, 0);
+#endif
+    g_ConfigDialog.corePureInterpCheckButton = gtk_radio_button_new_with_mnemonic( gtk_radio_button_group( GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)), tr("_Pure interpreter"));
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.corePureInterpCheckButton, FALSE, FALSE, 0);
 
-        // Create a frame for misc GUI options
-        {
-            frame = gtk_frame_new( tr("Misc. GUI Settings") );
-            gtk_box_pack_start( GTK_BOX(g_ConfigDialog.configMupen), frame, FALSE, FALSE, 0 );
-            vbox = gtk_vbox_new( TRUE, 6 );
-            gtk_container_set_border_width( GTK_CONTAINER(vbox), 10 );
-            gtk_container_add( GTK_CONTAINER(frame), vbox );
+    /* Create frame and compatibility options. */
+    frame = gtk_frame_new(tr("Compatibility"));
+    gtk_box_pack_start( GTK_BOX(g_ConfigDialog.configMupen), frame, FALSE, FALSE, 0 );
+    vbox = gtk_vbox_new( TRUE, 6 );
+    gtk_container_set_border_width( GTK_CONTAINER(vbox), 10 );
+    gtk_container_add( GTK_CONTAINER(frame), vbox );
 
-            hbox1 = gtk_hbox_new( TRUE, 2 );
-            
-            g_ConfigDialog.toolbarStyleCombo = gtk_combo_box_new_text();
-            gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Icons") );
-            gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Text") );
-            gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Icons & Text") );
-    
-            gtk_box_pack_start( GTK_BOX(hbox1), gtk_label_new(tr("Toolbar Style:")), 1, 1, 0 );
-            gtk_box_pack_start( GTK_BOX(hbox1), g_ConfigDialog.toolbarStyleCombo, 1, 1, 0 );
-            gtk_box_pack_start( GTK_BOX(vbox), hbox1, FALSE, FALSE, 0 );
+    g_ConfigDialog.noCompiledJumpCheckButton = gtk_check_button_new_with_mnemonic("Disable compiled _jump");
+    g_ConfigDialog.noMemoryExpansion = gtk_check_button_new_with_mnemonic("Disable memory _expansion");
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noCompiledJumpCheckButton, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noMemoryExpansion, FALSE, FALSE, 0);
 
-            hbox1 = gtk_hbox_new( TRUE, 2 );
-            
-            g_ConfigDialog.toolbarSizeCombo = gtk_combo_box_new_text();
-            gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Small") );
-            gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Medium") );
-            gtk_combo_box_append_text( GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Large") );
-    
-            gtk_box_pack_start( GTK_BOX(hbox1), gtk_label_new(tr("Toolbar Size:")), 1, 1, 0 );
-            gtk_box_pack_start( GTK_BOX(hbox1), g_ConfigDialog.toolbarSizeCombo, 1, 1, 0 );
-            gtk_box_pack_start( GTK_BOX(vbox), hbox1, FALSE, FALSE, 0 );
+    /* Create frame and miscellaneous options. */
+    frame = gtk_frame_new(tr("Miscellaneous"));
+    gtk_box_pack_start(GTK_BOX(g_ConfigDialog.configMupen), frame, FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(TRUE, 6);
+    gtk_container_set_border_width( GTK_CONTAINER(vbox), 10);
+    gtk_container_add(GTK_CONTAINER(frame), vbox);
 
-            g_ConfigDialog.autoincSaveSlotCheckButton = gtk_check_button_new_with_label(tr("Auto increment save slot"));
-            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.autoincSaveSlotCheckButton, FALSE, FALSE, 0);
+    hbox1 = gtk_hbox_new(TRUE, 2);
 
-            g_ConfigDialog.noaskCheckButton = gtk_check_button_new_with_label(tr("Ask before loading bad dump/hacked rom"));
-            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noaskCheckButton, FALSE, FALSE, 0);
+    g_ConfigDialog.toolbarStyleCombo = gtk_combo_box_new_text();
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Icons"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Text"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Icons & Text"));
 
-            g_ConfigDialog.OsdEnabled = gtk_check_button_new_with_label(tr("On Screen Display Enabled"));
-            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.OsdEnabled, FALSE, FALSE, 0);
+    label = gtk_label_new_with_mnemonic(tr("Toolbar st_yle:"));
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.toolbarStyleCombo);
+    gtk_box_pack_start(GTK_BOX(hbox1), label, 1, 1, 0);
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.toolbarStyleCombo, 1, 1, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 0);
 
-            g_ConfigDialog.alwaysFullscreen = gtk_check_button_new_with_label(tr("Always Start in Full Screen Mode"));
-            gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.alwaysFullscreen, FALSE, FALSE, 0);
-        }
-    
-        // Create some misc. core options
-        {
-        }
-    }
-    /** !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! **/
-    /** !! The following line will disable the dynamic recompiler radio option !! **/
-    /** !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! **/
-    //gtk_widget_set_sensitive( g_ConfigDialog.coreDynaRecCheckButton, FALSE );
-    // Yay, looks like this will not be needed in the near future.
+    hbox1 = gtk_hbox_new(TRUE, 2);
 
-    // Create plugin configuration page
+    g_ConfigDialog.toolbarSizeCombo = gtk_combo_box_new_text();
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Small"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Medium"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarSizeCombo), (char *)tr("Large"));
+
+    label = gtk_label_new_with_mnemonic(tr("Toolbar si_ze:"));
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.toolbarSizeCombo);
+    gtk_box_pack_start(GTK_BOX(hbox1), label, 1, 1, 0);
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.toolbarSizeCombo, 1, 1, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 0);
+
+    g_ConfigDialog.autoincSaveSlotCheckButton = gtk_check_button_new_with_mnemonic(tr("A_uto increment save slot"));
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.autoincSaveSlotCheckButton, FALSE, FALSE, 0);
+
+    g_ConfigDialog.noaskCheckButton = gtk_check_button_new_with_mnemonic(tr("Ask _before loading bad dump/ hacked rom"));
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noaskCheckButton, FALSE, FALSE, 0);
+
+    g_ConfigDialog.OsdEnabled = gtk_check_button_new_with_mnemonic(tr("On _screen display enabled"));
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.OsdEnabled, FALSE, FALSE, 0);
+
+    g_ConfigDialog.alwaysFullscreen = gtk_check_button_new_with_mnemonic(tr("Always start in _full screen mode"));
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.alwaysFullscreen, FALSE, FALSE, 0);
+
+    /* Create plugin configuration page. */
     {
         label = gtk_label_new( tr("Plugins") );
         g_ConfigDialog.configPlugins = gtk_vbox_new( FALSE, 5 );
@@ -1046,7 +1049,7 @@ int create_configDialog( void )
     
         // GFX Plugin Area
         {
-            frame = gtk_frame_new( tr("Gfx Plugin") );
+            frame = gtk_frame_new( tr("Graphics Plugin") );
             gtk_box_pack_start( GTK_BOX(g_ConfigDialog.configPlugins), frame, FALSE, FALSE, 0 );
         
             vbox = gtk_vbox_new( TRUE, 5 );
@@ -1380,7 +1383,7 @@ int create_configDialog( void )
     }
 
     // Initalize the widgets.
-    callback_dialogShow( NULL, NULL );
+    callback_dialogShow(NULL, NULL);
 
     return 0;
 }

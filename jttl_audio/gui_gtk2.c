@@ -76,12 +76,6 @@ static void callback_apply_changes(GtkWidget *widget, void *data)
         { gtk_widget_hide(g_ConfDialog.dialog); }
 }
 
-/* Cancel button. */
-static void callback_cancel_clicked(GtkWidget *widget, void *data)
-{
-    gtk_widget_hide(g_ConfDialog.dialog);
-}
-
 /* Link default volume slider and spinbox. GNOME UI guidelines suggest such an arrangement
  * if the there are more than 20 possibly values for the slider.
  */ 
@@ -109,6 +103,7 @@ EXPORT void CALL DllConfig(HWND hParent)
 
     if(g_ConfDialog.dialog)
         {
+        gtk_window_set_focus(GTK_WINDOW(g_ConfDialog.dialog), g_ConfDialog.okButton);
         gtk_widget_show_all(g_ConfDialog.dialog);
         return;
         }
@@ -129,7 +124,7 @@ EXPORT void CALL DllConfig(HWND hParent)
     gtk_table_set_row_spacings(GTK_TABLE(table), 2);
     gtk_container_add(GTK_CONTAINER(GTK_DIALOG(g_ConfDialog.dialog)->vbox), table);
 
-    label = gtk_label_new("Volume Control:");
+    label = gtk_label_new_with_mnemonic("Volume c_ontrol:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.volumetypeCombo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfDialog.volumetypeCombo), "Internal SDL");
@@ -138,6 +133,7 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.volumetypeCombo, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.volumetypeCombo);
     gtk_widget_set_size_request(g_ConfDialog.volumetypeCombo, 120, -1);
     if (VolumeControlType < 1 || VolumeControlType > 2) 
         VolumeControlType = 2;
@@ -145,7 +141,7 @@ EXPORT void CALL DllConfig(HWND hParent)
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.volumetypeCombo, 1, 2, 0, 1, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Change Volume by:");
+    label = gtk_label_new_with_mnemonic("Cha_nge volume by:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.volumedeltaSpin = gtk_spin_button_new_with_range(0, 100, 1);
     gtk_spin_button_set_digits(GTK_SPIN_BUTTON(g_ConfDialog.volumedeltaSpin), 0);
@@ -155,10 +151,12 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.volumedeltaSpin, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.volumedeltaSpin);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.volumedeltaSpin);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.volumedeltaSpin, 3, 4, 0, 1, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Resampling:");
+    label = gtk_label_new_with_mnemonic("_Resampling:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.resampleCombo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfDialog.resampleCombo), "Unfiltered");
@@ -167,6 +165,8 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.resampleCombo, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.resampleCombo, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.resampleCombo);
     gtk_widget_set_size_request(g_ConfDialog.resampleCombo, 120, -1);
     if (Resample < 1 || Resample > 2) 
         Resample = 1;
@@ -174,7 +174,7 @@ EXPORT void CALL DllConfig(HWND hParent)
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.resampleCombo, 1, 2, 1, 2, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Default Volume:");
+    label = gtk_label_new_with_mnemonic("Default _volume:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3, GTK_FILL, GTK_EXPAND, 0, 0);
 
@@ -196,17 +196,18 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.volumedefaultSpin, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.volumedefaultSpin);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.volumedefaultSpin , 3, 4, 2, 3, GTK_FILL, GTK_EXPAND, 0, 10);
     gtk_signal_connect_object( GTK_OBJECT(g_ConfDialog.volumedefaultSpin ), "value-changed", GTK_SIGNAL_FUNC(callback_connect_volume), (gpointer)g_ConfDialog.volumedefaultSpin );
 
-    g_ConfDialog.swapchannelsCheck = gtk_check_button_new_with_label("Swap L/R Channels");
+    g_ConfDialog.swapchannelsCheck = gtk_check_button_new_with_mnemonic("S_wap L/R channels");
     gtk_widget_set_tooltip_text(g_ConfDialog.swapchannelsCheck, "Swaps left and right channels.");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfDialog.swapchannelsCheck), SwapChannels);
     GtkWidget *swapHBox = gtk_hbox_new(0, 0);
     gtk_box_pack_start(GTK_BOX(swapHBox), g_ConfDialog.swapchannelsCheck, FALSE, FALSE, 0);
     gtk_table_attach(GTK_TABLE(table), swapHBox, 1, 2, 3, 4, GTK_FILL, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Default Frequency:");
+    label = gtk_label_new_with_mnemonic("Default _frequency:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.defaultfrequencyEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.defaultfrequencyEntry), itoa(GameFreq));
@@ -215,10 +216,11 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.defaultfrequencyEntry, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.defaultfrequencyEntry);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.defaultfrequencyEntry, 3, 4, 3, 4, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Primary Buffer:");
+    label = gtk_label_new_with_mnemonic("_Primary buffer:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.primarybufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.primarybufferEntry), itoa(PrimaryBufferSize));
@@ -227,10 +229,11 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.primarybufferEntry, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.primarybufferEntry);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.primarybufferEntry, 1, 2, 4, 5, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Buffer Low Level:");
+    label = gtk_label_new_with_mnemonic("Buffer _low level:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.lowbufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.lowbufferEntry), itoa(LowBufferLoadLevel));
@@ -239,10 +242,11 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.lowbufferEntry, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.lowbufferEntry);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.lowbufferEntry, 3, 4, 4, 5, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Secondary Buffer:");
+    label = gtk_label_new_with_mnemonic("_Secondary buffer:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.secondarybufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.secondarybufferEntry), itoa(SecondaryBufferSize));
@@ -251,10 +255,11 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.secondarybufferEntry, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.secondarybufferEntry);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.secondarybufferEntry, 1, 2, 5, 6, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    label = gtk_label_new("Buffer High Level:");
+    label = gtk_label_new_with_mnemonic("Buffer _high level:");
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     g_ConfDialog.highbufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.highbufferEntry), itoa(HighBufferLoadLevel));
@@ -263,6 +268,7 @@ EXPORT void CALL DllConfig(HWND hParent)
     buffer[MAXTOOLTIP-1] = '\0';
     gtk_widget_set_tooltip_text(label, buffer);
     gtk_widget_set_tooltip_text(g_ConfDialog.highbufferEntry, buffer);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfDialog.highbufferEntry);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.highbufferEntry, 3, 4, 5, 6, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
@@ -276,14 +282,15 @@ EXPORT void CALL DllConfig(HWND hParent)
 
     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfDialog.dialog)->action_area), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(callback_cancel_clicked), (gpointer)NULL);
+    gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
+                       GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), GTK_OBJECT(g_ConfDialog.dialog));
 
-    button = gtk_button_new_from_stock(GTK_STOCK_OK);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfDialog.dialog)->action_area), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked",
+    g_ConfDialog.okButton = gtk_button_new_from_stock(GTK_STOCK_OK);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfDialog.dialog)->action_area), g_ConfDialog.okButton, TRUE, TRUE, 0);
+    gtk_signal_connect(GTK_OBJECT(g_ConfDialog.okButton), "clicked",
                        GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)TRUE);
 
+    gtk_window_set_focus(GTK_WINDOW(g_ConfDialog.dialog), g_ConfDialog.okButton);
     gtk_widget_show_all(g_ConfDialog.dialog);
 }
 

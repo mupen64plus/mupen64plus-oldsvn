@@ -535,14 +535,15 @@ static void cb_UpdateSelectedSlot(GtkMenuItem *item, GSList *slots)
 static void callback_configure( GtkWidget *widget, gpointer data )
 {
     if(g_EmulationThread)
-    {
+        {
         if(!gui_message(2, "Cannot configure while emulator is running!\nWould you like to stop the emulator?"))
             return;
 
         stopEmulation();
-    }
+        }
 
-    gtk_widget_show_all( g_ConfigDialog.dialog );
+    gtk_window_set_focus(GTK_WINDOW(g_ConfigDialog.dialog), g_ConfigDialog.okButton);
+    gtk_widget_show_all(g_ConfigDialog.dialog);
 }
 
 // configure gfx

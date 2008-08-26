@@ -32,7 +32,6 @@
 typedef struct
 {
     GtkWidget *dialog;
-    // entries
     GtkWidget *filenameEntry;
     GtkWidget *goodnameEntry;
     GtkWidget *flag;
@@ -51,6 +50,7 @@ typedef struct
     GtkWidget *cicchipEntry;
     GtkWidget *rumbleEntry;
     GtkWidget *commentsEntry;
+    GtkWidget *okButton;
     GtkTreeIter iter;
     cache_entry *entry;
 } SRomPropertiesDialog;

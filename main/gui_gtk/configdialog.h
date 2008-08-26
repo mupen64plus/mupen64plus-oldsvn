@@ -29,8 +29,6 @@
 
 typedef struct
 {
-    GtkWidget   *dialog;
-
     GtkWidget   *notebook;
     GtkWidget   *configMupen;
     GtkWidget   *configPlugins;
@@ -63,6 +61,9 @@ typedef struct
     GtkWidget   *romShowFullPathsCheckButton;
     GtkWidget   *noCompiledJumpCheckButton;
     GtkWidget   *noMemoryExpansion;
+
+    GtkWidget   *okButton;
+    GtkWidget   *dialog;
 } SConfigDialog;
 extern SConfigDialog g_ConfigDialog;
 
