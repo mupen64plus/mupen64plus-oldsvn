@@ -31,6 +31,8 @@
 #include "../main/winlnxdefs.h"
 #include "../main/version.h"
 
+#define MAXTOOLTIP 512
+
 extern Uint8 Resample;
 extern Uint32 PrimaryBufferSize;
 extern Uint32 SecondaryBufferSize;
@@ -52,10 +54,11 @@ static SConfigureDialog g_ConfDialog;
 /*********************************************************************************************************
  * callbacks
  */
+
+/* Apply / Ok Button. */
 static void callback_apply_changes(GtkWidget *widget, void *data)
 {
-    gtk_widget_hide(g_ConfDialog.dialog);
-
+    /* Update config. */
     GameFreq = atoi(gtk_entry_get_text(GTK_ENTRY(g_ConfDialog.defaultfrequencyEntry)));
     PrimaryBufferSize = atoi(gtk_entry_get_text(GTK_ENTRY(g_ConfDialog.primarybufferEntry)));
     SecondaryBufferSize = atoi(gtk_entry_get_text(GTK_ENTRY(g_ConfDialog.secondarybufferEntry)));
@@ -67,8 +70,13 @@ static void callback_apply_changes(GtkWidget *widget, void *data)
     VolumeControlType = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfDialog.volumetypeCombo)) + 1;
     SwapChannels = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfDialog.swapchannelsCheck));
     SaveConfig();
+
+    /* Hide dialog. */
+    if(data)
+        { gtk_widget_hide(g_ConfDialog.dialog); }
 }
 
+/* Cancel button. */
 static void callback_cancel_clicked(GtkWidget *widget, void *data)
 {
     gtk_widget_hide(g_ConfDialog.dialog);
@@ -107,13 +115,14 @@ EXPORT void CALL DllConfig(HWND hParent)
 
     GtkWidget *label;
     GtkWidget *table;
+    char buffer[MAXTOOLTIP];
 
     g_ConfDialog.dialog = gtk_dialog_new();
 
     gtk_signal_connect_object(GTK_OBJECT(g_ConfDialog.dialog), "delete-event",                       GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), GTK_OBJECT(g_ConfDialog.dialog));
     gtk_window_set_title(GTK_WINDOW(g_ConfDialog.dialog), "JttL's SDL Audio Configuration");
 
-    table = gtk_table_new( 6, 4, FALSE );
+    table = gtk_table_new(6, 4, FALSE);
     gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(g_ConfDialog.dialog)->action_area), 12);
     gtk_container_set_border_width( GTK_CONTAINER(table), 10);
     gtk_table_set_col_spacings(GTK_TABLE(table), 10);
@@ -125,7 +134,10 @@ EXPORT void CALL DllConfig(HWND hParent)
     g_ConfDialog.volumetypeCombo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfDialog.volumetypeCombo), "Internal SDL");
     gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfDialog.volumetypeCombo), "OSS mixer" );
-    gtk_widget_set_tooltip_text(g_ConfDialog.volumetypeCombo, "Internal SDL volume control only affects the volume of Mupen64Plus.  OSS mixer volume control directly controls the OSS mixer, adjusting the master volume for the system.");
+    strncpy(buffer, "Internal SDL volume control only affects the volume of Mupen64Plus.  OSS mixer volume control directly controls the OSS mixer, adjusting the master volume for the system.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.volumetypeCombo, buffer);
     gtk_widget_set_size_request(g_ConfDialog.volumetypeCombo, 120, -1);
     if (VolumeControlType < 1 || VolumeControlType > 2) 
         VolumeControlType = 2;
@@ -139,7 +151,10 @@ EXPORT void CALL DllConfig(HWND hParent)
     gtk_spin_button_set_digits(GTK_SPIN_BUTTON(g_ConfDialog.volumedeltaSpin), 0);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(g_ConfDialog.volumedeltaSpin), VolDelta);
     gtk_entry_set_width_chars(GTK_ENTRY(g_ConfDialog.volumedeltaSpin), 4);
-    gtk_widget_set_tooltip_text(g_ConfDialog.volumedeltaSpin, "Sets the percentage change each time the volume is increased or decreased.");
+    strncpy(buffer, "Sets the percentage change each time the volume is increased or decreased.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.volumedeltaSpin, buffer);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.volumedeltaSpin, 3, 4, 0, 1, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
@@ -148,7 +163,10 @@ EXPORT void CALL DllConfig(HWND hParent)
     g_ConfDialog.resampleCombo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfDialog.resampleCombo), "Unfiltered");
     gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfDialog.resampleCombo), "SINC");
-    gtk_widget_set_tooltip_text(g_ConfDialog.resampleCombo, "Resampling type. Unfiltered uses less CPU, but has lower  quality than SINC. For SINC resampling, libsamplerate must be installed.");
+    strncpy(buffer, "Resampling type. Unfiltered uses less CPU, but has lower  quality than SINC. For SINC resampling, libsamplerate must be installed.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.resampleCombo, buffer);
     gtk_widget_set_size_request(g_ConfDialog.resampleCombo, 120, -1);
     if (Resample < 1 || Resample > 2) 
         Resample = 1;
@@ -164,18 +182,25 @@ EXPORT void CALL DllConfig(HWND hParent)
     gtk_scale_set_digits(GTK_SCALE(g_ConfDialog.volumedefaultSlider), 0);
     gtk_scale_set_draw_value(GTK_SCALE(g_ConfDialog.volumedefaultSlider), FALSE);
     gtk_range_set_value(GTK_RANGE(g_ConfDialog.volumedefaultSlider), VolPercent);
-    gtk_widget_set_tooltip_text(g_ConfDialog.volumedefaultSlider, "Sets the default volume upon startup when using Internal SDL volume control.  If Internal SDL is not used, this value is unused and the default volume is the volume that the harware mixer is set to when Mupen64Plus loads.");
+    strncpy(buffer, "Sets the default volume upon startup when using Internal SDL volume control.  If Internal SDL is not used, this value is unused and the default volume is the volume that the harware mixer is set to when Mupen64Plus loads.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.volumedefaultSlider, buffer);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.volumedefaultSlider, 1, 3, 2, 3, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_signal_connect_object( GTK_OBJECT(g_ConfDialog.volumedefaultSlider), "change-value", GTK_SIGNAL_FUNC(callback_connect_volume), (gpointer)g_ConfDialog.volumedefaultSlider);
 
     g_ConfDialog.volumedefaultSpin = gtk_spin_button_new_with_range(0, 100, 1);
     gtk_spin_button_set_digits(GTK_SPIN_BUTTON(g_ConfDialog.volumedefaultSpin), 0);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(g_ConfDialog.volumedefaultSpin), VolPercent);
-    gtk_widget_set_tooltip_text(g_ConfDialog.volumedefaultSpin, "Sets the default volume upon startup when using Internal SDL volume control. If Internal SDL is not used, this value is unused and the default volume is the volume that the harware mixer is set to when Mupen64Plus loads.");
+    strncpy(buffer, "Sets the default volume upon startup when using Internal SDL volume control. If Internal SDL is not used, this value is unused and the default volume is the volume that the harware mixer is set to when Mupen64Plus loads.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.volumedefaultSpin, buffer);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.volumedefaultSpin , 3, 4, 2, 3, GTK_FILL, GTK_EXPAND, 0, 10);
     gtk_signal_connect_object( GTK_OBJECT(g_ConfDialog.volumedefaultSpin ), "value-changed", GTK_SIGNAL_FUNC(callback_connect_volume), (gpointer)g_ConfDialog.volumedefaultSpin );
 
     g_ConfDialog.swapchannelsCheck = gtk_check_button_new_with_label("Swap L/R Channels");
+    gtk_widget_set_tooltip_text(g_ConfDialog.swapchannelsCheck, "Swaps left and right channels.");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfDialog.swapchannelsCheck), SwapChannels);
     GtkWidget *swapHBox = gtk_hbox_new(0, 0);
     gtk_box_pack_start(GTK_BOX(swapHBox), g_ConfDialog.swapchannelsCheck, FALSE, FALSE, 0);
@@ -186,7 +211,10 @@ EXPORT void CALL DllConfig(HWND hParent)
     g_ConfDialog.defaultfrequencyEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.defaultfrequencyEntry), itoa(GameFreq));
     gtk_entry_set_width_chars(GTK_ENTRY(g_ConfDialog.defaultfrequencyEntry), 8);
-    gtk_widget_set_tooltip_text(g_ConfDialog.defaultfrequencyEntry, "This sets default frequency used if rom doesn't want to change it. Probably the only game that needs this is Zelda: Ocarina Of Time Master Quest.");
+    strncpy(buffer, "Sets the default frequency in Hz, if rom doesn't want to change it. Probably the only games that needs this are the Gamecube Zelda ports.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.defaultfrequencyEntry, buffer);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.defaultfrequencyEntry, 3, 4, 3, 4, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
@@ -195,7 +223,10 @@ EXPORT void CALL DllConfig(HWND hParent)
     g_ConfDialog.primarybufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.primarybufferEntry), itoa(PrimaryBufferSize));
     gtk_entry_set_width_chars(GTK_ENTRY(g_ConfDialog.primarybufferEntry), 8);
-    gtk_widget_set_tooltip_text(g_ConfDialog.primarybufferEntry, "Size of primary buffer in bytes. This is the buffer where audio is loaded after it's extracted from the N64's memory.");
+    strncpy(buffer, "Size of primary buffer in bytes. This is the buffer where audio is loaded after it's extracted from the N64's memory.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.primarybufferEntry, buffer);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.primarybufferEntry, 1, 2, 4, 5, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
@@ -204,7 +235,10 @@ EXPORT void CALL DllConfig(HWND hParent)
     g_ConfDialog.lowbufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.lowbufferEntry), itoa(LowBufferLoadLevel));
     gtk_entry_set_width_chars(GTK_ENTRY(g_ConfDialog.lowbufferEntry), 8);
-    gtk_widget_set_tooltip_text(g_ConfDialog.lowbufferEntry , "If buffer load goes under this level, then the game will speed up to fill the buffer.  You probably want to adjust this value if you get dropouts.");
+    strncpy(buffer, "Size of low buffer in bytes. If buffer load goes under this level, then the game will speed up to fill the buffer. You probably want to adjust this value if you get dropouts.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.lowbufferEntry, buffer);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.lowbufferEntry, 3, 4, 4, 5, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
@@ -213,7 +247,10 @@ EXPORT void CALL DllConfig(HWND hParent)
     g_ConfDialog.secondarybufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.secondarybufferEntry), itoa(SecondaryBufferSize));
     gtk_entry_set_width_chars(GTK_ENTRY(g_ConfDialog.secondarybufferEntry), 8);
-    gtk_widget_set_tooltip_text(g_ConfDialog.secondarybufferEntry, "This is SDL's hardware buffer size. This is the number of samples, so the actual buffer size is four times this number.");
+    strncpy(buffer, "This is SDL's hardware buffer size. This is the number of samples, so the actual buffer size in bytes is four times this number.", MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.secondarybufferEntry, buffer);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.secondarybufferEntry, 1, 2, 5, 6, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
@@ -222,12 +259,20 @@ EXPORT void CALL DllConfig(HWND hParent)
     g_ConfDialog.highbufferEntry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(g_ConfDialog.highbufferEntry), itoa(HighBufferLoadLevel));
     gtk_entry_set_width_chars(GTK_ENTRY(g_ConfDialog.highbufferEntry), 8);
-    gtk_widget_set_tooltip_text(g_ConfDialog.highbufferEntry, "If buffer load exceeds this level, then some extra slowdown is added to prevent buffer overflow.");
+    strncpy(buffer, "Size of high buffer in bytes. If buffer load exceeds this level, then some extra slowdown is added to prevent buffer overflow.",  MAXTOOLTIP);
+    buffer[MAXTOOLTIP-1] = '\0';
+    gtk_widget_set_tooltip_text(label, buffer);
+    gtk_widget_set_tooltip_text(g_ConfDialog.highbufferEntry, buffer);
     gtk_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6, GTK_FILL, GTK_EXPAND, 0, 0);
     gtk_table_attach(GTK_TABLE(table), g_ConfDialog.highbufferEntry, 3, 4, 5, 6, GTK_FILL | GTK_EXPAND, GTK_EXPAND, 0, 0);
 
-    /* Ok/ Cancel buttons. */
+    /* Apply / Ok / Cancel buttons. */
     GtkWidget *button;
+
+    button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfDialog.dialog)->action_area), button, TRUE, TRUE, 0);
+    gtk_signal_connect(GTK_OBJECT(button), "clicked",
+                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)FALSE);
 
     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfDialog.dialog)->action_area), button, TRUE, TRUE, 0);
@@ -237,7 +282,7 @@ EXPORT void CALL DllConfig(HWND hParent)
     button = gtk_button_new_from_stock(GTK_STOCK_OK);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfDialog.dialog)->action_area), button, TRUE, TRUE, 0);
     gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)NULL);
+                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)TRUE);
 
     gtk_widget_show_all(g_ConfDialog.dialog);
 }
