@@ -204,7 +204,7 @@ QVariant RomModel::data(const QModelIndex& index, int role) const
                     data = QString().sprintf("%08X", entry->crc1);
                     break;
                 case CRC2:
-                    data = QString().sprintf("%08X", entry->crc1);
+                    data = QString().sprintf("%08X", entry->crc2);
                     break;
                 case SaveType:
                     buffer = (char*)calloc(16,sizeof(char));
