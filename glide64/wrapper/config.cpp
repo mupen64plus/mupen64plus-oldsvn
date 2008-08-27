@@ -385,3 +385,4 @@ int getDisableGLSL()
    return settings.noglsl;
 #endif // _WIN32
 }
+

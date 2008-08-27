@@ -346,3 +346,4 @@ unsigned char *filter(unsigned char *source, int width, int height, int *width2,
     }
     return NULL;
 }
+

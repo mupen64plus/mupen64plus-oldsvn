@@ -838,3 +838,4 @@ grDrawVertexArrayContiguous(FxU32 mode, FxU32 Count, void *pointers, FxU32 strid
     }
     glEnd();
 }
+

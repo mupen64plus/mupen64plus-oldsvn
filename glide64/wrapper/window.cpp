@@ -195,3 +195,4 @@ BOOL CreateGLWindow(const char* title, int width, int height)
     }
     return TRUE;                                    // Success
 }
+
