@@ -95,29 +95,36 @@ void gui_init(int *argc, char ***argv)
     create_aboutDialog();
 }
 
-/* gui_display
- *   Display GUI components to the screen
- */
+/* Display GUI components to the screen. */
 void gui_display(void)
 {
-    gtk_widget_show_all(g_MainWindow.window);
+    gtk_widget_show_all(g_MainWindow.toplevelVBox);
     if(!(config_get_bool("ToolbarVisible",TRUE)))
         gtk_widget_hide(g_MainWindow.toolBar);
     if(!(config_get_bool("FilterVisible",TRUE)))
         gtk_widget_hide(g_MainWindow.filterBar);
     if(!(config_get_bool("StatusbarVisible",TRUE)))
         gtk_widget_hide(g_MainWindow.statusBarHBox);
+    gtk_widget_show(g_MainWindow.window);
 }
 
-/* gui_destroy
- *   Better gui cleanup...
- */
+/* Save GUI properties and destroy widgets. */
 void gui_destroy(void)
 {
-    gtk_widget_destroy( g_MainWindow.window );
-    gtk_widget_destroy( g_AboutDialog.dialog );
-    gtk_widget_destroy( g_ConfigDialog.dialog );
-    gtk_widget_destroy( g_RomPropDialog.dialog );
+    gint width, height, xposition, yposition;
+
+    gtk_window_get_size(GTK_WINDOW(g_MainWindow.window), &width, &height);
+    gtk_window_get_position(GTK_WINDOW(g_MainWindow.window), &xposition, &yposition); 
+
+    config_put_number("MainWindowWidth",width);
+    config_put_number("MainWindowHeight",height);
+    config_put_number("MainWindowXPosition",xposition);
+    config_put_number("MainWindowYPosition",yposition);
+
+    gtk_widget_destroy(g_MainWindow.window);
+    gtk_widget_destroy(g_AboutDialog.dialog);
+    gtk_widget_destroy(g_ConfigDialog.dialog);
+    gtk_widget_destroy(g_RomPropDialog.dialog);
 }
 
 /* gui_main_loop
@@ -126,9 +133,7 @@ void gui_destroy(void)
 void gui_main_loop(void)
 {
     gtk_main();
-
     gui_destroy();
-
     gdk_threads_leave();
 }
 
@@ -154,7 +159,7 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
 
     return;
 }
- 
+
 /* gui_message() uses messagetype to display either an informational message, for example to the 
  * status bar, a yes / no confirmation dialogue, or an error dialogue.
  */
@@ -196,18 +201,15 @@ int gui_message(unsigned char messagetype, const char *format, ...)
         {
         GtkWidget *dialog, *hbox, *label, *icon;
 
-        hbox = gtk_hbox_new(FALSE, 5);
+        hbox = gtk_hbox_new(FALSE, 10);
+        gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
 
         GtkIconTheme *theme = gtk_icon_theme_get_default();
         GdkPixbuf *pixbuf;
 
         if(messagetype==1)
             {
-            dialog = gtk_dialog_new_with_buttons(tr("Error"),
-                                             GTK_WINDOW(g_MainWindow.window),
-                                             GTK_DIALOG_DESTROY_WITH_PARENT,
-                                             GTK_STOCK_OK, GTK_RESPONSE_NONE,
-                                             NULL);
+            dialog = gtk_dialog_new_with_buttons(tr("Error"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_NONE,NULL);
 
             if(check_icon_theme())
                 {
@@ -219,12 +221,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
             }
         else if(messagetype==2)
             {
-            dialog = gtk_dialog_new_with_buttons(tr("Confirm"),
-                                             GTK_WINDOW(g_MainWindow.window),
-                                             GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                             GTK_STOCK_YES, GTK_RESPONSE_ACCEPT,
-                                             GTK_STOCK_NO, GTK_RESPONSE_REJECT,
-                                             NULL);
+            dialog = gtk_dialog_new_with_buttons(tr("Confirm"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_YES, GTK_RESPONSE_ACCEPT, GTK_STOCK_NO, GTK_RESPONSE_REJECT, NULL);
 
             if(check_icon_theme())
                 {
@@ -235,13 +232,15 @@ int gui_message(unsigned char messagetype, const char *format, ...)
                 icon = gtk_image_new_from_file(get_iconpath("32x32/dialog-question.png"));
             }
 
+        gtk_misc_set_alignment(GTK_MISC(icon), 0, 0);
         gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
 
         label = gtk_label_new(buffer);
+        gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
         gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 5);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 0);
 
         gtk_widget_show_all(dialog);
 
@@ -331,25 +330,18 @@ static void callback_openRom(GtkWidget *widget, gpointer data)
 // close rom
 static void callback_closeRom(GtkWidget *widget, gpointer data)
 {
-    if(close_rom() == 0)
-    {
-        gtk_window_set_title( GTK_WINDOW(g_MainWindow.window), MUPEN_NAME " v" MUPEN_VERSION );
-    }
+    close_rom();
 }
-
 
 // reload windows
 void reload()
 {
-    // recreate gui
-    gtk_widget_destroy( g_MainWindow.window );
-    gtk_widget_destroy( g_AboutDialog.dialog );
-    gtk_widget_destroy( g_ConfigDialog.dialog );
-    gtk_widget_destroy( g_RomPropDialog.dialog );
+    gui_destroy();
     create_mainWindow();
     create_aboutDialog();
     create_configDialog();
-    gtk_widget_show_all( g_MainWindow.window );
+    rombrowser_refresh(g_romcache.length, FALSE);
+    gui_display();
 }
 
 // language selected
@@ -365,7 +357,6 @@ static void callback_languageSelected(GtkWidget *widget, gpointer data)
     config_put_string( "Language", name );
 
     reload();
-    g_romcache.rcstask = RCS_RESCAN;
 }
 
 /** emulation **/
@@ -641,6 +632,8 @@ static void callback_toggle_toolbar( GtkWidget *widget, gpointer data )
         gtk_widget_hide(g_MainWindow.toolBar);
     else
         gtk_widget_show(g_MainWindow.toolBar);
+
+    config_put_bool("ToolbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
 }
 
 static void callback_toggle_filter( GtkWidget *widget, gpointer data )
@@ -652,6 +645,8 @@ static void callback_toggle_filter( GtkWidget *widget, gpointer data )
         }
     else
         gtk_widget_show(g_MainWindow.filterBar);
+
+    config_put_bool("FilterVisible",GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
 }
 
 static void callback_toggle_statusbar( GtkWidget *widget, gpointer data )
@@ -660,8 +655,9 @@ static void callback_toggle_statusbar( GtkWidget *widget, gpointer data )
         gtk_widget_hide(g_MainWindow.statusBarHBox);
     else
         gtk_widget_show(g_MainWindow.statusBarHBox);
-}
 
+    config_put_bool("StatusbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
+}
 
 /** debugger **/
 #ifdef DBG
@@ -749,20 +745,7 @@ static void callback_aboutMupen( GtkWidget *widget, gpointer data )
 // hide on delete
 static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-    gint width, height, xposition, yposition;
-
-    gtk_window_get_size(GTK_WINDOW(g_MainWindow.window), &width, &height);
-    gtk_window_get_position(GTK_WINDOW(g_MainWindow.window), &xposition, &yposition); 
-
-    config_put_number("MainWindowWidth",width);
-    config_put_number("MainWindowHeight",height);
-    config_put_number("MainWindowXPosition",xposition);
-    config_put_number("MainWindowYPosition",yposition);
-
-    config_put_bool("ToolbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
-    config_put_bool("FilterVisible",GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
-    config_put_bool("StatusbarVisible",GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
-
+    
     gtk_main_quit();
     return TRUE; // undeleteable
 }
