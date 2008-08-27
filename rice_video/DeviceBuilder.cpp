@@ -233,7 +233,7 @@ CColorCombiner * OGLDeviceBuilder::CreateColorCombiner(CRender *pRender)
             m_deviceType = (SupportedDeviceType)options.OpenglRenderSetting;
             if( m_deviceType == OGL_DEVICE )    // Best fit
             {
-                int maxUnit = 2;
+                GLint maxUnit = 2;
                 COGLGraphicsContext *pcontext = (COGLGraphicsContext *)(CGraphicsContext::g_pGraphicsContext);
                 glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB,&maxUnit);
 

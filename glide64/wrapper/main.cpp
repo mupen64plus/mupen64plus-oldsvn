@@ -60,14 +60,14 @@ typedef struct
     unsigned int address;
     int width;
     int height;
-  unsigned int fbid;
-  unsigned int zbid;
-  unsigned int texid;
+  GLuint fbid;
+  GLuint zbid;
+  GLuint texid;
   int buff_clear;
 } fb;
 
-int nbTextureUnits;
-int nbAuxBuffers, current_buffer;
+GLint nbTextureUnits;
+GLint nbAuxBuffers, current_buffer;
 int width, widtho, heighto, height;
 int saved_width, saved_height;
 int blend_func_separate_support;

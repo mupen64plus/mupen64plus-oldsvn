@@ -54,8 +54,8 @@ struct GLInfo
     BOOL    ARB_render_texture;
     BOOL    ARB_pixel_format;
 
-    int     maxTextureUnits;            // TNT = 2, GeForce = 2-4, Rage 128 = 2, Radeon = 3-6
-    int     maxGeneralCombiners;
+    GLint   maxTextureUnits;            // TNT = 2, GeForce = 2-4, Rage 128 = 2, Radeon = 3-6
+    GLint   maxGeneralCombiners;
 
     BOOL    enable2xSaI;
     BOOL    enableAnisotropicFiltering;

@@ -780,7 +780,7 @@ void CRender::DrawSprite(uObjTxSprite &sprite, bool rectR)  //Without Ratation
     }
 
     // save the current clamp type
-    int iClampS, iClampT;
+    GLint iClampS, iClampT;
     glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &iClampS);
     glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &iClampT);
     // force clamp type to CLAMP_EDGE (experiments show sometimes this is set to hex 0x2901 - invalid value)

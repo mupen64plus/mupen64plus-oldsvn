@@ -134,7 +134,7 @@ protected:
     bool m_bOGLExtCombinerSupported;        // Is this OGL extension combiner supported by the video card driver?
     bool m_bSupportModAdd_ATI;
     bool m_bSupportModSub_ATI;
-    int m_maxTexUnits;
+    GLint m_maxTexUnits;
     int m_lastIndex;
     uint32 m_dwLastMux0;
     uint32 m_dwLastMux1;

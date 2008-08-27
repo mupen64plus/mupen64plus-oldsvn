@@ -41,7 +41,7 @@ static texlist *list = NULL;
 
 void remove_tex(unsigned int idmin, unsigned int idmax)
 {
-    unsigned int *t;
+    GLuint *t;
     int n = 0;
     texlist *aux = list;
   int sz = nbTex;

@@ -281,7 +281,7 @@ int COGL_FragmentProgramCombiner::ParseDecodedMux()
 
     if (glGetError() != 0)
     {
-        int position;
+        GLint position;
 #ifdef _DEBUG
         char *str = (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 #endif

@@ -280,7 +280,7 @@ void init_combiner()
         int texture0_location;
         int texture1_location;
         char *fragment_shader;
-        int log_length;
+        GLint log_length;
 
         /*glActiveTextureARB(GL_TEXTURE2_ARB);
         glBindTexture(GL_TEXTURE_2D, default_texture);
@@ -505,7 +505,7 @@ void compile_shader()
     char *fragment_shader;
     int i;
     int chroma_color_location;
-    int log_length;
+    GLint log_length;
 
     need_to_compile = 0;
 

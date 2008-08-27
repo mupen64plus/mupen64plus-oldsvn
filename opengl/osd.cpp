@@ -280,7 +280,7 @@ void osd_render()
     bool bSecColorArray = glIsEnabled(GL_SECONDARY_COLOR_ARRAY);
 
     // deactivate all the texturing units
-    int  iActiveTex;
+    GLint  iActiveTex;
     bool bTexture2D[8];
     glGetIntegerv(GL_ACTIVE_TEXTURE_ARB, &iActiveTex);
     for (i = 0; i < 8; i++)
