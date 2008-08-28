@@ -40,22 +40,21 @@ typedef struct
     GtkWidget   *corePureInterpCheckButton;
     GtkWidget   *autoincSaveSlotCheckButton;
     GtkWidget   *noaskCheckButton;
-    GtkWidget   *OsdEnabled;
+    GtkWidget   *osdEnabled;
     GtkWidget   *alwaysFullscreen;
     GList       *toolbarStyleGList;
     GtkWidget   *toolbarStyleCombo;
     GList       *toolbarSizeGList;
     GtkWidget   *toolbarSizeCombo;
 
-    GtkWidget   *gfxCombo;
+    GtkWidget   *graphicsCombo;
     GtkWidget   *audioCombo;
     GtkWidget   *inputCombo;
-    GtkWidget   *RSPCombo;
-    GList       *gfxPluginGList;
+    GtkWidget   *rspCombo;
+    GList       *graphicsPluginGList;
     GList       *audioPluginGList;
     GList       *inputPluginGList;
-    GList       *RSPPluginGList;
-
+    GList       *rspPluginGList;
     GtkWidget   *romDirectoryList;
     GtkWidget   *romDirsScanRecCheckButton;
     GtkWidget   *romShowFullPathsCheckButton;
@@ -64,7 +63,13 @@ typedef struct
 
     GtkWidget   *okButton;
     GtkWidget   *dialog;
+
+    GtkWidget* graphicsImage;
+    GtkWidget* audioImage;
+    GtkWidget* inputImage;
+    GtkWidget* rspImage;
 } SConfigDialog;
+
 extern SConfigDialog g_ConfigDialog;
 
 int create_configDialog( void );

@@ -560,28 +560,37 @@ void apply_filter( void )
 static gboolean callback_filter_selected( GtkWidget *widget, gpointer data )
 {
     if(g_MainWindow.accelUnsafeActive)
+        {
         gtk_window_remove_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe);
+        g_MainWindow.accelUnsafeActive = FALSE;
+        }
     return FALSE;
 }
 
 
 static gboolean callback_filter_unselected( GtkWidget *widget, gpointer data )
 {
-    if(g_MainWindow.accelUnsafeActive)
+    if(!g_MainWindow.accelUnsafeActive)
+        {
         gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe);
+        g_MainWindow.accelUnsafeActive = TRUE;
+        }
     return FALSE;
 }
 
 static gboolean callback_filter_grab_unselected( GtkWidget *widget, gpointer data )
 {
     if(!g_MainWindow.accelUnsafeActive)
+        {
         gtk_window_add_accel_group(GTK_WINDOW(g_MainWindow.window), g_MainWindow.accelUnsafe);
+        g_MainWindow.accelUnsafeActive = TRUE;
+        }
     gtk_window_set_focus(GTK_WINDOW(g_MainWindow.window), NULL);
     return FALSE;
 }
 
 // create GUI filter widgets.
-int create_filter( void )
+int create_filter(void)
 {
     GtkToolItem *toolitem;
     GtkWidget *label;
@@ -592,29 +601,25 @@ int create_filter( void )
     gtk_tool_item_set_expand(toolitem, TRUE);
 
     g_MainWindow.filterBar = gtk_toolbar_new();
-    gtk_toolbar_set_orientation( GTK_TOOLBAR(g_MainWindow.filterBar), GTK_ORIENTATION_HORIZONTAL );
+    gtk_toolbar_set_orientation(GTK_TOOLBAR(g_MainWindow.filterBar), GTK_ORIENTATION_HORIZONTAL);
 
-    label = gtk_label_new_with_mnemonic ( tr("F_ilter:") );
+    label = gtk_label_new_with_mnemonic(tr("F_ilter:"));
     g_MainWindow.filter = gtk_entry_new();
-    gtk_entry_set_text ( GTK_ENTRY(g_MainWindow.filter), "" );
-    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "changed",
-                       GTK_SIGNAL_FUNC(callback_apply_filter), (gpointer)NULL );
-    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "focus-in-event",
-                        GTK_SIGNAL_FUNC(callback_filter_selected), (gpointer)NULL );
-    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "focus-out-event",
-                      GTK_SIGNAL_FUNC(callback_filter_unselected), (gpointer)NULL );
-    gtk_signal_connect ( GTK_OBJECT(g_MainWindow.filter), "grab-notify",
-                     GTK_SIGNAL_FUNC(callback_filter_grab_unselected), (gpointer)NULL );
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_MainWindow.filter);
+    gtk_entry_set_text(GTK_ENTRY(g_MainWindow.filter), "");
 
-    gtk_label_set_mnemonic_widget ( GTK_LABEL(label), g_MainWindow.filter );
+    g_signal_connect(G_OBJECT(g_MainWindow.filter), "changed", G_CALLBACK(callback_apply_filter), NULL);
+    g_signal_connect(G_OBJECT(g_MainWindow.filter), "focus-in-event", G_CALLBACK(callback_filter_selected), NULL);
+    g_signal_connect(G_OBJECT(g_MainWindow.filter), "focus-out-event", G_CALLBACK(callback_filter_unselected), NULL);
+    g_signal_connect(G_OBJECT(g_MainWindow.filter), "grab-notify", G_CALLBACK(callback_filter_grab_unselected), NULL);
 
-    gtk_box_pack_start ( GTK_BOX(Hbox), label, FALSE, FALSE, 5);
-    gtk_box_pack_start ( GTK_BOX(Hbox), g_MainWindow.filter, TRUE, TRUE, 5);
+    gtk_box_pack_start(GTK_BOX(Hbox), label, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(Hbox), g_MainWindow.filter, TRUE, TRUE, 5);
 
     gtk_container_add(GTK_CONTAINER(toolitem), Hbox);
-    gtk_toolbar_insert ( GTK_TOOLBAR(g_MainWindow.filterBar), toolitem, 0);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.filterBar), toolitem, 0);
 
-    gtk_box_pack_start ( GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.filterBar, FALSE, FALSE, 0 );
+    gtk_box_pack_start(GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.filterBar, FALSE, FALSE, 0);
 }
 
 // play rom menu item
@@ -863,10 +868,7 @@ int create_romBrowser( void )
     GtkWidget *separatorItem;
 
     GtkIconTheme *theme = gtk_icon_theme_get_default();
-    if(gtk_icon_theme_has_icon(theme, "emblem-new"))
-        star = gtk_icon_theme_load_icon(theme, "emblem-new", 16, 0, NULL);
-    else
-        star = gdk_pixbuf_new_from_file( get_iconpath("16x16/star.png"), NULL);
+    star = gdk_pixbuf_new_from_file( get_iconpath("16x16/star.png"), NULL);
 
     australia = gdk_pixbuf_new_from_file( get_iconpath("australia.png"), NULL);
     europe = gdk_pixbuf_new_from_file( get_iconpath("europe.png"), NULL);

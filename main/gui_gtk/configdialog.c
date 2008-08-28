@@ -136,21 +136,21 @@ static struct input_mapping mappings[] =
 /** callbacks **/
 static void callback_configGfx(GtkWidget *widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo));
+    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
     if(name)
         plugin_exec_config(name);
 }
 
 static void callback_testGfx(GtkWidget *widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo));
+    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
     if(name)
         plugin_exec_test(name);
 }
 
 static void callback_aboutGfx(GtkWidget *widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.gfxCombo));
+    const char *name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
     if(name)
         plugin_exec_about(name);
 }
@@ -199,21 +199,21 @@ static void callback_aboutInput(GtkWidget *widget, gpointer data)
 
 static void callback_configRSP(GtkWidget *widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo));
+    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
     if(name)
         plugin_exec_config(name);
 }
 
 static void callback_testRSP(GtkWidget *widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo));
+    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
     if(name)
         plugin_exec_test(name);
 }
 
 static void callback_aboutRSP(GtkWidget *widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo));
+    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
     if(name)
         plugin_exec_about(name);
 }
@@ -300,7 +300,7 @@ static void callback_romDirectoryRemove(GtkWidget *widget, gpointer data)
 /* Apply / Ok Button. */
 static void callback_apply_changes(GtkWidget *widget, gpointer data)
 {
-    static unsigned char reloadgui = FALSE, rcsrescan = FALSE;
+    static unsigned char updategui = FALSE, rcsrescan = FALSE;
     const char *filename, *name;
     gchar *text = NULL;
     int guivalue, currentvalue, i;
@@ -331,25 +331,37 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     switch(guivalue)
         {
         case 2:
-            if(currentvalue!=22)
+            if(currentvalue!=32)
                 {
-                config_put_number("ToolbarSize", 22);
-                reloadgui = TRUE;
+                config_put_number("ToolbarSize", 32);
+                updategui = TRUE;
                 }
             break;
         case 0:
             if(currentvalue!=16)
                 {
                 config_put_number("ToolbarSize", 16);
-                reloadgui = TRUE;
+                updategui = TRUE;
                 }
             break;
         default:
             if(currentvalue!=22)
                 {
                 config_put_number("ToolbarSize", 22);
-                reloadgui = TRUE;
+                updategui = TRUE;
                 }
+        }
+
+    if(updategui)
+        {
+        currentvalue = config_get_number("ToolbarSize", 22);
+        set_icon(g_MainWindow.openImage, "document-open", currentvalue, FALSE);
+        set_icon(g_MainWindow.playImage, "media-playback-start", currentvalue, FALSE);
+        set_icon(g_MainWindow.pauseImage, "media-playback-pause", currentvalue, FALSE);
+        set_icon(g_MainWindow.stopImage, "media-playback-stop", currentvalue, FALSE);
+        set_icon(g_MainWindow.fullscreenImage, "view-fullscreen", currentvalue, FALSE);
+        set_icon(g_MainWindow.configureImage, "preferences-system", currentvalue, FALSE);
+        updategui = FALSE;
         }
 
     guivalue = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo));
@@ -357,17 +369,19 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
 
     if(currentvalue==-1||currentvalue!=guivalue)
         {
-        reloadgui = TRUE;
         switch(guivalue)
             {
             case 1:
                 config_put_number("ToolbarStyle", 1);
+                gtk_toolbar_set_style(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_TEXT);
                 break;
             case 2:
                 config_put_number("ToolbarStyle", 2);
+                gtk_toolbar_set_style(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_BOTH);
                 break;
             default:
                 config_put_number("ToolbarStyle", 0);
+                gtk_toolbar_set_style(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOLBAR_ICONS);
             }
         }
 
@@ -381,7 +395,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
         config_put_bool("NoAsk",g_Noask);
         }
 
-    g_OsdEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.OsdEnabled));
+    g_OsdEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.osdEnabled));
     config_put_bool("OsdEnabled", g_OsdEnabled);
 
     g_Fullscreen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen));
@@ -390,7 +404,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     /* Plugins Tab */
 
     /* Don't automatically save plugin to config if user specified it at the commandline. */
-    name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo));
+    name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
     if(!g_GfxPlugin&&name)
         {
         filename = plugin_filename_by_name(name);
@@ -411,7 +425,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
         if(filename)
             config_put_string("Input Plugin", filename);
         }
-    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.RSPCombo));
+    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
     if(!g_RspPlugin&&name)
         {
         filename = plugin_filename_by_name(name);
@@ -468,14 +482,6 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
             }
         }
 
-    /* If ToolbarStye or ToolbarSize was changed, reload GUI on Apply / Ok. */
-    if(reloadgui)
-        {
-        reload();
-        gtk_widget_show_all(g_ConfigDialog.dialog);
-        reloadgui = FALSE;
-        }
-
     /* Hide dialog. */
     if(data)
         { gtk_widget_hide(g_ConfigDialog.dialog); }
@@ -505,19 +511,19 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
     if(name)
         {
         index = 0;
-        if(g_ConfigDialog.gfxPluginGList)
+        if(g_ConfigDialog.graphicsPluginGList)
             {
-            GList *element = g_list_first(g_ConfigDialog.gfxPluginGList);
+            GList *element = g_list_first(g_ConfigDialog.graphicsPluginGList);
             while(element)
                 {
-                gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo), index);
-                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo));
+                gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo), index);
+                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
                     // if plugin was specified at the commandline, don't let user modify
                     if(g_GfxPlugin)
-                        gtk_widget_set_sensitive(g_ConfigDialog.gfxCombo, FALSE);
+                        gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, FALSE);
                     break;
                     }
                 free(combo);
@@ -592,19 +598,19 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
     if(name)
         {
         index = 0;
-        if(g_ConfigDialog.RSPPluginGList)
+        if(g_ConfigDialog.rspPluginGList)
             {
-            GList *element = g_list_first(g_ConfigDialog.RSPPluginGList);
+            GList *element = g_list_first(g_ConfigDialog.rspPluginGList);
             while(element)
                 {
-                gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo), index);
-                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo));
+                gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.rspCombo), index);
+                combo = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
                     // if plugin was specified at the commandline, don't let user modify
                     if(g_RspPlugin)
-                        gtk_widget_set_sensitive(g_ConfigDialog.RSPCombo, FALSE);
+                        gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, FALSE);
                     break;
                     }
                 free(combo);
@@ -666,7 +672,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion), config_get_bool("NoMemoryExpansion", FALSE ));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton), config_get_bool("AutoIncSaveSlot", FALSE ));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton), !g_Noask);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.OsdEnabled), g_OsdEnabled);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.osdEnabled), g_OsdEnabled);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen), config_get_bool("GuiStartFullscreen", FALSE));
 
     /* If --noask was specified at the commandline, disable checkbox. */
@@ -810,7 +816,7 @@ static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct inp
 }
 
 /* Create main configure dialog. */
-int create_configDialog( void )
+int create_configDialog(void)
 {
     GtkWidget *label;
     GtkWidget *frame;
@@ -823,15 +829,11 @@ int create_configDialog( void )
     list_node_t *node;
     plugin *p;
 
-    /* Check current gtk icon theme for the icons we need, if not toggle icontheme and use fallbacks. */
-    gboolean icontheme = check_icon_theme();
-    GtkIconTheme *theme = gtk_icon_theme_get_default();
-
     /* Since we rebuild the plugin lists, clear them if present. */
-    if(g_ConfigDialog.gfxPluginGList!=NULL)
+    if(g_ConfigDialog.graphicsPluginGList!=NULL)
         {
-        g_list_free(g_ConfigDialog.gfxPluginGList);
-        g_ConfigDialog.gfxPluginGList = NULL;
+        g_list_free(g_ConfigDialog.graphicsPluginGList);
+        g_ConfigDialog.graphicsPluginGList = NULL;
         }
     if(g_ConfigDialog.audioPluginGList!=NULL)
         {
@@ -843,10 +845,10 @@ int create_configDialog( void )
         g_list_free(g_ConfigDialog.inputPluginGList);
         g_ConfigDialog.inputPluginGList = NULL;
         }
-    if(g_ConfigDialog.RSPPluginGList = NULL)
+    if(g_ConfigDialog.rspPluginGList = NULL)
         {
-        g_list_free(g_ConfigDialog.RSPPluginGList);
-        g_ConfigDialog.RSPPluginGList = NULL;
+        g_list_free(g_ConfigDialog.rspPluginGList);
+        g_ConfigDialog.rspPluginGList = NULL;
         }
 
     /* Iterate through plugins, add only plugin if specified, otherwise add all plugins. */
@@ -858,7 +860,7 @@ int create_configDialog( void )
             {
             case PLUGIN_TYPE_GFX:
                 if(!g_GfxPlugin||(g_GfxPlugin&&(strcmp(g_GfxPlugin, p->file_name)==0)))
-                    g_ConfigDialog.gfxPluginGList = g_list_append( g_ConfigDialog.gfxPluginGList, p->plugin_name);
+                    g_ConfigDialog.graphicsPluginGList = g_list_append( g_ConfigDialog.graphicsPluginGList, p->plugin_name);
                 break;
             case PLUGIN_TYPE_AUDIO:
                 if(!g_AudioPlugin||(g_AudioPlugin &&(strcmp(g_AudioPlugin, p->file_name)==0)))
@@ -870,7 +872,7 @@ int create_configDialog( void )
                 break;
             case PLUGIN_TYPE_RSP:
                 if(!g_RspPlugin||(g_RspPlugin&&(strcmp(g_RspPlugin, p->file_name)==0)))
-                    g_ConfigDialog.RSPPluginGList = g_list_append( g_ConfigDialog.RSPPluginGList, p->plugin_name);
+                    g_ConfigDialog.rspPluginGList = g_list_append( g_ConfigDialog.rspPluginGList, p->plugin_name);
                 break;
             }
         }
@@ -978,8 +980,8 @@ int create_configDialog( void )
     g_ConfigDialog.noaskCheckButton = gtk_check_button_new_with_mnemonic(tr("Ask _before loading bad dump/ hacked rom"));
     gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.noaskCheckButton, FALSE, FALSE, 0);
 
-    g_ConfigDialog.OsdEnabled = gtk_check_button_new_with_mnemonic(tr("On _screen display enabled"));
-    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.OsdEnabled, FALSE, FALSE, 0);
+    g_ConfigDialog.osdEnabled = gtk_check_button_new_with_mnemonic(tr("On _screen display enabled"));
+    gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.osdEnabled, FALSE, FALSE, 0);
 
     g_ConfigDialog.alwaysFullscreen = gtk_check_button_new_with_mnemonic(tr("Always start in _full screen mode"));
     gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.alwaysFullscreen, FALSE, FALSE, 0);
@@ -1004,27 +1006,20 @@ int create_configDialog( void )
     gtk_container_add(GTK_CONTAINER(frame), vbox);
     gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 0);
-    if(icontheme)
-        {
-        pixbuf = gtk_icon_theme_load_icon(theme, "video-display", 32,  0, NULL);
-        icon = gtk_image_new_from_pixbuf(pixbuf); 
-        }
-    else
-        icon = gtk_image_new_from_file(get_iconpath("32x32/video-display.png"));
 
-    g_ConfigDialog.gfxCombo = gtk_combo_box_new_text();
-    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.gfxCombo);
-    if(g_ConfigDialog.gfxPluginGList)
+    g_ConfigDialog.graphicsCombo = gtk_combo_box_new_text();
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.graphicsCombo);
+    if(g_ConfigDialog.graphicsPluginGList)
         {
-        GList *element = g_list_first(g_ConfigDialog.gfxPluginGList);
+        GList *element = g_list_first(g_ConfigDialog.graphicsPluginGList);
         while(element)
             {
-            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.gfxCombo), (gchar *)g_list_nth_data(element, 0));
+            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo), (gchar *)g_list_nth_data(element, 0));
             element = g_list_next(element);
             }
         }
     else
-        gtk_widget_set_sensitive(GTK_WIDGET(g_ConfigDialog.gfxCombo), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(g_ConfigDialog.graphicsCombo), FALSE);
 
     button_config = gtk_button_new_with_label(tr("Config"));
     button_test = gtk_button_new_with_label(tr("Test"));
@@ -1033,8 +1028,11 @@ int create_configDialog( void )
     gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testGfx), (gpointer) NULL);
     gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutGfx), (gpointer) NULL);
 
-    gtk_box_pack_start(GTK_BOX(hbox1), icon, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.gfxCombo, TRUE, TRUE, 0);
+    g_ConfigDialog.graphicsImage = gtk_image_new();
+    set_icon(g_ConfigDialog.graphicsImage, "video-display", 32, FALSE);
+
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.graphicsImage, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.graphicsCombo, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_config, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_test, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_about, TRUE, TRUE, 0);
@@ -1052,14 +1050,6 @@ int create_configDialog( void )
     gtk_container_add(GTK_CONTAINER(frame), vbox);
     gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 0);
-
-    if(icontheme)
-        {
-        pixbuf = gtk_icon_theme_load_icon(theme, "audio-card", 32,  0, NULL);
-        icon = gtk_image_new_from_pixbuf(pixbuf); 
-        }
-    else
-        icon = gtk_image_new_from_file(get_iconpath("32x32/audio-card.png"));
 
     g_ConfigDialog.audioCombo = gtk_combo_box_new_text();
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.audioCombo);
@@ -1082,7 +1072,10 @@ int create_configDialog( void )
     gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testAudio), (gpointer) NULL);
     gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutAudio), (gpointer) NULL);
 
-    gtk_box_pack_start(GTK_BOX(hbox1), icon, FALSE, FALSE, 0);
+    g_ConfigDialog.audioImage = gtk_image_new();
+    set_icon(g_ConfigDialog.audioImage, "audio-card", 32, FALSE);
+
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.audioImage, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.audioCombo, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_config, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_test, TRUE, TRUE, 0);
@@ -1101,14 +1094,6 @@ int create_configDialog( void )
     gtk_container_add(GTK_CONTAINER(frame), vbox);
     gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 0);
-
-    if(icontheme)
-        {
-        pixbuf = gtk_icon_theme_load_icon(theme, "input-gaming", 32,  0, NULL);
-        icon = gtk_image_new_from_pixbuf(pixbuf); 
-        }
-    else
-        icon = gtk_image_new_from_file(get_iconpath("32x32/input-gaming.png"));
 
     g_ConfigDialog.inputCombo = gtk_combo_box_new_text();
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.inputCombo);
@@ -1131,7 +1116,10 @@ int create_configDialog( void )
     gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testInput), (gpointer) NULL);
     gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutInput), (gpointer) NULL);
 
-    gtk_box_pack_start(GTK_BOX(hbox1), icon, FALSE, FALSE, 0);
+    g_ConfigDialog.inputImage = gtk_image_new();
+    set_icon(g_ConfigDialog.inputImage, "input-gaming", 32, FALSE);
+
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.inputImage, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.inputCombo, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_config, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_test, TRUE, TRUE, 0);
@@ -1151,21 +1139,19 @@ int create_configDialog( void )
     gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 0);
 
-    icon = gtk_image_new_from_file(get_iconpath("32x32/cpu.png"));
-
-    g_ConfigDialog.RSPCombo = gtk_combo_box_new_text();
-    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.RSPCombo);
-    if(g_ConfigDialog.RSPPluginGList)
+    g_ConfigDialog.rspCombo = gtk_combo_box_new_text();
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.rspCombo);
+    if(g_ConfigDialog.rspPluginGList)
         {
-        GList *element = g_list_first(g_ConfigDialog.RSPPluginGList);
+        GList *element = g_list_first(g_ConfigDialog.rspPluginGList);
         while(element)
             {
-            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.RSPCombo), (gchar *)g_list_nth_data(element, 0));
+            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo), (gchar *)g_list_nth_data(element, 0));
             element = g_list_next(element);
             }
         }
     else
-        gtk_widget_set_sensitive(GTK_WIDGET(g_ConfigDialog.RSPCombo), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(g_ConfigDialog.rspCombo), FALSE);
 
     button_config = gtk_button_new_with_label(tr("Config"));
     button_test = gtk_button_new_with_label(tr("Test"));
@@ -1174,8 +1160,11 @@ int create_configDialog( void )
     gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testRSP), (gpointer) NULL);
     gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutRSP), (gpointer) NULL);
 
-    gtk_box_pack_start(GTK_BOX(hbox1), icon, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.RSPCombo, TRUE, TRUE, 0);
+    g_ConfigDialog.rspImage = gtk_image_new();
+    set_icon(g_ConfigDialog.rspImage, "cpu", 32, TRUE);
+
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.rspImage, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox1), g_ConfigDialog.rspCombo, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_config, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_test, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), button_about, TRUE, TRUE, 0);

@@ -29,30 +29,45 @@
 
 typedef struct
 {
-    GtkWidget *window;
-    GtkWidget *toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
-    GtkWidget *menuBar;
-    GtkWidget *toolBar;
-    GtkWidget *filterBar;
-    GtkWidget *filter;
-    GtkWidget *romScrolledWindow;
+    GtkWidget* window;
+    GtkWidget* toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
+    GtkWidget* menuBar;
+
+    GtkWidget* toolBar;
+    GtkWidget* openImage;
+    GtkWidget* playImage;
+    GtkWidget* pauseImage;
+    GtkWidget* stopImage;
+    GtkWidget* fullscreenImage;
+    GtkWidget* configureImage;
+
+    GtkWidget* filterBar;
+    GtkWidget* filter;
+    GtkWidget* romScrolledWindow;
     //Make two TreeViews, a visable manually filtered one for the Display, and a
     //Non-visable FullList from which we can filter.
-    GtkWidget *romDisplay, *romFullList;
-    GtkTreeViewColumn *column[17]; //columns in rombrowser. 
+    GtkWidget* romDisplay;
+    GtkWidget* romFullList;
+    GtkTreeViewColumn* column[17]; //columns in rombrowser. 
     unsigned short columnVisible[16];
     int romSortColumn; // sort column
     GtkSortType romSortType; // sort type (ascending/descending)
-    GtkWidget *statusBar;
-    GtkWidget *statusBarHBox;
-    GtkAccelGroup *accelGroup;
-    GtkAccelGroup *accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
+    GtkWidget* statusBar;
+    GtkWidget* statusBarHBox;
+    GtkAccelGroup* accelGroup;
+    GtkAccelGroup* accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
     gboolean accelUnsafeActive; //From getting keypresses, so must be deactivated.
-    GtkWidget *romHeaderMenu; //Context menu for rombrowser header to control visible columns.
+    GtkWidget* romHeaderMenu; //Context menu for rombrowser header to control visible columns.
+
+    GtkIconTheme* iconTheme;
+    gboolean fallbackIcons;
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;
 extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
+
+/* public helper functions. */
+void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
 
 //The functons which all GUIs must implement.
 void gui_init(int *argc, char ***argv);
@@ -60,7 +75,5 @@ void gui_display(void);
 void gui_main_loop(void);
 int gui_message(unsigned char messagetype, const char *format, ...);
 void updaterombrowser(unsigned int roms, unsigned short clear);
-
-gboolean check_icon_theme();
 
 #endif //__MAIN_GTK_H__
