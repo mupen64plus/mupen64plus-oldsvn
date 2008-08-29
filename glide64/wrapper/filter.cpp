@@ -22,9 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef _WIN32
 #include "../winlnxdefs.h"
-#endif // _WIN32
 
 #include "main.h"
 #include "2xsai.h"

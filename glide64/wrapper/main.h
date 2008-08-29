@@ -24,10 +24,8 @@
 
 #include <SDL_opengl.h>
 
-#ifndef _WIN32
-  #include "../winlnxdefs.h"
-//#define VPDEBUG
-#endif
+#include "../winlnxdefs.h"
+
 #ifdef VPDEBUG
 void dump_tex(int id);
 void dump_start();

@@ -23,11 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <conio.h>
-#include <windows.h>
-#endif // _WIN32
-
 static int   LUT16to32[65536];
 static int   RGBtoYUV[65536];
 static int   YUV1, YUV2;

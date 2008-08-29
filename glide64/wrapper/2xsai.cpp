@@ -19,11 +19,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef _WIN32
-#include <windows.h>
-#else // _WIN32
 #include "../winlnxdefs.h"
-#endif // _WIN32
 
 static __inline int GetResult( DWORD A, DWORD B, DWORD C, DWORD D )
 {
@@ -65,9 +61,6 @@ static __inline DWORD Q_INTERPOLATE( DWORD A, DWORD B, DWORD C, DWORD D)
 void Super2xSaI( DWORD *srcPtr, DWORD *destPtr, DWORD width, DWORD height, DWORD pitch)
 {
     DWORD destWidth = width << 1;
-#ifdef _WIN32
-    DWORD destHeight = height << 1;
-#endif // _WIN32
 
     DWORD color4, color5, color6;
     DWORD color1, color2, color3;

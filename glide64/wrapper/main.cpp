@@ -110,18 +110,7 @@ int save_w, save_h;
 int lfb_color_fmt;
 float invtex[2];
 
-#ifdef _WIN32
-static HDC hDC = NULL;
-static HGLRC hGLRC = NULL;
-static HWND hToolBar = NULL;
-static HWND hwnd_win = NULL;
-static unsigned long windowedExStyle, windowedStyle;
-#endif // _WIN32
 static unsigned long fullscreen;
-#ifdef _WIN32
-static RECT windowedRect;
-static HMENU windowedMenu;
-#endif // _WIN32
 
 static int savedWidtho, savedHeighto;
 static int savedWidth, savedHeight;
@@ -142,9 +131,7 @@ struct texbuf_t {
 static texbuf_t texbufs[NB_TEXBUFS];
 static int texbuf_i;
 
-#ifndef _WIN32
 static SDL_Surface *m_pScreen;
-#endif // _WIN32
 
 // unsigned short * frameBuffer = NULL;
 // unsigned short * depthBuffer = NULL;
@@ -166,42 +153,10 @@ void display_warning(const char *text, ...)
         vsprintf((char*)buf, (char*)text, ap);
         va_end(ap);
 
-// #ifdef _WIN32
-//      MessageBox(NULL, (LPCTSTR)buf, "Glide3x warning : ", MB_OK);
-// #else // _WIN32
        printf("Glide3x warning : %s\n", buf);
-// #endif // _WIN32
         first_message--;
     }
 }
-
-#ifdef _WIN32
-void display_error()
-{
-    LPVOID lpMsgBuf;
-    if (!FormatMessage( 
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-        FORMAT_MESSAGE_FROM_SYSTEM | 
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        GetLastError(),
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-        (LPTSTR) &lpMsgBuf,
-        0,
-        NULL ))
-    {
-    // Handle the error.
-    return;
-    }
-    // Process any inserts in lpMsgBuf.
-    // ...
-    // Display the string.
-    MessageBox( NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION );
-
-    // Free the buffer.
-    LocalFree( lpMsgBuf );
-}
-#endif // _WIN32
 
 #ifdef LOGGING
 FILE *log_file = NULL;
@@ -321,48 +276,6 @@ BOOL isExtensionSupported(const char *extension)
     return FALSE;
 }
 
-#ifdef _WIN32
-BOOL isWglExtensionSupported(const char *extension)
-{
-    const GLubyte *extensions = NULL;
-    const GLubyte *start;
-    GLubyte *where, *terminator;
-
-    where = (GLubyte *)strchr(extension, ' ');
-    if (where || *extension == '\0')
-        return 0;
-
-    extensions = (GLubyte*)wglGetExtensionsStringARB(wglGetCurrentDC());
-
-    start = extensions;
-    for (;;)
-    {
-        where = (GLubyte *) strstr((const char *) start, extension);
-        if (!where)
-            break;
-
-        terminator = where + strlen(extension);
-        if (where == start || *(where - 1) == ' ')
-            if (*terminator == ' ' || *terminator == '\0')
-                return TRUE;
-
-        start = terminator;
-    }
-
-    return FALSE;
-}
-
-BOOL CALLBACK FindToolBarProc(HWND hWnd, LPARAM lParam)
-{
-    if (GetWindowLong(hWnd, GWL_STYLE) & RBS_VARHEIGHT)
-    {
-        hToolBar = hWnd;
-        return FALSE;
-    }
-    return TRUE;
-}
-#endif // _WIN32
-
 #define GrPixelFormat_t int
 
 FX_ENTRY GrContext_t FX_CALL 
@@ -380,13 +293,6 @@ grSstWinOpenExt(
     return grSstWinOpen(hWnd, screen_resolution, refresh_rate, color_format, 
                         origin_location, nColBuffers, nAuxBuffers);
 }
-
-#ifdef WIN32
-# include <fcntl.h>
-# ifndef ATTACH_PARENT_PROCESS
-#  define ATTACH_PARENT_PROCESS ((DWORD)-1)
-# endif
-#endif
 
 FX_ENTRY GrContext_t FX_CALL 
 grSstWinOpen(
@@ -417,38 +323,8 @@ grSstWinOpen(
   color_texture = free_texture++;
   depth_texture = free_texture++;
   
-#ifdef _WIN32
-    PIXELFORMATDESCRIPTOR pfd = {
-        sizeof(PIXELFORMATDESCRIPTOR),  // size of this pfd
-        1,                       // version number
-        PFD_DRAW_TO_WINDOW |     // support window
-        PFD_SUPPORT_OPENGL |     // support OpenGL
-        PFD_GENERIC_ACCELERATED | //PFD_SWAP_COPY | PFD_SWAP_EXCHANGE |
-        PFD_DOUBLEBUFFER,        // double buffered
-        PFD_TYPE_RGBA,           // RGBA type
-        32,
-        0, 0, 0, 0, 0, 0,        // color bits ignored
-        0,                       // no alpha buffer
-        0,                       // shift bit ignored
-        0,                       // no accumulation buffer
-        0, 0, 0, 0,              // accum bits ignored
-        24,        // z-buffer      
-        0,                       // no stencil buffer
-        1,                       // no auxiliary buffer ZIGGY: added 1 auxiliary buffer
-        PFD_MAIN_PLANE,          // main layer
-        0,                       // reserved
-        0, 0, 0};                // layer masks ignored
-    int pfm;
-    RECT windowRect, toolRect;
-    int pc_width, pc_height;
-#endif // _WIN32
-
     LOG("grSstWinOpen(%d, %d, %d, %d, %d, %d %d)\r\n", hWnd, screen_resolution, refresh_rate, color_format, origin_location, nColBuffers, nAuxBuffers);
 
-#ifdef _WIN32
-    if ((HWND)hWnd == NULL) hWnd = (FxU32)GetActiveWindow();
-    hwnd_win = (HWND)hWnd;
-#endif // _WIN32
     switch ((screen_resolution & ~0x80)&0xFF)
     {
     case GR_RESOLUTION_320x200:
@@ -519,113 +395,6 @@ grSstWinOpen(
         display_warning("unknown SstWinOpen resolution : %x", screen_resolution);
     }
 
-#ifdef _WIN32
-    if (screen_resolution & 0x80)
-    {
-        viewport_offset = max(25, screen_resolution >> 8);
-        ChangeDisplaySettings(NULL, 0);
-        GetClientRect(hwnd_win, &windowRect);
-        EnumChildWindows(hwnd_win, FindToolBarProc, 0);
-
-        if (hToolBar)
-            GetWindowRect(hToolBar, &toolRect);
-        else
-            toolRect.bottom = toolRect.top = 0;
-
-        windowRect.right = windowRect.left + width - 1;
-        windowRect.bottom = windowRect.top + height - 1 + 40;
-        AdjustWindowRect(&windowRect, GetWindowLong(hwnd_win, GWL_STYLE), GetMenu(hwnd_win) != NULL);
-
-        SetWindowPos(hwnd_win, NULL, 0, 0, windowRect.right - windowRect.left + 1,
-                    windowRect.bottom - windowRect.top + 1 /*+ toolRect.bottom - toolRect.top + 1*/, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOMOVE);
-    fullscreen = 0;
-    }
-    else
-    {
-        DEVMODE fullscreenMode;
-        DEVMODE currentMode;
-        
-        viewport_offset = 0;
-        pc_width = getFullScreenWidth();
-        pc_height = getFullScreenHeight();
-        if (pc_width == 0 || pc_height == 0)
-        {
-            pc_width = width;
-            pc_height = height;
-        }
-
-        memset(&fullscreenMode, 0, sizeof(DEVMODE));
-        fullscreenMode.dmSize = sizeof(DEVMODE);
-        fullscreenMode.dmPelsWidth= pc_width;
-        fullscreenMode.dmPelsHeight= pc_height;
-        fullscreenMode.dmBitsPerPel= 32;
-        fullscreenMode.dmDisplayFrequency= 60;
-        fullscreenMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
-
-        EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &currentMode);
-        fullscreenMode.dmDisplayFrequency = currentMode.dmDisplayFrequency;
-
-        if (ChangeDisplaySettings( &fullscreenMode, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL)
-        {
-            display_warning("can't change to fullscreen mode");
-        }
-        ShowCursor(FALSE);
-
-        windowedExStyle = GetWindowLong(hwnd_win, GWL_EXSTYLE);
-        windowedStyle = GetWindowLong(hwnd_win, GWL_STYLE);
-
-        SetWindowLong(hwnd_win, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
-        SetWindowLong(hwnd_win, GWL_STYLE, WS_POPUP);
-
-        GetWindowRect(hwnd_win, &windowedRect);
-        windowedMenu = GetMenu(hwnd_win);
-        if (windowedMenu) SetMenu(hwnd_win, NULL);
-
-        fullscreen = 1;
-
-        SetWindowPos(hwnd_win, NULL, 0, 0, pc_width, pc_height, SWP_NOACTIVATE | SWP_NOZORDER | SWP_SHOWWINDOW);
-    }
-    
-    if ((hDC = GetDC(hwnd_win)) == NULL)
-    {
-        display_warning("GetDC on main window failed");
-        return FXFALSE;
-    }
-    SetViewportExtEx(hDC, width, height, NULL);
-    SetWindowExtEx(hDC, width, height, NULL);
-
-    if ((pfm = ChoosePixelFormat(hDC, &pfd)) == 0) {
-    printf("disabling auxiliary buffers\n");
-    pfd.cAuxBuffers = 0;
-    pfm = ChoosePixelFormat(hDC, &pfd);
-  }
-    if (pfm == 0)
-    {
-        display_warning("ChoosePixelFormat failed");
-        return FXFALSE;
-    }
-    if (SetPixelFormat(hDC, pfm, &pfd) == FALSE)
-    {
-        display_warning("SetPixelFormat failed");
-        return FXFALSE;
-    }
-
-    DescribePixelFormat(hDC, pfm, sizeof(pfd), &pfd);
-    
-    if ((hGLRC = wglCreateContext(hDC)) == 0)
-    {
-        display_warning("wglCreateContext failed!");
-        grSstWinClose(0);
-        return FXFALSE;
-    }
-
-    if (!wglMakeCurrent(hDC, hGLRC))
-    {
-        display_warning("wglMakeCurrent failed!");
-        grSstWinClose(0);
-        return FXFALSE;
-    }
-#else // _WIN32
    // init sdl & gl
    const SDL_VideoInfo *videoInfo;
    Uint32 videoFlags = 0;
@@ -697,7 +466,6 @@ grSstWinOpen(
 # endif // _DEBUG
    SDL_WM_SetCaption(caption, caption);
    glViewport(0, viewport_offset, width, height);
-#endif // _WIN32
     
     //if (color_format !=   GR_COLORFORMAT_ARGB) display_warning("color format is not ARGB");
     lfb_color_fmt = color_format;
@@ -769,25 +537,9 @@ grSstWinOpen(
     else
         glsl_support = 0;
 
-#ifdef _WIN32
-    if (screen_resolution & 0x80)
-    {
-        glViewport(0, viewport_offset, width, height);
-        viewport_width = width;
-        viewport_height = height;
-    }
-    else
-    {
-        glViewport(0, 0, pc_width, pc_height);
-        viewport_width = pc_width;
-        viewport_height = pc_height;
-    viewport_offset = 0;
-    }
-#else
     glViewport(0, viewport_offset, width, height);
     viewport_width = width;
     viewport_height = height;
-#endif // _WIN32
 
 //   void do_benchmarks();
 //   do_benchmarks();
@@ -889,21 +641,8 @@ grSstWinClose( GrContext_t context )
 //   frameBuffer = depthBuffer = NULL;
   
     free_combiners();
-#ifndef WIN32
-#ifndef GCC
-  __try // I don't know why, but opengl can be killed before this function call when emulator is closed (Gonetz).
-    // ZIGGY : I found the problem : it is a function pointer, when the extension isn't supported , it is then zero, so just need to check the pointer prior to do the call.
-#endif
-  {
     if (use_fbo)
       glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
-  }
-#ifndef GCC
-  __except(EXCEPTION_EXECUTE_HANDLER)
-  {
-    clear_texbuff = 0;
-  }
-#endif
 
   if (clear_texbuff)
   {
@@ -914,45 +653,14 @@ grSstWinClose( GrContext_t context )
       glDeleteRenderbuffersEXT( 1, &(fbs[i].zbid) );
     }
   }
-#endif
   nb_fb = 0;
   
-    //free_textures();
-#ifndef WIN32
   // ZIGGY for some reasons, Pj64 doesn't like remove_tex on exit
   remove_tex(0, 0xfffffff);
-#endif
 
-  //*/
-#ifdef _WIN32
-    if (hGLRC)
-    {
-        wglMakeCurrent(NULL,NULL);
-        wglDeleteContext(hGLRC);
-        hGLRC = NULL;
-    }
-  /*
-  if (hDC != NULL) 
-  {
-      ReleaseDC(hwnd_win,hDC);
-    hDC = NULL;
-  }
-    //*/
-    if (fullscreen)
-    {
-        ShowCursor(TRUE);
-        ChangeDisplaySettings(NULL, 0);
-        SetWindowLong(hwnd_win, GWL_STYLE, windowedStyle);
-        SetWindowLong(hwnd_win, GWL_EXSTYLE, windowedExStyle);
-        SetWindowPos(hwnd_win, NULL, windowedRect.left, windowedRect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-        if (windowedMenu) SetMenu(hwnd_win, windowedMenu);
-        fullscreen = 0;
-    }
-#else
    //SDL_QuitSubSystem(SDL_INIT_VIDEO);
    //sleep(2);
    m_pScreen = NULL;
-#endif
     return FXTRUE;
 }
 
@@ -1483,33 +1191,7 @@ grGetString( FxU32 pname )
 /* JOSH FIXME: hack to avoid implementing CreateGLWindow and KillGLWindow
  * Rather than calling glGetString to check for the appropriate extensions,
  * just let getDisableGLSL() decide. */
-#ifdef _WIN32
-                int openglinit = (hGLRC == NULL);
-        //if (glGetString(GL_EXTENSIONS) == NULL) openglinit = 1;
-                if(openglinit)
-                {
-          printf("Creating gl window\n");
-                    CreateGLWindow("Opengl window", 640, 480);
-                }
-                if (isExtensionSupported("GL_ARB_shading_language_100") &&
-                    isExtensionSupported("GL_ARB_shader_objects") &&
-                    isExtensionSupported("GL_ARB_fragment_shader") &&
-                    isExtensionSupported("GL_ARB_vertex_shader") && !getDisableGLSL())
-                {
-                    glsl_combiner = 1;
-                }
-                else
-                {
-                    glsl_combiner = 0;
-                }
-        printf("glsl_combiner %d\n", glsl_combiner);
-                if(openglinit)
-                {
-                    KillGLWindow();
-                }
-#else // _WIN32
         glsl_combiner = 1; /* Just use the disable flag */
-#endif // _WIN32
             }
             if(glsl_combiner == 1 && !getDisableGLSL())
                 return extension1;
@@ -1714,10 +1396,6 @@ FX_ENTRY void FX_CALL grFramebufferCopyExt(int x, int y, int w, int h,
 FX_ENTRY void FX_CALL
 grRenderBuffer( GrBuffer_t buffer )
 {
-#ifdef _WIN32
-    static HANDLE region = NULL;
-    int realWidth = pBufferWidth, realHeight = pBufferHeight;
-#endif // _WIN32
     LOG("grRenderBuffer(%d)\r\n", buffer);
     //printf("grRenderBuffer(%d)\n", buffer);
 
@@ -1918,11 +1596,7 @@ grBufferSwap( FxU32 swap_interval )
     return;
   }
 
-#ifdef _WIN32
-    SwapBuffers(wglGetCurrentDC());
-#else // _WIN32
   SDL_GL_SwapBuffers();
-#endif // _WIN32
   for (i = 0; i < nb_fb; i++)
     fbs[i].buff_clear = 1;
 

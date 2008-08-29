@@ -43,10 +43,6 @@ int fog_enabled;
 static int chroma_enabled;
 static int chroma_other_color;
 static int chroma_other_alpha;
-#ifdef _WIN32
-static float farF;
-static float nearF;
-#endif // _WIN32
 static int dither_enabled;
 int blackandwhite0;
 int blackandwhite1;
