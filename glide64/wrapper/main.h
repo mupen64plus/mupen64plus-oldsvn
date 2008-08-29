@@ -1,6 +1,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <SDL_opengl.h>
+
 #ifndef _WIN32
   #include "../winlnxdefs.h"
 //#define VPDEBUG
@@ -46,7 +48,7 @@ void remove_tex(unsigned int idmin, unsigned int idmax);
 void add_tex(unsigned int id);
 
 extern int w_buffer_mode;
-extern int nbTextureUnits;
+extern GLint nbTextureUnits;
 extern int width, height, widtho, heighto;
 extern int tex0_width, tex0_height, tex1_width, tex1_height;
 extern float texture_env_color[4];

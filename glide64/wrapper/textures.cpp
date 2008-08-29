@@ -46,11 +46,11 @@ void remove_tex(unsigned int idmin, unsigned int idmax)
     texlist *aux = list;
   int sz = nbTex;
     if (aux == NULL) return;
-    t = (unsigned int*)malloc(sz * sizeof(int));
+    t = (GLuint*)malloc(sz * sizeof(int));
     while (aux && aux->id >= idmin && aux->id < idmax)
     {
     if (n >= sz)
-      t = (unsigned int *) realloc(t, ++sz*sizeof(int));
+      t = (GLuint*)realloc(t, ++sz*sizeof(int));
         t[n++] = aux->id;
         aux = aux->next;
         free(list);
@@ -63,7 +63,7 @@ void remove_tex(unsigned int idmin, unsigned int idmax)
         {
             texlist *aux2 = aux->next->next;
       if (n >= sz)
-        t = (unsigned int *) realloc(t, ++sz*sizeof(int));
+        t = (GLuint*)realloc(t, ++sz*sizeof(int));
             t[n++] = aux->next->id;
             free(aux->next);
             aux->next = aux2;
