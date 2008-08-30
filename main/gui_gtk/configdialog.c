@@ -303,7 +303,8 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     static unsigned char updategui = FALSE, rcsrescan = FALSE;
     const char *filename, *name;
     gchar *text = NULL;
-    int guivalue, currentvalue, i;
+    int guivalue, currentvalue;
+    int i = 0;
 
     /* General Tab */ 
 
