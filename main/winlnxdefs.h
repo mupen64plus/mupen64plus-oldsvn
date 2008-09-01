@@ -25,6 +25,10 @@
 #ifdef __WIN32__
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
+# include <winbase.h>
+# define sleep(x) Sleep(x*1000)
+#endif
+
 #else
 typedef unsigned int BOOL;
 typedef unsigned int DWORD;

@@ -26,6 +26,7 @@
 
 #include <zlib.h>
 
+#include "winlnxdefs.h"
 #include "romcache.h"
 #include "config.h"
 #include "rom.h"
