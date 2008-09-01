@@ -51,6 +51,7 @@ void  plugin_load_plugins(const char *gfx_name,
               const char *audio_name, 
               const char *input_name,
               const char *RSP_name);
+void plugin_close_plugins();
 void  plugin_delete_list();
 plugin *plugin_get_by_name(const char *name);
 char *plugin_filename_by_name(const char *name);

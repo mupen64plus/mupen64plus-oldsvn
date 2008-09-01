@@ -721,3 +721,11 @@ void plugin_load_gfx_plugin(const char* gfx_name)
     setRenderingCallback = dummy_void;
      }
 }
+
+void plugin_close_plugins()
+{
+    closeDLL_gfx();
+    closeDLL_audio();
+    closeDLL_input();
+    closeDLL_RSP();
+}
