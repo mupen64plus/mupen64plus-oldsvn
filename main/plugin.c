@@ -113,6 +113,7 @@ const char * (*volumeGetString)() = dummy_volumeGetString;
 void (*closeDLL_input)() = dummy_void;
 void (*controllerCommand)(int Control, BYTE * Command) = dummy_controllerCommand;
 void (*getKeys)(int Control, BUTTONS *Keys) = dummy_getKeys;
+void (*old_initiateControllers)(HWND hMainWindow, CONTROL Controls[4]) = dummy_initiateControllers;
 void (*initiateControllers)(CONTROL_INFO ControlInfo) = dummy_initiateControllers;
 void (*readController)(int Control, BYTE *Command) = dummy_readController;
 void (*romClosed_input)() = dummy_void;
@@ -476,16 +477,20 @@ void plugin_load_input_plugin(const char* input_name)
     int i;
     plugin *p;
     void *handle_input = NULL;
-
+    PLUGIN_INFO input_pluginInfo;
+    
    p = plugin_get_by_name(input_name);
    if(p) handle_input = p->handle;
 
    if (handle_input)
-     {
+     {               
+    getDllInfo = dlsym(handle_input, "GetDllInfo");
+    getDllInfo(&input_pluginInfo);
     closeDLL_input = dlsym(handle_input, "CloseDLL");
     controllerCommand = dlsym(handle_input, "ControllerCommand");
     getKeys = dlsym(handle_input, "GetKeys");
     initiateControllers = dlsym(handle_input, "InitiateControllers");
+    old_initiateControllers = dlsym(handle_input, "InitiateControllers");
     readController = dlsym(handle_input, "ReadController");
     romClosed_input = dlsym(handle_input, "RomClosed");
     romOpen_input = dlsym(handle_input, "RomOpen");
@@ -515,7 +520,14 @@ void plugin_load_input_plugin(const char* input_name)
          Controls[i].RawData = FALSE;
          Controls[i].Plugin = PLUGIN_NONE;
       }
-    initiateControllers(control_info);
+    if (input_pluginInfo.Version == 0x0101)
+    {
+        initiateControllers(dummy_control_info);
+    }
+    else
+    {
+        old_initiateControllers(g_ProgramInfo.hwnd,Controls);
+    }
      }
    else
      {

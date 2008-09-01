@@ -288,6 +288,7 @@ extern const char * (*volumeGetString)();
 extern void (*closeDLL_input)();
 extern void (*controllerCommand)(int Control, BYTE * Command);
 extern void (*getKeys)(int Control, BUTTONS *Keys);
+extern void (*old_initiateControllers)(HWND hMainWindow, CONTROL Controls[4]);
 extern void (*initiateControllers)(CONTROL_INFO ControlInfo);
 extern void (*readController)(int Control, BYTE *Command);
 extern void (*romClosed_input)();
