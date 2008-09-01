@@ -51,6 +51,6 @@ version.h: .svn/entries
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 mupen64_input.so: $(OBJECTS)
-	$(CC) $^ $(SDL_LIBS) $(PLUGIN_LDFLAGS) -o $@
+	$(CC) $^ $(LDFLAGS) $(SDL_LIBS) $(PLUGIN_LDFLAGS) -o $@
 	$(STRIP) $@
 

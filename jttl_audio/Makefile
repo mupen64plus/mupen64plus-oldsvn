@@ -75,6 +75,6 @@ version.h: .svn/entries
 	$(CC) $(CFLAGS) $(SDL_FLAGS) $(SRC_FLAGS) -c -o $@ $<
 
 jttl_audio.so: $(OBJECTS)
-	$(CC) $^ $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SRC_LIBS) -o $@
+	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SRC_LIBS) -o $@
 	$(STRIP) $@
 

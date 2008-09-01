@@ -47,10 +47,10 @@ CONTROL Controls[4];
 
 static char l_PluginDir[PATH_MAX] = {0};
 
-GFX_INFO gfx_info;
-AUDIO_INFO audio_info;
-CONTROL_INFO control_info;
-RSP_INFO rsp_info;
+static GFX_INFO gfx_info;
+static AUDIO_INFO audio_info;
+static CONTROL_INFO control_info;
+static RSP_INFO rsp_info;
 
 void (*getDllInfo)(PLUGIN_INFO *PluginInfo);
 void (*dllConfig)(HWND hParent);
