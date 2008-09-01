@@ -169,7 +169,6 @@ void MainWindow::romOpen(const QString& url)
 
 void MainWindow::romOpen(const QString& url, unsigned int archivefile)
 {
-    qDebug() << "Opening:" << url;
     if (core::open_rom(url.toLocal8Bit(), archivefile) == 0) {
         startEmulation();
     }
