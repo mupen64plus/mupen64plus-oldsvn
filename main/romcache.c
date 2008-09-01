@@ -147,7 +147,7 @@ static void rebuild_cache_file(char* cache_filename)
         {
         sprintf(buffer,"RomDirectory[%d]",counter);
         strncpy(path, config_get_string(buffer,""), PATH_MAX);
-        if (path[strlen(path)] != '/')
+        if (path[strlen(path)-1] != '/')
         {
             strncat(path, "/", PATH_MAX);
         }
