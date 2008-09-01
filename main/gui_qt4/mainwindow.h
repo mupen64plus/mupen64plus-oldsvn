@@ -24,6 +24,7 @@
 #include <QMainWindow>
 #include <QEvent>
 #include <QActionGroup>
+#include <QPointer>
 
 #include "ui_mainwindow.h"
 
@@ -91,7 +92,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         QList<QAction*> slotActions;
         QLabel* m_statusBarLabel;
 #ifdef __WIN32__
-        QWidget* m_renderWindow;
+        QPointer<QWidget> m_renderWindow;
 
     protected:        
         bool eventFilter(QObject *obj, QEvent *ev);

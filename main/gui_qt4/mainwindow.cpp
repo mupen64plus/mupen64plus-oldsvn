@@ -40,19 +40,11 @@ namespace core {
 MainWindow::MainWindow() 
 : QMainWindow(0)
 , m_statusBarLabel(0)
-#ifdef __WIN32__
-, m_renderWindow(0)
-#endif
 {
     setupUi(this);
     setupActions();
     m_statusBarLabel = new QLabel;
     statusBar()->addPermanentWidget(m_statusBarLabel);
-
-#ifdef __WIN32__    
-    m_renderWindow = new QWidget;
-    m_renderWindow->installEventFilter(this);
-#endif
 
     connect(mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(itemCountUpdate(int)));
@@ -110,16 +102,45 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_bool("StatusBarVisible", actionShowStatusbar->isChecked());
     core::config_put_bool("ToolBarVisible", actionShowToolbar->isChecked());
     core::config_put_bool("FilterVisible", actionShowFilter->isChecked());
+#ifdef __WIN32__
+    if (m_renderWindow) {
+        m_renderWindow->close();
+        m_renderWindow->deleteLater();
+    }
+#endif
 }
 
 #ifdef __WIN32__
+
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 {
-    if ((obj == m_renderWindow) && (ev->type() == QEvent::Close)) {
-        emulationStop();
-        return true;
+    if (obj == m_renderWindow) {
+        switch (ev->type()) {
+        case QEvent::Close:
+            emulationStop();
+            return false;
+            break;
+        case QEvent::MouseButtonDblClick:
+            actionFullScreen->toggle();
+            return true;
+            break;
+        case QEvent::KeyRelease:
+            {
+                QKeyEvent* qke = static_cast<QKeyEvent*>(ev);
+                foreach (QObject* child, children()) {
+                    if (QAction*a = qobject_cast<QAction*>(child)) {
+                        QKeySequence seq(qke->key() + qke->modifiers());
+                        if (seq == a->shortcut()) {
+                            a->activate(QAction::Trigger);
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    } else {
+        return QMainWindow::eventFilter(obj, ev);
     }
-    return QMainWindow::eventFilter(obj, ev);
 }
 #endif
 
@@ -208,7 +229,10 @@ void MainWindow::emulationStop()
 {
     core::stopEmulation();
 #ifdef __WIN32__
-    m_renderWindow->hide();
+    if (m_renderWindow) {
+        m_renderWindow->close();
+        m_renderWindow->deleteLater();
+   }
 #endif
 }
 
@@ -319,6 +343,9 @@ void MainWindow::customEvent(QEvent* event)
 void MainWindow::startEmulation()
 {
 #ifdef __WIN32__
+    m_renderWindow = new QWidget;
+    m_renderWindow->addActions(actions());
+    m_renderWindow->installEventFilter(this);
     m_renderWindow->show();
     core::g_MainWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
     core::g_StatusBar = reinterpret_cast<core::HWND__*>(statusBar()->winId());
@@ -384,7 +411,7 @@ void MainWindow::setupActions()
     connect(actionShowFilter, SIGNAL(toggled(bool)),
             mainWidget, SLOT(showFilter(bool)));
     actionFullScreen->setIcon(icon("view-fullscreen.png"));
-    connect(actionFullScreen, SIGNAL(triggered()),
+    connect(actionFullScreen, SIGNAL(toggled(bool)),
             this, SLOT(fullScreenToggle()));
     actionConfigureMupen64Plus->setIcon(icon("preferences-system.png"));
     connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
