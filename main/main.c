@@ -1568,7 +1568,6 @@ int main(int argc, char *argv[])
 
 #ifdef __WIN32__
 
-ProgramInfo g_ProgramInfo;
 static const char* programName = "mupen64plus.exe";
 
 int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParamarg, int cmdShow)
@@ -1579,9 +1578,8 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParama
     char* arg = NULL;
     char* wrk = NULL;
     char** argv = NULL;
-    
-    g_ProgramInfo.hinst = instance;
-    g_ProgramInfo.hwnd = NULL;
+
+    g_ProgramInstance = instance;
     
     wrk = malloc(strlen(programName) + 1);
     strcpy(wrk, programName);

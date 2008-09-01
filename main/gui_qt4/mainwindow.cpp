@@ -40,7 +40,7 @@ namespace core {
 MainWindow::MainWindow() 
 : QMainWindow(0)
 , m_statusBarLabel(0)
-#ifdef __WIN32
+#ifdef __WIN32__
 , m_renderWindow(0)
 #endif
 {
@@ -48,9 +48,11 @@ MainWindow::MainWindow()
     setupActions();
     m_statusBarLabel = new QLabel;
     statusBar()->addPermanentWidget(m_statusBarLabel);
-    
+
+#ifdef __WIN32__    
     m_renderWindow = new QWidget;
     m_renderWindow->installEventFilter(this);
+#endif
 
     connect(mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(itemCountUpdate(int)));
@@ -318,7 +320,8 @@ void MainWindow::startEmulation()
 {
 #ifdef __WIN32__
     m_renderWindow->show();
-    core::g_ProgramInfo.hwnd = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
+    core::g_MainWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
+    core::g_StatusBar = reinterpret_cast<core::HWND__*>(statusBar()->winId());
 #endif
 
     core::startEmulation();

@@ -316,4 +316,8 @@ extern void (*fBRead)(DWORD addr);
 extern void (*fBWrite)(DWORD addr, DWORD size);
 extern void (*fBGetFrameBufferInfo)(void *p);
 
+extern HINSTANCE g_ProgramInstance;
+extern HWND g_MainWindow;
+extern HWND g_StatusBar;
+
 #endif

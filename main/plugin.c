@@ -133,6 +133,10 @@ void (*fBGetFrameBufferInfo)(void *p) = dummy_fBGetFrameBufferInfo;
 
 list_t g_PluginList = NULL;
 
+HINSTANCE g_ProgramInstance = NULL;
+HWND g_MainWindow = NULL;
+HWND g_StatusBar = NULL;
+
 void plugin_delete_list(void)
 {
     list_node_t *node;
@@ -459,7 +463,7 @@ void plugin_load_rsp_plugin(const char* RSP_name)
     rsp_info.ProcessRdpList = processRDPList;
     rsp_info.ShowCFB = showCFB;
 #ifdef __WIN32__
-    rsp_info.hInst = g_ProgramInfo.hinst;
+    rsp_info.hInst = g_ProgramInstance;
 #endif
     initiateRSP(rsp_info,(DWORD*) NULL);
      }
@@ -511,8 +515,8 @@ void plugin_load_input_plugin(const char* input_name)
     control_info.HEADER = rom;
     control_info.Controls = Controls;
 #ifdef __WIN32__
-    control_info.hMainWindow = g_ProgramInfo.hwnd;
-    control_info.hinst = g_ProgramInfo.hinst;
+    control_info.hMainWindow = g_MainWindow;
+    control_info.hinst = g_ProgramInstance;
 #endif
     for (i=0; i<4; i++)
       {
@@ -526,7 +530,7 @@ void plugin_load_input_plugin(const char* input_name)
     }
     else
     {
-        old_initiateControllers(g_ProgramInfo.hwnd,Controls);
+        old_initiateControllers(g_MainWindow, Controls);
     }
      }
    else
@@ -597,8 +601,8 @@ void plugin_load_audio_plugin(const char* audio_name)
     audio_info.AI_BITRATE_REG = &(ai_register.ai_bitrate);
     audio_info.CheckInterrupts = sucre;
 #ifdef __WIN32__
-    audio_info.hwnd = g_ProgramInfo.hwnd;
-    audio_info.hinst = g_ProgramInfo.hinst;
+    audio_info.hwnd = g_MainWindow;
+    audio_info.hinst = g_ProgramInstance;
 #endif
     initiateAudio(audio_info);
      }
@@ -693,8 +697,8 @@ void plugin_load_gfx_plugin(const char* gfx_name)
     gfx_info.VI_Y_SCALE_REG = &(vi_register.vi_y_scale);
     gfx_info.CheckInterrupts = sucre;
 #ifdef __WIN32__
-    gfx_info.hWnd = g_ProgramInfo.hwnd;
-    gfx_info.hStatusBar = NULL;
+    gfx_info.hWnd = g_MainWindow;
+    gfx_info.hStatusBar = g_StatusBar;
 #endif
     initiateGFX(gfx_info);
      }
