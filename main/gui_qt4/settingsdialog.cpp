@@ -344,6 +344,9 @@ void SettingsDialog::accept()
     core::config_put_number("NumRomDirs", romDirs.count());
     int i = 0;
     foreach(QString str, romDirs) {
+        if (!str.endsWith("/")) {
+            str.append("/");
+        }
         core::config_put_string(
             qPrintable(QString("RomDirectory[%1]").arg(i++)),
             qPrintable(str)

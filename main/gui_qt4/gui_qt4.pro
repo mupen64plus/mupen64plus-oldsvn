@@ -20,11 +20,20 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 TEMPLATE = lib
-CONFIG += staticlib link_pkgconfig
-PKGCONFIG += gtk+-2.0 sdl
+CONFIG += staticlib release
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .
+
+unix {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += gtk+-2.0 sdl
+}
+
+win32 {
+    message($$cflags)
+    QMAKE_CFLAGS_RELEASE += $$cflags
+}
 
 # Input
 HEADERS += globals.h \

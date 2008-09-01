@@ -99,7 +99,8 @@ void check_input_sync(unsigned char *value)
 }
 
 void compare_core()
-{   
+{
+#ifndef __WIN32__   
    static int comparecnt = 0;
    int iFirst = 1;
    char errHead[128];
@@ -174,4 +175,5 @@ void compare_core()
     /*fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
     fwrite(&FCR31, 4, 1, f);*/
      }
+#endif
 }

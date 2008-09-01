@@ -220,27 +220,7 @@ OBJ_GTK_GUI = \
 	main/gui_gtk/rombrowser.o \
 	main/gui_gtk/romproperties.o
 
-OBJ_QT_GUI = \
-	main/gui_qt4/main.o \
-	main/gui_qt4/mainwidget.o \
-	main/gui_qt4/mainwindow.o \
-	main/gui_qt4/romdirectorieslistwidget.o \
-	main/gui_qt4/rommodel.o \
-	main/gui_qt4/settingsdialog.o \
-	main/gui_qt4/globals.o
-
-OBJ_QT_MOC = \
-	main/gui_qt4/mainwidget.moc \
-	main/gui_qt4/mainwindow.moc \
-	main/gui_qt4/romdirectorieslistwidget.moc \
-	main/gui_qt4/settingsdialog.moc \
-	main/gui_qt4/rommodel.moc
-
-OBJ_QT_HEADERS = \
-	main/gui_qt4/ui_romdirectorieslistwidget.h \
-	main/gui_qt4/ui_settingsdialog.h \
-	main/gui_qt4/ui_mainwindow.h \
-    main/gui_qt4/ui_mainwidget.h
+OBJ_QT_GUI = main/gui_qt4/release/libgui_qt4.a
 
 OBJ_DBG = \
 	debugger/debugger.o \
@@ -345,14 +325,16 @@ all: main/version.h $(ALL)
 main/version.h: version.win32.h
 	${CP} version.win32.h main\version.h
 
+main/gui_qt4/Makefile:
+	${QMAKE} main/gui_qt4/gui_qt4.pro -o main/gui_qt4/Makefile
+
+main/gui_qt4/release/libgui_qt4.a: main/gui_qt4/Makefile FORCE
+	 ${MAKE} -C main/gui_qt4 CXXFLAGS="${CFLAGS}" 
+
 mupen64plus: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) -o $@
 
 .cpp.o:
-	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
-
-# I have no idea why this is needed, but apparently it is.
-main/gui_qt4/settings.o: main/gui_qt4/settings.cpp
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 .c.o:
@@ -393,15 +375,6 @@ plugins/mupen64_hle_rsp_azimer.so: FORCE
 plugins/mupen64_input.so: FORCE
 	$(MAKE) -C mupen64_input all
 	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
-
-# QT4 build rules
-main/gui_qt4/ui_%.h: main/gui_qt4/%.ui
-	$(UIC) $< -o $@
-
-main/gui_qt4/%.moc: main/gui_qt4/%.h
-	$(MOC) -i $< -o $@
-
-$(OBJ_QT_GUI): $(OBJ_QT_MOC) $(OBJ_QT_HEADERS)
 
 # This is used to force the plugin builds
 FORCE:

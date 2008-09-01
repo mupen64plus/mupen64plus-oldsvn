@@ -26,7 +26,9 @@
 
 StarLabel::StarLabel(QWidget* parent)
 : QLabel(parent), m_max(-1)
-{}
+{
+    setMinimumHeight(16);    
+}
 
 int StarLabel::max() const
 {

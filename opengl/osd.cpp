@@ -36,6 +36,11 @@ extern "C" {
 
 #define FONT_FILENAME "font.ttf"
 
+#ifdef __WIN32__
+# warning This hack should be fixed at some point
+# define glActiveTexture(x)
+#endif
+
 // static variables for OSD
 static int l_OsdInitialized = 0;
 

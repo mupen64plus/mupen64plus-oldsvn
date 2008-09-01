@@ -139,17 +139,20 @@ static int write_cache_file(char* cache_filename)
 
 static void rebuild_cache_file(char* cache_filename)
 {
-    char real_path[PATH_MAX];
+    char path[PATH_MAX];
     char buffer[32];
-    const char *directory; 
     int counter;
 
     for ( counter = 0; counter < config_get_number("NumRomDirs",0); ++counter )
         {
         sprintf(buffer,"RomDirectory[%d]",counter);
-        directory = config_get_string(buffer,"");
-        printf("Scanning... %s\n",directory);
-        scan_dir(directory);
+        strncpy(path, config_get_string(buffer,""), PATH_MAX);
+        if (path[strlen(path)] != '/')
+        {
+            strncat(path, "/", PATH_MAX);
+        }
+        printf("Scanning... %s\n", path);
+        scan_dir(path);
         }
 
     write_cache_file(cache_filename);

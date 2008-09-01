@@ -26,12 +26,8 @@
 #include <time.h>
 #include <time.h>
 
-#ifndef __WIN32__
 #include <SDL.h>
 #include "../main/winlnxdefs.h"
-#else
-#include <windows.h>
-#endif
 
 #include "interupt.h"
 #include "r4300.h"
@@ -379,10 +375,8 @@ void gen_interupt()
 #ifdef WITH_LIRC
             lircCheckInput();
 #endif
-#ifndef __WIN32__
             SDL_PumpEvents();
             refresh_stat();
-#endif
 
             // if paused, poll for input events
             if(rompause)
@@ -391,10 +385,14 @@ void gen_interupt()
                 SDL_GL_SwapBuffers();
                 while(rompause)
                 {
+#ifdef __WIN32__
+                    Sleep(10);
+#else
                     struct timespec ts;
                     ts.tv_sec = 0;
                     ts.tv_nsec = 10000000;
                     nanosleep(&ts, NULL); // sleep for 10 milliseconds
+#endif
                     SDL_PumpEvents();
 #ifdef WITH_LIRC
                     lircCheckInput();
@@ -440,9 +438,7 @@ void gen_interupt()
 #ifdef WITH_LIRC
             lircCheckInput();
 #endif //WITH_LIRC
-#ifndef __WIN32__
             SDL_PumpEvents();
-#endif
             PIF_RAMb[0x3F] = 0x0;
             remove_interupt_event();
             MI_register.mi_intr_reg |= 0x02;
