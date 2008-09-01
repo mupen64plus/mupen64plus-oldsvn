@@ -20,6 +20,7 @@
 
 #include <QSize>
 #include <QListWidgetItem>
+#include <QDebug>
 
 #include "rommodel.h"
 #include "settingsdialog.h"
@@ -104,6 +105,11 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
     osdEnabledCheck->setChecked(core::g_OsdEnabled);
 
+    QString inputPlugin = core::config_get_string("Input Plugin", "");
+    QString gfxPlugin = core::config_get_string("Gfx Plugin", "");
+    QString audioPlugin = core::config_get_string("Audio Plugin", "");
+    QString rspPlugin = core::config_get_string("RSP Plugin", "");
+
     core::list_node_t *node;
     core::plugin *p;
     list_foreach(core::g_PluginList, node) {
@@ -137,6 +143,30 @@ SettingsDialog::SettingsDialog(QWidget* parent)
                     rspPluginCombo->addItem(p->plugin_name);
                 break;
         }
+    }
+
+    inputPlugin = core::plugin_name_by_filename(qPrintable(inputPlugin));
+    if (!inputPlugin.isEmpty() &&
+        ((i = inputPluginCombo->findText(inputPlugin)) != -1)) {
+        inputPluginCombo->setCurrentIndex(i);
+    }
+
+    audioPlugin = core::plugin_name_by_filename(qPrintable(audioPlugin));
+    if (!audioPlugin.isEmpty() &&
+        ((i = audioPluginCombo->findText(audioPlugin)) != -1)) {
+        audioPluginCombo->setCurrentIndex(i);
+    }
+
+    rspPlugin = core::plugin_name_by_filename(qPrintable(rspPlugin));
+    if (!rspPlugin.isEmpty() &&
+        ((i = rspPluginCombo->findText(rspPlugin)) != -1)) {
+        rspPluginCombo->setCurrentIndex(i);
+    }
+
+    gfxPlugin = core::plugin_name_by_filename(qPrintable(gfxPlugin));
+    if (!gfxPlugin.isEmpty() &&
+        ((i = graphicsPluginCombo->findText(gfxPlugin)) != -1)) {
+        graphicsPluginCombo->setCurrentIndex(i);
     }
 
     romDirectoriesListWidget->setDirectories(romDirectories());
@@ -320,6 +350,7 @@ void SettingsDialog::accept()
         );
     }
     RomModel::self()->settingsChanged();
+    core::config_write();
     QDialog::accept();
 }
 

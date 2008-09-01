@@ -21,6 +21,7 @@
 extern "C" {
     #include "../version.h"
     #include "../main.h"
+    #include "../config.h"
 }
 
 #ifndef __WIN32__
@@ -88,6 +89,7 @@ void gui_main_loop(void)
     mainWindow = 0;
     delete application;
     application = 0;
+    config_write();
 }
 
 int gui_message(unsigned char messagetype, const char *format, ...)
