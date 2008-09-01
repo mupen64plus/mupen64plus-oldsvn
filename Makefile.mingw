@@ -343,7 +343,7 @@ clean:
 all: main/version.h $(ALL)
 
 main/version.h: version.win32.h
-	${CP} version.win32.h main/version.h
+	${CP} version.win32.h main\version.h
 
 mupen64plus: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) -o $@
