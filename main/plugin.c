@@ -522,7 +522,7 @@ void plugin_load_input_plugin(const char* input_name)
       }
     if (input_pluginInfo.Version == 0x0101)
     {
-        initiateControllers(dummy_control_info);
+        initiateControllers(control_info);
     }
     else
     {
