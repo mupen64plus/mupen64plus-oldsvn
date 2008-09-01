@@ -92,6 +92,9 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         QLabel* m_statusBarLabel;
 #ifdef __WIN32__
         QWidget* m_renderWindow;
+
+    protected:        
+        bool eventFilter(QObject *obj, QEvent *ev);
 #endif
 };
 

@@ -50,6 +50,7 @@ MainWindow::MainWindow()
     statusBar()->addPermanentWidget(m_statusBarLabel);
     
     m_renderWindow = new QWidget;
+    m_renderWindow->installEventFilter(this);
 
     connect(mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(itemCountUpdate(int)));
@@ -107,6 +108,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_bool("ToolBarVisible", actionShowToolbar->isChecked());
     core::config_put_bool("FilterVisible", actionShowFilter->isChecked());
 }
+
+#ifdef __WIN32__
+bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
+{
+    if ((obj == m_renderWindow) && (ev->type() == QEvent::Close)) {
+        emulationStop();
+        return true;
+    }
+    return QMainWindow::eventFilter(obj, ev);
+}
+#endif
 
 void MainWindow::showInfoMessage(const QString& msg)
 {
