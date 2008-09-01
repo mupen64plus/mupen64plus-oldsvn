@@ -60,3 +60,7 @@ EXPORT void CALL InitiateControllers (CONTROL_INFO ControlInfo)
     ControlInfo.Controls[0].Present = TRUE;
 }
 
+EXPORT void CALL GetKeys(int Control, BUTTONS * Keys )
+{
+    Keys->Value = 0x0000;
+}
