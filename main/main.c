@@ -1570,14 +1570,39 @@ int main(int argc, char *argv[])
 #ifdef __WIN32__
 
 ProgramInfo g_ProgramInfo;
+static const char* programName = "mupen64plus.exe";
 
 int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParamarg, int cmdShow)
 {
+    list_t arguments = NULL;
+    list_node_t*  node = NULL;
+    int i = 0;
+    char* arg = NULL;
+    char* wrk = NULL;
+    char** argv = NULL;
+    
     g_ProgramInfo.hinst = instance;
     g_ProgramInfo.hwnd = NULL;
     
-	int argc = 1;
-	char *argv[] = { "mupen64plus.exe" };
-	return main(argc, argv);	
+    wrk = malloc(strlen(programName) + 1);
+    strcpy(wrk, programName);
+    list_append(&arguments, wrk);
+    
+    for (arg = strtok(cmdParamarg, " ");
+         arg != NULL;
+         arg = strtok(NULL, " "))
+    {
+        wrk = malloc(strlen(arg) + 1);
+        strcpy(wrk, arg);
+        list_append(&arguments, arg);
+    }
+    
+    argv = malloc(list_length(arguments) + 1 * sizeof(char*));
+    list_foreach(arguments, node)
+    {
+        argv[i++] = node->data;
+    }
+    
+	return main(i, argv);	
 }
 #endif
