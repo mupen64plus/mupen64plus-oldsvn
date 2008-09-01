@@ -62,5 +62,3 @@ typedef void* LPVOID;
 #endif
 
 #endif // __WIN32__
-
-#endif
