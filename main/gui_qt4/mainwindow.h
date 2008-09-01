@@ -62,8 +62,8 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
 
     private slots:
         void romOpen();
-        void romOpen(const QUrl& url);
-        void romOpen(const QUrl& url, unsigned int archivefile);
+        void romOpen(const QString& url);
+        void romOpen(const QString& url, unsigned int archivefile);
         void romClose();
 
         void emulationStart();

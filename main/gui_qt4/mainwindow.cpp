@@ -56,8 +56,8 @@ MainWindow::MainWindow()
 
     connect(mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(itemCountUpdate(int)));
-    connect(mainWidget, SIGNAL(romDoubleClicked(QUrl, unsigned int)),
-             this, SLOT(romOpen(QUrl, unsigned int)));
+    connect(mainWidget, SIGNAL(romDoubleClicked(QString, unsigned int)),
+             this, SLOT(romOpen(QString, unsigned int)));
 
     QSize size(core::config_get_number("MainWindowWidth",600),
                core::config_get_number("MainWindowHeight",400));
@@ -162,15 +162,15 @@ void MainWindow::romOpen()
     }
 }
 
-void MainWindow::romOpen(const QUrl& url)
+void MainWindow::romOpen(const QString& url)
 {
     romOpen(url, 0);
 }
 
-void MainWindow::romOpen(const QUrl& url, unsigned int archivefile)
+void MainWindow::romOpen(const QString& url, unsigned int archivefile)
 {
-    QString path = url.path();
-    if (core::open_rom(path.toLocal8Bit(), archivefile) == 0) {
+    qDebug() << "Opening:" << url;
+    if (core::open_rom(url.toLocal8Bit(), archivefile) == 0) {
         startEmulation();
     }
 }

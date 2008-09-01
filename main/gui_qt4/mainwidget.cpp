@@ -267,9 +267,12 @@ bool MainWidget::eventFilter(QObject* obj, QEvent* event)
     return filtered;
 }
 
+#include <QDebug>
+
 void MainWidget::load(const QModelIndex& index)
 {
     QString filename = index.data(RomModel::FullPath).toString();
+    qDebug() << filename;
     unsigned int archivefile = index.data(RomModel::ArchiveFile).toUInt();
     if (!filename.isEmpty()) {
         emit romDoubleClicked(filename, archivefile);
