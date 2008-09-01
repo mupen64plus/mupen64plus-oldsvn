@@ -23,7 +23,9 @@ extern "C" {
     #include "../main.h"
 }
 
-#include <gtk/gtk.h>
+#ifndef __WIN32__
+# include <gtk/gtk.h>
+#endif
 
 #include <QApplication>
 #include <QAbstractEventDispatcher>

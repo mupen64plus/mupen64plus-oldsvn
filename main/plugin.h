@@ -60,6 +60,11 @@ void  plugin_exec_config(const char *name);
 void  plugin_exec_test(const char *name);
 void  plugin_exec_about(const char *name);
 
+void plugin_load_gfx_plugin(const char* gfx_name);
+void plugin_load_audio_plugin(const char* audio_name);
+void plugin_load_input_plugin(const char* input_name);
+void plugin_load_rsp_plugin(const char* RSP_name);
+
 /* Plugin types */
 #define PLUGIN_TYPE_RSP         1
 #define PLUGIN_TYPE_GFX         2
@@ -283,6 +288,7 @@ extern const char * (*volumeGetString)();
 extern void (*closeDLL_input)();
 extern void (*controllerCommand)(int Control, BYTE * Command);
 extern void (*getKeys)(int Control, BUTTONS *Keys);
+extern void (*old_initiateControllers)(HWND hMainWindow, CONTROL Controls[4]);
 extern void (*initiateControllers)(CONTROL_INFO ControlInfo);
 extern void (*readController)(int Control, BYTE *Command);
 extern void (*romClosed_input)();
@@ -309,5 +315,9 @@ typedef struct
 extern void (*fBRead)(DWORD addr);
 extern void (*fBWrite)(DWORD addr, DWORD size);
 extern void (*fBGetFrameBufferInfo)(void *p);
+
+extern HINSTANCE g_ProgramInstance;
+extern HWND g_MainWindow;
+extern HWND g_StatusBar;
 
 #endif

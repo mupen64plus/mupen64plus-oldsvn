@@ -22,6 +22,12 @@
 #ifndef WINLNXDEFS_H
 #define WINLNXDEFS_H
 
+#ifdef __WIN32__
+# define WIN32_LEAN_AND_MEAN
+# include <windows.h>
+# include <winbase.h>
+# define sleep(x) Sleep(x*1000)
+#else
 typedef unsigned int BOOL;
 typedef unsigned int DWORD;
 typedef unsigned short WORD;
@@ -52,4 +58,5 @@ typedef void* LPVOID;
 #define TRUE 1
 #endif
 
-#endif
+#endif // __WIN32__
+#endif // WINLNXDEFS_H

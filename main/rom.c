@@ -459,7 +459,7 @@ static int ask_hack(void)
 
 int open_rom(const char* filename, unsigned int archivefile)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
          {
 #ifndef NO_GUI
          if(!g_Noask)
@@ -617,7 +617,7 @@ int open_rom(const char* filename, unsigned int archivefile)
 
 int close_rom(void)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         {
 #ifndef NO_GUI
         if(!g_Noask)

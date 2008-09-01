@@ -24,6 +24,7 @@
 #define __7Z_BUFFER_H
 
 #include <stddef.h>
+
 #include "Types.h"
 
 typedef struct _CSzByteBuffer

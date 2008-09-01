@@ -25,16 +25,20 @@
  * gui subdirectories for the gui-specific code.
  * if you want to implement an interface, you should look here
  */
+ 
+#ifndef __WIN32__
+# include <ucontext.h> // extra signal types (for portability)
+# include <libgen.h> // basename, dirname
+#endif
 
+#include <sys/time.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>  // POSIX macros and standard types.
 #include <pthread.h> // POSIX thread library
 #include <signal.h> // signals
-#include <ucontext.h> // extra signal types (for portability)
 #include <getopt.h> // getopt_long
-#include <libgen.h> // basename, dirname
 #include <dirent.h>
 
 #include <png.h>    // for writing screenshot PNG files
@@ -43,7 +47,6 @@
 
 #include "main.h"
 #include "version.h"
-#include "winlnxdefs.h"
 #include "config.h"
 #include "plugin.h"
 #include "rom.h"
@@ -75,15 +78,21 @@
 static void parseCommandLine(int argc, char **argv);
 static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
 static void *emulationThread( void *_arg );
-static void sighandler( int signal, siginfo_t *info, void *context ); // signal handler
 extern void *rom_cache_system(void *_arg);
+
+
+#ifdef __WIN32__
+static void sighandler( int signal );
+#else
+static void sighandler( int signal, siginfo_t *info, void *context );
+#endif
 
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
-pthread_t   g_EmulationThread = 0;      // core thread handle
-pthread_t   g_RomCacheThread = 0;       // rom cache thread handle
+pthread_t   g_EmulationThread;      // core thread handle
+pthread_t   g_RomCacheThread;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_Fullscreen = 0;           // fullscreen enabled?
@@ -231,11 +240,21 @@ static int GetVILimit(void)
 
 static unsigned int gettimeofday_msec(void)
 {
-    struct timeval tv;
     unsigned int foo;
+#if defined(__WIN32__)
+    FILETIME ft;
+    unsigned __int64 tmpres = 0;
+    GetSystemTimeAsFileTime(&ft);
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+    foo = (((tmpres / 1000000UL) % 1000000) * 1000) + (tmpres % 1000000UL / 1000);
+#else
+    struct timeval tv;
 
     gettimeofday(&tv, NULL);
     foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
+#endif
     return foo;
 }
 
@@ -331,9 +350,13 @@ void startEmulation(void)
 
     // make sure all plugins are specified before running
     if(g_GfxPlugin)
+    {
         gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
+    }
     else
+    {
         gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
+    }
 
     if(!gfx_plugin)
     {
@@ -379,12 +402,11 @@ void startEmulation(void)
     {
         emulationThread(NULL);
     }
-    else if(!g_EmulationThread)
+    else if(!g_EmulatorRunning)
     {
         // spawn emulation thread
         if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
         {
-            g_EmulationThread = 0;
             error_message(tr("Couldn't spawn core thread!"));
             return;
         }
@@ -404,7 +426,7 @@ void startEmulation(void)
 
 void stopEmulation(void)
 {
-    if(g_EmulationThread || g_EmulatorRunning)
+    if(g_EmulatorRunning)
     {
 #ifndef NO_GUI
         g_romcache.rcspause = 0;
@@ -414,7 +436,7 @@ void stopEmulation(void)
         stop_it();
 
         // wait until emulation thread is done before continuing
-        if(g_EmulationThread)
+        if(g_EmulatorRunning)
             pthread_join(g_EmulationThread, NULL);
 
         g_EmulatorRunning = 0;
@@ -539,7 +561,11 @@ void new_vi(void)
         time = (int)(CalculatedTime - CurrentFPSTime);
         if (time > 0)
         {
+#ifdef __WIN32__
+            Sleep(time);
+#else
             usleep(time * 1000);
+#endif
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }
@@ -737,16 +763,23 @@ static int sdl_event_filter( const SDL_Event *event )
 */
 static void * emulationThread( void *_arg )
 {
+#ifndef __WIN32__
+    struct sigaction sa;
+#endif
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
            *input_plugin = NULL,
            *RSP_plugin = NULL;
-    struct sigaction sa;
 
     // install signal handler, but only if we're running in GUI mode
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
     if (l_GuiEnabled)
     {
+#ifdef __WIN32__
+        signal( SIGSEGV, sighandler );
+        signal( SIGILL, sighandler );
+        signal( SIGFPE, sighandler );
+#else
         memset( &sa, 0, sizeof( struct sigaction ) );
         sa.sa_sigaction = sighandler;
         sa.sa_flags = SA_SIGINFO;
@@ -754,6 +787,7 @@ static void * emulationThread( void *_arg )
         sigaction( SIGILL, &sa, NULL );
         sigaction( SIGFPE, &sa, NULL );
         sigaction( SIGCHLD, &sa, NULL );
+#endif
     }
 
     g_EmulatorRunning = 1;
@@ -876,7 +910,7 @@ static void * emulationThread( void *_arg )
     free_memory();
 
     // clean up
-    g_EmulationThread = 0;
+    g_EmulatorRunning = 0;
 
     SDL_Quit();
 
@@ -895,6 +929,12 @@ static void * emulationThread( void *_arg )
 /*********************************************************************************************************
 * signal handler
 */
+#ifdef __WIN32__
+static void sighandler(int signal)
+{
+    printf( "Signal number %d caught\n", signal );
+}
+#else
 static void sighandler(int signal, siginfo_t *info, void *context)
 {
     if( info->si_pid == g_EmulationThread )
@@ -965,6 +1005,7 @@ static void sighandler(int signal, siginfo_t *info, void *context)
         exit( EXIT_FAILURE );
     }
 }
+#endif /* __WIN32__ */
 
 static void printUsage(const char *progname)
 {
@@ -991,7 +1032,7 @@ static void printUsage(const char *progname)
            "    --debugger            : start with debugger enabled\n"
 #endif 
            "    -h, --help            : see this help message\n"
-           "\n", basename(str));
+           "\n", str);
 
     free(str);
 
@@ -1182,7 +1223,6 @@ void parseCommandLine(int argc, char **argv)
     // This allows creation of a mupen64plus_nogui symlink to mupen64plus instead of passing --nogui
     // for backwards compatability with old mupen64_nogui program name.
     str = strdup(argv[0]);
-    basename(str);
     if(strstr(str, "_nogui") != NULL)
     {
         l_GuiEnabled = FALSE;
@@ -1198,6 +1238,11 @@ void parseCommandLine(int argc, char **argv)
  */
 static void setPaths(void)
 {
+#ifdef __WIN32__
+    strncpy(l_ConfigDir, "./", PATH_MAX);
+    strncpy(l_InstallDir, "./", PATH_MAX);
+    return;
+#else
     char buf[PATH_MAX], buf2[PATH_MAX];
 
     // if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
@@ -1335,7 +1380,7 @@ static void setPaths(void)
         snprintf(chDefaultDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
         SetScreenshotDir(chDefaultDir);
     }
-
+#endif /* __WIN32__ */
 }
 
 /*********************************************************************************************************
@@ -1451,7 +1496,6 @@ int main(int argc, char *argv[])
         g_romcache.rcstask = RCS_INIT;
         if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
             {
-            g_RomCacheThread = 0;
             error_message(tr("Couldn't spawn rom cache thread!"));
             }
         else
@@ -1519,3 +1563,40 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+#ifdef __WIN32__
+
+static const char* programName = "mupen64plus.exe";
+
+int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParamarg, int cmdShow)
+{
+    list_t arguments = NULL;
+    list_node_t*  node = NULL;
+    int i = 0;
+    char* arg = NULL;
+    char* wrk = NULL;
+    char** argv = NULL;
+
+    g_ProgramInstance = instance;
+    
+    wrk = malloc(strlen(programName) + 1);
+    strcpy(wrk, programName);
+    list_append(&arguments, wrk);
+    
+    for (arg = strtok(cmdParamarg, " ");
+         arg != NULL;
+         arg = strtok(NULL, " "))
+    {
+        wrk = malloc(strlen(arg) + 1);
+        strcpy(wrk, arg);
+        list_append(&arguments, arg);
+    }
+    
+    argv = malloc(list_length(arguments) + 1 * sizeof(char*));
+    list_foreach(arguments, node)
+    {
+        argv[i++] = node->data;
+    }
+    
+    return main(i, argv);
+}
+#endif

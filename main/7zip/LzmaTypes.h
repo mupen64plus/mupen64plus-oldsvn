@@ -10,10 +10,7 @@ This file is part of LZMA SDK 4.40 (2006-05-01)
 #ifndef __LZMATYPES_H
 #define __LZMATYPES_H
 
-#ifndef _7ZIP_BYTE_DEFINED
-#define _7ZIP_BYTE_DEFINED
-typedef unsigned char Byte;
-#endif 
+#include <zconf.h>
 
 #ifndef _7ZIP_UINT16_DEFINED
 #define _7ZIP_UINT16_DEFINED

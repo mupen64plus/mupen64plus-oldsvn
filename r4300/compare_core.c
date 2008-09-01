@@ -24,7 +24,12 @@
 #include "r4300.h"
 
 #include "../memory/memory.h"
+#ifndef __WIN32__
 #include "../main/winlnxdefs.h"
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 #include "../main/plugin.h"
 #include "../r4300/recomph.h"
 
@@ -166,7 +171,7 @@ void compare_core()
     fwrite(reg, 32, sizeof(long long int), f);
     fwrite(reg_cop0, 32, sizeof(int), f);
     fwrite(reg_cop1_fgr_64, 32, sizeof(long long int), f);
-    //fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
-    /*fwrite(&FCR31, 4, 1, f);*/
+    /*fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
+    fwrite(&FCR31, 4, 1, f);*/
      }
 }

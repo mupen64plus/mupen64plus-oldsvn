@@ -40,11 +40,19 @@ namespace core {
 MainWindow::MainWindow() 
 : QMainWindow(0)
 , m_statusBarLabel(0)
+#ifdef __WIN32__
+, m_renderWindow(0)
+#endif
 {
     setupUi(this);
     setupActions();
     m_statusBarLabel = new QLabel;
     statusBar()->addPermanentWidget(m_statusBarLabel);
+
+#ifdef __WIN32__    
+    m_renderWindow = new QWidget;
+    m_renderWindow->installEventFilter(this);
+#endif
 
     connect(mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(itemCountUpdate(int)));
@@ -84,6 +92,14 @@ MainWindow::MainWindow()
     move(position);
 }
 
+MainWindow::~MainWindow()
+{
+#ifdef __WIN32__
+    delete m_renderWindow;
+    m_renderWindow = 0;
+#endif
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event);
@@ -95,6 +111,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_bool("ToolBarVisible", actionShowToolbar->isChecked());
     core::config_put_bool("FilterVisible", actionShowFilter->isChecked());
 }
+
+#ifdef __WIN32__
+bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
+{
+    if ((obj == m_renderWindow) && (ev->type() == QEvent::Close)) {
+        emulationStop();
+        return true;
+    }
+    return QMainWindow::eventFilter(obj, ev);
+}
+#endif
 
 void MainWindow::showInfoMessage(const QString& msg)
 {
@@ -144,7 +171,7 @@ void MainWindow::romOpen(const QUrl& url, unsigned int archivefile)
 {
     QString path = url.path();
     if (core::open_rom(path.toLocal8Bit(), archivefile) == 0) {
-        core::startEmulation();
+        startEmulation();
     }
 }
 
@@ -170,7 +197,7 @@ void MainWindow::emulationStart()
         }
     }
     else
-        core::startEmulation();
+        startEmulation();
 }
 
 void MainWindow::emulationPauseContinue()
@@ -181,6 +208,9 @@ void MainWindow::emulationPauseContinue()
 void MainWindow::emulationStop()
 {
     core::stopEmulation();
+#ifdef __WIN32__
+    m_renderWindow->hide();
+#endif
 }
 
 void MainWindow::fullScreenToggle()
@@ -190,14 +220,14 @@ void MainWindow::fullScreenToggle()
 
 void MainWindow::saveStateSave()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         core::savestates_job |= SAVESTATE;
     }
 }
 
 void MainWindow::saveStateSaveAs()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         QString filename = QFileDialog::getSaveFileName(this);
         if (!filename.isEmpty()) {
             core::savestates_select_filename(filename.toLocal8Bit());
@@ -210,14 +240,14 @@ void MainWindow::saveStateSaveAs()
 
 void MainWindow::saveStateLoad()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         core::savestates_job |= LOADSTATE;
     }
 }
 
 void MainWindow::saveStateLoadFrom()
 {
-    if (core::g_EmulationThread) {
+    if (core::g_EmulatorRunning) {
         QString filename = QFileDialog::getOpenFileName(this);
         if (!filename.isEmpty()) {
             core::savestates_select_filename(filename.toLocal8Bit());
@@ -285,6 +315,17 @@ void MainWindow::customEvent(QEvent* event)
             qDebug("Got unknown custom event of type %d!", event->type());
             break;
     }
+}
+
+void MainWindow::startEmulation()
+{
+#ifdef __WIN32__
+    m_renderWindow->show();
+    core::g_MainWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
+    core::g_StatusBar = reinterpret_cast<core::HWND__*>(statusBar()->winId());
+#endif
+
+    core::startEmulation();
 }
 
 void MainWindow::setupActions()

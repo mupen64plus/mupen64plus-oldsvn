@@ -51,9 +51,15 @@ void dyna_jump()
         *return_address = (unsigned long) (actual->code + PC->local_addr);
 }
 
-static long save_ebp = 0;
-static long save_esp = 0;
-static long save_eip = 0;
+#ifdef __GNUC__
+# define ASM_NAME(name) asm(name)
+#else
+# define ASM_NAME(name)
+#endif
+
+static long save_ebp ASM_NAME("save_ebp") = 0;
+static long save_esp ASM_NAME("save_esp") = 0;
+static long save_eip ASM_NAME("save_eip") = 0;
 
 void dyna_start(void (*code)())
 {
@@ -62,7 +68,7 @@ void dyna_start(void (*code)())
   /* then call the code(), which should theoretically never return.  */
   /* When dyna_stop() sets the *return_address to the saved EIP, the emulator thread will come back here. */
   /* It will jump to label 2, restore the base and stack pointers, and exit this function */
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
    __asm
    {
      mov _save_ebp, ebp

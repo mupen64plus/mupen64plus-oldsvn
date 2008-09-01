@@ -23,10 +23,7 @@
 #ifndef __C_TYPES_H
 #define __C_TYPES_H
 
-#ifndef _7ZIP_BYTE_DEFINED
-#define _7ZIP_BYTE_DEFINED
-typedef unsigned char Byte;
-#endif 
+#include <zconf.h>
 
 #ifndef _7ZIP_UINT16_DEFINED
 #define _7ZIP_UINT16_DEFINED

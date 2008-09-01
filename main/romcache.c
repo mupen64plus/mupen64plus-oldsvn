@@ -26,6 +26,7 @@
 
 #include <zlib.h>
 
+#include "winlnxdefs.h"
 #include "romcache.h"
 #include "config.h"
 #include "rom.h"
@@ -333,12 +334,16 @@ static void scan_dir(const char *directoryname)
         snprintf(filename, PATH_MAX-1, "%s%s", directoryname, directoryentry->d_name);
         filename[PATH_MAX-1] = '\0';
 
+#ifdef __WIN32__        
+        strncpy(fullpath, filename, PATH_MAX-1);
+#else
         //Use real path (maybe it's a link)
         if(realpath(filename,fullpath))
             {
             strncpy(filename,fullpath,PATH_MAX-1); 
             filename[PATH_MAX-1] = '\0';
             }
+#endif
 
         //If we can't get information, move to next file.
         if(stat(fullpath,&filestatus)==-1)
