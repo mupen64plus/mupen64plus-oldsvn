@@ -78,13 +78,13 @@ void drawStars(QPainter* painter,
 {
     static QPixmap star = pixmap("star.png", "16x16");
     painter->save();
-    if (painter->paintEngine()->hasFeature(QPaintEngine::PorterDuff)) {
-        painter->setCompositionMode(QPainter::CompositionMode_Xor);
-    }
     for (int i = 0; i < n; i++) {
         QPoint p = r.topLeft();
         p += QPoint(i * (star.width() + 2), 1);
         painter->drawPixmap(p, star);
+    }
+    if (painter->paintEngine()->hasFeature(QPaintEngine::PorterDuff)) {
+        painter->setCompositionMode(QPainter::CompositionMode_Xor);
     }
     painter->setOpacity(0.2);
     for (int i = n; i < max; i++) {
