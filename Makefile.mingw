@@ -335,7 +335,6 @@ targets:
 # the version strings
 
 clean:
-
 	$(RM) /f r4300\*.o r4300\x86\*.o r4300\x86_64\*.o memory\*.o debugger\*.o opengl\*.o
 	$(RM) /f main\*.o main\zip\*.o main\bzip2\*.o main\lzma\*.o main\7zip\*.o main\gui_gtk\*.o main\gui_gtk\debugger\*.o
 	$(RM) /f mupen64plus.exe
@@ -348,7 +347,6 @@ main/version.h: version.win32.h
 
 mupen64plus: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) -o $@
-	$(STRIP) $@
 
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<

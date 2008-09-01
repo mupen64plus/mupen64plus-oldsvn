@@ -47,10 +47,10 @@ CONTROL Controls[4];
 
 static char l_PluginDir[PATH_MAX] = {0};
 
-static GFX_INFO gfx_info;
-static AUDIO_INFO audio_info;
-static CONTROL_INFO control_info;
-static RSP_INFO rsp_info;
+GFX_INFO gfx_info;
+AUDIO_INFO audio_info;
+CONTROL_INFO control_info;
+RSP_INFO rsp_info;
 
 void (*getDllInfo)(PLUGIN_INFO *PluginInfo);
 void (*dllConfig)(HWND hParent);
@@ -470,6 +470,10 @@ void plugin_load_plugins(const char *gfx_name,
     gfx_info.VI_X_SCALE_REG = &(vi_register.vi_x_scale);
     gfx_info.VI_Y_SCALE_REG = &(vi_register.vi_y_scale);
     gfx_info.CheckInterrupts = sucre;
+#ifdef __WIN32__
+    gfx_info.hWnd = g_ProgramInfo.hwnd;
+    gfx_info.hStatusBar = NULL;
+#endif
     initiateGFX(gfx_info);
      }
    else
@@ -535,6 +539,10 @@ void plugin_load_plugins(const char *gfx_name,
     audio_info.AI_DACRATE_REG = &(ai_register.ai_dacrate);
     audio_info.AI_BITRATE_REG = &(ai_register.ai_bitrate);
     audio_info.CheckInterrupts = sucre;
+#ifdef __WIN32__
+    audio_info.hwnd = g_ProgramInfo.hwnd;
+    audio_info.hinst = g_ProgramInfo.hinst;
+#endif
     initiateAudio(audio_info);
      }
    else
@@ -576,6 +584,10 @@ void plugin_load_plugins(const char *gfx_name,
     control_info.MemoryBswaped = TRUE;
     control_info.HEADER = rom;
     control_info.Controls = Controls;
+#ifdef __WIN32__
+    control_info.hMainWindow = g_ProgramInfo.hwnd;
+    control_info.hinst = g_ProgramInfo.hinst;
+#endif
     for (i=0; i<4; i++)
       {
          Controls[i].Present = FALSE;
@@ -636,6 +648,9 @@ void plugin_load_plugins(const char *gfx_name,
     rsp_info.ProcessAlistList = processAList;
     rsp_info.ProcessRdpList = processRDPList;
     rsp_info.ShowCFB = showCFB;
+#ifdef __WIN32__
+    rsp_info.hInst = g_ProgramInfo.hinst;
+#endif
     initiateRSP(rsp_info,(DWORD*)&i);
      }
    else

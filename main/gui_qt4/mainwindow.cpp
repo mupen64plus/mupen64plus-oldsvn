@@ -143,7 +143,7 @@ void MainWindow::romOpen(const QUrl& url, unsigned int archivefile)
 {
     QString path = url.path();
     if (core::open_rom(path.toLocal8Bit(), archivefile) == 0) {
-        core::startEmulation();
+        startEmulation();
     }
 }
 
@@ -169,7 +169,7 @@ void MainWindow::emulationStart()
         }
     }
     else
-        core::startEmulation();
+        startEmulation();
 }
 
 void MainWindow::emulationPauseContinue()
@@ -284,6 +284,17 @@ void MainWindow::customEvent(QEvent* event)
             qDebug("Got unknown custom event of type %d!", event->type());
             break;
     }
+}
+
+void MainWindow::startEmulation()
+{
+#ifdef __WIN32__
+    QWidget* w = new QWidget;
+    w->show();
+    core::g_ProgramInfo.hwnd = reinterpret_cast<core::HWND__*>(w->winId());
+#endif
+
+    core::startEmulation();
 }
 
 void MainWindow::setupActions()

@@ -27,8 +27,6 @@
 # include <windows.h>
 # include <winbase.h>
 # define sleep(x) Sleep(x*1000)
-#endif
-
 #else
 typedef unsigned int BOOL;
 typedef unsigned int DWORD;
@@ -62,3 +60,4 @@ typedef void* LPVOID;
 #endif
 
 #endif // __WIN32__
+#endif // WINLNXDEFS_H

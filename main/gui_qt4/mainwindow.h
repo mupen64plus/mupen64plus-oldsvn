@@ -85,6 +85,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void closeEvent(QCloseEvent* event);
 
     private:
+        void startEmulation();
         void setupActions();
         QList<QAction*> slotActions;
         QLabel* m_statusBarLabel;

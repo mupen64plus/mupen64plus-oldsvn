@@ -33,11 +33,7 @@
  * if you want to implement an interface, you should look here
  */
  
-#ifdef __WIN32__
-# define WIN32_MEAN_AND_LEAN
-# include <windows.h>
-# include <winbase.h>
-#else
+#ifndef __WIN32__
 # include <ucontext.h> // extra signal types (for portability)
 # include <libgen.h> // basename, dirname
 #endif
@@ -1572,8 +1568,14 @@ int main(int argc, char *argv[])
 }
 
 #ifdef __WIN32__
+
+ProgramInfo g_ProgramInfo;
+
 int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParamarg, int cmdShow)
 {
+    g_ProgramInfo.hinst = instance;
+    g_ProgramInfo.hwnd = NULL;
+    
 	int argc = 1;
 	char *argv[] = { "mupen64plus.exe" };
 	return main(argc, argv);	

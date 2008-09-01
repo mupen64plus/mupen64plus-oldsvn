@@ -63,4 +63,15 @@ void take_next_screenshot(void);
 void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char *format, ...);
 void error_message(const char *format, ...);
 
+#ifdef __WIN32__
+
+#include "winlnxdefs.h"
+typedef struct {
+    HWND hwnd;
+    HINSTANCE hinst;
+} ProgramInfo;
+extern ProgramInfo g_ProgramInfo;
+
+#endif
+
 #endif // __MAIN_H__
