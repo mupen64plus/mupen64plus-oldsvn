@@ -60,6 +60,11 @@ void  plugin_exec_config(const char *name);
 void  plugin_exec_test(const char *name);
 void  plugin_exec_about(const char *name);
 
+void plugin_load_gfx_plugin(const char* gfx_name);
+void plugin_load_audio_plugin(const char* audio_name);
+void plugin_load_input_plugin(const char* input_name);
+void plugin_load_rsp_plugin(const char* RSP_name);
+
 /* Plugin types */
 #define PLUGIN_TYPE_RSP         1
 #define PLUGIN_TYPE_GFX         2

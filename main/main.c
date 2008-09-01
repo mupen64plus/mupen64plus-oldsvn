@@ -935,8 +935,7 @@ static void * emulationThread( void *_arg )
 #ifdef __WIN32__
 static void sighandler(int signal)
 {
-        printf( "Signal number %d caught:\n", signal );
-        exit( EXIT_FAILURE );
+        printf( "Signal number %d caught\n", signal );
 }
 #else
 static void sighandler(int signal, siginfo_t *info, void *context)

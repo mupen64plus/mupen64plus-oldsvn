@@ -236,6 +236,11 @@ void plugin_scan_directory(const char *plugindir)
 {
     DIR *dir;
     struct dirent *entry;
+#ifdef __WIN32__
+    const char* suffix = ".dll";
+#else
+    const char* suffix = ".so";
+#endif
 
     // open the plugins directory and if it's valid, copy it to the static l_PluginDir char array
     dir = opendir(plugindir);
@@ -254,7 +259,7 @@ void plugin_scan_directory(const char *plugindir)
     // look for any shared libraries in this folder, and scan them
     while((entry = readdir(dir)) != NULL)
     {
-        if (strcmp(entry->d_name + strlen(entry->d_name) - 4, ".dll") != 0)
+        if (strcmp(entry->d_name + strlen(entry->d_name) - strlen(suffix), suffix) != 0)
             continue;
         
         plugin_scan_file(entry->d_name, 0);
@@ -349,6 +354,21 @@ void plugin_exec_config(const char *name)
 
     if(p && p->handle)
     {
+        switch (p->type)
+        {
+            case PLUGIN_TYPE_CONTROLLER:
+                plugin_load_input_plugin(name);
+                break;
+            case PLUGIN_TYPE_RSP:
+                plugin_load_rsp_plugin(name);
+                break;
+            case PLUGIN_TYPE_GFX:
+                plugin_load_gfx_plugin(name);
+                break;
+            case PLUGIN_TYPE_AUDIO:
+                plugin_load_audio_plugin(name);
+                break;
+        }
         dllConfig = dlsym(p->handle, "DllConfig");
         if(dllConfig)
             dllConfig(0);
@@ -384,26 +404,216 @@ void plugin_load_plugins(const char *gfx_name,
                          const char *input_name,
                          const char *RSP_name)
 {
-   int i;
-   plugin *p;
-   void *handle_gfx = NULL,
-        *handle_audio = NULL,
-        *handle_input = NULL,
-        *handle_RSP = NULL;
+   plugin_load_gfx_plugin(gfx_name);
+   plugin_load_audio_plugin(audio_name);
+   plugin_load_input_plugin(input_name);
+   plugin_load_rsp_plugin(RSP_name);
+}
 
-   p = plugin_get_by_name(gfx_name);
-   if(p) handle_gfx = p->handle;
+void plugin_load_rsp_plugin(const char* RSP_name)
+{
+       plugin *p;
+   void *handle_RSP = NULL;        
+   
+   p = plugin_get_by_name(RSP_name);
+   if(p) handle_RSP = p->handle;     
 
-   p = plugin_get_by_name(audio_name);
-   if(p) handle_audio = p->handle;
+   if (handle_RSP)
+     {
+    closeDLL_RSP = dlsym(handle_RSP, "CloseDLL");
+    doRspCycles = dlsym(handle_RSP, "DoRspCycles");
+    initiateRSP = dlsym(handle_RSP, "InitiateRSP");
+    romClosed_RSP = dlsym(handle_RSP, "RomClosed");
+    
+    if (closeDLL_RSP == NULL) closeDLL_RSP = dummy_void;
+    if (doRspCycles == NULL) doRspCycles = dummy_doRspCycles;
+    if (initiateRSP == NULL) initiateRSP = dummy_initiateRSP;
+    if (romClosed_RSP == NULL) romClosed_RSP = dummy_void;
+    
+    rsp_info.MemoryBswaped = TRUE;
+    rsp_info.RDRAM = (BYTE*)rdram;
+    rsp_info.DMEM = (BYTE*)SP_DMEM;
+    rsp_info.IMEM = (BYTE*)SP_IMEM;
+    rsp_info.MI_INTR_REG = &MI_register.mi_intr_reg;
+    rsp_info.SP_MEM_ADDR_REG = &sp_register.sp_mem_addr_reg;
+    rsp_info.SP_DRAM_ADDR_REG = &sp_register.sp_dram_addr_reg;
+    rsp_info.SP_RD_LEN_REG = &sp_register.sp_rd_len_reg;
+    rsp_info.SP_WR_LEN_REG = &sp_register.sp_wr_len_reg;
+    rsp_info.SP_STATUS_REG = &sp_register.sp_status_reg;
+    rsp_info.SP_DMA_FULL_REG = &sp_register.sp_dma_full_reg;
+    rsp_info.SP_DMA_BUSY_REG = &sp_register.sp_dma_busy_reg;
+    rsp_info.SP_PC_REG = &rsp_register.rsp_pc;
+    rsp_info.SP_SEMAPHORE_REG = &sp_register.sp_semaphore_reg;
+    rsp_info.DPC_START_REG = &dpc_register.dpc_start;
+    rsp_info.DPC_END_REG = &dpc_register.dpc_end;
+    rsp_info.DPC_CURRENT_REG = &dpc_register.dpc_current;
+    rsp_info.DPC_STATUS_REG = &dpc_register.dpc_status;
+    rsp_info.DPC_CLOCK_REG = &dpc_register.dpc_clock;
+    rsp_info.DPC_BUFBUSY_REG = &dpc_register.dpc_bufbusy;
+    rsp_info.DPC_PIPEBUSY_REG = &dpc_register.dpc_pipebusy;
+    rsp_info.DPC_TMEM_REG = &dpc_register.dpc_tmem;
+    rsp_info.CheckInterrupts = sucre;
+    rsp_info.ProcessDlistList = processDList;
+    rsp_info.ProcessAlistList = processAList;
+    rsp_info.ProcessRdpList = processRDPList;
+    rsp_info.ShowCFB = showCFB;
+#ifdef __WIN32__
+    rsp_info.hInst = g_ProgramInfo.hinst;
+#endif
+    initiateRSP(rsp_info,(DWORD*) NULL);
+     }
+   else
+     {
+    closeDLL_RSP = dummy_void;
+    doRspCycles = dummy_doRspCycles;
+    initiateRSP = dummy_initiateRSP;
+    romClosed_RSP = dummy_void;
+     }
+}
+
+void plugin_load_input_plugin(const char* input_name)
+{
+    int i;
+    plugin *p;
+    void *handle_input = NULL;
 
    p = plugin_get_by_name(input_name);
    if(p) handle_input = p->handle;
 
-   p = plugin_get_by_name(RSP_name);
-   if(p) handle_RSP = p->handle;
+   if (handle_input)
+     {
+    closeDLL_input = dlsym(handle_input, "CloseDLL");
+    controllerCommand = dlsym(handle_input, "ControllerCommand");
+    getKeys = dlsym(handle_input, "GetKeys");
+    initiateControllers = dlsym(handle_input, "InitiateControllers");
+    readController = dlsym(handle_input, "ReadController");
+    romClosed_input = dlsym(handle_input, "RomClosed");
+    romOpen_input = dlsym(handle_input, "RomOpen");
+    keyDown = dlsym(handle_input, "WM_KeyDown");
+    keyUp = dlsym(handle_input, "WM_KeyUp");
+    
+    if (closeDLL_input == NULL) closeDLL_input = dummy_void;
+    if (controllerCommand == NULL) controllerCommand = dummy_controllerCommand;
+    if (getKeys == NULL) getKeys = dummy_getKeys;
+    if (initiateControllers == NULL) initiateControllers = dummy_initiateControllers;
+    if (readController == NULL) readController = dummy_readController;
+    if (romClosed_input == NULL) romClosed_input = dummy_void;
+    if (romOpen_input == NULL) romOpen_input = dummy_void;
+    if (keyDown == NULL) keyDown = dummy_keyDown;
+    if (keyUp == NULL) keyUp = dummy_keyUp;
+    
+    control_info.MemoryBswaped = TRUE;
+    control_info.HEADER = rom;
+    control_info.Controls = Controls;
+#ifdef __WIN32__
+    control_info.hMainWindow = g_ProgramInfo.hwnd;
+    control_info.hinst = g_ProgramInfo.hinst;
+#endif
+    for (i=0; i<4; i++)
+      {
+         Controls[i].Present = FALSE;
+         Controls[i].RawData = FALSE;
+         Controls[i].Plugin = PLUGIN_NONE;
+      }
+    initiateControllers(control_info);
+     }
+   else
+     {
+    closeDLL_input = dummy_void;
+    controllerCommand = dummy_controllerCommand;
+    getKeys = dummy_getKeys;
+    initiateControllers = dummy_initiateControllers;
+    readController = dummy_readController;
+    romClosed_input = dummy_void;
+    romOpen_input = dummy_void;
+    keyDown = dummy_keyDown;
+    keyUp = dummy_keyUp;
+     }
+}
 
-   if (handle_gfx)
+void plugin_load_audio_plugin(const char* audio_name)
+{
+   plugin *p;
+   void *handle_audio = NULL;
+
+   p = plugin_get_by_name(audio_name);
+   if(p) handle_audio = p->handle;
+   
+   if (handle_audio)
+     {
+    closeDLL_audio = dlsym(handle_audio, "CloseDLL");
+    aiDacrateChanged = dlsym(handle_audio, "AiDacrateChanged");
+    aiLenChanged = dlsym(handle_audio, "AiLenChanged");
+    aiReadLength = dlsym(handle_audio, "AiReadLength");
+    //aiUpdate = dlsym(handle_audio, "AiUpdate");
+    initiateAudio = dlsym(handle_audio, "InitiateAudio");
+    processAList = dlsym(handle_audio, "ProcessAList");
+    romClosed_audio = dlsym(handle_audio, "RomClosed");
+    romOpen_audio = dlsym(handle_audio, "RomOpen");
+    setSpeedFactor = dlsym(handle_audio, "SetSpeedFactor");
+    volumeUp = dlsym(handle_audio, "VolumeUp");
+    volumeDown = dlsym(handle_audio, "VolumeDown");
+    volumeMute = dlsym(handle_audio, "VolumeMute");
+    volumeGetString = dlsym(handle_audio, "VolumeGetString");
+    
+    if (aiDacrateChanged == NULL) aiDacrateChanged = dummy_aiDacrateChanged;
+    if (aiLenChanged == NULL) aiLenChanged = dummy_void;
+    if (aiReadLength == NULL) aiReadLength = dummy_aiReadLength;
+    //if (aiUpdate == NULL) aiUpdate = dummy_aiUpdate;
+    if (closeDLL_audio == NULL) closeDLL_audio = dummy_void;
+    if (initiateAudio == NULL) initiateAudio = dummy_initiateAudio;
+    if (processAList == NULL) processAList = dummy_void;
+    if (romClosed_audio == NULL) romClosed_audio = dummy_void;
+    if (romOpen_audio == NULL) romOpen_audio = dummy_void;
+    if (setSpeedFactor == NULL) setSpeedFactor = dummy_setSpeedFactor;
+    if (volumeUp == NULL) volumeUp = dummy_void;
+    if (volumeDown == NULL) volumeDown = dummy_void;
+    if (volumeMute == NULL) volumeMute = dummy_void;
+    if (volumeGetString == NULL) volumeGetString = dummy_volumeGetString;
+    
+    audio_info.MemoryBswaped = TRUE;
+    audio_info.HEADER = rom;
+    audio_info.RDRAM = (BYTE*)rdram;
+    audio_info.DMEM = (BYTE*)SP_DMEM;
+    audio_info.IMEM = (BYTE*)SP_IMEM;
+    audio_info.MI_INTR_REG = &(MI_register.mi_intr_reg);
+    audio_info.AI_DRAM_ADDR_REG = &(ai_register.ai_dram_addr);
+    audio_info.AI_LEN_REG = &(ai_register.ai_len);
+    audio_info.AI_CONTROL_REG = &(ai_register.ai_control);
+    audio_info.AI_STATUS_REG = &dummy;
+    audio_info.AI_DACRATE_REG = &(ai_register.ai_dacrate);
+    audio_info.AI_BITRATE_REG = &(ai_register.ai_bitrate);
+    audio_info.CheckInterrupts = sucre;
+#ifdef __WIN32__
+    audio_info.hwnd = g_ProgramInfo.hwnd;
+    audio_info.hinst = g_ProgramInfo.hinst;
+#endif
+    initiateAudio(audio_info);
+     }
+   else
+     {
+    aiDacrateChanged = dummy_aiDacrateChanged;
+    aiLenChanged = dummy_void;
+    aiReadLength = dummy_aiReadLength;
+    //aiUpdate = dummy_aiUpdate;
+    closeDLL_audio = dummy_void;
+    initiateAudio = dummy_initiateAudio;
+    processAList = dummy_void;
+    romClosed_audio = dummy_void;
+    romOpen_audio = dummy_void;
+    setSpeedFactor = dummy_setSpeedFactor;
+     }
+}
+
+void plugin_load_gfx_plugin(const char* gfx_name)
+{
+   plugin *p;
+   void *handle_gfx = NULL;
+    
+   p = plugin_get_by_name(gfx_name);
+   if(p) handle_gfx = p->handle;
+   
+      if (handle_gfx)
      {
     changeWindow = dlsym(handle_gfx, "ChangeWindow");
     closeDLL_gfx = dlsym(handle_gfx, "CloseDLL");
@@ -492,172 +702,5 @@ void plugin_load_plugins(const char *gfx_name,
     readScreen = 0;
     captureScreen = dummy_void;
     setRenderingCallback = dummy_void;
-     }
-
-   if (handle_audio)
-     {
-    closeDLL_audio = dlsym(handle_audio, "CloseDLL");
-    aiDacrateChanged = dlsym(handle_audio, "AiDacrateChanged");
-    aiLenChanged = dlsym(handle_audio, "AiLenChanged");
-    aiReadLength = dlsym(handle_audio, "AiReadLength");
-    //aiUpdate = dlsym(handle_audio, "AiUpdate");
-    initiateAudio = dlsym(handle_audio, "InitiateAudio");
-    processAList = dlsym(handle_audio, "ProcessAList");
-    romClosed_audio = dlsym(handle_audio, "RomClosed");
-    romOpen_audio = dlsym(handle_audio, "RomOpen");
-    setSpeedFactor = dlsym(handle_audio, "SetSpeedFactor");
-    volumeUp = dlsym(handle_audio, "VolumeUp");
-    volumeDown = dlsym(handle_audio, "VolumeDown");
-    volumeMute = dlsym(handle_audio, "VolumeMute");
-    volumeGetString = dlsym(handle_audio, "VolumeGetString");
-    
-    if (aiDacrateChanged == NULL) aiDacrateChanged = dummy_aiDacrateChanged;
-    if (aiLenChanged == NULL) aiLenChanged = dummy_void;
-    if (aiReadLength == NULL) aiReadLength = dummy_aiReadLength;
-    //if (aiUpdate == NULL) aiUpdate = dummy_aiUpdate;
-    if (closeDLL_audio == NULL) closeDLL_audio = dummy_void;
-    if (initiateAudio == NULL) initiateAudio = dummy_initiateAudio;
-    if (processAList == NULL) processAList = dummy_void;
-    if (romClosed_audio == NULL) romClosed_audio = dummy_void;
-    if (romOpen_audio == NULL) romOpen_audio = dummy_void;
-    if (setSpeedFactor == NULL) setSpeedFactor = dummy_setSpeedFactor;
-    if (volumeUp == NULL) volumeUp = dummy_void;
-    if (volumeDown == NULL) volumeDown = dummy_void;
-    if (volumeMute == NULL) volumeMute = dummy_void;
-    if (volumeGetString == NULL) volumeGetString = dummy_volumeGetString;
-    
-    audio_info.MemoryBswaped = TRUE;
-    audio_info.HEADER = rom;
-    audio_info.RDRAM = (BYTE*)rdram;
-    audio_info.DMEM = (BYTE*)SP_DMEM;
-    audio_info.IMEM = (BYTE*)SP_IMEM;
-    audio_info.MI_INTR_REG = &(MI_register.mi_intr_reg);
-    audio_info.AI_DRAM_ADDR_REG = &(ai_register.ai_dram_addr);
-    audio_info.AI_LEN_REG = &(ai_register.ai_len);
-    audio_info.AI_CONTROL_REG = &(ai_register.ai_control);
-    audio_info.AI_STATUS_REG = &dummy;
-    audio_info.AI_DACRATE_REG = &(ai_register.ai_dacrate);
-    audio_info.AI_BITRATE_REG = &(ai_register.ai_bitrate);
-    audio_info.CheckInterrupts = sucre;
-#ifdef __WIN32__
-    audio_info.hwnd = g_ProgramInfo.hwnd;
-    audio_info.hinst = g_ProgramInfo.hinst;
-#endif
-    initiateAudio(audio_info);
-     }
-   else
-     {
-    aiDacrateChanged = dummy_aiDacrateChanged;
-    aiLenChanged = dummy_void;
-    aiReadLength = dummy_aiReadLength;
-    //aiUpdate = dummy_aiUpdate;
-    closeDLL_audio = dummy_void;
-    initiateAudio = dummy_initiateAudio;
-    processAList = dummy_void;
-    romClosed_audio = dummy_void;
-    romOpen_audio = dummy_void;
-    setSpeedFactor = dummy_setSpeedFactor;
-     }
-   
-   if (handle_input)
-     {
-    closeDLL_input = dlsym(handle_input, "CloseDLL");
-    controllerCommand = dlsym(handle_input, "ControllerCommand");
-    getKeys = dlsym(handle_input, "GetKeys");
-    initiateControllers = dlsym(handle_input, "InitiateControllers");
-    readController = dlsym(handle_input, "ReadController");
-    romClosed_input = dlsym(handle_input, "RomClosed");
-    romOpen_input = dlsym(handle_input, "RomOpen");
-    keyDown = dlsym(handle_input, "WM_KeyDown");
-    keyUp = dlsym(handle_input, "WM_KeyUp");
-    
-    if (closeDLL_input == NULL) closeDLL_input = dummy_void;
-    if (controllerCommand == NULL) controllerCommand = dummy_controllerCommand;
-    if (getKeys == NULL) getKeys = dummy_getKeys;
-    if (initiateControllers == NULL) initiateControllers = dummy_initiateControllers;
-    if (readController == NULL) readController = dummy_readController;
-    if (romClosed_input == NULL) romClosed_input = dummy_void;
-    if (romOpen_input == NULL) romOpen_input = dummy_void;
-    if (keyDown == NULL) keyDown = dummy_keyDown;
-    if (keyUp == NULL) keyUp = dummy_keyUp;
-    
-    control_info.MemoryBswaped = TRUE;
-    control_info.HEADER = rom;
-    control_info.Controls = Controls;
-#ifdef __WIN32__
-    control_info.hMainWindow = g_ProgramInfo.hwnd;
-    control_info.hinst = g_ProgramInfo.hinst;
-#endif
-    for (i=0; i<4; i++)
-      {
-         Controls[i].Present = FALSE;
-         Controls[i].RawData = FALSE;
-         Controls[i].Plugin = PLUGIN_NONE;
-      }
-    initiateControllers(control_info);
-     }
-   else
-     {
-    closeDLL_input = dummy_void;
-    controllerCommand = dummy_controllerCommand;
-    getKeys = dummy_getKeys;
-    initiateControllers = dummy_initiateControllers;
-    readController = dummy_readController;
-    romClosed_input = dummy_void;
-    romOpen_input = dummy_void;
-    keyDown = dummy_keyDown;
-    keyUp = dummy_keyUp;
-     }
-   
-   if (handle_RSP)
-     {
-    closeDLL_RSP = dlsym(handle_RSP, "CloseDLL");
-    doRspCycles = dlsym(handle_RSP, "DoRspCycles");
-    initiateRSP = dlsym(handle_RSP, "InitiateRSP");
-    romClosed_RSP = dlsym(handle_RSP, "RomClosed");
-    
-    if (closeDLL_RSP == NULL) closeDLL_RSP = dummy_void;
-    if (doRspCycles == NULL) doRspCycles = dummy_doRspCycles;
-    if (initiateRSP == NULL) initiateRSP = dummy_initiateRSP;
-    if (romClosed_RSP == NULL) romClosed_RSP = dummy_void;
-    
-    rsp_info.MemoryBswaped = TRUE;
-    rsp_info.RDRAM = (BYTE*)rdram;
-    rsp_info.DMEM = (BYTE*)SP_DMEM;
-    rsp_info.IMEM = (BYTE*)SP_IMEM;
-    rsp_info.MI_INTR_REG = &MI_register.mi_intr_reg;
-    rsp_info.SP_MEM_ADDR_REG = &sp_register.sp_mem_addr_reg;
-    rsp_info.SP_DRAM_ADDR_REG = &sp_register.sp_dram_addr_reg;
-    rsp_info.SP_RD_LEN_REG = &sp_register.sp_rd_len_reg;
-    rsp_info.SP_WR_LEN_REG = &sp_register.sp_wr_len_reg;
-    rsp_info.SP_STATUS_REG = &sp_register.sp_status_reg;
-    rsp_info.SP_DMA_FULL_REG = &sp_register.sp_dma_full_reg;
-    rsp_info.SP_DMA_BUSY_REG = &sp_register.sp_dma_busy_reg;
-    rsp_info.SP_PC_REG = &rsp_register.rsp_pc;
-    rsp_info.SP_SEMAPHORE_REG = &sp_register.sp_semaphore_reg;
-    rsp_info.DPC_START_REG = &dpc_register.dpc_start;
-    rsp_info.DPC_END_REG = &dpc_register.dpc_end;
-    rsp_info.DPC_CURRENT_REG = &dpc_register.dpc_current;
-    rsp_info.DPC_STATUS_REG = &dpc_register.dpc_status;
-    rsp_info.DPC_CLOCK_REG = &dpc_register.dpc_clock;
-    rsp_info.DPC_BUFBUSY_REG = &dpc_register.dpc_bufbusy;
-    rsp_info.DPC_PIPEBUSY_REG = &dpc_register.dpc_pipebusy;
-    rsp_info.DPC_TMEM_REG = &dpc_register.dpc_tmem;
-    rsp_info.CheckInterrupts = sucre;
-    rsp_info.ProcessDlistList = processDList;
-    rsp_info.ProcessAlistList = processAList;
-    rsp_info.ProcessRdpList = processRDPList;
-    rsp_info.ShowCFB = showCFB;
-#ifdef __WIN32__
-    rsp_info.hInst = g_ProgramInfo.hinst;
-#endif
-    initiateRSP(rsp_info,(DWORD*)&i);
-     }
-   else
-     {
-    closeDLL_RSP = dummy_void;
-    doRspCycles = dummy_doRspCycles;
-    initiateRSP = dummy_initiateRSP;
-    romClosed_RSP = dummy_void;
      }
 }

@@ -54,6 +54,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
     Q_OBJECT
     public:
         MainWindow();
+        virtual ~MainWindow();
 
         void showInfoMessage(const QString& msg);
         void showAlertMessage(const QString& msg);
@@ -89,6 +90,9 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void setupActions();
         QList<QAction*> slotActions;
         QLabel* m_statusBarLabel;
+#ifdef __WIN32__
+        QWidget* m_renderWindow;
+#endif
 };
 
 #endif // MUPEN_KDE4_MAINWINDOW_H

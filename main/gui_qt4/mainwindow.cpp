@@ -40,11 +40,16 @@ namespace core {
 MainWindow::MainWindow() 
 : QMainWindow(0)
 , m_statusBarLabel(0)
+#ifdef __WIN32
+, m_renderWindow(0)
+#endif
 {
     setupUi(this);
     setupActions();
     m_statusBarLabel = new QLabel;
     statusBar()->addPermanentWidget(m_statusBarLabel);
+    
+    m_renderWindow = new QWidget;
 
     connect(mainWidget, SIGNAL(itemCountChanged(int)),
              this, SLOT(itemCountUpdate(int)));
@@ -82,6 +87,14 @@ MainWindow::MainWindow()
 
     resize(size);
     move(position);
+}
+
+MainWindow::~MainWindow()
+{
+#ifdef __WIN32__
+    delete m_renderWindow;
+    m_renderWindow = 0;
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -180,6 +193,9 @@ void MainWindow::emulationPauseContinue()
 void MainWindow::emulationStop()
 {
     core::stopEmulation();
+#ifdef __WIN32__
+    m_renderWindow->hide();
+#endif
 }
 
 void MainWindow::fullScreenToggle()
@@ -289,9 +305,8 @@ void MainWindow::customEvent(QEvent* event)
 void MainWindow::startEmulation()
 {
 #ifdef __WIN32__
-    QWidget* w = new QWidget;
-    w->show();
-    core::g_ProgramInfo.hwnd = reinterpret_cast<core::HWND__*>(w->winId());
+    m_renderWindow->show();
+    core::g_ProgramInfo.hwnd = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
 #endif
 
     core::startEmulation();
