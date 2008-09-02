@@ -445,10 +445,13 @@ void stopEmulation(void)
 
         // wait until emulation thread is done before continuing
         if(g_EmulatorRunning)
-            //pthread_join(g_EmulationThread, NULL);
+            SDL_WaitThread(g_EmulationThread, NULL);
 
-        plugin_close_plugins();
+#ifdef __WIN32__
+         plugin_close_plugins();
+#endif
         g_EmulatorRunning = 0;
+        g_EmulationThread = 0;
 
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation stopped.\n"));
     }
