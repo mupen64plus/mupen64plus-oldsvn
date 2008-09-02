@@ -85,6 +85,7 @@ $INSTALL -d -v "${SHAREDIR}" || exit $?
 $INSTALL -d -v "${SHAREDIR}/config" || exit $?
 $INSTALL -m 0644 config/* "${SHAREDIR}/config" || exit $?
 $INSTALL -m 0644 mupen64plus.ini "${SHAREDIR}/" || exit $?
+$INSTALL -m 0644 mupen64plus.cht "${SHAREDIR}/" || exit $?
 $INSTALL -d -v "${SHAREDIR}/doc" || exit $?
 $INSTALL -m 0644 doc/HiRezTexture.txt "${SHAREDIR}/doc" || exit $?
 $INSTALL -d -v "${SHAREDIR}/fonts" || exit $?
