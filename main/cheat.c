@@ -35,6 +35,9 @@
 #include "config.h"
 #include "ini_reader.h"
 
+// this seems stupid
+// #define CHEAT_CODE_MAGIC_VALUE 0xcafe // use this to know that old_value is uninitialized
+
 #define CHEAT_FILENAME "mupen64plus.cht"
 static ini_file *cheat_file = NULL;
 static ini_section *current_rom_section = NULL;
@@ -274,18 +277,24 @@ void cheat_delete_all(void)
     ini_file_free(&cheat_file);
 }
 
+void cheat_unload_current_rom(void)
+{
+    current_rom_section = NULL;
+}
+
 /** cheat_load_current_rom
  *   sets pointer to cheats for currently loaded rom.
  */
 void cheat_load_current_rom(void)
 {
-    char buf[PATH_MAX];
+    /* The title is always 22 chars long. Add one for the \0 */
+    char buf[23];
     list_node_t *node = NULL;
-    ini_section* section = NULL;
+    ini_section *section = NULL;
 
     if (ROM_HEADER && cheat_file)
     {
-        snprintf(buf, PATH_MAX, "%X-%X-C:%X",
+        snprintf(buf, 23, "%X-%X-C:%X",
                  g_MemHasBeenBSwapped ? sl(ROM_HEADER->CRC1) : ROM_HEADER->CRC1,
                  g_MemHasBeenBSwapped ? sl(ROM_HEADER->CRC2) : ROM_HEADER->CRC2,
                  ROM_HEADER->Country_code);
@@ -294,11 +303,167 @@ void cheat_load_current_rom(void)
             section = node->data;
             if (strcasecmp(buf, section->title) == 0)
             {
+                puts("FOUND CHEAT ENTRY");
                 current_rom_section = section;
                 break;
             }
         }
     }
+}
+
+static cheat_t *find_or_create_cheat(list_t *list, int number)
+{
+    list_t node = NULL;
+    cheat_t *cheat = NULL;
+    int found = 0;
+
+    list_foreach(*list, node)
+    {
+        cheat = node->data;
+        if (cheat->number == number)
+        {
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found)
+    {
+        cheat = malloc(sizeof(cheat_t));
+        cheat->name = NULL;
+        cheat->comment = NULL;
+        cheat->number = number;
+        cheat->codes = NULL;
+        cheat->options = NULL;
+        list_append(list, cheat);
+    }
+
+    return cheat;
+}
+
+static list_t tokenize_string(const char *string, const char* delim)
+{
+    list_t list = NULL;
+    char *token = NULL, *wrk = NULL;
+    char buf[4096]; // some of those strings are really long
+    strncpy(buf, string, 4096);
+
+    token = strtok(buf, delim);
+    if (token)
+    {
+        wrk = malloc(strlen(token) + 1);
+        strcpy(wrk, token);
+        list_append(&list, wrk);
+    }
+
+    while ((token = strtok(NULL, delim)))
+    {
+        wrk = malloc(strlen(token) + 1);
+        strcpy(wrk, token);
+        list_append(&list, wrk);
+    }
+    return list;
+}
+
+list_t cheats_for_current_rom()
+{
+    list_t node = NULL;
+    list_t node2 = NULL;
+    list_t list = NULL;
+    list_t temp = NULL;
+    ini_entry *entry = NULL;
+    cheat_t *cheat = NULL;
+    int n = 0, len = 0;
+    int value = 0;
+    char buf[PATH_MAX];
+    cheat_option_t *option;
+
+    if (!current_rom_section)
+    {
+        return NULL;
+    }
+
+    list_foreach(current_rom_section->entries, node)
+    {
+        entry = node->data;
+        len = strlen(entry->key);
+        if (strcmp("_O", entry->key + len - 2) == 0) // Option for a cheat
+        {
+            if (sscanf(entry->key, "Cheat%d_O", &n) == 1)
+            {
+                cheat = find_or_create_cheat(&list, n);
+                temp = tokenize_string(entry->value, ",");
+                node2 = NULL;
+                list_foreach(temp, node2)
+                {
+                    memset(buf, '\0', PATH_MAX);
+                    if (sscanf(node2->data, "$%x %[a-zA-Z0-9 ]", &value, &buf) == 2)
+                    {
+                        printf("Parsed %02X %s\n", value, buf);
+                        option = malloc(sizeof(cheat_option_t));
+                        option->code = value;
+                        option->description = malloc(strlen(buf) + 1);
+                        strcpy(option->description, buf);
+                        list_append(&cheat->options, option);
+                    }
+                    free(node2->data);
+                }
+                list_delete(&temp);
+            }
+        }
+        else if (strcmp("_N", entry->key + len - 2) == 0) // Comment for a cheat
+        {
+            if (sscanf(entry->key, "Cheat%d_N", &n) == 1)
+            {
+                cheat = find_or_create_cheat(&list, n);
+                cheat->comment = malloc(strlen(entry->value) + 1);
+                strcpy(cheat->comment, entry->value);
+            }
+        }
+        else if (sscanf(entry->key, "Cheat%d", &n) == 1)
+        {
+            cheat = find_or_create_cheat(&list, n);
+            cheat->codes = tokenize_string(entry->value, ",");
+            cheat->name = list_first_data(cheat->codes);
+            list_node_delete(&cheat->codes, list_first_node(cheat->codes));
+        }
+
+        cheat = NULL;
+    }
+
+    return list;
+}
+
+void cheats_free(list_t *cheats)
+{
+    cheat_t *cheat = NULL;
+    cheat_option_t *option = NULL;
+    list_t node1, node2;
+    node1 = node2 = NULL;
+
+    list_foreach(*cheats, node1)
+    {
+        cheat = node1->data;
+
+        free(cheat->name);
+        free(cheat->comment);
+
+        list_foreach(cheat->codes, node2)
+        {
+            free(node2->data);
+        }
+        list_delete(&cheat->codes);
+
+        list_foreach(cheat->options, node2)
+        {
+            option = node2->data;
+            free(option->description);
+            free(option);
+        }
+        list_delete(&cheat->options);
+    }
+
+    list_delete(cheats);
 }
 
 /** cheat_new_rom

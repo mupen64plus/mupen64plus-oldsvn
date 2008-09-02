@@ -903,6 +903,7 @@ static void * emulationThread( void *_arg )
         osd_exit();
     }
 
+    cheat_unload_current_rom();
     romClosed_RSP();
     romClosed_input();
     romClosed_audio();
