@@ -18,7 +18,9 @@ Email                : blight@Ashitaka
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#include <pthread.h>
+// #include <pthread.h>
+#include <SDL.h>
+#include <SDL_thread.h>
 
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
@@ -32,8 +34,8 @@ extern int g_TakeScreenshot;
 extern int g_OsdEnabled;
 extern int g_Fullscreen;
 extern int g_EmulatorRunning;
-extern pthread_t g_EmulationThread;
-extern pthread_t g_RomCacheThread;
+extern SDL_Thread * g_EmulationThread;
+extern SDL_Thread * g_RomCacheThread;
 extern char *g_GfxPlugin;
 extern char *g_AudioPlugin;
 extern char *g_InputPlugin;

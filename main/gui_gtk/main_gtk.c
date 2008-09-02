@@ -28,7 +28,7 @@
 
 #include <signal.h>
 
-#include <pthread.h>    // POSIX Thread library
+//#include <pthread.h>    // POSIX Thread library
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -67,7 +67,7 @@ static int create_mainWindow(void);
 
 /** globals **/
 SMainWindow g_MainWindow;
-static pthread_t g_GuiThread = 0; // main gui thread
+SDL_Thread * g_GuiThread; // main gui thread
 
 static gboolean check_icon_theme()
 {

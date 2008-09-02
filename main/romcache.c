@@ -48,7 +48,7 @@ romdatabase_entry empty_entry;
 #include <iconv.h>
 
 #include <errno.h>
-#include <pthread.h>
+// #include <pthread.h>
 
 #include <limits.h> //PATH_MAX //There is a more standards compliant way of doing this.
 #include <dirent.h> //Directory support.
@@ -163,10 +163,10 @@ static void rebuild_cache_file(char* cache_filename)
  * cache (generally by user action in the GUI).
  */
 
-void* rom_cache_system(void* _arg)
+int rom_cache_system(void* _arg)
 {
     char* buffer;
-    struct sched_param param;
+   // struct sched_param param;
     char cache_filename[PATH_MAX];
     g_romcache.rcspause = 0;
 
@@ -191,8 +191,8 @@ void* rom_cache_system(void* _arg)
                 if(load_initial_cache(cache_filename))
                     { updaterombrowser(g_romcache.length, 1); }
 
-                param.sched_priority = 0;
-                pthread_attr_setschedparam (_arg, &param);
+               // param.sched_priority = 0;
+               // pthread_attr_setschedparam (_arg, &param);
 
                 remove(cache_filename);
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
@@ -229,7 +229,8 @@ void* rom_cache_system(void* _arg)
         }
 
     printf("Rom cache system terminated!\n");
-    pthread_join(g_RomCacheThread, NULL);
+    return 1;
+    //pthread_join(g_RomCacheThread, NULL);
 }
 
 /* Given a pointer to the memory space of a valid ROM, and its size in entry->romsize
