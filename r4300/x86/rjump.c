@@ -93,12 +93,12 @@ void dyna_start(void (*code)())
        "1:                    \n"
        " popl %%eax           \n"
        " movl %%eax, save_eip \n"
-       " call *%%ebx          \n"
+       " call *%[codeptr]     \n"
        "2:                    \n"
        " movl save_ebp, %%ebp \n"
        " movl save_esp, %%esp \n"
        :
-       : "b" (code)
+       : [codeptr]"r"(code)
        : "%eax", "memory"
        );
 #endif
