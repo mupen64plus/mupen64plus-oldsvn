@@ -32,28 +32,43 @@ def main(rootdir, cfgfile, nobuild):
     tester = RegTester(rootdir, srcdir, shotdir)
     rval = 0
     while True:
-        # Step 1: check out from SVN and build the source
+        # Step 1: load the test config file
+        if not tester.LoadConfig(cfgfile):
+            rval = 1
+            break
+        # Step 2: check out from SVN
         if not nobuild:
             if not CheckoutSource(srcdir):
-                rval = 1
-                break
-            if not BuildSource(srcdir):
                 rval = 2
                 break
-        # Step 2: load the test config file, run the tests
-        if not tester.LoadConfig(cfgfile):
-            rval = 3
-            break
+        # Step 3: run test builds
+        if not nobuild:
+            testlist = [ name.strip() for name in tester.generalParams["testbuilds"].split(',') ]
+            makeparams = [ params.strip() for params in tester.generalParams["testbuildparams"].split(',') ]
+            if len(testlist) != len(makeparams):
+                report += "Config file error for test builds.  Build name list and makefile parameter list have different lengths.\n"
+            testbuilds = min(len(testlist), len(makeparams))
+            for i in range(testbuilds):
+                buildname = testlist[i]
+                buildmake = makeparams[i]
+                BuildSource(srcdir, buildname, buildmake, True)
+        # Step 4: build the binary for the video regression test
+        if not nobuild:
+            videobuild = tester.generalParams["videobuild"]
+            videomake = tester.generalParams["videobuildparams"]
+            if not BuildSource(srcdir, videobuild, videomake, False):
+                rval = 3
+                break
+        # Step 5: run the tests, check the results
         if not tester.RunTests():
             rval = 4
             break
-        # Step 3: check the results
         if not tester.CheckResults(refdir):
             rval = 5
             break
         # test procedure is finished
         break
-    # Step 4: send email report and archive the results
+    # Step 6: send email report and archive the results
     if not tester.SendReport():
         rval = 6
     if not tester.ArchiveResults(archivedir):
@@ -80,38 +95,45 @@ def CheckoutSource(srcdir):
     report += "SVN Error: %s\n\n" % lastline
     return False
 
-def BuildSource(srcdir):
+def BuildSource(srcdir, buildname, buildmake, istest):
     global report
     # print build report message and clear counters
-    report += "Building Mupen64Plus:\n"
+    testbuildcommand = "make -C %s %s" % (srcdir, buildmake)
+    if istest:
+        report += "Running test build \"%s\" with command \"%s\"\n" % (buildname, testbuildcommand)
+    else:
+        report += "Building Mupen64Plus \"%s\" for video test with command \"%s\"\n" % (buildname, testbuildcommand)
     warnings = 0
     errors = 0
     # run make and capture the output
-    output = commands.getoutput("make -C %s all" % srcdir)
+    output = commands.getoutput(testbuildcommand)
     makelines = output.split("\n")
     # print warnings and errors
     for line in makelines:
         if "error:" in line:
-            report += "    " + line
+            report += "    " + line + "\n"
             errors += 1
         if "warning:" in line:
-            report += "    " + line
+            report += "    " + line + "\n"
             warnings += 1
     report += "%i errors. %i warnings.\n" % (errors, warnings)
-    if errors > 0:
+    if errors > 0 and not istest:
         return False
     # check for program files
     binfiles = [ "mupen64plus" ]
-    libfiles = [ "blight_input.so", "dummyaudio.so", "glN64.so", "glide64.so", "ricevideo.so",
-                 "mupen64_hle_rsp_azimer.so" ]
+    libfiles = [ "blight_input.so", "dummyaudio.so", "dummyvideo.so", "glN64.so", "glide64.so", "ricevideo.so",
+                 "mupen64_hle_rsp_azimer.so", "jttl_audio.so" ]
     filelist = [ os.path.join(srcdir, filename) for filename in binfiles ]
     filelist += [ os.path.join(srcdir, "plugins", filename) for filename in libfiles ]
     for filename in filelist:
         if not os.path.exists(filename):
             report += "Build failed: '%s' not found\n" % filename
             errors += 1
-    if errors > 0:
+    if errors > 0 and not istest:
         return False
+    # clean up if this was a test
+    if istest:
+        os.system("make -C %s clean" % srcdir)
     # build was successful!
     return True
 
