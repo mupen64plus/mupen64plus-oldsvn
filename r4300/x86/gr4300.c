@@ -54,7 +54,7 @@ void gennotcompiled()
     if (dst->addr == 0xa4000040 && dynarec_stack_initialized == 0)
     {
         dynarec_stack_initialized = 1;
-        sub_reg32_imm32(ESP, 0xC);
+        sub_reg32_imm32(ESP, 0x18);
         mov_m32_reg32((unsigned int*)(&return_address), ESP);
         sub_m32_imm32((unsigned int*)(&return_address), 4);
     }
