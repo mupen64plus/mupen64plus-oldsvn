@@ -48,6 +48,7 @@ OBJECTS = \
 	CRC.o \
 	Combine.o \
 	TexBuffer.o \
+	Config.o \
 	3dmath.o \
 	DepthBufferRender.o
 
