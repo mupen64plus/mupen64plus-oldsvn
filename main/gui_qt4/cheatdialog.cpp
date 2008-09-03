@@ -24,23 +24,25 @@
 #include <QStandardItemModel>
 #include <QMap>
 
+#include "globals.h"
 #include "cheatdialog.h"
 
 CheatDialog::CheatDialog(QWidget* parent)
 : QDialog(parent)
+, m_cheats(0)
 , m_model(new QStandardItemModel(this))
 {
     setupUi(this);
+    setWindowIcon(icon("tools-wizard.png"));
 
-    core::list_t cheats = 0;
     core::list_t node1 = 0;
     core::list_t node2 = 0;
 
     QMap<QString, QStandardItem*> itemMap;
 
-    cheats = core::cheats_for_current_rom();
-    if (cheats) {
-        list_foreach(cheats, node1) {
+    m_cheats = core::cheats_for_current_rom();
+    if (m_cheats) {
+        list_foreach(m_cheats, node1) {
             core::cheat_t* cheat = static_cast<core::cheat_t*>(node1->data);
             QStandardItem* entry = 0;
             if (QString(cheat->name).contains("\\")) {
@@ -77,6 +79,11 @@ CheatDialog::CheatDialog(QWidget* parent)
 
     m_model->sort(0);
     treeView->setModel(m_model);
+}
+
+CheatDialog::~CheatDialog()
+{
+    cheats_free(&m_cheats);
 }
 
 QStandardItem* CheatDialog::createItemForCheat(QString name,

@@ -5,22 +5,37 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>564</width>
-    <height>556</height>
+    <width>574</width>
+    <height>634</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Cheats</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <property name="sizeGripEnabled" >
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2" >
    <item>
-    <widget class="QTreeView" name="treeView" >
-     <property name="animated" >
-      <bool>true</bool>
+    <widget class="QFrame" name="frame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="headerHidden" >
-      <bool>true</bool>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <item>
+       <widget class="QTreeView" name="treeView" >
+        <property name="animated" >
+         <bool>true</bool>
+        </property>
+        <property name="headerHidden" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

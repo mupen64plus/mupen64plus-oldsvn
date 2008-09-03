@@ -26,6 +26,9 @@
  *
 **/
 
+#ifndef CHEAT_H
+#define CHEAT_H
+
 #include "util.h" // list_t
 
 #define ENTRY_BOOT 0
@@ -61,3 +64,4 @@ void cheats_free(list_t *cheats); // list_t becomes invalid after this!
 // void cheat_delete_cheat(rom_cheats_t *, cheat_t *);
 // void cheat_delete_cheat_code(cheat_t *, cheat_code_t *);
 
+#endif // #define CHEAT_H
