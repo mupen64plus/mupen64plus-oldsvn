@@ -48,6 +48,8 @@
     <addaction name="actionPause" />
     <addaction name="actionStop" />
     <addaction name="separator" />
+    <addaction name="actionCheats" />
+    <addaction name="separator" />
     <addaction name="actionLoadState" />
     <addaction name="actionLoadStateFrom" />
     <addaction name="actionSaveState" />
@@ -244,6 +246,11 @@
    </property>
    <property name="text" >
     <string>Show F&amp;ilter</string>
+   </property>
+  </action>
+  <action name="actionCheats" >
+   <property name="text" >
+    <string>Ch&amp;eats</string>
    </property>
   </action>
  </widget>

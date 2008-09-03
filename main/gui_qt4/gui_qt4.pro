@@ -45,6 +45,7 @@ HEADERS += globals.h \
            rommodel.h \
            settingsdialog.h \
            starlabel.h \
+           cheatdialog.h \
            ../config.h \
            ../main.h \
            ../version.h \
@@ -67,7 +68,8 @@ FORMS += mainwidget.ui \
          mainwindow.ui \
          romdirectorieslistwidget.ui \
          rominfodialog.ui \
-         settingsdialog.ui
+         settingsdialog.ui \
+         cheatdialog.ui
 SOURCES += globals.cpp \
            main.cpp \
            mainwidget.cpp \
@@ -77,4 +79,5 @@ SOURCES += globals.cpp \
            rominfodialog.cpp \
            rommodel.cpp \
            settingsdialog.cpp \
-           starlabel.cpp
+           starlabel.cpp \
+           cheatdialog.cpp

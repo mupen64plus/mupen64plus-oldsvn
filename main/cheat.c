@@ -341,30 +341,6 @@ static cheat_t *find_or_create_cheat(list_t *list, int number)
     return cheat;
 }
 
-static list_t tokenize_string(const char *string, const char* delim)
-{
-    list_t list = NULL;
-    char *token = NULL, *wrk = NULL;
-    char buf[4096]; // some of those strings are really long
-    strncpy(buf, string, 4096);
-
-    token = strtok(buf, delim);
-    if (token)
-    {
-        wrk = malloc(strlen(token) + 1);
-        strcpy(wrk, token);
-        list_append(&list, wrk);
-    }
-
-    while ((token = strtok(NULL, delim)))
-    {
-        wrk = malloc(strlen(token) + 1);
-        strcpy(wrk, token);
-        list_append(&list, wrk);
-    }
-    return list;
-}
-
 list_t cheats_for_current_rom()
 {
     list_t node = NULL;
@@ -399,7 +375,6 @@ list_t cheats_for_current_rom()
                     memset(buf, '\0', PATH_MAX);
                     if (sscanf(node2->data, "$%x %[a-zA-Z0-9 ]", &value, &buf) == 2)
                     {
-                        printf("Parsed %02X %s\n", value, buf);
                         option = malloc(sizeof(cheat_option_t));
                         option->code = value;
                         option->description = malloc(strlen(buf) + 1);
@@ -426,6 +401,10 @@ list_t cheats_for_current_rom()
             cheat->codes = tokenize_string(entry->value, ",");
             cheat->name = list_first_data(cheat->codes);
             list_node_delete(&cheat->codes, list_first_node(cheat->codes));
+
+            /* Remove quotation marks from around name */
+            strcpy(cheat->name, cheat->name + 1);
+            cheat->name[strlen(cheat->name) - 1] = '\0';
         }
 
         cheat = NULL;

@@ -24,8 +24,8 @@
 #include "mainwidget.h"
 #include "globals.h"
 #include "rommodel.h"
-
 #include "settingsdialog.h"
+#include "cheatdialog.h"
 
 namespace core {
     extern "C" {
@@ -237,43 +237,22 @@ void MainWindow::emulationStop()
 #endif
 }
 
+void MainWindow::showCheatDialog()
+{
+    CheatDialog* d = new CheatDialog(this);
+    d->show();
+}
+
 void MainWindow::fullScreenToggle()
 {
     core::changeWindow();
 }
 
-#include <QDebug>
-
 void MainWindow::saveStateSave()
 {
-    core::list_t node1, node2;
-    node1 = node2 = NULL;
-    core::list_t cheats = core::cheats_for_current_rom();
-
-    if (!cheats) {
-        return;
+    if (core::g_EmulatorRunning) {
+        core::savestates_job |= SAVESTATE;
     }
-
-    list_foreach(cheats, node1)
-    {
-        core::cheat_t* cheat = static_cast<core::cheat_t*>(node1->data);
-        qDebug() << "Cheat:" << cheat->name;
-        qDebug() << "\tComment:" << cheat->comment;
-        qDebug() << "\tNumber:" << cheat->number;
-        list_foreach(cheat->codes, node2)
-        {
-            qDebug() << "\tValue:" << static_cast<char*>(node2->data);
-        }
-        list_foreach(cheat->options, node2)
-        {
-            core::cheat_option_t* option = static_cast<core::cheat_option_t*>(node2->data);
-            qDebug() << "\tOption:" << option->code << option->description;
-        }
-    }
-    cheats_free(&cheats);
-//     if (core::g_EmulatorRunning) {
-//         core::savestates_job |= SAVESTATE;
-//     }
 }
 
 void MainWindow::saveStateSaveAs()
@@ -400,6 +379,10 @@ void MainWindow::setupActions()
             this, SLOT(emulationPauseContinue()));
     actionStop->setIcon(icon("media-playback-stop.png"));
     connect(actionStop, SIGNAL(triggered()), this, SLOT(emulationStop()));
+
+    connect(actionCheats, SIGNAL(triggered()),
+             this, SLOT(showCheatDialog()));
+
     actionSaveState->setIcon(icon("document-save.png"));
     connect(actionSaveState, SIGNAL(triggered()),
             this, SLOT(saveStateSave()));
