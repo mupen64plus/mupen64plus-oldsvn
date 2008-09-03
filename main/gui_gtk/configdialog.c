@@ -307,7 +307,6 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     int i = 0;
 
     /* General Tab */ 
-
     /* CPU Core */
     if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)))
         config_put_number("Core", CORE_INTERPRETER); 
@@ -434,14 +433,12 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
         }
 
     /* Rom Browser Tab */
-
     GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
     GtkTreeIter iter;
 
     /* Get the first item. */
     gboolean keepgoing = gtk_tree_model_get_iter_first(model, &iter);
     currentvalue = config_get_number("NumRomDirs", 0);
-
     /* Iterate through list and add to the configuration if different from current. */
     while(keepgoing)
         {
@@ -451,18 +448,14 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
             {
             char buffer[30];
             sprintf(buffer, "RomDirectory[%d]", i++);
-            if(strcmp(config_get_string(buffer, NULL), text)!=0)
-                { g_romcache.rcstask = RCS_RESCAN; }
             config_put_string(buffer, text);
             }
 
         keepgoing = gtk_tree_model_iter_next(model, &iter);
         }
-
     config_put_number("NumRomDirs", i);
     if(currentvalue!=i)
         { g_romcache.rcstask = RCS_RESCAN; }
-
     guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton));
     config_put_bool("RomDirsScanRecursive", guivalue);
 

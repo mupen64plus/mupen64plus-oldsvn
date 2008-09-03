@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>  // POSIX macros and standard types.
-// #include <pthread.h> // POSIX thread library
 // #include <signal.h> // signals
 #include <getopt.h> // getopt_long
 #include <dirent.h>
@@ -339,7 +338,6 @@ void startEmulation(void)
     VILimitMilliseconds = (double) 1000.0/VILimit; 
     printf("init timer!\n");
     
-    
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
                *input_plugin = NULL,
@@ -409,7 +407,7 @@ void startEmulation(void)
     else if(!g_EmulatorRunning)
     {
         // spawn emulation thread
-        printf("Creating SDL Thread!\n");
+        
         g_EmulationThread = SDL_CreateThread(emulationThread, NULL);
         if(g_EmulationThread == NULL)
         {
@@ -417,8 +415,7 @@ void startEmulation(void)
             error_message(tr("Couldn't spawn core thread!"));
             return;
         }
-        printf("Thread ID: %i\n",SDL_GetThreadID( g_EmulationThread ));
-        // pthread_detach(g_EmulationThread);
+        
         main_message(0, 1, 0, OSD_BOTTOM_LEFT,  tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
@@ -775,11 +772,9 @@ static int sdl_event_filter( const SDL_Event *event )
 */
 static int emulationThread( void *_arg )
 {
-	
-	printf("Made it here\n");
-#ifndef __WIN32__
+/* #ifndef __WIN32__
     struct sigaction sa;
-#endif
+#endif */
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
            *input_plugin = NULL,
@@ -787,9 +782,9 @@ static int emulationThread( void *_arg )
 
     // install signal handler, but only if we're running in GUI mode
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
-    if (l_GuiEnabled)
+/*    if (l_GuiEnabled)
     {
-/* #ifdef __WIN32__
+ #ifdef __WIN32__
         signal( SIGSEGV, sighandler );
         signal( SIGILL, sighandler );
         signal( SIGFPE, sighandler );
@@ -801,11 +796,10 @@ static int emulationThread( void *_arg )
         sigaction( SIGILL, &sa, NULL );
         sigaction( SIGFPE, &sa, NULL );
         sigaction( SIGCHLD, &sa, NULL );
-#endif */
-    }
+#endif 
+    }*/
 
     g_EmulatorRunning = 1;
-
     // if emu mode wasn't specified at the commandline, set from config file
     if(!l_EmuMode)
         dynacore = config_get_number( "Core", CORE_DYNAREC );
@@ -823,7 +817,7 @@ static int emulationThread( void *_arg )
 
     SDL_SetEventFilter(sdl_event_filter);
     SDL_EnableUNICODE(1);
-printf("Made it here\n");
+
     /* Determine which plugins to use:
      *  -If valid plugin was specified at the commandline, use it
      *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
@@ -864,7 +858,7 @@ printf("Made it here\n");
     romOpen_gfx();
     romOpen_audio();
     romOpen_input();
-printf("Made it here\n");
+
     // switch to fullscreen if enabled
     if (g_Fullscreen)
         changeWindow();
@@ -928,6 +922,7 @@ printf("Made it here\n");
 
     SDL_Quit();
 
+    // Look at this block, its not even really needed. But I'd rather remove it after the branch got merged.
     if (l_Filename != 0)
     {
         // the following doesn't work - it wouldn't exit immediately but when the next event is
@@ -1499,25 +1494,14 @@ int main(int argc, char *argv[])
 #ifndef NO_GUI
     // only create the ROM Cache Thread if GUI is enabled
     if (l_GuiEnabled)
-    {
-        /* pthread_attr_t tattr;
-        int ret;
-        int newprio = 80;
-        struct sched_param param;
-        pthread_attr_init (&tattr);
-        pthread_attr_getschedparam (&tattr, &param);
-        param.sched_priority = newprio;
-        pthread_attr_setschedparam (&tattr, &param); */
-        printf("prethread made\n");
+    {  
         g_romcache.rcstask = RCS_INIT;
         g_RomCacheThread = SDL_CreateThread(rom_cache_system, NULL);
-        printf("thread made\n");
+        
         if(g_RomCacheThread == NULL)
-            {
+        {
             error_message(tr("Couldn't spawn rom cache thread!"));
-            }
-       // else
-        //   pthread_detach(g_RomCacheThread);
+        }
     }
 
     // only display gui if user wants it
