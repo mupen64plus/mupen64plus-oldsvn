@@ -1135,12 +1135,16 @@ configure_sdl( SController *controller )
     g_psController = controller;
 
     // run thread
+#if defined(__APPLE__)
+    init_and_run(NULL);
+#else
     thread = SDL_CreateThread( init_and_run, NULL );
     if( !thread )
     {
         fprintf( stderr, "["PLUGIN_NAME"]: Couldn't create thread: %s\n", SDL_GetError() );
         return;
     }
+#endif
 
     // everything ok
 }

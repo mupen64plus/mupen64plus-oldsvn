@@ -125,7 +125,7 @@ ifeq ($(OS),LINUX)
 STRIP	= strip -s
 endif
 ifeq ($(OS),OSX)
-STRIP	= strip 
+STRIP	= strip -x 
 endif
 RM      = rm
 MV      = mv

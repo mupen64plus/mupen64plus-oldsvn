@@ -233,11 +233,14 @@ PLUGINS	= plugins/blight_input.so \
           plugins/dummyaudio.so \
           plugins/dummyvideo.so \
           plugins/glN64.so \
-          plugins/ricevideo.so \
-          plugins/glide64.so \
           plugins/jttl_audio.so \
           plugins/mupen64_hle_rsp_azimer.so \
           plugins/mupen64_input.so
+
+ifeq (!$(OS),OSX)
+PLUGINS = $(PLUGINS) 	plugins/ricevideo.so \
+			plugins/glide64.so
+endif
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 

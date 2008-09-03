@@ -1,7 +1,10 @@
 #ifndef TEXTURES_H
 #define TEXTURES_H
-
+#if defined(__APPLE__)
+#include <SDL_OpenGL.h>
+#else
 #include <GL/gl.h>
+#endif
 #include "convert.h"
 
 struct CachedTexture

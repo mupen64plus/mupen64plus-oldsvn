@@ -6,8 +6,13 @@
 # include "../main/winlnxdefs.h"
 # include <string.h>
 #endif
+#if defined(__APPLE__)
+#include <SDL_OpenGL.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
+
 #include "glN64.h"
 #include "Debug.h"
 #include "Zilmar GFX 1.3.h"

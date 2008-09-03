@@ -1,7 +1,12 @@
 
 # include "../main/winlnxdefs.h"
 #define GL_GLEXT_PROTOTYPES
+#if defined(__APPLE__)
+#include <SDL_OpenGL.h>
+#else
 #include <GL/gl.h>
+#endif
+
 #include <png.h>
 # include "SDL.h"
 # include <string.h>
