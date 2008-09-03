@@ -347,7 +347,7 @@ void MainWindow::startEmulation()
     m_renderWindow->addActions(actions());
     m_renderWindow->installEventFilter(this);
     m_renderWindow->show();
-    core::g_MainWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
+    core::g_RenderWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
     core::g_StatusBar = reinterpret_cast<core::HWND__*>(statusBar()->winId());
 #endif
 
