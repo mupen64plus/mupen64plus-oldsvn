@@ -36,7 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>  // POSIX macros and standard types.
-// #include <signal.h> // signals
+#include <signal.h> // signals
 #include <getopt.h> // getopt_long
 #include <dirent.h>
 
@@ -81,11 +81,11 @@ static int emulationThread( void *_arg );
 extern int rom_cache_system( void *_arg );
 
 
-/* #ifdef __WIN32__
+#ifdef __WIN32__
 static void sighandler( int signal );
 #else
 static void sighandler( int signal, siginfo_t *info, void *context );
-#endif */
+#endif
 
 /** threads **/
 SDL_Thread * g_EmulationThread;         // core thread handle
@@ -772,9 +772,9 @@ static int sdl_event_filter( const SDL_Event *event )
 */
 static int emulationThread( void *_arg )
 {
-/* #ifndef __WIN32__
+ #ifndef __WIN32__
     struct sigaction sa;
-#endif */
+#endif
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
            *input_plugin = NULL,
@@ -782,7 +782,7 @@ static int emulationThread( void *_arg )
 
     // install signal handler, but only if we're running in GUI mode
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
-/*    if (l_GuiEnabled)
+    if (l_GuiEnabled)
     {
  #ifdef __WIN32__
         signal( SIGSEGV, sighandler );
@@ -797,7 +797,7 @@ static int emulationThread( void *_arg )
         sigaction( SIGFPE, &sa, NULL );
         sigaction( SIGCHLD, &sa, NULL );
 #endif 
-    }*/
+    }
 
     g_EmulatorRunning = 1;
     // if emu mode wasn't specified at the commandline, set from config file
@@ -938,7 +938,7 @@ static int emulationThread( void *_arg )
 /*********************************************************************************************************
 * signal handler
 */
-/* #ifdef __WIN32__
+#ifdef __WIN32__
 static void sighandler(int signal)
 {
     printf( "Signal number %d caught\n", signal );
@@ -946,7 +946,7 @@ static void sighandler(int signal)
 #else
 static void sighandler(int signal, siginfo_t *info, void *context)
 {
-    if( info->si_pid == g_EmulationThread )
+    if( info->si_pid == SDL_GetThreadID(g_EmulationThread) )
     {
         switch( signal )
         {
@@ -1003,7 +1003,8 @@ static void sighandler(int signal, siginfo_t *info, void *context)
                 printf( "Signal number %d in core thread caught:\n", signal );
                 printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
         }
-        pthread_cancel(g_EmulationThread);
+        // it says that killthread can be messy, but im not sure what else to use.
+        SDL_KillThread(g_EmulationThread);
         g_EmulationThread = 0;
         g_EmulatorRunning = 0;
     }
