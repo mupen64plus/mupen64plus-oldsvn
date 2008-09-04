@@ -203,6 +203,20 @@ void Config_DoConfig()
     QDialog dialog;
     Ui_glN64ConfigDialog ui;
     ui.setupUi(&dialog);
+
+    QString res = QString("%1x%2")
+                    .arg(OGL.fullscreenWidth)
+                    .arg(OGL.fullscreenHeight);
+    ui.resolutionCombo->setEditText(res);
+    ui.forceBilinearFilteringCheck->setChecked(OGL.forceBilinear);
+    ui.twoExSaiTextureScalingCheck->setChecked(OGL.enable2xSaI);
+    ui.anisotropicFilteringCheck->setChecked(OGL.enableAnisotropicFiltering);
+    ui.drawFogCheck->setChecked(OGL.fog);
+    ui.hwFramebufferTexturesCheck->setChecked(OGL.frameBufferTextures);
+    ui.ditheredAlphaTestingCheck->setChecked(OGL.usePolygonStipple);
+    ui.bitDepthCombo->setCurrentIndex(OGL.textureBitDepth);
+    ui.cacheSizeSpin->setValue(cache.maxBytes / 1024 / 1024);
+
     // eek copy paste
     if (dialog.exec() == QDialog::Accepted) {
         FILE *f;
