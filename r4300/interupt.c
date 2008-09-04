@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 #ifdef __WIN32__
   #ifdef _POSIX_C_SOURCE
   #undef _POSIX_C_SOURCE
@@ -29,6 +30,7 @@
 #define _POSIX_C_SOURCE 199309
 #endif
 
+#include <time.h>
 #include <time.h>
 
 #include <SDL.h>
@@ -125,14 +127,13 @@ int before_event(unsigned int evt1, unsigned int evt2, int type2)
 void add_interupt_event(int type, unsigned int delay)
 {
     unsigned int count = Count + delay/**2*/;
-    unsigned int dupcount;
     int special = 0;
    
     if(type == SPECIAL_INT /*|| type == COMPARE_INT*/) special = 1;
     if(Count > 0x80000000) SPECIAL_done = 0;
    
-    if ((dupcount = get_event(type)) != 0) {
-        printf("two events of type %x in queue: one in %i clocks, the other in %i\n", type, dupcount - Count, delay);
+    if (get_event(type)) {
+        printf("two events of type %x in queue\n", type);
     }
     interupt_queue *aux = q;
    
@@ -446,11 +447,10 @@ void gen_interupt()
             lircCheckInput();
 #endif //WITH_LIRC
             SDL_PumpEvents();
-            printf("si interrupt.\n");
             PIF_RAMb[0x3F] = 0x0;
             remove_interupt_event();
             MI_register.mi_intr_reg |= 0x02;
-            si_register.si_stat = (si_register.si_stat & ~0x3) | 0x1000;
+            si_register.si_stat |= 0x1000;
             if (MI_register.mi_intr_reg & MI_register.mi_intr_mask_reg)
                 Cause = (Cause | 0x400) & 0xFFFFFF83;
             else
