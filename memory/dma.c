@@ -328,6 +328,8 @@ void dma_si_write()
     
     update_pif_write();
     update_count();
+    si_register.si_stat |= 1;
+    printf("dma_si_write()\n");
     add_interupt_event(SI_INT, /*0x100*/0x900);
 }
 
@@ -349,5 +351,8 @@ void dma_si_read()
     }
     
     update_count();
-    add_interupt_event(SI_INT, /*0x100*/0x900);
+    si_register.si_stat |= 1;
+    printf("dma_si_read()\n");
+    add_interupt_event(SI_INT, /*0x100*/0x500);
 }
+

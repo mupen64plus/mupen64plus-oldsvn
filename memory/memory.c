@@ -3802,6 +3802,8 @@ void write_pif()
       {
          PIF_RAMb[0x3F] = 0;
          update_count();
+         //si_register.si_stat |= 1;
+         printf("write_pif()\n");
          add_interupt_event(SI_INT, /*0x100*/0x900);
       }
     else
@@ -3828,6 +3830,8 @@ void write_pifb()
       {
          PIF_RAMb[0x3F] = 0;
          update_count();
+         //si_register.si_stat |= 1;
+         printf("write_pifb()\n");
          add_interupt_event(SI_INT, /*0x100*/0x900);
       }
     else
@@ -3855,6 +3859,8 @@ void write_pifh()
       {
          PIF_RAMb[0x3F] = 0;
          update_count();
+         //si_register.si_stat |= 1;
+         printf("write_pifh()\n");
          add_interupt_event(SI_INT, /*0x100*/0x900);
       }
     else
@@ -3884,6 +3890,8 @@ void write_pifd()
       {
          PIF_RAMb[0x3F] = 0;
          update_count();
+         //si_register.si_stat |= 1;
+         printf("write_pifd()\n");
          add_interupt_event(SI_INT, /*0x100*/0x900);
       }
     else
