@@ -1,17 +1,13 @@
-#ifndef __LINUX__
-# include <windows.h>
-# include <commctrl.h>
-# include <process.h>
+#ifndef __LINUX__ //Change me...
+#include <windows.h>
+#include <commctrl.h>
+#include <process.h>
 #else
-# include "../main/winlnxdefs.h"
-# include <string.h>
+#include <string.h>
+#include "../main/winlnxdefs.h"
 #endif
-#if defined(__APPLE__)
-#include <SDL_OpenGL.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
+
+#include <SDL_opengl.h>
 
 #include "glN64.h"
 #include "Debug.h"

@@ -1,13 +1,13 @@
+#include <stdlib.h>
 
-# include "../main/winlnxdefs.h"
-# include <stdlib.h>
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
 
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
+#include "../main/winlnxdefs.h"
 
 #include "NV_register_combiners.h"
 #include "OpenGL.h"

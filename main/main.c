@@ -442,7 +442,7 @@ void stopEmulation(void)
 #ifdef __WIN32__
         plugin_close_plugins();
 #endif
-
+        g_EmulationThread = 0;
         g_EmulatorRunning = 0;
 
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation stopped.\n"));

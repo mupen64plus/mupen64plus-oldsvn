@@ -1,12 +1,9 @@
+#include <stdlib.h>
 
-# include "../main/winlnxdefs.h"
-# include <stdlib.h>
 #define GL_GLEXT_PROTOTYPES
-#if defined(__APPLE__)
-#include <SDL_OpenGL.h>
-#else
-#include <GL/gl.h>
-#endif
+#include <SDL_opengl.h>
+
+#include "../main/winlnxdefs.h"
 
 #include "OpenGL.h"
 #include "Combiner.h"

@@ -1,20 +1,15 @@
-
-# include "../main/winlnxdefs.h"
-# include <time.h>
-# include <stdlib.h>
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# define timeGetTime() time(NULL)
-
+#include <time.h>
+#include <stdlib.h>
 #include <memory.h>
-#define GL_GLEXT_PROTOTYPES
-#if defined(__APPLE__)
-#include <SDL_OpenGL.h>
-#else
-#include <GL/gl.h>
-#endif
 
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
+#include "../main/winlnxdefs.h"
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#define timeGetTime() time(NULL)
 
 #include "OpenGL.h"
 #include "Textures.h"

@@ -1,28 +1,26 @@
 
-# include "../main/winlnxdefs.h"
-#define GL_GLEXT_PROTOTYPES
-#if defined(__APPLE__)
-#include <SDL_OpenGL.h>
-#else
-#include <GL/gl.h>
-#endif
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <time.h>
 
 #include <png.h>
-# include "SDL.h"
-# include <string.h>
-# include <time.h>
-# include <stdlib.h>
 
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
-# define timeGetTime() time(NULL)
+#include <SDL.h>
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
 
-#include <math.h>
-#include <stdio.h>
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#define timeGetTime() time(NULL)
+
+#include "../main/winlnxdefs.h"
+
 #include "glN64.h"
 #include "OpenGL.h"
 #include "Types.h"
