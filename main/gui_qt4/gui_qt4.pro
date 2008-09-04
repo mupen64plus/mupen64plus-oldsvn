@@ -30,11 +30,6 @@ unix {
     PKGCONFIG += gtk+-2.0 sdl
 }
 
-win32 {
-    message($$cflags)
-    QMAKE_CFLAGS_RELEASE += $$cflags
-}
-
 # Input
 HEADERS += globals.h \
            mainwidget.h \

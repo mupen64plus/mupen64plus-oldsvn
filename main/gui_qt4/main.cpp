@@ -50,11 +50,9 @@ extern "C" {
 // arguments. This is called before mupen64plus parses any of its commandline options.
 void gui_init(int *argc, char ***argv)
 {
-    QT_REQUIRE_VERSION(*argc, *argv, "4.4")
-
     application = new QApplication(*argc, *argv);
-    application->setOrganizationName("mupen64plus");
-    application->setApplicationName("mupen64plus");
+    application->setOrganizationName("Mupen64Plus");
+    application->setApplicationName("Mupen64Plus");
     application->setWindowIcon(icon("mupen64plus.png"));
     mainWindow = new MainWindow;
 

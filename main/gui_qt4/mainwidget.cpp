@@ -62,8 +62,6 @@ MainWidget::MainWidget(QWidget* parent)
     m_proxyModel->setDynamicSortFilter(true);
     m_proxyModel->setSortRole(RomModel::Sort);
 
-    treeView->setRootIsDecorated(false);
-    treeView->setSortingEnabled(true);
     treeView->setModel(m_proxyModel);
     treeView->sortByColumn(RomModel::GoodName, Qt::AscendingOrder);
     treeView->header()->resizeSections(QHeaderView::ResizeToContents);
