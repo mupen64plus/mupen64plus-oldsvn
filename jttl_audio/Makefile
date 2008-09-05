@@ -50,7 +50,7 @@ CFLAGS += -fpic -DPIC
 OBJECTS = main.o volume.o
 
 ifneq ($(findstring $(GUI), GTK2 QT4),)
-  CFLAGS += $(GTK_FLAGS) -DUSE_GTK
+  CFLAGS += $(GTK_FLAGS)
   PLUGIN_LDFLAGS += $(GTK_LIBS)
   OBJECTS += gui_gtk2.o
 endif

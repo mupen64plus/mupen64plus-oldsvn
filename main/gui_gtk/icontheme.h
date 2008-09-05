@@ -1,8 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - aboutdialog.c                                           *
+ *   Mupen64plus - checkicontheme.h                                        *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Tillin9                                            *
- *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,13 +19,14 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* aboutdialog.h - Handles the about box */
+/* checkicontheme.h - Checks current gtk icon theme for application icons. */
 
 #include <gtk/gtk.h>
 
-#ifndef __ABOUTDIALOG_H__
-#define __ABOUTDIALOG_H__
+#ifndef __CHECKICONTHEME_H__
+#define __CHECKICONTHEME_H__
 
-void callback_aboutMupen(GtkWidget *widget, gpointer data);
+gboolean check_icon_theme();
+void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
 
-#endif // __ABOUTDIALOG_H__
+#endif // __CHECKICONTHEME_H__

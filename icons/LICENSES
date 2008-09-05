@@ -19,6 +19,12 @@ preferences-system.png
 16x16/document-save-as.png
 16x16/document-properties.png
 16x16/view-refresh.png
+16x16/video-display.png
+16x16/window-close.png
+16x16/cpu.png
+16x16/audio-card.png
+16x16/document-save-as.png
+16x16/application-exit.png
 22x22/document-open.png
 22x22/document-save.png
 22x22/media-playback-pause.png
@@ -111,6 +117,7 @@ are Copyright: The Oxygen Icon Theme
 32x32/mupen64plus.png
 32x32/mupen64cart.png
 16x16/mupen64plus.png
+mupen64plus-large.png
 australia.png
 europe.png
 france.png

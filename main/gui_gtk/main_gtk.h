@@ -29,17 +29,45 @@
 
 typedef struct
 {
+    GtkWidget* dialogErrorImage;
+    GtkWidget* dialogQuestionImage;
+
     GtkWidget* window;
     GtkWidget* toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
+
     GtkWidget* menuBar;
+    GtkWidget* openMenuImage;
+
+    GtkWidget* openRomMenuImage;
+    GtkWidget* closeRomMenuImage;
+    GtkWidget* quitMenuImage;
+
+    GtkWidget* playMenuImage;
+    GtkWidget* pauseMenuImage;
+    GtkWidget* stopMenuImage;
+    GtkWidget* saveStateMenuImage;
+    GtkWidget* saveStateAsMenuImage;
+    GtkWidget* loadStateMenuImage;
+    GtkWidget* loadStateAsMenuImage;
+
+    GtkWidget* configureMenuImage;
+    GtkWidget* graphicsMenuImage;
+    GtkWidget* audioMenuImage;
+    GtkWidget* inputMenuImage;
+    GtkWidget* rspMenuImage;
+    GtkWidget* fullscreenMenuImage;
+
+    GtkWidget* aboutMenuImage;
 
     GtkWidget* toolBar;
-    GtkWidget* openImage;
-    GtkWidget* playImage;
-    GtkWidget* pauseImage;
-    GtkWidget* stopImage;
-    GtkWidget* fullscreenImage;
-    GtkWidget* configureImage;
+    GtkWidget* openButtonImage;
+    GtkWidget* playButtonImage;
+    GtkWidget* pauseButtonImage;
+    GtkWidget* stopButtonImage;
+    GtkWidget* saveStateButtonImage;
+    GtkWidget* loadStateButtonImage;
+    GtkWidget* fullscreenButtonImage;
+    GtkWidget* configureButtonImage;
 
     GtkWidget* filterBar;
     GtkWidget* filter;
@@ -75,5 +103,10 @@ void gui_display(void);
 void gui_main_loop(void);
 int gui_message(unsigned char messagetype, const char *format, ...);
 void updaterombrowser(unsigned int roms, unsigned short clear);
+
+/* View defines */
+#define TOOLBAR 1
+#define FILTER 2
+#define STATUSBAR 3
 
 #endif //__MAIN_GTK_H__

@@ -47,8 +47,10 @@
 
 #include "../../r4300/r4300.h"
 
-/** globals **/
+/* Globals. */
 SConfigDialog g_ConfigDialog;
+
+// special function input mappings
 static int sdl_loop = 0;
 
 struct input_mapping
@@ -61,7 +63,6 @@ struct input_mapping
 
 #define mapping_foreach(mapping) for(mapping = mappings; mapping->name; mapping++)
 
-// special function input mappings
 static struct input_mapping mappings[] =
     {
         {
@@ -133,7 +134,6 @@ static struct input_mapping mappings[] =
         { 0, 0, 0, 0 } // last entry
     };
 
-/** callbacks **/
 static void callback_configGfx(GtkWidget *widget, gpointer data)
 {
     const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
@@ -356,12 +356,12 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     if(updategui)
         {
         currentvalue = config_get_number("ToolbarSize", 22);
-        set_icon(g_MainWindow.openImage, "document-open", currentvalue, FALSE);
-        set_icon(g_MainWindow.playImage, "media-playback-start", currentvalue, FALSE);
-        set_icon(g_MainWindow.pauseImage, "media-playback-pause", currentvalue, FALSE);
-        set_icon(g_MainWindow.stopImage, "media-playback-stop", currentvalue, FALSE);
-        set_icon(g_MainWindow.fullscreenImage, "view-fullscreen", currentvalue, FALSE);
-        set_icon(g_MainWindow.configureImage, "preferences-system", currentvalue, FALSE);
+        set_icon(g_MainWindow.openButtonImage, "mupen64cart", currentvalue, TRUE);
+        set_icon(g_MainWindow.playButtonImage, "media-playback-start", currentvalue, FALSE);
+        set_icon(g_MainWindow.pauseButtonImage, "media-playback-pause", currentvalue, FALSE);
+        set_icon(g_MainWindow.stopButtonImage, "media-playback-stop", currentvalue, FALSE);
+        set_icon(g_MainWindow.fullscreenButtonImage, "view-fullscreen", currentvalue, FALSE);
+        set_icon(g_MainWindow.configureButtonImage, "preferences-system", currentvalue, FALSE);
         updategui = FALSE;
         }
 
@@ -440,19 +440,19 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
 
     /* Get the first item. */
     gboolean keepgoing = gtk_tree_model_get_iter_first(model, &iter);
-    currentvalue = config_get_number("NumRomDirs", 0);
 
     /* Iterate through list and add to the configuration if different from current. */
+    i = 0;
     while(keepgoing)
         {
         gtk_tree_model_get(model, &iter, 0, &text, -1);
 
         if(text!=NULL)
             {
-            char buffer[30];
+            char buffer[32];
             sprintf(buffer, "RomDirectory[%d]", i++);
-            if(strcmp(config_get_string(buffer, NULL), text)!=0)
-                { g_romcache.rcstask = RCS_RESCAN; }
+            if(strncmp(config_get_string(buffer, "/"), text, PATH_MAX)!=0)
+                g_romcache.rcstask = RCS_RESCAN;
             config_put_string(buffer, text);
             }
 
@@ -460,8 +460,6 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
         }
 
     config_put_number("NumRomDirs", i);
-    if(currentvalue!=i)
-        { g_romcache.rcstask = RCS_RESCAN; }
 
     guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton));
     config_put_bool("RomDirsScanRecursive", guivalue);
@@ -522,9 +520,10 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    // if plugin was specified at the commandline, don't let user modify
-                    if(g_GfxPlugin)
+                    if(g_GfxPlugin||g_EmulationThread)
                         gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, FALSE);
+                    else
+                        gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, TRUE);
                     break;
                     }
                 free(combo);
@@ -551,9 +550,10 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    // if plugin was specified at the commandline, don't let user modify
-                    if(g_AudioPlugin)
+                    if(g_AudioPlugin||g_EmulationThread)
                         gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, FALSE);
+                    else
+                        gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, TRUE);
                     break;
                     }
                 free(combo);
@@ -580,9 +580,10 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    // if plugin was specified at the commandline, don't let user modify
-                    if(g_InputPlugin)
+                    if(g_InputPlugin||g_EmulationThread)
                         gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, FALSE);
+                    else
+                        gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, TRUE);
                     break;
                     }
                 free(combo);
@@ -609,9 +610,10 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    // if plugin was specified at the commandline, don't let user modify
-                    if(g_RspPlugin)
+                    if(g_RspPlugin||g_EmulationThread)
                         gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, FALSE);
+                    else
+                        gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, TRUE);
                     break;
                     }
                 free(combo);
@@ -690,6 +692,8 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
             gtk_editable_insert_text(GTK_EDITABLE(mapping->joy_mapping_textbox), config_get_string(mapping->joy_config_name, ""), strlen(config_get_string(mapping->joy_config_name, "")), &i);
             }
         }
+
+    gtk_window_set_focus(GTK_WINDOW(g_ConfigDialog.dialog), g_ConfigDialog.okButton);
 }
 
 static void callback_cancelSetInput(GtkWidget *widget, gint response, GtkWidget *textbox)
