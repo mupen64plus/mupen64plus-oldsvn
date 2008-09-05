@@ -285,8 +285,8 @@ static void callback_theme_changed(GtkWidget *widget, gpointer data)
     set_icon(g_MainWindow.stopButtonImage, "media-playback-stop", size, FALSE);
     set_icon(g_MainWindow.saveStateButtonImage, "document-save", size, FALSE);
     set_icon(g_MainWindow.loadStateButtonImage, "document-revert", size, FALSE);
-    set_icon(g_MainWindow.fullscreenButtonImage, "view-fullscreen", size, FALSE);
     set_icon(g_MainWindow.configureButtonImage, "preferences-system", size, FALSE);
+    set_icon(g_MainWindow.fullscreenButtonImage, "view-fullscreen", size, FALSE);
 
     if(g_MainWindow.dialogErrorImage)
         set_icon(g_MainWindow.dialogErrorImage, "dialog-error", size, FALSE);
@@ -323,7 +323,7 @@ static void callback_theme_changed(GtkWidget *widget, gpointer data)
 /* Ask user to load a rom. If emulation is running, give warning. */
 static void callback_open_rom(GtkWidget *widget, gpointer data)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         {
         if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load a rom?")))
             return;
@@ -422,7 +422,7 @@ static void callback_stop_emulation(GtkWidget *widget, gpointer data)
 
 static void callback_save_state(GtkWidget *widget, gpointer data)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         savestates_job |= SAVESTATE;
     else
         error_message(tr("Emulation is not running."));
@@ -431,7 +431,7 @@ static void callback_save_state(GtkWidget *widget, gpointer data)
 /* Save state as. Launch a file chooser so user can specify file. */
 static void callback_save_state_as(GtkWidget *widget, gpointer data)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         {
         GtkWidget *file_chooser;
 
@@ -460,7 +460,7 @@ static void callback_save_state_as(GtkWidget *widget, gpointer data)
 
 static void callback_load_state(GtkWidget *widget, gpointer data)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         savestates_job |= LOADSTATE;
     else
         error_message(tr("Emulation is not running."));
@@ -469,7 +469,7 @@ static void callback_load_state(GtkWidget *widget, gpointer data)
 /* Load state from. Open a file chooser so user can specify file. */
 static void callback_load_state_from(GtkWidget *widget, gpointer data)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         {
         GtkWidget *file_chooser;
 
@@ -589,7 +589,7 @@ static void callback_configure_rsp(GtkWidget *widget, gpointer data)
 /* Enter full screen mode. */
 static void callback_fullscreen(GtkWidget *widget, gpointer data)
 {
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         changeWindow();
 }
 
@@ -659,7 +659,7 @@ static void callback_debuggerEnableToggled(GtkWidget *widget, gpointer data)
 {
     int emuRestart = 0;
 
-    if(g_EmulationThread)
+    if(g_EmulatorRunning)
         {
         if(gui_message(2, tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
             {

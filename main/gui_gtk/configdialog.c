@@ -360,6 +360,8 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
         set_icon(g_MainWindow.playButtonImage, "media-playback-start", currentvalue, FALSE);
         set_icon(g_MainWindow.pauseButtonImage, "media-playback-pause", currentvalue, FALSE);
         set_icon(g_MainWindow.stopButtonImage, "media-playback-stop", currentvalue, FALSE);
+        set_icon(g_MainWindow.saveStateButtonImage, "document-save", currentvalue, FALSE);
+        set_icon(g_MainWindow.loadStateButtonImage, "document-revert", currentvalue, FALSE);
         set_icon(g_MainWindow.fullscreenButtonImage, "view-fullscreen", currentvalue, FALSE);
         set_icon(g_MainWindow.configureButtonImage, "preferences-system", currentvalue, FALSE);
         updategui = FALSE;
@@ -520,7 +522,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_GfxPlugin||g_EmulationThread)
+                    if(g_GfxPlugin||g_EmulatorRunning)
                         gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, FALSE);
                     else
                         gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, TRUE);
@@ -550,7 +552,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_AudioPlugin||g_EmulationThread)
+                    if(g_AudioPlugin||g_EmulatorRunning)
                         gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, FALSE);
                     else
                         gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, TRUE);
@@ -580,7 +582,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_InputPlugin||g_EmulationThread)
+                    if(g_InputPlugin||g_EmulatorRunning)
                         gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, FALSE);
                     else
                         gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, TRUE);
@@ -610,7 +612,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_RspPlugin||g_EmulationThread)
+                    if(g_RspPlugin||g_EmulatorRunning)
                         gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, FALSE);
                     else
                         gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, TRUE);
