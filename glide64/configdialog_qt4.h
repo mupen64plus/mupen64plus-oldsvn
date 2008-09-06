@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-*   Mupen64plus - config_qt4.cpp                                          *
+*   Mupen64plus - configdialog_qt4.cpp                                    *
 *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
 *   Copyright (C) 2008 slougi                                             *
 *                                                                         *
@@ -19,32 +19,27 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <QString>
-#include <string.h>
+#ifndef CONFIGDIALOG_QT4_H
+#define CONFIGDIALOG_QT4_H
 
-#include "Gfx1.3.h"
-#include "configdialog_qt4.h"
+#include <QDialog>
+#include "ui_glide64config.h"
 
-extern "C" {
-
-void CALL DllConfig(HWND hParent)
+class ConfigDialog : public QDialog, private Ui_Glide64ConfigDialog
 {
-    ReadSettings();
+    Q_OBJECT
+    public:
+        ConfigDialog(QWidget* parent = 0);
 
-    char name[21] = "DEFAULT";
-    ReadSpecialSettings(name);
+    public slots:
+        virtual void accept();
+        void reset();
+        void defaults();
+        void buttonClicked(QAbstractButton* button);
 
-    if (gfx.HEADER) {
-        for (int i = 0; i < 20; i++) {
-            name[i] = gfx.HEADER[(32+i)^3];
-        }
-        name[20] = '\0';
+    private:
+        void readSettings();
+        void writeSettings();
+};
 
-        ReadSpecialSettings(qPrintable(QString(name).trimmed()));
-    }
-
-    ConfigDialog cd;
-    cd.exec();
-}
-
-} // extern "C"
+#endif // CONFIGDIALOG_QT4_H

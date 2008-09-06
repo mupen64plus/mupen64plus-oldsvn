@@ -21,18 +21,21 @@
 
 #include <QPushButton>
 #include <QMessageBox>
+
 #include <stdarg.h>
+#include <stdio.h>
+#include <assert.h>
 
 #include "icons/messagebox-error.xpm"
 #include "icons/messagebox-info.xpm"
 #include "icons/messagebox-quest.xpm"
 #include "icons/messagebox-warn.xpm"
 
+#include "messagebox.h"
+
 static const int MAX = 2048;
 
 extern "C" {
-
-#include "messagebox.h"
 
 int messagebox(const char *title, int flags, const char *fmt, ...)
 {
@@ -118,6 +121,9 @@ int messagebox(const char *title, int flags, const char *fmt, ...)
     } else if (button3 == mb.clickedButton()) {
         return 3;
     }
+
+    assert(false); // we should never get here
+    return 1;
 }
 
 } // extern "C"

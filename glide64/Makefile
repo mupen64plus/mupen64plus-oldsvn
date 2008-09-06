@@ -70,7 +70,11 @@ GTKOBJECTS = \
 
 QT_OBJECTS = \
 	messagebox_qt4.o \
-	config_qt4.o
+	config_qt4.o \
+	configdialog_qt4.o
+
+MOC_OBJECTS = \
+	configdialog_qt4.moc
 
 OBJECTS	+= $(WRAPPEROBJECTS)
 TARGET	= glide64.so
@@ -113,12 +117,15 @@ targets:
 
 all: version.h $(TARGET)
 
-$(TARGET): ${EXTRAS} $(OBJECTS)
+$(TARGET): ${MOC_OBJECTS} ${EXTRAS} $(OBJECTS)
 	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 	$(STRIP) $@
 
 ui_glide64config.h: glide64config.ui
 	$(UIC) $< -o $@
+
+configdialog_qt4.moc: configdialog_qt4.h
+	$(MOC) $< -o $@
 
 Main.o: font.h cursor.h
 font.h:	compiletex
@@ -136,7 +143,7 @@ rdp.o: ucode06.h
 
 clean:
 	$(RM) -rf $(OBJECTS) $(TARGET) $(DEPS) compiletex compiletex.o font.h cursor.h
-	$(RM) -rf *.ii *.i *.s
+	$(RM) -rf *.ii *.i *.s *.moc ui_*.h
 
 rebuild: clean $(TARGET)
 
