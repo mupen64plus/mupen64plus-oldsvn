@@ -34,33 +34,18 @@ class SettingsDialog : public QDialog, public Ui_SettingsDialog
         void accept();
 
     private slots:
-        void on_dynamicRecompilerRadio_toggled(bool checked);
-        void on_interpreterRadio_toggled(bool checked);
-        void on_pureInterpreterRadio_toggled(bool checked);
-        void on_disableCompiledJumpCheck_toggled(bool checked);
-        void on_disableMemoryExpansionCheck_toggled(bool checked);
-        void on_alwaysStartInFullScreenModeCheck_toggled(bool checked);
-        void on_askBeforeLoadingBadRomCheck_toggled(bool checked);
-        void on_autoIncrementSaveSlotCheck_toggled(bool checked);
-        void on_osdEnabledCheck_toggled(bool checked);
-        void on_audioPluginCombo_currentIndexChanged(const QString& text);
         void on_aboutAudioPluginButton_clicked();
         void on_configAudioPluginButton_clicked();
         void on_testAudioPluginButton_clicked();
-        void on_inputPluginCombo_currentIndexChanged(const QString& text);
         void on_aboutInputPluginButton_clicked();
         void on_configInputPluginButton_clicked();
         void on_testInputPluginButton_clicked();
-        void on_rspPluginCombo_currentIndexChanged(const QString& text);
         void on_aboutRspPluginButton_clicked();
         void on_configRspPluginButton_clicked();
         void on_testRspPluginButton_clicked();
-        void on_graphicsPluginCombo_currentIndexChanged(const QString& text);
         void on_aboutGraphicsPluginButton_clicked();
         void on_configGraphicsPluginButton_clicked();
         void on_testGraphicsPluginButton_clicked();
-        void on_scanDirectoriesRecursivelyCheck_toggled(bool checked);
-        void on_showFullPathsInFilenamesCheck_toggled(bool checked);
 
         void pageChanged(int);
 };

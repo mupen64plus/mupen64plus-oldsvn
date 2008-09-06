@@ -180,64 +180,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     );
 }
 
-void SettingsDialog::on_dynamicRecompilerRadio_toggled(bool checked)
-{
-    if (checked) {
-        core::config_put_number("Core", CORE_DYNAREC);
-    }
-}
-
-void SettingsDialog::on_interpreterRadio_toggled(bool checked)
-{
-    if (checked) {
-        core::config_put_number("Core", CORE_INTERPRETER);
-    }
-}
-
-void SettingsDialog::on_pureInterpreterRadio_toggled(bool checked)
-{
-    if (checked) {
-        core::config_put_number("Core", CORE_PURE_INTERPRETER);
-    }
-}
-
-void SettingsDialog::on_disableCompiledJumpCheck_toggled(bool checked)
-{
-    core::config_put_bool("NoCompiledJump", checked);
-}
-
-void SettingsDialog::on_disableMemoryExpansionCheck_toggled(bool checked)
-{
-    core::config_put_bool("NoMemoryExpansion", checked);
-}
-
-void SettingsDialog::on_alwaysStartInFullScreenModeCheck_toggled(bool checked)
-{
-    core::config_put_bool("GuiStartFullscreen", checked);
-}
-
-void SettingsDialog::on_askBeforeLoadingBadRomCheck_toggled(bool checked)
-{
-    core::g_Noask = checked;
-    core::config_put_bool("No Ask", checked);
-}
-
-void SettingsDialog::on_autoIncrementSaveSlotCheck_toggled(bool checked)
-{
-    core::config_put_bool("AutoIncSaveSlot", checked);
-}
-
-void SettingsDialog::on_osdEnabledCheck_toggled(bool checked)
-{
-    core::config_put_bool("OsdEnabled", checked);
-}
-
-void SettingsDialog::on_audioPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("Audio Plugin", filename);
-}
-
 void SettingsDialog::on_aboutAudioPluginButton_clicked()
 {
     QString text = audioPluginCombo->currentText();
@@ -254,12 +196,6 @@ void SettingsDialog::on_testAudioPluginButton_clicked()
 {
     QString text = audioPluginCombo->currentText();
     core::plugin_exec_test(qPrintable(text));
-}
-
-void SettingsDialog::on_graphicsPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("Gfx Plugin", filename);
 }
 
 void SettingsDialog::on_aboutGraphicsPluginButton_clicked()
@@ -280,12 +216,6 @@ void SettingsDialog::on_testGraphicsPluginButton_clicked()
     core::plugin_exec_test(qPrintable(text));
 }
 
-void SettingsDialog::on_rspPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("RSP Plugin", filename);
-}
-
 void SettingsDialog::on_aboutRspPluginButton_clicked()
 {
     QString text = rspPluginCombo->currentText();
@@ -302,12 +232,6 @@ void SettingsDialog::on_testRspPluginButton_clicked()
 {
     QString text = rspPluginCombo->currentText();
     core::plugin_exec_test(qPrintable(text));
-}
-
-void SettingsDialog::on_inputPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("Input Plugin", filename);
 }
 
 void SettingsDialog::on_aboutInputPluginButton_clicked()
@@ -328,18 +252,74 @@ void SettingsDialog::on_testInputPluginButton_clicked()
     core::plugin_exec_test(qPrintable(text));
 }
 
-void SettingsDialog::on_scanDirectoriesRecursivelyCheck_toggled(bool checked)
-{
-    core::config_put_bool("RomDirsScanRecursive", checked);
-}
-
-void SettingsDialog::on_showFullPathsInFilenamesCheck_toggled(bool checked)
-{
-    core::config_put_bool("RomBrowserShowFullPaths", checked);
-}
-
 void SettingsDialog::accept()
 {
+    const char* p = 0;
+
+    p = qPrintable(audioPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("Audio Plugin", p);
+
+    p = qPrintable(graphicsPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("Gfx Plugin", p);
+
+    p = qPrintable(rspPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("RSP Plugin", p);
+
+    p = qPrintable(inputPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("Input Plugin", p);
+
+    if (dynamicRecompilerRadio->isChecked()) {
+        core::config_put_number("Core", CORE_DYNAREC);
+    }
+
+    if (interpreterRadio->isChecked()) {
+        core::config_put_number("Core", CORE_INTERPRETER);
+    }
+
+    if (pureInterpreterRadio->isChecked()) {
+        core::config_put_number("Core", CORE_PURE_INTERPRETER);
+    }
+
+    core::config_put_bool(
+        "NoCompiledJump",
+        disableCompiledJumpCheck->isChecked()
+    );
+
+    core::config_put_bool(
+        "NoMemoryExpansion",
+        disableMemoryExpansionCheck->isChecked()
+    );
+
+    core::config_put_bool(
+        "GuiStartFullscreen",
+        alwaysStartInFullScreenModeCheck->isChecked()
+    );
+
+    core::g_Noask = askBeforeLoadingBadRomCheck->isChecked();
+    core::config_put_bool("No Ask", askBeforeLoadingBadRomCheck->isChecked());
+
+    core::g_OsdEnabled = osdEnabledCheck->isChecked();
+    core::config_put_bool("OsdEnabled", osdEnabledCheck->isChecked());
+
+    core::config_put_bool(
+        "AutoIncSaveSlot",
+        autoIncrementSaveSlotCheck->isChecked()
+    );
+
+    core::config_put_bool(
+        "RomDirsScanRecursive",
+        scanDirectoriesRecursivelyCheck->isChecked()
+    );
+
+    core::config_put_bool(
+        "RomBrowserShowFullPaths",
+        showFullPathsInFilenamesCheck->isChecked()
+    );
+
     QStringList romDirs = romDirectoriesListWidget->directories();
     core::config_put_number("NumRomDirs", romDirs.count());
     int i = 0;

@@ -308,7 +308,7 @@ void MainWindow::savestateSelectSlot(QAction* a)
 void MainWindow::configDialogShow()
 {
     SettingsDialog* d = new SettingsDialog(this);
-    d->show();
+    d->exec();
 }
 
 void MainWindow::itemCountUpdate(int count)
