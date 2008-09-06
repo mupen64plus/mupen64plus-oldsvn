@@ -38,7 +38,7 @@ QStringList romDirectories()
     QStringList dirs;
     for(int i = 0; i < core::config_get_number("NumRomDirs", 0); i++) {
         char buf[30];
-        sprintf(buf, "RomDirectory[%d]", i);
+        snprintf(buf, 30, "RomDirectory[%d]", i);
         dirs << core::config_get_string(buf, "");
     }
     dirs.removeAll("");
