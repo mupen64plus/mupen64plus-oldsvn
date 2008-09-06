@@ -51,15 +51,14 @@ extern "C" {
 void gui_init(int *argc, char ***argv)
 {
     application = new QApplication(*argc, *argv);
-    application->setOrganizationName("Mupen64Plus");
-    application->setApplicationName("Mupen64Plus");
-    application->setWindowIcon(icon("mupen64plus.png"));
-    mainWindow = new MainWindow;
 
 #ifndef __WIN32__
-    if (QAbstractEventDispatcher::instance()->inherits("QEventDispatcherGlib"))
+    if (QAbstractEventDispatcher::instance()->inherits("QEventDispatcherGlib")) {
+        delete application;
+        application = 0;
         gtk_init(argc, argv);
-    else
+        application = new QApplication(*argc, *argv);
+    } else {
         QMessageBox::warning(0,
             QObject::tr("No Glib Integration"),
             QObject::tr("<html><p>Your Qt library was compiled without glib \
@@ -68,7 +67,12 @@ void gui_init(int *argc, char ***argv)
                          <p>To fix this, install a Qt version with glib \
                          main loop support. Most distributions provide this \
                          by default.</p></html>"));
+    }
 #endif
+    application->setOrganizationName("Mupen64Plus");
+    application->setApplicationName("Mupen64Plus");
+    application->setWindowIcon(icon("mupen64plus.png"));
+    mainWindow = new MainWindow;
 }
 
 // display GUI components to the screen
