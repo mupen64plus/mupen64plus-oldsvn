@@ -1,0 +1,999 @@
+<ui version="4.0" >
+ <class>Glide64ConfigDialog</class>
+ <widget class="QDialog" name="Glide64ConfigDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>341</width>
+    <height>624</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Glide64 Setup</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <item>
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
+       <string>General</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout" >
+       <item row="0" column="0" colspan="2" >
+        <widget class="QLabel" name="label_17" >
+         <property name="text" >
+          <string>&lt;h4>Compatibility&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <spacer name="horizontalSpacer" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QLabel" name="autodetectMicrocodeLabel" >
+         <property name="text" >
+          <string>Autodetect Microcode:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2" >
+        <widget class="QCheckBox" name="autodetectMicrocodeCheck" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" >
+        <widget class="QLabel" name="label_19" >
+         <property name="text" >
+          <string>Force Microcode:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_7" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="comboBox_7" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <item>
+            <property name="text" >
+             <string>0: RSP SW 2.0X (ex. Mario)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>1: F3DEX 1.XX (ex. Star Fox)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>2: F3DEX 2.XX (ex. Zelda OOT)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>3: RSP SW 2.0D EXT (ex. Waverace)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>4: RSP SW 2.0D EXT (ex. Shadows of the Empire)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>5: RSP SW 2.0 (ex. Diddy Kong Racing)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>6: S2DEX 1.XX (ex. Yoshi's Story)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>7: RSP SW PD Perfect Dark</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>8: F3DEXBG 2.08 Conker's Bad Fur Day</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_8" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0" colspan="2" >
+        <widget class="QLabel" name="label" >
+         <property name="text" >
+          <string>&lt;h4>Rendering&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" >
+        <widget class="QLabel" name="label_2" >
+         <property name="text" >
+          <string>Window Resolution:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>comboBox</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_6" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="comboBox" />
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="1" >
+        <widget class="QLabel" name="label_3" >
+         <property name="text" >
+          <string>Fullscreen Resolution:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>comboBox_2</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_5" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="comboBox_2" />
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="1" >
+        <widget class="QLabel" name="label_4" >
+         <property name="text" >
+          <string>Texture Filter:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>comboBox_3</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_4" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="comboBox_3" >
+           <item>
+            <property name="text" >
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Blur Edges</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Super 2x Sai</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Hq2x</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Hq4x</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_4" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="7" column="1" >
+        <widget class="QLabel" name="label_5" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
+         <property name="text" >
+          <string>Filtering Mode:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>comboBox_4</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="comboBox_4" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="8" column="1" >
+        <widget class="QLabel" name="label_6" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
+         <property name="text" >
+          <string>LOD Calculation:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>comboBox_5</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_2" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="comboBox_5" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <item>
+            <property name="text" >
+             <string>Off</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_6" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="9" column="1" >
+        <widget class="QLabel" name="label_7" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
+         <property name="text" >
+          <string>Fog Enabled:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="2" >
+        <widget class="QCheckBox" name="checkBox" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="1" >
+        <widget class="QLabel" name="label_15" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
+         <property name="text" >
+          <string>Buffer clear on every frame:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox_7</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="2" >
+        <widget class="QCheckBox" name="checkBox_7" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1" >
+        <widget class="QLabel" name="label_16" >
+         <property name="text" >
+          <string>Vertical Sync:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox_8</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="2" >
+        <widget class="QCheckBox" name="checkBox_8" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="1" >
+        <widget class="QLabel" name="label_8" >
+         <property name="text" >
+          <string>Fast CRC:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox_2</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="2" >
+        <widget class="QCheckBox" name="checkBox_2" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1" >
+        <widget class="QLabel" name="label_9" >
+         <property name="text" >
+          <string>Hires Framebuffer:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox_3</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="2" >
+        <widget class="QCheckBox" name="checkBox_3" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="14" column="0" colspan="2" >
+        <widget class="QLabel" name="label_10" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
+         <property name="text" >
+          <string>Buffer swapping method:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>comboBox_6</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="14" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="comboBox_6" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_7" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="15" column="0" colspan="2" >
+        <widget class="QLabel" name="label_11" >
+         <property name="text" >
+          <string>&lt;h4>Glide Wrapper&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="1" >
+        <widget class="QLabel" name="label_12" >
+         <property name="text" >
+          <string>Disable dithered Alpha:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox_4</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="2" >
+        <widget class="QCheckBox" name="checkBox_4" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="17" column="1" >
+        <widget class="QLabel" name="label_13" >
+         <property name="text" >
+          <string>Disable GLSL Combiners:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox_5</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="17" column="2" >
+        <widget class="QCheckBox" name="checkBox_5" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="18" column="1" >
+        <widget class="QLabel" name="label_14" >
+         <property name="text" >
+          <string>Use Framebuffer Objects:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy" >
+          <cstring>checkBox_6</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="18" column="2" >
+        <widget class="QCheckBox" name="checkBox_6" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2" >
+      <attribute name="title" >
+       <string>Miscellaneous</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2" >
+       <item row="0" column="0" colspan="3" >
+        <widget class="QLabel" name="label_20" >
+         <property name="text" >
+          <string>&lt;h4>Special Fixes&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <spacer name="horizontalSpacer_9" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QLabel" name="biggestLabel" >
+         <property name="text" >
+          <string>Wrap textures too big for tmem:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2" >
+        <widget class="QCheckBox" name="checkBox_10" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" >
+        <widget class="QLabel" name="zeldaCoronaFixLabel" >
+         <property name="text" >
+          <string>Zelda Corona Fix:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2" >
+        <widget class="QCheckBox" name="zeldaCoronaFixCheck" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="3" >
+        <widget class="QLabel" name="label_23" >
+         <property name="text" >
+          <string>&lt;h4>Frame buffer emulation options&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" >
+        <widget class="QLabel" name="label_24" >
+         <property name="text" >
+          <string>Read Every Frame:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_8" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="checkBox_12" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_38" >
+           <property name="text" >
+            <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">slow!&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_10" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="1" >
+        <widget class="QLabel" name="label_25" >
+         <property name="text" >
+          <string>Detect CPU writes:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2" >
+        <widget class="QCheckBox" name="checkBox_13" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1" >
+        <widget class="QLabel" name="label_26" >
+         <property name="text" >
+          <string>Get Frame buffer info:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2" >
+        <widget class="QCheckBox" name="checkBox_15" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1" >
+        <widget class="QLabel" name="label_27" >
+         <property name="text" >
+          <string>Depth buffer renderer:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2" >
+        <widget class="QCheckBox" name="checkBox_14" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0" colspan="3" >
+        <widget class="QLabel" name="label_28" >
+         <property name="text" >
+          <string>&lt;h4>Speed&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1" >
+        <widget class="QLabel" name="label_29" >
+         <property name="text" >
+          <string>FPS Counter:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="2" >
+        <widget class="QCheckBox" name="checkBox_16" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="1" >
+        <widget class="QLabel" name="label_30" >
+         <property name="text" >
+          <string>VI/s Counter:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="2" >
+        <widget class="QCheckBox" name="checkBox_17" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1" >
+        <widget class="QLabel" name="label_31" >
+         <property name="text" >
+          <string>% speed:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="2" >
+        <widget class="QCheckBox" name="checkBox_18" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="1" >
+        <widget class="QLabel" name="label_32" >
+         <property name="text" >
+          <string>FPS transparent:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="2" >
+        <widget class="QCheckBox" name="checkBox_19" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="0" colspan="3" >
+        <widget class="QLabel" name="label_33" >
+         <property name="text" >
+          <string>&lt;h4>Time&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="14" column="1" >
+        <widget class="QLabel" name="label_34" >
+         <property name="text" >
+          <string>Clock enabled:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="14" column="2" >
+        <widget class="QCheckBox" name="checkBox_20" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="15" column="1" >
+        <widget class="QLabel" name="label_35" >
+         <property name="text" >
+          <string>Clock is 24-hour:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="15" column="2" >
+        <widget class="QCheckBox" name="checkBox_21" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="0" colspan="3" >
+        <widget class="QLabel" name="label_36" >
+         <property name="text" >
+          <string>&lt;h4>Other&lt;/h4></string>
+         </property>
+        </widget>
+       </item>
+       <item row="17" column="1" >
+        <widget class="QLabel" name="label_37" >
+         <property name="text" >
+          <string>Custom ini settings:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="17" column="2" >
+        <widget class="QCheckBox" name="checkBox_22" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="18" column="1" >
+        <spacer name="verticalSpacer" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>comboBox</tabstop>
+  <tabstop>comboBox_2</tabstop>
+  <tabstop>comboBox_3</tabstop>
+  <tabstop>comboBox_4</tabstop>
+  <tabstop>comboBox_5</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>checkBox_7</tabstop>
+  <tabstop>checkBox_8</tabstop>
+  <tabstop>checkBox_2</tabstop>
+  <tabstop>checkBox_3</tabstop>
+  <tabstop>comboBox_6</tabstop>
+  <tabstop>checkBox_4</tabstop>
+  <tabstop>checkBox_5</tabstop>
+  <tabstop>checkBox_6</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>Glide64ConfigDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>Glide64ConfigDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
