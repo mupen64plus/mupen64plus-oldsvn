@@ -21,7 +21,6 @@
 
 # paths
 SDL_DIR = C:\SDL-1.2.13
-PTHREADS-WIN32_DIR = C:\pthreads-win32
 DLFCN-WIN32_DIR = C:\dlfcn-win32-static-r8
 GNUWIN32_DIR = C:\GnuWin32
 
@@ -48,10 +47,6 @@ LDFLAGS += -L${GNUWIN32_DIR}/lib -lfreetype -lz -liconv -lpng
 # dlfcn-win
 CFLAGS += -I${DLFCN-WIN32_DIR}/include
 LDFLAGS += ${DLFCN-WIN32_DIR}/lib/libdl.a
-
-# pthreads-win32
-CFLAGS += -I${PTHREADS-WIN32_DIR}/include
-LDFLAGS += -L${PTHREADS-WIN32_DIR}/lib -lpthreadGC2
 
 # Qt
 QT_H = ${shell qmake -query QT_INSTALL_HEADERS}
