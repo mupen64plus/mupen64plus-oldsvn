@@ -325,7 +325,7 @@ void ReadSettings ()
   INI_Close ();
 }
 
-void ReadSpecialSettings (char name[21])
+void ReadSpecialSettings (const char name[21])
 {
   //  char buf [256];
   //  sprintf(buf, "ReadSpecialSettings. Name: %s\n", name);

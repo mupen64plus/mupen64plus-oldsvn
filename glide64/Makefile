@@ -14,6 +14,7 @@
 #***************************************************************************
 
 # include pre-make file with a bunch of definitions
+USES_QT4 = true
 USES_GTK2 = true
 include ../pre.mk
 
@@ -48,7 +49,6 @@ OBJECTS = \
 	CRC.o \
 	Combine.o \
 	TexBuffer.o \
-	Config.o \
 	3dmath.o \
 	DepthBufferRender.o
 
@@ -64,16 +64,32 @@ WRAPPEROBJECTS = \
 	wrapper/hq4x.o
 
 GTKOBJECTS = \
-	support.o \
-	messagebox.o
+	support_gtk2.o \
+	messagebox_gtk2.o \
+	Config_gtk2.o
 
-OBJECTS	+= $(GTKOBJECTS) $(WRAPPEROBJECTS)
+QT_OBJECTS = \
+	messagebox_qt4.o \
+	config_qt4.o
+
+OBJECTS	+= $(WRAPPEROBJECTS)
 TARGET	= glide64.so
 
 CFLAGS += -MMD -MP -MQ $@
 DEPS := $(OBJECTS:.o=.d)
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
+endif
+
+ifeq ($(GUI), QT4)
+  LDFLAGS += $(QT_LIBS)
+  CFLAGS += $(QT_FLAGS) -DQT_NO_STL
+  OBJECTS += $(QT_OBJECTS)
+  EXTRAS += ui_glide64config.h
+else
+  LDFLAGS += $(GTK_LIBS)
+  CFLAGS += -DUSE_GTK $(GTK_FLAGS)
+  OBJECTS += $(GTKOBJECTS)
 endif
 
 # build targets
@@ -91,12 +107,17 @@ targets:
 	@echo "    VPDEBUG=1     == some kind of debugging"
 	@echo "    RDP_LOG=1     == Dump out RDP instruction data"
 	@echo "    RDP_LOG_ERR=1 == Dump out RDP instruction data + errors"
+	@echo "    GUI=GTK2      == Build gtk+-2 GUI"
+	@echo "    GUI=QT4       == Build Qt4 GUI"
 
 all: version.h $(TARGET)
 
-$(TARGET): $(OBJECTS)
-	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
+$(TARGET): ${EXTRAS} $(OBJECTS)
+	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 	$(STRIP) $@
+
+ui_glide64config.h: glide64config.ui
+	$(UIC) $< -o $@
 
 Main.o: font.h cursor.h
 font.h:	compiletex

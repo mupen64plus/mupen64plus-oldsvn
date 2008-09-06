@@ -489,7 +489,7 @@ extern GRSTIPPLE            grStipplePatternExt;
 #endif
 
 void ReadSettings ();
-void ReadSpecialSettings (char name[21]);
+void ReadSpecialSettings (const char name[21]);
 void WriteSettings ();
 
 /******************************************************************
