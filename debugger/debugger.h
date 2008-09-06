@@ -28,7 +28,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
+#include <SDL.h>
+#include <SDL_thread.h>
 
 #include "types.h"
 #include "../r4300/r4300.h"
@@ -50,12 +51,13 @@ extern uint32 previousPC;
 
 void init_debugger();
 void update_debugger();
+void uninit_debugger();
 
 extern void init_debugger_frontend();
 extern void update_debugger_frontend();
 extern void debugger_frontend_vi();
 
-extern pthread_cond_t  debugger_done_cond;
-extern pthread_mutex_t mutex;
+extern SDL_cond  *debugger_done_cond;
+extern SDL_mutex *mutex;
 
 #endif //DEBUGGER_H

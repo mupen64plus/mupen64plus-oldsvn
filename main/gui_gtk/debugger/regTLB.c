@@ -23,7 +23,6 @@
 **/
 
 #include "regTLB.h"
-#include <pthread.h>
 
 static GtkWidget *clTLBentries;
 

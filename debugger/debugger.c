@@ -29,12 +29,12 @@
 // State of the Emulation Thread:
 // 0 -> pause, 2 -> run.
 
-int  g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
+int g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
 int debugger_mode;
 int run;
 
-pthread_cond_t  debugger_done_cond;
-pthread_mutex_t mutex;
+SDL_cond  *debugger_done_cond;
+SDL_mutex *mutex;
 
 uint32 previousPC;
 
@@ -49,10 +49,17 @@ void init_debugger()
 
     init_host_disassembler();
 
-    pthread_mutex_init( &mutex, NULL);
-    pthread_cond_init( &debugger_done_cond, NULL);
+    mutex = SDL_CreateMutex();
+    debugger_done_cond = SDL_CreateCond();
 }
 
+void uninit_debugger()
+{
+    SDL_DestroyMutex(mutex);
+    mutex = NULL;
+    SDL_DestroyCond(debugger_done_cond);
+    debugger_done_cond = NULL;
+}
 
 //]=-=-=-=-=-=-=-=-=-=-=-=-=[ Mise-a-Jour Debugger ]=-=-=-=-=-=-=-=-=-=-=-=-=[
 
@@ -84,5 +91,6 @@ void update_debugger()
 
     previousPC = PC->addr;
     // Emulation thread is blocked until a button is clicked.
-    pthread_cond_wait(&debugger_done_cond, &mutex);
+    SDL_CondWait(debugger_done_cond, mutex);
 }
+

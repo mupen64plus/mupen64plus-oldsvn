@@ -23,7 +23,6 @@
 **/
 
 #include "registers.h"
-#include <pthread.h>
 
 
 // State of the Emulation Thread:

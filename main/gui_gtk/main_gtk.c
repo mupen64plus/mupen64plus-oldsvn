@@ -661,7 +661,7 @@ static void callback_debuggerEnableToggled(GtkWidget *widget, gpointer data)
         {
         if(gui_message(2, tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
             {
-            callback_stopEmulation( NULL, NULL );
+            callback_stop_emulation( NULL, NULL );
             emuRestart = 1;
             }
         }
@@ -686,7 +686,7 @@ static void callback_debuggerEnableToggled(GtkWidget *widget, gpointer data)
         }
 
     if(emuRestart==1)
-        callback_startEmulation(NULL,NULL);
+        callback_start_emulation(NULL,NULL);
 }
 
 static void callback_debuggerWindowShow(GtkWidget *widget, gpointer window)

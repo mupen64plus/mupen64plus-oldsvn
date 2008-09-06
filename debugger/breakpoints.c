@@ -23,6 +23,8 @@
  *
 **/
 
+#include <SDL.h>
+#include <SDL_thread.h>
 
 #include "breakpoints.h"
 
@@ -134,7 +136,7 @@ int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags )
             
              previousPC = PC->addr;
             // Emulation thread is blocked until a button is clicked.
-            pthread_cond_wait(&debugger_done_cond, &mutex);
+            SDL_CondWait(debugger_done_cond, mutex);
             
             return bpt;
         }

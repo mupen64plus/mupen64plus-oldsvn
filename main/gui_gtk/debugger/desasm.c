@@ -25,6 +25,9 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <SDL.h>
+#include <SDL_thread.h>
+
 #include "desasm.h"
 #include "ui_disasm_list.h"
 
@@ -329,7 +332,7 @@ static void on_run()
     } else {
         run = 2;
         //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child),"Pause"); //avoid deadlock
-        pthread_cond_signal(&debugger_done_cond);
+        SDL_CondSignal(debugger_done_cond);
     }
 }
 
@@ -339,7 +342,7 @@ static void on_step()
     if(run == 2) {
         //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
     } else {
-        pthread_cond_signal(&debugger_done_cond);
+        SDL_CondSignal(debugger_done_cond);
     }
     run = 0;
 }

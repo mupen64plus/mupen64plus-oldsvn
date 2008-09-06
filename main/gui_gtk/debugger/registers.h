@@ -27,7 +27,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <gtk/gtk.h>
 #include <glib.h>
 

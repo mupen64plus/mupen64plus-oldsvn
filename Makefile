@@ -306,7 +306,7 @@ targets:
 all: version.h $(ALL)
 
 mupen64plus: version.h $(OBJECTS)
-	$(CXX) $(OBJECTS) $(LDFLAGS) $(LIBS) -lpthread -ldl -o $@
+	$(CXX) $(OBJECTS) $(LDFLAGS) $(LIBS) -ldl -o $@
 	$(STRIP) $@
 
 install:

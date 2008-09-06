@@ -76,10 +76,6 @@ OBJECTS	+= $(WRAPPEROBJECTS)
 TARGET	= glide64.so
 
 CFLAGS += -MMD -MP -MQ $@
-DEPS := $(OBJECTS:.o=.d)
-ifneq ($(MAKECMDGOALS),clean)
--include $(DEPS)
-endif
 
 ifeq ($(GUI), QT4)
   LDFLAGS += $(QT_LIBS)
@@ -90,6 +86,11 @@ else
   LDFLAGS += $(GTK_LIBS)
   CFLAGS += -DUSE_GTK $(GTK_FLAGS)
   OBJECTS += $(GTKOBJECTS)
+endif
+
+DEPS := $(OBJECTS:.o=.d)
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEPS)
 endif
 
 # build targets

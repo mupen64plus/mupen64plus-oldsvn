@@ -885,12 +885,14 @@ static int emulationThread( void *_arg )
 #endif // WITH_LIRC
 
 #ifdef DBG
-    if( g_DebuggerEnabled )
+    if (g_DebuggerEnabled)
         init_debugger();
 #endif
-    // load cheats for the current rom
+
+    /* load cheats for the current rom  */
     cheat_load_current_rom();
 
+    /* Startup message on the OSD */
     osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
 
     /* call r4300 CPU core and run the game */
@@ -901,6 +903,11 @@ static int emulationThread( void *_arg )
 #ifdef WITH_LIRC
     lircStop();
 #endif // WITH_LIRC
+
+#ifdef DBG
+    if (g_DebuggerEnabled)
+        uninit_debugger();
+#endif
 
     if (g_OsdEnabled)
     {
