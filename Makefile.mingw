@@ -36,6 +36,7 @@ LD      = g++
 RM      = del
 MV      = move
 CP      = copy
+QMAKE   = qmake
 
 CFLAGS = -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing  -I.
 LDFLAGS = -lopengl32 -lglu32
