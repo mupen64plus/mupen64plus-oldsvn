@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>  // POSIX macros and standard types.
-#include <pthread.h> // POSIX thread library
 #include <signal.h> // signals
 #include <getopt.h> // getopt_long
 #include <dirent.h>
@@ -44,6 +43,7 @@
 #include <png.h>    // for writing screenshot PNG files
 
 #include <SDL.h>
+#include <SDL_thread.h>
 
 #include "main.h"
 #include "version.h"
@@ -77,8 +77,8 @@
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
 static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
-static void *emulationThread( void *_arg );
-extern void *rom_cache_system(void *_arg);
+static int emulationThread( void *_arg );
+extern int rom_cache_system( void *_arg );
 
 
 #ifdef __WIN32__
@@ -87,12 +87,14 @@ static void sighandler( int signal );
 static void sighandler( int signal, siginfo_t *info, void *context );
 #endif
 
+/** threads **/
+SDL_Thread * g_EmulationThread;         // core thread handle
+SDL_Thread * g_RomCacheThread;          // rom cache thread handle
+
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
-pthread_t   g_EmulationThread;      // core thread handle
-pthread_t   g_RomCacheThread;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_Fullscreen = 0;           // fullscreen enabled?
@@ -335,7 +337,7 @@ void startEmulation(void)
     VILimit = GetVILimit();
     VILimitMilliseconds = (double) 1000.0/VILimit; 
     printf("init timer!\n");
-
+    
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
                *input_plugin = NULL,
@@ -405,12 +407,15 @@ void startEmulation(void)
     else if(!g_EmulatorRunning)
     {
         // spawn emulation thread
-        if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
+        
+        g_EmulationThread = SDL_CreateThread(emulationThread, NULL);
+        if(g_EmulationThread == NULL)
         {
+            printf("Unable to create thread: %s\n", SDL_GetError());
             error_message(tr("Couldn't spawn core thread!"));
             return;
         }
-        pthread_detach(g_EmulationThread);
+        
         main_message(0, 1, 0, OSD_BOTTOM_LEFT,  tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
@@ -437,12 +442,13 @@ void stopEmulation(void)
 
         // wait until emulation thread is done before continuing
         if(g_EmulatorRunning)
-            pthread_join(g_EmulationThread, NULL);
+            SDL_WaitThread(g_EmulationThread, NULL);
 
 #ifdef __WIN32__
         plugin_close_plugins();
 #endif
         g_EmulatorRunning = 0;
+        g_EmulationThread = 0;
 
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation stopped.\n"));
     }
@@ -764,9 +770,9 @@ static int sdl_event_filter( const SDL_Event *event )
 /*********************************************************************************************************
 * emulation thread - runs the core
 */
-static void * emulationThread( void *_arg )
+static int emulationThread( void *_arg )
 {
-#ifndef __WIN32__
+#if !defined(__WIN32__)
     struct sigaction sa;
 #endif
     const char *gfx_plugin = NULL,
@@ -778,7 +784,7 @@ static void * emulationThread( void *_arg )
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
     if (l_GuiEnabled)
     {
-#ifdef __WIN32__
+#if defined(__WIN32__)
         signal( SIGSEGV, sighandler );
         signal( SIGILL, sighandler );
         signal( SIGFPE, sighandler );
@@ -790,11 +796,10 @@ static void * emulationThread( void *_arg )
         sigaction( SIGILL, &sa, NULL );
         sigaction( SIGFPE, &sa, NULL );
         sigaction( SIGCHLD, &sa, NULL );
-#endif
+#endif 
     }
 
     g_EmulatorRunning = 1;
-
     // if emu mode wasn't specified at the commandline, set from config file
     if(!l_EmuMode)
         dynacore = config_get_number( "Core", CORE_DYNAREC );
@@ -917,16 +922,7 @@ static void * emulationThread( void *_arg )
 
     SDL_Quit();
 
-    if (l_Filename != 0)
-    {
-        // the following doesn't work - it wouldn't exit immediately but when the next event is
-        // recieved (i.e. mouse movement)
-/*      gdk_threads_enter();
-        gtk_main_quit();
-        gdk_threads_leave();*/
-    }
-
-    return NULL;
+    return 0;
 }
 
 /*********************************************************************************************************
@@ -940,75 +936,72 @@ static void sighandler(int signal)
 #else
 static void sighandler(int signal, siginfo_t *info, void *context)
 {
-    if( info->si_pid == g_EmulationThread )
+    SDL_Thread *emuThread = g_EmulationThread;
+
+    switch( signal )
     {
-        switch( signal )
-        {
-            case SIGSEGV:
-                error_message(tr("The core thread recieved a SIGSEGV signal.\n"
-                                "This means it tried to access protected memory.\n"
-                                "Maybe you have set a wrong ucode for one of the plugins!"));
-                printf( "SIGSEGV in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+        case SIGSEGV:
+            error_message(tr("The core thread recieved a SIGSEGV signal.\n"
+                            "This means it tried to access protected memory.\n"
+                            "Maybe you have set a wrong ucode for one of the plugins!"));
+            printf( "SIGSEGV in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
 #ifdef SEGV_MAPERR
-                switch( info->si_code )
-                {
-                    case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
-                    case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
-                }
+            switch( info->si_code )
+            {
+                case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
+                case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
+            }
 #endif
-                break;
-            case SIGILL:
-                printf( "SIGILL in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+            break;
+        case SIGILL:
+            printf( "SIGILL in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
 #ifdef ILL_ILLOPC
-                switch( info->si_code )
-                {
-                    case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
-                    case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
-                    case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
-                    case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
-                    case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
-                    case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
-                    case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
-                    case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
-                }
+            switch( info->si_code )
+            {
+                case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
+                case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
+                case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
+                case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
+                case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
+                case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
+                case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
+                case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
+            }
 #endif
-                break;
-            case SIGFPE:
-                printf( "SIGFPE in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-                switch( info->si_code )
-                {
-                    case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
-                    case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
-                    case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
-                    case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
-                    case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
-                    case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
-                    case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
-                    case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
-                }
-                break;
-            default:
-                printf( "Signal number %d in core thread caught:\n", signal );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        }
-        pthread_cancel(g_EmulationThread);
-        g_EmulationThread = 0;
-        g_EmulatorRunning = 0;
+            break;
+        case SIGFPE:
+            printf( "SIGFPE in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+            switch( info->si_code )
+            {
+                case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
+                case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
+                case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
+                case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
+                case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
+                case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
+                case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
+                case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
+            }
+            break;
+        default:
+            printf( "Signal number %d in core thread caught:\n", signal );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
     }
-    else
-    {
-        printf( "Signal number %d caught:\n", signal );
-        printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        exit( EXIT_FAILURE );
-    }
+
+    g_EmulationThread = 0;
+    g_EmulatorRunning = 0;
+
+    if (emuThread != NULL)
+        SDL_KillThread(emuThread);
 }
 #endif /* __WIN32__ */
+
 
 static void printUsage(const char *progname)
 {
@@ -1487,22 +1480,14 @@ int main(int argc, char *argv[])
 #ifndef NO_GUI
     // only create the ROM Cache Thread if GUI is enabled
     if (l_GuiEnabled)
-    {
-        pthread_attr_t tattr;
-        int ret;
-        int newprio = 80;
-        struct sched_param param;
-        pthread_attr_init (&tattr);
-        pthread_attr_getschedparam (&tattr, &param);
-        param.sched_priority = newprio;
-        pthread_attr_setschedparam (&tattr, &param);
+    {  
         g_romcache.rcstask = RCS_INIT;
-        if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
-            {
+        g_RomCacheThread = SDL_CreateThread(rom_cache_system, NULL);
+        
+        if(g_RomCacheThread == NULL)
+        {
             error_message(tr("Couldn't spawn rom cache thread!"));
-            }
-        else
-           pthread_detach(g_RomCacheThread);
+        }
     }
 
     // only display gui if user wants it

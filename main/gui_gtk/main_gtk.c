@@ -26,9 +26,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <signal.h>
-
-#include <pthread.h>    // POSIX Thread library
+#include <SDL_thread.h>
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -69,7 +67,7 @@ static void create_mainWindow(void);
 
 /* Globals. */
 SMainWindow g_MainWindow;
-static pthread_t g_GuiThread = 0; /* Main gui thread. */
+static Uint32 g_GuiThreadID = 0; /* Main gui thread. */
 
 /*********************************************************************************************************
 * GUI interfaces.
@@ -85,7 +83,7 @@ void gui_init(int *argc, char ***argv)
     gdk_threads_init();
 
     /* Save main gui thread handle. */
-    g_GuiThread = pthread_self();
+    g_GuiThreadID = SDL_ThreadID();
 
     /* Call gtk to parse arguments. */
     gtk_init(argc, argv);
@@ -153,10 +151,10 @@ void gui_main_loop(void)
  */
 void updaterombrowser( unsigned int roms, unsigned short clear )
 {
-    pthread_t self = pthread_self();
+    Uint32 self = SDL_ThreadID();
 
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
-    if (!pthread_equal(self, g_GuiThread))
+    if (self != g_GuiThreadID)
         gdk_threads_enter();
 
     rombrowser_refresh(roms, clear);
@@ -165,7 +163,7 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
     while(g_main_context_iteration(NULL, FALSE));
     gdk_threads_enter();
 
-    if (!pthread_equal(self, g_GuiThread))
+    if (self != g_GuiThreadID)
         gdk_threads_leave();
 
     return;
@@ -181,7 +179,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
 
     va_list ap;
     char buffer[2049];
-    pthread_t self = pthread_self();
+    Uint32 self = SDL_ThreadID();
     gint response = 0;
 
     va_start(ap, format);
@@ -190,10 +188,10 @@ int gui_message(unsigned char messagetype, const char *format, ...)
     va_end(ap);
 
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
-    if(!pthread_equal(self, g_GuiThread))
+    if (self != g_GuiThreadID)
         gdk_threads_enter();
 
-    if(messagetype==0)
+    if (messagetype == 0)
         {
         int counter;
         for( counter = 0; counter < strlen(buffer); ++counter )
@@ -256,7 +254,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
     g_main_context_iteration(NULL, FALSE);
     gdk_threads_enter();
 
-    if(!pthread_equal(self, g_GuiThread))
+   if (self != g_GuiThreadID)
        gdk_threads_leave();
 
     g_MainWindow.dialogErrorImage = g_MainWindow.dialogQuestionImage = NULL;
