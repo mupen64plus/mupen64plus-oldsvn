@@ -1422,7 +1422,7 @@ int main(int argc, char *argv[])
     printf("             |_|         http://code.google.com/p/mupen64plus/  \n");
     printf("Version %s\n\n",MUPEN_VERSION);
 
-    MasterServerAddToList("orbitaldecay.kicks-ass.net:8000");
+    //MasterServerAddToList("orbitaldecay.kicks-ass.net:8000");
     memset(&l_NetSettings, 0, sizeof(l_NetSettings));
     parseCommandLine(argc, argv);
     if (netInitialize(&g_NetplayClient)) {

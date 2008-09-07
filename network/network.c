@@ -71,7 +71,8 @@ void netShutdown(MupenClient *mClient) {
 }
 
 int netMain(MupenClient *mClient) {
-    static int lastSent;
+    static unsigned int lastSent=0xFFFFFFFF,
+                        lastKeepAlive=0xFFFFFFFF;
 
     if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0 &&
             lastSent!=mClient->frameCounter) {
@@ -79,9 +80,11 @@ int netMain(MupenClient *mClient) {
         lastSent=mClient->frameCounter;
     }
 
-    if (mClient->masterServer != NULL && (mClient->frameCounter % VI_PER_MSSYNC)==0)
+    if (mClient->masterServer != NULL && (mClient->frameCounter % VI_PER_MSSYNC)==0
+            && lastKeepAlive!=mClient->frameCounter) {
         MasterServerKeepAlive(mClient->masterServer->host,mClient->masterServer->port,g_Game_ID,mClient->socket);
-
+        lastKeepAlive=mClient->frameCounter;
+    }
     clientProcessMessages(mClient);
 
     if( processEventQueue(mClient) )
