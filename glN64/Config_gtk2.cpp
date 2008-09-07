@@ -524,7 +524,7 @@ void Config_LoadConfig()
     fclose( f );
 }
 
-void Config_DoConfig()
+void Config_DoConfig(HWND /*hParent*/)
 {
     Config_LoadConfig();
 

@@ -7,6 +7,10 @@
 #include "../main/winlnxdefs.h"
 #endif
 
+#ifdef QT4_GUI
+# include <QMessageBox>
+#endif
+
 #include <SDL_opengl.h>
 
 #include "glN64.h"
@@ -168,17 +172,28 @@ EXPORT void CALL DllAbout ( HWND hParent )
 #ifndef __LINUX__
     MessageBox( hParent, "glN64 v0.4 by Orkin\n\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn", pluginName, MB_OK | MB_ICONINFORMATION );
 #else
+# ifdef QT4_GUI
+    QMessageBox::about(QWidget::find(hParent),
+                        "About glN64",
+                        "glN64 v0.4 by Orkin\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn\nported by blight\nQt4 interface by slougi");
+# else
     puts( "glN64 v0.4 by Orkin\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn\nported by blight" );
+# endif // QT4_GUI
 #endif
 }
 
 EXPORT void CALL DllConfig ( HWND hParent )
 {
-    Config_DoConfig();
+    Config_DoConfig(hParent);
 }
 
 EXPORT void CALL DllTest ( HWND hParent )
 {
+#ifdef QT4_GUI
+    QMessageBox::information(QWidget::find(hParent),
+                              "glN64 Test",
+                              "This plugin has nothing to test.");
+#endif
 }
 
 EXPORT void CALL DrawScreen (void)

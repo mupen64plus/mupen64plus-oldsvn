@@ -203,7 +203,7 @@ void Config_LoadConfig()
     fclose( f );
 }
 
-void Config_DoConfig()
+void Config_DoConfig(HWND /*hParent*/)
 {
 printf("GlN64 compiled with GUI=NONE. Please edit the config file\nin SHAREDIR/glN64.conf manually or recompile plugin with a GUI.\n");
 }

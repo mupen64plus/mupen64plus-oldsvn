@@ -196,11 +196,11 @@ void Config_LoadConfig()
     fclose( f );
 }
 
-void Config_DoConfig()
+void Config_DoConfig(HWND hParent)
 {
     Config_LoadConfig();
 
-    QDialog dialog;
+    QDialog dialog(QWidget::find(hParent));
     Ui_glN64ConfigDialog ui;
     ui.setupUi(&dialog);
 

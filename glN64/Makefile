@@ -34,7 +34,7 @@ ifeq ($(GUI), NONE)
 else
   ifeq ($(GUI), QT4)
     LDFLAGS += $(QT_LIBS)
-    CFLAGS += $(QT_FLAGS)
+    CFLAGS += $(QT_FLAGS) -DQT4_GUI
     OBJECTS = Config_qt4.o
   else
     LDFLAGS += $(GTK_LIBS) 
