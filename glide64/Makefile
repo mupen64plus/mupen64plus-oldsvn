@@ -85,14 +85,14 @@ ifeq ($(GUI), QT4)
   LDFLAGS += $(QT_LIBS)
   CFLAGS += $(QT_FLAGS) -DQT_NO_STL
   OBJECTS += $(QT_OBJECTS)
-  EXTRAS += ui_glide64config.h
+  QT_EXTRA := $(MOC_OBJECTS) ui_glide64config.h
 else
   LDFLAGS += $(GTK_LIBS)
   CFLAGS += -DUSE_GTK $(GTK_FLAGS)
   OBJECTS += $(GTKOBJECTS)
 endif
 
-DEPS := $(OBJECTS:.o=.d)
+DEPS := $(OBJECTS:.o=.d) $(QT_OBJECTS:.o=.d)
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
 endif
@@ -117,7 +117,7 @@ targets:
 
 all: version.h $(TARGET)
 
-$(TARGET): ${MOC_OBJECTS} ${EXTRAS} $(OBJECTS)
+$(TARGET): $(QT_EXTRA) $(OBJECTS)
 	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 	$(STRIP) $@
 
