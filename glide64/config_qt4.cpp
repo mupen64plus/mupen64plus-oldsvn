@@ -19,6 +19,7 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <QDebug>
 #include <QString>
 #include <string.h>
 
@@ -43,7 +44,7 @@ void CALL DllConfig(HWND hParent)
         ReadSpecialSettings(qPrintable(QString(name).trimmed()));
     }
 
-    ConfigDialog cd;
+    ConfigDialog cd(QWidget::find(hParent));
     cd.exec();
 }
 

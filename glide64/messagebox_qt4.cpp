@@ -31,6 +31,7 @@
 #include "icons/messagebox-quest.xpm"
 #include "icons/messagebox-warn.xpm"
 
+#include "Gfx1.3.h"
 #include "messagebox.h"
 
 static const int MAX = 2048;
@@ -46,7 +47,7 @@ int messagebox(const char *title, int flags, const char *fmt, ...)
     vsnprintf( buf, MAX, fmt, ap );
     va_end( ap );
 
-    QMessageBox mb;
+    QMessageBox mb(QWidget::find(gfx.hWnd));
     mb.setWindowTitle(title);
     mb.setText(buf);
 
