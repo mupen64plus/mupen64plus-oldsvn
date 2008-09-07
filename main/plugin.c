@@ -356,6 +356,11 @@ static void sucre()
 
 void plugin_exec_config(const char *name)
 {
+    plugin_exec_config_with_wid(name, 0);
+}
+
+void plugin_exec_config_with_wid(const char *name, HWND wid)
+{
     plugin *p = plugin_get_by_name(name);
 
     if(p && p->handle)
@@ -377,11 +382,16 @@ void plugin_exec_config(const char *name)
         }
         dllConfig = dlsym(p->handle, "DllConfig");
         if(dllConfig)
-            dllConfig(0);
+            dllConfig(wid);
     }
 }
 
 void plugin_exec_test(const char *name)
+{
+    plugin_exec_test_with_wid(name, 0);
+}
+
+void plugin_exec_test_with_wid(const char *name, HWND wid)
 {
     plugin *p = plugin_get_by_name(name);
 
@@ -389,11 +399,16 @@ void plugin_exec_test(const char *name)
     {
         dllTest = dlsym(p->handle, "DllTest");
         if(dllTest)
-            dllTest(0);
+            dllTest(wid);
     }
 }
 
 void plugin_exec_about(const char *name)
+{
+    plugin_exec_about_with_wid(name, 0);
+}
+
+void plugin_exec_about_with_wid(const char *name, HWND wid)
 {
     plugin *p = plugin_get_by_name(name);
 
@@ -401,7 +416,7 @@ void plugin_exec_about(const char *name)
     {
         dllAbout = dlsym(p->handle, "DllAbout");
         if(dllAbout)
-            dllAbout(0);
+            dllAbout(wid);
     }
 }
 

@@ -57,6 +57,10 @@ plugin *plugin_get_by_name(const char *name);
 char *plugin_filename_by_name(const char *name);
 char *plugin_name_by_filename(const char *filename);
 
+void  plugin_exec_config_with_wid(const char *name, HWND wid);
+void  plugin_exec_test_with_wid(const char *name, HWND wid);
+void  plugin_exec_about_with_wid(const char *name, HWND wid);
+
 void  plugin_exec_config(const char *name);
 void  plugin_exec_test(const char *name);
 void  plugin_exec_about(const char *name);
