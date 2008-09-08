@@ -125,7 +125,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
     return response;
 }
 
-void updaterombrowser(unsigned int roms, unsigned short clear)
+void update_rombrowser(unsigned int roms, unsigned short clear)
 {
     RomModel::self()->update(roms, clear);
 }

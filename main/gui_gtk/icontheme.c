@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - checkicontheme.c                                        *
+ *   Mupen64plus - icontheme.c                                             *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Tillin9                                            *
  *                                                                         *
@@ -19,7 +19,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* checkicontheme.c - Checks current gtk icon theme for application icons. */
+/* icontheme.c - Checks current gtk icon theme for application icons. */
 
 #include <gtk/gtk.h>
 
@@ -29,7 +29,7 @@
 
 /* Does the current iconset have all the icons the application (plugin authors, 
  * add requests here) need? If icons could use themed icons, but fallbacks would 
- * be okay (non-standard themed icons), don't check here, and use a force flage of
+ * be okay (non-standard themed icons), don't check here, and use a force flag of
  * TRUE in your set_icon() calls.
  */
 gboolean check_icon_theme()
@@ -70,8 +70,7 @@ void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force)
     else
         {
         char buffer[128];
-        snprintf(buffer, 128, "%dx%d/%s.png", size, size, icon);
-        buffer[127] = '\0';
+        snprintf(buffer, sizeof(buffer), "%dx%d/%s.png", size, size, icon);
         pixbuf = gdk_pixbuf_new_from_file(get_iconpath(buffer), NULL);
         }
     gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);

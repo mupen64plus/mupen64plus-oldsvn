@@ -29,6 +29,7 @@
 #include <SDL_thread.h>
 
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "main_gtk.h"
@@ -59,10 +60,10 @@
 #endif
 
 /* Necessary function prototypes. */
-static void callback_start_emulation(GtkWidget *widget, gpointer data);
-static void callback_stop_emulation(GtkWidget *widget, gpointer data);
-static void callback_open_rom(GtkWidget *widget, gpointer data);
-static void callback_theme_changed(GtkWidget *widget, gpointer data);
+static void callback_start_emulation(GtkWidget* widget, gpointer data);
+static void callback_stop_emulation(GtkWidget* widget, gpointer data);
+static void callback_open_rom(GtkWidget* widget, gpointer data);
+static void callback_theme_changed(GtkWidget* widget, gpointer data);
 static void create_mainWindow(void);
 
 /* Globals. */
@@ -76,7 +77,7 @@ static Uint32 g_GuiThreadID = 0; /* Main gui thread. */
 /* Parse gui-specific arguments, remove them from argument list,
  * and create gtk gui in thread-safe manner, but do not display.
  */
-void gui_init(int *argc, char ***argv)
+void gui_init(int* argc, char*** argv)
 {
     /* Initialize multi-threading support. */
     g_thread_init(NULL);
@@ -99,7 +100,7 @@ void gui_init(int *argc, char ***argv)
 
     create_mainWindow();
     create_configDialog();
-    create_romPropDialog();
+    create_rom_properties();
     callback_theme_changed(NULL, NULL);
 }
 
@@ -129,10 +130,6 @@ void gui_destroy(void)
     config_put_number("MainWindowXPosition",xposition);
     config_put_number("MainWindowYPosition",yposition);
 
-    config_put_bool("ToolbarVisible", GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
-    config_put_bool("FilterVisible", GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
-    config_put_bool("StatusbarVisible", GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
-
     gtk_widget_destroy(g_MainWindow.window);
     gtk_widget_destroy(g_ConfigDialog.dialog);
     gtk_widget_destroy(g_RomPropDialog.dialog);
@@ -146,10 +143,10 @@ void gui_main_loop(void)
     gdk_threads_leave();
 }
 
-/* updaterombrowser() accesses g_romcahce.length and adds upto roms to the rombrowser.
+/* update_rombrowser() accesses g_romcahce.length and adds upto roms to the rombrowser.
  * The clear flag tells the GUI to clear the rombrowser first.
  */
-void updaterombrowser( unsigned int roms, unsigned short clear )
+void update_rombrowser(unsigned int roms, unsigned short clear)
 {
     Uint32 self = SDL_ThreadID();
 
@@ -172,7 +169,7 @@ void updaterombrowser( unsigned int roms, unsigned short clear )
 /* Display either an informational message to the status bar, a yes / no confirmation 
  * dialog, or an error dialog.
  */
-int gui_message(unsigned char messagetype, const char *format, ...)
+int gui_message(unsigned char messagetype, const char* format, ...)
 {
     if(!gui_enabled())
         return 0;
@@ -194,7 +191,7 @@ int gui_message(unsigned char messagetype, const char *format, ...)
     if (messagetype == 0)
         {
         int counter;
-        for( counter = 0; counter < strlen(buffer); ++counter )
+        for(counter = 0; counter < strlen(buffer); ++counter)
             {
             if(buffer[counter]=='\n')
                 {
@@ -203,8 +200,8 @@ int gui_message(unsigned char messagetype, const char *format, ...)
                 }
             }
 
-        gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
-        gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id( GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
+        gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
+        gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
         }
     else if(messagetype>0)
         {
@@ -265,17 +262,18 @@ int gui_message(unsigned char messagetype, const char *format, ...)
 * Callbacks.
 */
 
-static gint callback_mainWindowDeleteEvent(GtkWidget *widget, GdkEvent *event, gpointer data)
+static gint callback_mainWindowDeleteEvent(GtkWidget* widget, GdkEvent* event, gpointer data)
 {
     gtk_main_quit();
     return TRUE; /* Don't delete main window here. */
 }
 
 /* If theme changes, update application with images from new theme, or fallbacks. */
-static void callback_theme_changed(GtkWidget *widget, gpointer data)
+static void callback_theme_changed(GtkWidget* widget, gpointer data)
 {
     g_MainWindow.fallbackIcons = check_icon_theme();
     short size = config_get_number("ToolbarSize", 22);
+    int counter;
 
     set_icon(g_MainWindow.openButtonImage, "mupen64cart", size, TRUE);
     set_icon(g_MainWindow.playButtonImage, "media-playback-start", size, FALSE);
@@ -316,14 +314,39 @@ static void callback_theme_changed(GtkWidget *widget, gpointer data)
     set_icon(g_MainWindow.loadStateAsMenuImage, "document-open", 16, FALSE);
 
     set_icon(g_MainWindow.aboutMenuImage, "gtk-about", 16, FALSE);
+
+    set_icon(g_MainWindow.playRombrowserImage, "media-playback-start", 16, FALSE);
+    set_icon(g_MainWindow.propertiesRombrowserImage, "document-properties", 16, FALSE);
+    set_icon(g_MainWindow.refreshRombrowserImage, "view-refresh", 16, FALSE);
+
+    if(g_MainWindow.fallbackIcons)
+        star = gtk_icon_theme_load_icon(g_MainWindow.iconTheme, "gtk-about", 16, 0, NULL);
+    else
+        star = gdk_pixbuf_new_from_file(get_iconpath("16x16/gtk-about.png"), NULL);
+
+    staroff = gdk_pixbuf_copy(star);
+    gdk_pixbuf_saturate_and_pixelate(star, staroff, 0.1, FALSE);
+
+    if(g_RomPropDialog.entry)
+        {
+            for(counter = 0; counter < 5; ++counter)
+            {
+            if(g_RomPropDialog.entry->inientry->status>counter)
+                gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[counter]), star);
+            else
+                gtk_image_set_from_pixbuf(GTK_IMAGE(g_RomPropDialog.status[counter]), staroff);
+            }
+        }
+
+    rombrowser_refresh(g_romcache.length, TRUE);
 }
 
 /* Ask user to load a rom. If emulation is running, give warning. */
-static void callback_open_rom(GtkWidget *widget, gpointer data)
+static void callback_open_rom(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         {
-        if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load a rom?")))
+        if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load another rom?")))
             return;
         callback_stop_emulation(NULL, NULL);
         }
@@ -353,7 +376,7 @@ static void callback_open_rom(GtkWidget *widget, gpointer data)
 
     if(gtk_dialog_run(GTK_DIALOG(file_chooser))==GTK_RESPONSE_ACCEPT)
         {
-        gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER (file_chooser));
+        gchar* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER (file_chooser));
         gtk_widget_hide(file_chooser); /* Hide dialog while rom is loading. */
         open_rom(filename, 0);
         g_free(filename);
@@ -362,7 +385,7 @@ static void callback_open_rom(GtkWidget *widget, gpointer data)
     gtk_widget_destroy(file_chooser);
 }
 
-static void callback_close_rom(GtkWidget *widget, gpointer data)
+static void callback_close_rom(GtkWidget* widget, gpointer data)
 {
     close_rom();
 }
@@ -370,15 +393,15 @@ static void callback_close_rom(GtkWidget *widget, gpointer data)
 /* If a rom is loaded, start emulation. Else attempt to load rom, first from rombrowser
  * then, if none selected, ask the user.
  */
-static void callback_start_emulation(GtkWidget *widget, gpointer data)
+static void callback_start_emulation(GtkWidget* widget, gpointer data)
 {
     if(!rom)
         {
         GList *list = NULL, *llist = NULL;
-        cache_entry *entry;
+        cache_entry* entry;
         GtkTreeIter iter;
-        GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
-        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+        GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_MainWindow.romDisplay));
+        GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_MainWindow.romDisplay));
 
         list = gtk_tree_selection_get_selected_rows (selection, &model);
 
@@ -392,7 +415,7 @@ static void callback_start_emulation(GtkWidget *widget, gpointer data)
             {
             llist = g_list_first(list);
 
-            gtk_tree_model_get_iter(model, &iter,(GtkTreePath *) llist->data);
+            gtk_tree_model_get_iter(model, &iter,(GtkTreePath*)llist->data);
             gtk_tree_model_get(model, &iter, 22, &entry, -1);
 
             g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
@@ -408,17 +431,17 @@ static void callback_start_emulation(GtkWidget *widget, gpointer data)
     startEmulation();
 }
 
-static void callback_pause_emulation(GtkWidget *widget, gpointer data)
+static void callback_pause_emulation(GtkWidget* widget, gpointer data)
 {
     pauseContinueEmulation();
 }
 
-static void callback_stop_emulation(GtkWidget *widget, gpointer data)
+static void callback_stop_emulation(GtkWidget* widget, gpointer data)
 {
     stopEmulation();
 }
 
-static void callback_save_state(GtkWidget *widget, gpointer data)
+static void callback_save_state(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         savestates_job |= SAVESTATE;
@@ -427,11 +450,11 @@ static void callback_save_state(GtkWidget *widget, gpointer data)
 }
 
 /* Save state as. Launch a file chooser so user can specify file. */
-static void callback_save_state_as(GtkWidget *widget, gpointer data)
+static void callback_save_state_as(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         {
-        GtkWidget *file_chooser;
+        GtkWidget* file_chooser;
 
         file_chooser = gtk_file_chooser_dialog_new(tr("Save as..."), GTK_WINDOW(g_MainWindow.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 
@@ -442,7 +465,7 @@ static void callback_save_state_as(GtkWidget *widget, gpointer data)
 
         if(gtk_dialog_run(GTK_DIALOG(file_chooser))==GTK_RESPONSE_ACCEPT)
             {
-            gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+            gchar* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
 
             savestates_select_filename(filename);
             savestates_job |= SAVESTATE;
@@ -456,7 +479,7 @@ static void callback_save_state_as(GtkWidget *widget, gpointer data)
         error_message(tr("Emulation is not running."));
 }
 
-static void callback_load_state(GtkWidget *widget, gpointer data)
+static void callback_load_state(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         savestates_job |= LOADSTATE;
@@ -465,17 +488,17 @@ static void callback_load_state(GtkWidget *widget, gpointer data)
 }
 
 /* Load state from. Open a file chooser so user can specify file. */
-static void callback_load_state_from(GtkWidget *widget, gpointer data)
+static void callback_load_state_from(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         {
-        GtkWidget *file_chooser;
+        GtkWidget* file_chooser;
 
         file_chooser = gtk_file_chooser_dialog_new(tr("Load..."), GTK_WINDOW(g_MainWindow.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
         if(gtk_dialog_run(GTK_DIALOG(file_chooser))==GTK_RESPONSE_ACCEPT)
             {
-            gchar *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
+            gchar* filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser));
 
             savestates_select_filename(filename);
             savestates_job |= LOADSTATE;
@@ -490,7 +513,7 @@ static void callback_load_state_from(GtkWidget *widget, gpointer data)
 }
 
 /* User changed savestate slot. */
-static void callback_change_slot(GtkMenuItem *item, int slot)
+static void callback_change_slot(GtkMenuItem* item, int slot)
 {
     if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
         {
@@ -500,7 +523,7 @@ static void callback_change_slot(GtkMenuItem *item, int slot)
 }
 
 /* User opened save slot menu. Make sure current save slot is selected. */
-static void callback_update_slot(GtkMenuItem *item, GSList *slots)
+static void callback_update_slot(GtkMenuItem* item, GSList* slots)
 {
     unsigned int i, slot;
     GtkWidget* slotItem;
@@ -519,16 +542,16 @@ static void callback_update_slot(GtkMenuItem *item, GSList *slots)
         }
 }
 
-static void callback_configure(GtkWidget *widget, gpointer data)
+static void callback_configure(GtkWidget* widget, gpointer data)
 {
     gtk_widget_show_all(g_ConfigDialog.dialog);
 }
 
-static void callback_configure_graphics(GtkWidget *widget, gpointer data)
+static void callback_configure_graphics(GtkWidget* widget, gpointer data)
 {
-    char *name = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
+    char* name = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
     if(name)
-        plugin_exec_config(name);
+        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
     else
         {
         if(gui_message(2, tr("No graphics plugin selected! Do you\nwant to select one?")))
@@ -539,11 +562,11 @@ static void callback_configure_graphics(GtkWidget *widget, gpointer data)
         }
 }
 
-static void callback_configure_audio(GtkWidget *widget, gpointer data)
+static void callback_configure_audio(GtkWidget* widget, gpointer data)
 {
-    char *name = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
+    char* name = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
     if(name)
-        plugin_exec_config(name);
+        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
     else
         {
         if(gui_message(2, tr("No audio plugin selected! Do you\nwant to select one?")))
@@ -554,11 +577,11 @@ static void callback_configure_audio(GtkWidget *widget, gpointer data)
         }
 }
 
-static void callback_configure_input( GtkWidget *widget, gpointer data )
+static void callback_configure_input(GtkWidget* widget, gpointer data)
 {
-    char *name = plugin_name_by_filename(config_get_string("Input Plugin", ""));
+    char* name = plugin_name_by_filename(config_get_string("Input Plugin", ""));
     if(name)
-        plugin_exec_config(name);
+        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
     else
         {
         if(gui_message(2, tr("No input plugin selected! Do you\nwant to select one?")))
@@ -569,11 +592,11 @@ static void callback_configure_input( GtkWidget *widget, gpointer data )
         }
 }
 
-static void callback_configure_rsp(GtkWidget *widget, gpointer data)
+static void callback_configure_rsp(GtkWidget* widget, gpointer data)
 {
-    char *name = plugin_name_by_filename(config_get_string( "RSP Plugin", ""));
+    char* name = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
     if(name)
-        plugin_exec_config(name);
+        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
     else
         {
         if(gui_message(2, tr("No RSP plugin selected! Do you\nwant to select one?")))
@@ -585,26 +608,29 @@ static void callback_configure_rsp(GtkWidget *widget, gpointer data)
 }
 
 /* Enter full screen mode. */
-static void callback_fullscreen(GtkWidget *widget, gpointer data)
+static void callback_fullscreen(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         changeWindow();
 }
 
-static void callback_toggle_view(GtkWidget *widget, gpointer data)
+static void callback_toggle_view(GtkWidget* widget, gpointer data)
 {
-    GtkWidget *toggle_object = NULL;
+    GtkWidget* toggle_object = NULL;
     switch(GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(widget), "toggle_object")))
         {
         case TOOLBAR:
             toggle_object = g_MainWindow.toolBar;
+            config_put_bool("ToolbarVisible", !GTK_WIDGET_VISIBLE(g_MainWindow.toolBar));
             break;
         case FILTER:
             toggle_object = g_MainWindow.filterBar;
             gtk_entry_set_text(GTK_ENTRY(g_MainWindow.filter),"");
+            config_put_bool("FilterVisible", !GTK_WIDGET_VISIBLE(g_MainWindow.filterBar));
             break;
         case STATUSBAR:
             toggle_object = g_MainWindow.statusBarHBox;
+            config_put_bool("StatusbarVisible", !GTK_WIDGET_VISIBLE(g_MainWindow.statusBarHBox));
             break;
         }
 
@@ -617,9 +643,9 @@ static void callback_toggle_view(GtkWidget *widget, gpointer data)
         gtk_widget_show(toggle_object);
 }
 
-static void callback_update_check_item(GtkWidget *widget, gpointer data)
+static void callback_update_check_item(GtkWidget* widget, gpointer data)
 {
-    GtkWidget *toggle_object = NULL;
+    GtkWidget* toggle_object = NULL;
     switch(GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(widget), "toggle_object")))
         {
         case TOOLBAR:
@@ -641,19 +667,19 @@ static void callback_update_check_item(GtkWidget *widget, gpointer data)
      g_signal_handlers_unblock_by_func(widget, callback_toggle_view, NULL);
 }
 
-static void callback_update_view(GtkWidget *widget, gpointer data)
+static void callback_update_view(GtkWidget* widget, gpointer data)
 {
     gtk_container_foreach(GTK_CONTAINER(widget), callback_update_check_item, NULL);
 }
 
 #ifdef DBG
-static GtkWidget   *debuggerRegistersShow;
-static GtkWidget   *debuggerBreakpointsShow;
-static GtkWidget   *debuggerTLBShow;
-static GtkWidget   *debuggerMemoryShow;
-static GtkWidget   *debuggerVariablesShow;
+static GtkWidget* debuggerRegistersShow;
+static GtkWidget* debuggerBreakpointsShow;
+static GtkWidget* debuggerTLBShow;
+static GtkWidget* debuggerMemoryShow;
+static GtkWidget* debuggerVariablesShow;
 
-static void callback_debuggerEnableToggled(GtkWidget *widget, gpointer data)
+static void callback_debuggerEnableToggled(GtkWidget* widget, gpointer data)
 {
     int emuRestart = 0;
 
@@ -661,35 +687,24 @@ static void callback_debuggerEnableToggled(GtkWidget *widget, gpointer data)
         {
         if(gui_message(2, tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
             {
-            callback_stop_emulation( NULL, NULL );
+            callback_stop_emulation(NULL, NULL);
             emuRestart = 1;
             }
         }
 
     g_DebuggerEnabled = gtk_check_menu_item_get_active((GtkCheckMenuItem*)widget);
 
-    if(g_DebuggerEnabled==TRUE)
-        {
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerRegistersShow), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerBreakpointsShow), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerTLBShow), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerMemoryShow), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerVariablesShow), TRUE);
-        }
-    else
-        {
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerRegistersShow), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerBreakpointsShow), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerTLBShow), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerMemoryShow), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(debuggerVariablesShow), FALSE);
-        }
+    gtk_widget_set_sensitive(debuggerRegistersShow, g_DebuggerEnabled);
+    gtk_widget_set_sensitive(debuggerBreakpointsShow, g_DebuggerEnabled);
+    gtk_widget_set_sensitive(debuggerTLBShow, g_DebuggerEnabled);
+    gtk_widget_set_sensitive(debuggerMemoryShow, g_DebuggerEnabled);
+    gtk_widget_set_sensitive(debuggerVariablesShow, g_DebuggerEnabled);
 
     if(emuRestart==1)
-        callback_start_emulation(NULL,NULL);
+        callback_start_emulation(NULL, NULL);
 }
 
-static void callback_debuggerWindowShow(GtkWidget *widget, gpointer window)
+static void callback_debuggerWindowShow(GtkWidget* widget, gpointer window)
 {
     switch(GPOINTER_TO_UINT(window))
     {
@@ -715,13 +730,13 @@ static void callback_debuggerWindowShow(GtkWidget *widget, gpointer window)
         break;
     }
 }
-#endif // DBG
+#endif
 
 /*********************************************************************************************************
 * GUI creation.
 */
 
-static int create_menubar(void)
+static int create_menubar()
 {
     GtkWidget* menu;
     GtkWidget* menuitem;
@@ -778,7 +793,7 @@ static int create_menubar(void)
     item = gtk_image_menu_item_new_with_mnemonic(tr("_Start"));
     g_MainWindow.playMenuImage = gtk_image_new();
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.playMenuImage);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_start_emulation), NULL );
+    g_signal_connect(item, "activate", G_CALLBACK(callback_start_emulation), NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     item = gtk_image_menu_item_new_with_mnemonic(tr("_Pause"));
@@ -833,7 +848,7 @@ static int create_menubar(void)
 
     item = gtk_radio_menu_item_new(NULL);
     char buffer[128];
-    for (i = 0; i < 10; ++i)
+    for(i = 0; i < 10; ++i)
         {
         snprintf(buffer, 128, tr(" Slot _%d"), i); /* Mnemonic needed even with accelerator. */
 
@@ -895,7 +910,7 @@ static int create_menubar(void)
     g_MainWindow.fullscreenMenuImage = gtk_image_new();
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.fullscreenMenuImage);
     gtk_widget_add_accelerator(item, "activate", g_MainWindow.accelGroup, GDK_Return, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_fullscreen), NULL );
+    g_signal_connect(item, "activate", G_CALLBACK(callback_fullscreen), NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     /* View menu. */
@@ -920,51 +935,55 @@ static int create_menubar(void)
     g_signal_connect(item, "toggled", G_CALLBACK(callback_toggle_view), NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    // debugger menu
+    /* Debugger submenu. */
 #ifdef DBG
-    GtkWidget   *debuggerMenu;
-    GtkWidget   *debuggerMenuItem;
-    GtkWidget   *debuggerEnableItem;
-    GtkWidget   *debuggerSeparator;
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), gtk_separator_menu_item_new());
+
+    GtkWidget* debuggerMenu;
+    GtkWidget* debuggerMenuItem;
 
     debuggerMenu = gtk_menu_new();
     debuggerMenuItem = gtk_menu_item_new_with_mnemonic(tr("_Debugger"));
-    gtk_menu_item_set_submenu( GTK_MENU_ITEM(debuggerMenuItem), debuggerMenu );
-    debuggerEnableItem = gtk_check_menu_item_new_with_mnemonic(tr(" _Enable"));
-    debuggerSeparator = gtk_menu_item_new();
-    debuggerRegistersShow = gtk_menu_item_new_with_mnemonic(tr("_Registers"));
-    debuggerBreakpointsShow = gtk_menu_item_new_with_mnemonic(tr("_Breakpoints"));
-    debuggerTLBShow = gtk_menu_item_new_with_mnemonic(tr("_TLB"));
-    debuggerMemoryShow = gtk_menu_item_new_with_mnemonic(tr("_Memory"));
-    debuggerVariablesShow = gtk_menu_item_new_with_mnemonic(tr("_Variables"));
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(debuggerMenuItem), debuggerMenu);
 
-    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerEnableItem );
-    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerSeparator );
-    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerRegistersShow );
-    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerBreakpointsShow );
-    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerTLBShow );
-    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerMemoryShow );
-    gtk_menu_append( GTK_MENU(debuggerMenu), debuggerVariablesShow );
+    item = gtk_check_menu_item_new_with_mnemonic(tr(" _Enable"));
+    g_signal_connect(item, "toggled", G_CALLBACK(callback_debuggerEnableToggled), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(debuggerMenu), item);
+
+    debuggerRegistersShow = gtk_menu_item_new_with_mnemonic(tr("_Registers"));
+    g_signal_connect(debuggerRegistersShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)1);
+    gtk_menu_shell_append(GTK_MENU_SHELL(debuggerMenu), debuggerRegistersShow);
+
+    debuggerBreakpointsShow = gtk_menu_item_new_with_mnemonic(tr("_Breakpoints"));
+    g_signal_connect(debuggerBreakpointsShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)2);
+    gtk_menu_shell_append(GTK_MENU_SHELL(debuggerMenu), debuggerBreakpointsShow);
+
+    debuggerTLBShow = gtk_menu_item_new_with_mnemonic(tr("_TLB"));
+    g_signal_connect(debuggerTLBShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)3);
+    gtk_menu_shell_append(GTK_MENU_SHELL(debuggerMenu), debuggerTLBShow);
+
+    debuggerMemoryShow = gtk_menu_item_new_with_mnemonic(tr("_Memory"));
+    g_signal_connect(debuggerMemoryShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)4);
+    gtk_menu_shell_append(GTK_MENU_SHELL(debuggerMenu), debuggerMemoryShow);
+
+    debuggerVariablesShow = gtk_menu_item_new_with_mnemonic(tr("_Variables"));
+    g_signal_connect(debuggerVariablesShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)5);
+    gtk_menu_shell_append(GTK_MENU_SHELL(debuggerMenu), debuggerVariablesShow);
 
     if(g_DebuggerEnabled)
-      gtk_check_menu_item_set_active( (GtkCheckMenuItem *) debuggerEnableItem, TRUE );
-    else 
-      {
-    gtk_widget_set_sensitive( GTK_WIDGET(debuggerRegistersShow), FALSE);
-    gtk_widget_set_sensitive( GTK_WIDGET(debuggerBreakpointsShow), FALSE);
-    gtk_widget_set_sensitive( GTK_WIDGET(debuggerTLBShow), FALSE);
-    gtk_widget_set_sensitive( GTK_WIDGET(debuggerMemoryShow), FALSE);
-    gtk_widget_set_sensitive( GTK_WIDGET(debuggerVariablesShow), FALSE);
-      }
+        gtk_check_menu_item_set_active((GtkCheckMenuItem*)item, TRUE);
+    else
+        {
+        gtk_widget_set_sensitive(GTK_WIDGET(debuggerRegistersShow), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(debuggerBreakpointsShow), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(debuggerTLBShow), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(debuggerMemoryShow), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(debuggerVariablesShow), FALSE);
+        }
 
-    g_signal_connect(debuggerEnableItem, "toggled", G_CALLBACK(callback_debuggerEnableToggled), NULL);
-    g_signal_connect(debuggerRegistersShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)1);
-    g_signal_connect(debuggerBreakpointsShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)2);
-    g_signal_connect(debuggerTLBShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)3);
-    g_signal_connect(debuggerMemoryShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)4);
-    g_signal_connect(debuggerVariablesShow, "activate", G_CALLBACK(callback_debuggerWindowShow), (gpointer)5);
-    gtk_menu_bar_append( GTK_MENU_BAR(g_MainWindow.menuBar), debuggerMenuItem );
-#endif // DBG
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), debuggerMenuItem);
+#endif
 
     /* Help menu. */
     menu = gtk_menu_new();
@@ -975,7 +994,7 @@ static int create_menubar(void)
     item = gtk_image_menu_item_new_with_mnemonic(tr("_About..."));
     g_MainWindow.aboutMenuImage = gtk_image_new();
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.aboutMenuImage);
-    gtk_signal_connect_object(GTK_OBJECT(item), "activate", GTK_SIGNAL_FUNC(callback_aboutMupen), (gpointer)NULL );
+    g_signal_connect(item, "activate", G_CALLBACK(callback_about_mupen64plus), NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 }
 
@@ -1011,12 +1030,12 @@ static void create_toolbar(void)
     gtk_toolbar_append_space(GTK_TOOLBAR(g_MainWindow.toolBar));
 
     gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Start"), tr("Start Emulation"), "", g_MainWindow.playButtonImage, G_CALLBACK(callback_start_emulation), NULL);
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Pause"), tr("Pause/ Continue Emulation"), "", g_MainWindow.pauseButtonImage, G_CALLBACK(callback_pause_emulation), NULL );
+    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Pause"), tr("Pause/ Continue Emulation"), "", g_MainWindow.pauseButtonImage, G_CALLBACK(callback_pause_emulation), NULL);
     gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Stop"), tr("Stop Emulation"), "", g_MainWindow.stopButtonImage, G_CALLBACK(callback_stop_emulation), NULL);
 
     gtk_toolbar_append_space(GTK_TOOLBAR(g_MainWindow.toolBar));
 
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Save State"), tr("Save State"), "", g_MainWindow.saveStateButtonImage, G_CALLBACK(callback_save_state), NULL );
+    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Save State"), tr("Save State"), "", g_MainWindow.saveStateButtonImage, G_CALLBACK(callback_save_state), NULL);
     gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Load State"), tr("Load State"), "", g_MainWindow.loadStateButtonImage, G_CALLBACK(callback_load_state), NULL);
 
     gtk_toolbar_append_space(GTK_TOOLBAR(g_MainWindow.toolBar));
@@ -1047,8 +1066,8 @@ static void create_mainWindow()
     xposition = config_get_number("MainWindowXPosition", 0);
     yposition = config_get_number("MainWindowYPosition", 0);
 
-    GdkDisplay *display = gdk_display_get_default();
-    GdkScreen *screen = gdk_display_get_default_screen(display);
+    GdkDisplay* display = gdk_display_get_default();
+    GdkScreen* screen = gdk_display_get_default_screen(display);
 
     gint screenwidth = gdk_screen_get_width(screen);
     gint screenheight = gdk_screen_get_height(screen);
@@ -1077,24 +1096,24 @@ static void create_mainWindow()
     mupen64plus16 = gdk_pixbuf_new_from_file(get_iconpath("16x16/mupen64plus.png"), NULL);
     mupen64plus32 = gdk_pixbuf_new_from_file(get_iconpath("32x32/mupen64plus.png"), NULL);
 
-    GList *iconlist = NULL;
+    GList* iconlist = NULL;
     iconlist = g_list_append(iconlist, mupen64plus16);
     iconlist = g_list_append(iconlist, mupen64plus16);
 
     gtk_window_set_icon_list(GTK_WINDOW(g_MainWindow.window), iconlist);
     /* Edit gtk on quit. */
-    gtk_signal_connect(GTK_OBJECT(g_MainWindow.window), "delete_event", GTK_SIGNAL_FUNC(callback_mainWindowDeleteEvent), (gpointer)NULL);
+    g_signal_connect(g_MainWindow.window, "delete_event", G_CALLBACK(callback_mainWindowDeleteEvent), NULL);
 
     /* Toplevel vbox, parent to all GUI widgets. */
-    g_MainWindow.toplevelVBox = gtk_vbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER(g_MainWindow.window), g_MainWindow.toplevelVBox);
+    g_MainWindow.toplevelVBox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(g_MainWindow.window), g_MainWindow.toplevelVBox);
 
     create_menubar();
     create_toolbar();
     create_filter();
 
     /* Setup rombrowser. */
-    int value = config_get_number("RomSortType",16);
+    int value = config_get_number("RomSortType", 16);
     if(value!=GTK_SORT_ASCENDING&&value!=GTK_SORT_DESCENDING)
         {
         g_MainWindow.romSortType = GTK_SORT_ASCENDING;
@@ -1102,11 +1121,11 @@ static void create_mainWindow()
         }
     else
         g_MainWindow.romSortType = value;
-    value = config_get_number("RomSortColumn",17);
+    value = config_get_number("RomSortColumn", 17);
     if(value<0||value>16)
         {
         g_MainWindow.romSortColumn = 1;
-        config_put_number("RomSortColumn",1);
+        config_put_number("RomSortColumn", 1);
         }
     else
         g_MainWindow.romSortColumn = value;

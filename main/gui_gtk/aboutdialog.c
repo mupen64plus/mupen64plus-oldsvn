@@ -2,7 +2,6 @@
  *   Mupen64plus - aboutdialog.c                                           *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Tillin9                                            *
- *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -31,7 +30,7 @@
 
 #include <gtk/gtk.h>
 
-void callback_aboutMupen(GtkWidget *widget, gpointer data)
+void callback_about_mupen64plus(GtkWidget* widget, gpointer data)
 {
     const gchar* authors[] =
         {

@@ -27,6 +27,6 @@
 #ifndef __ABOUTDIALOG_H__
 #define __ABOUTDIALOG_H__
 
-void callback_aboutMupen(GtkWidget *widget, gpointer data);
+void callback_about_mupen64plus(GtkWidget* widget, gpointer data);
 
-#endif // __ABOUTDIALOG_H__
+#endif /* __ABOUTDIALOG_H__ */

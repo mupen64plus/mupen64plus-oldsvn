@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - checkicontheme.h                                        *
+ *   Mupen64plus - icontheme.h                                             *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Tillin9                                            *
  *                                                                         *
@@ -19,7 +19,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* checkicontheme.h - Checks current gtk icon theme for application icons. */
+/* icontheme.h - Checks current gtk icon theme for application icons. */
 
 #include <gtk/gtk.h>
 
@@ -29,4 +29,4 @@
 gboolean check_icon_theme();
 void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
 
-#endif // __CHECKICONTHEME_H__
+#endif /* __CHECKICONTHEME_H__ */

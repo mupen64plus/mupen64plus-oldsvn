@@ -27,6 +27,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
 #include <SDL.h>
@@ -50,15 +51,15 @@
 /* Globals. */
 SConfigDialog g_ConfigDialog;
 
-// special function input mappings
+/* Special function input mappings. */
 static int sdl_loop = 0;
 
 struct input_mapping
 {
-    char *name;                     // human-readable name of emulation special function
-    char *key_mapping;              // keyboard mapping of function
-    char *joy_config_name;          // name of joystick mapping in config file
-    GtkWidget *joy_mapping_textbox; // textbox displaying string representation of joystick mapping
+    char* name;                     /* Human-readable name of emulation special function */
+    char* key_mapping;              /* keyboard mapping of function */
+    char* joy_config_name;          /* name of joystick mapping in config file */
+    GtkWidget* joy_mapping_textbox; /* textbox displaying string representation of joystick mapping */
 };
 
 #define mapping_foreach(mapping) for(mapping = mappings; mapping->name; mapping++)
@@ -131,99 +132,99 @@ static struct input_mapping mappings[] =
             "Joy Mapping GS Button",
             NULL
         },
-        { 0, 0, 0, 0 } // last entry
+        { 0, 0, 0, 0 } /* Last entry. */
     };
 
-static void callback_configGfx(GtkWidget *widget, gpointer data)
+static void callback_config_graphics(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
     if(name)
         plugin_exec_config(name);
 }
 
-static void callback_testGfx(GtkWidget *widget, gpointer data)
+static void callback_test_graphics(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
     if(name)
         plugin_exec_test(name);
 }
 
-static void callback_aboutGfx(GtkWidget *widget, gpointer data)
+static void callback_about_graphics(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo));
     if(name)
         plugin_exec_about(name);
 }
 
-static void callback_configAudio(GtkWidget *widget, gpointer data)
+static void callback_config_audio(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
     if(name)
         plugin_exec_config(name);
 }
 
-static void callback_testAudio(GtkWidget *widget, gpointer data)
+static void callback_testAudio(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
     if(name)
         plugin_exec_test(name);
 }
 
-static void callback_aboutAudio( GtkWidget *widget, gpointer data )
+static void callback_aboutAudio(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
-    if(name)
-        plugin_exec_about( name );
-}
-
-static void callback_configInput(GtkWidget *widget, gpointer data)
-{
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
-    if(name)
-        plugin_exec_config(name);
-}
-
-static void callback_testInput(GtkWidget *widget, gpointer data)
-{
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
-    if(name)
-        plugin_exec_test(name);
-}
-
-static void callback_aboutInput(GtkWidget *widget, gpointer data)
-{
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo));
     if(name)
         plugin_exec_about(name);
 }
 
-static void callback_configRSP(GtkWidget *widget, gpointer data)
+static void callback_configInput(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
     if(name)
         plugin_exec_config(name);
 }
 
-static void callback_testRSP(GtkWidget *widget, gpointer data)
+static void callback_testInput(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
     if(name)
         plugin_exec_test(name);
 }
 
-static void callback_aboutRSP(GtkWidget *widget, gpointer data)
+static void callback_aboutInput(GtkWidget* widget, gpointer data)
 {
-    const char *name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo));
+    if(name)
+        plugin_exec_about(name);
+}
+
+static void callback_configRSP(GtkWidget* widget, gpointer data)
+{
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
+    if(name)
+        plugin_exec_config(name);
+}
+
+static void callback_testRSP(GtkWidget* widget, gpointer data)
+{
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
+    if(name)
+        plugin_exec_test(name);
+}
+
+static void callback_aboutRSP(GtkWidget* widget, gpointer data)
+{
+    const char* name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
     if(name)
         plugin_exec_about(name);
 }
 
 /* Add dirname if not in model, otherwise give an error. */
-static void addRomDirectory(const gchar *dirname)
+static void addRomDirectory(const gchar* dirname)
 {
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
     GtkTreeIter iter;
-    gchar *text;
+    gchar* text;
 
     gboolean keepgoing = gtk_tree_model_get_iter_first(model, &iter);
 
@@ -245,17 +246,17 @@ static void addRomDirectory(const gchar *dirname)
 }
 
 /* Get a directory name from the user and attempt to add it. */
-static void callback_romDirectoryAdd(GtkWidget *widget, gpointer data)
+static void callback_romDirectoryAdd(GtkWidget* widget, gpointer data)
 {
-    GtkWidget *file_chooser;
+    GtkWidget* file_chooser;
 
     /* Use standard gtk file chooser to get a directory from the user. */
     file_chooser = gtk_file_chooser_dialog_new(tr("Select Rom Directory"), GTK_WINDOW(g_ConfigDialog.dialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
 
     if(gtk_dialog_run(GTK_DIALOG(file_chooser))==GTK_RESPONSE_ACCEPT)
         {
-        char *dirname;
-        gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+        char* dirname;
+        gchar* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
         dirname = malloc(strlen(path)+2);
         strcpy(dirname, path);
 
@@ -275,8 +276,8 @@ static void callback_romDirectoryAdd(GtkWidget *widget, gpointer data)
 /* Remove selected directory name(s) from model. */
 static void callback_romDirectoryRemove(GtkWidget *widget, gpointer data)
 {
-    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
 
     while(gtk_tree_selection_count_selected_rows(selection) > 0)
         {
@@ -298,21 +299,21 @@ static void callback_romDirectoryRemove(GtkWidget *widget, gpointer data)
 }
 
 /* Apply / Ok Button. */
-static void callback_apply_changes(GtkWidget *widget, gpointer data)
+static void callback_apply_changes(GtkWidget* widget, gpointer data)
 {
     static unsigned char updategui = FALSE, rcsrescan = FALSE;
     const char *filename, *name;
-    gchar *text = NULL;
+    gchar* text = NULL;
     int guivalue, currentvalue;
     int i = 0;
 
     /* General Tab */ 
 
     /* CPU Core */
-    if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)))
+    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)))
         config_put_number("Core", CORE_INTERPRETER); 
 #ifndef NO_ASM
-    else if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.coreDynaRecCheckButton)))
+    else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.coreDynaRecCheckButton)))
         config_put_number("Core", CORE_DYNAREC);
 #endif
     else
@@ -320,7 +321,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
 
     /* Compatibility */
     guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton));
-    config_put_bool( "NoCompiledJump", guivalue);
+    config_put_bool("NoCompiledJump", guivalue);
 
     guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion));
     config_put_bool("NoMemoryExpansion", guivalue);
@@ -428,7 +429,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
         if(filename)
             config_put_string("Input Plugin", filename);
         }
-    name = gtk_combo_box_get_active_text( GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
+    name = gtk_combo_box_get_active_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo));
     if(!g_RspPlugin&&name)
         {
         filename = plugin_filename_by_name(name);
@@ -437,7 +438,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
 
     /* Rom Browser Tab */
 
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
     GtkTreeIter iter;
 
     /* Get the first item. */
@@ -466,7 +467,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton));
     config_put_bool("RomDirsScanRecursive", guivalue);
 
-    guivalue = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton));
+    guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton));
     config_put_bool("RomBrowserShowFullPaths", guivalue);
 
     struct input_mapping *mapping;
@@ -489,7 +490,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
 }
 
 /* Initalize configuration dialog. */
-static void callback_dialogShow(GtkWidget *widget, gpointer data)
+static void callback_dialogShow(GtkWidget* widget, gpointer data)
 {
     int index, i;
     char *name, *combo;
@@ -498,7 +499,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
     gtk_tree_selection_select_all(selection);
 
     callback_romDirectoryRemove(NULL, NULL);
-    for( i = 0; i < config_get_number("NumRomDirs", 0); i++ )
+    for(i = 0; i < config_get_number("NumRomDirs", 0); i++)
         {
         char buffer[30];
         sprintf(buffer, "RomDirectory[%d]", i);
@@ -514,7 +515,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
         index = 0;
         if(g_ConfigDialog.graphicsPluginGList)
             {
-            GList *element = g_list_first(g_ConfigDialog.graphicsPluginGList);
+            GList* element = g_list_first(g_ConfigDialog.graphicsPluginGList);
             while(element)
                 {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo), index);
@@ -538,7 +539,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
     if(g_AudioPlugin)
         name = plugin_name_by_filename(g_AudioPlugin);
     else
-        name = plugin_name_by_filename(config_get_string("Audio Plugin", "" ));
+        name = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
     if(name)
         {
         index = 0;
@@ -568,7 +569,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
     if(g_InputPlugin)
         name = plugin_name_by_filename(g_InputPlugin);
     else
-        name = plugin_name_by_filename(config_get_string( "Input Plugin", "" ));
+        name = plugin_name_by_filename(config_get_string("Input Plugin", ""));
     if(name)
         {
         index = 0;
@@ -598,7 +599,7 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
     if(g_RspPlugin)
         name = plugin_name_by_filename(g_RspPlugin);
     else
-        name = plugin_name_by_filename(config_get_string( "RSP Plugin", "" ));
+        name = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
     if(name)
         {
         index = 0;
@@ -672,16 +673,16 @@ static void callback_dialogShow(GtkWidget *widget, gpointer data)
         }
 
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton), config_get_bool("RomDirsScanRecursive", FALSE));
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton), config_get_bool("RomBrowserShowFullPaths", FALSE));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton), config_get_bool("RomBrowserShowFullPaths", FALSE));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noCompiledJumpCheckButton), config_get_bool("NoCompiledJump", FALSE));
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion), config_get_bool("NoMemoryExpansion", FALSE ));
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton), config_get_bool("AutoIncSaveSlot", FALSE ));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noMemoryExpansion), config_get_bool("NoMemoryExpansion", FALSE));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.autoincSaveSlotCheckButton), config_get_bool("AutoIncSaveSlot", FALSE));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.noaskCheckButton), !g_Noask);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.osdEnabled), g_OsdEnabled);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.alwaysFullscreen), config_get_bool("GuiStartFullscreen", FALSE));
 
     /* If --noask was specified at the commandline, disable checkbox. */
-    gtk_widget_set_sensitive( g_ConfigDialog.noaskCheckButton, !g_NoaskParam );
+    gtk_widget_set_sensitive(g_ConfigDialog.noaskCheckButton, !g_NoaskParam);
 
     /* Set special function input mapping textbox values. */
     struct input_mapping *mapping;
@@ -708,7 +709,7 @@ static void callback_cancelSetInput(GtkWidget *widget, gint response, GtkWidget 
     gtk_widget_destroy(widget);
 }
 
-static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct input_mapping *mapping )
+static void callback_setInput(GtkWidget* widget, GdkEventAny* event, struct input_mapping *mapping)
 {
     int i;
     char *mapping_str = NULL;
@@ -823,7 +824,7 @@ static void callback_setInput( GtkWidget *widget, GdkEventAny *event, struct inp
 }
 
 /* Create main configure dialog. */
-int create_configDialog(void)
+void create_configDialog()
 {
     GtkWidget *label;
     GtkWidget *frame;
@@ -867,19 +868,19 @@ int create_configDialog(void)
             {
             case PLUGIN_TYPE_GFX:
                 if(!g_GfxPlugin||(g_GfxPlugin&&(strcmp(g_GfxPlugin, p->file_name)==0)))
-                    g_ConfigDialog.graphicsPluginGList = g_list_append( g_ConfigDialog.graphicsPluginGList, p->plugin_name);
+                    g_ConfigDialog.graphicsPluginGList = g_list_append(g_ConfigDialog.graphicsPluginGList, p->plugin_name);
                 break;
             case PLUGIN_TYPE_AUDIO:
                 if(!g_AudioPlugin||(g_AudioPlugin &&(strcmp(g_AudioPlugin, p->file_name)==0)))
-                    g_ConfigDialog.audioPluginGList = g_list_append( g_ConfigDialog.audioPluginGList, p->plugin_name);
+                    g_ConfigDialog.audioPluginGList = g_list_append(g_ConfigDialog.audioPluginGList, p->plugin_name);
                 break;
             case PLUGIN_TYPE_CONTROLLER:
                 if(!g_InputPlugin||(g_InputPlugin&&(strcmp(g_InputPlugin, p->file_name)==0)))
-                    g_ConfigDialog.inputPluginGList = g_list_append( g_ConfigDialog.inputPluginGList, p->plugin_name);
+                    g_ConfigDialog.inputPluginGList = g_list_append(g_ConfigDialog.inputPluginGList, p->plugin_name);
                 break;
             case PLUGIN_TYPE_RSP:
                 if(!g_RspPlugin||(g_RspPlugin&&(strcmp(g_RspPlugin, p->file_name)==0)))
-                    g_ConfigDialog.rspPluginGList = g_list_append( g_ConfigDialog.rspPluginGList, p->plugin_name);
+                    g_ConfigDialog.rspPluginGList = g_list_append(g_ConfigDialog.rspPluginGList, p->plugin_name);
                 break;
             }
         }
@@ -888,8 +889,8 @@ int create_configDialog(void)
     g_ConfigDialog.dialog = gtk_dialog_new();
     gtk_window_set_title(GTK_WINDOW(g_ConfigDialog.dialog), tr("Configure"));
     gtk_window_set_transient_for(GTK_WINDOW(g_ConfigDialog.dialog), GTK_WINDOW(g_MainWindow.window));
-    gtk_signal_connect(GTK_OBJECT(g_ConfigDialog.dialog), "show", GTK_SIGNAL_FUNC(callback_dialogShow), (gpointer)NULL);
-    gtk_signal_connect(GTK_OBJECT(g_ConfigDialog.dialog), "delete_event", GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), (gpointer)NULL );
+    g_signal_connect(g_ConfigDialog.dialog, "show", G_CALLBACK(callback_dialogShow), NULL);
+    g_signal_connect(g_ConfigDialog.dialog, "delete_event", G_CALLBACK(gtk_widget_hide_on_delete), NULL);
 
     /* Create notebook, i.e. tabs. */
     g_ConfigDialog.notebook = gtk_notebook_new();
@@ -900,18 +901,15 @@ int create_configDialog(void)
     /* Apply / Ok / Cancel buttons. */
     button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)FALSE);
+    g_signal_connect(button, "clicked", G_CALLBACK(callback_apply_changes), (gpointer)FALSE);
 
     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), button, TRUE, TRUE, 0);
-    gtk_signal_connect_object(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), GTK_OBJECT(g_ConfigDialog.dialog));
+     g_signal_connect_object(button, "clicked", G_CALLBACK(gtk_widget_hide_on_delete), g_ConfigDialog.dialog, G_CONNECT_SWAPPED);
 
     g_ConfigDialog.okButton = gtk_button_new_from_stock(GTK_STOCK_OK);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->action_area), g_ConfigDialog.okButton, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(g_ConfigDialog.okButton), "clicked",
-                       GTK_SIGNAL_FUNC(callback_apply_changes), (gpointer)TRUE);
+    g_signal_connect(g_ConfigDialog.okButton, "clicked", G_CALLBACK(callback_apply_changes), (gpointer)TRUE);
 
     /* Create main settings configuration page. */
 
@@ -921,7 +919,7 @@ int create_configDialog(void)
     gtk_notebook_append_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configMupen, label);
 
     /* Create frame and CPU core options. */
-    frame = gtk_frame_new( tr("CPU Core") );
+    frame = gtk_frame_new(tr("CPU Core"));
     gtk_box_pack_start(GTK_BOX(g_ConfigDialog.configMupen), frame, TRUE, TRUE, 0);
     vbox = gtk_vbox_new(TRUE, 5);
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
@@ -930,10 +928,10 @@ int create_configDialog(void)
     g_ConfigDialog.coreInterpreterCheckButton = gtk_radio_button_new_with_mnemonic(NULL, tr("_Interpreter"));
     gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.coreInterpreterCheckButton, FALSE, FALSE, 0);
 #ifndef NO_ASM
-    g_ConfigDialog.coreDynaRecCheckButton = gtk_radio_button_new_with_mnemonic(gtk_radio_button_group( GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)), tr("_Dynamic recompiler"));
+    g_ConfigDialog.coreDynaRecCheckButton = gtk_radio_button_new_with_mnemonic(gtk_radio_button_group(GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)), tr("_Dynamic recompiler"));
      gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.coreDynaRecCheckButton, FALSE, FALSE, 0);
 #endif
-    g_ConfigDialog.corePureInterpCheckButton = gtk_radio_button_new_with_mnemonic( gtk_radio_button_group( GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)), tr("_Pure interpreter"));
+    g_ConfigDialog.corePureInterpCheckButton = gtk_radio_button_new_with_mnemonic(gtk_radio_button_group(GTK_RADIO_BUTTON(g_ConfigDialog.coreInterpreterCheckButton)), tr("_Pure interpreter"));
     gtk_box_pack_start(GTK_BOX(vbox), g_ConfigDialog.corePureInterpCheckButton, FALSE, FALSE, 0);
 
     /* Create frame and compatibility options. */
@@ -941,7 +939,7 @@ int create_configDialog(void)
     gtk_box_pack_start(GTK_BOX(g_ConfigDialog.configMupen), frame, TRUE, TRUE, 0);
     vbox = gtk_vbox_new(TRUE, 5);
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
-    gtk_container_add(GTK_CONTAINER(frame), vbox );
+    gtk_container_add(GTK_CONTAINER(frame), vbox);
 
     g_ConfigDialog.noCompiledJumpCheckButton = gtk_check_button_new_with_mnemonic("Disable compiled _jump");
     g_ConfigDialog.noMemoryExpansion = gtk_check_button_new_with_mnemonic("Disable memory _expansion");
@@ -952,15 +950,15 @@ int create_configDialog(void)
     frame = gtk_frame_new(tr("Miscellaneous"));
     gtk_box_pack_start(GTK_BOX(g_ConfigDialog.configMupen), frame, TRUE, TRUE, 0);
     vbox = gtk_vbox_new(TRUE, 5);
-    gtk_container_set_border_width( GTK_CONTAINER(vbox), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
     gtk_container_add(GTK_CONTAINER(frame), vbox);
 
     hbox1 = gtk_hbox_new(TRUE, 0);
 
     g_ConfigDialog.toolbarStyleCombo = gtk_combo_box_new_text();
-    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Icons"));
-    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Text"));
-    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char *)tr("Icons & Text"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char*)tr("Icons"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char*)tr("Text"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.toolbarStyleCombo), (char*)tr("Icons & Text"));
 
     label = gtk_label_new_with_mnemonic(tr("Toolbar st_yle:"));
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.toolbarStyleCombo);
@@ -1021,7 +1019,7 @@ int create_configDialog(void)
         GList *element = g_list_first(g_ConfigDialog.graphicsPluginGList);
         while(element)
             {
-            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo), (gchar *)g_list_nth_data(element, 0));
+            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.graphicsCombo), (gchar*)g_list_nth_data(element, 0));
             element = g_list_next(element);
             }
         }
@@ -1031,9 +1029,9 @@ int create_configDialog(void)
     button_config = gtk_button_new_with_label(tr("Config"));
     button_test = gtk_button_new_with_label(tr("Test"));
     button_about = gtk_button_new_with_label(tr("About"));
-    gtk_signal_connect(GTK_OBJECT(button_config), "clicked", GTK_SIGNAL_FUNC(callback_configGfx), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testGfx), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutGfx), (gpointer) NULL);
+    g_signal_connect(button_config, "clicked", G_CALLBACK(callback_config_graphics), NULL);
+    g_signal_connect(button_test, "clicked", G_CALLBACK(callback_test_graphics), NULL);
+    g_signal_connect(button_about, "clicked", GTK_SIGNAL_FUNC(callback_about_graphics), NULL);
 
     g_ConfigDialog.graphicsImage = gtk_image_new();
     set_icon(g_ConfigDialog.graphicsImage, "video-display", 32, FALSE);
@@ -1062,10 +1060,10 @@ int create_configDialog(void)
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.audioCombo);
     if(g_ConfigDialog.audioPluginGList)
         {
-        GList *element = g_list_first(g_ConfigDialog.audioPluginGList);
+        GList* element = g_list_first(g_ConfigDialog.audioPluginGList);
         while(element)
             {
-            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo), (gchar *)g_list_nth_data(element, 0));
+            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.audioCombo), (gchar*)g_list_nth_data(element, 0));
             element = g_list_next(element);
             }
         }
@@ -1075,9 +1073,9 @@ int create_configDialog(void)
     button_config = gtk_button_new_with_label(tr("Config"));
     button_test = gtk_button_new_with_label(tr("Test"));
     button_about = gtk_button_new_with_label(tr("About"));
-    gtk_signal_connect(GTK_OBJECT(button_config), "clicked", GTK_SIGNAL_FUNC(callback_configAudio), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testAudio), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutAudio), (gpointer) NULL);
+    g_signal_connect(button_config, "clicked", G_CALLBACK(callback_config_audio), NULL);
+    g_signal_connect(button_test, "clicked", G_CALLBACK(callback_testAudio), NULL);
+    g_signal_connect(button_about, "clicked", G_CALLBACK(callback_aboutAudio), NULL);
 
     g_ConfigDialog.audioImage = gtk_image_new();
     set_icon(g_ConfigDialog.audioImage, "audio-card", 32, FALSE);
@@ -1106,10 +1104,10 @@ int create_configDialog(void)
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.inputCombo);
     if(g_ConfigDialog.inputPluginGList)
         {
-        GList *element = g_list_first(g_ConfigDialog.inputPluginGList);
+        GList* element = g_list_first(g_ConfigDialog.inputPluginGList);
         while(element)
         {
-            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo), (gchar *)g_list_nth_data(element, 0));
+            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.inputCombo), (gchar*)g_list_nth_data(element, 0));
             element = g_list_next(element);
             }
         }
@@ -1119,9 +1117,9 @@ int create_configDialog(void)
     button_config = gtk_button_new_with_label(tr("Config"));
     button_test = gtk_button_new_with_label(tr("Test"));
     button_about = gtk_button_new_with_label(tr("About"));
-    gtk_signal_connect(GTK_OBJECT(button_config), "clicked", GTK_SIGNAL_FUNC(callback_configInput), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testInput), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutInput), (gpointer) NULL);
+    g_signal_connect(button_config, "clicked", G_CALLBACK(callback_configInput), NULL);
+    g_signal_connect(button_test, "clicked", G_CALLBACK(callback_testInput), NULL);
+    g_signal_connect(button_about, "clicked", G_CALLBACK(callback_aboutInput), NULL);
 
     g_ConfigDialog.inputImage = gtk_image_new();
     set_icon(g_ConfigDialog.inputImage, "input-gaming", 32, FALSE);
@@ -1150,10 +1148,10 @@ int create_configDialog(void)
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), g_ConfigDialog.rspCombo);
     if(g_ConfigDialog.rspPluginGList)
         {
-        GList *element = g_list_first(g_ConfigDialog.rspPluginGList);
+        GList* element = g_list_first(g_ConfigDialog.rspPluginGList);
         while(element)
             {
-            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo), (gchar *)g_list_nth_data(element, 0));
+            gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.rspCombo), (gchar*)g_list_nth_data(element, 0));
             element = g_list_next(element);
             }
         }
@@ -1163,9 +1161,9 @@ int create_configDialog(void)
     button_config = gtk_button_new_with_label(tr("Config"));
     button_test = gtk_button_new_with_label(tr("Test"));
     button_about = gtk_button_new_with_label(tr("About"));
-    gtk_signal_connect(GTK_OBJECT(button_config), "clicked", GTK_SIGNAL_FUNC(callback_configRSP), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_test), "clicked", GTK_SIGNAL_FUNC(callback_testRSP), (gpointer) NULL);
-    gtk_signal_connect(GTK_OBJECT(button_about), "clicked", GTK_SIGNAL_FUNC(callback_aboutRSP), (gpointer) NULL);
+    g_signal_connect(button_config, "clicked", G_CALLBACK(callback_configRSP), NULL);
+    g_signal_connect(button_test, "clicked", G_CALLBACK(callback_testRSP), NULL);
+    g_signal_connect(button_about, "clicked", G_CALLBACK(callback_aboutRSP), NULL);
 
     g_ConfigDialog.rspImage = gtk_image_new();
     set_icon(g_ConfigDialog.rspImage, "cpu", 32, TRUE);
@@ -1194,19 +1192,19 @@ int create_configDialog(void)
     g_ConfigDialog.romDirectoryList = gtk_tree_view_new();
 
     /* Get the GtkTreeSelection and flip the mode to GTK_SELECTION_MULTIPLE. */
-    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
     gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 
     /* Create our model and set it. */
-    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList), -1, "Directory", renderer, "text", 0, NULL);
-    GtkTreeModel *model = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
+    GtkTreeModel* model = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList), model);
     g_object_unref(model);
 
     /* Create a scrolled window to contain the rom list, make scrollbar visibility automatic. */
-    GtkWidget *scrolled_window = gtk_scrolled_window_new (NULL, NULL);
+    GtkWidget* scrolled_window = gtk_scrolled_window_new (NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     /* Add the romDirectoryList tree view into our scrolled window. */
@@ -1219,11 +1217,11 @@ int create_configDialog(void)
 
     button = gtk_button_new_from_stock(GTK_STOCK_ADD);
     gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_romDirectoryAdd), (gpointer) NULL);
+    g_signal_connect(button, "clicked", G_CALLBACK(callback_romDirectoryAdd), NULL);
 
     button = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
     gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(callback_romDirectoryRemove), (gpointer) NULL);
+    g_signal_connect(button, "clicked", G_CALLBACK(callback_romDirectoryRemove), NULL);
 
     gtk_box_pack_start(GTK_BOX(hbox1), scrolled_window, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox1), vbox, FALSE, FALSE, 0);
@@ -1241,8 +1239,8 @@ int create_configDialog(void)
     gtk_container_set_border_width(GTK_CONTAINER(g_ConfigDialog.configInputMappings), 10);
     gtk_notebook_append_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configInputMappings, label);
 
-    struct input_mapping *mapping;
-    GtkTooltips *tooltips;
+    struct input_mapping* mapping;
+    GtkTooltips* tooltips;
 
     tooltips = gtk_tooltips_new();
 
@@ -1293,6 +1291,4 @@ int create_configDialog(void)
 
     /* Initalize the widgets. */
     callback_dialogShow(NULL, NULL);
-
-    return 0;
 }

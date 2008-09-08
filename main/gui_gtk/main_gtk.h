@@ -29,11 +29,13 @@
 
 typedef struct
 {
+    GtkWidget* window;
+    GtkWidget* toplevelVBox;  /* Topevel vbox containing menubar, toolbar, filter, rombrowser, and statusbar. */
+    GtkIconTheme* iconTheme;
+    gboolean fallbackIcons; /* Are we using the icons from iconTheme or our own fallbacks. */
+
     GtkWidget* dialogErrorImage;
     GtkWidget* dialogQuestionImage;
-
-    GtkWidget* window;
-    GtkWidget* toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
 
     GtkWidget* menuBar;
     GtkWidget* openMenuImage;
@@ -69,44 +71,49 @@ typedef struct
     GtkWidget* fullscreenButtonImage;
     GtkWidget* configureButtonImage;
 
-    GtkWidget* filterBar;
-    GtkWidget* filter;
+    GtkWidget* filterBar; /* Container object for filter, toggle visability. */
+    GtkWidget* filter; /* Entry for filter text. */
+    GtkAccelGroup* accelGroup;
+    GtkAccelGroup* accelUnsafe; /* GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets. */
+    gboolean accelUnsafeActive; /* From getting keypresses, so must be deactivated. */
+
     GtkWidget* romScrolledWindow;
-    //Make two TreeViews, a visable manually filtered one for the Display, and a
-    //Non-visable FullList from which we can filter.
+    /* Make two TreeViews, a visable manually filtered one for the Display, and a
+    Non-visable FullList from which we can filter. */
     GtkWidget* romDisplay;
     GtkWidget* romFullList;
-    GtkTreeViewColumn* column[17]; //columns in rombrowser. 
-    unsigned short columnVisible[16];
-    int romSortColumn; // sort column
-    GtkSortType romSortType; // sort type (ascending/descending)
-    GtkWidget* statusBar;
-    GtkWidget* statusBarHBox;
-    GtkAccelGroup* accelGroup;
-    GtkAccelGroup* accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
-    gboolean accelUnsafeActive; //From getting keypresses, so must be deactivated.
-    GtkWidget* romHeaderMenu; //Context menu for rombrowser header to control visible columns.
+    GtkTreeViewColumn* column[17]; /* Column pointers in rombrowser. */
+    char column_names[16][2][128]; /* Localized names and English config system strings. */
+    int romSortColumn;
+    GtkSortType romSortType;
+    GtkWidget* romHeaderMenu; /* Context menu for rombrowser to control visible columns. */
+    GtkWidget* playRomItem;
+    GtkWidget* romPropertiesItem;
 
-    GtkIconTheme* iconTheme;
-    gboolean fallbackIcons;
+    GtkWidget* playRombrowserImage;
+    GtkWidget* propertiesRombrowserImage;
+    GtkWidget* refreshRombrowserImage;
+
+    GtkWidget* statusBar; /* Statusbar message stack. */
+    GtkWidget* statusBarHBox; /* Container object for statusbar, toggle visability. */
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;
-extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
+extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star, *staroff;
 
 /* public helper functions. */
 void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
 
-//The functons which all GUIs must implement.
-void gui_init(int *argc, char ***argv);
+/* The functons which all GUIs must implement. */
+void gui_init(int* argc, char*** argv);
 void gui_display(void);
 void gui_main_loop(void);
 int gui_message(unsigned char messagetype, const char *format, ...);
-void updaterombrowser(unsigned int roms, unsigned short clear);
+void update_rombrowser(unsigned int roms, unsigned short clear);
 
 /* View defines */
 #define TOOLBAR 1
 #define FILTER 2
 #define STATUSBAR 3
 
-#endif //__MAIN_GTK_H__
+#endif /* __MAIN_GTK_H__ */

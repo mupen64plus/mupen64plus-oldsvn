@@ -29,49 +29,50 @@
 
 typedef struct
 {
-    GtkWidget   *notebook;
-    GtkWidget   *configMupen;
-    GtkWidget   *configPlugins;
-    GtkWidget   *configRomBrowser;
-    GtkWidget   *configInputMappings;
+    GtkWidget* dialog;
 
-    GtkWidget   *coreInterpreterCheckButton;
-    GtkWidget   *coreDynaRecCheckButton;
-    GtkWidget   *corePureInterpCheckButton;
-    GtkWidget   *autoincSaveSlotCheckButton;
-    GtkWidget   *noaskCheckButton;
-    GtkWidget   *osdEnabled;
-    GtkWidget   *alwaysFullscreen;
-    GList       *toolbarStyleGList;
-    GtkWidget   *toolbarStyleCombo;
-    GList       *toolbarSizeGList;
-    GtkWidget   *toolbarSizeCombo;
+    GtkWidget* notebook;
+    GtkWidget* configMupen;
+    GtkWidget* configPlugins;
+    GtkWidget* configRomBrowser;
+    GtkWidget* configInputMappings;
 
-    GtkWidget   *graphicsCombo;
-    GtkWidget   *audioCombo;
-    GtkWidget   *inputCombo;
-    GtkWidget   *rspCombo;
-    GList       *graphicsPluginGList;
-    GList       *audioPluginGList;
-    GList       *inputPluginGList;
-    GList       *rspPluginGList;
-    GtkWidget   *romDirectoryList;
-    GtkWidget   *romDirsScanRecCheckButton;
-    GtkWidget   *romShowFullPathsCheckButton;
-    GtkWidget   *noCompiledJumpCheckButton;
-    GtkWidget   *noMemoryExpansion;
+    GtkWidget* coreInterpreterCheckButton;
+    GtkWidget* coreDynaRecCheckButton;
+    GtkWidget* corePureInterpCheckButton;
+    GtkWidget* autoincSaveSlotCheckButton;
+    GtkWidget* noaskCheckButton;
+    GtkWidget* osdEnabled;
+    GtkWidget* alwaysFullscreen;
+    GList* toolbarStyleGList;
+    GtkWidget* toolbarStyleCombo;
+    GList* toolbarSizeGList;
+    GtkWidget* toolbarSizeCombo;
 
-    GtkWidget   *okButton;
-    GtkWidget   *dialog;
+    GtkWidget* graphicsCombo;
+    GtkWidget* audioCombo;
+    GtkWidget* inputCombo;
+    GtkWidget* rspCombo;
+    GList* graphicsPluginGList;
+    GList* audioPluginGList;
+    GList* inputPluginGList;
+    GList* rspPluginGList;
+    GtkWidget* romDirectoryList;
+    GtkWidget* romDirsScanRecCheckButton;
+    GtkWidget* romShowFullPathsCheckButton;
+    GtkWidget* noCompiledJumpCheckButton;
+    GtkWidget* noMemoryExpansion;
 
     GtkWidget* graphicsImage;
     GtkWidget* audioImage;
     GtkWidget* inputImage;
     GtkWidget* rspImage;
+
+    GtkWidget* okButton;
 } SConfigDialog;
 
 extern SConfigDialog g_ConfigDialog;
 
-int create_configDialog( void );
+void create_configDialog(void);
 
-#endif // __CONFIGDIALOG_H__
+#endif /* __CONFIGDIALOG_H__ */
