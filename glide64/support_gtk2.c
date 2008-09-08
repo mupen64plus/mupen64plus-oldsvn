@@ -22,7 +22,7 @@
 // function to create pixmaps from buffers
 GtkWidget *
 create_pixmap_d                        (GtkWidget       *widget,
-                                        gchar          **data)
+                                        const gchar     **data)
 {
         GdkColormap *colormap;
         GdkPixmap *gdkpixmap;
@@ -31,10 +31,11 @@ create_pixmap_d                        (GtkWidget       *widget,
 
         colormap = gtk_widget_get_colormap (widget);
         gdkpixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, colormap, &mask,
-                                                     NULL, data);
+                                                     NULL, (gchar**) data);
         pixmap = gtk_pixmap_new (gdkpixmap, mask);
         gdk_pixmap_unref (gdkpixmap);
         gdk_bitmap_unref (mask);
 
         return pixmap;
 }
+
