@@ -29,7 +29,6 @@
 #include <SDL_thread.h>
 
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "main_gtk.h"
@@ -551,7 +550,7 @@ static void callback_configure_graphics(GtkWidget* widget, gpointer data)
 {
     char* name = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
     if(name)
-        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
+        plugin_exec_config(name);
     else
         {
         if(gui_message(2, tr("No graphics plugin selected! Do you\nwant to select one?")))
@@ -566,7 +565,7 @@ static void callback_configure_audio(GtkWidget* widget, gpointer data)
 {
     char* name = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
     if(name)
-        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
+        plugin_exec_config(name);
     else
         {
         if(gui_message(2, tr("No audio plugin selected! Do you\nwant to select one?")))
@@ -581,7 +580,7 @@ static void callback_configure_input(GtkWidget* widget, gpointer data)
 {
     char* name = plugin_name_by_filename(config_get_string("Input Plugin", ""));
     if(name)
-        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
+        plugin_exec_config(name);
     else
         {
         if(gui_message(2, tr("No input plugin selected! Do you\nwant to select one?")))
@@ -596,7 +595,7 @@ static void callback_configure_rsp(GtkWidget* widget, gpointer data)
 {
     char* name = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
     if(name)
-        plugin_exec_config_with_wid(name, GDK_WINDOW_XWINDOW(GTK_WIDGET(g_MainWindow.window)->window));
+        plugin_exec_config(name);
     else
         {
         if(gui_message(2, tr("No RSP plugin selected! Do you\nwant to select one?")))

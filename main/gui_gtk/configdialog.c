@@ -27,7 +27,6 @@
 #include <string.h>
 #include <limits.h>
 
-#include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
 #include <SDL.h>
