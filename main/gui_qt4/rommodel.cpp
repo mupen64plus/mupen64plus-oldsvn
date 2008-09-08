@@ -105,7 +105,7 @@ void RomModel::update(unsigned int roms, unsigned short clear)
         m_romList.clear();
     }
 
-    int arrayroms = m_romList.count();
+    unsigned int arrayroms = static_cast<unsigned int>(m_romList.count());
 
     //If there are currently more ROMs in cache than GUI rombrowser, add them.
     if (roms > arrayroms) {
@@ -290,7 +290,8 @@ bool RomModel::setData(const QModelIndex& index, const QVariant& value,
     bool result = false;
     if (index.isValid() &&
         index.row() >= 0 &&
-        index.row() < m_romList.count()) {
+        index.row() < m_romList.count() &&
+        role == Qt::EditRole) {
         switch (index.column()) {
             case UserComments:
                 result = true;
