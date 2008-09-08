@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>426</width>
-    <height>352</height>
+    <width>461</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -24,6 +24,9 @@
     <spacer name="horizontalSpacer_4" >
      <property name="orientation" >
       <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeType" >
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0" >
       <size>
@@ -125,38 +128,88 @@
      </item>
     </layout>
    </item>
+   <item row="2" column="1" >
+    <widget class="QLabel" name="label_6" >
+     <property name="text" >
+      <string>Draw Fog:</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
    <item row="2" column="2" >
     <widget class="QCheckBox" name="drawFogCheck" >
      <property name="text" >
-      <string>Draw Fog</string>
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1" >
+    <widget class="QLabel" name="label_7" >
+     <property name="text" >
+      <string>2x SAI Texture Scaling:</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
    <item row="3" column="2" >
     <widget class="QCheckBox" name="twoExSaiTextureScalingCheck" >
      <property name="text" >
-      <string>2xSAI Texture Scaling</string>
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1" >
+    <widget class="QLabel" name="label_8" >
+     <property name="text" >
+      <string>Anisotropic Filtering:</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
    <item row="4" column="2" >
     <widget class="QCheckBox" name="anisotropicFilteringCheck" >
      <property name="text" >
-      <string>Anisotropic Filtering</string>
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1" >
+    <widget class="QLabel" name="label_9" >
+     <property name="text" >
+      <string>Force Bilinear Filtering:</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
    <item row="5" column="2" >
     <widget class="QCheckBox" name="forceBilinearFilteringCheck" >
      <property name="text" >
-      <string>Force Biliner Filtering</string>
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" >
+    <widget class="QLabel" name="label_10" >
+     <property name="text" >
+      <string>Dithered Alpha Testing:</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
    <item row="6" column="2" >
     <widget class="QCheckBox" name="ditheredAlphaTestingCheck" >
      <property name="text" >
-      <string>Dithered Alpha Testing</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -259,10 +312,26 @@
      </item>
     </layout>
    </item>
+   <item row="10" column="1" >
+    <widget class="QLabel" name="label_11" >
+     <property name="text" >
+      <string>HW Framebuffer Textures:</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
    <item row="10" column="2" >
     <widget class="QCheckBox" name="hwFramebufferTexturesCheck" >
+     <property name="font" >
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text" >
-      <string>HW Framebuffer Textures (experimental)</string>
+      <string>Note: experimental!</string>
      </property>
     </widget>
    </item>
