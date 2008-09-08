@@ -24,6 +24,8 @@
 #include <QDialog>
 #include "ui_settingsdialog.h"
 
+class QAbstractButton;
+
 class SettingsDialog : public QDialog, public Ui_SettingsDialog
 {
     Q_OBJECT
@@ -47,7 +49,12 @@ class SettingsDialog : public QDialog, public Ui_SettingsDialog
         void on_configGraphicsPluginButton_clicked();
         void on_testGraphicsPluginButton_clicked();
 
+        void buttonClicked(QAbstractButton* button);
         void pageChanged(int);
+
+    private:
+        void readSettings();
+        void writeSettings();
 };
 
 #endif // MUPEN_KDE4_SETTINGS_DIALOG_H

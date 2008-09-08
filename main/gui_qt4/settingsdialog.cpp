@@ -50,11 +50,10 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     items << new QListWidgetItem(QIcon(icon("preferences-system-network.png")),
                                  tr("Rom Browser"),
                                  listWidget);
-    int i = 0;
     foreach (QListWidgetItem* item, items) {
         item->setTextAlignment(Qt::AlignHCenter);
         item->setSizeHint(QSize(110, 55));
-        listWidget->insertItem(i, item);
+        listWidget->insertItem(0, item);
     }
 
     connect(listWidget, SIGNAL(currentRowChanged(int)),
@@ -70,114 +69,10 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     connect(listWidget, SIGNAL(currentRowChanged(int)),
             this, SLOT(pageChanged(int)));
 
-    int core = core::config_get_number("Core", CORE_DYNAREC);
-    switch (core) {
-        case CORE_DYNAREC:
-            dynamicRecompilerRadio->setChecked(true);
-            break;
-        case CORE_INTERPRETER:
-            interpreterRadio->setChecked(true);
-            break;
-        case CORE_PURE_INTERPRETER:
-            pureInterpreterRadio->setChecked(true);
-            break;
-    }
+    connect(buttonBox, SIGNAL(clicked(QAbstractButton*)),
+            this, SLOT(buttonClicked(QAbstractButton*)));
 
-    disableCompiledJumpCheck->setChecked(
-        core::config_get_bool("NoCompiledJump", FALSE)
-    );
-
-    disableMemoryExpansionCheck->setChecked(
-        core::config_get_bool("NoMemoryExpansion", FALSE)
-    );
-
-    alwaysStartInFullScreenModeCheck->setChecked(
-        core::config_get_bool("GuiStartFullscreen", FALSE)
-    );
-
-    askBeforeLoadingBadRomCheck->setChecked(
-        core::config_get_bool("No Ask", !core::g_NoaskParam)
-    );
-
-    autoIncrementSaveSlotCheck->setChecked(
-        core::config_get_bool("AutoIncSaveSlot", FALSE)
-    );
-
-    osdEnabledCheck->setChecked(core::g_OsdEnabled);
-
-    QString inputPlugin = core::config_get_string("Input Plugin", "");
-    QString gfxPlugin = core::config_get_string("Gfx Plugin", "");
-    QString audioPlugin = core::config_get_string("Audio Plugin", "");
-    QString rspPlugin = core::config_get_string("RSP Plugin", "");
-
-    core::list_node_t *node;
-    core::plugin *p;
-    list_foreach(core::g_PluginList, node) {
-        p = static_cast<core::plugin*>(node->data);
-        switch (p->type) {
-            case PLUGIN_TYPE_GFX:
-                if(!core::g_GfxPlugin ||
-                        (core::g_GfxPlugin &&
-                         (strcmp(core::g_GfxPlugin, p->file_name) == 0))) {
-                    graphicsPluginCombo->addItem(p->plugin_name);
-                }
-                break;
-            case PLUGIN_TYPE_AUDIO:
-                if(!core::g_AudioPlugin ||
-                    (core::g_AudioPlugin &&
-                    (strcmp(core::g_AudioPlugin, p->file_name) == 0)))
-                    audioPluginCombo->addItem(p->plugin_name);
-                break;
-            case PLUGIN_TYPE_CONTROLLER:
-                // if plugin was specified at commandline, only add it to the combobox list
-                if(!core::g_InputPlugin ||
-                    (core::g_InputPlugin &&
-                    (strcmp(core::g_InputPlugin, p->file_name) == 0)))
-                    inputPluginCombo->addItem(p->plugin_name);
-                break;
-            case PLUGIN_TYPE_RSP:
-                // if plugin was specified at commandline, only add it to the combobox list
-                if(!core::g_RspPlugin ||
-                    (core::g_RspPlugin &&
-                    (strcmp(core::g_RspPlugin, p->file_name) == 0)))
-                    rspPluginCombo->addItem(p->plugin_name);
-                break;
-        }
-    }
-
-    inputPlugin = core::plugin_name_by_filename(qPrintable(inputPlugin));
-    if (!inputPlugin.isEmpty() &&
-        ((i = inputPluginCombo->findText(inputPlugin)) != -1)) {
-        inputPluginCombo->setCurrentIndex(i);
-    }
-
-    audioPlugin = core::plugin_name_by_filename(qPrintable(audioPlugin));
-    if (!audioPlugin.isEmpty() &&
-        ((i = audioPluginCombo->findText(audioPlugin)) != -1)) {
-        audioPluginCombo->setCurrentIndex(i);
-    }
-
-    rspPlugin = core::plugin_name_by_filename(qPrintable(rspPlugin));
-    if (!rspPlugin.isEmpty() &&
-        ((i = rspPluginCombo->findText(rspPlugin)) != -1)) {
-        rspPluginCombo->setCurrentIndex(i);
-    }
-
-    gfxPlugin = core::plugin_name_by_filename(qPrintable(gfxPlugin));
-    if (!gfxPlugin.isEmpty() &&
-        ((i = graphicsPluginCombo->findText(gfxPlugin)) != -1)) {
-        graphicsPluginCombo->setCurrentIndex(i);
-    }
-
-    romDirectoriesListWidget->setDirectories(romDirectories());
-
-    scanDirectoriesRecursivelyCheck->setChecked(
-        core::config_get_bool("RomDirsScanRecursive", FALSE)
-    );
-
-    showFullPathsInFilenamesCheck->setChecked(
-        core::config_get_bool("RomBrowserShowFullPaths", FALSE)
-    );
+    readSettings();
 }
 
 void SettingsDialog::on_aboutAudioPluginButton_clicked()
@@ -253,6 +148,144 @@ void SettingsDialog::on_testInputPluginButton_clicked()
 }
 
 void SettingsDialog::accept()
+{
+    writeSettings();
+    QDialog::accept();
+}
+
+void SettingsDialog::buttonClicked(QAbstractButton* button)
+{
+    switch (buttonBox->standardButton(button)) {
+        case QDialogButtonBox::Reset:
+            readSettings();
+            break;
+        default: // we really only care about a few buttons here
+            break;
+    }
+}
+
+void SettingsDialog::pageChanged(int page)
+{
+    QListWidgetItem* i = listWidget->item(page);
+    imageLabel->setPixmap(i->icon().pixmap(32, 32));
+    textLabel->setText(QString("<b>%1</b>").arg(i->text()));
+}
+
+void SettingsDialog::readSettings()
+{
+    int core = core::config_get_number("Core", CORE_DYNAREC);
+    switch (core) {
+        case CORE_DYNAREC:
+            dynamicRecompilerRadio->setChecked(true);
+            break;
+        case CORE_INTERPRETER:
+            interpreterRadio->setChecked(true);
+            break;
+        case CORE_PURE_INTERPRETER:
+            pureInterpreterRadio->setChecked(true);
+            break;
+    }
+
+    disableCompiledJumpCheck->setChecked(
+        core::config_get_bool("NoCompiledJump", FALSE)
+    );
+
+    disableMemoryExpansionCheck->setChecked(
+        core::config_get_bool("NoMemoryExpansion", FALSE)
+    );
+
+    alwaysStartInFullScreenModeCheck->setChecked(
+        core::config_get_bool("GuiStartFullscreen", FALSE)
+    );
+
+    askBeforeLoadingBadRomCheck->setChecked(
+        core::config_get_bool("No Ask", !core::g_NoaskParam)
+    );
+
+    autoIncrementSaveSlotCheck->setChecked(
+        core::config_get_bool("AutoIncSaveSlot", FALSE)
+    );
+
+    osdEnabledCheck->setChecked(core::g_OsdEnabled);
+
+    QString inputPlugin = core::config_get_string("Input Plugin", "");
+    QString gfxPlugin = core::config_get_string("Gfx Plugin", "");
+    QString audioPlugin = core::config_get_string("Audio Plugin", "");
+    QString rspPlugin = core::config_get_string("RSP Plugin", "");
+
+    core::list_node_t *node;
+    core::plugin *p;
+    list_foreach(core::g_PluginList, node) {
+        p = static_cast<core::plugin*>(node->data);
+        switch (p->type) {
+            case PLUGIN_TYPE_GFX:
+                if(!core::g_GfxPlugin ||
+                        (core::g_GfxPlugin &&
+                         (strcmp(core::g_GfxPlugin, p->file_name) == 0))) {
+                    graphicsPluginCombo->addItem(p->plugin_name);
+                }
+                break;
+            case PLUGIN_TYPE_AUDIO:
+                if(!core::g_AudioPlugin ||
+                    (core::g_AudioPlugin &&
+                    (strcmp(core::g_AudioPlugin, p->file_name) == 0)))
+                    audioPluginCombo->addItem(p->plugin_name);
+                break;
+            case PLUGIN_TYPE_CONTROLLER:
+                // if plugin was specified at commandline, only add it to the combobox list
+                if(!core::g_InputPlugin ||
+                    (core::g_InputPlugin &&
+                    (strcmp(core::g_InputPlugin, p->file_name) == 0)))
+                    inputPluginCombo->addItem(p->plugin_name);
+                break;
+            case PLUGIN_TYPE_RSP:
+                // if plugin was specified at commandline, only add it to the combobox list
+                if(!core::g_RspPlugin ||
+                    (core::g_RspPlugin &&
+                    (strcmp(core::g_RspPlugin, p->file_name) == 0)))
+                    rspPluginCombo->addItem(p->plugin_name);
+                break;
+        }
+    }
+
+    int i = 0;
+
+    inputPlugin = core::plugin_name_by_filename(qPrintable(inputPlugin));
+    if (!inputPlugin.isEmpty() &&
+        ((i = inputPluginCombo->findText(inputPlugin)) != -1)) {
+        inputPluginCombo->setCurrentIndex(i);
+    }
+
+    audioPlugin = core::plugin_name_by_filename(qPrintable(audioPlugin));
+    if (!audioPlugin.isEmpty() &&
+        ((i = audioPluginCombo->findText(audioPlugin)) != -1)) {
+        audioPluginCombo->setCurrentIndex(i);
+    }
+
+    rspPlugin = core::plugin_name_by_filename(qPrintable(rspPlugin));
+    if (!rspPlugin.isEmpty() &&
+        ((i = rspPluginCombo->findText(rspPlugin)) != -1)) {
+        rspPluginCombo->setCurrentIndex(i);
+    }
+
+    gfxPlugin = core::plugin_name_by_filename(qPrintable(gfxPlugin));
+    if (!gfxPlugin.isEmpty() &&
+        ((i = graphicsPluginCombo->findText(gfxPlugin)) != -1)) {
+        graphicsPluginCombo->setCurrentIndex(i);
+    }
+
+    romDirectoriesListWidget->setDirectories(romDirectories());
+
+    scanDirectoriesRecursivelyCheck->setChecked(
+        core::config_get_bool("RomDirsScanRecursive", FALSE)
+    );
+
+    showFullPathsInFilenamesCheck->setChecked(
+        core::config_get_bool("RomBrowserShowFullPaths", FALSE)
+    );
+}
+
+void SettingsDialog::writeSettings()
 {
     const char* p = 0;
 
@@ -334,12 +367,4 @@ void SettingsDialog::accept()
     }
     RomModel::self()->settingsChanged();
     core::config_write();
-    QDialog::accept();
-}
-
-void SettingsDialog::pageChanged(int page)
-{
-    QListWidgetItem* i = listWidget->item(page);
-    imageLabel->setPixmap(i->icon().pixmap(32, 32));
-    textLabel->setText(QString("<b>%1</b>").arg(i->text()));
 }
