@@ -77,21 +77,16 @@ void drawStars(QPainter* painter,
                int n,
                int max)
 {
-    static QPixmap star = pixmap("star.png", "16x16");
-    painter->save();
+    static QPixmap enabled = icon("star.png").pixmap(16, 16);
+    static QPixmap disabled = icon("star.png").pixmap(16, 16, QIcon::Disabled);
     for (int i = 0; i < n; i++) {
         QPoint p = r.topLeft();
-        p += QPoint(i * (star.width() + 2), 1);
-        painter->drawPixmap(p, star);
+        p += QPoint(i * (enabled.width() + 2), 1);
+        painter->drawPixmap(p, enabled);
     }
-    if (painter->paintEngine()->hasFeature(QPaintEngine::PorterDuff)) {
-        painter->setCompositionMode(QPainter::CompositionMode_Xor);
-    }
-    painter->setOpacity(0.2);
     for (int i = n; i < max; i++) {
         QPoint p = r.topLeft();
-        p += QPoint(i * (star.width() + 2), 1);
-        painter->drawPixmap(p, star);
+        p += QPoint(i * (disabled.width() + 2), 1);
+        painter->drawPixmap(p, disabled);
     }
-    painter->restore();
 }
