@@ -29,9 +29,11 @@
 #include "../opengl/osd.h"
 #include "../main/plugin.h" // Need typdef BUTTONS, DWORD, BOOL
 #include "../main/main.h"
+#include "../r4300/macros.h"
 #include <sys/types.h>
 #include <SDL_net.h>
 #include <stdint.h>
+#include <zlib.h>
 
 #ifdef _WIN32               //needed for gethostname in linux, in windows it's Winsock2.h
     #include "Winsock2.h"
@@ -40,6 +42,10 @@
 #endif
 
 #define SERVER_PORT         7000
+
+#define DUMP_TIMING_DATA    1
+#define DUMP_INPUT_STATE    1
+#define DUMP_GZIP           0
 
 #define DEFAULT_INPUT_DELAY 4  // starting delay in frames
 #define MAX_PLAYERS         4
@@ -72,6 +78,12 @@
 
 #define 	CHUNK_INPUT		16
 #define         CHUNK_WRAPPER           17
+
+#ifdef DUMP_GZIP
+//#define OPENLOGFILE(
+#else
+
+#endif
 
 typedef struct TFrame {
     Uint16  eID;
@@ -127,6 +139,7 @@ typedef struct TNetPlayerUpdate {
     u_int32_t       value;
     u_int16_t       timer;
     u_int16_t       control;   //start/stop/pause, quit, save, etc...
+    u_int32_t       timems;     //timestamp in ms
 } NetPlayerUpdate;
 
 typedef struct TNetPlayer {
@@ -168,10 +181,17 @@ typedef struct TMupenClient {
         u_int8_t            inputDelay;
         u_int32_t           numConnected;
         u_int32_t           myID;
+        u_int32_t           timems;
         //BOOL                isWaitingForServer;
         BOOL                isListening;
         BOOL                isEnabled;
         BOOL                startEvt;
+#ifdef DUMP_TIMING_DATA
+        gzFile              timeDump;
+#endif
+#ifdef DUMP_INPUT_STATE
+        gzFile              inputDump;
+#endif
 } MupenClient;
 
 typedef struct TNetPlaySettings {

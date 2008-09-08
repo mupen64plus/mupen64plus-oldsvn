@@ -323,6 +323,7 @@ void check_interupt()
 
 void gen_interupt()
 {
+    clientProcessMessages(getNetplayClient());
     if (stop == 1)
     {
         vi_counter = 0; // debug

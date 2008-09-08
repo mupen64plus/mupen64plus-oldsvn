@@ -37,37 +37,50 @@ unsigned int gettimeofday_msec(void)
 }
 
 int netInitialize(MupenClient *mClient) {
-  int retValue;
 
-  SDLNet_Init();
-  rompause = 1;
+    SDLNet_Init();
+    rompause = 1;
 
- if ((!clientInitialize(mClient))) {
-     printf("[Netplay] Network initialization failed.\n");
-     return 0;
- } else printf("[Netplay] Network initialization sucessful.\n");
+    if ((!clientInitialize(mClient))) {
+        printf("[Netplay] Network initialization failed.\n");
+        return 0;
+    } else printf("[Netplay] Network initialization sucessful.\n");
 
-  MasterServerCloseGame();
+    MasterServerCloseGame();
+#ifdef DUMP_TIMING_DATA
+    mClient->timeDump = gzopen("timing.csv.gz","wb");
+    gzprintf(mClient->timeDump,"frame,peer,timems,latencyms,latencyfm\n");
+#endif
+#ifdef DUMP_INPUT_STATE
+    mClient->inputDump = gzopen("input.csv.gz","wb");
+    gzprintf(mClient->inputDump,"frame,cycles,controller,value\n");
+#endif
 
- return 1;
+    return 1;
 }
 
 int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings) {
-  int ret = 0;
-
-  if (netSettings.hostname[0]!='\0') {
-    if (clientConnect(mClient, netSettings.hostname, SERVER_PORT)) {
-      printf("[Netplay] Connected to %s.\n", netSettings.hostname);
-      ret = 1;
+    if (netSettings.hostname[0]!='\0') {
+        if (clientConnect(mClient, netSettings.hostname, SERVER_PORT))
+            printf("[Netplay] Connected to %s.\n", netSettings.hostname);
+        else
+            return 0;
     }
-  }
-  else
-    ret = 1;
-  return ret;
+    else
+    return 1;
 }
 
 void netShutdown(MupenClient *mClient) {
     clientDisconnect(mClient);
+#ifdef DUMP_TIMING_DATA
+    if(mClient->timeDump!=NULL)
+        gzclose(mClient->timeDump);
+#endif
+#ifdef DUMP_INPUT_STATE
+    if(mClient->inputDump!=NULL)
+        gzclose(mClient->inputDump);
+#endif
+
 }
 
 int netMain(MupenClient *mClient) {
@@ -85,10 +98,12 @@ int netMain(MupenClient *mClient) {
         MasterServerKeepAlive(mClient->masterServer->host,mClient->masterServer->port,g_Game_ID,mClient->socket);
         lastKeepAlive=mClient->frameCounter;
     }
+
     clientProcessMessages(mClient);
 
-    if( processEventQueue(mClient) )
+    if( processEventQueue(mClient) ) {
         mClient->frameCounter++;
+    }
 
     return 0;
 }

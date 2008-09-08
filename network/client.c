@@ -23,6 +23,7 @@
 **/
 
 #include <time.h>
+#include <zlib.h>
 #include "network.h"
 #include "../main/md5.h"
 #include "../r4300/r4300.h"
@@ -130,19 +131,24 @@ void clientProcessFrame(MupenClient *Client) {
     int player=curChunk->header.peer;
     unsigned int frame=SDLNet_Read16(&(curChunk->header.eID));
     curChunk=((void *)curChunk)+sizeof(Frame);
-    fprintf(stderr,"Host %d-%d lag time local: %d remote: %d\n", player, frame, Client->lag[player], Client->lag_local[player]);
-
+    //fprintf(stderr,"Host %d-%d lag time local: %d remote: %d\n", player, frame, Client->lag[player], Client->lag_local[player]);
+#ifdef DUMP_TIMING_DATA
+    unsigned int timervalue = (rompause==0)?gettimeofday_msec()-Client->timems:Client->timems;
+    //printf("%d %d %d %d\n",gettimeofday_msec(),Client->timems,rompause,timervalue);
+    gzprintf(Client->timeDump,"%f,%d,%d,%d,%f\n",Client->frameCounter / (1.0f*VI_PER_FRAME),player,timervalue,Client->playerEvent[frame%FRAME_BUFFER_LENGTH][Client->myID].timer==frame?timervalue-Client->playerEvent[frame%FRAME_BUFFER_LENGTH][Client->myID].timems:-1,frameDelta(Client, frame * VI_PER_FRAME) / (VI_PER_FRAME*1.0f));
+#endif //DUMP_TIMING_DATA
     while(len>0) {
         switch(curChunk->type) {
           case CHUNK_INPUT:
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timer=frame;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
-            fprintf(stderr,"chunk player: %d frame: %d data: %08x control %d\n", curChunk->input.player,frame,curChunk->input.buttons.Value,curChunk->input.player);
+            Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timems = gettimeofday_msec()-Client->timems;
+            //fprintf(stderr,"chunk player: %d frame: %d data: %08x control %d\n", curChunk->input.player,frame,curChunk->input.buttons.Value,curChunk->input.player);
             len-=sizeof(InputChunk);
           break;
           default:
-            fprintf(stderr,"Invalid Frame received!\n");
+            printf("NETPLAY: Invalid Frame received!\n");
         }
     }
 }
@@ -150,6 +156,9 @@ void clientProcessFrame(MupenClient *Client) {
 void clientSendFrame(MupenClient *Client) {
     int i;
     FrameChunk *chunk = (FrameChunk*) Client->packet->data;
+#ifdef DUMP_TIMING_DATA
+    unsigned int timervalue = (rompause==0)?gettimeofday_msec()-Client->timems:Client->timems;    gzprintf(Client->timeDump,"%f,%d,%d,%d,%f\n",Client->frameCounter / (1.0f*VI_PER_FRAME),Client->myID,timervalue,0,0.0f);
+#endif //DUMP_TIMING_DATA
 
     // Get input here, this is temporary but should resolve some issues
     BUTTONS Keys;
@@ -163,7 +172,7 @@ void clientSendFrame(MupenClient *Client) {
     NetPlayerUpdate *localUpdate = &(Client->playerEvent[bufInd][Client->myID]);
     localUpdate->timer = (Client->frameCounter/VI_PER_FRAME);
     localUpdate->value = Keys.Value & 0xFFFF7FFF;
-
+    localUpdate->timems = rompause?Client->timems:gettimeofday_msec()-Client->timems;
     for(i=0; i<Client->numConnected-1;i++){
         int curID=sourceID(Client->myID, i);
         Client->packet->address=Client->player[curID].address;
@@ -272,7 +281,7 @@ void clientProcessMessages(MupenClient *Client) {
                     JoinRequest *packet=((JoinRequest*)Client->packet->data);
                     Uint16 port=packet->client.port;
                     Uint32 address=packet->client.host;
-                    fprintf(stderr,"[NETPLAY] Received JoinRequest from %d.%d.%d.%d:%d\n",
+                    printf("[NETPLAY] Received JoinRequest from %d.%d.%d.%d:%d\n",
                          GET_IP(Client->packet->address.host), GET_PORT(Client->packet->address.port));
                     /*if(Client->joinState.state!=enabled)
                         fprintf(stderr,"... Ignoring\n");
@@ -447,7 +456,7 @@ int processEventQueue(MupenClient *Client) {
           break;
           case EVENT_INPUT:
             frame=Client->frameCounter-Client->inputDelay;
-fprintf(stderr,"Input Event frame:%f event:%f cpu: %d\n",Client->frameCounter/(1.0f*VI_PER_FRAME),frame/(1.0f*VI_PER_FRAME),Count);
+           //gzprintf(Client->inputDump,"Input Event frame:%f event:%f cpu: %d\n",Client->frameCounter/(1.0f*VI_PER_FRAME),frame/(1.0f*VI_PER_FRAME),Count);
 
             for(i=0; i<Client->numConnected;i++) {
                 NetPlayerUpdate *curUpdate=&(Client->playerEvent[(frame/VI_PER_FRAME) % FRAME_BUFFER_LENGTH][i]);
@@ -458,6 +467,7 @@ fprintf(stderr,"Input Event frame:%f event:%f cpu: %d\n",Client->frameCounter/(1
                         if(rompause==0) {
                             fprintf(stderr,"[NETPLAY] Out of sync at frame %f (%d) player: %d\n", frame/(1.0f*VI_PER_FRAME), curUpdate->timer, i);
                             rompause=1;
+                            Client->timems=gettimeofday_msec()-Client->timems;
                         }
                         fprintf(stderr,"[NETPLAY] Skip cycle %d != %d\n", curUpdate->timer,frame/VI_PER_FRAME);
                         return 0;
@@ -466,15 +476,24 @@ fprintf(stderr,"Input Event frame:%f event:%f cpu: %d\n",Client->frameCounter/(1
                 else {
                     if(curUpdate->control==1) {
                         curUpdate->control=0;
+                        if(rompause)
+                            Client->timems=gettimeofday_msec()-Client->timems;
+                        else
+                            Client->timems=gettimeofday_msec()-Client->timems;
+
                         rompause=!rompause;
                         printf("Unpause event frame %d\n",frame);
-                        if(Client->emuState==paused)
+                        if(Client->emuState==paused) {
                             Client->emuState=running;
-                        else
+                        }
+                        else {
                             Client->emuState=paused;
+                        }
                     }
-                    if(rompause==1 && Client->emuState==running)
+                    if(rompause==1 && Client->emuState==running) {
                         rompause=0;
+                        Client->timems=gettimeofday_msec()-Client->timems;
+                    }
                     Client->playerKeys[i].Value=curUpdate->value;
 //if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", curUpdate->value, i, Client->frameCounter);
                 }

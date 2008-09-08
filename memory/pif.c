@@ -199,7 +199,9 @@ void internal_ReadController(int Control, BYTE *Command)
 {
    BUTTONS Keys;
    MupenClient *mClient = (MupenClient *)getNetplayClient();
+#ifdef DUMP_INPUT_STATE
    static BUTTONS btnPrev[4];
+#endif //DUMP_INPUT_STATE
 
    switch (Command[2])
      {
@@ -207,9 +209,11 @@ void internal_ReadController(int Control, BYTE *Command)
         if (mClient->isEnabled) { // Update the server if we're connected to one and if the button state has actually changed
             //clientSendButtons(mClient, Control, Keys.Value);
             *((unsigned int *)(Command + 3)) = mClient->playerKeys[Control].Value;
+#ifdef DUMP_INPUT_STATE
             if(btnPrev[Control].Value != mClient->playerKeys[Control].Value)
-                fprintf(stderr,"Control %d = %08x frame: %f\n",Control,mClient->playerKeys[Control].Value,mClient->frameCounter / (1.0f * VI_PER_FRAME));
+                gzprintf(mClient->inputDump,"%f,%d,%d,%08x\n",mClient->frameCounter / (1.0f * VI_PER_FRAME), Count, Control, mClient->playerKeys[Control].Value);
             btnPrev[Control].Value = mClient->playerKeys[Control].Value;
+#endif //DUMP_INPUT_STATE
         } else if (Controls[Control].Present) {
 #ifdef VCR_SUPPORT
         VCR_getKeys(Control, &Keys);
