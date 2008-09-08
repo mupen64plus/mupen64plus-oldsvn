@@ -42,6 +42,8 @@ void RomDelegate::paint(QPainter* painter,
                 const QRect& r = option.rect;
 
                 drawStars(painter, r, n, MAX_STATUS);
+
+                drawFocus(painter, option, option.rect);
             }
             break;
         default:
