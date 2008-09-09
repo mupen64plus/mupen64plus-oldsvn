@@ -543,7 +543,7 @@ static void callback_update_slot(GtkMenuItem* item, GSList* slots)
 
 static void callback_configure(GtkWidget* widget, gpointer data)
 {
-    gtk_widget_show_all(g_ConfigDialog.dialog);
+    show_configure();
 }
 
 static void callback_configure_graphics(GtkWidget* widget, gpointer data)

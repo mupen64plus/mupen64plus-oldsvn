@@ -338,7 +338,7 @@ void rombrowser_refresh(unsigned int roms, unsigned short clear)
             gtk_list_store_append(GTK_LIST_STORE(model), iter);
             gtk_list_store_set(GTK_LIST_STORE(model), iter, 0, country, 1, goodname, 2, NULL, 3, usercomments, 4, filename, 5, md5hash, 6, crc1, 7, crc2, 8, internalname, 9, savetype, 10, players, 11, size, 12, compressiontype, 13, imagetype, 14, cicchip, 15, rumble, 16, status[0], 17, status[1], 18, status[2], 19, status[3], 20, status[4], 21, flag, 22, entry, -1);
 
-            /* printf("Added: %s\n", goodname); */
+            /*printf("Added: %s\n", goodname);*/
             entry = entry->next;
             }
 
@@ -353,9 +353,9 @@ void rombrowser_refresh(unsigned int roms, unsigned short clear)
         free(imagetype);
         free(cicchip);
         free(rumble);
-        if(fullpaths)
+        if(!fullpaths)
            free(filename);
-        free(iter);
+       free(iter);
 
         /* Do an initial sort. */
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(model), g_MainWindow.romSortColumn, rombrowser_compare, (gpointer)NULL, (gpointer)NULL);

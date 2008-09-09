@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - icontheme.h                                             *
+ *   Mupen64plus - romchache.c                                             *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Tillin9                                            *
  *                                                                         *
@@ -36,7 +36,8 @@
 #define DEFAULT 16
 
 /* Rom database necessary even in GUI=NONE due to Eeprom issue for ROM loading.
- Possible SoftHack or other necessary compatibility settings as well. */
+ * Possible SoftHack or other necessary compatibility settings as well.
+ */
 void romdatabase_open();
 void romdatabase_close();
 
@@ -45,18 +46,20 @@ romdatabase_entry empty_entry;
 
 /* All RCS thread and caching functions aren't needed if compiling GUI=NONE */
 #ifndef NO_GUI
+#include <libgen.h>
+
 #include <iconv.h>
 
 #include <errno.h>
 
-#include <limits.h>
+#include <limits.h> /* PATH_MAX */
 #include <dirent.h> /* Directory support. */
 
 #include <sys/stat.h> /* Includes for POSIX file status.*/
 #include <sys/types.h>
 
 #include "7zip/Types.h"
-#include "../memory/memory.h" //sl() macro
+#include "../memory/memory.h" /* sl() macro for CRCs. */
 
 #include "md5.h"
 #include "main.h"
@@ -70,12 +73,12 @@ romdatabase_entry empty_entry;
 
 rom_cache g_romcache;
 
-static const char *romextensions[] =
+static const char* romextensions[] =
 {
  ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2", ".lzma", ".7z", NULL
 };
 
-static void scan_dir(const char* dirname );
+static void scan_dir(const char* dirname);
 
 static void clear_cache()
 {
@@ -113,7 +116,7 @@ static int write_cache_file(char* cache_filename)
 
     if(g_romcache.length!=0)
        {
-       cache_entry *entry;
+       cache_entry* entry;
        entry = g_romcache.top;
        do
             {
@@ -142,14 +145,76 @@ static int write_cache_file(char* cache_filename)
 static void rebuild_cache_file(char* cache_filename)
 {
     char path[PATH_MAX];
-    char buffer[32];
-    int counter;
+    char buffer[PATH_MAX];
+    char* file;
+    unsigned char match;
+    int counter, oldlength;
 
-    for ( counter = 0; counter < config_get_number("NumRomDirs",0); ++counter )
+    /* Scrub cache, if user removed rom directories remove roms. */
+    cache_entry *entry, *entryprevious, *entrynext;
+
+    if(g_romcache.length!=0)
+        {
+        oldlength = g_romcache.length;
+
+        entryprevious = entry = g_romcache.top;
+         while (entry != NULL)
+            {
+            for(match = counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
+                {
+                snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
+                snprintf(path, sizeof(path), "%s", config_get_string(buffer, "/"));
+
+                if(config_get_bool("RomDirsScanRecursive", FALSE))
+                    {
+                    if(strncmp(entry->filename, path, strlen(path))==0)
+                        match = 1;
+                    }
+                else
+                    {
+                    snprintf(buffer, sizeof(buffer), "%s", entry->filename);
+                    file = dirname(buffer); /* Linux dirname modifies string, we don't want this. */
+                    strcat(file, "/");
+
+                    if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
+                        match = 1;
+                    }
+
+                if(match)
+                    break;
+                }
+
+            if(!match)
+                {
+                if(entry==g_romcache.top)
+                    g_romcache.top = entry->next; 
+                if(entryprevious)
+                  entryprevious->next = entry->next;
+                entrynext = entry->next;
+                entry = NULL; /* Why can't we free(entry) here? */
+                --g_romcache.length;
+                }
+           else
+                {
+                entrynext = entry->next;
+                entryprevious = entry;
+                }
+
+            entry = entrynext;
+            };
+
+        if(g_romcache.length!=oldlength)
+            g_romcache.clear = 1;
+        }
+
+    g_romcache.last = entryprevious;
+
+    /* Re-scan directories. */
+    for(counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
         {
         snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
-        snprintf(path, sizeof(path), "%s", config_get_string(buffer,""));
-        if (path[strlen(path)-1] != '/')
+        snprintf(path, sizeof(path), "%s", config_get_string(buffer, ""));
+        if(path[strlen(path)-1]!='/')
             strncat(path, "/", PATH_MAX);
         printf("Scanning... %s\n", path);
         scan_dir(path);
@@ -168,10 +233,12 @@ int rom_cache_system(void* _arg)
     char* buffer;
     char cache_filename[PATH_MAX];
     g_romcache.rcspause = 0;
+    g_romcache.clear = 0;
 
     /* Setup job parser. */
     while (g_romcache.rcstask != RCS_SHUTDOWN)
         {
+        /* Uncomment to debug RCS task. */
         /* printf("Task: %d\n", g_romcache.rcstask); */
         switch(g_romcache.rcstask)
             {
@@ -188,16 +255,16 @@ int rom_cache_system(void* _arg)
                 snprintf(cache_filename, sizeof(cache_filename), "%s", buffer);
 
                 if(load_initial_cache(cache_filename))
-                    update_rombrowser(g_romcache.length, 1);
+                    update_rombrowser(g_romcache.length, g_romcache.clear);
 
                 remove(cache_filename);
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
                 rebuild_cache_file(cache_filename);
-                update_rombrowser(g_romcache.length, 0);
+                update_rombrowser(g_romcache.length, g_romcache.clear);
 
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
                 if(g_romcache.rcstask==RCS_BUSY)
-                   { g_romcache.rcstask = RCS_SLEEP; }
+                   g_romcache.rcstask = RCS_SLEEP;
                 break;
             case RCS_WRITE_CACHE:
                 g_romcache.rcstask = RCS_BUSY;
@@ -211,15 +278,15 @@ int rom_cache_system(void* _arg)
 
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
                 rebuild_cache_file(cache_filename);
-                update_rombrowser(g_romcache.length, 0);
+                update_rombrowser(g_romcache.length, g_romcache.clear);
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
+                g_romcache.clear = 0;
 
                 if(g_romcache.rcstask==RCS_BUSY)
                     g_romcache.rcstask = RCS_SLEEP;
                 break;
             case RCS_SLEEP:
-                /* Sleep to not use any CPU power. */
-                SDL_Delay(100);
+                SDL_Delay(100); /* Sleep to not use any CPU power. */
                 break;
             }
         }
@@ -275,8 +342,8 @@ void fill_entry(cache_entry* entry, unsigned char* localrom)
     /* Detect CIC copy protection boot chip by CRCing the boot code. */
     long long CRC = 0;
     int counter;
-    for ( counter = 0x40/4; counter < 0x1000/4; ++counter )
-        { CRC += ((unsigned int*)localrom)[counter]; }
+    for(counter = 0x40/4; counter < 0x1000/4; ++counter)
+        CRC += ((unsigned int*)localrom)[counter];
 
     switch(CRC)
         {
@@ -323,9 +390,9 @@ static void scan_dir(const char* directoryname)
     int counter;
     int romcounter=0;
 
-    while((directoryentry=readdir(directory)))
+    while ((directoryentry = readdir(directory)))
         {
-        if( directoryentry->d_name[0] == '.' ) // .., . or hidden file
+        if(directoryentry->d_name[0]=='.') /* Skip .,.., or hidden files. */
             continue;
         snprintf(filename, PATH_MAX-1, "%s%s", directoryname, directoryentry->d_name);
 
@@ -333,18 +400,18 @@ static void scan_dir(const char* directoryname)
         snprintf(fullpath, PATH_MAX-1, "%s" filename);
 #else
         /* Use real path (maybe it's a link) */
-        if(realpath(filename,fullpath))
+        if(realpath(filename, fullpath))
             snprintf(fullpath, PATH_MAX-1, "%s", filename);
 #endif
 
         /* If we can't get information, move to next file. */
         if(stat(fullpath,&filestatus)==-1)
             {
-            printf( "Could not open file '%s': %s\n", fullpath, strerror(errno));
+            printf("Could not open file '%s': %s\n", fullpath, strerror(errno));
             continue; 
             }
 
-        //Handle recursive scanning.
+        /* Handle recursive scanning. */
         if(config_get_bool("RomDirsScanRecursive", 0))
             {
             if(S_ISDIR(filestatus.st_mode))
@@ -365,7 +432,7 @@ static void scan_dir(const char* directoryname)
                 break;
             }
         if(!romextensions[counter])
-            { continue; }
+            continue;
 
         found = 0; /* Found controls whether its found in the cache. */
         if(g_romcache.length!=0)
@@ -373,14 +440,14 @@ static void scan_dir(const char* directoryname)
             entry = g_romcache.top;
             do
                {
-               if(strncmp(entry->filename,filename,PATH_MAX)==0)
+               if(strncmp(entry->filename, filename, PATH_MAX)==0)
                      {
                      found = 1;
                      break;
                      }
                entry = entry->next;
                }
-            while (entry!=NULL);
+            while (entry != NULL);
             }
 
         entry = (cache_entry*)calloc(1,sizeof(cache_entry));
@@ -396,6 +463,7 @@ static void scan_dir(const char* directoryname)
 
             unsigned char* localrom;
 
+            /* Uncomment to debug file handling. */
             /* printf("File: %s\n", filename); */
 
             UInt32 blockIndex = 0xFFFFFFFF;
@@ -413,7 +481,7 @@ static void scan_dir(const char* directoryname)
 
             unsigned int archivefile = 0;
 
-            /* Test if we're a valid rom. */
+             /* Testload to see if we're a valid rom. Functions in rom.c. */
             if((localrom=load_single_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize))==NULL)
                 {
                 if((localrom=load_archive_rom(filename, &entry->romsize, &entry->compressiontype, &entry->romsize, &archivefile, &blockIndex, &outBuffer, &outBufferSize, &archiveStream, &db))==NULL)
@@ -453,7 +521,7 @@ static void scan_dir(const char* directoryname)
                 ++romcounter;
                 if(romcounter%UPDATE_FREQUENCY==0)
                     {
-                    update_rombrowser(g_romcache.length, 0); 
+                    update_rombrowser(g_romcache.length, g_romcache.clear); 
                     main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Added ROMs %d-%d."), g_romcache.length-UPDATE_FREQUENCY+1, g_romcache.length);
                     }
 
@@ -467,22 +535,22 @@ static void scan_dir(const char* directoryname)
                         multi = 1; 
                         if(entry==NULL)
                             {
-                            fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                            fprintf(stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__);
                             continue;
                             }
                         }
                     }
                 }
-            while(multi);
+            while (multi);
             if(outBuffer)
-                { free(outBuffer); }
+                free(outBuffer);
             if(archiveStream.File)
-                { fclose(archiveStream.File); }
+                fclose(archiveStream.File);
             SzArDbExFree(&db, free);
             }
 
         /* Pause if user open a ROM and starts emulation. Toggled in rom.c. */
-        while(g_romcache.rcspause)
+        while (g_romcache.rcspause)
             SDL_Delay(100);
         }
      closedir(directory);
@@ -536,7 +604,7 @@ int load_initial_cache(char* cache_filename)
         gzread(gzfile, &entry->romsize, sizeof(int));
 
         /* Check rom is valid. */
-        if(stat(entry->filename,&filestatus)==-1)
+        if(stat(entry->filename, &filestatus)==-1)
             {
             free(entry); /* If we can't get into make sure to */
             --counter;   /* Update counters before continuing. */
@@ -561,6 +629,7 @@ int load_initial_cache(char* cache_filename)
                 g_romcache.last->next = entry;
                 g_romcache.last = entry;
                 }
+            /* Uncomment to debug which roms are loaded from cache. */
             /* printf("Added from cache: %d %s\n", counter, entry->inientry->goodname); */
             }
         }
@@ -592,10 +661,10 @@ unsigned char hexconvert(const char* bigraph)
 }
 
 /* Helper function, identify the space of a line before an = sign. */
-static int split_property(char *string)
+static int split_property(char* string)
 {
     int counter = 0;
-    while(string[counter] != '=' && string[counter] != '\0')
+    while (string[counter] != '=' && string[counter] != '\0')
         ++counter;
     if(string[counter]=='\0')
         return -1;
@@ -615,7 +684,7 @@ void romdatabase_open()
     hashtemp[2] = '\0';
 
     if(g_romdatabase.comment!=NULL)
-        { return; }
+        return;
 
     /* Setup empty_entry. */
     empty_entry.goodname = NULL;
@@ -706,7 +775,7 @@ void romdatabase_open()
                 g_romdatabase.md5_lists[index] = search;
             else
                 {
-                romdatabase_search *aux = g_romdatabase.md5_lists[index];
+                romdatabase_search* aux = g_romdatabase.md5_lists[index];
                 search->next_md5 = aux;
                 g_romdatabase.md5_lists[index] = search;
                 }
@@ -748,7 +817,7 @@ void romdatabase_open()
                         g_romdatabase.crc_lists[index] = search;
                     else
                         {
-                        romdatabase_search *aux = g_romdatabase.crc_lists[index];
+                        romdatabase_search* aux = g_romdatabase.crc_lists[index];
                         search->next_crc = aux;
                         g_romdatabase.crc_lists[index] = search;
                         }
@@ -766,7 +835,7 @@ void romdatabase_open()
                     /* Lookup reference MD5 and replace non-default entries. */
                     if((entry = ini_search_by_md5(search->entry.refmd5))!=&empty_entry)
                         {
-                        //printf("RefMD5: %s\n", aux->goodname);
+                        /* printf("RefMD5: %s\n", aux->goodname); */
                         if(entry->savetype!=DEFAULT)
                             search->entry.savetype = entry->savetype;
                         if(entry->status!=0)
@@ -828,7 +897,7 @@ void romdatabase_close()
 
     free(g_romdatabase.comment);
 
-    while(g_romdatabase.list != NULL)
+    while (g_romdatabase.list != NULL)
         {
         romdatabase_search* search = g_romdatabase.list->next_entry;
         if(g_romdatabase.list->entry.goodname)
@@ -860,7 +929,7 @@ romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2)
 {
     if(g_romdatabase.comment==NULL) 
         return &empty_entry;
-    romdatabase_search *search;
+    romdatabase_search* search;
     search = g_romdatabase.crc_lists[(unsigned short)crc1];
 
     while (search!=NULL&&search->entry.crc1!=crc1&search->entry.crc2!=crc2)

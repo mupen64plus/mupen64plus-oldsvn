@@ -300,10 +300,10 @@ static void callback_romDirectoryRemove(GtkWidget *widget, gpointer data)
 /* Apply / Ok Button. */
 static void callback_apply_changes(GtkWidget* widget, gpointer data)
 {
-    static unsigned char updategui = FALSE, rcsrescan = FALSE;
     const char *filename, *name;
     gchar* text = NULL;
     int guivalue, currentvalue;
+    gboolean updategui = FALSE, rcsrescan = FALSE;
     int i = 0;
 
     /* General Tab */ 
@@ -333,10 +333,7 @@ static void callback_apply_changes(GtkWidget* widget, gpointer data)
         {
         case 2:
             if(currentvalue!=32)
-                {
                 config_put_number("ToolbarSize", 32);
-                updategui = TRUE;
-                }
             break;
         case 0:
             if(currentvalue!=16)
@@ -454,20 +451,33 @@ static void callback_apply_changes(GtkWidget* widget, gpointer data)
             char buffer[32];
             sprintf(buffer, "RomDirectory[%d]", i++);
             if(strncmp(config_get_string(buffer, "/"), text, PATH_MAX)!=0)
-                g_romcache.rcstask = RCS_RESCAN;
+                rcsrescan = TRUE;
             config_put_string(buffer, text);
             }
 
         keepgoing = gtk_tree_model_iter_next(model, &iter);
         }
 
-    config_put_number("NumRomDirs", i);
+    currentvalue = config_get_number("NumRomDirs", 0);
 
+    if(currentvalue!=i)
+        rcsrescan = TRUE;
+
+    currentvalue = config_get_bool("RomDirsScanRecursive", FALSE);
     guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romDirsScanRecCheckButton));
     config_put_bool("RomDirsScanRecursive", guivalue);
 
+    if(currentvalue!=guivalue||rcsrescan)
+        g_romcache.rcstask = RCS_RESCAN;
+
+    config_put_number("NumRomDirs", i);
+
+    currentvalue = config_get_bool("RomBrowserShowFullPaths", FALSE);
     guivalue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.romShowFullPathsCheckButton));
     config_put_bool("RomBrowserShowFullPaths", guivalue);
+
+    if(currentvalue!=guivalue)
+        rombrowser_refresh(g_romcache.length, TRUE);
 
     struct input_mapping *mapping;
 
@@ -485,11 +495,11 @@ static void callback_apply_changes(GtkWidget* widget, gpointer data)
 
     /* Hide dialog. */
     if(data)
-        { gtk_widget_hide(g_ConfigDialog.dialog); }
+        gtk_widget_hide(g_ConfigDialog.dialog);
 }
 
 /* Initalize configuration dialog. */
-static void callback_dialogShow(GtkWidget* widget, gpointer data)
+void show_configure()
 {
     int index, i;
     char *name, *combo;
@@ -696,6 +706,7 @@ static void callback_dialogShow(GtkWidget* widget, gpointer data)
         }
 
     gtk_window_set_focus(GTK_WINDOW(g_ConfigDialog.dialog), g_ConfigDialog.okButton);
+    gtk_widget_show_all(g_ConfigDialog.dialog);
 }
 
 static void callback_cancelSetInput(GtkWidget *widget, gint response, GtkWidget *textbox)
@@ -888,7 +899,6 @@ void create_configDialog()
     g_ConfigDialog.dialog = gtk_dialog_new();
     gtk_window_set_title(GTK_WINDOW(g_ConfigDialog.dialog), tr("Configure"));
     gtk_window_set_transient_for(GTK_WINDOW(g_ConfigDialog.dialog), GTK_WINDOW(g_MainWindow.window));
-    g_signal_connect(g_ConfigDialog.dialog, "show", G_CALLBACK(callback_dialogShow), NULL);
     g_signal_connect(g_ConfigDialog.dialog, "delete_event", G_CALLBACK(gtk_widget_hide_on_delete), NULL);
 
     /* Create notebook, i.e. tabs. */
@@ -1287,7 +1297,4 @@ void create_configDialog()
         }
 
     gtk_box_pack_start(GTK_BOX(hbox1), vbox, TRUE, TRUE, 0);
-
-    /* Initalize the widgets. */
-    callback_dialogShow(NULL, NULL);
 }

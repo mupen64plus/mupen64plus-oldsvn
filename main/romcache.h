@@ -85,6 +85,7 @@ typedef struct
     unsigned int length; 
     unsigned char rcstask;  /* Enum for what rcs thread should do. */
     unsigned char rcspause; /* Bool for pausing after last file, toggled by start/stopping emulation. */
+    unsigned char clear;    /* Bool for clearing on an update. */
     cache_entry* top;
     cache_entry* last;
 } rom_cache;
