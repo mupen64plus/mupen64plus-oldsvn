@@ -359,7 +359,6 @@ struct ROMHeader
     s8    nCountryID;
     uint8  nUnknown5;
 };
-#pragma pack()
 
 typedef struct 
 {
@@ -442,3 +441,4 @@ void CreateOptionsDialogs(HWND hParent);
 void ShowConfigBox();
 
 #endif
+
