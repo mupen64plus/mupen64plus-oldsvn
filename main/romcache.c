@@ -59,6 +59,7 @@ romdatabase_entry empty_entry;
 #include <sys/types.h>
 
 #include "7zip/Types.h"
+#include "7zip/7zCrc.h"
 #include "../memory/memory.h" /* sl() macro for CRCs. */
 
 #include "md5.h"
@@ -79,6 +80,8 @@ static const char* romextensions[] =
 };
 
 static void scan_dir(const char* dirname);
+int load_initial_cache(char* cache_filename);
+void update_rombrowser(unsigned int roms, unsigned short clear);
 
 static void clear_cache()
 {
@@ -149,6 +152,7 @@ static void rebuild_cache_file(char* cache_filename)
     char* file;
     unsigned char match;
     int counter, oldlength;
+    struct stat filestatus;
 
     /* Scrub cache, if user removed rom directories remove roms. */
     cache_entry *entry, *entryprevious, *entrynext;
@@ -168,7 +172,10 @@ static void rebuild_cache_file(char* cache_filename)
                 if(config_get_bool("RomDirsScanRecursive", FALSE))
                     {
                     if(strncmp(entry->filename, path, strlen(path))==0)
+                        {
                         match = 1;
+                        break;
+                        }
                     }
                 else
                     {
@@ -177,21 +184,23 @@ static void rebuild_cache_file(char* cache_filename)
                     strcat(file, "/");
 
                     if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
+                        {
                         match = 1;
+                        break;
+                        }
                     }
-
-                if(match)
-                    break;
                 }
 
-            if(!match)
+            /* Check rom is valid. */
+            if(!match||stat(entry->filename, &filestatus)==-1)
                 {
                 if(entry==g_romcache.top)
                     g_romcache.top = entry->next; 
                 if(entryprevious)
                   entryprevious->next = entry->next;
                 entrynext = entry->next;
-                entry = NULL; /* Why can't we free(entry) here? */
+                entry = NULL;
+                free(entry);
                 --g_romcache.length;
                 }
            else
@@ -292,6 +301,7 @@ int rom_cache_system(void* _arg)
         }
 
     printf("Rom cache system terminated!\n");
+    clear_cache();
     SDL_WaitThread(g_RomCacheThread, NULL);
     return 1;
 }
@@ -560,14 +570,14 @@ int load_initial_cache(char* cache_filename)
 {
     int counter;
     char header[6];
-    cache_entry *entry, *entrynext;
+    cache_entry *entry;
     struct stat filestatus;
 
     gzFile* gzfile;
 
     if((gzfile = gzopen(cache_filename,"rb"))==NULL)
         {
-        printf("Could not open %s\n",cache_filename);
+        printf("Could not open %s\n", cache_filename);
         return 0;
         }
 
@@ -581,7 +591,7 @@ int load_initial_cache(char* cache_filename)
     gzread(gzfile, &g_romcache.length, sizeof(unsigned int));
     for(counter = 0; counter < g_romcache.length; ++counter)
         {
-        entry = (cache_entry*)calloc(1,sizeof(cache_entry));
+        entry = (cache_entry*)calloc(1, sizeof(cache_entry));
 
         if(!entry)
             {
@@ -932,7 +942,7 @@ romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2)
     romdatabase_search* search;
     search = g_romdatabase.crc_lists[(unsigned short)crc1];
 
-    while (search!=NULL&&search->entry.crc1!=crc1&search->entry.crc2!=crc2)
+    while (search!=NULL&&search->entry.crc1!=crc1&&search->entry.crc2!=crc2)
         search = search->next_crc;
 
     if(search == NULL) 
