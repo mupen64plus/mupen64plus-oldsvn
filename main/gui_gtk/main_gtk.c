@@ -242,7 +242,6 @@ int gui_message(unsigned char messagetype, const char* format, ...)
             {
             response = gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
-            g_MainWindow.dialogErrorImage = NULL;
             }
         }
 
@@ -253,7 +252,6 @@ int gui_message(unsigned char messagetype, const char* format, ...)
    if (self != g_GuiThreadID)
        gdk_threads_leave();
 
-    g_MainWindow.dialogErrorImage = g_MainWindow.dialogQuestionImage = NULL;
     return response == GTK_RESPONSE_ACCEPT;
 }
 
@@ -283,10 +281,10 @@ static void callback_theme_changed(GtkWidget* widget, gpointer data)
     set_icon(g_MainWindow.configureButtonImage, "preferences-system", size, FALSE);
     set_icon(g_MainWindow.fullscreenButtonImage, "view-fullscreen", size, FALSE);
 
-    if(g_MainWindow.dialogErrorImage)
-        set_icon(g_MainWindow.dialogErrorImage, "dialog-error", size, FALSE);
-    if(g_MainWindow.dialogQuestionImage)
-        set_icon(g_MainWindow.dialogQuestionImage, "dialog-question", size, FALSE);
+    if(GTK_IS_IMAGE(g_MainWindow.dialogErrorImage))
+        set_icon(g_MainWindow.dialogErrorImage, "dialog-error", 32, FALSE);
+    if(GTK_IS_IMAGE(g_MainWindow.dialogQuestionImage))
+        set_icon(g_MainWindow.dialogQuestionImage, "dialog-question", 32, FALSE);
 
     set_icon(g_ConfigDialog.graphicsImage, "video-display", 32, FALSE);
     set_icon(g_ConfigDialog.audioImage, "audio-card", 32, FALSE);

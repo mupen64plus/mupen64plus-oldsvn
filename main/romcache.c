@@ -926,7 +926,7 @@ romdatabase_entry* ini_search_by_md5(md5_byte_t* md5)
     romdatabase_search* search;
     search = g_romdatabase.md5_lists[md5[0]];
 
-    while (search!=NULL&&memcmp(search->entry.md5, md5, 16)!=0)
+    while (search != NULL && memcmp(search->entry.md5, md5, 16) != 0)
         search = search->next_md5;
 
     if(search==NULL)
@@ -942,7 +942,7 @@ romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2)
     romdatabase_search* search;
     search = g_romdatabase.crc_lists[(unsigned short)crc1];
 
-    while (search!=NULL&&search->entry.crc1!=crc1&&search->entry.crc2!=crc2)
+    while (search != NULL && search->entry.crc1 != crc1 && search->entry.crc2 != crc2)
         search = search->next_crc;
 
     if(search == NULL) 
