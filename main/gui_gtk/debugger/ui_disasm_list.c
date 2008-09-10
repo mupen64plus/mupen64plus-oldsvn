@@ -359,6 +359,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
 {
   char opcode[64];
   char args[128];
+  char buffer[256];
   uint32 instr;
   long laddr;
 
@@ -380,7 +381,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
       if((get_memory_flags((uint32)(long)iter->user_data) & MEM_FLAG_READABLE) != 0)
     {
       instr = read_memory_32((uint32)(long)iter->user_data);
-      r4300_decode_op( instr, opcode, args );
+      r4300_decode_op( instr, opcode, args, iter->user_data );
     }
       else
     {

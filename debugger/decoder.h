@@ -27,8 +27,11 @@
 #define DECODER_H
 
 #include <stdio.h>
+#include <string.h>
 #include "types.h"
+#include "opprintf.h"
 
-void r4300_decode_op(uint32 instr, char *op, char *args );
+void r4300_decode_op( uint32 instr, char *op, char *args, int pc );
+void mr4kd_disassemble ( uint32 instruction, uint32 counter, char * buffer );
 
 #endif //DECODER_H

@@ -205,6 +205,7 @@ OBJ_GTK_GUI = \
 OBJ_DBG = \
 	debugger/debugger.o \
 	debugger/decoder.o \
+	debugger/opprintf.o \
 	debugger/memory.o \
 	debugger/breakpoints.o
 

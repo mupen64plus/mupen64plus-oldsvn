@@ -23,301 +23,233 @@
 **/
 
 #include "decoder.h"
+#include "opprintf.h"
 
 static int  mot;
 static char *op;
 static char *args;
-
-
-
-
+static int pc;
 
 static void RESERV(){
-    sprintf(op, "[%.2lX] RESERV: Instruction Inconnue => Mail Us!",(mot>>26)&0x3F);
-    sprintf(args, "0x%.8lX",mot);
+    sprintf(op, "0x%08X", mot);
 }
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ SPECIAL ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void SLL()
 {
-    if(mot==0){
-        sprintf(op, "[00] NOP");
-        sprintf(args, " ");
-    }
+    if( !mot )
+        mr4kd_sprintf( op, "NOP", mot, pc, "%n0" );
+    
     else{
-        sprintf(op, "[00] SLL");
-        sprintf(args, "reg%d, reg%d, %d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+        mr4kd_sprintf( op, "SLL", mot, pc, "%ns%rd, %rt, %sa" );
     }
 }
 
 static void SRL(){
-    sprintf(op, "[00] SRL");
-    sprintf(args, "reg%d, reg%d, %d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "SRL", mot, pc, "%ns%rd, %rt, %sa" );
 }
 
 static void SRA(){
-    sprintf(op, "[00] SRA");
-    sprintf(args, "reg%d, reg%d, %d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "SRA", mot, pc, "%ns%rd, %rt, %sa" );
 }
 
 static void SLLV(){
-    sprintf(op, "[00] SLLV");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SLLV", mot, pc, "%ns%rd, %rt, %rs" );
 }
 
 static void SRLV(){
-    sprintf(op, "[00] SRLV");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SRLV", mot, pc, "%ns%rd, %rt, %rs" );
 }
 
 static void SRAV(){
-    sprintf(op, "[00] SRAV");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SRAV", mot, pc, "%ns%rd, %rt, %rs" );
 
 }
 
 static void JR(){
-    sprintf(op, "[00] JR");
-    sprintf(args, "reg%d", (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "JR", mot, pc, "%ns%rs" );
 }
 
 static void JALR(){
-    sprintf(op, "[00] JALR");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "JALR", mot, pc, "%ns%rd, %rs" );
 }
 
 static void SYSCALL(){
-    sprintf(op, "[00] SYSCALL");
-    sprintf(args, "0x%.5X", (mot>>6)&0xFFFFF);
+    mr4kd_sprintf( op, "SYSCALL", mot, pc, "%n0" );
 }
 
 static void BREAK(){
-    sprintf(op, "[00] BREAK");
-    sprintf(args, "0x%.5X", (mot>>6)&0xFFFFF);
+    mr4kd_sprintf( op, "BREAK", mot, pc, "%n0" );
 }
 
 static void SYNC(){
-    sprintf(op, "[00] SYNC");
-    sprintf(args, "%d", (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "SYNC", mot, pc, "%n0" );
 }
 
 static void MFHI(){
-    sprintf(op, "[00] MFHI");
-    sprintf(args, "reg%d", (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MFHI", mot, pc, "%ns%rd" );
 }
 
 static void MTHI(){
-    sprintf(op, "[00] MTHI");
-    sprintf(args, "reg%d", (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "MTHI", mot, pc, "%ns%rs" );
 }
 
 static void MFLO(){
-    sprintf(op, "[00] MFLO");
-    sprintf(args, "reg%d", (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MFLO", mot, pc, "%ns%rd" );
 }
 
 static void MTLO(){
-    sprintf(op, "[00] MTLO");
-    sprintf(args, "reg%d", (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "MTLO", mot, pc, "%ns%rs" );
 }
 
 static void DSLLV(){
-    sprintf(op, "[00] DSLLV");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "DSLLV", mot, pc, "%ns%rd, %rt, %rs" );
 }
 
 static void DSRLV(){
-    sprintf(op, "[00] DSRLV");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSRLV", mot, pc, "%ns%rd, %rt, %rs" );
 }
 
 static void DSRAV(){
-    sprintf(op, "[00] DSRAV");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSRAV", mot, pc, "%ns%rd, %rt, %rs" );
 }
 
 static void MULT(){
-    sprintf(op, "[00] MULT");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "MULT", mot, pc, "%ns%rs, %rt" );
 }
 
 static void MULTU(){
-    sprintf(op, "[00] MULTU");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "MULTU", mot, pc, "%ns%rs, %rt" );
 }
 
 static void DIV(){
-    sprintf(op, "[00] DIV");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DIV", mot, pc, "%ns%rs, %rt" );
 }
 
 static void DIVU(){
-    sprintf(op, "[00] DIVU");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DIVU", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void DMULT(){
-    sprintf(op, "[00] DMULTU");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DMULT", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void DMULTU(){
-    sprintf(op, "[00] DMULTU");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DMULTU", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void DDIV(){
-    sprintf(op, "[00] DDIV");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DDIV", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void DDIVU(){
-    sprintf(op, "[00] DDIVU");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DDIVU", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void ADD(){
-    sprintf(op, "[00] ADD");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "ADD", mot, pc, "%ns%rd, %rs, %rt" ); 
 }
 
 static void ADDU(){
-    sprintf(op, "[00] ADDU");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "ADDU", mot, pc, "%ns%rd, %rs, %rt" ); 
 }
 
 static void SUB()
 {
-    if ((mot>>16)&0x1F){
-        sprintf(op, "[00] SUB");
-        sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
-    }
-    else{
-        sprintf(op, "[00] NEG");
-        sprintf(args, "reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
-    }
+    mr4kd_sprintf( op, "SUB", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void SUBU(){
-    if ((mot>>16)&0x1F){
-        sprintf(op, "[00] SUBU");
-        sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
-    }
-    else{
-        sprintf(op, "[00] NEGU");
-        sprintf(args, "reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
-    }
+    mr4kd_sprintf( op, "SUBU", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void AND(){
-    sprintf(op, "[00] AND");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "AND", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void OR(){
-    sprintf(op, "[00] OR");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "OR", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void XOR(){
-    sprintf(op, "[00] XOR");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "XOR", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void NOR(){
-    sprintf(op, "[00] NOR");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "NOR", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void SLT(){
-    sprintf(op, "[00] SLT");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "SLT", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void SLTU(){
-    sprintf(op, "[00] SLTU");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "SLTU", mot, pc, "%ns%rd, %rs, %rt" );
 }
 
 static void DADD(){
-    sprintf(op, "[00] DADD");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DADD", mot, pc, "%ns%rd, %rs, %rt" ); 
 }
 
 static void DADDU(){
-    sprintf(op, "[00] DADDU");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DADDU", mot, pc, "%ns%rd, %rs, %rt" ); 
 }
 
 static void DSUB(){
-    sprintf(op, "[00] DSUB");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DSUB", mot, pc, "%ns%rd, %rs, %rt" ); 
 }
 
 static void DSUBU(){
-    sprintf(op, "[00] DSUBU");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DSUBU", mot, pc, "%ns%rd, %rs, %rt" ); 
 }
 
 static void TGE(){
-    sprintf(op, "[00] TGE");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "TGE", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void TGEU(){
-    sprintf(op, "[00] TGEU");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "TGEU", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void TLT(){
-    sprintf(op, "[00] TLT");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "TLT", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void TLTU(){
-    sprintf(op, "[00] TLTU");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "TLTU", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void TEQ(){
-    sprintf(op, "[00] TEQ");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "TEQ", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void TNE(){
-    sprintf(op, "[00] TNE");
-    sprintf(args, "reg%d, reg%d", (mot>>21)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "TNE", mot, pc, "%ns%rs, %rt" ); 
 }
 
 static void DSLL(){
-    sprintf(op, "[00] DSLL");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSLL", mot, pc, "%ns%rd, %rt, %sa" ); 
 }
 
 static void DSRL(){
-    sprintf(op, "[00] DSRL");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSRL", mot, pc, "%ns%rd, %rt, %sa" ); 
 }
 
 static void DSRA(){
-    sprintf(op, "[00] DSRA");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSRA", mot, pc, "%ns%rd, %rt, %sa" ); 
 }
 
 static void DSLL32(){
-    sprintf(op, "[00] DSLL32");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSLL32", mot, pc, "%ns%rd, %rt, %sa" );
 }
 
 static void DSRL32(){
-    sprintf(op, "[00] DSRL32");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSRL32", mot, pc, "%ns%rd, %rt, %sa" );
 }
 
 static void DSRA32(){
-    sprintf(op, "[00] DSRA32");
-    sprintf(args, "reg%d, reg%d, reg%d", (mot>>11)&0x1F, (mot>>16)&0x1F, (mot>>6)&0x1F);
+    mr4kd_sprintf( op, "DSRA32", mot, pc, "%ns%rd, %rt, %sa" );
 }
 
 static void special()
@@ -386,73 +318,59 @@ static void special()
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ REGIMM ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void BLTZ(){
-    sprintf(op, "[01] BLTZ");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BLTZ", mot, pc, "%ns%rs, %br" );
 }
 
 static void BGEZ(){
-    sprintf(op, "[01] BGEZ");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BGEZ", mot, pc, "%ns%rs, %br" );
 }
 
 static void BLTZL(){
-    sprintf(op, "[01] BLTZL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BLTZL", mot, pc, "%ns%rs, %br" );
 }
 
 static void BGEZL(){
-    sprintf(op, "[01] BGEZL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BGEZL", mot, pc, "%ns%rs, %br" );
 }
 
 static void TGEI(){
-    sprintf(op, "[01] TGEI");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "TGEI", mot, pc, "%ns%rs, %ih" );
 }
 
 static void TGEIU(){
-    sprintf(op, "[01] TGEIU");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "TGEIU", mot, pc, "%ns%rs, %ih" );
 }
 
 static void TLTI(){
-    sprintf(op, "[01] TLTI");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "TLTI", mot, pc, "%ns%rs, %ih" );
 }
 
 static void TLTIU(){
-    sprintf(op, "[01] TLTIU");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "TLTIU", mot, pc, "%ns%rs, %ih" );
 }
 
 static void TEQI(){
-    sprintf(op, "[01] TEQI");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "TEQI", mot, pc, "%ns%rs, %ih" );
 }
 
 static void TNEI(){
-    sprintf(op, "[01] TNEI");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "TNEI", mot, pc, "%ns%rs, %ih" );
 }
 
 static void BLTZAL(){
-    sprintf(op, "[01] BLTZAL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BLTZAL", mot, pc, "%ns%rs, %br" );
 }
 
 static void BGEZAL(){
-    sprintf(op, "[01] BGEZAL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BGEZAL", mot, pc, "%ns%rs, %br" );
 }
 
 static void BLTZALL(){
-    sprintf(op, "[01] BLTZALL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BLTZALL", mot, pc, "%ns%rs, %br" );
 }
 
 static void BGEZALL(){
-    sprintf(op, "[01] BGEZALL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BGEZALL", mot, pc, "%ns%rs, %br" );
 }
 
 static void regimm()
@@ -483,114 +401,93 @@ static void regimm()
 //]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ ... ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[
 
 static void J(){
-    sprintf(op, "[02] J");
-    sprintf(args, "0x%lX", mot&0x3FFFFFF);
+    mr4kd_sprintf( op, "J", mot, pc, "%ns%jm" );
 }
 
 static void JAL(){
-    sprintf(op, "[03] JAL");
-    sprintf(args, "0x%lX", mot&0x3FFFFFF);
+    mr4kd_sprintf( op, "JAL", mot, pc, "%ns%jm" );
 }
 
 static void BEQ(){
-    sprintf(op, "[04] BEQ");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>21)&0x1F, (mot>>16)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BEQ", mot, pc, "%ns%rs, %rt, %br" );
 }
 
 static void BNE(){
-    sprintf(op, "[05] BNE");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>21)&0x1F, (mot>>16)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BNE", mot, pc, "%ns%rs, %rt, %br" );
 }
 
 static void BLEZ(){
-    sprintf(op, "[06] BLEZ");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BLEZ", mot, pc, "%ns%rs, %br" );
 }
 
 static void BGTZ(){
-    sprintf(op, "[07] BGTZ");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BGTZ", mot, pc, "%ns%rs, %br" );
 }
 
 static void ADDI(){
-    sprintf(op, "[08] ADDI");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "ADDI", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void ADDIU(){
-    sprintf(op, "[09] ADDIU");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "ADDIU", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void SLTI(){
-    sprintf(op, "[0A] SLTI");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "SLTI", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void SLTIU(){
-    sprintf(op, "[0B] SLTIU");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "SLTIU", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void ANDI(){
-    sprintf(op, "[0C] ANDI");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "ANDI", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void ORI(){
-    sprintf(op, "[0D] ORI");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "ORI", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void XORI(){
-    sprintf(op, "[0E] XORI");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "XORI", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void LUI(){
-    sprintf(op, "[0F] LUI");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>16)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "LUI", mot, pc, "%ns%rt, %ih" );
 }
 
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ cop0 ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void MFC0(){
-    sprintf(op, "[10] MFC0");
-    sprintf(args, "reg%d, reg%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MFC0", mot, pc, "%ns%rt, %rd" );
 }   
 
 static void MTC0(){
-    sprintf(op, "[10] MTC0");
-    sprintf(args, "reg%d, reg%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MTC0", mot, pc, "%ns%rt, %rd" );
 }
 
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ tlb ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
-static void TLBR(){
-    sprintf(op, "[10] TLBR");
-    sprintf(args, " ");
+static void TLBR(){   
+    mr4kd_sprintf( op, "TLBR", mot, pc, "%n0" );
 }   
     
 static void TLBWI(){
-    sprintf(op, "[10] TLBWI");
-    sprintf(args, " ");
+    mr4kd_sprintf( op, "TLBWI", mot, pc, "%n0" );
 }   
 
 static void TLBWR(){
-    sprintf(op, "[10] TLBWR");
-    sprintf(args, " ");
+    mr4kd_sprintf( op, "TLBWR", mot, pc, "%n0" );
 }   
 
 static void TLBP(){
-    sprintf(op, "[10] TLBP");
-    sprintf(args, " ");
+    mr4kd_sprintf( op, "TLBP", mot, pc, "%n0" );
 }   
 
 static void ERET(){
-    sprintf(op, "[10] ERET");
-    sprintf(args, " ");
+    mr4kd_sprintf( op, "ERET", mot, pc, "%n0" );
 }   
 
 static void tlb()
@@ -625,58 +522,48 @@ static void cop0()
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ cop1 ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void MFC1(){
-    sprintf(op, "[11] MFC1");
-    sprintf(args, "reg%d, fgr%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MFC1", mot, pc, "%ns%rt, %fs" );
 }
 
 static void DMFC1(){
-    sprintf(op, "[11] DMFC1");
-    sprintf(args, "reg%d, fgr%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "DMFC1", mot, pc, "%ns%rt, %fs" );
 }
 
 static void CFC1(){
-    sprintf(op, "[11] CFC1");
-    sprintf(args, "reg%d, fgr%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CFC1", mot, pc, "%ns%rt, %rd" );
 }
 
 static void MTC1(){
-    sprintf(op, "[11] MTC1");
-    sprintf(args, "reg%d, fgr%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MTC1", mot, pc, "%ns%ft, %rd" );
 }
 
 static void DMTC1(){
-    sprintf(op, "[11] DMTC1");
-    sprintf(args, "reg%d, fgr%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "DMTC1", mot, pc, "%ns%ft, %rd" );
 }
 
 static void CTC1(){
-    sprintf(op, "[11] CTC1");
-    sprintf(args, "reg%d, fgr%d", (mot>>16)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CTC1", mot, pc, "%ns%rt, %rd" );
 }
 
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ BC ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void BC1F(){
-    sprintf(op, "[11] BC1F");
-    sprintf(args, "0x%.4X", mot&0xFFFF);
+    mr4kd_sprintf( op, "BC1F", mot, pc, "%ns%br" );
 }
 
 static void BC1T(){
-    sprintf(op, "[11] BC1T");
-    sprintf(args, "0x%.4X", mot&0xFFFF);
+    mr4kd_sprintf( op, "BC1T", mot, pc, "%ns%br" );
     
 }
 
 static void BC1FL(){
-    sprintf(op, "[11] BC1FL");
-    sprintf(args, "0x%.4X", mot&0xFFFF);
+    mr4kd_sprintf( op, "BC1FL", mot, pc, "%ns%br" );
     
 }
 
 static void BC1TL(){
-    sprintf(op, "[11] BC1TL");
-    sprintf(args, "0x%.4X", mot&0xFFFF);
+    mr4kd_sprintf( op, "BC1TL", mot, pc, "%ns%br" );
 }
 
 static void BC()
@@ -696,178 +583,144 @@ static void BC()
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ S ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void ADD_S(){
-    sprintf(op, "[11] ADD.S");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "ADD.S", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void SUB_S(){
-    sprintf(op, "[11] SUB.S");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "SUB.S", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void MUL_S(){
-    sprintf(op, "[11] MUL.S");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "MUL.S", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void DIV_S(){
-    sprintf(op, "[11] DIV.S");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DIV.S", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void SQRT_S(){
-    sprintf(op, "[11] SQRT.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "SQRT.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void ABS_S(){
-    sprintf(op, "[11] ABS.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "ABS.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void MOV_S(){
-    sprintf(op, "[11] MOV.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MOV.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void NEG_S(){
-    sprintf(op, "[11] NEG.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "NEG.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void ROUND_L_S(){
-    sprintf(op, "[11]  ROUND.L.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "ROUND.L.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void TRUNC_L_S(){
-    sprintf(op, "[11] TRUNC.L.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "TRUNC.L.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CEIL_L_S(){
-    sprintf(op, "[11] CEIL.L.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CEIL.L.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void FLOOR_L_S(){
-    sprintf(op, "[11] FLOOR.L.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "FLOOR.L.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void ROUND_W_S(){
-    sprintf(op, "[11] ROUND.W.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "ROUND.W.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void TRUNC_W_S(){
-    sprintf(op, "[11] TRUNC.W.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "TRUNC.W.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CEIL_W_S(){
-    sprintf(op, "[11] CEIL.W.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CEIL.W.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void FLOOR_W_S(){
-    sprintf(op, "[11] FLOOR.W.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "FLOOR.W.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_D_S(){
-    sprintf(op, "[11] CVT.D.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.D.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_W_S(){
-    sprintf(op, "[11] CVT.W.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.W.S", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_L_S(){
-    sprintf(op, "[11] CVT.L.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.L.S", mot, pc, "%ns%fd, %fs" );
 }
 
+
 static void C_F_S(){
-    sprintf(op, "[11] C.F.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.F.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_UN_S(){
-    sprintf(op, "[11] C.UN.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.UN.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_EQ_S(){
-    sprintf(op, "[11] C.EQ.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.EQ.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_UEQ_S(){
-    sprintf(op, "[11] C.UEQ.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.UEQ.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_OLT_S(){
-    sprintf(op, "[11] C.OLT.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.OLT.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_ULT_S(){
-    sprintf(op, "[11] C.ULT.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.ULT.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_OLE_S(){
-    sprintf(op, "[11] C.OLE.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.OLE.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_ULE_S(){
-    sprintf(op, "[11] C.ULE.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.ULE.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_SF_S(){
-    sprintf(op, "[11] C.SF.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.SF.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGLE_S(){
-    sprintf(op, "[11] C.NGLE.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGLE.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_SEQ_S(){
-    sprintf(op, "[11] C.SEQ.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.SEQ.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGL_S(){
-    sprintf(op, "[11] C.NGL.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGL.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_LT_S(){
-    sprintf(op, "[11] C.LT.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.LT.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGE_S(){
-    sprintf(op, "[11] C.NGE.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGE.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_LE_S(){
-    sprintf(op, "[11] C.LE.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.LE.S", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGT_S(){
-    sprintf(op, "[11] C.NGT.S");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGT.S", mot, pc, "%ns%fs, %ft" );
 }
 
 
@@ -921,178 +774,145 @@ static void S()
 
 
 static void ADD_D(){
-    sprintf(op, "[11] ADD.D");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "ADD.D", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void SUB_D(){
-    sprintf(op, "[11] SUB.D");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "SUB.D", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void MUL_D(){
-    sprintf(op, "[11] MUL.D");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "MUL.D", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void DIV_D(){
-    sprintf(op, "[11] DIV.D");
-    sprintf(args, "fgr%d, fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "DIV.D", mot, pc, "%ns%fd, %fs, %ft" );
 }
 
 static void SQRT_D(){
-    sprintf(op, "[11] ADD.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "SQRT.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void ABS_D(){
-    sprintf(op, "[11] ADD.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "ABS.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void MOV_D(){
-    sprintf(op, "[11] MOV.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "MOV.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void NEG_D(){
-    sprintf(op, "[11] NEG.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "NEG.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void ROUND_L_D(){
-    sprintf(op, "[11]  ROUND.L.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "ROUND.L.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void TRUNC_L_D(){
-    sprintf(op, "[11] TRUNC.L.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "TRUNC.L.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CEIL_L_D(){
-    sprintf(op, "[11] CEIL.L.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CEIL.L.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void FLOOR_L_D(){
-    sprintf(op, "[11] FLOOR.L.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "FLOOR.L.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void ROUND_W_D(){
-    sprintf(op, "[11] ROUND.W.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "ROUND.W.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void TRUNC_W_D(){
-    sprintf(op, "[11] TRUNC.W.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "TRUNC.W.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CEIL_W_D(){
-    sprintf(op, "[11] CEIL.W.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CEIL.W.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void FLOOR_W_D(){
-    sprintf(op, "[11] FLOOR.W.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "FLOOR.W.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_S_D(){
-    sprintf(op, "[11] CVT.S.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.S.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_W_D(){
-    sprintf(op, "[11] CVT.W.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.W.D", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_L_D(){
-    sprintf(op, "[11] CVT.L.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.L.D", mot, pc, "%ns%fd, %fs" );
 }
 
+
+
 static void C_F_D(){
-    sprintf(op, "[11] C.F.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.F.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_UN_D(){
-    sprintf(op, "[11] C.UN.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.UN.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_EQ_D(){
-    sprintf(op, "[11] C.EQ.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.EQ.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_UEQ_D(){
-    sprintf(op, "[11] C.UEQ.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.UEQ.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_OLT_D(){
-    sprintf(op, "[11] C.OLT.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.OLT.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_ULT_D(){
-    sprintf(op, "[11] C.ULT.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.ULT.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_OLE_D(){
-    sprintf(op, "[11] C.OLE.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.OLE.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_ULE_D(){
-    sprintf(op, "[11] C.ULE.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.ULE.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_SF_D(){
-    sprintf(op, "[11] C.SF.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.SF.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGLE_D(){
-    sprintf(op, "[11] C.NGLE.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGLE.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_SEQ_D(){
-    sprintf(op, "[11] C.SEQ.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.SEQ.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGL_D(){
-    sprintf(op, "[11] C.NGL.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGL.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_LT_D(){
-    sprintf(op, "[11] C.LT.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.LT.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGE_D(){
-    sprintf(op, "[11] C.NGE.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGE.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_LE_D(){
-    sprintf(op, "[11] C.LE.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.LE.D", mot, pc, "%ns%fs, %ft" );
 }
 
 static void C_NGT_D(){
-    sprintf(op, "[11] C.NGT.D");
-    sprintf(args, "fgr%d, fgr%d", (mot>>11)&0x1F, (mot>>16)&0x1F);
+    mr4kd_sprintf( op, "C.NGT.D", mot, pc, "%ns%fs, %ft" );
 }
 
 
@@ -1145,13 +965,11 @@ static void D()
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ W ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void CVT_S_W(){
-    sprintf(op, "[11] CVT.S.W");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.S.W", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_D_W(){
-    sprintf(op, "[11] CVT.D.W");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.D.W", mot, pc, "%ns%fd, %fs" );
 }
 
 
@@ -1172,13 +990,11 @@ static void W()
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ L ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void CVT_S_L(){
-    sprintf(op, "[11] CVT.S.L");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.S.L", mot, pc, "%ns%fd, %fs" );
 }
 
 static void CVT_D_L(){
-    sprintf(op, "[11] CVT.D.L");
-    sprintf(args, "fgr%d, fgr%d", (mot>>6)&0x1F, (mot>>11)&0x1F);
+    mr4kd_sprintf( op, "CVT.D.L", mot, pc, "%ns%fd, %fs" );
 }
 
 
@@ -1222,184 +1038,166 @@ static void cop1()
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ ... ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void BEQL(){
-    sprintf(op, "[14] BEQL");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>21)&0x1F, (mot>>16)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BEQL", mot, pc, "%ns%rs, %rt, %br" );
 }
 
 static void BNEL(){
-    sprintf(op, "[15] BNEL");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>21)&0x1F, (mot>>16)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BNEL", mot, pc, "%ns%rs, %rt, %br" );
 }
 
 static void BLEZL(){
-    sprintf(op, "[16] BLEZL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BLEZL", mot, pc, "%ns%rs, %rt, %br" );
 }
 
 static void BGTZL(){
-    sprintf(op, "[17] BGTZL");
-    sprintf(args, "reg%d, 0x%.4X", (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "BGTZL", mot, pc, "%ns%rs, %rt, %br" );
 }
 
+
 static void DADDI(){
-    sprintf(op, "[18] DADDI");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "DADDI", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
 static void DADDIU(){
-    sprintf(op, "[19] DADDIU");
-    sprintf(args, "reg%d, reg%d, 0x%.4X", (mot>>16)&0x1F, (mot>>21)&0x1F, mot&0xFFFF);
+    mr4kd_sprintf( op, "DADDIU", mot, pc, "%ns%rt, %rs, %ih" );
 }
 
+
 static void LDL(){
-    sprintf(op, "[1A] LDL");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LDL", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LDR(){
-    sprintf(op, "[1B] LRD");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LDR", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LB(){
-    sprintf(op, "[20] LB");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LB", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LH(){
-    sprintf(op, "[21] LH");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LH", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LWL(){
-    sprintf(op, "[22] LWL");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LWL", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LW(){
-    sprintf(op, "[23] LW");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LW", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LBU(){
-    sprintf(op, "[24] LBU");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LBU", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LHU(){
-    sprintf(op, "[25] LHU");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LHU", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LWR(){
-    sprintf(op, "[26] LWR");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LWR", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LWU(){
-    sprintf(op, "[27] LWU");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LWU", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SB(){
-    sprintf(op, "[28] SB");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SB", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SH(){
-    sprintf(op, "[29] SH");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SH", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SWL(){
-    sprintf(op, "[2A] SWL");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SWL", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SW(){
-    sprintf(op, "[2B] SW");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SW", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SDL(){
-    sprintf(op, "[2C] SDL");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SDL", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SDR(){
-    sprintf(op, "[2D] SDR");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SDR", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SWR(){
-    sprintf(op, "[2E] SWR");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SWR", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 static void CACHE(){
     sprintf(op, "[2F] CACHE");
     sprintf(args, "op%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
     //Creuser "op"
 }
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 
 static void LL(){
-    sprintf(op, "[30] LL");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LL", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LWC1(){
-    sprintf(op, "[31] LWC1");
-    sprintf(args, "fgr%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LWC1", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LLD(){
-    sprintf(op, "[34] LLD");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LLD", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LDC1(){
-    sprintf(op, "[35] LDC1");
-    sprintf(args, "fgr%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LDC1", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void LD(){
-    sprintf(op, "[37] LD");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "LD", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SC(){
-    sprintf(op, "[38] SC");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SC", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SWC1(){
-    sprintf(op, "[39] SWC1");
-    sprintf(args, "fgr%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SWC1", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SCD(){
-    sprintf(op, "[3C] SCD");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SCD", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SDC1(){
-    sprintf(op, "[3D] SDC1");
-    sprintf(args, "fgr%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SDC1", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 static void SD(){
-    sprintf(op, "[3F] SD");
-    sprintf(args, "reg%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
+    mr4kd_sprintf( op, "SD", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
 
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ DECODE_OP ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
-void r4300_decode_op( uint32 instr, char *opcode, char *arguments )
+void r4300_decode_op( uint32 instr, char *opcode, char *arguments, int counter )
 {
-    mot = instr;
-    op = opcode;
-    args = arguments;
+    char buffer[256]; int result;
+    mr4kd_disassemble( instr, counter, buffer );
+    
+    /* Split it up */
+    if( (result = sscanf( buffer, "%s %s", opcode, arguments )) == 1 )
+        strcpy( arguments, " " );
+}
+
+/* Disassemble */
+void mr4kd_disassemble ( uint32 instruction, uint32 counter, char * buffer )
+{
+    mot = instruction;
+    pc  = counter;
+    op  = buffer;
     
     switch((mot>>26)&0x3F)
     {
