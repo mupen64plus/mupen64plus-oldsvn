@@ -76,9 +76,6 @@ $INSTALL -d -v "${SHAREDIR}/icons/16x16"
 $INSTALL -m 0644 icons/16x16/* "${SHAREDIR}/icons/16x16"
 $INSTALL -d -v "${SHAREDIR}/lang"
 $INSTALL -m 0644 lang/* "${SHAREDIR}/lang"
-if [ -x mupen64plusui.rc ]; then
-    $INSTALL -m 0644 mupen64plusui.rc "${SHAREDIR}"
-fi
 $INSTALL -D -m 0755 mupen64plus "${BINDIR}/mupen64plus"
 $INSTALL -d -v "${MANDIR}"
 $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}"
