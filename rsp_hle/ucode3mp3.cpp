@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - ucode3mp3.h                                             *
+ *   Mupen64plus - rsp plugin - ucode3mp3.cpp                              *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
- *   Copyright (C) 2002 Hacktarux                                          *
+ *   Copyright (C) 2002 Azimer, adapted for mupen64 HLE RSP by Hacktarux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,6 +22,10 @@
 #ifdef __WIN32__
 # include <windows.h>
 #else
+# include "gui.h"
+/* NOTE:  all MessageBox commands are commented due to
+          focus issues (gnu+linux) if they're not. */
+          
 # include "wintypes.h"
 # include <string.h>
 # include <stdio.h>
@@ -297,6 +301,9 @@ static void InnerLoop () {
                 RSP_Vect[0].DW[1] = 0xB504A57E00016A09;
                 RSP_Vect[0].DW[0] = 0x0002D4130005A827;
 */
+                if ((t1 | t2 | t3 | t5 | t6) & 0x1)
+//                    __asm int 3;
+                    do {} while (0);
 
                 // 0x13A8
                 v[1] = 0;
@@ -408,8 +415,8 @@ static void InnerLoop () {
                 for (i = 0; i < 16; i++) {
                     v[0+i] = (v[0+i] * LUT6[i]) >> 0x10;
                 }
-                v[0] = v[0] + v[0]; v[1] = v[1] + v[1];
-                v[2] = v[2] + v[2]; v[3] = v[3] + v[3]; v[4] = v[4] + v[4];
+                v[0] = v[0] + v[0];    v[1] = v[1] + v[1];
+                v[2] = v[2] + v[2]; v[3] = v[3] + v[3];    v[4] = v[4] + v[4];
                 v[5] = v[5] + v[5]; v[6] = v[6] + v[6]; v[7] = v[7] + v[7];
                 v[12] = v[12] + v[12]; v[13] = v[13] + v[13]; v[15] = v[15] + v[15];
                 
@@ -579,7 +586,11 @@ static void InnerLoop () {
                 s32 hi0 = mult6;
                 s32 hi1 = mult4;
                 s32 v;
-
+                /*
+                if (hi0 & 0xffff)
+                    __asm int 3; 
+                if (hi1 & 0xffff)
+                    __asm int 3;*/
                 hi0 = (int)hi0 >> 0x10;
                 hi1 = (int)hi1 >> 0x10;
                 for (i = 0; i < 8; i++) {

@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - rsp plugin - wintypes.h                                 *
+ *   Mupen64plus - rsp plugin - extension.h                                *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
- *   Copyright (C) 2002 Hacktarux                                          *
+ *   Copyright (C) 2002 Dylan Wagstaff (Pyromanik)                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,52 +18,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
- 
-#ifndef __WINTYPES_H__
-#define __WINTYPES_H__
 
-#include <sys/types.h>
+#include <dirent.h>
+#include "wintypes.h"
 
+char audioname[100];
+extern BOOL AudioHle;    /* TRUE = audio lists aren't processed in the rsp plugin            */
+extern BOOL GraphicsHle; /* TRUE = gfx lists aren't processed in the rsp pluign              */
+extern BOOL SpecificHle; /* TRUE = audio lists are processed by a specific audio plugin      */
+                  /* otherwise it's processed by the audio plugin choosen in the emu  */
+void startup();
+BOOL loadPlugin();
+char* next_plugin();
 
-typedef int APIENTRY;
-
-typedef int HWND;
-typedef int HINSTANCE;
-typedef int WPARAM;
-typedef int LPARAM;
-typedef char* LPSTR;
-typedef void* LPVOID;
-typedef void* HMODULE;
-
-#define __declspec(dllexport)
-#define __cdecl
-#define _cdecl
-#define WINAPI
-
-typedef u_int32_t        DWORD;
-typedef u_int16_t        WORD;
-typedef u_int8_t         BYTE, byte;
-typedef int              BOOL, BOOLEAN;
-typedef unsigned int     UINT;
-#define __int8           char
-#define __int16          short
-#define __int32          int
-#define __int64          long long
-
-/** HRESULT stuff **/
-typedef long             HRESULT;
-#define S_OK             ((HRESULT)0L)
-#define E_NOTIMPL        0x80004001L
-
-#ifndef FALSE
-# define FALSE (0)
-#endif
-#ifndef TRUE
-# define TRUE (!FALSE)
-#endif
-
-typedef int HMENU;
-typedef int RECT;
-typedef int PAINTSTRUCT;
-
-#endif /* __WINTYPES_H__ */
+extern char LibPath[PATH_MAX];

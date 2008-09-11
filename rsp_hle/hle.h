@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - hle.h                                                   *
+ *   Mupen64plus - rsp plugin - hle.h                                      *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2002 Hacktarux                                          *
  *                                                                         *
@@ -33,61 +33,61 @@
 #endif
 
 // types
-typedef unsigned char       u8;
-typedef unsigned short      u16;
-typedef unsigned int        u32;
-typedef unsigned long long  u64;
+typedef unsigned char          u8;
+typedef unsigned short         u16;
+typedef unsigned long          u32;
+typedef unsigned long long     u64;
 
-typedef signed char         s8;
-typedef signed short        s16;
-typedef signed int          s32;
-typedef signed long long    s64;
+typedef signed char            s8;
+typedef signed short           s16;
+typedef signed long            s32;
+typedef signed long long       s64;
 
-//#define ACMD_SIZE               32
+//#define ACMD_SIZE              32
 /*
  * Audio flags
  */
 
-#define A_INIT          0x01
-#define A_CONTINUE      0x00
-#define A_LOOP          0x02
-#define A_OUT           0x02
-#define A_LEFT          0x02
-#define A_RIGHT         0x00
-#define A_VOL           0x04
-#define A_RATE          0x00
-#define A_AUX           0x08
-#define A_NOAUX         0x00
-#define A_MAIN          0x00
-#define A_MIX           0x10
+#define A_INIT            0x01
+#define A_CONTINUE        0x00
+#define A_LOOP            0x02
+#define A_OUT             0x02
+#define A_LEFT            0x02
+#define    A_RIGHT        0x00
+#define A_VOL             0x04
+#define A_RATE            0x00
+#define A_AUX             0x08
+#define A_NOAUX           0x00
+#define A_MAIN            0x00
+#define A_MIX             0x10
 
 extern RSP_INFO rsp;
 
 typedef struct
 {
-   unsigned int type;
-   unsigned int flags;
+   unsigned long type;
+   unsigned long flags;
    
-   unsigned int ucode_boot;
-   unsigned int ucode_boot_size;
+   unsigned long ucode_boot;
+   unsigned long ucode_boot_size;
 
-   unsigned int ucode;
-   unsigned int ucode_size;
+   unsigned long ucode;
+   unsigned long ucode_size;
    
-   unsigned int ucode_data;
-   unsigned int ucode_data_size;
+   unsigned long ucode_data;
+   unsigned long ucode_data_size;
    
-   unsigned int dram_stack;
-   unsigned int dram_stack_size;
+   unsigned long dram_stack;
+   unsigned long dram_stack_size;
    
-   unsigned int output_buff;
-   unsigned int output_buff_size;
+   unsigned long output_buff;
+   unsigned long output_buff_size;
    
-   unsigned int data_ptr;
-   unsigned int data_size;
+   unsigned long data_ptr;
+   unsigned long data_size;
    
-   unsigned int yield_data_ptr;
-   unsigned int yield_data_size;
+   unsigned long yield_data_ptr;
+   unsigned long yield_data_size;
 } OSTask_t;
 
 void jpg_uncompress(OSTask_t *task);
