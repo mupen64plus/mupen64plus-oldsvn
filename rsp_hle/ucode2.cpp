@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - rsp plugin - ucode1.cpp                                 *
+ *   Mupen64plus - ucode2.cpp                                              *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
- *   Copyright (C) 2002 Azimer, adapted by for mupen64 HLE RSP Hacktarux   *
+ *   Copyright (C) 2002 Hacktarux                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,10 +23,6 @@
 # include <windows.h>
 # include <stdio.h>
 #else
-# include "gui.h"
-/* NOTE:  all MessageBox commands are commented due to
-          focus issues (gnu+linux) if they're not. */
-          
 # include "wintypes.h"
 # include <string.h>
 # include <stdio.h>
@@ -34,22 +30,21 @@
 
 #include "hle.h"
 
-
 extern u8 BufferSpace[0x10000];
 
 static void SPNOOP () {
     char buff[0x100];
     sprintf (buff, "Unknown/Unimplemented Audio Command %i in ABI 2", (int)(inst1 >> 24));
-//#ifdef __WIN32__
-//    MessageBox (NULL, buff, "Audio HLE Error", MB_OK);
-//#else
+#ifdef __WIN32__
+    MessageBox (NULL, buff, "Audio HLE Error", MB_OK);
+#else
     printf( "Audio HLE Error: %s\n", buff );
-//#endif
+#endif
 }
-extern u16 AudioInBuffer;        // 0x0000(T8)
-extern u16 AudioOutBuffer;       // 0x0002(T8)
-extern u16 AudioCount;           // 0x0004(T8)
-extern u32 loopval;              // 0x0010(T8)
+extern u16 AudioInBuffer;       // 0x0000(T8)
+extern u16 AudioOutBuffer;      // 0x0002(T8)
+extern u16 AudioCount;          // 0x0004(T8)
+extern u32 loopval;         // 0x0010(T8)
 extern u32 SEGMENTS[0x10];
 
 extern u16 adpcmtable[0x88];
@@ -85,9 +80,9 @@ static void SETLOOP2 () {
 }
 
 static void SETBUFF2 () {
-    AudioInBuffer   = u16(inst1);             // 0x00
-    AudioOutBuffer    = u16((inst2 >> 0x10)); // 0x02
-    AudioCount        = u16(inst2);           // 0x04
+    AudioInBuffer   = u16(inst1);            // 0x00
+    AudioOutBuffer  = u16((inst2 >> 0x10)); // 0x02
+    AudioCount      = u16(inst2);            // 0x04
 }
 
 static void ADPCM2 () { // Verified to be 100% Accurate...
@@ -170,18 +165,18 @@ static void ADPCM2 () { // Verified to be 100% Accurate...
             icode=BufferSpace[(AudioInBuffer+inPtr)^3];
             inPtr++;
 
-            inp1[j]=(s16)((icode&mask1) << 8);            // this will in effect be signed
+            inp1[j]=(s16)((icode&mask1) << 8);          // this will in effect be signed
             if(code<srange) inp1[j]=((int)((int)inp1[j]*(int)vscale)>>16);
             //else int catchme=1;
             j++;
 
             inp1[j]=(s16)((icode&mask2)<<shifter);
-            if(code<srange)    inp1[j]=((int)((int)inp1[j]*(int)vscale)>>16);
+            if(code<srange) inp1[j]=((int)((int)inp1[j]*(int)vscale)>>16);
             //else int catchme=1;
             j++;
 
             if (Flags & 4) {
-                inp1[j]=(s16)((icode&0xC) << 12);         // this will in effect be signed
+                inp1[j]=(s16)((icode&0xC) << 12);           // this will in effect be signed
                 if(code < 0xE) inp1[j]=((int)((int)inp1[j]*(int)vscale)>>16);
                 //else int catchme=1;
                 j++;
@@ -206,7 +201,7 @@ static void ADPCM2 () { // Verified to be 100% Accurate...
             j++;
 
             inp2[j]=(s16)((icode&mask2)<<shifter);
-            if(code<srange)    inp2[j]=((int)((int)inp2[j]*(int)vscale)>>16);
+            if(code<srange) inp2[j]=((int)((int)inp2[j]*(int)vscale)>>16);
             //else int catchme=1;
             j++;
 
@@ -434,7 +429,7 @@ static void RESAMPLE2 () {
 
     srcPtr -= 4;
 
-    if ((Flags & 0x1) == 0) {    
+    if ((Flags & 0x1) == 0) {   
         for (int x=0; x < 4; x++) //memcpy (src+srcPtr, rsp.RDRAM+addy, 0x8);
             src[(srcPtr+x)^1] = ((u16 *)rsp.RDRAM)[((addy/2)+x)^1];
         Accum = *(u16 *)(rsp.RDRAM+addy+10);
@@ -442,9 +437,6 @@ static void RESAMPLE2 () {
         for (int x=0; x < 4; x++)
             src[(srcPtr+x)^1] = 0;//*(u16 *)(rsp.RDRAM+((addy+x)^2));
     }
-
-//    if ((Flags & 0x2))
-//        __asm int 3;
 
     for(int i=0;i < ((AudioCount+0xf)&0xFFF0)/2;i++)    {
         location = (((Accum * 0x40) >> 0x10) * 8);
@@ -505,13 +497,13 @@ static void ENVSETUP1 () {
 
     //fprintf (dfile, "ENVSETUP1: inst1 = %08X, inst2 = %08X\n", inst1, inst2);
     t3 = inst1 & 0xFFFF;
-    tmp    = (inst1 >> 0x8) & 0xFF00;
+    tmp = (inst1 >> 0x8) & 0xFF00;
     env[4] = (u16)tmp;
     tmp += t3;
     env[5] = (u16)tmp;
     s5 = inst2 >> 0x10;
     s6 = inst2 & 0xFFFF;
-    //fprintf (dfile, "    t3 = %X / s5 = %X / s6 = %X / env[4] = %X / env[5] = %X\n", t3, s5, s6, env[4], env[5]);
+    //fprintf (dfile, " t3 = %X / s5 = %X / s6 = %X / env[4] = %X / env[5] = %X\n", t3, s5, s6, env[4], env[5]);
 }
 
 static void ENVSETUP2 () {
@@ -526,7 +518,7 @@ static void ENVSETUP2 () {
     env[2] = (u16)tmp;
     tmp += s6;
     env[3] = (u16)tmp;
-    //fprintf (dfile, "    env[0] = %X / env[1] = %X / env[2] = %X / env[3] = %X\n", env[0], env[1], env[2], env[3]);
+    //fprintf (dfile, " env[0] = %X / env[1] = %X / env[2] = %X / env[3] = %X\n", env[0], env[1], env[2], env[3]);
 }
 
 static void ENVMIXER2 () {
@@ -540,8 +532,6 @@ static void ENVMIXER2 () {
     s16 vec9, vec10;
 
     s16 v2[8];
-
-    //__asm int 3;
 
     buffs3 = (s16 *)(BufferSpace + ((inst1 >> 0x0c)&0x0ff0));
     bufft6 = (s16 *)(BufferSpace + ((inst2 >> 0x14)&0x0ff0));
@@ -741,7 +731,7 @@ static void ADDMIXER () {
     for (int cntr = 0; cntr < Count; cntr+=2) {
         temp = *outp + *inp;
         if (temp > 32767)  temp = 32767; if (temp < -32768) temp = -32768;
-        outp++;    inp++;
+        outp++; inp++;
     }
 }
 
@@ -778,19 +768,19 @@ static void FILTER2 () {
             if (t4 > 1) { // Then set the cnt variable
                 cnt = (inst1 & 0xFFFF);
                 lutt6 = (s16 *)save;
-//                memcpy (dmem+0xFE0, rsp.RDRAM+(inst2&0xFFFFFF), 0x10);
+//              memcpy (dmem+0xFE0, rsp.RDRAM+(inst2&0xFFFFFF), 0x10);
                 return;
             }
 
             if (t4 == 0) {
-//                memcpy (dmem+0xFB0, rsp.RDRAM+(inst2&0xFFFFFF), 0x20);
+//              memcpy (dmem+0xFB0, rsp.RDRAM+(inst2&0xFFFFFF), 0x20);
                 lutt5 = (short *)(save+0x10);
             }
 
             lutt5 = (short *)(save+0x10);
 
-//            lutt5 = (short *)(dmem + 0xFC0);
-//            lutt6 = (short *)(dmem + 0xFE0);
+//          lutt5 = (short *)(dmem + 0xFC0);
+//          lutt6 = (short *)(dmem + 0xFE0);
             for (x = 0; x < 8; x++) {
                 s32 a;
                 a = (lutt5[x] + lutt6[x]) >> 1;
@@ -887,7 +877,7 @@ static void FILTER2 () {
                 inp2 += 8;
                 outp += 8;
             }
-//            memcpy (rsp.RDRAM+(inst2&0xFFFFFF), dmem+0xFB0, 0x20);
+//          memcpy (rsp.RDRAM+(inst2&0xFFFFFF), dmem+0xFB0, 0x20);
             memcpy (save, inp2-8, 0x10);
             memcpy (BufferSpace+(inst1&0xffff), outbuff, cnt);
 }
@@ -933,5 +923,5 @@ void (*ABI2[0x20])() = {
 /* NOTES:
 
   FILTER/SEGMENT - Still needs to be finished up... add FILTER?
-  UNKNOWWN #27     - Is this worth doing?  Looks like a pain in the ass just for WaveRace64
+  UNKNOWWN #27   - Is this worth doing?  Looks like a pain in the ass just for WaveRace64
 */

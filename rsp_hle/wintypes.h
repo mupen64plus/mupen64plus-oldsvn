@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - rsp plugin - wintypes.h                                 *
+ *   Mupen64plus - wintypes.h                                              *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2002 Hacktarux                                          *
  *                                                                         *
@@ -18,42 +18,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
- 
+
 #ifndef __WINTYPES_H__
 #define __WINTYPES_H__
 
 #include <sys/types.h>
 
-
-typedef int APIENTRY;
-
 typedef int HWND;
 typedef int HINSTANCE;
-typedef int WPARAM;
-typedef int LPARAM;
-typedef char* LPSTR;
 typedef void* LPVOID;
-typedef void* HMODULE;
 
 #define __declspec(dllexport)
 #define __cdecl
 #define _cdecl
 #define WINAPI
 
-typedef u_int32_t        DWORD;
-typedef u_int16_t        WORD;
-typedef u_int8_t         BYTE, byte;
-typedef int              BOOL, BOOLEAN;
-typedef unsigned int     UINT;
-#define __int8           char
-#define __int16          short
-#define __int32          int
-#define __int64          long long
+typedef u_int32_t       DWORD;
+typedef u_int16_t       WORD;
+typedef u_int8_t            BYTE, byte;
+typedef int         BOOL, BOOLEAN;
+#define __int8                  char
+#define __int16                 short
+#define __int32                 int
+#define __int64                 long long
 
 /** HRESULT stuff **/
-typedef long             HRESULT;
-#define S_OK             ((HRESULT)0L)
-#define E_NOTIMPL        0x80004001L
+typedef int             HRESULT;
+#define S_OK                ((HRESULT)0L)
+#define E_NOTIMPL       0x80004001L
 
 #ifndef FALSE
 # define FALSE (0)

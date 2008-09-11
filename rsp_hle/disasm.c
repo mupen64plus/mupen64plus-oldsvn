@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - rsp plugin - disasm.c                                   *
+ *   Mupen64plus - disasm.c                                                *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2002 Hacktarux                                          *
  *                                                                         *
@@ -23,17 +23,17 @@
 
 void disasm(FILE *f, unsigned int t[0x1000/4])
 {
-    int i;
-    
-    for (i=0; i<(0x1000/4); i++)
-    {
-        fprintf(f,"%4x: ", i*4);
-        switch((t[i] >> 26) & 0x3F)
-        {
-            case 0:
-                switch(t[i] & 0x3F)
-                {
-            case 0:
+   int i;
+
+   for (i=0; i<(0x1000/4); i++)
+     {
+    fprintf(f,"%4x: ", i*4);
+    switch((t[i] >> 26) & 0x3F)
+      {
+       case 0:
+         switch(t[i] & 0x3F)
+           {
+        case 0:
           if (t[i]) { 
              fprintf(f,"SLL r%d, r%d, %d\n", (t[i] >> 11) & 0x1F, (t[i] >> 16) & 0x1F, (t[i] >> 6) & 0x1F);
           }
