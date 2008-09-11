@@ -32,15 +32,15 @@ ifneq ($(strip $(shell pkg-config samplerate --modversion 2> /dev/null)),)
     SRC_LIBS	= `pkg-config samplerate --libs`
   else
     # clear libsamplerate flags and libraries
-    SRC_FLAGS	= 
-    SRC_LIBS	= 
+    SRC_FLAGS	=
+    SRC_LIBS	=
   endif
 else
   # warn user
   $(warning No libsamplerate development libraries found.  jttl_audio will be built without Best Quality SINC resampler.)
   # clear libsamplerate flags and libraries
-  SRC_FLAGS	= 
-  SRC_LIBS	= 
+  SRC_FLAGS	=
+  SRC_LIBS	=
 endif
 
 # local CFLAGS, LIBS, and LDFLAGS
@@ -56,7 +56,7 @@ ifneq ($(findstring $(GUI), GTK2 QT4),)
 endif
 
 ifeq ($(GUI),NONE)
-  OBJECTS += nogui.o
+  OBJECTS += gui_none.o
 endif
 
 # build targets

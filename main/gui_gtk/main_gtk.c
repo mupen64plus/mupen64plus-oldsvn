@@ -873,7 +873,7 @@ static int create_menubar()
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), gtk_separator_menu_item_new());
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("_Video Settings..."));
+    item = gtk_image_menu_item_new_with_mnemonic(tr("_Graphics Settings..."));
     g_MainWindow.graphicsMenuImage = gtk_image_new();
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.graphicsMenuImage);
     g_signal_connect(item, "activate", G_CALLBACK(callback_configure_graphics), NULL);

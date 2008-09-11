@@ -725,7 +725,7 @@ EXPORT void CALL RomClosed( void )
         free(mixBuffer);
         mixBuffer = NULL;
     }
-    
+
     // Delete the hardware spec struct
     if(hardware_spec != NULL) free(hardware_spec);
     hardware_spec = NULL;
@@ -733,18 +733,18 @@ EXPORT void CALL RomClosed( void )
 
     // Actually close the audio device
     SDL_CloseAudio();
-    
+
     // Shutdown the respective subsystems
     if(SDL_WasInit(SDL_INIT_AUDIO) != 0) SDL_QuitSubSystem(SDL_INIT_AUDIO);
     if(SDL_WasInit(SDL_INIT_TIMER) != 0) SDL_QuitSubSystem(SDL_INIT_TIMER);
 }
 
-EXPORT void CALL SetConfigDir( char *configDir )
+EXPORT void CALL SetConfigDir(char* configDir)
 {
     strncpy(configdir, configDir, PATH_MAX);
 }
 
-EXPORT void CALL ProcessAlist( void )
+EXPORT void CALL ProcessAlist()
 {
 }
 
@@ -821,7 +821,7 @@ void SaveConfig()
     fprintf(config_file, "# Volume increment/decrement\n"
                          "# Set the percentage change each time the volume is increased or decreased.\n");
     fprintf(config_file, "VOLUME_ADJUST %d\n\n", VolDelta);
-    
+
     fclose(config_file);
 }
 
@@ -857,7 +857,7 @@ void ReadConfig()
             strncpy(param, line, (strlen(line) - strlen(value)));
             param[(strlen(line) - strlen(value))] = '\0';
 #ifdef DEBUG
-            printf("[JttL's SDL Audio plugin] Debug: Parameter \"%s\", value: \"%i\"\n",&param,atoi(&value[1]));
+            printf("[JttL's SDL Audio plugin] Debug: Parameter \"%s\", value: \"%i\"\n", &param, atoi(&value[1]));
 #endif
             if(strcasecmp(param, "DEFAULT_FREQUENCY") == 0) GameFreq = atoi(value);
             if(strcasecmp(param, "SWAP_CHANNELS") == 0) SwapChannels = atoi(value);

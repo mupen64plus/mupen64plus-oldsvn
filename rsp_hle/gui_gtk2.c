@@ -50,7 +50,7 @@ void configDialog(HWND handle)
     dialog = gtk_dialog_new();
     if(handle != 0) /*backwards compatibility (vanilla mupen, & old versions) without crying*/
         {
-        gdk_window_get_user_data(gdk_window_lookup(handle), &parent); /*get GtkWindow from X11 ID or HWND*/
+        gdk_window_get_user_data(gdk_window_lookup(handle), (gpointer*)&parent); /* Get GtkWindow from XID or HWND. */
         gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
         }
 
@@ -127,7 +127,7 @@ void MessageBox(HWND handle, char* message, char* title, int flags)
 
     if(handle != 0) /*backwards compatibility (vanilla mupen, & old versions) without crying*/
         {
-        gdk_window_get_user_data(gdk_window_lookup(handle), &parent); /* Get GtkWindow from XID or HWND. */
+        gdk_window_get_user_data(gdk_window_lookup(handle), (gpointer*)&parent); /* Get GtkWindow from XID or HWND. */
         gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
         }
 
@@ -192,7 +192,7 @@ void checkCallback(GtkWidget* widget, gpointer* data)
 
 void configCallback(GtkWidget* widget, gpointer* data)
 {
-    int result = (int)object;
+    int result = (int)data;
     if(result==GTK_RESPONSE_ACCEPT)
         {
         AudioHle = pseudoaudiohle;

@@ -43,6 +43,7 @@ void callback_about_mupen64plus(GtkWidget* widget, gpointer data)
         "Louai Al-Khanji (slougi)",
         "Bob Forder (orbitaldecay)",
         "Jason Espinosa (hasone)",
+        "Dylan Wagstaff (Pyromanik)",
         "HyperHacker",
         "Hacktarux",
         "Dave2001",

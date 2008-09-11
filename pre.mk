@@ -111,6 +111,10 @@ ifeq ($(GUI), QT4)
     ifeq ($(UIC),)
       $(error uic from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
+    RCC         = $(shell which rcc 2>/dev/null)
+    ifeq ($(RCC),)
+      $(error rcc from Qt not found! Make sure the Qt binaries are in your PATH)
+    endif
     QT_FLAGS    = $(shell pkg-config QtCore QtGui --cflags)
     QT_LIBS     = $(shell pkg-config QtCore QtGui --libs)
     # define Gtk flags when using Qt4 gui so it can load plugins, etc.

@@ -181,7 +181,7 @@ static void rebuild_cache_file(char* cache_filename)
                     {
                     snprintf(buffer, sizeof(buffer), "%s", entry->filename);
                     file = dirname(buffer); /* Linux dirname modifies string, we don't want this. */
-                    strcat(file, "/");
+                    strncat(file, "/", sizeof(buffer)-1);
 
                     if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
                         {
