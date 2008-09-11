@@ -1,0 +1,188 @@
+<ui version="4.0" >
+ <class>configDialog</class>
+ <widget class="QDialog" name="configDialog" >
+  <property name="windowModality" >
+   <enum>Qt::WindowModal</enum>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>271</width>
+    <height>264</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>RSP Configuration</string>
+  </property>
+  <property name="modal" >
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3" >
+   <item>
+    <widget class="QGroupBox" name="Aframe" >
+     <property name="title" >
+      <string>Audio Processing:</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <item>
+       <widget class="QRadioButton" name="radioA1" >
+        <property name="toolTip" >
+         <string>This is the default and most stable option.</string>
+        </property>
+        <property name="text" >
+         <string>Process Alists inside the RSP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioA2" >
+        <property name="toolTip" >
+         <string>You will not hear any sound if your chosen plugin does not support HLE processing.
+Side effects of this may provide you with a small speed up at the cost of audio.</string>
+        </property>
+        <property name="text" >
+         <string>Process Alists with emu defined plugin</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioA3" >
+        <property name="toolTip" >
+         <string>You will not hear any sound if your chosen plugin does not support HLE processing.
+Avoid choosing the same plugin as defined in the emulator settings, as this could have unpredictable results.</string>
+        </property>
+        <property name="text" >
+         <string>Process Alists with RSP defined plugin</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="dropbox" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="Gframe" >
+     <property name="title" >
+      <string>Graphics Processing:</string>
+     </property>
+     <property name="flat" >
+      <bool>false</bool>
+     </property>
+     <property name="checkable" >
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <item>
+       <widget class="QCheckBox" name="Gcheck" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="toolTip" >
+         <string>The RSP does not currently support the decoding of Dlists. This would disable video, which makes the whole thing kind of pointless.
+This is disabled for now.</string>
+        </property>
+        <property name="text" >
+         <string>Process Dlists inside the RSP</string>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer" >
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="Line" name="line" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>configDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>260</x>
+     <y>234</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>250</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>configDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>260</x>
+     <y>240</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>270</x>
+     <y>250</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioA3</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dropbox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>119</x>
+     <y>79</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>119</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
