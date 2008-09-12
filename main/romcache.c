@@ -147,8 +147,7 @@ static int write_cache_file(char* cache_filename)
 
 static void rebuild_cache_file(char* cache_filename)
 {
-    char path[PATH_MAX];
-    char buffer[PATH_MAX];
+    char path[PATH_MAX], buffer1[PATH_MAX], buffer2[PATH_MAX];
     char* file;
     unsigned char match;
     int counter, oldlength;
@@ -166,8 +165,8 @@ static void rebuild_cache_file(char* cache_filename)
             {
             for(match = counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
                 {
-                snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
-                snprintf(path, sizeof(path), "%s", config_get_string(buffer, "/"));
+                snprintf(buffer1, sizeof(buffer1), "RomDirectory[%d]", counter);
+                snprintf(path, sizeof(path), "%s", config_get_string(buffer1, "/"));
 
                 if(config_get_bool("RomDirsScanRecursive", FALSE))
                     {
@@ -179,11 +178,11 @@ static void rebuild_cache_file(char* cache_filename)
                     }
                 else
                     {
-                    snprintf(buffer, sizeof(buffer), "%s", entry->filename);
-                    file = dirname(buffer); /* Linux dirname modifies string, we don't want this. */
-                    strncat(file, "/", sizeof(buffer)-1);
+                    snprintf(buffer1, sizeof(buffer1), "%s", entry->filename); /* Linux dirname may modify string. */
+                    file = dirname(buffer1); 
+                    snprintf(buffer2, sizeof(buffer2), "%s/", file);
 
-                    if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
+                    if(strlen(buffer2)==strlen(path)&&strncmp(buffer2, path, strlen(path))==0)
                         {
                         match = 1;
                         break;
@@ -221,10 +220,10 @@ static void rebuild_cache_file(char* cache_filename)
     /* Re-scan directories. */
     for(counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
         {
-        snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
-        snprintf(path, sizeof(path), "%s", config_get_string(buffer, ""));
+        snprintf(buffer1, sizeof(buffer1), "RomDirectory[%d]", counter);
+        snprintf(path, sizeof(path), "%s", config_get_string(buffer1, ""));
         if(path[strlen(path)-1]!='/')
-            strncat(path, "/", PATH_MAX);
+            snprintf(path, sizeof(path), "%s/", path);
         printf("Scanning... %s\n", path);
         scan_dir(path);
         }
@@ -426,7 +425,7 @@ static void scan_dir(const char* directoryname)
             {
             if(S_ISDIR(filestatus.st_mode))
                 {
-                strncat(filename, "/", PATH_MAX);
+                snprintf(filename, sizeof(filename), "%s/", filename);
                 scan_dir(filename);
                 continue;
                 }
