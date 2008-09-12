@@ -46,7 +46,7 @@ extern list_t g_PluginList;
 
 int   plugin_scan_file(const char *filepath, WORD PluginType);
 void  plugin_scan_directory(const char *plugindir);
-void  plugin_set_configdir(char *configdir);
+void  plugin_set_dirs(char* configdir, char* installdir);
 void  plugin_load_plugins(const char *gfx_name, 
               const char *audio_name, 
               const char *input_name,

@@ -74,6 +74,7 @@ static void dummy_readController(int Control, BYTE *Command) {}
 static void dummy_keyDown(WPARAM wParam, LPARAM lParam) {}
 static void dummy_keyUp(WPARAM wParam, LPARAM lParam) {}
 static void dummy_setConfigDir(char *configDir) {}
+static void dummy_setInstallDir(char *installDir) {}
 static unsigned int dummy;
 static DWORD dummy_doRspCycles(DWORD Cycles) { return Cycles; };
 static void dummy_initiateRSP(RSP_INFO Rsp_Info, DWORD * CycleCount) {};
@@ -122,6 +123,7 @@ void (*romOpen_input)() = dummy_void;
 void (*keyDown)(WPARAM wParam, LPARAM lParam) = dummy_keyDown;
 void (*keyUp)(WPARAM wParam, LPARAM lParam) = dummy_keyUp;
 void (*setConfigDir)(char *configDir) = dummy_setConfigDir;
+void (*setInstallDir)(char *installDir) = dummy_setInstallDir;
 
 void (*closeDLL_RSP)() = dummy_void;
 DWORD (*doRspCycles)(DWORD Cycles) = dummy_doRspCycles;
@@ -277,21 +279,24 @@ void plugin_scan_directory(const char *plugindir)
 /* plugin_set_configdir
  *  Sets config dir of all plugins that support the SetConfigDir API call to the given dir.
  */
-void plugin_set_configdir(char *configdir)
+void plugin_set_dirs(char* configdir, char* installdir)
 {
-    plugin *p = NULL;
-    list_node_t *node;
+    plugin* p = NULL;
+    list_node_t* node;
 
     list_foreach(g_PluginList, node)
-    {
-        p = (plugin *)node->data;
+        {
+        p = (plugin*)node->data;
 
         if(p->handle)
-        {
-            // if plugin provides ability to set a config dir, set it.
+            {
+            /* If plugin provides ability to set config or install directories, set them. */
             setConfigDir = dlsym(p->handle, "SetConfigDir");
             if(setConfigDir)
                 setConfigDir(configdir);
+            setInstallDir = dlsym(p->handle, "SetInstallDir");
+            if(setInstallDir)
+                setInstallDir(installdir);
         }
     }
 }

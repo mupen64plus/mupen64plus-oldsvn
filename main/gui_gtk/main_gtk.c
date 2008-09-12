@@ -92,9 +92,8 @@ void gui_init(int* argc, char*** argv)
     g_set_application_name(MUPEN_NAME);
 
     /* Setup gtk theme. */
-    g_MainWindow.iconTheme = gtk_icon_theme_get_default();
-    g_MainWindow.fallbackIcons = check_icon_theme();
-    g_signal_connect(g_MainWindow.iconTheme, "changed", G_CALLBACK(callback_theme_changed), NULL);
+    GtkIconTheme* icontheme = gtk_icon_theme_get_default();
+    g_signal_connect(icontheme, "changed", G_CALLBACK(callback_theme_changed), NULL);
     g_MainWindow.dialogErrorImage = g_MainWindow.dialogQuestionImage = NULL;
 
     create_mainWindow();
@@ -268,7 +267,7 @@ static gint callback_mainWindowDeleteEvent(GtkWidget* widget, GdkEvent* event, g
 /* If theme changes, update application with images from new theme, or fallbacks. */
 static void callback_theme_changed(GtkWidget* widget, gpointer data)
 {
-    g_MainWindow.fallbackIcons = check_icon_theme();
+    gboolean usefallbacks = check_icon_theme();
     short size = config_get_number("ToolbarSize", 22);
     int counter;
 
@@ -316,8 +315,11 @@ static void callback_theme_changed(GtkWidget* widget, gpointer data)
     set_icon(g_MainWindow.propertiesRombrowserImage, "document-properties", 16, FALSE);
     set_icon(g_MainWindow.refreshRombrowserImage, "view-refresh", 16, FALSE);
 
-    if(g_MainWindow.fallbackIcons)
-        star = gtk_icon_theme_load_icon(g_MainWindow.iconTheme, "gtk-about", 16, 0, NULL);
+    if(usefallbacks)
+        {
+        GtkIconTheme* icontheme = gtk_icon_theme_get_default();
+        star = gtk_icon_theme_load_icon(icontheme, "gtk-about", 16, 0, NULL);
+        }
     else
         star = gdk_pixbuf_new_from_file(get_iconpath("16x16/gtk-about.png"), NULL);
 

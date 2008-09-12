@@ -1460,7 +1460,7 @@ int main(int argc, char *argv[])
     }
     // scan the plugin directory and set the config dir for the plugins
     plugin_scan_directory(dirpath);
-    plugin_set_configdir(l_ConfigDir);
+    plugin_set_dirs(l_ConfigDir, l_InstallDir);
 
 #ifndef NO_GUI
     if(l_GuiEnabled)

@@ -741,7 +741,7 @@ EXPORT BOOL CALL InitiateGFX(GFX_INFO Gfx_Info)
     memset(&status, 0, sizeof(status));
     windowSetting.bDisplayFullscreen = FALSE;
     memcpy(&g_GraphicsInfo, &Gfx_Info, sizeof(GFX_INFO));
-    
+
     g_pRDRAMu8          = Gfx_Info.RDRAM;
     g_pRDRAMu32         = (uint32*)Gfx_Info.RDRAM;
     g_pRDRAMs8          = (signed char *)Gfx_Info.RDRAM;
@@ -755,6 +755,7 @@ EXPORT BOOL CALL InitiateGFX(GFX_INFO Gfx_Info)
     CGraphicsContext::InitWindowInfo();
     CGraphicsContext::InitDeviceParameters();
 
+    gui_init();
     return(TRUE);
 }
 

@@ -55,6 +55,7 @@ extern "C"
 #endif
    // returns 1 if the first button was clicked, 2 for the second and 3 for the third
    int messagebox( const char *title, int flags, const char *fmt, ... );
+   void gui_init();
 #ifdef __cplusplus
 }
 #endif

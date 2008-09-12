@@ -31,8 +31,6 @@ typedef struct
 {
     GtkWidget* window;
     GtkWidget* toplevelVBox;  /* Topevel vbox containing menubar, toolbar, filter, rombrowser, and statusbar. */
-    GtkIconTheme* iconTheme;
-    gboolean fallbackIcons; /* Are we using the icons from iconTheme or our own fallbacks. */
 
     GtkWidget* dialogErrorImage;
     GtkWidget* dialogQuestionImage;
