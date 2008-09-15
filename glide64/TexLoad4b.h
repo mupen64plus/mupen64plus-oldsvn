@@ -3056,7 +3056,7 @@ end_y_loop:
     "4:                     \n"  // end_y_loop2
     : [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
     : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
-    : "memory", "cc", "eax", "edx", "ebx"
+    : "memory", "cc", "eax", "edx"
     );
 #endif
 
@@ -3397,7 +3397,7 @@ end_y_loop:
     }
 #elif !defined(NO_ASM)
    //printf("Load4bI\n");
-   long lTempX, lTempY, lHeight = (long) height;
+   int lTempX, lTempY, lHeight = (int) height;
    asm volatile (
          "1:                     \n"  // y_loop3
          "mov %[c], %[tempy]     \n"
@@ -3715,7 +3715,7 @@ end_y_loop:
          "4:                     \n"  // end_y_loop3
          : [tempx]"=m"(lTempX), [tempy]"=m"(lTempY), [src] "+S"(src), [dst] "+D"(dst), [c]"+c"(lHeight)
          : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
-         : "memory", "cc", "eax", "edx", "ebx"
+         : "memory", "cc", "eax", "edx"
          );
 #endif
 
