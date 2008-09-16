@@ -106,9 +106,9 @@ static int write_cache_file(char* cache_filename)
 {
     gzFile* gzfile;
 
-    if((gzfile = gzopen(cache_filename,"wb"))==NULL)
+    if((gzfile = gzopen(cache_filename, "wb"))==NULL)
         {
-        printf("[rcs] Could not create cache file %s\n",cache_filename);
+        printf("[rcs] Could not create cache file %s\n", cache_filename);
         return 0;
         }
 
@@ -256,7 +256,7 @@ int rom_cache_system(void* _arg)
                 if(buffer==NULL)
                     {
                     buffer = (char*)malloc(PATH_MAX*sizeof(char));
-                    snprintf(buffer, sizeof(buffer), "%s%s", get_configpath(), "rombrowser.cache");
+                    snprintf(buffer, PATH_MAX, "%s%s", get_configpath(), "rombrowser.cache");
                     config_put_string("RomCacheFile", buffer);
                     }
 
