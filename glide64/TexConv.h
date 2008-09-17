@@ -117,7 +117,7 @@ tc1_loop:
          "mov %%ecx, (%[_dst])     \n"
          "add $4, %[_dst]          \n"
          
-         "dec %[_size]             \n"
+         "decl %[_size]            \n"
          "jnz 0b \n"
          : [_src]"+S"(_src), [_dst]"+D"(_dst), [_size]"+g"(_size)
          :
@@ -184,7 +184,7 @@ tc1_loop:
          "mov %%ecx, (%[_dst])     \n"
          "add $4, %[_dst]          \n"
          
-         "dec %[_size]             \n"
+         "decl %[_size]            \n"
          "jnz 0b \n"
          : [_src]"+S"(_src), [_dst]"+D"(_dst), [_size]"+g"(_size)
          :
@@ -313,7 +313,7 @@ tc1_loop:
          "mov %%ecx, (%[_dst])     \n"
          "add $4, %[_dst]          \n"
          
-         "dec %[_size]             \n"
+         "decl %[_size]            \n"
          "jnz 0b \n"
          : [_src]"+S"(_src), [_dst]"+D"(_dst), [_size]"+g"(_size)
          :
@@ -448,7 +448,7 @@ tc1_loop:
          "mov %%ecx, (%[_dst])     \n"
          "add $4, %[_dst]          \n"
          
-         "dec %[_size]             \n"
+         "decl %[_size]            \n"
          "jnz 0b \n"
          : [src]"+S"(_src), [_dst]"+D"(_dst), [_size]"+g"(_size)
          :
