@@ -46,7 +46,10 @@ romdatabase_entry empty_entry;
 
 /* All RCS thread and caching functions aren't needed if compiling GUI=NONE */
 #ifndef NO_GUI
-#include <libgen.h>
+
+#ifndef __WIN32__
+# include <libgen.h>
+#endif
 
 #include <iconv.h>
 
@@ -406,7 +409,7 @@ static void scan_dir(const char* directoryname)
         snprintf(filename, PATH_MAX-1, "%s%s", directoryname, directoryentry->d_name);
 
 #ifdef __WIN32__
-        snprintf(fullpath, PATH_MAX-1, "%s" filename);
+        snprintf(fullpath, PATH_MAX-1, "%s", filename);
 #else
         /* Use real path (maybe it's a link) */
         if(realpath(filename, fullpath))
