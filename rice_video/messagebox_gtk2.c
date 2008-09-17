@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h> 
 #include <sys/stat.h>
 
 #include <gtk/gtk.h>
@@ -33,14 +32,55 @@
 #include "messagebox.h"
 #include "support.h"
 
-#include "../main/gui_gtk/icontheme.h"
-
 static char l_IconDir[PATH_MAX] = {'\0'};
+static GtkIconTheme* icontheme;
+static gboolean usefallbacks;
 
-int isfile(char *path)
+gboolean check_icon_theme()
 {
-    struct stat sbuf;
-    return (stat(path, &sbuf) == 0) && S_ISREG(sbuf.st_mode);
+    icontheme = gtk_icon_theme_get_default();
+    if(gtk_icon_theme_has_icon(icontheme, "media-playback-start")&&
+       gtk_icon_theme_has_icon(icontheme, "media-playback-pause")&&
+       gtk_icon_theme_has_icon(icontheme, "media-playback-stop")&&
+       gtk_icon_theme_has_icon(icontheme, "view-fullscreen")&&
+       gtk_icon_theme_has_icon(icontheme, "preferences-system")&&
+       gtk_icon_theme_has_icon(icontheme, "dialog-warning")&&
+       gtk_icon_theme_has_icon(icontheme, "dialog-error")&&
+       gtk_icon_theme_has_icon(icontheme, "dialog-question")&&
+       gtk_icon_theme_has_icon(icontheme, "video-display")&&
+       gtk_icon_theme_has_icon(icontheme, "audio-card")&&
+       gtk_icon_theme_has_icon(icontheme, "input-gaming")&&
+       gtk_icon_theme_has_icon(icontheme, "window-close")&&
+       gtk_icon_theme_has_icon(icontheme, "document-save")&&
+       gtk_icon_theme_has_icon(icontheme, "document-save-as")&&
+       gtk_icon_theme_has_icon(icontheme, "document-revert")&&
+       gtk_icon_theme_has_icon(icontheme, "document-open")&&
+       gtk_icon_theme_has_icon(icontheme, "gtk-about"))
+        usefallbacks = TRUE;
+    else
+        usefallbacks = FALSE;
+
+    return usefallbacks;
+}
+
+/* Set image to a themed icon of size from gtk iconset or NULL unless using fallback. 
+ * Force allows for the use of packaged icons with a gtk iconset.
+ */
+void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force)
+{
+    GdkPixbuf* pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
+    if(pixbuf)
+        g_object_unref(pixbuf);
+
+    if(usefallbacks&&!force)
+        pixbuf = gtk_icon_theme_load_icon(icontheme, icon, size,  0, NULL);
+    else
+        {
+        char buffer[PATH_MAX];
+        snprintf(buffer, sizeof(buffer), "%s/%dx%d/%s.png", l_IconDir, size, size, icon);
+        pixbuf = gdk_pixbuf_new_from_file(buffer, NULL);
+        }
+    gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
 }
 
 /* If theme changes, update application with images from new theme, or fallbacks. */

@@ -47,7 +47,7 @@ OBJECTS = OGLGraphicsContext.o \
 	TextureManager.o \
 	RenderBase.o \
 	FrameBuffer.o \
-	messagebox.o \
+	messagebox_gtk2.o \
 	Texture.o \
 	TextureFilters_2xsai.o \
 	TextureFilters_hq2x.o \
