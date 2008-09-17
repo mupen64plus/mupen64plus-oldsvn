@@ -78,84 +78,84 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 void SettingsDialog::on_aboutAudioPluginButton_clicked()
 {
     QString text = audioPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_about_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_configAudioPluginButton_clicked()
 {
     QString text = audioPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_config_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_testAudioPluginButton_clicked()
 {
     QString text = audioPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_test_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_aboutGraphicsPluginButton_clicked()
 {
     QString text = graphicsPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_about_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_configGraphicsPluginButton_clicked()
 {
     QString text = graphicsPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_config_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_testGraphicsPluginButton_clicked()
 {
     QString text = graphicsPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_test_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_aboutRspPluginButton_clicked()
 {
     QString text = rspPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_about_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_configRspPluginButton_clicked()
 {
     QString text = rspPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_config_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_testRspPluginButton_clicked()
 {
     QString text = rspPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_test_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_aboutInputPluginButton_clicked()
 {
     QString text = inputPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_about_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_configInputPluginButton_clicked()
 {
     QString text = inputPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_config_with_wid(qPrintable(text), wid);
 }
 
 void SettingsDialog::on_testInputPluginButton_clicked()
 {
     QString text = inputPluginCombo->currentText();
-    core::HWND wid = static_cast<core::HWND>(winId());
+    core::HWND wid = (core::HWND) winId();
     core::plugin_exec_test_with_wid(qPrintable(text), wid);
 }
 
@@ -228,7 +228,7 @@ void SettingsDialog::readSettings()
     core::list_node_t *node;
     core::plugin *p;
     list_foreach(core::g_PluginList, node) {
-        p = static_cast<core::plugin*>(node->data);
+        p = reinterpret_cast<core::plugin*>(node->data);
         switch (p->type) {
             case PLUGIN_TYPE_GFX:
                 if(!core::g_GfxPlugin ||
