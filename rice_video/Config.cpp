@@ -528,7 +528,7 @@ bool isMMXSupported()
          "pop %%ebx            \n"
          : "=d"(IsMMXSupported)
          :
-         : "memory", "cc", "eax"
+         : "memory", "cc", "eax", "ecx"
          );
 #endif
     if (IsMMXSupported != 0) 
@@ -560,7 +560,7 @@ bool isSSESupported()
          "pop %%ebx                        \n"
          : "=d"(SSESupport)
          :
-         : "memory", "cc"
+         : "memory", "cc", "eax", "ecx"
          );
 # endif
     
