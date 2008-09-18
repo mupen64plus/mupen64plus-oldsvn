@@ -58,6 +58,9 @@ void dyna_jump()
 #endif
 
 static long save_ebp ASM_NAME("save_ebp") = 0;
+static long save_ebx ASM_NAME("save_ebx") = 0;
+static long save_esi ASM_NAME("save_esi") = 0;
+static long save_edi ASM_NAME("save_edi") = 0;
 static long save_esp ASM_NAME("save_esp") = 0;
 static long save_eip ASM_NAME("save_eip") = 0;
 
@@ -88,6 +91,9 @@ void dyna_start(void (*code)())
    asm volatile 
       (" movl %%ebp, save_ebp \n"
        " movl %%esp, save_esp \n"
+       " movl %%ebx, save_ebx \n"
+       " movl %%esi, save_esi \n"
+       " movl %%edi, save_edi \n"
        " call 1f              \n"
        " jmp 2f               \n"
        "1:                    \n"
@@ -97,6 +103,9 @@ void dyna_start(void (*code)())
        "2:                    \n"
        " movl save_ebp, %%ebp \n"
        " movl save_esp, %%esp \n"
+       " movl save_ebx, %%ebx \n"
+       " movl save_esi, %%esi \n"
+       " movl save_edi, %%edi \n"
        :
        : [codeptr]"r"(code)
        : "%eax", "memory"
@@ -107,6 +116,10 @@ void dyna_start(void (*code)())
     dynarec_stack_initialized = 0;
 
     /* clear the registers so we don't return here a second time; that would be a bug */
+    /* this is also necessary to prevent compiler from optimizing out the static variables */
+    save_edi=0;
+    save_esi=0;
+    save_ebx=0;
     save_ebp=0;
     save_esp=0;
     save_eip=0;
