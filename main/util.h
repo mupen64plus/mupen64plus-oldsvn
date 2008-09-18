@@ -76,6 +76,7 @@ void *list_last_data(list_t list);
 int inline list_empty(list_t list);
 int list_length(list_t list);
 list_node_t *list_find_node(list_t list, void *data);
+char* dirfrompath(const char* string);
 
 /* GUI utilities */
 void countrycodestring(unsigned short countrycode, char *string);

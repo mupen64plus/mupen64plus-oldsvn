@@ -726,3 +726,27 @@ void playersstring(unsigned char players, char *string)
     sprintf(string, "%d %s", players, (netplay) ? "Netplay" : "");
 }
 
+char* dirfrompath(const char* string)
+{
+    int stringlength, counter;
+    char* buffer;
+
+    stringlength = strlen(string);
+
+    for(counter = stringlength; counter > 0; --counter)
+        {
+        if(string[counter]=='/')
+            {
+            ++counter;
+            break;
+            }
+        }
+
+    buffer = (char*)malloc((counter+1)*sizeof(char));
+    strncpy(buffer, string, counter);
+    buffer[counter] = '\0';
+    return buffer;
+}
+
+
+

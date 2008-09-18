@@ -46,11 +46,6 @@ romdatabase_entry empty_entry;
 
 /* All RCS thread and caching functions aren't needed if compiling GUI=NONE */
 #ifndef NO_GUI
-
-#ifndef __WIN32__
-# include <libgen.h>
-#endif
-
 #include <iconv.h>
 
 #include <errno.h>
@@ -150,7 +145,7 @@ static int write_cache_file(char* cache_filename)
 
 static void rebuild_cache_file(char* cache_filename)
 {
-    char path[PATH_MAX], buffer1[PATH_MAX], buffer2[PATH_MAX];
+    char path[PATH_MAX], buffer[PATH_MAX];
     char* file;
     unsigned char match;
     int counter, oldlength;
@@ -168,8 +163,8 @@ static void rebuild_cache_file(char* cache_filename)
             {
             for(match = counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
                 {
-                snprintf(buffer1, sizeof(buffer1), "RomDirectory[%d]", counter);
-                snprintf(path, sizeof(path), "%s", config_get_string(buffer1, "/"));
+                snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
+                snprintf(path, sizeof(path), "%s", config_get_string(buffer, "/"));
 
                 if(config_get_bool("RomDirsScanRecursive", FALSE))
                     {
@@ -181,15 +176,14 @@ static void rebuild_cache_file(char* cache_filename)
                     }
                 else
                     {
-                    snprintf(buffer1, sizeof(buffer1), "%s", entry->filename); /* Linux dirname may modify string. */
-                    file = dirname(buffer1); 
-                    snprintf(buffer2, sizeof(buffer2), "%s/", file);
-
-                    if(strlen(buffer2)==strlen(path)&&strncmp(buffer2, path, strlen(path))==0)
+                    file = dirfrompath(entry->filename);
+                    if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
                         {
+                        free(file);
                         match = 1;
                         break;
                         }
+                    free(file);
                     }
                 }
 
@@ -223,8 +217,8 @@ static void rebuild_cache_file(char* cache_filename)
     /* Re-scan directories. */
     for(counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
         {
-        snprintf(buffer1, sizeof(buffer1), "RomDirectory[%d]", counter);
-        snprintf(path, sizeof(path), "%s", config_get_string(buffer1, ""));
+        snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
+        snprintf(path, sizeof(path), "%s", config_get_string(buffer, ""));
         if(path[strlen(path)-1]!='/')
             snprintf(path, sizeof(path), "%s/", path);
         printf("Scanning... %s\n", path);
@@ -417,7 +411,7 @@ static void scan_dir(const char* directoryname)
 #endif
 
         /* If we can't get information, move to next file. */
-        if(stat(fullpath,&filestatus)==-1)
+        if(stat(fullpath, &filestatus)==-1)
             {
             printf("Could not open file '%s': %s\n", fullpath, strerror(errno));
             continue; 
@@ -428,7 +422,8 @@ static void scan_dir(const char* directoryname)
             {
             if(S_ISDIR(filestatus.st_mode))
                 {
-                snprintf(filename, sizeof(filename), "%s/", filename);
+                strncat(filename, "/", sizeof(filename));
+                filename[sizeof(filename)-1] = '\0';
                 scan_dir(filename);
                 continue;
                 }
@@ -548,7 +543,7 @@ static void scan_dir(const char* directoryname)
                         if(entry==NULL)
                             {
                             fprintf(stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__);
-                            continue;
+                            continue; 
                             }
                         }
                     }

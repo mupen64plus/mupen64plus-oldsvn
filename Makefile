@@ -237,10 +237,11 @@ PLUGINS	= plugins/blight_input.so \
           plugins/glN64.so \
           plugins/jttl_audio.so \
           plugins/mupen64_hle_rsp_azimer.so \
-          plugins/mupen64_input.so
+          plugins/mupen64_input.so \
+          plugins/ricevideo.so
 
 ifneq ($(OS), OSX)
-  PLUGINS += plugins/ricevideo.so plugins/glide64.so
+  PLUGINS += plugins/glide64.so
 endif
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
