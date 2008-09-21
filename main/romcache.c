@@ -71,14 +71,15 @@ romdatabase_entry empty_entry;
 #define RCS_VERSION "RCS1.1"
 
 rom_cache g_romcache;
+static char cache_filename[PATH_MAX];
 
 static const char* romextensions[] =
 {
  ".v64", ".z64", ".n64", ".gz", ".zip", ".bz2", ".lzma", ".7z", NULL
 };
 
-static void scan_dir(const char* dirname);
-int load_initial_cache(char* cache_filename);
+static void scan_dir(const char* dirname, int* romcounter);
+int load_initial_cache();
 void update_rombrowser(unsigned int roms, unsigned short clear);
 
 static void clear_cache()
@@ -100,7 +101,7 @@ static void clear_cache()
         }
 }
 
-static int write_cache_file(char* cache_filename)
+static int write_cache_file()
 {
     gzFile* gzfile;
 
@@ -143,7 +144,7 @@ static int write_cache_file(char* cache_filename)
     return 1;
 }
 
-static void rebuild_cache_file(char* cache_filename)
+static void rebuild_cache_file()
 {
     char path[PATH_MAX], buffer[PATH_MAX];
     char* file;
@@ -214,18 +215,23 @@ static void rebuild_cache_file(char* cache_filename)
 
     g_romcache.last = entryprevious;
 
+    int romcounter = 0;
+
     /* Re-scan directories. */
     for(counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
         {
         snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
         snprintf(path, sizeof(path), "%s", config_get_string(buffer, ""));
         if(path[strlen(path)-1]!='/')
-            snprintf(path, sizeof(path), "%s/", path);
+            {
+            strncat(path, "/", sizeof(path));
+            path[sizeof(path)-1] = '\0';
+            }
         printf("Scanning... %s\n", path);
-        scan_dir(path);
+        scan_dir(path, &romcounter);
         }
 
-    write_cache_file(cache_filename);
+    write_cache_file();
 }
 
 /* Entry point for the RCS thread. Sets up local variables and enters task loop.
@@ -236,7 +242,6 @@ static void rebuild_cache_file(char* cache_filename)
 int rom_cache_system(void* _arg)
 {
     char* buffer;
-    char cache_filename[PATH_MAX];
     g_romcache.rcspause = 0;
     g_romcache.clear = 0;
 
@@ -259,12 +264,12 @@ int rom_cache_system(void* _arg)
 
                 snprintf(cache_filename, sizeof(cache_filename), "%s", buffer);
 
-                if(load_initial_cache(cache_filename))
+                if(load_initial_cache())
                     update_rombrowser(g_romcache.length, g_romcache.clear);
 
                 remove(cache_filename);
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
-                rebuild_cache_file(cache_filename);
+                rebuild_cache_file();
                 update_rombrowser(g_romcache.length, g_romcache.clear);
 
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
@@ -274,7 +279,7 @@ int rom_cache_system(void* _arg)
             case RCS_WRITE_CACHE:
                 g_romcache.rcstask = RCS_BUSY;
                 remove(cache_filename);
-                write_cache_file(cache_filename);
+                write_cache_file();
                 if(g_romcache.rcstask==RCS_BUSY)
                     g_romcache.rcstask = RCS_SLEEP;
                 break;
@@ -282,7 +287,7 @@ int rom_cache_system(void* _arg)
                 g_romcache.rcstask = RCS_BUSY;
 
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
-                rebuild_cache_file(cache_filename);
+                rebuild_cache_file();
                 update_rombrowser(g_romcache.length, g_romcache.clear);
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
                 g_romcache.clear = 0;
@@ -373,7 +378,7 @@ void fill_entry(cache_entry* entry, unsigned char* localrom)
         }
 }
 
-static void scan_dir(const char* directoryname)
+static void scan_dir(const char* directoryname, int* romcounter)
 {
     char filename[PATH_MAX];
     char fullpath[PATH_MAX];
@@ -394,7 +399,6 @@ static void scan_dir(const char* directoryname)
         }
 
     int counter;
-    int romcounter=0;
 
     while ((directoryentry = readdir(directory)))
         {
@@ -424,7 +428,7 @@ static void scan_dir(const char* directoryname)
                 {
                 strncat(filename, "/", sizeof(filename));
                 filename[sizeof(filename)-1] = '\0';
-                scan_dir(filename);
+                scan_dir(filename, romcounter);
                 continue;
                 }
             }
@@ -525,11 +529,12 @@ static void scan_dir(const char* directoryname)
                     ++g_romcache.length;
                     }
                 printf("Added ROM: %s\n", entry->inientry->goodname);
-                ++romcounter;
-                if(romcounter%UPDATE_FREQUENCY==0)
+                ++*romcounter;
+                if(*romcounter%UPDATE_FREQUENCY==0)
                     {
                     update_rombrowser(g_romcache.length, g_romcache.clear); 
                     main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Added ROMs %d-%d."), g_romcache.length-UPDATE_FREQUENCY+1, g_romcache.length);
+                    write_cache_file();
                     }
 
                 if(entry->compressiontype==ZIP_COMPRESSION||entry->compressiontype==SZIP_COMPRESSION)
@@ -563,7 +568,7 @@ static void scan_dir(const char* directoryname)
      closedir(directory);
  }
 
-int load_initial_cache(char* cache_filename)
+int load_initial_cache()
 {
     int counter;
     char header[6];
