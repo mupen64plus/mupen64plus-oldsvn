@@ -234,7 +234,9 @@ void InitVertexTextureConstants();
 bool PrepareTriangle(uint32 dwV0, uint32 dwV1, uint32 dwV2);
 bool IsTriangleVisible(uint32 dwV0, uint32 dwV1, uint32 dwV2);
 extern void (*ProcessVertexData)(uint32 dwAddr, uint32 dwV0, uint32 dwNum);
+#if !defined(NO_ASM)
 void ProcessVertexDataSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum);
+#endif
 void ProcessVertexDataNoSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum);
 void ProcessVertexDataExternal(uint32 dwAddr, uint32 dwV0, uint32 dwNum);
 void SetPrimitiveColor(uint32 dwCol, uint32 LODMin, uint32 LODFrac);

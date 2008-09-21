@@ -722,12 +722,14 @@ void ReadConfiguration(void)
     }
 
     status.isSSEEnabled = status.isSSESupported && options.bEnableSSE;
+#if !defined(NO_ASM)
     if( status.isSSEEnabled )
     {
         ProcessVertexData = ProcessVertexDataSSE;
         printf("[RiceVideo] SSE processing enabled.\n");
     }
     else
+#endif
     {
         ProcessVertexData = ProcessVertexDataNoSSE;
         printf("[RiceVideo] Disabled SSE processing.\n");
@@ -2278,9 +2280,12 @@ for (i=0; (size_t)i<sizeof(colorQualitySettings)/sizeof(SettingInfo); i++)
 options.colorQuality = colorQualitySettings[i].setting;
 options.bEnableSSE = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->enableSSECheckButton));
 status.isSSEEnabled = status.isSSESupported && options.bEnableSSE;
+
+#if !defined(NO_ASM)
 if (status.isSSEEnabled) 
    ProcessVertexData = ProcessVertexDataSSE;
 else
+#endif
    ProcessVertexData = ProcessVertexDataNoSSE;
 
 options.bSkipFrame = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->skipFrameCheckButton));
