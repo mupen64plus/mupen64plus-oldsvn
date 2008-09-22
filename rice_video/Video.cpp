@@ -208,22 +208,22 @@ void StartVideo(void)
 
     g_CritialSection.Lock();
 
-    if(g_GraphicsInfo.HEADER[0]==0x40)
+    memcpy(&g_curRomInfo.romheader, g_GraphicsInfo.HEADER, sizeof(ROMHeader));
+
+    unsigned int i;
+    unsigned char temp;
+    unsigned char* header = (unsigned char*)&g_curRomInfo.romheader;
+
+    for (i = 0; i < sizeof(ROMHeader)/4; ++i)
         {
-        unsigned int i;
-        BYTE temp;
-        for (i = 0; i < sizeof(ROMHeader)/4; ++i)
-            {
-            temp=g_GraphicsInfo.HEADER[i*4];
-            g_GraphicsInfo.HEADER[i*4]=g_GraphicsInfo.HEADER[i*4+3];
-            g_GraphicsInfo.HEADER[i*4+3]=temp;
-            temp=g_GraphicsInfo.HEADER[i*4+1];
-            g_GraphicsInfo.HEADER[i*4+1]=g_GraphicsInfo.HEADER[i*4+2];
-            g_GraphicsInfo.HEADER[i*4+2]=temp;
-            }
+        temp=header[i*4];
+        header[i*4]=header[i*4+3];
+        header[i*4+3]=temp;
+        temp=header[i*4+1];
+        header[i*4+1]=header[i*4+2];
+        header[i*4+2]=temp;
         }
 
-    memcpy(&g_curRomInfo.romheader, g_GraphicsInfo.HEADER, sizeof(ROMHeader));
     ROM_GetRomNameFromHeader(g_curRomInfo.szGameName, &g_curRomInfo.romheader);
     Ini_GetRomOptions(&g_curRomInfo);
     char *p = (char *) g_curRomInfo.szGameName + (strlen((char *) g_curRomInfo.szGameName) -1);     // -1 to skip null
