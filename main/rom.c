@@ -78,14 +78,14 @@ int is_valid_rom(unsigned char buffer[4])
  */
 void swap_rom(unsigned char* localrom, unsigned char *imagetype, int loadlength)
 {
-    char temp;
+    unsigned char temp;
     int i;
 
     //Btyeswap if .v64 image.
     if(localrom[0]==0x37)
         {
         *imagetype = V64IMAGE;
-        for ( i = 0; i < (loadlength/2); ++i )
+        for (i = 0; i < (loadlength/2); ++i)
             {
             temp=localrom[i*2];
             localrom[i*2]=localrom[i*2+1];
@@ -96,7 +96,7 @@ void swap_rom(unsigned char* localrom, unsigned char *imagetype, int loadlength)
     else if(localrom[0]==0x40)
         {
         *imagetype = N64IMAGE;
-        for ( i = 0; i < (loadlength/4); ++i )
+        for (i = 0; i < (loadlength/4); ++i)
             {
             temp=localrom[i*4];
             localrom[i*4]=localrom[i*4+3];

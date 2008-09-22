@@ -25,7 +25,7 @@ USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DUSE_GTK -fpic -DPIC -Wall
+CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -fpic -DPIC -Wall
 LDFLAGS	+= $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
 # set options
@@ -47,7 +47,6 @@ OBJECTS = OGLGraphicsContext.o \
 	TextureManager.o \
 	RenderBase.o \
 	FrameBuffer.o \
-	messagebox_gtk2.o \
 	Texture.o \
 	TextureFilters_2xsai.o \
 	TextureFilters_hq2x.o \
@@ -72,7 +71,6 @@ OBJECTS = OGLGraphicsContext.o \
 	ConvertImage16.o \
 	DecodedMux.o \
 	RenderTexture.o \
-	support.o \
 	liblinux/BMGUtils.o \
 	liblinux/pngread.o \
 	liblinux/png.o \
@@ -105,6 +103,15 @@ OBJECTS = OGLGraphicsContext.o \
 	liblinux/inftrees.o \
 	liblinux/inffast.o \
 	OGLRenderExt.o
+
+GTKOBJECTS = \
+	gui_gtk2/messagebox_gtk2.o
+
+ifeq ($(GUI), GTK2)
+  LDFLAGS += $(GTK_LIBS)
+  CFLAGS += -DUSE_GTK $(GTK_FLAGS)
+  OBJECTS += $(GTKOBJECTS)
+endif
 
 # build targets
 targets:
