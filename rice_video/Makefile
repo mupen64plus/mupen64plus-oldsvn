@@ -25,7 +25,7 @@ USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -fpic -DPIC -Wall
+CFLAGS += $(SDL_FLAGS) -fpic -DPIC -Wall
 LDFLAGS	+= $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
 # set options
@@ -36,7 +36,7 @@ endif
 
 # list of object files to generate
 OBJECTS = OGLGraphicsContext.o \
-    Debugger.o \
+	Debugger.o \
 	Video.o \
 	Config.o \
 	GraphicsContext.o \
@@ -148,5 +148,4 @@ version.h: .svn/entries
 
 .c.o:
 	$(CC) -o $*.o $(CFLAGS) -c $<
-
 
