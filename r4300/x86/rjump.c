@@ -108,7 +108,7 @@ void dyna_start(void (*code)())
        " movl save_edi, %%edi \n"
        :
        : [codeptr]"r"(code)
-       : "%eax", "memory"
+       : "eax", "ecx", "edx", "memory"
        );
 #endif
 
