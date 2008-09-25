@@ -762,7 +762,7 @@ BOOL InitGfx (BOOL evoodoo_using_window)
   
   // get the # of TMUs available
   grGet (GR_NUM_TMU, 4, (FxI32 *) &num_tmu);
-  printf("num_tmu %ld\n", num_tmu);
+  printf("num_tmu %d\n", num_tmu);
   // get maximal texture size
   grGet (GR_MAX_TEXTURE_SIZE, 4, (FxI32 *) &max_tex_size);
   //num_tmu = 1;
