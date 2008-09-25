@@ -22,6 +22,7 @@
 #include <stdlib.h>
 
 #include "recomp.h"
+#include "recomph.h" //include for function prototypes
 #include "macros.h"
 #include "r4300.h"
 #include "ops.h"
