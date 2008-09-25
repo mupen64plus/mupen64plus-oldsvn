@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <unistd.h> /* close() */
 #include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
@@ -65,6 +66,7 @@ void volSet(int percent)
 
 /* volGet
  *  Returns volume of PCM channel as a percentage (0-100).
+ *  Returns 0 on error.
  */
 int volGet(void)
 {
@@ -74,7 +76,7 @@ int volGet(void)
     if(mixerfd < 0)
     {
         perror("/dev/mixer: ");
-        return;
+        return 0;
     }
 
 #if defined(__linux__)

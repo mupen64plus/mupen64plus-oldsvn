@@ -27,6 +27,7 @@
 
 #include "gui.h"
 #include "gui_gtk2.h"
+#include "main.h"
 
 #include "../main/winlnxdefs.h"
 #include "../main/version.h"
