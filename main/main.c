@@ -32,6 +32,7 @@
 #endif
 
 #include <sys/time.h>
+#include <sys/stat.h> /* mkdir() */
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -65,6 +66,10 @@
 #include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
 
+#ifndef NO_GUI
+#include "gui.h"
+#endif
+
 #ifdef DBG
 #include <glib.h>
 #include "../debugger/debugger.h"
@@ -76,7 +81,6 @@
 
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
-static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
 static int emulationThread( void *_arg );
 extern int rom_cache_system( void *_arg );
 
@@ -755,7 +759,7 @@ static int sdl_event_filter( const SDL_Event *event )
             }
             else if(strcmp(event_str, config_get_string("Joy Mapping Increase Volume", "")) == 0)
             {
-                volumeUp;
+                volumeUp();
                 main_draw_volume_osd();
             }
 

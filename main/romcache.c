@@ -155,63 +155,63 @@ static void rebuild_cache_file()
     /* Scrub cache, if user removed rom directories remove roms. */
     cache_entry *entry, *entryprevious, *entrynext;
 
-    if(g_romcache.length!=0)
+    if(g_romcache.length==0)
+        return;
+
+    oldlength = g_romcache.length;
+
+    entryprevious = entry = g_romcache.top;
+    while (entry != NULL)
         {
-        oldlength = g_romcache.length;
-
-        entryprevious = entry = g_romcache.top;
-         while (entry != NULL)
+        for(match = counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
             {
-            for(match = counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
-                {
-                snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
-                snprintf(path, sizeof(path), "%s", config_get_string(buffer, "/"));
+            snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
+            snprintf(path, sizeof(path), "%s", config_get_string(buffer, "/"));
 
-                if(config_get_bool("RomDirsScanRecursive", FALSE))
+            if(config_get_bool("RomDirsScanRecursive", FALSE))
+                {
+                if(strncmp(entry->filename, path, strlen(path))==0)
                     {
-                    if(strncmp(entry->filename, path, strlen(path))==0)
-                        {
-                        match = 1;
-                        break;
-                        }
+                    match = 1;
+                    break;
                     }
-                else
+                }
+            else
+                {
+                file = dirfrompath(entry->filename);
+                if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
                     {
-                    file = dirfrompath(entry->filename);
-                    if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
-                        {
-                        free(file);
-                        match = 1;
-                        break;
-                        }
                     free(file);
+                    match = 1;
+                    break;
                     }
+                free(file);
                 }
+            }
 
-            /* Check rom is valid. */
-            if(!match||stat(entry->filename, &filestatus)==-1)
-                {
-                if(entry==g_romcache.top)
-                    g_romcache.top = entry->next; 
-                if(entryprevious)
-                  entryprevious->next = entry->next;
-                entrynext = entry->next;
-                entry = NULL;
-                free(entry);
-                --g_romcache.length;
-                }
-           else
-                {
-                entrynext = entry->next;
-                entryprevious = entry;
-                }
+        /* Check rom is valid. */
+        if(!match||stat(entry->filename, &filestatus)==-1)
+            {
+            if(entry==g_romcache.top)
+                g_romcache.top = entry->next; 
+            if(entryprevious)
+                entryprevious->next = entry->next;
+            entrynext = entry->next;
+            entry = NULL;
+            free(entry);
+            --g_romcache.length;
+            }
+        else
+            {
+            entrynext = entry->next;
+            entryprevious = entry;
+            }
 
-            entry = entrynext;
-            };
+        entry = entrynext;
+        };
 
-        if(g_romcache.length!=oldlength)
-            g_romcache.clear = 1;
-        }
+    if(g_romcache.length!=oldlength)
+        g_romcache.clear = 1;
 
     g_romcache.last = entryprevious;
 

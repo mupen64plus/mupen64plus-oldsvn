@@ -8,7 +8,7 @@
  * If you want to contribute to the project please contact
  * me first (maybe someone is already making what you are
  * planning to do).
- *
+ * 
  *
  * This program is free software; you can redistribute it and/
  * or modify it under the terms of the GNU General Public Li-
@@ -138,44 +138,44 @@ char *event_to_str(const SDL_Event *event)
  *    Returns 1 if the specified joystick event is currently active. This
  *    function expects an input string of the same form output by event_to_str.
  */
-int event_active(const char *event_str)
+int event_active(const char* event_str)
 {
     char device, joy_input_type, axis_direction;
     int dev_number, input_number, input_value;
     SDL_Joystick *joystick = NULL;
 
-    // empty string
-    if(!event_str || strlen(event_str) == 0) return 0;
+    /* Empty string. */
+    if(!event_str||strlen(event_str)==0)
+        return 0;
 
-    // joystick event
-    if(event_str[0] == 'J')
-    {
-        // parse string depending on type of joystick input
-        switch(event_str[2])
+    /* Parse string depending on type of joystick input. */
+    if(event_str[0]=='J')
         {
-            // axis
+        switch(event_str[2])
+            {
+            /* Axis. */
             case 'A':
                 sscanf(event_str, "%c%d%c%d%c", &device, &dev_number,
                        &joy_input_type, &input_number, &axis_direction);
                 break;
-            // hat
+            /* Hat. ??? */
             case 'H':
                 sscanf(event_str, "%c%d%c%dV%d", &device, &dev_number,
                        &joy_input_type, &input_number, &input_value);
                 break;
-            // button
+            /* Button. */
             case 'B':
                 sscanf(event_str, "%c%d%c%d", &device, &dev_number,
                        &joy_input_type, &input_number);
                 break;
-        }
+            }
 
         joystick = SDL_JoystickOpen(dev_number);
         SDL_JoystickUpdate();
         switch(joy_input_type)
-        {
+            {
             case 'A':
-                if(axis_direction == '-')
+                if(axis_direction=='-')
                     return SDL_JoystickGetAxis(joystick, input_number) < -15000;
                 else
                     return SDL_JoystickGetAxis(joystick, input_number) > 15000;
@@ -187,17 +187,14 @@ int event_active(const char *event_str)
             case 'H':
                 return SDL_JoystickGetHat(joystick, input_number) == input_value;
                 break;
-            default:
-                return 0;
-                break;
+            }
         }
-    }
 
-    // keyboard event
-    if(event_str[0] == 'K')
-    {
-        // TODO
-    }
+    /* TODO: Keyboard event. */
+    /* if(event_str[0]=='K') */
+
+    /* Undefined event. */
+    return 0;
 }
 
 /** key_pressed

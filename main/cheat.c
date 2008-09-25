@@ -51,7 +51,7 @@ static unsigned short read_address_16bit(unsigned int address)
 
 static unsigned short read_address_8bit(unsigned int address)
 {
-    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8)));
+    return *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8)));
 }
 
 static void update_address_16bit(unsigned int address, unsigned short new_value)

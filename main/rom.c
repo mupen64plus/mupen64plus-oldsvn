@@ -1,33 +1,31 @@
-/**
- * Mupen64plus - rom.c
- * Copyright (C) 2008 Tillin9
- * based on work in Mupen64 (C) 2002 Hacktarux
- *
- * http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - rom.c                                                   *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Tillin9                                            *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
-#include <zlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <limits.h> 
+#include <limits.h>
+#include <zlib.h>
 
 #include "zip/unzip.h"
 #include "bzip2/bzlib.h"
@@ -37,35 +35,39 @@
 
 #include "md5.h"
 #include "rom.h"
-#include "../memory/memory.h"
 #include "romcache.h"
 #include "translate.h"
 #include "main.h"
-#include "../opengl/osd.h"
 #include "util.h"
 
-#define CHUNKSIZE 1024*128 //Read files 128KB at a time.
+#include "../memory/memory.h"
+#include "../opengl/osd.h"
 
-//Global loaded rom memory space.
+#define CHUNKSIZE 1024*128 /* Read files 128KB at a time. */
+
+#ifndef NO_GUI
+#include "gui.h"
+#endif
+
+/* Global loaded rom memory space. */
 unsigned char* rom;
-//Global loaded rom size.
+/* Global loaded rom size. */
 int taille_rom;
 
-//Possibly replace with a glocal cache_entry?
-//Global loaded rom header information.
+/* TODO: Replace with a glocal cache_entry. */
 rom_header* ROM_HEADER;
 rom_settings ROM_SETTINGS;
 
-//Tests if a file is a valid N64 rom by checking the first 4 bytes.
+/* Tests if a file is a valid N64 rom by checking the first 4 bytes. */
 int is_valid_rom(unsigned char buffer[4])
 {
-    //Test if rom is a native .z64 image with header 0x80371240. [ABCD]
+    /* Test if rom is a native .z64 image with header 0x80371240. [ABCD] */
     if((buffer[0]==0x80)&&(buffer[1]==0x37)&&(buffer[2]==0x12)&&(buffer[3]==0x40))
         return 1;
-    //Test if rom is a byteswapped .v64 image with header 0x37804012. [BADC]
+    /* Test if rom is a byteswapped .v64 image with header 0x37804012. [BADC] */
     else if((buffer[0]==0x37)&&(buffer[1]==0x80)&&(buffer[2]==0x40)&&(buffer[3]==0x12))
         return 1;
-    //Test if rom is a wordswapped .n64 image with header  0x40123780. [DCBA]
+    /* Test if rom is a wordswapped .n64 image with header  0x40123780. [DCBA] */
     else if((buffer[0]==0x40)&&(buffer[1]==0x12)&&(buffer[2]==0x37)&&(buffer[3]==0x80))
         return 1;
     else
@@ -76,34 +78,34 @@ int is_valid_rom(unsigned char buffer[4])
  * rom data to native .z64 before forwarding. Makes sure that data extraction
  * and MD5ing routines always deal with a .z64 image.
  */
-void swap_rom(unsigned char* localrom, unsigned char *imagetype, int loadlength)
+void swap_rom(unsigned char* localrom, unsigned char* imagetype, int loadlength)
 {
     unsigned char temp;
     int i;
 
-    //Btyeswap if .v64 image.
+    /* Btyeswap if .v64 image. */
     if(localrom[0]==0x37)
         {
         *imagetype = V64IMAGE;
-        for (i = 0; i < (loadlength/2); ++i)
+        for (i = 0; i < loadlength; i+=2)
             {
-            temp=localrom[i*2];
-            localrom[i*2]=localrom[i*2+1];
-            localrom[i*2+1]=temp;
+            temp=localrom[i];
+            localrom[i]=localrom[i+1];
+            localrom[i+1]=temp;
             }
         }
-    //Wordswap if .n64 image.
+    /* Wordswap if .n64 image. */
     else if(localrom[0]==0x40)
         {
         *imagetype = N64IMAGE;
-        for (i = 0; i < (loadlength/4); ++i)
+        for (i = 0; i < loadlength; i+=4)
             {
-            temp=localrom[i*4];
-            localrom[i*4]=localrom[i*4+3];
-            localrom[i*4+3]=temp;
-            temp=localrom[i*4+1];
-            localrom[i*4+1]=localrom[i*4+2];
-            localrom[i*4+2]=temp;
+            temp=localrom[i];
+            localrom[i]=localrom[1+3];
+            localrom[i+3]=temp;
+            temp=localrom[i+1];
+            localrom[i+1]=localrom[i+2];
+            localrom[i+2]=temp;
             }
         }
     else
@@ -122,7 +124,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
     unsigned char* localrom;
 
     FILE* romfile;
-    //Uncompressed roms.
+    /* Uncompressed roms. */
     romfile=fopen(filename, "rb");
     if(romfile!=NULL)
         {
@@ -144,7 +146,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
             }
         if(romread==0)
             {
-            //Bzip2 roms.
+            /* Bzip2 roms. */
             BZFILE* bzromfile;
             int bzerror;
             fseek(romfile, 0L, SEEK_SET);
@@ -183,7 +185,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
             }
         if(romread==0)
             {
-            //LZMA roms.
+            /* LZMA roms. */
             fseek(romfile, 0L, SEEK_SET);
             int lzmastatus;
             lzmadec_stream stream;
@@ -193,10 +195,10 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
             stream.avail_in = 0;
             stream.next_in = NULL;
 
-            //Minimum size to get decoded blocks back is 45.
-            //LZMA has 13 byte headers, likely 32 byte internal buffer.
-            unsigned char *buffer_in = (unsigned char*)malloc(45*sizeof(unsigned char));
-            unsigned char *buffer_out = (unsigned char*)malloc(45*128*sizeof(unsigned char));
+            /* Minimum size to get decoded blocks back is 45.
+           LZMA has 13 byte headers, likely 32 byte internal buffer. */
+            unsigned char* buffer_in = (unsigned char*)malloc(45*sizeof(unsigned char));
+            unsigned char* buffer_out = (unsigned char*)malloc(45*128*sizeof(unsigned char));
             if(buffer_in==NULL||buffer_out==NULL||lzmadec_init(&stream)!=LZMADEC_OK)
                 {
                 fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
@@ -226,7 +228,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
                     return NULL;
                     }
 
-                memcpy(localrom,buffer_out,*romsize);
+                memcpy(localrom,buffer_out, *romsize);
                 while(lzmastatus==LZMADEC_OK)
                     {
                     fread(buffer_in, sizeof(unsigned char), CHUNKSIZE, romfile);
@@ -261,10 +263,10 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
         fclose(romfile);
         }
 
-    //Gzipped roms.
+    /* Gzipped roms. */
     if(romread==0)
         {
-        gzFile *gzromfile;
+        gzFile* gzromfile;
         gzromfile=gzopen(filename, "rb");
         if(gzromfile!=NULL)
             {
@@ -297,7 +299,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
             }
         }
 
-    //File invalid, or valid rom not found in file.
+    /* File invalid, or valid rom not found in file. */
     if(romread==0)
         return NULL;
 
@@ -317,7 +319,7 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
     unsigned short romread = 0;
     unsigned char* localrom;
 
-    //Zip roms.
+    /* Zip roms. */
     unsigned char buffer[4];
     unzFile zipromfile;
     unz_file_info fileinfo;
@@ -326,7 +328,7 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
     if(zipromfile!=NULL) 
         {
         unzGoToFirstFile(zipromfile);
-        //Get first valid rom in archive.
+        /* Get first valid rom in archive. */
         do
             {
             unzGetCurrentFileInfo(zipromfile, &fileinfo, szFileName, 255, 
@@ -354,12 +356,12 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
                 }
             ++filecounter;
             }
-        while (status=(unzGoToNextFile(zipromfile)) != UNZ_END_OF_LIST_OF_FILE);
+        while ((status=unzGoToNextFile(zipromfile)) != UNZ_END_OF_LIST_OF_FILE);
         unzClose(zipromfile);
         }
     else
         {
-        //7zip 
+        /* 7zip */
         ISzAlloc allocImp;
         allocImp.Free = SzFree;
         allocImp.Alloc = SzAlloc;
@@ -419,7 +421,7 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
             }
         }
 
-    //File invalid, or valid rom not found in file.
+    /* File invalid, or valid rom not found in file. */
     if(romread==0)
         return NULL;
 
@@ -473,7 +475,7 @@ int open_rom(const char* filename, unsigned int archivefile)
 
     md5_state_t state;
     md5_byte_t digest[16];
-    romdatabase_entry *entry;
+    romdatabase_entry* entry;
     char buffer[PATH_MAX];
     unsigned char compressiontype, imagetype;
     int i;
@@ -481,7 +483,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     if(rom)
         free(rom);
 
-    //Clear Byte-swapped flag, since ROM is now deleted.
+    /* Clear Byte-swapped flag, since ROM is now deleted. */
     g_MemHasBeenBSwapped = 0;
 
     UInt32 blockIndex = 0xFFFFFFFF;
@@ -525,7 +527,9 @@ int open_rom(const char* filename, unsigned int archivefile)
     printf("Rom size: %d bytes (or %d Mb or %d Megabits)\n",
     taille_rom, taille_rom/1024/1024, taille_rom/1024/1024*8);
 
-    //Load rom settings and check if it's a good dump
+    /* TODO: Replace the following validation code with fill_entry(). */
+
+    /* Load rom settings and check if it's a good dump. */
     md5_init(&state);
     md5_append(&state, (const md5_byte_t*)rom, taille_rom);
     md5_finish(&state, digest);
@@ -544,7 +548,7 @@ int open_rom(const char* filename, unsigned int archivefile)
         return 0;
         }
     memcpy(ROM_HEADER, rom, sizeof(rom_header));
-    trim((char *)ROM_HEADER->nom); // remove trailing whitespace from Rom name
+    trim((char*)ROM_HEADER->nom); /* Remove trailing whitespace from Rom name. */
 
     printf("%x %x %x %x\n", ROM_HEADER->init_PI_BSB_DOM1_LAT_REG,
                             ROM_HEADER->init_PI_BSB_DOM1_PGS_REG,
@@ -577,7 +581,7 @@ int open_rom(const char* filename, unsigned int archivefile)
         }
 
     unsigned short close = 0;
-    char *s = entry->goodname;
+    char* s = entry->goodname;
     if(s!=NULL)
         {
         for ( i = strlen(s); i > 1; --i )
@@ -641,7 +645,7 @@ int close_rom(void)
         rom = NULL;
         }
 
-    //Clear Byte-swapped flag, since ROM is now deleted
+    /* Clear Byte-swapped flag, since ROM is now deleted. */
     g_MemHasBeenBSwapped = 0;
     main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Rom closed."));
 
