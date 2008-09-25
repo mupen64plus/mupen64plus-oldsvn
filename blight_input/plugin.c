@@ -1,49 +1,55 @@
-/***************************************************************************
-                          plugin.c  -  description
-                             -------------------
-    begin                : Fri Oct 18 2002
-    copyright            : (C) 2002 by blight
-    email                : blight@fuckmicrosoft.com
- ***************************************************************************/
-
-/***************************************************************************
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - plugin.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Richard42 Tillin9                                  *
+ *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- ***************************************************************************/
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
-#ifdef __linux__
-#include <linux/input.h>
-#endif //__linux__
 
-#include "plugin.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include "SDL.h"
 
 #include "../main/winlnxdefs.h"
+#include "plugin.h"
 
 #ifdef GUI_SDL
 # include "configdialog_sdl.h"
-#elif defined( GUI_GTK )
+#elif defined(GUI_GTK)
 # include "configdialog_gtk.h"
 #endif
-
-#include "Controller_1.1.h"
 
 #ifdef GUI_GTK
 # include <gtk/gtk.h>
 #endif
-#include "SDL.h"
+
+#ifdef __linux__
+#include <linux/input.h>
+#endif /* __linux__ */
+
 #include <errno.h>
-#include <stdio.h>
-#include <string.h>
 
 /* defines for the force feedback rumble support */
 #ifdef __linux__
@@ -972,7 +978,6 @@ GetKeys( int Control, BUTTONS *Keys )
                     }
                 }
             }
-            
             if( controller[Control].axis[b].hat >= 0 )
             {
                 if( controller[Control].axis[b].hat_pos_a >= 0 )
@@ -998,7 +1003,7 @@ GetKeys( int Control, BUTTONS *Keys )
     }
 
     // read keyboard state
-//  else if( controller[Control].device == DEVICE_KEYBOARD )
+// else if( controller[Control].device == DEVICE_KEYBOARD )
     {
         axis_max_val = 80;
         if (keystate[SDLK_LCTRL])
@@ -1050,8 +1055,8 @@ GetKeys( int Control, BUTTONS *Keys )
 
     if (controller[Control].mouse)
     {
-        int grabmouse = -1;        
-        while (SDL_PollEvent( &event ))
+        int grabmouse = -1;
+        while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_MOUSEMOTION && SDL_WM_GrabInput( SDL_GRAB_QUERY ) == SDL_GRAB_ON)
             {
@@ -1123,77 +1128,82 @@ GetKeys( int Control, BUTTONS *Keys )
                 perror("Error starting rumble effect");
         }
     }
-#endif //__linux__
+#endif /* __linux__ */
 }
 
-int InitiateRumble(int cntrl)
+static void InitiateRumble(int cntrl)
 {
-    DIR *dp;
-    struct dirent *ep;
+#ifdef __linux__
+    DIR* dp;
+    struct dirent* ep;
     unsigned long features[4];
     char temp[128];
     char temp2[128];
     int iFound = 0;
 
     controller[cntrl].event_joystick = 0;
-#ifdef __linux__
+
     sprintf(temp,"/sys/class/input/js%d/device", controller[cntrl].device);
     dp = opendir(temp);
 
-    if (dp == NULL) return 0;
+    if(dp==NULL)
+        return;
 
-    while ((ep = readdir (dp)))
-    {
-        if (strncmp(ep->d_name,"event",5) == 0)
+    while ((ep=readdir(dp)))
         {
-            sprintf(temp,"/dev/input/%s",ep->d_name);
+        if (strncmp(ep->d_name, "event",5)==0)
+            {
+            sprintf(temp, "/dev/input/%s", ep->d_name);
             iFound = 1;
             break;
-        }
-        else if (strncmp(ep->d_name,"input:event",11) == 0)
-        {
-            sscanf(ep->d_name,"input:%s",temp2);
-            sprintf(temp,"/dev/input/%s",temp2);
+            }
+        else if(strncmp(ep->d_name,"input:event", 11)==0)
+            {
+            sscanf(ep->d_name, "input:%s", temp2);
+            sprintf(temp, "/dev/input/%s", temp2);
             iFound = 1;
             break;
-        }
-        else if (strncmp(ep->d_name,"input:input",11) == 0)
-        {
+            }
+        else if(strncmp(ep->d_name,"input:input", 11)==0)
+            {
             strcat(temp, "/");
             strcat(temp, ep->d_name);
             closedir (dp);
             dp = opendir(temp);
-            if (dp == NULL) return 0;
-        }
-    }
+            if(dp==NULL)
+                return;
+            }
+       }
+
     closedir(dp);
-    if (!iFound)
-    {
-        printf("["PLUGIN_NAME"]: Couldn't find input event for rumble support.\n", temp);
-        return 0;
-    }
+
+    if(!iFound)
+        {
+        printf("["PLUGIN_NAME"]: Couldn't find input event for rumble support.\n");
+        return;
+        }
 
     controller[cntrl].event_joystick = open(temp, O_RDWR);
-    if (controller[cntrl].event_joystick == -1)
-    {
+    if(controller[cntrl].event_joystick==-1)
+        {
         printf("["PLUGIN_NAME"]: Couldn't open device file '%s' for rumble support.\n", temp);
         controller[cntrl].event_joystick = 0;
-        return 0;
-    }
+        return;
+        }
 
-    if (ioctl(controller[cntrl].event_joystick, EVIOCGBIT(EV_FF, sizeof(unsigned long) * 4), features) == -1)
-    {
-        printf("["PLUGIN_NAME"]: Linux kernel communication failed for force feedback (rumble).\n", temp);
+    if(ioctl(controller[cntrl].event_joystick, EVIOCGBIT(EV_FF, sizeof(unsigned long) * 4), features)==-1)
+        {
+        printf("["PLUGIN_NAME"]: Linux kernel communication failed for force feedback (rumble).\n");
         controller[cntrl].event_joystick = 0;
-        return 0;
-    }
+        return;
+        }
 
-    if (!test_bit(FF_RUMBLE, features))
-    {
+    if(!test_bit(FF_RUMBLE, features))
+        {
         printf("["PLUGIN_NAME"]: No rumble supported on N64 joystick #%i\n", cntrl + 1);
         controller[cntrl].event_joystick = 0;
-        return 0;
-    }
+        return;
+        }
 
     ffeffect[cntrl].type = FF_RUMBLE;
     ffeffect[cntrl].id = -1;
@@ -1221,8 +1231,7 @@ int InitiateRumble(int cntrl)
     ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffweak[cntrl]);
 
     printf("["PLUGIN_NAME"]: Rumble activated on N64 joystick #%i\n", cntrl + 1);
-#endif //__linux__
-
+#endif /* __linux__ */
 }
 
 /******************************************************************
@@ -1234,8 +1243,7 @@ int InitiateRumble(int cntrl)
               the emulator to know how to handle each controller.
   output:   none
 *******************************************************************/
-void
-InitiateControllers( CONTROL_INFO ControlInfo )
+void InitiateControllers( CONTROL_INFO ControlInfo )
 {
     int i;
 
