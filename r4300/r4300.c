@@ -1710,7 +1710,6 @@ void r4300_reset_soft()
 
 void r4300_execute()
 {
-    long long CRC = 0;
     unsigned int i;
 
     debug_count = 0;
@@ -1725,7 +1724,7 @@ void r4300_execute()
     for (i = 0; i < 131; i++)
         instr_count[i] = 0;
 #endif
-   
+
     last_addr = 0xa4000040;
     next_interupt = 624999;
     init_interupt();
@@ -1786,7 +1785,7 @@ void r4300_execute()
         pure_interpreter();
     }
     debug_count+= Count;
-    printf("R4300 core finished.\n",(unsigned int)debug_count);
+    printf("R4300 core finished.\n");
     for (i=0; i<0x100000; i++)
     {
         if (blocks[i])
