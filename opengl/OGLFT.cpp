@@ -346,11 +346,12 @@ namespace OGLFT
     BBox Face::measure (const wchar_t* s)
     {
         BBox bbox;
+        int i;
 
         if(wstrlen(s) > 0) 
         {
             bbox = measure(s[0]);
-            for(unsigned int i = 1; i<wstrlen(s); i++) 
+            for(i = 1; i < wstrlen(s); i++)
             {
                 BBox char_bbox = measure(s[i]);
                 bbox += char_bbox;
@@ -367,7 +368,9 @@ namespace OGLFT
     BBox Face::measureRaw (const wchar_t* s)
     {
         BBox bbox;
-        for(unsigned int i=0; i<wstrlen(s); i++) 
+        int i;
+
+        for(i = 0; i < wstrlen(s); i++)
         {
             BBox char_bbox;
 
@@ -551,7 +554,9 @@ namespace OGLFT
     void Face::draw (const wchar_t* s)
     {
         DLCI character_display_list = character_display_lists_.begin();
-        for(unsigned int i=0; i<wstrlen(s); i++)
+        int i;
+
+        for(i = 0; i < wstrlen(s); i++)
         {
             if(character_display_list != character_display_lists_.end())
             {
@@ -585,7 +590,7 @@ namespace OGLFT
         }
 
         if(glyph_index == 0) return;
-        
+
         if(compile_mode_ == COMPILE)
         {
             GLuint dlist = compile(c);
@@ -780,33 +785,38 @@ namespace OGLFT
         if(!advance_)
             glPushMatrix();
 
-        if(horizontal_justification_ != ORIGIN ||
-            vertical_justification_ != BASELINE){
+        if(horizontal_justification_!=ORIGIN||vertical_justification_!=BASELINE)
+            {
             glPushMatrix();
 
             BBox bbox = measure_nominal(s);
 
             GLfloat dx = 0, dy = 0;
 
-            switch (horizontal_justification_){
+            switch (horizontal_justification_)
+                {
                 case LEFT:
                     dx = -bbox.x_min_; break;
                 case CENTER:
-                    dx = -(bbox.x_min_ + bbox.x_max_)/ 2.; break;
+                    dx = -(bbox.x_min_ + bbox.x_max_)/ 2.0; break;
                 case RIGHT:
                     dx = -bbox.x_max_; break;
-            }
-            switch (vertical_justification_){
+                default:
+                    break;
+                }
+            switch (vertical_justification_)
+                {
                 case BOTTOM:
                     dy = -bbox.y_min_; break;
                 case MIDDLE:
-                    dy = -(bbox.y_min_ + bbox.y_max_)/ 2.; break;
+                    dy = -(bbox.y_min_ + bbox.y_max_)/ 2.0; break;
                 case TOP:
                     dy = -bbox.y_max_; break;
-            }
+                default:
+                    break;
+                }
 
-// There is probably a less expensive way to compute this
-
+            // There is probably a less expensive way to compute this
             glRotatef(string_rotation_, 0., 0., 1.);
             glTranslatef(dx, dy, 0);
             glRotatef(-string_rotation_, 0., 0., 1.);
@@ -834,8 +844,8 @@ namespace OGLFT
     {
         if(!advance_) glPushMatrix();
 
-        if(horizontal_justification_ != ORIGIN || vertical_justification_ != BASELINE)
-        {
+        if(horizontal_justification_!= ORIGIN||vertical_justification_!= BASELINE)
+            {
             glPushMatrix();
 
             // In 3D, we need to exert more care in the computation of the
@@ -845,22 +855,18 @@ namespace OGLFT
             BBox bbox;
             // Code from measure_nominal, but changed to use measureRaw instead
             if(string_rotation_ == 0.)  bbox = measureRaw(s);
-            else 
-            {
+            else
+                {
                 for(unsigned int f=0; f<faces_.size(); f++)
                     FT_Set_Transform(faces_[f].face_, 0, 0);
 
                 bbox = measureRaw(s);
 
                 float angle;
-                if(string_rotation_<0.)
-                {
+                if(string_rotation_<0.0)
                     angle = 360. - fmod(fabs(string_rotation_), 360.f);
-                }
-                else 
-                {
+                else
                     angle = fmod(string_rotation_, 360.f);
-                }
 
                 FT_Matrix rotation_matrix;
                 FT_Vector sinus;
@@ -872,50 +878,61 @@ namespace OGLFT
                 rotation_matrix.yx = sinus.y;
                 rotation_matrix.yy = sinus.x;
 
-                for(unsigned int f=0; f<faces_.size(); f++) FT_Set_Transform(faces_[f].face_, &rotation_matrix, 0);
-            }
+                for(unsigned int f=0; f<faces_.size(); f++)
+                    FT_Set_Transform(faces_[f].face_, &rotation_matrix, 0);
+                }
 
             GLfloat dx = 0, dy = 0;
+
             switch (horizontal_justification_)
-            {
-                case LEFT:   dx = bbox.x_min_; break;
-                case CENTER: dx = (bbox.x_min_ + bbox.x_max_)/ 2; break;
-                case RIGHT:  dx = bbox.x_max_; break;
-            }
+                {
+                case LEFT:
+                    dx = bbox.x_min_; break;
+                case CENTER:
+                    dx = (bbox.x_min_ + bbox.x_max_)/ 2; break;
+                case RIGHT:
+                    dx = bbox.x_max_; break;
+                default:
+                    break;
+                }
             switch (vertical_justification_)
-            {
-                case BOTTOM: dy = bbox.y_min_; break;
-                case MIDDLE: dy = (bbox.y_min_ + bbox.y_max_)/2; break;
-                case TOP:    dy = bbox.y_max_; break;
-            }
+                {
+                case BOTTOM:
+                    dy = bbox.y_min_; break;
+                case MIDDLE:
+                    dy = (bbox.y_min_ + bbox.y_max_)/2; break;
+                case TOP:
+                    dy = bbox.y_max_; break;
+                default:
+                    break;
+                }
 
             GLint viewport[4];
             GLdouble modelview[16], projection[16];
-    
+
             glGetIntegerv(GL_VIEWPORT, viewport);
             glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
             glGetDoublev(GL_PROJECTION_MATRIX, projection);
-    
+
             GLdouble x0, y0, z0;
             gluUnProject(0, 0, 0, modelview, projection, viewport, &x0, &y0, &z0);
-    
+
             GLdouble dx_m, dy_m, dz_m;
             gluUnProject(dx, dy, 0., modelview, projection, viewport,&dx_m,&dy_m,&dz_m);
-    
+
             glTranslated(x0-dx_m, y0-dy_m, z0-dz_m);
-        }
+            }
 
         glTranslatef(x, y, z);
-
         glColor4f(foreground_color_[R], foreground_color_[G], foreground_color_[B], foreground_color_[A]);
-
         glRasterPos2i(0, 0);
-
         draw(s);
 
-        if(horizontal_justification_ != ORIGIN || vertical_justification_ != BASELINE) glPopMatrix();
+        if(horizontal_justification_!=ORIGIN||vertical_justification_!= BASELINE)
+            glPopMatrix();
 
-        if(!advance_) glPopMatrix();
+        if(!advance_)
+            glPopMatrix();
     }
 
     // Draw the number at the given position per the given format.
