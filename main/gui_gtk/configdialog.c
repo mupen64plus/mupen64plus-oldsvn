@@ -19,7 +19,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+ 
 /* configdialog.c - Handles the configuration dialog */
 
 #include <stdio.h>
@@ -42,6 +42,7 @@
 #include "../util.h"
 #include "../winlnxdefs.h"
 #include "../plugin.h"
+#include "../savestates.h"
 
 #include "../../opengl/osd.h"
 
@@ -839,8 +840,6 @@ void create_configDialog()
     GtkWidget *label;
     GtkWidget *frame;
     GtkWidget *button, *button_config, *button_test, *button_about;
-    GdkPixbuf *pixbuf;
-    GtkWidget *icon = NULL;
     GtkWidget *vbox;
     GtkWidget *hbox1, *hbox2;
 
@@ -858,12 +857,12 @@ void create_configDialog()
         g_list_free(g_ConfigDialog.audioPluginGList);
         g_ConfigDialog.audioPluginGList = NULL;
         }
-    if(g_ConfigDialog.inputPluginGList = NULL)
+    if(g_ConfigDialog.inputPluginGList==NULL)
         {
         g_list_free(g_ConfigDialog.inputPluginGList);
         g_ConfigDialog.inputPluginGList = NULL;
         }
-    if(g_ConfigDialog.rspPluginGList = NULL)
+    if(g_ConfigDialog.rspPluginGList==NULL)
         {
         g_list_free(g_ConfigDialog.rspPluginGList);
         g_ConfigDialog.rspPluginGList = NULL;

@@ -183,10 +183,10 @@ int gui_message(unsigned char messagetype, const char* format, ...)
     va_end(ap);
 
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
-    if (self != g_GuiThreadID)
+    if(self!=g_GuiThreadID)
         gdk_threads_enter();
 
-    if (messagetype == 0)
+    if(messagetype==0)
         {
         int counter;
         for(counter = 0; counter < strlen(buffer); ++counter)
@@ -201,25 +201,28 @@ int gui_message(unsigned char messagetype, const char* format, ...)
         gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
         gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
         }
+    else if(messagetype>2)
+        return 0;
     else if(messagetype>0)
         {
         GtkWidget *dialog, *hbox, *label, *icon;
 
         hbox = gtk_hbox_new(FALSE, 10);
         gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
+        icon = gtk_image_new();
 
         if(messagetype==1)
             {
             dialog = gtk_dialog_new_with_buttons(tr("Error"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_NONE,NULL);
 
-            icon = g_MainWindow.dialogErrorImage = gtk_image_new();
+            icon = g_MainWindow.dialogErrorImage;
             set_icon(g_MainWindow.dialogErrorImage, "dialog-error", 32, FALSE);
             }
         else if(messagetype==2)
             {
             dialog = gtk_dialog_new_with_buttons(tr("Confirm"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_YES, GTK_RESPONSE_ACCEPT, GTK_STOCK_NO, GTK_RESPONSE_REJECT, NULL);
 
-            icon = g_MainWindow.dialogErrorImage = gtk_image_new();
+            icon = g_MainWindow.dialogErrorImage;
             set_icon(g_MainWindow.dialogErrorImage, "dialog-question", 32, FALSE);
             }
 
@@ -345,7 +348,7 @@ static void callback_open_rom(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         {
-        if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load another rom?")))
+        if(!gui_message(2, tr("Emulation is running. Do you want to stop it?\n\nNote: in order to play another rom, you must first stop this one. ")))
             return;
         callback_stop_emulation(NULL, NULL);
         }
@@ -379,6 +382,9 @@ static void callback_open_rom(GtkWidget* widget, gpointer data)
         gtk_widget_hide(file_chooser); /* Hide dialog while rom is loading. */
         open_rom(filename, 0);
         g_free(filename);
+
+        if(rom)
+            startEmulation();
         }
 
     gtk_widget_destroy(file_chooser);
@@ -735,7 +741,7 @@ static void callback_debuggerWindowShow(GtkWidget* widget, gpointer window)
 * GUI creation.
 */
 
-static int create_menubar()
+static void create_menubar()
 {
     GtkWidget* menu;
     GtkWidget* menuitem;

@@ -129,13 +129,8 @@ void show_rom_properties()
  */
 void create_rom_properties()
 {
-    GtkWidget* frame;
-    GtkWidget* table;
-    GtkWidget* label;
-    GtkWidget* statushbox;
-    GtkWidget* countryhbox;
+    GtkWidget *frame, *table, *label, *statushbox, *countryhbox;
     int counter;
-    char buffer[32];
 
     g_RomPropDialog.entry = NULL;
 

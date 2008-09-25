@@ -280,7 +280,6 @@ static void cb_delete(GtkButton *button, GtkTreeView *view)
     GtkTreeModel *model;
     GtkTreeIter iter, parentIter;
     GtkTreeSelection *selection;
-    GtkTreePath *path;
 
     rom_cheats_t *romcheat = NULL;
     cheat_t *cheat = NULL;
@@ -714,7 +713,6 @@ void cb_cheatDialog(GtkWidget *widget)
 {
     // Local Variables
     GtkWidget *dialog;
-    GtkWidget *label;
     GtkWidget *frame;
     GtkWidget *hbox, *vbox;
     GtkWidget *viewport;

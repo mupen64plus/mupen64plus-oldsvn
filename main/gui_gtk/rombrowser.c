@@ -2,7 +2,7 @@
  *   Mupen64plus - rombrowser.c                                            *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Tillin9                                            *
- *   Copyright (C) 2002 Blight                                             *
+ *   Copyright (C) 2002 Blight                                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -148,7 +148,7 @@ static gint rombrowser_compare(GtkTreeModel* model, GtkTreeIter* ptr1, GtkTreeIt
             item1 = entry1->romsize;
             item2 = entry2->romsize;
             }
-        else if(g_MainWindow.romSortColumn==14)
+        else
             {
             item1 = entry1->cic;
             item2 = entry2->cic;
@@ -260,23 +260,24 @@ void rombrowser_refresh(unsigned int roms, unsigned short clear)
         gboolean fullpaths;
 
         GtkTreeIter* iter = (GtkTreeIter*)malloc(sizeof(GtkTreeIter));
-        char *country, *goodname, *usercomments, *filename, *md5hash, *crc1, *crc2, *internalname, *savetype, *players, *size, *compressiontype, *imagetype, *cicchip, *rumble;
+        char *country, *goodname, *usercomments, *md5hash, *crc1, *crc2, *internalname, *savetype, *players, *size, *compressiontype, *imagetype, *cicchip, *rumble;
+        char* filename = NULL; /* Needs to be NULLed if fullpaths and zero roms are updated, for free. */
         GdkPixbuf* flag;
         GdkPixbuf* status[5];
         unsigned int romcounter;
         int counter;
 
-        country = (char*)calloc(32,sizeof(char));
-        md5hash = (char*)calloc(33,sizeof(char));
-        crc1 = (char*)calloc(9,sizeof(char));
-        crc2 = (char*)calloc(9,sizeof(char));
-        savetype = (char*)calloc(16,sizeof(char));
-        players = (char*)calloc(16,sizeof(char));
-        size = (char*)calloc(16,sizeof(char));
-        compressiontype = (char*)calloc(16,sizeof(char));
-        imagetype = (char*)calloc(32,sizeof(char));
-        cicchip = (char*)calloc(16,sizeof(char));
-        rumble = (char*)calloc(8,sizeof(char));
+        country = (char*)calloc(32, sizeof(char));
+        md5hash = (char*)calloc(33, sizeof(char));
+        crc1 = (char*)calloc(9, sizeof(char));
+        crc2 = (char*)calloc(9, sizeof(char));
+        savetype = (char*)calloc(16, sizeof(char));
+        players = (char*)calloc(16, sizeof(char));
+        size = (char*)calloc(16, sizeof(char));
+        compressiontype = (char*)calloc(16, sizeof(char));
+        imagetype = (char*)calloc(32, sizeof(char));
+        cicchip = (char*)calloc(16, sizeof(char));
+        rumble = (char*)calloc(8, sizeof(char));
 
         if(iter==NULL||country==NULL||md5hash==NULL||crc1==NULL||crc2==NULL||size==NULL||compressiontype==NULL||imagetype==NULL||cicchip==NULL)
             {
@@ -354,7 +355,10 @@ void rombrowser_refresh(unsigned int roms, unsigned short clear)
         free(cicchip);
         free(rumble);
         if(!fullpaths)
-           free(filename);
+           {
+           if(filename!=NULL)
+              free(filename);
+           }
        free(iter);
 
         /* Do an initial sort. */
@@ -822,7 +826,6 @@ void create_romBrowser()
     GtkWidget* menu;
     GtkWidget* submenu;
     GtkWidget* item;
-    int counter;
 
     australia = gdk_pixbuf_new_from_file(get_iconpath("australia.png"), NULL);
     europe = gdk_pixbuf_new_from_file(get_iconpath("europe.png"), NULL);
