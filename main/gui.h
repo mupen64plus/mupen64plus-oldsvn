@@ -32,3 +32,4 @@ void update_rombrowser(unsigned int roms, unsigned short clear);
 /* TODO: Add debugger GUI APIs here. */
 
 #endif /* __GUI_H__ */
+

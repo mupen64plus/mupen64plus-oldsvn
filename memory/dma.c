@@ -32,6 +32,7 @@
 #include "../r4300/macros.h"
 #include "../r4300/ops.h"
 
+#include "../main/config.h"
 #include "../main/main.h"
 #include "../main/rom.h"
 

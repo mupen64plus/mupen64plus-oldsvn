@@ -107,11 +107,9 @@ OBJECTS = OGLGraphicsContext.o \
 GTKOBJECTS = \
 	gui_gtk2/messagebox_gtk2.o
 
-ifeq ($(GUI), GTK2)
-  LDFLAGS += $(GTK_LIBS)
-  CFLAGS += -DUSE_GTK $(GTK_FLAGS)
-  OBJECTS += $(GTKOBJECTS)
-endif
+LDFLAGS += $(GTK_LIBS)
+CFLAGS += -DUSE_GTK $(GTK_FLAGS)
+OBJECTS += $(GTKOBJECTS)
 
 # build targets
 targets:
