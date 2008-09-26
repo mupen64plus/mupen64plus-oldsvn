@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - main.c                                                  *
+ *   Mupen64plus - screenshot.c                                            *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Richard42                                          *
  *                                                                         *
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <limits.h>
 
 #include <SDL_opengl.h>
 #include <SDL.h>
