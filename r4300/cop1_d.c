@@ -360,3 +360,4 @@ void C_NGT_D()
    else FCR31 &= ~0x800000;
    PC++;
 }
+

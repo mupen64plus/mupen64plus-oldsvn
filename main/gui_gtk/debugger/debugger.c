@@ -121,3 +121,4 @@ void debugger_frontend_vi()
         gdk_threads_leave();
     }
 }
+

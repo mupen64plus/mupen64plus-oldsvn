@@ -38,3 +38,4 @@ int add_breakpoint(uint32 address);
 void update_breakpoints();
 
 #endif  /* __GUIGTK_BREAKPOINTS_H__ */
+

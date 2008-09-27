@@ -352,3 +352,4 @@ void dma_si_read()
     update_count();
     add_interupt_event(SI_INT, /*0x100*/0x900);
 }
+

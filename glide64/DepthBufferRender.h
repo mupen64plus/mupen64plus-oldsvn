@@ -51,3 +51,4 @@ void ZLUT_release();
 void Rasterize(vertexi * vtx, int vertices, int dzdx);
 
 #endif //DEPTH_BUFFER_RENDER_H
+

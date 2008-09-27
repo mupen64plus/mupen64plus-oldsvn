@@ -154,3 +154,4 @@ int log_breakpoint(uint32 PC, uint32 Flag, uint32 Access)
     printf("BPT: %s\n", msg);
     //todo: log to file
 }
+

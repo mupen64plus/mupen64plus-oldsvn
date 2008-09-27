@@ -27,3 +27,4 @@
 void cb_cheatDialog(GtkWidget *widget);
 
 #endif // __CHEATDIALOG_H__
+

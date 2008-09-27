@@ -282,3 +282,4 @@ EXPORT const char * CALL VolumeGetString(void);
 #endif
 
 #endif
+

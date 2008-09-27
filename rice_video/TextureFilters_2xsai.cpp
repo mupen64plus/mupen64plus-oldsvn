@@ -472,3 +472,4 @@ void Super2xSaI_16( uint16 *srcPtr, uint16 *destPtr, uint32 width, uint32 height
         destPtr += (((pitch-width)<<1)+(pitch<<1));
     }
 }
+

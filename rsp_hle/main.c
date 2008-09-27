@@ -359,3 +359,4 @@ __declspec(dllexport) void RomClosed (void)
    firstTime = TRUE;
 #endif
 }
+

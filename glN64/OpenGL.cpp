@@ -1235,3 +1235,4 @@ void OGL_ReadScreen( void **dest, int *width, int *height )
 }
 
 #endif // __LINUX__
+

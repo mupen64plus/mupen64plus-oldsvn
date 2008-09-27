@@ -905,3 +905,4 @@ void RSP_RDP_InsertMatrix(Gfx *gfx)
     }
 #endif
 }
+

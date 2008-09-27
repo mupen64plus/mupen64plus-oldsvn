@@ -25,3 +25,4 @@ void DepthBuffer_RemoveBuffer( u32 address );
 DepthBuffer *DepthBuffer_FindBuffer( u32 address );
 
 #endif
+

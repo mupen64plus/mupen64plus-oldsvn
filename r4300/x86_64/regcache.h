@@ -54,3 +54,4 @@ void build_wrapper(precomp_instr*, unsigned char*, precomp_block*);
 void build_wrappers(precomp_instr*, int, int, precomp_block*);
 
 #endif // REGCACHE_H
+

@@ -58,3 +58,4 @@ class SettingsDialog : public QDialog, public Ui_SettingsDialog
 };
 
 #endif // MUPEN_KDE4_SETTINGS_DIALOG_H
+

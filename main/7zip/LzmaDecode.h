@@ -118,3 +118,4 @@ int LzmaDecode(CLzmaDecoderState *vs,
     unsigned char *outStream, SizeT outSize, SizeT *outSizeProcessed);
 
 #endif
+

@@ -35,3 +35,4 @@ const char *tr(const char *text);           // translate text
 #endif
 
 #endif // __TRANSLATE_H__
+

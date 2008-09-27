@@ -601,3 +601,4 @@ void RSP_S2DEX_OBJ_RECTANGLE_R(Gfx *gfx)
         }
     );
 }
+

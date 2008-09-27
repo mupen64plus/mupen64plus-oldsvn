@@ -638,3 +638,4 @@ png_get_user_transform_ptr(png_structp png_ptr)
    return (NULL);
 #endif
 }
+

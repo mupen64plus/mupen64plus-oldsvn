@@ -2573,3 +2573,4 @@ void prefetch_opcode(unsigned int op)
    src = op;
    recomp_ops[((src >> 26) & 0x3F)]();
 }
+

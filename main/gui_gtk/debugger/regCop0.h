@@ -42,3 +42,4 @@ void init_regCop0();
 void update_regCop0();
 
 #endif //GUIGTK_REGCOP0_H
+

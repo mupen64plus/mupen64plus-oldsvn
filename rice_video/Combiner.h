@@ -102,3 +102,4 @@ extern const char *sc_colcombtypes8[];
 COLOR CalculateConstFactor(uint32 colorOp, uint32 alphaOp, uint32 curCol=0);
 
 #endif
+

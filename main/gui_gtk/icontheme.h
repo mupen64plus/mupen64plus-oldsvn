@@ -30,3 +30,4 @@ gboolean check_icon_theme();
 void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
 
 #endif /* __CHECKICONTHEME_H__ */
+

@@ -64,3 +64,4 @@ HBITMAP BMG_EXPORT CreateBitmapFromPNGFile( const char *filename,
 #endif
 
 #endif
+

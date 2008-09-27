@@ -380,3 +380,4 @@ void SettingsDialog::writeSettings()
     RomModel::self()->settingsChanged();
     core::config_write();
 }
+

@@ -1245,3 +1245,4 @@ void Convert16b_16(CTexture *pTexture, const TxtrInfo &tinfo)
     pTexture->EndUpdate(&dInfo);
     pTexture->SetOthersVariables();
 }
+

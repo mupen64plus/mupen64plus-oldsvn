@@ -42,3 +42,4 @@ void init_memedit();
 int GetMemEditSelectionRange(uint32* StartAddr, int AllowEmpty);
 
 #endif  // MEMEDIT_H
+

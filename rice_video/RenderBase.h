@@ -304,3 +304,4 @@ inline void SetScreenMult(float fMultX, float fMultY) { windowSetting.fMultX = f
 inline COLOR GetLightCol(uint32 dwLight) { return gRSPlights[dwLight].col; }
 
 #endif
+

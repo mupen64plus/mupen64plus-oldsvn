@@ -345,3 +345,4 @@ void display_test(const char *Message)
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     gtk_widget_show_all(dialog);
 }
+

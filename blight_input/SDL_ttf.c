@@ -1747,3 +1747,4 @@ int TTF_WasInit( void )
 {
     return TTF_initialized;
 }
+

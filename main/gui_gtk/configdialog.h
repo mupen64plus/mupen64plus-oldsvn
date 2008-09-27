@@ -77,3 +77,4 @@ void create_configDialog(void);
 void show_configure();
 
 #endif /* __CONFIGDIALOG_H__ */
+

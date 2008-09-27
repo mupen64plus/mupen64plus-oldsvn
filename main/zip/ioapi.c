@@ -187,3 +187,4 @@ void fill_fopen_filefunc (pzlib_filefunc_def)
     pzlib_filefunc_def->zerror_file = ferror_file_func;
     pzlib_filefunc_def->opaque = NULL;
 }
+

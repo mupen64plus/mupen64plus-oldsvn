@@ -49,3 +49,4 @@ void CALL DllConfig(HWND hParent)
 }
 
 } // extern "C"
+

@@ -598,3 +598,4 @@ void Set_NV_register_combiners( RegisterCombiners *regCombiners )
     glFinalCombinerInputNV( GL_VARIABLE_F_NV, regCombiners->final.F.input, regCombiners->final.F.mapping, regCombiners->final.F.usage );
     glFinalCombinerInputNV( GL_VARIABLE_G_NV, regCombiners->final.G.input, regCombiners->final.G.mapping, GL_ALPHA );
 }
+

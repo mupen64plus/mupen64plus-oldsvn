@@ -226,3 +226,4 @@ void *png_far_to_near(png_structp png_ptr,png_voidp ptr, int check)
 #   endif
 #   endif
 #endif /* PNG_WRITE_SUPPORTED */
+

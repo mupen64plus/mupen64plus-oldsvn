@@ -41,3 +41,4 @@ void init_FGR();
 void update_FGR();
 
 #endif //GUIGTK_REGR4300_H
+

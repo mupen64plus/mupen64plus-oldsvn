@@ -1078,3 +1078,4 @@ static void uc0_tri4 ()
     rdp.tri_n ++;
   }
 }
+

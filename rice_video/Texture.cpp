@@ -273,3 +273,4 @@ void CTexture::RestoreAlphaChannel(void)
         //TRACE0("Cannot lock texture");
     }
 }
+

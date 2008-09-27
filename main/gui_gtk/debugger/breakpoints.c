@@ -428,3 +428,4 @@ static void on_close()
 {
     breakpoints_opened = 0;
 }
+

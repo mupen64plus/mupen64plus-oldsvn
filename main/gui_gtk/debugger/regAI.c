@@ -99,3 +99,4 @@ void update_regAI()
 
     gtk_clist_thaw(GTK_CLIST(clRegAI));
 }
+

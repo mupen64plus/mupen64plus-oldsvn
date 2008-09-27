@@ -56,3 +56,4 @@ int lru_register_exc1(int exc1);
 void simplify_access();
 
 #endif // REGCACHE_H
+

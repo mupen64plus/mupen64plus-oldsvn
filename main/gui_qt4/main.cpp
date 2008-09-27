@@ -131,3 +131,4 @@ void update_rombrowser(unsigned int roms, unsigned short clear)
 }
 
 } // extern "C"
+

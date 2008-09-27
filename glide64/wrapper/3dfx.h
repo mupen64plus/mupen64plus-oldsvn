@@ -130,3 +130,4 @@ typedef struct { float r, g, b, a; } FxColor4;
 #endif
 
 #endif /* !__3DFX_H__ */
+

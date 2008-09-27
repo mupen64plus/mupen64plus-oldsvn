@@ -770,3 +770,4 @@ EXPORT void CALL SetRenderingCallback(void (*callback)());
 }
 #endif
 #endif //_GFX_H_INCLUDED__
+

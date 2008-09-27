@@ -120,3 +120,4 @@ void update_FGR()
     }
     gtk_clist_thaw( GTK_CLIST(clFGR2) );
 }
+

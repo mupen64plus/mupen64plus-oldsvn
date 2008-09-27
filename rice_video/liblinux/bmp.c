@@ -524,3 +524,4 @@ BMGError WriteBMP( const char *filename,
     }
 
 #endif
+

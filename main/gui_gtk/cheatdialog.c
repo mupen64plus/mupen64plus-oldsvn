@@ -779,3 +779,4 @@ void cb_cheatDialog(GtkWidget *widget)
 
     gtk_widget_show_all(dialog);
 }
+

@@ -82,3 +82,4 @@ typedef struct XCOLOR {
 } XCOLOR;
 
 #endif
+

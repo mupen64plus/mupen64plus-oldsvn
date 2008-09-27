@@ -250,3 +250,4 @@ static void uc3_quad3d()
     rdp.tri_n ++;
   }
 }
+

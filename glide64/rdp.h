@@ -760,3 +760,4 @@ extern BOOL SwapOK;
 void load_palette (DWORD addr, WORD start, WORD count);
 
 #endif  // ifndef RDP_H
+

@@ -41,3 +41,4 @@ void init_regSpecial();
 void update_regSpecial();
 
 #endif //GUIGTK_REGSPECIAL_H
+

@@ -68,3 +68,4 @@ int lookup_breakpoint( uint32 address, uint32 flags );
 int log_breakpoint(uint32 PC, uint32 Flag, uint32 Access);
 
 #endif  // BREAKPOINTS_H
+

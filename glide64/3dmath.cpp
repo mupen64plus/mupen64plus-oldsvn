@@ -384,3 +384,4 @@ void math_init()
     LOG("SSE detected.\n");
   }
 }
+

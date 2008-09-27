@@ -93,3 +93,4 @@ void update_regRI()
     
     gtk_clist_thaw(GTK_CLIST(clRegRI));
 }
+

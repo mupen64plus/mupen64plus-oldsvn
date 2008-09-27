@@ -57,3 +57,4 @@ class RomDirectoriesListWidget
 };
 
 #endif // MUPEN64_KDE4_ROMDIRECTORIESLISTWIDGET_H
+

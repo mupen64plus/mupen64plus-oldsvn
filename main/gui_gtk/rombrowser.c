@@ -938,3 +938,4 @@ void create_romBrowser()
 
     g_signal_connect(g_MainWindow.romDisplay, "button-press-event", G_CALLBACK(callback_rombrowser_context), (gpointer)menu);
 }
+

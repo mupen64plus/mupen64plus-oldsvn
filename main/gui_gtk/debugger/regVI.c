@@ -107,3 +107,4 @@ void update_regVI()
 
     gtk_clist_thaw(GTK_CLIST(clRegVI));
 }
+

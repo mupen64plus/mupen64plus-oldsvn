@@ -64,3 +64,4 @@ EXPORT void CALL GetKeys(int Control, BUTTONS * Keys )
 {
     Keys->Value = 0x0000;
 }
+

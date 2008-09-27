@@ -919,3 +919,4 @@ void RSP_GBI2_SubModule(Gfx *gfx)
 
     RSP_RDP_NOIMPL("RDP: RSP_GBI2_SubModule (0x%08x 0x%08x)", (gfx->words.w0), (gfx->words.w1));
 }
+

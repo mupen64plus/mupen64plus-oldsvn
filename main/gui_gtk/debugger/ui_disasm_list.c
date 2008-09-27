@@ -664,3 +664,4 @@ void disasm_list_update (GtkTreeModel *tree_model, guint address)
     address=0xFFFFFFFC-(POSTLINES*4);
   disasm_list->startAddr = address;
 }
+

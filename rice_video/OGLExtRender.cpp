@@ -265,3 +265,4 @@ void COGLExtRender::SetTextureToTextureUnitMap(int tex, int unit)
     if( unit < 8 && (tex >= -1 || tex <= 1))
         m_textureUnitMap[unit] = tex;
 }
+

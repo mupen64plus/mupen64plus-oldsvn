@@ -181,3 +181,4 @@ GtkCList * init_hwreg_clist(int n, char **regnames)
     
     return cl;
 }
+

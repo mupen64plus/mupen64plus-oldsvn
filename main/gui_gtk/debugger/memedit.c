@@ -588,3 +588,4 @@ int GetMemEditSelectionRange(uint32* StartAddr, int AllowEmpty)
     //printf("%u bytes from %08X\n", numbytes, (*StartAddr));
     return numbytes;
 }
+

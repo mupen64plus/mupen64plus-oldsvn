@@ -45,3 +45,4 @@ void update_registers();
 GtkCList* init_hwreg_clist(int n, char** regnames);
 
 #endif /* __GUIGTK_REGISTERS_H__ */
+

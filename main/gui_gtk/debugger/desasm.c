@@ -485,3 +485,4 @@ static void on_close()
   //For now, lets get rid of the close button, and keep this window always open
   //for the execution controls to be accessible
 }
+

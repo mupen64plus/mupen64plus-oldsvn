@@ -410,3 +410,4 @@ unsigned int SwapULong( unsigned int in )
 
     return *((unsigned int *)sout);
 }
+

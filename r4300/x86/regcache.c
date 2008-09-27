@@ -873,3 +873,4 @@ void simplify_access()
    dst->local_addr = code_length;
    for(i=0; i<8; i++) dst->reg_cache_infos.needed_registers[i] = NULL;
 }
+

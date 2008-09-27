@@ -88,3 +88,4 @@ void SzFreeTemp(void *address)
   #endif
   free(address);
 }
+

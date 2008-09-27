@@ -74,3 +74,4 @@ void callback_about_mupen64plus(GtkWidget* widget, gpointer data)
 
     gtk_show_about_dialog(GTK_WINDOW(g_MainWindow.window), "version", PLUGIN_VERSION, "copyright", "(C) 2007-2008 The Mupen64Plus Team", "license", license, "website", "http://code.google.com/p/mupen64plus/", "comments", "Mupen64plus is an open source Nintendo 64 emulator.", "authors", authors, "logo", pixbuf, "title", "About Mupen64plus", NULL);
 }
+

@@ -241,3 +241,4 @@ static void on_close()
 {
     regTLB_opened = 0;
 }
+

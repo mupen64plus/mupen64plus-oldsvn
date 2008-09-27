@@ -59,3 +59,4 @@ void gencvt_d_w()
    fstp_preg32_qword(EAX);
 #endif
 }
+

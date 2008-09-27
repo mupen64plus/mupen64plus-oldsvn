@@ -45,3 +45,4 @@ void update_desasm( uint32 focused_address );
 
 void switch_button_to_run();
 #endif  // GUIGTK_DESASM_H
+

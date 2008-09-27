@@ -1325,3 +1325,4 @@ void CGeneralCombiner::LM_SkipStage(StageOperate &op)
     op.Arg2 = CM_IGNORE;
     op.Arg0 = CM_IGNORE;
 }
+

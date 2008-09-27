@@ -185,3 +185,4 @@ typedef FxU32 GrAlphaBlendOp_t;
 #include <glideutl.h>
 
 #endif /* __H3EXT_H__ */
+

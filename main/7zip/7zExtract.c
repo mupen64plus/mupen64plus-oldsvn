@@ -137,3 +137,4 @@ SZ_RESULT SzExtract(
   }
   return res;
 }
+

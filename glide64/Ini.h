@@ -45,3 +45,4 @@ const char *INI_ReadString (const char *itemname, const char *value, const char 
 void INI_WriteString (const char *itemname, const char *value);
 int INI_ReadInt (const char *itemname, int def_value, BOOL create=TRUE);
 void INI_WriteInt (const char *itemname, int value);
+

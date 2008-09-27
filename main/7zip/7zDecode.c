@@ -359,3 +359,4 @@ SZ_RESULT SzDecode(const CFileSize *packSizes, const CFolder *folder,
     allocMain->Free(tempBuf[i]);
   return res;
 }
+

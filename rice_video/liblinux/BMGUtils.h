@@ -52,3 +52,4 @@ int SwapLong( int in );
 unsigned int SwapULong( unsigned int in );
 
 #endif
+

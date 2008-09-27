@@ -90,3 +90,4 @@ void drawStars(QPainter* painter,
         painter->drawPixmap(p, disabled);
     }
 }
+

@@ -1166,3 +1166,4 @@ void gendsra32()
    sar_reg32_imm8(rd, dst->f.r.sa);
 #endif
 }
+

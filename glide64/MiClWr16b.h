@@ -295,3 +295,4 @@ void Clamp16bT (unsigned char * tex, DWORD height, DWORD real_width, DWORD clamp
         dst += line_full;
     }
 }
+

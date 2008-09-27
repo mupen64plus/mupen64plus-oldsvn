@@ -435,3 +435,4 @@ static void ModifyPalette(DWORD mod, DWORD modcolor, DWORD modcolor1, DWORD modf
             ;
        }
 }
+

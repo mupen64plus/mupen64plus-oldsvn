@@ -271,3 +271,4 @@ void Config_DoConfig(HWND hParent)
         fclose( f );
     }
 }
+

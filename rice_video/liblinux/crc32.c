@@ -161,3 +161,4 @@ uLong ZEXPORT crc32(crc, buf, len)
     } while (--len);
     return crc ^ 0xffffffffL;
 }
+

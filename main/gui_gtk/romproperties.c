@@ -309,3 +309,4 @@ void create_rom_properties()
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_RomPropDialog.dialog)->action_area), g_RomPropDialog.okButton, TRUE, TRUE, 0);
     g_signal_connect(g_RomPropDialog.okButton, "clicked", G_CALLBACK(callback_apply_changes), (gpointer)TRUE);
 }
+

@@ -152,3 +152,4 @@ void genctc1()
    fldcw_m16abs((unsigned short*)&rounding_mode);
 #endif
 }
+

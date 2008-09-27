@@ -88,3 +88,4 @@ void TextureCache_ActivateDummy( u32 t );
 BOOL TextureCache_Verify();
 
 #endif
+

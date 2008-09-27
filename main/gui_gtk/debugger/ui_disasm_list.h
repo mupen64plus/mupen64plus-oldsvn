@@ -93,3 +93,4 @@ gboolean disasm_list_get_iter (GtkTreeModel *tree_model,
               GtkTreeIter  *iter, GtkTreePath  *path);
 
 #endif
+

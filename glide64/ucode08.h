@@ -534,3 +534,4 @@ static void uc8_tri4() //by Gugaman Apr 19 2002
     rdp.tri_n ++;
   }
 }
+

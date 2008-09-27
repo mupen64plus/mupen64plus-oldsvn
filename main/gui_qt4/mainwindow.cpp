@@ -433,3 +433,4 @@ void MainWindow::setupActions()
         core::config_get_bool("StatusBarVisible", TRUE)
     );
 }
+

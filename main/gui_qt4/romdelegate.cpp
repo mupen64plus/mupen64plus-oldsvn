@@ -64,3 +64,4 @@ QSize RomDelegate::sizeHint(const QStyleOptionViewItem& option,
             break;
     }
 }
+

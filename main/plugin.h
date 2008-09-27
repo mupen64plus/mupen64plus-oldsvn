@@ -326,3 +326,4 @@ extern HWND g_RenderWindow;
 extern HWND g_StatusBar;
 
 #endif
+

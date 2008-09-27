@@ -137,3 +137,4 @@ void genctc1()
    fldcw_m16((unsigned short*)&rounding_mode);
 #endif
 }
+

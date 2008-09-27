@@ -106,3 +106,4 @@ void update_regPI()
 
     gtk_clist_thaw(GTK_CLIST(clRegPI));
 }
+

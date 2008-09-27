@@ -114,3 +114,4 @@ inline float DotProduct( float v0[3], float v1[3] )
 }
 
 #endif
+

@@ -624,3 +624,4 @@ void Set_texture_env_combine( TexEnvCombiner *envCombiner )
         }           
     }
 }
+

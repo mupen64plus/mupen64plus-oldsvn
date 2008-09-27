@@ -50,3 +50,4 @@ DWORD WINAPI RSP_ThreadProc( LPVOID lpParameter );
 void RSP_LoadMatrix( f32 mtx[4][4], u32 address );
 
 #endif
+

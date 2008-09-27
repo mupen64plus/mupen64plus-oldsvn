@@ -43,3 +43,4 @@ void drawStars(QPainter* painter,
                int m);
 
 #endif // MUPEN64_KDE4_GLOBALS_H
+

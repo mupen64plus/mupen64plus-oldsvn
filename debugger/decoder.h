@@ -35,3 +35,4 @@ void r4300_decode_op( uint32 instr, char *op, char *args, int pc );
 void mr4kd_disassemble ( uint32 instruction, uint32 counter, char * buffer );
 
 #endif //DECODER_H
+

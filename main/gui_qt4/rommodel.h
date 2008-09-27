@@ -97,3 +97,4 @@ class RomModel : public QAbstractItemModel
 };
 
 #endif // MUPEN_KDE4_ROMMODEL_H
+

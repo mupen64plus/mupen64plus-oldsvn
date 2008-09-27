@@ -61,3 +61,4 @@ extern SDL_cond  *debugger_done_cond;
 extern SDL_mutex *mutex;
 
 #endif //DEBUGGER_H
+

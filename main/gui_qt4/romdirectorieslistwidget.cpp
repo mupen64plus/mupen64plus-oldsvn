@@ -81,3 +81,4 @@ void RomDirectoriesListWidget::updateListWidget()
     romListWidget->clear();
     romListWidget->addItems(m_directories);
 }
+

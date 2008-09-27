@@ -39,3 +39,4 @@ class RomInfoDialog : public QDialog, public Ui_RomInfoDialog
 };
 
 #endif // MUPEN64_ROM_INFO_DIALOG_H
+

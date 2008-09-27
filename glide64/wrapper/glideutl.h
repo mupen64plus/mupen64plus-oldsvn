@@ -151,3 +151,4 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data );
 #endif
 
 #endif /* __GLIDEUTL_H__ */
+

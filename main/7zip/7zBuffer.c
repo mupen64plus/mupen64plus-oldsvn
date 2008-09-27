@@ -47,3 +47,4 @@ void SzByteBufferFree(CSzByteBuffer *buffer, void (*freeFunc)(void *))
   buffer->Items = 0;
   buffer->Capacity = 0;
 }
+

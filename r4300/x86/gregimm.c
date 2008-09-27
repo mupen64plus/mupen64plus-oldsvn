@@ -579,3 +579,4 @@ void genbgezall_idle()
    genbgezall();
 #endif
 }
+

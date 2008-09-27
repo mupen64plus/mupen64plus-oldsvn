@@ -41,3 +41,4 @@ class StarLabel : public QLabel
 };
 
 #endif // MUPEN64_STAR_LABEL_H
+

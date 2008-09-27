@@ -38,3 +38,4 @@ class RomDelegate : public QItemDelegate
 };
 
 #endif // MUPEN64_QT4_GUI_ROM_DELEGATE_H
+

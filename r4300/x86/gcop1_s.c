@@ -606,3 +606,4 @@ void genc_ngt_s()
    and_m32_imm32((unsigned int*)&FCR31, ~0x800000); // 10
 #endif
 }
+

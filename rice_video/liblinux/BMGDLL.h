@@ -158,3 +158,4 @@ BMGError BMG_EXPORT ReadPCX( const char *filename,
 #endif
 
 #endif
+

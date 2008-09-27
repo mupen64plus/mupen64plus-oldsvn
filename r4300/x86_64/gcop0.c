@@ -46,3 +46,4 @@ void genmtc0()
 #endif
     gencallinterp((unsigned long long)MTC0, 0);
 }
+

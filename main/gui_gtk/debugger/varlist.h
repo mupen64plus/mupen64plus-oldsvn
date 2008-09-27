@@ -41,3 +41,4 @@ void update_varlist();
 void init_varlist();
 
 #endif  // VARLIST_H
+

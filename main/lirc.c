@@ -134,3 +134,4 @@ void lircCheckInput(void)
 }
 
 #endif //WITH_LIRC
+

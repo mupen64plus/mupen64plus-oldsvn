@@ -1155,3 +1155,4 @@ configure_sdl( SController *controller )
 }
 
 #endif // GUI_SDL
+

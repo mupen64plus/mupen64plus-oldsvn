@@ -57,3 +57,4 @@ BMGError BMG_EXPORT WritePNG( const char *filename,
 #endif
 
 #endif
+

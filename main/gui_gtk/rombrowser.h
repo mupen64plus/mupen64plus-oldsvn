@@ -32,3 +32,4 @@ void rombrowser_refresh(unsigned int roms, unsigned short clear);
 void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag);
 
 #endif /* __ROMBROWSER_H__ */
+

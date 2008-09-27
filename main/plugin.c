@@ -741,3 +741,4 @@ void plugin_close_plugins()
     closeDLL_input();
     closeDLL_RSP();
 }
+

@@ -42,3 +42,4 @@ void init_regAI();
 void update_regAI();
 
 #endif //GUIGTK_REGAI_H
+

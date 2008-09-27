@@ -51,3 +51,4 @@ extern GtkWidget   *winRegisters;
 extern PangoFontDescription *debugger_font_desc;
 
 #endif //GTK_DEBUGGER_H
+

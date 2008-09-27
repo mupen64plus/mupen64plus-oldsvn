@@ -115,3 +115,4 @@ void update_rombrowser(unsigned int roms, unsigned short clear);
 #define STATUSBAR 3
 
 #endif /* __MAIN_GTK_H__ */
+

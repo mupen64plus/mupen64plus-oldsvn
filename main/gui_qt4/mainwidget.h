@@ -68,3 +68,4 @@ class MainWidget : public QWidget, public Ui_MainWidget
 };
 
 #endif // MUPEN_KDE4_MAINWIDGET_H
+

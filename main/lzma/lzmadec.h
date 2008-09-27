@@ -303,3 +303,4 @@ extern int_fast8_t lzmadec_close (lzmadec_FILE *file);
 #endif
 
 #endif /* ifndef LZMADEC_H */
+

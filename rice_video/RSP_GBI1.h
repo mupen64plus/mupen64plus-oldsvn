@@ -394,3 +394,4 @@ void RSP_S2DEX_SPObjLoadTxtr_Ucode1(Gfx *gfx)
 
     RSP_S2DEX_SPObjLoadTxtr(gfx);
 }
+

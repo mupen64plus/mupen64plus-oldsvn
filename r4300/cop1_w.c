@@ -38,3 +38,4 @@ void CVT_D_W()
    *reg_cop1_double[cffd] = *((int*)reg_cop1_simple[cffs]);
    PC++;
 }
+

@@ -74,3 +74,4 @@ uint32 get_memory_flags(uint32);
 int get_memory_type(uint32);
 
 #endif //__DEBUGGER_MEMORY_H__
+

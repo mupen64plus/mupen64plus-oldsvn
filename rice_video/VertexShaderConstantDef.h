@@ -88,3 +88,4 @@
 
 #define FOG_MUL         60
 #define FOG_ADD         61
+

@@ -81,3 +81,4 @@ void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force)
         }
     gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
 }
+

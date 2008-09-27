@@ -5524,3 +5524,4 @@ void hq4x_32( unsigned char * pIn, unsigned char * pOut, int Xres, int Yres, int
   printf( "\nOK\n" );
   return 0;
 }*/
+

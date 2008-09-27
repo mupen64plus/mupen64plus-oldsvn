@@ -1332,3 +1332,4 @@ SZ_RESULT SzArchiveOpen(
     SzArDbExFree(db, allocMain->Free);
   return res;
 }
+

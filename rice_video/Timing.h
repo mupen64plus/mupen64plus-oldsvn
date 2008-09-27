@@ -114,3 +114,4 @@ enum
 #define SP_Timing(t) {status.SPCycleCount+=Timing_##t;}
 
 #endif
+

@@ -245,3 +245,4 @@ void fild_preg32_qword(int reg32);
 void fild_preg32_dword(int reg32);
 
 #endif // ASSEMBLE_H
+

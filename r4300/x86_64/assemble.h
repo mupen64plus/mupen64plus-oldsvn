@@ -310,3 +310,4 @@ void fild_preg64_qword(int reg64);
 void fild_preg64_dword(int reg64);
 
 #endif // ASSEMBLE_H
+

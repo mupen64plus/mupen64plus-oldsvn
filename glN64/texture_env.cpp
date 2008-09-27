@@ -183,3 +183,4 @@ void Set_texture_env( TexEnv *texEnv )
 
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnv->mode );
 }
+

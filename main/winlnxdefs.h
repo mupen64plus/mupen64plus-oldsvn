@@ -60,3 +60,4 @@ typedef void* LPVOID;
 
 #endif // __WIN32__
 #endif // WINLNXDEFS_H
+

@@ -273,3 +273,4 @@ void MainWidget::load(const QModelIndex& index)
         emit romDoubleClicked(filename, archivefile);
     }
 }
+

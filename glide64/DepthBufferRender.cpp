@@ -350,3 +350,4 @@ void Rasterize(vertexi * vtx, int vertices, int dzdx)
         }
     }
 }
+

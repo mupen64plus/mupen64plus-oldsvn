@@ -533,3 +533,4 @@ void Config_DoConfig(HWND /*hParent*/)
 
     gtk_widget_show_all( configWindow );
 }
+

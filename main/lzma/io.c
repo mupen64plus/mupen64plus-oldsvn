@@ -333,3 +333,4 @@ lzmadec_seek (lzmadec_FILE *lfile, off_t offset, int whence)
 }
 
 #endif /* ifndef LZMADEC_NO_STDIO */
+

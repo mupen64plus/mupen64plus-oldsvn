@@ -1297,3 +1297,4 @@ void create_configDialog()
 
     gtk_box_pack_start(GTK_BOX(hbox1), vbox, TRUE, TRUE, 0);
 }
+

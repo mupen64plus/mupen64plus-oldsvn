@@ -627,3 +627,4 @@ bool IsUsedAsDI(uint32 addr);
 #endif
 
 #endif  // __RICE_RDP_GFX_H__
+

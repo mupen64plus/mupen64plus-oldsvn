@@ -36,3 +36,4 @@ void RomInfoDialog::accept()
     }
     QDialog::accept();
 }
+

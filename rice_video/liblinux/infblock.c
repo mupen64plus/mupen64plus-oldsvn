@@ -401,3 +401,4 @@ inflate_blocks_statef *s;
 {
   return s->mode == LENS;
 }
+

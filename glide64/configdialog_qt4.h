@@ -43,3 +43,4 @@ class ConfigDialog : public QDialog, private Ui_Glide64ConfigDialog
 };
 
 #endif // CONFIGDIALOG_QT4_H
+

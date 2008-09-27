@@ -80,3 +80,4 @@ BMGError BMG_EXPORT WriteTIFF( const char *filename,
 
 
 #endif
+

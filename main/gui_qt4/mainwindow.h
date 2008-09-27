@@ -100,3 +100,4 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
 };
 
 #endif // MUPEN_KDE4_MAINWINDOW_H
+

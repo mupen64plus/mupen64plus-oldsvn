@@ -117,3 +117,4 @@ void update_regCop0()
 
     gtk_clist_thaw( GTK_CLIST(clRegCop0) );
 }
+

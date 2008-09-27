@@ -2673,3 +2673,4 @@ png_write_filtered_row(png_structp png_ptr, png_bytep filtered_row)
 #endif
 }
 #endif /* PNG_WRITE_SUPPORTED */
+

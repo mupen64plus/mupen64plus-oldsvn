@@ -630,3 +630,4 @@ void cheat_delete_cheat_code(cheat_t *cheat, cheat_code_t *cheatcode)
     free(cheatcode);
     list_node_delete(&cheat->cheat_codes, codenode);
 }
+

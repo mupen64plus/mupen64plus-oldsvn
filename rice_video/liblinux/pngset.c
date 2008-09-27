@@ -1158,3 +1158,4 @@ png_set_mmx_thresholds (png_structp png_ptr,
 }
 #endif /* ?PNG_ASSEMBLER_CODE_SUPPORTED */
 #endif /* ?PNG_1_0_X */
+

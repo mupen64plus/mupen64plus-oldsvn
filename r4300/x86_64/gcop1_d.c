@@ -709,3 +709,4 @@ void genc_ngt_d()
    and_m32abs_imm32((unsigned int*)&FCR31, ~0x800000); // 11
 #endif
 }
+

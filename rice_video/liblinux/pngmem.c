@@ -564,3 +564,4 @@ png_get_mem_ptr(png_structp png_ptr)
    return ((png_voidp)png_ptr->mem_ptr);
 }
 #endif /* PNG_USER_MEM_SUPPORTED */
+

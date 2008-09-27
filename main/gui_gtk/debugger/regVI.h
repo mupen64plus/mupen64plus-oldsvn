@@ -42,3 +42,4 @@ void init_regVI();
 void update_regVI();
 
 #endif //GUIGTK_REGVI_H
+

@@ -166,3 +166,4 @@ void ConfigDialog::buttonClicked(QAbstractButton* button)
 }
 
 #include "configdialog_qt4.moc"
+
