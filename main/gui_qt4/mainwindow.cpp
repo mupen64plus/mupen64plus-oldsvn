@@ -238,7 +238,8 @@ void MainWindow::emulationStop()
 
 void MainWindow::fullScreenToggle()
 {
-    core::changeWindow();
+    if(core::g_EmulatorRunning)
+        core::changeWindow();
 }
 
 void MainWindow::saveStateSave()

@@ -107,7 +107,7 @@ static int write_cache_file()
 
     if((gzfile = gzopen(cache_filename, "wb"))==NULL)
         {
-        printf("[rcs] Could not create cache file %s\n", cache_filename);
+        printf("Could not create cache file %s\n", cache_filename);
         return 0;
         }
 
@@ -155,65 +155,65 @@ static void rebuild_cache_file()
     /* Scrub cache, if user removed rom directories remove roms. */
     cache_entry *entry, *entryprevious, *entrynext;
 
-    if(g_romcache.length==0)
-        return;
-
-    oldlength = g_romcache.length;
-
-    entryprevious = entry = g_romcache.top;
-    while (entry != NULL)
+    if(g_romcache.length!=0)
         {
-        for(match = counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
-            {
-            snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
-            snprintf(path, sizeof(path), "%s", config_get_string(buffer, "/"));
+        oldlength = g_romcache.length;
 
-            if(config_get_bool("RomDirsScanRecursive", FALSE))
+        entryprevious = entry = g_romcache.top;
+        while (entry != NULL)
+            {
+            for(match = counter = 0; counter < config_get_number("NumRomDirs", 0); ++counter)
                 {
-                if(strncmp(entry->filename, path, strlen(path))==0)
+                snprintf(buffer, sizeof(buffer), "RomDirectory[%d]", counter);
+                snprintf(path, sizeof(path), "%s", config_get_string(buffer, "/"));
+
+                if(config_get_bool("RomDirsScanRecursive", FALSE))
                     {
-                    match = 1;
-                    break;
+                    if(strncmp(entry->filename, path, strlen(path))==0)
+                        {
+                        match = 1;
+                        break;
+                        }
                     }
+                else
+                    {
+                    file = dirfrompath(entry->filename);
+                    if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
+                        {
+                        free(file);
+                        match = 1;
+                        break;
+                        }
+                    free(file);
+                    }
+                }
+
+            /* Check rom is valid. */
+            if(!match||stat(entry->filename, &filestatus)==-1)
+                {
+                if(entry==g_romcache.top)
+                    g_romcache.top = entry->next; 
+                if(entryprevious)
+                    entryprevious->next = entry->next;
+                entrynext = entry->next;
+                entry = NULL;
+                free(entry);
+                --g_romcache.length;
                 }
             else
                 {
-                file = dirfrompath(entry->filename);
-                if(strlen(file)==strlen(path)&&strncmp(file, path, strlen(path))==0)
-                    {
-                    free(file);
-                    match = 1;
-                    break;
-                    }
-                free(file);
+                entrynext = entry->next;
+                entryprevious = entry;
                 }
-            }
 
-        /* Check rom is valid. */
-        if(!match||stat(entry->filename, &filestatus)==-1)
-            {
-            if(entry==g_romcache.top)
-                g_romcache.top = entry->next; 
-            if(entryprevious)
-                entryprevious->next = entry->next;
-            entrynext = entry->next;
-            entry = NULL;
-            free(entry);
-            --g_romcache.length;
-            }
-        else
-            {
-            entrynext = entry->next;
-            entryprevious = entry;
-            }
+            entry = entrynext;
+            };
 
-        entry = entrynext;
-        };
+        if(g_romcache.length!=oldlength)
+            g_romcache.clear = 1;
 
-    if(g_romcache.length!=oldlength)
-        g_romcache.clear = 1;
-
-    g_romcache.last = entryprevious;
+        g_romcache.last = entryprevious;
+        }
 
     int romcounter = 0;
 
@@ -579,7 +579,7 @@ int load_initial_cache()
 
     if((gzfile = gzopen(cache_filename,"rb"))==NULL)
         {
-        printf("Could not open %s\n", cache_filename);
+        printf("Could not open cachefile %s\n", cache_filename);
         return 0;
         }
 
