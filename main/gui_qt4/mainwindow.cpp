@@ -42,6 +42,7 @@ namespace core {
 MainWindow::MainWindow() 
 : QMainWindow(0)
 , m_statusBarLabel(0)
+, m_uiActions(0)
 {
     setupUi(this);
     setupActions();
@@ -436,35 +437,40 @@ void MainWindow::setupActions()
     actionShowStatusbar->setChecked(
         core::config_get_bool("StatusBarVisible", TRUE)
     );
+
+    m_uiActions = new QActionGroup(this);
+    m_uiActions->setExclusive(false);
+    m_uiActions->addAction(actionCloseRom);
+    m_uiActions->addAction(actionSaveState);
+    m_uiActions->addAction(actionSaveStateAs);
+    m_uiActions->addAction(actionLoadState);
+    m_uiActions->addAction(actionLoadStateFrom);
+    m_uiActions->addAction(actionFullScreen);
+    m_uiActions->addAction(actionStop);
+    m_uiActions->addAction(actionPause);
 }
 
-void MainWindow::setState(unsigned char state)
+void MainWindow::setState(core::gui_state_t state)
 {
-    bool enabled, paused;
+    bool pause, stop, play;
+    pause = stop = play = false;
 
-    if(state>core::GUI_STATE_RUNNING)
-        return;
+    switch (state) {
+        case core::GUI_STATE_RUNNING:
+            play = true;
+            break;
+        case core::GUI_STATE_PAUSED:
+            pause = true;
+            break;
+        case core::GUI_STATE_STOPPED:
+            stop = true;
+            break;
+    }
 
-    if(state==core::GUI_STATE_STOPPED)
-        enabled = paused = FALSE;
+    m_uiActions->setEnabled(!stop);
 
-    if(state==core::GUI_STATE_RUNNING)
-        {
-        enabled = TRUE;
-        paused = FALSE;
-        }
-
-    if(state==core::GUI_STATE_PAUSED)
-        enabled = paused = TRUE;
-
-    actionPause->setChecked(paused);
-
-    actionPause->setEnabled(enabled);
-    actionStop->setEnabled(enabled);
-    actionSaveState->setEnabled(enabled);
-    actionSaveStateAs->setEnabled(enabled);
-    actionLoadState->setEnabled(enabled);
-    actionLoadStateFrom->setEnabled(enabled);
-    actionFullScreen->setEnabled(enabled);
+    actionStart->setChecked(play);
+    actionPause->setChecked(pause);
+    actionStop->setChecked(stop);
 }
 

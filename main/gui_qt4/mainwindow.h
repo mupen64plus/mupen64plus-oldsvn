@@ -30,6 +30,13 @@
 #include "ui_mainwindow.h"
 
 class QLabel;
+class QActionGroup;
+
+extern "C" {
+    namespace core {
+        #include "../gui.h"
+    }
+}
 
 enum CustomEventTypes
 {
@@ -61,7 +68,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void showInfoMessage(const QString& msg);
         void showAlertMessage(const QString& msg);
         bool confirmMessage(const QString& msg);
-        void setState(unsigned char state);
+        void setState(core::gui_state_t state);
 
     private slots:
         void romOpen();
@@ -93,6 +100,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void setupActions();
         QList<QAction*> slotActions;
         QLabel* m_statusBarLabel;
+        QActionGroup* m_uiActions;
 #ifdef __WIN32__
         QPointer<QWidget> m_renderWindow;
 

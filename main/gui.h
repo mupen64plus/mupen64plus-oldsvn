@@ -35,21 +35,21 @@ void gui_display(void);
 /* Take control of the application and wait for user input. */
 void gui_main_loop(void);
 
-enum
+typedef enum gui_message
 {
     GUI_MESSAGE_INFO,
     GUI_MESSAGE_CONFIRM,
     GUI_MESSAGE_ERROR
-};
+} gui_message_t;
 
-/* Interface for sending text messages to the GUI. messagetype can be either
- * 0 - An informational message.
- * 1 - A yes / no confirmation dialog.
- * 2 - An error messagee.
+/* Interface for sending text messages to the GUI. messagetype can be
+ * GUI_MESSAGE_INFO    - An informational message.
+ * GUI_MESSAGE_CONFIRM - A yes / no confirmation dialog.
+ * GUI_MESSAGE_ERROR   - An error messagee.
  * Returns true / false (1 / 0) when messagetype specifies confirm.
  * On other messagetypes return may be undefined.
  */
-int gui_message(unsigned char messagetype, const char *format, ...);
+int gui_message(gui_message_t messagetype, const char *format, ...);
 
 /* gui_update_rombrowser() accesses g_romcahce.length and adds upto roms to the
  * GUI's rombrowser widget. The clear flag tells the GUI whether to clear the
@@ -57,15 +57,15 @@ int gui_message(unsigned char messagetype, const char *format, ...);
  */
 void gui_update_rombrowser(unsigned int roms, unsigned short clear);
 
-enum
+typedef enum gui_state
 {
     GUI_STATE_STOPPED,
     GUI_STATE_PAUSED,
     GUI_STATE_RUNNING
-};
+} gui_state_t;
 
 /* Allow the core to send hints to the GUI as to the state of the emulator. */
-void gui_set_state(unsigned char state);
+void gui_set_state(gui_state_t state);
 
 /* TODO: Add debugger GUI APIs here. */
 

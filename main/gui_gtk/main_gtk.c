@@ -169,7 +169,7 @@ void gui_update_rombrowser(unsigned int roms, unsigned short clear)
 /* Display either an informational message to the status bar, a yes / no confirmation 
  * dialog, or an error dialog.
  */
-int gui_message(unsigned char messagetype, const char* format, ...)
+int gui_message(gui_message_t messagetype , const char* format, ...)
 {
     if(!gui_enabled())
         return 0;
@@ -260,7 +260,7 @@ int gui_message(unsigned char messagetype, const char* format, ...)
 }
 
 /* Depending on emulator state, disable undefined options in menus and on the toolbar. */
-void gui_set_state(unsigned char state)
+void gui_set_state(gui_state_t state)
 {
     Uint32 self = SDL_ThreadID();
     gboolean enabled, paused;

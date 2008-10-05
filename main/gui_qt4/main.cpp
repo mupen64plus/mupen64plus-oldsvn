@@ -19,13 +19,6 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern "C" {
-    #include "../version.h"
-    #include "../main.h"
-    #include "../config.h"
-    #include "../gui.h"
-}
-
 #ifndef __WIN32__
 # include <gtk/gtk.h>
 #endif
@@ -44,9 +37,13 @@ extern "C" {
 static MainWindow* mainWindow = 0;
 static QApplication* application = 0;
 
-#include <QDebug>
-
+namespace core {
 extern "C" {
+
+#include "../version.h"
+#include "../main.h"
+#include "../config.h"
+#include "../gui.h"
 
 // Initializes gui subsystem. Also parses AND REMOVES any gui-specific commandline
 // arguments. This is called before mupen64plus parses any of its commandline options.
@@ -96,7 +93,7 @@ void gui_main_loop(void)
     config_write();
 }
 
-int gui_message(unsigned char messagetype, const char *format, ...)
+int gui_message(gui_message_t messagetype, const char *format, ...)
 {
     if (!gui_enabled())
         return 0;
@@ -132,7 +129,7 @@ void gui_update_rombrowser(unsigned int roms, unsigned short clear)
     RomModel::self()->update(roms, clear);
 }
 
-void gui_set_state(unsigned char state)
+void gui_set_state(gui_state_t state)
 {
      if (!gui_enabled())
         return;
@@ -141,4 +138,5 @@ void gui_set_state(unsigned char state)
 }
 
 } // extern "C"
+} // namespace core
 
