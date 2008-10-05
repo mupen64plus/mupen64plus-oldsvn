@@ -300,6 +300,26 @@ void gui_set_state(unsigned char state)
     gtk_widget_set_sensitive(g_MainWindow.loadStateButtonItem, enabled);
     gtk_widget_set_sensitive(g_MainWindow.fullscreenButtonItem, enabled);
 
+    if(g_GfxPlugin||enabled)
+        gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, FALSE);
+    else
+        gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, TRUE);
+
+    if(g_AudioPlugin||enabled)
+        gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, FALSE);
+    else
+        gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, TRUE);
+
+    if(g_InputPlugin||enabled)
+        gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, FALSE);
+    else
+        gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, TRUE);
+
+    if(g_RspPlugin||enabled)
+        gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, FALSE);
+    else
+        gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, TRUE);
+
     if (self != g_GuiThreadID)
        gdk_threads_leave();
 }
@@ -1126,7 +1146,7 @@ static void create_toolbar(void)
 
     g_MainWindow.fullscreenButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.fullscreenButtonImage, tr("Fullscreen")));
     gtk_widget_set_tooltip_text(GTK_WIDGET(g_MainWindow.fullscreenButtonItem), tr("Fullscreen"));
-    g_signal_connect(item, "clicked", G_CALLBACK(callback_fullscreen), NULL);
+    g_signal_connect(g_MainWindow.fullscreenButtonItem, "clicked", G_CALLBACK(callback_fullscreen), NULL);
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.fullscreenButtonItem), 10);
 
     gtk_box_pack_start(GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.toolBar, FALSE, FALSE, 0);

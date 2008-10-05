@@ -537,10 +537,6 @@ void show_configure(void)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_GfxPlugin||g_EmulatorRunning)
-                        gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, FALSE);
-                    else
-                        gtk_widget_set_sensitive(g_ConfigDialog.graphicsCombo, TRUE);
                     break;
                     }
                 free(combo);
@@ -567,10 +563,6 @@ void show_configure(void)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_AudioPlugin||g_EmulatorRunning)
-                        gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, FALSE);
-                    else
-                        gtk_widget_set_sensitive(g_ConfigDialog.audioCombo, TRUE);
                     break;
                     }
                 free(combo);
@@ -597,10 +589,6 @@ void show_configure(void)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_InputPlugin||g_EmulatorRunning)
-                        gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, FALSE);
-                    else
-                        gtk_widget_set_sensitive(g_ConfigDialog.inputCombo, TRUE);
                     break;
                     }
                 free(combo);
@@ -627,10 +615,6 @@ void show_configure(void)
                 if(strcmp(combo, name)==0)
                     {
                     free(combo);
-                    if(g_RspPlugin||g_EmulatorRunning)
-                        gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, FALSE);
-                    else
-                        gtk_widget_set_sensitive(g_ConfigDialog.rspCombo, TRUE);
                     break;
                     }
                 free(combo);
