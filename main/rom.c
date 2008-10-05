@@ -625,18 +625,7 @@ int open_rom(const char* filename, unsigned int archivefile)
 int close_rom(void)
 {
     if(g_EmulatorRunning)
-        {
-#ifndef NO_GUI
-        if(g_Noask)
-            {
-            if(!gui_message(GUI_MESSAGE_CONFIRM,
-                            tr("Emulation is running. Do you want to\n"\
-                               "stop it and load a rom?")))
-                return -1;
-            }
-#endif
         stopEmulation();
-        }
 
     if(ROM_HEADER)
         {

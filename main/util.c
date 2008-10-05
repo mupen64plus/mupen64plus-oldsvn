@@ -732,8 +732,7 @@ char* dirfrompath(const char* string)
         }
 
     buffer = (char*)malloc((counter+1)*sizeof(char));
-    strncpy(buffer, string, counter);
-    buffer[counter] = '\0';
+    snprintf(buffer, counter+1, "%s", string);
     return buffer;
 }
 
