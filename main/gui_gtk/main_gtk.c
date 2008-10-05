@@ -171,25 +171,21 @@ void gui_update_rombrowser(unsigned int roms, unsigned short clear)
  */
 int gui_message(gui_message_t messagetype , const char* format, ...)
 {
-    if(!gui_enabled())
+    if(!gui_enabled()||messagetype>GUI_MESSAGE_ERROR)
         return 0;
 
-    va_list ap;
-    char buffer[2049];
-    Uint32 self = SDL_ThreadID();
     gint response = 0;
 
+    va_list ap;
+    char buffer[2048];
     va_start(ap, format);
-    vsnprintf(buffer, 2048, format, ap);
-    buffer[2048] = '\0';
+    vsnprintf(buffer, sizeof(buffer), format, ap);
     va_end(ap);
 
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
+    Uint32 self = SDL_ThreadID();
     if(self!=g_GuiThreadID)
         gdk_threads_enter();
-
-    if(messagetype>GUI_MESSAGE_ERROR)
-        return 0;
 
     if(messagetype==GUI_MESSAGE_INFO)
         {
