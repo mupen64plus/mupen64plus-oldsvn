@@ -1128,12 +1128,12 @@ static void create_toolbar(void)
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), gtk_separator_tool_item_new(), 5);
 
     g_MainWindow.saveStateButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.saveStateButtonImage, tr("Save State")));
-    gtk_widget_set_tooltip_text(g_MainWindow.stopButtonItem, tr("Save State"));
+    gtk_widget_set_tooltip_text(g_MainWindow.saveStateButtonItem, tr("Save State"));
     g_signal_connect(g_MainWindow.saveStateButtonItem, "clicked", G_CALLBACK(callback_save_state), NULL);
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.saveStateButtonItem), 6);
 
     g_MainWindow.loadStateButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.loadStateButtonImage, tr("Load State")));
-    gtk_widget_set_tooltip_text(g_MainWindow.stopButtonItem, tr("Load State"));
+    gtk_widget_set_tooltip_text(g_MainWindow.loadStateButtonItem, tr("Load State"));
     g_signal_connect(g_MainWindow.loadStateButtonItem, "clicked", G_CALLBACK(callback_load_state), NULL);
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.loadStateButtonItem), 7);
 
