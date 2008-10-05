@@ -141,6 +141,9 @@
    </property>
   </action>
   <action name="actionPause" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
    <property name="text" >
     <string>&amp;Pause</string>
    </property>
@@ -188,9 +191,6 @@
    </property>
   </action>
   <action name="actionFullScreen" >
-   <property name="checkable" >
-    <bool>true</bool>
-   </property>
    <property name="text" >
     <string>&amp;Full Screen</string>
    </property>

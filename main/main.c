@@ -341,7 +341,7 @@ void startEmulation(void)
     VILimit = GetVILimit();
     VILimitMilliseconds = (double) 1000.0/VILimit; 
     printf("init timer!\n");
-    
+
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
                *input_plugin = NULL,
@@ -411,7 +411,6 @@ void startEmulation(void)
     else if(!g_EmulatorRunning)
     {
         // spawn emulation thread
-        
         g_EmulationThread = SDL_CreateThread(emulationThread, NULL);
         if(g_EmulationThread == NULL)
         {
@@ -419,7 +418,7 @@ void startEmulation(void)
             error_message(tr("Couldn't spawn core thread!"));
             return;
         }
-        
+
         main_message(0, 1, 0, OSD_BOTTOM_LEFT,  tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
@@ -429,6 +428,7 @@ void startEmulation(void)
     }
 
 #ifndef NO_GUI
+    gui_set_state(GUI_STATE_RUNNING);
     g_romcache.rcspause = 1;
 #endif
 }
@@ -437,9 +437,6 @@ void stopEmulation(void)
 {
     if(g_EmulatorRunning)
     {
-#ifndef NO_GUI
-        g_romcache.rcspause = 0;
-#endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Stopping emulation.\n"));
         rompause = 0;
         stop_it();
@@ -447,6 +444,11 @@ void stopEmulation(void)
         // wait until emulation thread is done before continuing
         if(g_EmulatorRunning)
             SDL_WaitThread(g_EmulationThread, NULL);
+
+#ifndef NO_GUI
+        gui_set_state(GUI_STATE_STOPPED);
+        g_romcache.rcspause = 0;
+#endif
 
 #ifdef __WIN32__
         plugin_close_plugins();
@@ -468,6 +470,7 @@ int pauseContinueEmulation(void)
     if (rompause)
     {
 #ifndef NO_GUI
+        gui_set_state(GUI_STATE_RUNNING);
         g_romcache.rcspause = 1;
 #endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
@@ -480,6 +483,7 @@ int pauseContinueEmulation(void)
     else
     {
 #ifndef NO_GUI
+        gui_set_state(GUI_STATE_PAUSED);
         g_romcache.rcspause = 0;
 #endif
         if(msg)

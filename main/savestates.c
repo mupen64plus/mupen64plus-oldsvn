@@ -36,7 +36,7 @@
 #include "../r4300/interupt.h"
 #include "../opengl/osd.h"
 
-const char *savestate_magic = "M64+SAVE";
+const char* savestate_magic = "M64+SAVE";
 const int savestate_version = 0x00010000;  /* 1.0 */
 
 extern unsigned int interp_addr;
@@ -49,50 +49,49 @@ static char fname[1024] = {0};
 
 void savestates_select_slot(unsigned int s)
 {
-    if (s < 0 || s > 9 || s == slot) return;
+    if(s<0||s>9||s==slot)
+        return;
     slot = s;
-    config_put_number("CurrentSaveSlot",s);
+    config_put_number("CurrentSaveSlot", s);
 
     if(rom)
-    {
-        char *filename = savestates_get_filename();
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %s", tr("Selected state file"), filename);
+        {
+        char* filename = savestates_get_filename();
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Selected state file: %s"), filename);
         free(filename);
-    }
-    else 
-    {
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %d", tr("Selected state slot"), slot);
-    }
+        }
+    else
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Selected state slot: %d"), slot);
 }
 
-// returns the currently selected save slot
+/* Returns the currently selected save slot. */
 unsigned int savestates_get_slot(void)
 {
     return slot;
 }
 
-// sets save state slot autoincrement on or off
+/* Sets save state slot autoincrement on or off. */
 void savestates_set_autoinc_slot(int b)
 {
     autoinc_save_slot = b;
 }
 
-// returns save state slot autoincrement on or off
+/* Returns save state slot autoincrement on or off. */
 int savestates_get_autoinc_slot(void)
 {
     return autoinc_save_slot != 0;
 }
 
-// increment save slot
 void savestates_inc_slot(void)
 {
-    if (++slot > 9)
+    if(++slot>9)
         slot = 0;
 }
 
-void savestates_select_filename(const char *fn)
+void savestates_select_filename(const char* fn)
 {
-   if (strlen((char *) fn) >= 1024) return;
+   if(strlen((char*)fn)>=1024)
+       return;
    strcpy(fname, fn);
 }
 
@@ -100,7 +99,7 @@ char* savestates_get_filename()
 {
     size_t length;
     length = strlen(ROM_SETTINGS.goodname)+4+1;
-    char *filename = (char*)malloc(length);
+    char* filename = (char*)malloc(length);
     snprintf(filename, length, "%s.st%d", ROM_SETTINGS.goodname, slot);
     return filename;
 }
@@ -113,32 +112,32 @@ void savestates_save()
     size_t length;
     int queuelength;
 
-    if (autoinc_save_slot)
+    if(autoinc_save_slot)
         savestates_inc_slot();
 
-    if (fname[0] != 0)  // a specific filename was given
-    {
+    if(fname[0]!=0)  /* A specific filename was given. */
+        {
         file = malloc(strlen(fname)+1);
         filename = malloc(strlen(fname)+1);
         strcpy(file, fname);
         strcpy(filename, fname);
         fname[0] = 0;
-    }
+        }
     else
-    {
+        {
         filename = savestates_get_filename();
         length = strlen(get_savespath())+strlen(filename)+1;
         file = malloc(length);
         snprintf(file, length, "%s%s", get_savespath(), filename);
-    }
+        }
 
     f = gzopen(file, "wb");
     free(file);
 
-    /* write magic number */
+    /* Write magic number. */
     gzwrite(f, savestate_magic, 8);
 
-    /* write savestate file version in big-endian */
+    /* Write savestate file version in big-endian. */
     outbuf[0] = (savestate_version >> 24) & 0xff;
     outbuf[1] = (savestate_version >> 16) & 0xff;
     outbuf[2] = (savestate_version >>  8) & 0xff;
@@ -191,7 +190,7 @@ void savestates_save()
     gzwrite(f, buffer, queuelength);
 
     gzclose(f);
-    main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %s", tr("Saved state to"), filename);
+    main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Saved state to: %s"), filename);
     free(filename);
 }
 
@@ -203,64 +202,64 @@ void savestates_load()
     size_t length;
     int queuelength, i;
 
-    if (fname[0] != 0)  // a specific filename was given
-    {
+    if(fname[0]!=0)  /* A specific filename was given. */
+        {
         file = malloc(strlen(fname)+1);
         filename = malloc(strlen(fname)+1);
         strcpy(file, fname);
         strcpy(filename, fname);
         fname[0] = 0;
-    }
+        }
     else
-    {
+        {
         filename = savestates_get_filename();
         length = strlen(get_savespath())+strlen(filename)+1;
         file = malloc(length);
         snprintf(file, length, "%s%s", get_savespath(), filename);
-    }
+        }
 
     f = gzopen(file, "rb");
     free(file);
 
-    if (f == NULL)
-    {
+    if(f==NULL)
+        {
         main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: state file '%s' doesn't exist"), filename);
         free(filename);
         return;
-    }
+        }
 
-    /* read and check magic number */
+    /* Read and check magic number. */
     gzread(f, buffer, 8);
-    if (strncmp(buffer, savestate_magic, 8) != 0)
-    {
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Unrecognized savestate format"));
+    if(strncmp(buffer, savestate_magic, 8)!=0)
+        {
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Unrecognized savestate format."));
         free(filename);
         gzclose(f);
         return;
-    }
+        }
 
-    /* read savestate file version in big-endian order */
+    /* Read savestate file version in big-endian order. */
     gzread(f, inbuf, 4);
     i =            inbuf[0];
     i = (i << 8) | inbuf[1];
     i = (i << 8) | inbuf[2];
     i = (i << 8) | inbuf[3];
-    if (i != savestate_version)
-    {
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Savestate version (%08x) doesn't match my version (%08x)"), i, savestate_version);
+    if(i!=savestate_version)
+        {
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Savestate version (%08x) doesn't match current version (%08x)."), i, savestate_version);
         free(filename);
         gzclose(f);
         return;
-    }
+        }
 
     gzread(f, buffer, 32);
     if(memcmp(buffer, ROM_SETTINGS.MD5, 32))
-    {
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Load state error: Saved state ROM doesn't match current ROM"));
+        {
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Load state error: Saved state ROM doesn't match current ROM."));
         free(filename);
         gzclose(f);
         return;
-    }
+        }
 
     gzread(f, &rdram_register, sizeof(RDRAM_register));
     gzread(f, &MI_register, sizeof(mips_register));
@@ -296,13 +295,13 @@ void savestates_load()
     if(!dynacore&&interpcore)
         gzread(f, &interp_addr, 4);
     else
-    {
+        {
         int i;
         gzread(f, &queuelength, 4);
-        for ( i = 0; i < 0x100000; i++ ) 
+        for (i = 0; i < 0x100000; i++)
             invalid_code[i] = 1;
         jump_to(queuelength);
-    }
+        }
 
     gzread(f, &next_interupt, 4);
     gzread(f, &next_vi, 4);
@@ -310,13 +309,13 @@ void savestates_load()
 
     queuelength = 0;
     while(1)
-    {
+        {
         gzread(f, buffer+queuelength, 4);
-        if (*((unsigned int*)&buffer[queuelength]) == 0xFFFFFFFF)
+        if(*((unsigned int*)&buffer[queuelength])==0xFFFFFFFF)
             break;
         gzread(f, buffer+queuelength+4, 4);
         queuelength += 8;
-    }
+        }
     load_eventqueue_infos(buffer);
 
     gzclose(f);
@@ -325,8 +324,7 @@ void savestates_load()
     else
         last_addr = PC->addr;
 
-    main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s: %s", tr("State loaded from"), filename);
+    main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("State loaded from: %s"), filename);
     free(filename);
-
 }
 

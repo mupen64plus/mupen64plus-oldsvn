@@ -431,32 +431,32 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
 
 static int ask_bad(void)
 {
-    if(g_Noask)
-    {
-        printf(tr("The rom you are trying to load is probably a bad dump!\n"
-                      "Be warned that this will probably give unexpected results.\n"));
-        return 1;
-    }
 #ifndef NO_GUI
-    return gui_message(2, tr("The rom you are trying to load is probably a bad dump!\n"
-                           "Be warned that this will probably give unexpected results.\n"
-                           "Do you still want to run it?"));
+    if(!g_Noask)
+        return gui_message(2, tr("The rom you are trying to load is probably a bad dump!\n"
+                                 "Be warned that this will probably give unexpected results.\n"
+                                 "Do you still want to run it?"));
+    else
 #endif
+        printf(tr("The rom you are trying to load is probably a bad dump!\n"
+                  "Be warned that this will probably give unexpected results.\n"));
+
+    return 1;
 }
 
 static int ask_hack(void)
 {
-    if(g_Noask)
-        {
+#ifndef NO_GUI
+    if(!g_Noask)
+        return gui_message(2, tr("The rom you are trying to load is probably a hack!\n"
+                                 "Be warned that this will probably give unexpected results.\n"
+                                 "Do you still want to run it?"));
+    else
+#endif
         printf(tr("The rom you are trying to load is probably a hack!\n"
                   "Be warned that this will probably give unexpected results.\n"));
-        return 1;
-        }
-#ifndef NO_GUI
-    return gui_message(2, tr("The rom you are trying to load is probably a hack!\n"
-                           "Be warned that this will probably give unexpected results.\n"
-                           "Do you still want to run it?"));
-#endif
+
+    return 1;
 }
 
 int open_rom(const char* filename, unsigned int archivefile)
@@ -624,7 +624,7 @@ int close_rom(void)
     if(g_EmulatorRunning)
         {
 #ifndef NO_GUI
-        if(!g_Noask)
+        if(g_Noask)
             {
             if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load a rom?")))
                 return -1;
@@ -644,6 +644,8 @@ int close_rom(void)
         free(rom);
         rom = NULL;
         }
+     else
+        return -1;
 
     /* Clear Byte-swapped flag, since ROM is now deleted. */
     g_MemHasBeenBSwapped = 0;

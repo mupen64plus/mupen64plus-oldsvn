@@ -34,6 +34,7 @@
 #include "configdialog.h"
 #include "main_gtk.h"
 #include "rombrowser.h"
+#include "icontheme.h"
 
 #include "../main.h"
 #include "../romcache.h"
@@ -334,7 +335,10 @@ static void callback_apply_changes(GtkWidget* widget, gpointer data)
         {
         case 2:
             if(currentvalue!=32)
+                {
                 config_put_number("ToolbarSize", 32);
+                updategui = TRUE;
+                }
             break;
         case 0:
             if(currentvalue!=16)
@@ -500,7 +504,7 @@ static void callback_apply_changes(GtkWidget* widget, gpointer data)
 }
 
 /* Initalize configuration dialog. */
-void show_configure()
+void show_configure(void)
 {
     int index, i;
     char *name, *combo;
@@ -835,7 +839,7 @@ static void callback_setInput(GtkWidget* widget, GdkEventAny* event, struct inpu
 }
 
 /* Create main configure dialog. */
-void create_configDialog()
+void create_configDialog(void)
 {
     GtkWidget *label;
     GtkWidget *frame;

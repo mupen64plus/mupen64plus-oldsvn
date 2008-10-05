@@ -60,6 +60,7 @@
 
 /* Necessary function prototypes. */
 static void callback_start_emulation(GtkWidget* widget, gpointer data);
+static void callback_pause_emulation(GtkWidget* widget, gpointer data);
 static void callback_stop_emulation(GtkWidget* widget, gpointer data);
 static void callback_open_rom(GtkWidget* widget, gpointer data);
 static void callback_theme_changed(GtkWidget* widget, gpointer data);
@@ -100,6 +101,7 @@ void gui_init(int* argc, char*** argv)
     create_configDialog();
     create_rom_properties();
     callback_theme_changed(NULL, NULL);
+    gui_set_state(GUI_STATE_STOPPED);
 }
 
 /* Display GUI components to the screen. */
@@ -141,10 +143,10 @@ void gui_main_loop(void)
     gdk_threads_leave();
 }
 
-/* update_rombrowser() accesses g_romcahce.length and adds upto roms to the rombrowser.
- * The clear flag tells the GUI to clear the rombrowser first.
+/* gui_update_rombrowser() accesses g_romcahce.length and adds upto roms to the 
+ * rombrowser. The clear flag tells the GUI to clear the rombrowser first.
  */
-void update_rombrowser(unsigned int roms, unsigned short clear)
+void gui_update_rombrowser(unsigned int roms, unsigned short clear)
 {
     Uint32 self = SDL_ThreadID();
 
@@ -186,7 +188,9 @@ int gui_message(unsigned char messagetype, const char* format, ...)
     if(self!=g_GuiThreadID)
         gdk_threads_enter();
 
-    if(messagetype==0)
+    if(messagetype>GUI_MESSAGE_ERROR)
+        return 0;
+    else if(messagetype==GUI_MESSAGE_INFO)
         {
         int counter;
         for(counter = 0; counter < strlen(buffer); ++counter)
@@ -201,9 +205,7 @@ int gui_message(unsigned char messagetype, const char* format, ...)
         gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
         gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
         }
-    else if(messagetype>2)
-        return 0;
-    else if(messagetype>0)
+    else if(messagetype>GUI_MESSAGE_INFO)
         {
         GtkWidget *dialog, *hbox, *label, *icon;
 
@@ -211,18 +213,18 @@ int gui_message(unsigned char messagetype, const char* format, ...)
         gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
         icon = gtk_image_new();
 
-        if(messagetype==1)
+        if(messagetype==GUI_MESSAGE_CONFIRM)
             {
             dialog = gtk_dialog_new_with_buttons(tr("Error"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_NONE,NULL);
 
-            icon = g_MainWindow.dialogErrorImage;
+            icon = g_MainWindow.dialogErrorImage = gtk_image_new();
             set_icon(g_MainWindow.dialogErrorImage, "dialog-error", 32, FALSE);
             }
-        else if(messagetype==2)
+        else if(messagetype==GUI_MESSAGE_ERROR)
             {
             dialog = gtk_dialog_new_with_buttons(tr("Confirm"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_YES, GTK_RESPONSE_ACCEPT, GTK_STOCK_NO, GTK_RESPONSE_REJECT, NULL);
 
-            icon = g_MainWindow.dialogErrorImage;
+            icon = g_MainWindow.dialogErrorImage = gtk_image_new();
             set_icon(g_MainWindow.dialogErrorImage, "dialog-question", 32, FALSE);
             }
 
@@ -238,9 +240,9 @@ int gui_message(unsigned char messagetype, const char* format, ...)
 
         gtk_widget_show_all(dialog);
 
-        if(messagetype==1)
+        if(messagetype==GUI_MESSAGE_CONFIRM)
             g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
-        else if(messagetype==2)
+        else if(messagetype==GUI_MESSAGE_ERROR)
             {
             response = gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
@@ -255,6 +257,51 @@ int gui_message(unsigned char messagetype, const char* format, ...)
        gdk_threads_leave();
 
     return response == GTK_RESPONSE_ACCEPT;
+}
+
+/* Depending on emulator state, disable undefined options in menus and on the toolbar. */
+void gui_set_state(unsigned char state)
+{
+    Uint32 self = SDL_ThreadID();
+    gboolean enabled, paused;
+
+    if(!gui_enabled()||state>GUI_STATE_RUNNING)
+        return;
+
+    /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
+    if(self!=g_GuiThreadID)
+        gdk_threads_enter();
+
+    if(state==GUI_STATE_STOPPED)
+        enabled = paused = FALSE;
+
+    if(state==GUI_STATE_RUNNING)
+        {
+        enabled = TRUE;
+        paused = FALSE;
+        }
+
+    if(state==GUI_STATE_PAUSED)
+        enabled = paused = TRUE;
+
+    g_signal_handlers_block_by_func(g_MainWindow.pauseButtonItem, callback_pause_emulation, NULL);
+    gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(g_MainWindow.pauseButtonItem), paused);
+    g_signal_handlers_unblock_by_func(g_MainWindow.pauseButtonItem, callback_pause_emulation, NULL);
+
+    gtk_widget_set_sensitive(g_MainWindow.stopMenuItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.saveStateMenuItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.saveStateAsMenuItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.loadStateMenuItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.loadStateFromMenuItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.fullscreenMenuItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.pauseButtonItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.stopButtonItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.saveStateButtonItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.loadStateButtonItem, enabled);
+    gtk_widget_set_sensitive(g_MainWindow.fullscreenButtonItem, enabled);
+
+    if (self != g_GuiThreadID)
+       gdk_threads_leave();
 }
 
 /*********************************************************************************************************
@@ -310,7 +357,7 @@ static void callback_theme_changed(GtkWidget* widget, gpointer data)
     set_icon(g_MainWindow.saveStateMenuImage, "document-save", 16, FALSE);
     set_icon(g_MainWindow.saveStateAsMenuImage, "document-save-as", 16, FALSE);
     set_icon(g_MainWindow.loadStateMenuImage, "document-revert", 16, FALSE);
-    set_icon(g_MainWindow.loadStateAsMenuImage, "document-open", 16, FALSE);
+    set_icon(g_MainWindow.loadStateFromMenuImage, "document-open", 16, FALSE);
 
     set_icon(g_MainWindow.aboutMenuImage, "gtk-about", 16, FALSE);
 
@@ -668,7 +715,7 @@ static void callback_update_check_item(GtkWidget* widget, gpointer data)
         return;
 
      g_signal_handlers_block_by_func(widget, callback_toggle_view, NULL);
-     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(widget),GTK_WIDGET_VISIBLE(toggle_object));
+     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(widget), GTK_WIDGET_VISIBLE(toggle_object));
      g_signal_handlers_unblock_by_func(widget, callback_toggle_view, NULL);
 }
 
@@ -741,7 +788,7 @@ static void callback_debuggerWindowShow(GtkWidget* widget, gpointer window)
 * GUI creation.
 */
 
-static void create_menubar()
+static void create_menubar(void)
 {
     GtkWidget* menu;
     GtkWidget* menuitem;
@@ -801,47 +848,47 @@ static void create_menubar()
     g_signal_connect(item, "activate", G_CALLBACK(callback_start_emulation), NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("_Pause"));
+    g_MainWindow.pauseMenuItem = gtk_image_menu_item_new_with_mnemonic(tr("_Pause"));
     g_MainWindow.pauseMenuImage = gtk_image_new();
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.pauseMenuImage);
-    gtk_widget_add_accelerator(item, "activate", g_MainWindow.accelGroup, GDK_Pause, 0, GTK_ACCEL_VISIBLE);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_pause_emulation), NULL);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.pauseMenuItem), g_MainWindow.pauseMenuImage);
+    gtk_widget_add_accelerator(g_MainWindow.pauseMenuItem, "activate", g_MainWindow.accelGroup, GDK_Pause, 0, GTK_ACCEL_VISIBLE);
+    g_signal_connect(g_MainWindow.pauseMenuItem, "activate", G_CALLBACK(callback_pause_emulation), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.pauseMenuItem);
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("S_top"));
+    g_MainWindow.stopMenuItem = gtk_image_menu_item_new_with_mnemonic(tr("S_top"));
     g_MainWindow.stopMenuImage = gtk_image_new();
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.stopMenuImage);
-    gtk_widget_add_accelerator(item, "activate", g_MainWindow.accelGroup, GDK_Escape, 0, GTK_ACCEL_VISIBLE);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_stop_emulation), NULL);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.stopMenuItem), g_MainWindow.stopMenuImage);
+    gtk_widget_add_accelerator(g_MainWindow.stopMenuItem, "activate", g_MainWindow.accelGroup, GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+    g_signal_connect(g_MainWindow.stopMenuItem, "activate", G_CALLBACK(callback_stop_emulation), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.stopMenuItem);
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), gtk_separator_menu_item_new());
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("Sa_ve State"));
+    g_MainWindow.saveStateMenuItem = gtk_image_menu_item_new_with_mnemonic(tr("Sa_ve State"));
     g_MainWindow.saveStateMenuImage = gtk_image_new();
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.saveStateMenuImage);
-    gtk_widget_add_accelerator(item, "activate", g_MainWindow.accelGroup, GDK_F5, 0, GTK_ACCEL_VISIBLE);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_save_state), NULL);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.saveStateMenuItem), g_MainWindow.saveStateMenuImage);
+    gtk_widget_add_accelerator(g_MainWindow.saveStateMenuItem, "activate", g_MainWindow.accelGroup, GDK_F5, 0, GTK_ACCEL_VISIBLE);
+    g_signal_connect(g_MainWindow.saveStateMenuItem, "activate", G_CALLBACK(callback_save_state), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.saveStateMenuItem);
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("Save State _as..."));
+    g_MainWindow.saveStateAsMenuItem = gtk_image_menu_item_new_with_mnemonic(tr("Save State _as..."));
     g_MainWindow.saveStateAsMenuImage = gtk_image_new();
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.saveStateAsMenuImage);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_save_state_as), NULL);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.saveStateAsMenuItem), g_MainWindow.saveStateAsMenuImage);
+    g_signal_connect(g_MainWindow.saveStateAsMenuItem, "activate", G_CALLBACK(callback_save_state_as), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.saveStateAsMenuItem);
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("_Load State"));
+    g_MainWindow.loadStateMenuItem = gtk_image_menu_item_new_with_mnemonic(tr("_Load State"));
     g_MainWindow.loadStateMenuImage = gtk_image_new();
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.loadStateMenuImage);
-    gtk_widget_add_accelerator(item, "activate", g_MainWindow.accelGroup, GDK_F7, 0, GTK_ACCEL_VISIBLE);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_load_state), NULL);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.loadStateMenuItem), g_MainWindow.loadStateMenuImage);
+    gtk_widget_add_accelerator(g_MainWindow.loadStateMenuItem, "activate", g_MainWindow.accelGroup, GDK_F7, 0, GTK_ACCEL_VISIBLE);
+    g_signal_connect(g_MainWindow.loadStateMenuItem, "activate", G_CALLBACK(callback_load_state), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.loadStateMenuItem);
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("L_oad State from..."));
-    g_MainWindow.loadStateAsMenuImage = gtk_image_new();
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.loadStateAsMenuImage);
-    g_signal_connect(item, "activate", G_CALLBACK(callback_load_state_from), NULL);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    g_MainWindow.loadStateFromMenuItem = gtk_image_menu_item_new_with_mnemonic(tr("L_oad State from..."));
+    g_MainWindow.loadStateFromMenuImage = gtk_image_new();
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.loadStateFromMenuItem), g_MainWindow.loadStateFromMenuImage);
+    g_signal_connect(g_MainWindow.loadStateFromMenuItem, "activate", G_CALLBACK(callback_load_state_from), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.loadStateFromMenuItem);
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), gtk_separator_menu_item_new());
 
@@ -911,12 +958,12 @@ static void create_menubar()
     g_signal_connect(item, "activate", G_CALLBACK(cb_cheatDialog), NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    item = gtk_image_menu_item_new_with_mnemonic(tr("_Full Screen"));
+    g_MainWindow.fullscreenMenuItem = gtk_image_menu_item_new_with_mnemonic(tr("_Full Screen"));
     g_MainWindow.fullscreenMenuImage = gtk_image_new();
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), g_MainWindow.fullscreenMenuImage);
-    gtk_widget_add_accelerator(item, "activate", g_MainWindow.accelGroup, GDK_Return, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.fullscreenMenuItem), g_MainWindow.fullscreenMenuImage);
+    gtk_widget_add_accelerator(g_MainWindow.fullscreenMenuItem, "activate", g_MainWindow.accelGroup, GDK_Return, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
     g_signal_connect(item, "activate", G_CALLBACK(callback_fullscreen), NULL);
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.fullscreenMenuItem);
 
     /* View menu. */
     menu = gtk_menu_new();
@@ -925,6 +972,8 @@ static void create_menubar()
     g_signal_connect_object(menuitem, "activate", G_CALLBACK(callback_update_view), menu, G_CONNECT_SWAPPED);
     gtk_menu_shell_append(GTK_MENU_SHELL(g_MainWindow.menuBar), menuitem);
 
+    /* Note: we must use embedded data since g_callbacks don't reference pointers
+    and not all widgets have been created. */
     item = gtk_check_menu_item_new_with_mnemonic(tr(" _Toolbar"));
     g_object_set_data(G_OBJECT(item), "toggle_object", GUINT_TO_POINTER(TOOLBAR));
     g_signal_connect(item, "toggled", G_CALLBACK(callback_toggle_view), NULL);
@@ -1029,29 +1078,61 @@ static void create_toolbar(void)
     g_MainWindow.fullscreenButtonImage = gtk_image_new();
     g_MainWindow.configureButtonImage = gtk_image_new();
 
+    GtkToolItem* item;
+
     /* Add icons to toolbar. */
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Open Rom"), tr("Open Rom"), "", g_MainWindow.openButtonImage, G_CALLBACK(callback_open_rom), NULL);
+    item = gtk_tool_button_new(g_MainWindow.openButtonImage, tr("Open Rom"));
+    gtk_widget_set_tooltip_text(GTK_WIDGET(item), tr("Open Rom"));
+    g_signal_connect(item, "clicked", G_CALLBACK(callback_open_rom), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), item, 0);
 
-    gtk_toolbar_append_space(GTK_TOOLBAR(g_MainWindow.toolBar));
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), gtk_separator_tool_item_new(), 1);
 
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Start"), tr("Start Emulation"), "", g_MainWindow.playButtonImage, G_CALLBACK(callback_start_emulation), NULL);
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Pause"), tr("Pause/ Continue Emulation"), "", g_MainWindow.pauseButtonImage, G_CALLBACK(callback_pause_emulation), NULL);
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Stop"), tr("Stop Emulation"), "", g_MainWindow.stopButtonImage, G_CALLBACK(callback_stop_emulation), NULL);
+    g_MainWindow.playButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.playButtonImage, tr("Start")));
+    gtk_widget_set_tooltip_text(g_MainWindow.playButtonItem, tr("Start Emulation"));
+    g_signal_connect(g_MainWindow.playButtonItem, "clicked", G_CALLBACK(callback_start_emulation), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.playButtonItem), 2);
 
-    gtk_toolbar_append_space(GTK_TOOLBAR(g_MainWindow.toolBar));
+    g_MainWindow.pauseButtonItem = GTK_WIDGET(gtk_toggle_tool_button_new());
+    gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(g_MainWindow.pauseButtonItem), g_MainWindow.pauseButtonImage);
+    gtk_tool_button_set_label(GTK_TOOL_BUTTON(g_MainWindow.pauseButtonItem), tr("Pause"));
+    gtk_widget_set_tooltip_text(g_MainWindow.pauseButtonItem, tr("Pause/ Continue Emulation"));
+    g_signal_connect(g_MainWindow.pauseButtonItem, "toggled", G_CALLBACK(callback_pause_emulation), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.pauseButtonItem), 3);
 
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Save State"), tr("Save State"), "", g_MainWindow.saveStateButtonImage, G_CALLBACK(callback_save_state), NULL);
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Load State"), tr("Load State"), "", g_MainWindow.loadStateButtonImage, G_CALLBACK(callback_load_state), NULL);
+    g_MainWindow.stopButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.stopButtonImage, tr("Stop")));
+    gtk_widget_set_tooltip_text(g_MainWindow.stopButtonItem, tr("Stop Emulation"));
+    g_signal_connect(g_MainWindow.stopButtonItem, "clicked", G_CALLBACK(callback_stop_emulation), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.stopButtonItem), 4);
 
-    gtk_toolbar_append_space(GTK_TOOLBAR(g_MainWindow.toolBar));
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), gtk_separator_tool_item_new(), 5);
 
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Configure"), tr("Configure") ,"", g_MainWindow.configureButtonImage, G_CALLBACK(callback_configure), NULL);
-    gtk_toolbar_append_item(GTK_TOOLBAR(g_MainWindow.toolBar), tr("Fullscreen"), tr("Fullscreen"), "", g_MainWindow.fullscreenButtonImage, G_CALLBACK(callback_fullscreen), NULL);
+    g_MainWindow.saveStateButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.saveStateButtonImage, tr("Save State")));
+    gtk_widget_set_tooltip_text(g_MainWindow.stopButtonItem, tr("Save State"));
+    g_signal_connect(g_MainWindow.saveStateButtonItem, "clicked", G_CALLBACK(callback_save_state), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.saveStateButtonItem), 6);
+
+    g_MainWindow.loadStateButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.loadStateButtonImage, tr("Load State")));
+    gtk_widget_set_tooltip_text(g_MainWindow.stopButtonItem, tr("Load State"));
+    g_signal_connect(g_MainWindow.loadStateButtonItem, "clicked", G_CALLBACK(callback_load_state), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.loadStateButtonItem), 7);
+
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), gtk_separator_tool_item_new(), 8);
+
+    item = gtk_tool_button_new(g_MainWindow.configureButtonImage, tr("Configure"));
+    gtk_widget_set_tooltip_text(GTK_WIDGET(item), tr("Configure"));
+    g_signal_connect(item, "clicked", G_CALLBACK(callback_configure), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), item, 9);
+
+    g_MainWindow.fullscreenButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.fullscreenButtonImage, tr("Fullscreen")));
+    gtk_widget_set_tooltip_text(GTK_WIDGET(g_MainWindow.fullscreenButtonItem), tr("Fullscreen"));
+    g_signal_connect(item, "clicked", G_CALLBACK(callback_fullscreen), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.fullscreenButtonItem), 10);
 
     gtk_box_pack_start(GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.toolBar, FALSE, FALSE, 0);
 }
 
-static void create_statusbar()
+static void create_statusbar(void)
 {
     g_MainWindow.statusBarHBox = gtk_hbox_new(FALSE, 5);
     gtk_box_pack_end(GTK_BOX(g_MainWindow.toplevelVBox), g_MainWindow.statusBarHBox, FALSE, FALSE, 0);
@@ -1061,7 +1142,7 @@ static void create_statusbar()
     gtk_box_pack_start(GTK_BOX(g_MainWindow.statusBarHBox), g_MainWindow.statusBar, TRUE , TRUE, 0);
 }
 
-static void create_mainWindow()
+static void create_mainWindow(void)
 {
     /* Setup main window. */
     gint width, height, xposition, yposition;

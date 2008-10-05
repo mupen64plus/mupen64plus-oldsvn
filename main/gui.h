@@ -23,11 +23,49 @@
 #define __GUI_H__
 
 /* The functons which all GUIs must implement. */
+
+/* Build the GUI and allocate necessary dependenices, but don't display
+ * anything to the screen.
+ */
 void gui_init(int* argc, char*** argv);
+
+/* Display the newly built GUI. */
 void gui_display(void);
+
+/* Take control of the application and wait for user input. */
 void gui_main_loop(void);
+
+enum
+{
+    GUI_MESSAGE_INFO,
+    GUI_MESSAGE_CONFIRM,
+    GUI_MESSAGE_ERROR
+};
+
+/* Interface for sending text messages to the GUI. messagetype can be either
+ * 0 - An informational message.
+ * 1 - A yes / no confirmation dialog.
+ * 2 - An error messagee.
+ * Returns true / false (1 / 0) when messagetype specifies confirm.
+ * On other messagetypes return may be undefined.
+ */
 int gui_message(unsigned char messagetype, const char *format, ...);
-void update_rombrowser(unsigned int roms, unsigned short clear);
+
+/* gui_update_rombrowser() accesses g_romcahce.length and adds upto roms to the
+ * GUI's rombrowser widget. The clear flag tells the GUI whether to clear the
+ * rombrowser first.
+ */
+void gui_update_rombrowser(unsigned int roms, unsigned short clear);
+
+enum
+{
+    GUI_STATE_STOPPED,
+    GUI_STATE_PAUSED,
+    GUI_STATE_RUNNING
+};
+
+/* Allow the core to send hints to the GUI as to the state of the emulator. */
+void gui_set_state(unsigned char state);
 
 /* TODO: Add debugger GUI APIs here. */
 

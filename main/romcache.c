@@ -29,6 +29,7 @@
 #include "romcache.h"
 #include "config.h"
 #include "rom.h"
+#include "main.h"
 #include "translate.h"
 
 #include "../opengl/osd.h"
@@ -38,8 +39,8 @@
 /* Rom database necessary even in GUI=NONE due to Eeprom issue for ROM loading.
  * Possible SoftHack or other necessary compatibility settings as well.
  */
-void romdatabase_open();
-void romdatabase_close();
+void romdatabase_open(void);
+void romdatabase_close(void);
 
 _romdatabase g_romdatabase;
 romdatabase_entry empty_entry;
@@ -61,7 +62,7 @@ romdatabase_entry empty_entry;
 #include "../memory/memory.h" /* sl() macro for CRCs. */
 
 #include "md5.h"
-#include "main.h"
+#include "gui.h"
 #include "util.h"
 
 #include <SDL.h>
@@ -79,10 +80,9 @@ static const char* romextensions[] =
 };
 
 static void scan_dir(const char* dirname, int* romcounter);
-int load_initial_cache();
-void update_rombrowser(unsigned int roms, unsigned short clear);
+int load_initial_cache(void);
 
-static void clear_cache()
+static void clear_cache(void)
 {
     cache_entry *entry, *entrynext;
 
@@ -101,7 +101,7 @@ static void clear_cache()
         }
 }
 
-static int write_cache_file()
+static int write_cache_file(void)
 {
     gzFile* gzfile;
 
@@ -144,7 +144,7 @@ static int write_cache_file()
     return 1;
 }
 
-static void rebuild_cache_file()
+static void rebuild_cache_file(void)
 {
     char path[PATH_MAX], buffer[PATH_MAX];
     char* file;
@@ -265,12 +265,12 @@ int rom_cache_system(void* _arg)
                 snprintf(cache_filename, sizeof(cache_filename), "%s", buffer);
 
                 if(load_initial_cache())
-                    update_rombrowser(g_romcache.length, g_romcache.clear);
+                    gui_update_rombrowser(g_romcache.length, g_romcache.clear);
 
                 remove(cache_filename);
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
                 rebuild_cache_file();
-                update_rombrowser(g_romcache.length, g_romcache.clear);
+                gui_update_rombrowser(g_romcache.length, g_romcache.clear);
 
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
                 if(g_romcache.rcstask==RCS_BUSY)
@@ -288,7 +288,7 @@ int rom_cache_system(void* _arg)
 
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rescanning rom cache."));
                 rebuild_cache_file();
-                update_rombrowser(g_romcache.length, g_romcache.clear);
+                gui_update_rombrowser(g_romcache.length, g_romcache.clear);
                 main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Rom cache up to date. %d ROM%s."), g_romcache.length, (g_romcache.length==1) ? "" : "s");
                 g_romcache.clear = 0;
 
@@ -532,7 +532,7 @@ static void scan_dir(const char* directoryname, int* romcounter)
                 ++*romcounter;
                 if(*romcounter%UPDATE_FREQUENCY==0)
                     {
-                    update_rombrowser(g_romcache.length, g_romcache.clear); 
+                    gui_update_rombrowser(g_romcache.length, g_romcache.clear); 
                     main_message(1, 1, 0, OSD_BOTTOM_LEFT, tr("Added ROMs %d-%d."), g_romcache.length-UPDATE_FREQUENCY+1, g_romcache.length);
                     write_cache_file();
                     }
@@ -568,7 +568,7 @@ static void scan_dir(const char* directoryname, int* romcounter)
      closedir(directory);
  }
 
-int load_initial_cache()
+int load_initial_cache(void)
 {
     int counter;
     char header[6];
@@ -684,7 +684,7 @@ static int split_property(char* string)
     return counter;
 }
 
-void romdatabase_open()
+void romdatabase_open(void)
 {
     gzFile gzfile;
     char buffer[256];
@@ -902,7 +902,7 @@ void romdatabase_open()
    gzclose(gzfile);
 }
 
-void romdatabase_close()
+void romdatabase_close(void)
 {
     if (g_romdatabase.comment == NULL)
         return;

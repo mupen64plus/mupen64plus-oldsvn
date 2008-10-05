@@ -27,11 +27,15 @@
 
 #include <gtk/gtk.h>
 
+#include "../gui.h"
+
 typedef struct
 {
     GtkWidget* window;
-    GtkWidget* toplevelVBox;  /* Topevel vbox containing menubar, toolbar, filter, rombrowser, and statusbar. */
+    GtkWidget* toplevelVBox;  /* Topevel vbox for main window. */
 
+    /* Pointers to GUI widgets whose state can be changed while running, 
+    such as toggling visibile / enabled, or chaning icons. */
     GtkWidget* dialogErrorImage;
     GtkWidget* dialogQuestionImage;
 
@@ -43,29 +47,42 @@ typedef struct
     GtkWidget* quitMenuImage;
 
     GtkWidget* playMenuImage;
+    GtkWidget* pauseMenuItem;
     GtkWidget* pauseMenuImage;
+    GtkWidget* stopMenuItem;
     GtkWidget* stopMenuImage;
+    GtkWidget* saveStateMenuItem;
     GtkWidget* saveStateMenuImage;
+    GtkWidget* saveStateAsMenuItem;
     GtkWidget* saveStateAsMenuImage;
+    GtkWidget* loadStateMenuItem;
     GtkWidget* loadStateMenuImage;
-    GtkWidget* loadStateAsMenuImage;
+    GtkWidget* loadStateFromMenuItem;
+    GtkWidget* loadStateFromMenuImage;
 
     GtkWidget* configureMenuImage;
     GtkWidget* graphicsMenuImage;
     GtkWidget* audioMenuImage;
     GtkWidget* inputMenuImage;
     GtkWidget* rspMenuImage;
+    GtkWidget* fullscreenMenuItem;
     GtkWidget* fullscreenMenuImage;
 
     GtkWidget* aboutMenuImage;
 
     GtkWidget* toolBar;
     GtkWidget* openButtonImage;
+    GtkWidget* playButtonItem;
     GtkWidget* playButtonImage;
+    GtkWidget* pauseButtonItem;
     GtkWidget* pauseButtonImage;
+    GtkWidget* stopButtonItem;
     GtkWidget* stopButtonImage;
+    GtkWidget* saveStateButtonItem;
     GtkWidget* saveStateButtonImage;
+    GtkWidget* loadStateButtonItem;
     GtkWidget* loadStateButtonImage;
+    GtkWidget* fullscreenButtonItem;
     GtkWidget* fullscreenButtonImage;
     GtkWidget* configureButtonImage;
 
@@ -98,16 +115,6 @@ typedef struct
 
 extern SMainWindow g_MainWindow;
 extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star, *staroff;
-
-/* public helper functions. */
-void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
-
-/* The functons which all GUIs must implement. */
-void gui_init(int* argc, char*** argv);
-void gui_display(void);
-void gui_main_loop(void);
-int gui_message(unsigned char messagetype, const char *format, ...);
-void update_rombrowser(unsigned int roms, unsigned short clear);
 
 /* View defines */
 #define TOOLBAR 1
