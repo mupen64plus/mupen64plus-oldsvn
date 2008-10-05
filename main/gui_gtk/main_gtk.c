@@ -280,9 +280,17 @@ void gui_set_state(gui_state_t state)
     if(state==GUI_STATE_PAUSED)
         enabled = paused = TRUE;
 
+    g_signal_handlers_block_by_func(g_MainWindow.playButtonItem, callback_start_emulation, NULL);
+    gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(g_MainWindow.playButtonItem), enabled&&!paused);
+    g_signal_handlers_unblock_by_func(g_MainWindow.playButtonItem, callback_start_emulation, NULL);
+
     g_signal_handlers_block_by_func(g_MainWindow.pauseButtonItem, callback_pause_emulation, NULL);
     gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(g_MainWindow.pauseButtonItem), paused);
     g_signal_handlers_unblock_by_func(g_MainWindow.pauseButtonItem, callback_pause_emulation, NULL);
+
+    g_signal_handlers_block_by_func(g_MainWindow.stopButtonItem, callback_stop_emulation, NULL);
+    gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(g_MainWindow.stopButtonItem), !enabled);
+    g_signal_handlers_unblock_by_func(g_MainWindow.stopButtonItem, callback_stop_emulation, NULL);
 
     gtk_widget_set_sensitive(g_MainWindow.stopMenuItem, enabled);
     gtk_widget_set_sensitive(g_MainWindow.saveStateMenuItem, enabled);
@@ -1104,9 +1112,11 @@ static void create_toolbar(void)
 
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), gtk_separator_tool_item_new(), 1);
 
-    g_MainWindow.playButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.playButtonImage, tr("Start")));
+    g_MainWindow.playButtonItem = GTK_WIDGET(gtk_toggle_tool_button_new());
+    gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(g_MainWindow.playButtonItem), g_MainWindow.playButtonImage);
+    gtk_tool_button_set_label(GTK_TOOL_BUTTON(g_MainWindow.playButtonItem), tr("Start"));
     gtk_widget_set_tooltip_text(g_MainWindow.playButtonItem, tr("Start Emulation"));
-    g_signal_connect(g_MainWindow.playButtonItem, "clicked", G_CALLBACK(callback_start_emulation), NULL);
+    g_signal_connect(g_MainWindow.playButtonItem, "toggled", G_CALLBACK(callback_start_emulation), NULL);
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.playButtonItem), 2);
 
     g_MainWindow.pauseButtonItem = GTK_WIDGET(gtk_toggle_tool_button_new());
@@ -1116,9 +1126,11 @@ static void create_toolbar(void)
     g_signal_connect(g_MainWindow.pauseButtonItem, "toggled", G_CALLBACK(callback_pause_emulation), NULL);
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.pauseButtonItem), 3);
 
-    g_MainWindow.stopButtonItem = GTK_WIDGET(gtk_tool_button_new(g_MainWindow.stopButtonImage, tr("Stop")));
+    g_MainWindow.stopButtonItem = GTK_WIDGET(gtk_toggle_tool_button_new());
+    gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(g_MainWindow.stopButtonItem), g_MainWindow.stopButtonImage);
+    gtk_tool_button_set_label(GTK_TOOL_BUTTON(g_MainWindow.pauseButtonItem), tr("Stop"));
     gtk_widget_set_tooltip_text(g_MainWindow.stopButtonItem, tr("Stop Emulation"));
-    g_signal_connect(g_MainWindow.stopButtonItem, "clicked", G_CALLBACK(callback_stop_emulation), NULL);
+    g_signal_connect(g_MainWindow.stopButtonItem, "toggled", G_CALLBACK(callback_stop_emulation), NULL);
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.stopButtonItem), 4);
 
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), gtk_separator_tool_item_new(), 5);

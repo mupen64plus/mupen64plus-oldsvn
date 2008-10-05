@@ -464,7 +464,7 @@ static void scan_dir(const char* directoryname, int* romcounter)
         entry = (cache_entry*)calloc(1,sizeof(cache_entry));
         if(entry==NULL)
             {
-            fprintf(stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__);
+            fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
             continue;
             }
 
@@ -547,7 +547,7 @@ static void scan_dir(const char* directoryname, int* romcounter)
                         multi = 1; 
                         if(entry==NULL)
                             {
-                            fprintf(stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__);
+                            fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                             continue; 
                             }
                         }
@@ -597,7 +597,7 @@ int load_initial_cache(void)
 
         if(!entry)
             {
-            fprintf(stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__);
+            fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
             return 0;
             }
 

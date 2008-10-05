@@ -281,7 +281,7 @@ void rombrowser_refresh(unsigned int roms, unsigned short clear)
 
         if(iter==NULL||country==NULL||md5hash==NULL||crc1==NULL||crc2==NULL||size==NULL||compressiontype==NULL||imagetype==NULL||cicchip==NULL)
             {
-            fprintf(stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__); 
+            fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__); 
             return;
             }
 

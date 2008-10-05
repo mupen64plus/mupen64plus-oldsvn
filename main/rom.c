@@ -138,7 +138,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
             localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
             if(localrom==NULL)
                 {
-                fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                 return NULL;
                 }
             fread(localrom, 1, *loadlength, romfile); 
@@ -167,7 +167,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
                         localrom = (unsigned char*)realloc(localrom, (i+1)*CHUNKSIZE*sizeof(unsigned char));
                         if(localrom==NULL)
                            {
-                           fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                           fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                            return NULL;
                            }
                         *romsize += BZ2_bzRead(&bzerror, bzromfile, localrom+(i*CHUNKSIZE), CHUNKSIZE); 
@@ -201,7 +201,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
             unsigned char* buffer_out = (unsigned char*)malloc(45*128*sizeof(unsigned char));
             if(buffer_in==NULL||buffer_out==NULL||lzmadec_init(&stream)!=LZMADEC_OK)
                 {
-                fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                 return NULL;
                 }
 
@@ -224,7 +224,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
                 localrom = (unsigned char*)malloc(*romsize*sizeof(unsigned char));
                 if(buffer_in==NULL||buffer_out==NULL||localrom==NULL)
                     {
-                    fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                    fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                     return NULL;
                     }
 
@@ -244,7 +244,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
                     localrom = (unsigned char*)realloc(localrom,*romsize*sizeof(unsigned char));
                     if(localrom==NULL)
                         {
-                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                        fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                         return NULL;
                         }
                     memcpy(localrom+oldsize,buffer_out,CHUNKSIZE*128-stream.avail_out);
@@ -282,7 +282,7 @@ unsigned char* load_single_rom(const char* filename, int* romsize, unsigned char
                     localrom = (unsigned char*)realloc(localrom, (i+1)*CHUNKSIZE*sizeof(unsigned char));
                     if(localrom==NULL)
                        {
-                       fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                       fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                        return NULL;
                        }
                     *romsize += gzread(gzromfile, localrom+(i*CHUNKSIZE), CHUNKSIZE);
@@ -344,7 +344,7 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
                     localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
                     if(localrom==NULL)
                         {
-                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                        fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                         return NULL;
                         }
                     unzOpenCurrentFile(zipromfile);
@@ -410,7 +410,7 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
                     localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
                     if(localrom==NULL)
                         {
-                        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+                        fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
                         return NULL;
                         }
                     memcpy(localrom,*outBuffer+offset,*loadlength);
@@ -547,7 +547,7 @@ int open_rom(const char* filename, unsigned int archivefile)
     ROM_HEADER = malloc(sizeof(rom_header));
     if(ROM_HEADER==NULL)
         {
-        fprintf( stderr, "%s, %c: Out of memory!\n", __FILE__, __LINE__ );
+        fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
         return 0;
         }
     memcpy(ROM_HEADER, rom, sizeof(rom_header));
