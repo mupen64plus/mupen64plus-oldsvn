@@ -175,22 +175,24 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
         return 0;
 
     va_list ap;
-    char buffer[2049];
+    gchar buffer[2049];
     Uint32 self = SDL_ThreadID();
-    gint response = 0;
 
     va_start(ap, format);
     vsnprintf(buffer, 2048, format, ap);
     buffer[2048] = '\0';
     va_end(ap);
 
+    GtkDialog *dialog = NULL;
+    GtkMessageType type = 0;
+    GtkButtonsType buttons = 0;
+    gint response = 0;
+
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
     if(self!=g_GuiThreadID)
         gdk_threads_enter();
 
-    if(messagetype>GUI_MESSAGE_ERROR)
-        return 0;
-    else if(messagetype==GUI_MESSAGE_INFO)
+    if(messagetype==GUI_MESSAGE_INFO)
         {
         int counter;
         for(counter = 0; counter < strlen(buffer); ++counter)
@@ -205,58 +207,45 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
         gtk_statusbar_pop(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"));
         gtk_statusbar_push(GTK_STATUSBAR(g_MainWindow.statusBar), gtk_statusbar_get_context_id(GTK_STATUSBAR(g_MainWindow.statusBar), "status"), buffer);
         }
-    else if(messagetype>GUI_MESSAGE_INFO)
+    else
         {
-        GtkWidget *dialog, *hbox, *label, *icon;
-
-        hbox = gtk_hbox_new(FALSE, 10);
-        gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
-        icon = gtk_image_new();
-
-        if(messagetype==GUI_MESSAGE_CONFIRM)
+        switch(messagetype)
             {
-            dialog = gtk_dialog_new_with_buttons(tr("Error"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_NONE,NULL);
-
-            icon = g_MainWindow.dialogErrorImage = gtk_image_new();
-            set_icon(g_MainWindow.dialogErrorImage, "dialog-error", 32, FALSE);
-            }
-        else if(messagetype==GUI_MESSAGE_ERROR)
-            {
-            dialog = gtk_dialog_new_with_buttons(tr("Confirm"), GTK_WINDOW(g_MainWindow.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_YES, GTK_RESPONSE_ACCEPT, GTK_STOCK_NO, GTK_RESPONSE_REJECT, NULL);
-
-            icon = g_MainWindow.dialogErrorImage = gtk_image_new();
-            set_icon(g_MainWindow.dialogErrorImage, "dialog-question", 32, FALSE);
+            case GUI_MESSAGE_CONFIRM:
+                type = GTK_MESSAGE_QUESTION;
+                buttons = GTK_BUTTONS_YES_NO;
+                break;
+            case GUI_MESSAGE_ERROR:
+                buttons = GTK_BUTTONS_OK;
+                type = GTK_MESSAGE_ERROR;
+                break;
             }
 
-        gtk_misc_set_alignment(GTK_MISC(icon), 0, 0);
-        gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
-
-        label = gtk_label_new(buffer);
-        gtk_misc_set_alignment(GTK_MISC(label), 0, 0);
-        gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
-
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, FALSE, FALSE, 0);
-
-        gtk_widget_show_all(dialog);
-
-        if(messagetype==GUI_MESSAGE_CONFIRM)
-            g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
-        else if(messagetype==GUI_MESSAGE_ERROR)
+        dialog = gtk_message_dialog_new(GTK_WINDOW(g_MainWindow.window),
+                                         0,
+                                         type,
+                                         buttons,
+                                         buffer);
+        switch(gtk_dialog_run(dialog))
             {
-            response = gtk_dialog_run(GTK_DIALOG(dialog));
-            gtk_widget_destroy(dialog);
+            case GTK_RESPONSE_YES:
+                response = 1;
+                break;
+            default:
+                response = 0;
+                break;
             }
+        gtk_widget_destroy(GTK_WIDGET(dialog));
         }
 
     gdk_threads_leave();
     g_main_context_iteration(NULL, FALSE);
     gdk_threads_enter();
 
-   if (self != g_GuiThreadID)
-       gdk_threads_leave();
+    if (self != g_GuiThreadID)
+        gdk_threads_leave();
 
-    return response == GTK_RESPONSE_ACCEPT;
+    return response;
 }
 
 /* Depending on emulator state, disable undefined options in menus and on the toolbar. */
@@ -415,7 +404,10 @@ static void callback_open_rom(GtkWidget* widget, gpointer data)
 {
     if(g_EmulatorRunning)
         {
-        if(!gui_message(2, tr("Emulation is running. Do you want to stop it?\n\nNote: in order to play another rom, you must first stop this one. ")))
+        if(!gui_message(GUI_MESSAGE_CONFIRM,
+                        tr("Emulation is running. Do you want to stop it?\n\n" \
+                           "Note: in order to play another rom, you must first" \
+                           " stop this one.")))
             return;
         callback_stop_emulation(NULL, NULL);
         }
@@ -479,7 +471,8 @@ static void callback_start_emulation(GtkWidget* widget, gpointer data)
 
         if(!list) 
             {
-            if(gui_message(2, tr("There is no Rom loaded. Do you want to load one?")))
+            if(gui_message(GUI_MESSAGE_CONFIRM,
+                           tr("There is no Rom loaded. Do you want to load one?")))
                 callback_open_rom(NULL, NULL);
             return;
             }
@@ -626,7 +619,8 @@ static void callback_configure_graphics(GtkWidget* widget, gpointer data)
         plugin_exec_config(name);
     else
         {
-        if(gui_message(2, tr("No graphics plugin selected! Do you\nwant to select one?")))
+        if(gui_message(GUI_MESSAGE_CONFIRM,
+                       tr("No graphics plugin selected! Do you\nwant to select one?")))
             {
             gtk_notebook_set_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num(GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins));
             gtk_widget_show_all(g_ConfigDialog.dialog);
@@ -641,7 +635,8 @@ static void callback_configure_audio(GtkWidget* widget, gpointer data)
         plugin_exec_config(name);
     else
         {
-        if(gui_message(2, tr("No audio plugin selected! Do you\nwant to select one?")))
+        if(gui_message(GUI_MESSAGE_CONFIRM,
+                       tr("No audio plugin selected! Do you\nwant to select one?")))
             {
             gtk_notebook_set_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num(GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins));
             gtk_widget_show_all(g_ConfigDialog.dialog);
@@ -656,7 +651,8 @@ static void callback_configure_input(GtkWidget* widget, gpointer data)
         plugin_exec_config(name);
     else
         {
-        if(gui_message(2, tr("No input plugin selected! Do you\nwant to select one?")))
+        if(gui_message(GUI_MESSAGE_CONFIRM,
+                       tr("No input plugin selected! Do you\nwant to select one?")))
             {
             gtk_notebook_set_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num(GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins));
             gtk_widget_show_all(g_ConfigDialog.dialog);
@@ -671,7 +667,8 @@ static void callback_configure_rsp(GtkWidget* widget, gpointer data)
         plugin_exec_config(name);
     else
         {
-        if(gui_message(2, tr("No RSP plugin selected! Do you\nwant to select one?")))
+        if(gui_message(GUI_MESSAGE_CONFIRM,
+                       tr("No RSP plugin selected! Do you\nwant to select one?")))
             {
             gtk_notebook_set_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), gtk_notebook_page_num(GTK_NOTEBOOK(g_ConfigDialog.notebook), g_ConfigDialog.configPlugins));
             gtk_widget_show_all(g_ConfigDialog.dialog);
@@ -757,7 +754,9 @@ static void callback_debuggerEnableToggled(GtkWidget* widget, gpointer data)
 
     if(g_EmulatorRunning)
         {
-        if(gui_message(2, tr("Emulation needs to be restarted in order\nto activate the debugger. Do you want\nthis to happen?")))
+        if(gui_message(GUI_MESSAGE_CONFIRM,
+                       tr("Emulation needs to be restarted in order\n" \
+                          "to activate the debugger. Do you want\nthis to happen?")))
             {
             callback_stop_emulation(NULL, NULL);
             emuRestart = 1;

@@ -433,9 +433,10 @@ static int ask_bad(void)
 {
 #ifndef NO_GUI
     if(!g_Noask)
-        return gui_message(2, tr("The rom you are trying to load is probably a bad dump!\n"
-                                 "Be warned that this will probably give unexpected results.\n"
-                                 "Do you still want to run it?"));
+        return gui_message(GUI_MESSAGE_CONFIRM,
+                           tr("The rom you are trying to load is probably a bad dump!\n"
+                              "Be warned that this will probably give unexpected results.\n"
+                              "Do you still want to run it?"));
     else
 #endif
         printf(tr("The rom you are trying to load is probably a bad dump!\n"
@@ -448,7 +449,7 @@ static int ask_hack(void)
 {
 #ifndef NO_GUI
     if(!g_Noask)
-        return gui_message(2, tr("The rom you are trying to load is probably a hack!\n"
+        return gui_message(GUI_MESSAGE_CONFIRM, tr("The rom you are trying to load is probably a hack!\n"
                                  "Be warned that this will probably give unexpected results.\n"
                                  "Do you still want to run it?"));
     else
@@ -466,7 +467,9 @@ int open_rom(const char* filename, unsigned int archivefile)
 #ifndef NO_GUI
          if(!g_Noask)
              {
-             if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
+             if(!gui_message(GUI_MESSAGE_CONFIRM,
+                             tr("Emulation is running. Do you want to\n"
+                                "stop it and load the selected rom?")))
                  return -1;
              }
 #endif
@@ -626,7 +629,9 @@ int close_rom(void)
 #ifndef NO_GUI
         if(g_Noask)
             {
-            if(!gui_message(2, tr("Emulation is running. Do you want to\nstop it and load a rom?")))
+            if(!gui_message(GUI_MESSAGE_CONFIRM,
+                            tr("Emulation is running. Do you want to\n"\
+                               "stop it and load a rom?")))
                 return -1;
             }
 #endif

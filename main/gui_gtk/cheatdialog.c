@@ -295,7 +295,9 @@ static void cb_delete(GtkButton *button, GtkTreeView *view)
             gtk_tree_model_get(model, &parentIter, 1, &romcheat, -1);
             gtk_tree_model_get(model, &iter, 1, &cheat, -1);
 
-            if(gui_message(2, tr("Are you sure you want to delete cheat \"%s\"?"), cheat->name))
+            if(gui_message(GUI_MESSAGE_CONFIRM,
+                           tr("Are you sure you want to delete cheat \"%s\"?"),
+                           cheat->name))
                 {
                 gtk_tree_store_remove(GTK_TREE_STORE(model), &iter);
                 cheat_delete_cheat(romcheat, cheat);
@@ -309,7 +311,9 @@ static void cb_delete(GtkButton *button, GtkTreeView *view)
             // selected item is a rom
             gtk_tree_model_get(model, &iter, 1, &romcheat, -1);
 
-            if(gui_message(2, tr("Are you sure you want to delete rom \"%s\" and all of its cheats?"), romcheat->rom_name))
+            if(gui_message(GUI_MESSAGE_CONFIRM,
+                           tr("Are you sure you want to delete rom \"%s\" and all of its cheats?"),
+                           romcheat->rom_name))
                 {
                 gtk_tree_store_remove(GTK_TREE_STORE(model), &iter);
                 cheat_delete_rom(romcheat);

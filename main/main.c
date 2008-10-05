@@ -185,7 +185,7 @@ void main_message(unsigned int console, unsigned int statusbar, unsigned int osd
         osd_new_message(osd_corner, buffer);
 #ifndef NO_GUI
     if (l_GuiEnabled && statusbar)
-        gui_message(0, buffer);
+        gui_message(GUI_MESSAGE_INFO, buffer);
 #endif
     if (console)
         printf("%s\n", buffer);
@@ -202,7 +202,7 @@ void error_message(const char *format, ...)
 
 #ifndef NO_GUI
     if (l_GuiEnabled)
-        gui_message(1, buffer);
+        gui_message(GUI_MESSAGE_ERROR, buffer);
 #endif
     printf("%s: %s\n", tr("Error"), buffer);
 }
