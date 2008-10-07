@@ -23,10 +23,6 @@
 # include <windows.h>
 # include <stdio.h>
 #else
-# include "gui.h"
-/* NOTE:  all MessageBox commands are commented due to
-          focus issues (gnu+linux) if they're not. */
-          
 # include "wintypes.h"
 # include <string.h>
 # include <stdio.h>
@@ -34,15 +30,14 @@
 
 #include "hle.h"
 
-
 static void SPNOOP () {
     char buff[0x100];
     sprintf (buff, "Unknown/Unimplemented Audio Command %i in ABI 3", (int)(inst1 >> 24));
-//#ifdef __WIN32__
-//    MessageBox (NULL, buff, "Audio HLE Error", MB_OK);
-//#else
+#ifdef __WIN32__
+    MessageBox (NULL, buff, "Audio HLE Error", MB_OK);
+#else
     printf( "Audio HLE Error: %s\n", buff );
-//#endif
+#endif
 }
 
 extern u16 ResampleLUT [0x200];
@@ -79,8 +74,8 @@ static void SETVOL3 () { // Swapped Rate_Left and Vol
         }
     } else {
         Vol_Left    = *(s16*)&inst1;
-        Env_Dry        = (s16)(*(s32*)&inst2 >> 0x10);
-        Env_Wet        = *(s16*)&inst2;
+        Env_Dry     = (s16)(*(s32*)&inst2 >> 0x10);
+        Env_Wet     = *(s16*)&inst2;
     }
 }
 */
@@ -89,8 +84,8 @@ static void SETVOL3 () {
     if (Flags & 0x4) { // 288
         if (Flags & 0x2) { // 290
             Vol_Left  = *(s16*)&inst1; // 0x50
-            Env_Dry        = (s16)(*(s32*)&inst2 >> 0x10); // 0x4E
-            Env_Wet        = *(s16*)&inst2; // 0x4C
+            Env_Dry     = (s16)(*(s32*)&inst2 >> 0x10); // 0x4E
+            Env_Wet     = *(s16*)&inst2; // 0x4C
         } else {
             VolTrg_Right  = *(s16*)&inst1; // 0x46
             //VolRamp_Right = (u16)(inst2 >> 0x10) | (s32)(s16)(inst2 << 0x10);
@@ -106,7 +101,7 @@ static void ENVMIXER3 () {
     u8 flags = (u8)((inst1 >> 16) & 0xff);
     u32 addy = (inst2 & 0xFFFFFF);
 
-     short *inp=(short *)(BufferSpace+0x4F0);
+    short *inp=(short *)(BufferSpace+0x4F0);
     short *out=(short *)(BufferSpace+0x9D0);
     short *aux1=(short *)(BufferSpace+0xB40);
     short *aux2=(short *)(BufferSpace+0xCB0);
@@ -139,7 +134,7 @@ static void ENVMIXER3 () {
         RVol  = Vol_Right;
         RSig = (s16)(VolRamp_Right >> 16);
 
-        Wet = (s16)Env_Wet; Dry = (s16)Env_Dry;  // Save Wet/Dry values
+        Wet = (s16)Env_Wet; Dry = (s16)Env_Dry; // Save Wet/Dry values
         LTrg = VolTrg_Left; RTrg = VolTrg_Right; // Save Current Left/Right Targets
     } else {
         memcpy((u8 *)hleMixerWorkArea, rsp.RDRAM+addy, 80);
@@ -157,13 +152,12 @@ static void ENVMIXER3 () {
         RSig   = *(s16 *)(hleMixerWorkArea + 22); // 22-23
         //u32 test  = *(s32 *)(hleMixerWorkArea + 24); // 22-23
         //if (test != 0x13371337)
-        //    __asm int 3;
     }
 
 
     //if(!(flags&A_AUX)) {
-    //    AuxIncRate=0;
-    //    aux2=aux3=zero;
+    //  AuxIncRate=0;
+    //  aux2=aux3=zero;
     //}
 
     for (int y = 0; y < (0x170/2); y++) {
@@ -267,14 +261,14 @@ static void ENVMIXER3o () {
     //static FILE *dfile = fopen ("d:\\envmix.txt", "wt");
 // ********* Make sure these conditions are met... ***********
     if ((AudioInBuffer | AudioOutBuffer | AudioAuxA | AudioAuxC | AudioAuxE | AudioCount) & 0x3) {
-//#ifdef __WIN32__
-//        MessageBox (NULL, "Unaligned EnvMixer... please report this to Azimer with the following information: RomTitle, Place in the rom it occurred, and any save state just before the error", "AudioHLE Error", MB_OK);
-//#else
+#ifdef __WIN32__
+        MessageBox (NULL, "Unaligned EnvMixer... please report this to Azimer with the following information: RomTitle, Place in the rom it occurred, and any save state just before the error", "AudioHLE Error", MB_OK);
+#else
         printf( "Unaligned EnvMixer... please report this to Azimer with the following information: RomTitle, Place in the rom it occurred, and any save state just before the error" );
-//#endif
+#endif
     }
 // ------------------------------------------------------------
-     short *inp=(short *)(BufferSpace+0x4F0);
+    short *inp=(short *)(BufferSpace+0x4F0);
     short *out=(short *)(BufferSpace+0x9D0);
     short *aux1=(short *)(BufferSpace+0xB40);
     short *aux2=(short *)(BufferSpace+0xCB0);
@@ -426,7 +420,7 @@ static void ENVMIXER3 () { // Borrowed from RCP...
     u8  flags = (u8)((inst1 >> 16) & 0xff);
     u32 addy = (inst2 & 0xffffff);// + SEGMENTS[(inst2>>24)&0xf];
 
-     short *inp=(short *)(BufferSpace+0x4F0);
+    short *inp=(short *)(BufferSpace+0x4F0);
     short *out=(short *)(BufferSpace+0x9D0);
     short *aux1=(short *)(BufferSpace+0xB40);
     short *aux2=(short *)(BufferSpace+0xCB0);
@@ -635,11 +629,11 @@ static void ADPCM3 () { // Verified to be 100% Accurate...
 
         code=BufferSpace[(0x4f0+inPtr)^3];
         index=code&0xf;
-        index<<=4;                                    // index into the adpcm code table
+        index<<=4;                                  // index into the adpcm code table
         book1=(short *)&adpcmtable[index];
         book2=book1+8;
-        code>>=4;                                    // upper nibble is scale
-        vscale=(0x8000>>((12-code)-1));            // very strange. 0x8000 would be .5 in 16:16 format
+        code>>=4;                                   // upper nibble is scale
+        vscale=(0x8000>>((12-code)-1));         // very strange. 0x8000 would be .5 in 16:16 format
                                                     // so this appears to be a fractional scale based
                                                     // on the 12 based inverse of the scale value.  note
                                                     // that this could be negative, in which case we do
@@ -648,13 +642,13 @@ static void ADPCM3 () { // Verified to be 100% Accurate...
 
         inPtr++;                                    // coded adpcm data lies next
         j=0;
-        while(j<8)                                    // loop of 8, for 8 coded nibbles from 4 bytes
+        while(j<8)                                  // loop of 8, for 8 coded nibbles from 4 bytes
                                                     // which yields 8 short pcm values
         {
             icode=BufferSpace[(0x4f0+inPtr)^3];
             inPtr++;
 
-            inp1[j]=(s16)((icode&0xf0)<<8);            // this will in effect be signed
+            inp1[j]=(s16)((icode&0xf0)<<8);         // this will in effect be signed
             if(code<12)
                 inp1[j]=((int)((int)inp1[j]*(int)vscale)>>16);
             /*else
@@ -674,7 +668,7 @@ static void ADPCM3 () { // Verified to be 100% Accurate...
             icode=BufferSpace[(0x4f0+inPtr)^3];
             inPtr++;
 
-            inp2[j]=(short)((icode&0xf0)<<8);            // this will in effect be signed
+            inp2[j]=(short)((icode&0xf0)<<8);           // this will in effect be signed
             if(code<12)
                 inp2[j]=((int)((int)inp2[j]*(int)vscale)>>16);
             /*else
@@ -855,7 +849,7 @@ static void RESAMPLE3 () {
     s32 accum;
 
     //if (addy > (1024*1024*8))
-    //    addy = (inst2 & 0xffffff);
+    //  addy = (inst2 & 0xffffff);
 
     srcPtr -= 4;
 
@@ -865,7 +859,7 @@ static void RESAMPLE3 () {
         dstPtr = 0x4f0/2;
     }
 
-    if ((Flags & 0x1) == 0) {    
+    if ((Flags & 0x1) == 0) {   
         for (int x=0; x < 4; x++) //memcpy (src+srcPtr, rsp.RDRAM+addy, 0x8);
             src[(srcPtr+x)^1] = ((u16 *)rsp.RDRAM)[((addy/2)+x)^1];
         Accum = *(u16 *)(rsp.RDRAM+addy+10);
@@ -873,9 +867,6 @@ static void RESAMPLE3 () {
         for (int x=0; x < 4; x++)
             src[(srcPtr+x)^1] = 0;//*(u16 *)(rsp.RDRAM+((addy+x)^2));
     }
-
-    //if ((Flags & 0x2))
-    //    __asm int 3;
 
     for(int i=0;i < 0x170/2;i++)    {
         location = (((Accum * 0x40) >> 0x10) * 8);
@@ -893,7 +884,7 @@ static void RESAMPLE3 () {
         
         temp = ((s32)*(s16*)(src+((srcPtr+3)^1))*((s32)((s16)lut[3])));
         accum += (s32)(temp >> 15);
-/*        temp =  ((s64)*(s16*)(src+((srcPtr+0)^1))*((s64)((s16)lut[0]<<1)));
+/*      temp =  ((s64)*(s16*)(src+((srcPtr+0)^1))*((s64)((s16)lut[0]<<1)));
         if (temp & 0x8000) temp = (temp^0x8000) + 0x10000;
         else temp = (temp^0x8000);
         temp = (s32)(temp >> 16);
@@ -977,21 +968,21 @@ static void INTERLEAVE3 () { // Needs accuracy verification...
 typedef struct {
     BYTE sync;
 
-    BYTE error_protection    : 1;    //  0=yes, 1=no
+    BYTE error_protection   : 1;    //  0=yes, 1=no
     BYTE lay                : 2;    // 4-lay = layerI, II or III
     BYTE version            : 1;    // 3=mpeg 1.0, 2=mpeg 2.5 0=mpeg 2.0
-    BYTE sync2                : 4;
+    BYTE sync2              : 4;
 
-    BYTE extension            : 1;    // Unknown
+    BYTE extension          : 1;    // Unknown
     BYTE padding            : 1;    // padding
-    BYTE sampling_freq        : 2;    // see table below
-    BYTE bitrate_index        : 4;    //     see table below
+    BYTE sampling_freq      : 2;    // see table below
+    BYTE bitrate_index      : 4;    //     see table below
 
-    BYTE emphasis            : 2;    //see table below
-    BYTE original            : 1;    // 0=no 1=yes
-    BYTE copyright            : 1;    // 0=no 1=yes
-    BYTE mode_ext            : 2;    // used with "joint stereo" mode
-    BYTE mode                : 2;    // Channel Mode
+    BYTE emphasis           : 2;    //see table below
+    BYTE original           : 1;    // 0=no 1=yes
+    BYTE copyright          : 1;    // 0=no 1=yes
+    BYTE mode_ext           : 2;    // used with "joint stereo" mode
+    BYTE mode               : 2;    // Channel Mode
 } mp3struct;
 
 mp3struct mp3;
@@ -1005,8 +996,6 @@ static void WHATISTHIS () {
 u32 setaddr;
 static void MP3ADDY () {
     setaddr = (inst2 & 0xffffff);
-    //__asm int 3;
-    //fprintf (fp, "mp3addy: inst1: %08X, inst2: %08X, loopval: %08X\n", inst1, inst2, loopval);
 }
 
 extern "C" {
@@ -1018,12 +1007,10 @@ extern u32 base, dmembase;
 extern "C" {
     extern char *pDMEM;
 }
-
 void MP3 ();
-
 /*
  {
-//    return;
+//  return;
     // Setup Registers...
     mp3setup (inst1, inst2, 0xFA0);
     
@@ -1034,7 +1021,7 @@ void MP3 ();
     ((u32*)BufferSpace)[0x008/4] += base;
     ((u32*)BufferSpace)[0xFFC/4] = loopval;
     ((u32*)BufferSpace)[0xFF8/4] = dmembase;
-    //__asm int 3;
+
     memcpy (imem+0x238, rsp.RDRAM+((u32*)BufferSpace)[0x008/4], 0x9C0);
     ((u32*)BufferSpace)[0xFF4/4] = setaddr;
     pDMEM = (char *)BufferSpace;
@@ -1076,7 +1063,7 @@ static void DISABLE () {
 
 
 void (*ABI3[0x20])() = {
-    DISABLE , ADPCM3 , CLEARBUFF3,    ENVMIXER3  , LOADBUFF3, RESAMPLE3  , SAVEBUFF3, MP3,
+    DISABLE , ADPCM3 , CLEARBUFF3,  ENVMIXER3  , LOADBUFF3, RESAMPLE3  , SAVEBUFF3, MP3,
     MP3ADDY, SETVOL3, DMEMMOVE3 , LOADADPCM3 , MIXER3   , INTERLEAVE3, WHATISTHIS   , SETLOOP3,
     SPNOOP , SPNOOP, SPNOOP   , SPNOOP    , SPNOOP  , SPNOOP    , SPNOOP  , SPNOOP,
     SPNOOP , SPNOOP, SPNOOP   , SPNOOP    , SPNOOP  , SPNOOP    , SPNOOP  , SPNOOP
@@ -1085,7 +1072,7 @@ void (*ABI3[0x20])() = {
 void (*ABI3[32])(void) =
 {
    SPNOOP  , ADPCM3    , CLEARBUFF3, SPNOOP   ,
-   MIXER3   , RESAMPLE3  , SPNOOP   , MP3*   ,
+   MIXER3   , RESAMPLE3  , SPNOOP   , MP3   ,
    MP3ADDY , SETVOL3   , DMEMMOVE3 , LOADADPCM3,
    MIXER3   , INTERLEAVE3, WHATISTHIS    , SETLOOP3  ,
    SPNOOP  , /*MEMHALVE  , ENVSET1*/ SPNOOP, SPNOOP  , ENVMIXER3 ,
@@ -1094,3 +1081,4 @@ void (*ABI3[32])(void) =
    SPNOOP  , SPNOOP    , SPNOOP   , SPNOOP
 };
 #endif
+

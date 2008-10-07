@@ -51,7 +51,7 @@ typedef unsigned int     UINT;
 #define __int64          long long
 
 /** HRESULT stuff **/
-typedef long             HRESULT;
+typedef int              HRESULT;
 #define S_OK             ((HRESULT)0L)
 #define E_NOTIMPL        0x80004001L
 

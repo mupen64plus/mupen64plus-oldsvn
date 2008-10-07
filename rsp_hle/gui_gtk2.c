@@ -49,10 +49,10 @@ void configDialog(HWND handle)
 
     dialog = gtk_dialog_new();
     if(handle != 0) /*backwards compatibility (vanilla mupen, & old versions) without crying*/
-        {
+    {
         gdk_window_get_user_data(gdk_window_lookup(handle), (gpointer*)&parent); /* Get GtkWindow from XID or HWND. */
         gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-        }
+    }
 
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 350, 300);
@@ -82,12 +82,12 @@ void configDialog(HWND handle)
     dropbox = gtk_combo_box_new_text();
 
     for(cnt = 0; plugname != NULL; cnt++)
-        {
+    {
         gtk_combo_box_append_text(GTK_COMBO_BOX(dropbox), plugname);
         if(strcmp(plugname, pseudoaudioname) == 0)
             gtk_combo_box_set_active(GTK_COMBO_BOX(dropbox), cnt);
         plugname = next_plugin();
-        }
+    }
 
     gtk_widget_set_sensitive(dropbox, pseudospecifichle);
     gtk_box_pack_start(GTK_BOX(Abox), dropbox, FALSE, TRUE, 2);
@@ -126,10 +126,10 @@ void MessageBox(HWND handle, char* message, char* title, int flags)
     dialog = gtk_dialog_new();
 
     if(handle != 0) /*backwards compatibility (vanilla mupen, & old versions) without crying*/
-        {
+    {
         gdk_window_get_user_data(gdk_window_lookup(handle), (gpointer*)&parent); /* Get GtkWindow from XID or HWND. */
         gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-        }
+    }
 
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
@@ -140,7 +140,7 @@ void MessageBox(HWND handle, char* message, char* title, int flags)
     gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), box);
 
     switch (flags)
-        {
+    {
         case 1:
             icon = GTK_STOCK_DIALOG_INFO; break;
         case 2:
@@ -149,13 +149,13 @@ void MessageBox(HWND handle, char* message, char* title, int flags)
             icon = GTK_STOCK_DIALOG_WARNING; break;
         default:
             icon = NULL;
-        }
+    }
 
     if(icon != NULL)
-        {
+    {
         img = gtk_image_new_from_stock(icon, GTK_ICON_SIZE_DIALOG);
         gtk_container_add(GTK_CONTAINER(box), img);
-        }
+    }
 
     label = gtk_label_new(message);
     gtk_container_add(GTK_CONTAINER(box), label);
@@ -194,7 +194,7 @@ void configCallback(GtkWidget* widget, gpointer* data)
 {
     int result = (int)data;
     if(result==GTK_RESPONSE_ACCEPT)
-        {
+    {
         AudioHle = pseudoaudiohle;
         GraphicsHle = pseudographicshle;
         SpecificHle = pseudospecifichle;
@@ -204,7 +204,7 @@ void configCallback(GtkWidget* widget, gpointer* data)
 
         strcpy(audioname, pseudoaudioname);
         SaveConfig();
-        }
+    }
 
     gtk_widget_destroy(widget);
 }
