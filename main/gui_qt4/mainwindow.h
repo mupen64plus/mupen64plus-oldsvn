@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - mainwindow.h                                            *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
- *   Copyright (C) 2008 Louai Al-Khanji                                    *
+ *   Copyright (C) 2008 Slougi                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,8 +19,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef MUPEN_KDE4_MAINWINDOW_H
-#define MUPEN_KDE4_MAINWINDOW_H
+#ifndef __MAINWINDOW_H__
+#define __MAINWINDOW_H__
 
 #include <QMainWindow>
 #include <QEvent>
@@ -109,5 +109,5 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
 #endif
 };
 
-#endif // MUPEN_KDE4_MAINWINDOW_H
+#endif // __MAINWINDOW_H__
 

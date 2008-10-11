@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - globals.h                                               *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
- *   Copyright (C) 2008 Louai Al-Khanji                                    *
+ *   Copyright (C) 2008 Slougi                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,8 +19,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef MUPEN64_KDE4_GLOBALS_H
-#define MUPEN64_KDE4_GLOBALS_H
+#ifndef __GLOBALS_H__
+#define __GLOBALS_H__
 
 #include <QStringList>
 #include <QIcon>
@@ -43,5 +43,5 @@ void drawStars(QPainter* painter,
                int n,
                int m);
 
-#endif // MUPEN64_KDE4_GLOBALS_H
+#endif // __GLOBALS_H__
 
