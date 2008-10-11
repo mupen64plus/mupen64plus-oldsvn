@@ -1,25 +1,23 @@
-/**
- * Mupen64Plus - Gfx_1.3.h
- * Copyright (C) 2002 Zilmar
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the License, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
- * Boston, MA  02110-1301, USA
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - Graphics_1.3.h                                          *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Zilmar                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************************************
 
@@ -47,6 +45,8 @@ extern "C" {
 #define EXPORT                      __declspec(dllexport)
 #define CALL                        _cdecl
 
+#ifndef __PLUGIN_INFO__
+#define __PLUGIN_INFO__
 /***** Structures *****/
 typedef struct {
     WORD Version;        /* Set to 0x0103 */
@@ -59,6 +59,7 @@ typedef struct {
     BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
                               bswap on a dword (32 bits) boundry */
 } PLUGIN_INFO;
+#endif //__PLUGIN_INFO
 
 typedef struct {
     HWND hWnd;          /* Render window */
@@ -278,14 +279,14 @@ EXPORT void CALL ViStatusChanged (void);
             ViWidth registers value has been changed.
   input:    none
   output:   none
-*******************************************************************/
+*******************************************************************/ 
 EXPORT void CALL ViWidthChanged (void);
 
 /******************************************************************
   Function: ReadScreen
   Purpose:  Capture the current screen
   Input:    none
-  Output:   dest - 24-bit RGB data (flipped horizontally)
+  Output:   dest - 24-bit RGB data
             width - width of image
             height - height of image
  ******************************************************************/
@@ -301,6 +302,21 @@ EXPORT void CALL ReadScreen (void **dest, int *width, int *height);
   output:   none
 *******************************************************************/
 EXPORT void CALL SetConfigDir( char *configDir );
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetRenderingCallback
+  Purpose:  Allows emulator to register a callback function that will
+            be called by the graphics plugin just before the the
+            frame buffers are swapped.
+            This was added as a way for the emulator to draw emulator-
+            specific things to the screen, e.g. On-screen display.
+  input:    pointer to callback function. The function expects
+            to receive the current window width and height.
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetRenderingCallback(void (*callback)());
 
 #if defined(__cplusplus)
 }
