@@ -1,31 +1,27 @@
-/*
- * Mupen64Plus - debugger/opprintf.h
- *
- * Copyright (C) 2008 ZZT32 (zz@64.vg)
- *
- * Mupen64 homepage: http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - opprintf.h                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 ZZT32                                              *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __MR4KD_H
-#define __MR4KD_H
+#ifndef __OPPRINTF_H__
+#define __OPPRINTF_H__
 
-/* Types */
 #include "types.h"
 
 /* Macros */
@@ -44,10 +40,10 @@ enum
     MR4KD_RTYPE1  = 0x00000002, /*  21 */
     MR4KD_RPREFIX = 0x00000004, /* $K0 */
     MR4KD_RLOWER  = 0x00000008, /*  k0 */
-    
+
     /* Opcode display options */
     MR4KD_OLOWER  = 0x00000010, /* mfhi */
-    
+
     /* Number display options */
     MR4KD_HLOWER  = 0x00000020, /* 0xffff */
 };
@@ -61,5 +57,5 @@ int  mr4kd_flag_get   ( int flag  );
 /* Controlling functions (app-wide) */
 int mr4kd_sprintf ( char *dest, char *name, uint32 instruction, uint32 pc, char *fmt );
 
-#endif /* __MR4KD_H */
+#endif /* __OPPRINTF_H__ */
 

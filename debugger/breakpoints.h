@@ -1,30 +1,26 @@
-/**
- * Mupen64Plus - debugger/breakpoints.c
- *
- * Copyright (C) 2008 DarkJezter
- * Copyright (C) 2008 HyperHacker (at gmail dot com)
- *
- * Mupen64 homepage: http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - breakpoints.h                                           *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 DarkJeztr HyperHacker                              *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef BREAKPOINTS_H
-#define BREAKPOINTS_H
+#ifndef __BREAKPOINTS_H__
+#define __BREAKPOINTS_H__
 
 #include <stdlib.h>
 #include <string.h>
@@ -33,8 +29,8 @@
 
 #define BREAKPOINTS_MAX_NUMBER  128
 
-#define BPT_FLAG_ENABLED                0x01
-#define BPT_FLAG_CONDITIONAL            0x02
+#define BPT_FLAG_ENABLED        0x01
+#define BPT_FLAG_CONDITIONAL    0x02
 #define BPT_FLAG_COUNTER        0x04
 #define BPT_FLAG_READ           0x08
 #define BPT_FLAG_WRITE          0x10
@@ -67,5 +63,5 @@ int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags )
 int lookup_breakpoint( uint32 address, uint32 flags );
 int log_breakpoint(uint32 PC, uint32 Flag, uint32 Access);
 
-#endif  // BREAKPOINTS_H
+#endif  /* __BREAKPOINTS_H__ */
 
