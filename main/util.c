@@ -533,7 +533,7 @@ list_node_t *list_find_node(list_t list, void *data)
 
 void countrycodestring(unsigned short countrycode, char *string)
 {
-    switch(countrycode)
+    switch (countrycode)
     {
     case 0:    /* Demo */
         strcpy(string, tr("Demo"));
@@ -588,7 +588,7 @@ void countrycodestring(unsigned short countrycode, char *string)
 
 void compressionstring(unsigned char compressiontype, char *string)
 {
-    switch(compressiontype)
+    switch (compressiontype)
     {
     case UNCOMPRESSED:
         strcpy(string, tr("Uncompressed"));
@@ -615,7 +615,7 @@ void compressionstring(unsigned char compressiontype, char *string)
 
 void imagestring(unsigned char imagetype, char *string)
 {
-    switch(imagetype)
+    switch (imagetype)
     {
     case Z64IMAGE:
         strcpy(string, tr(".z64 (native)"));
@@ -633,7 +633,7 @@ void imagestring(unsigned char imagetype, char *string)
 
 void cicstring(unsigned char cic, char *string)
 {
-    switch(cic)
+    switch (cic)
     {
     case CIC_NUS_6101:
         strcpy(string, tr("CIC-NUS-6101"));
@@ -657,7 +657,7 @@ void cicstring(unsigned char cic, char *string)
 
 void rumblestring(unsigned char rumble, char *string)
 {
-    switch(rumble)
+    switch (rumble)
     {
     case 1:
         strcpy(string, tr("Yes"));
@@ -672,7 +672,7 @@ void rumblestring(unsigned char rumble, char *string)
 
 void savestring(unsigned char savetype, char *string)
 {
-    switch(savetype)
+    switch (savetype)
     {
     case EEPROM_4KB:
         strcpy(string, tr("Eeprom 4KB"));
@@ -699,14 +699,14 @@ void savestring(unsigned char savetype, char *string)
 
 void playersstring(unsigned char players, char *string)
 {
-    if(players>7)
+    if (players > 7)
         {
         string[0] = '\0';
         return;
         }
 
     unsigned short netplay=0;
-    if(players>4)
+    if (players > 4)
         {
         players-=3;
         netplay=1;
@@ -724,15 +724,13 @@ char* dirfrompath(const char* string)
 
     for(counter = stringlength; counter > 0; --counter)
         {
-        if(string[counter]=='/')
-            {
-            ++counter;
+        if (string[counter-1] == '/')
             break;
-            }
         }
 
     buffer = (char*)malloc((counter+1)*sizeof(char));
     snprintf(buffer, counter+1, "%s", string);
+
     return buffer;
 }
 
