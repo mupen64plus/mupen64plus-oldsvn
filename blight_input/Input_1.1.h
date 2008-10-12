@@ -1,25 +1,23 @@
-/**
- * Mupen64Plus - Controller_1.1.h
- * Copyright (C) 2002 Zilmar
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the License, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
- * Boston, MA  02110-1301, USA
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - Input_1.1.h                                             *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Zilmar                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef _CONTR_H_INCLUDED__
 #define _CONTR_H_INCLUDED__
@@ -51,6 +49,8 @@ extern "C" {
 #define EXPORT                      __declspec(dllexport)
 #define CALL                        _cdecl
 
+#ifndef __PLUGIN_INFO__
+#define __PLUGIN_INFO__
 /***** Structures *****/
 typedef struct {
     WORD Version;        /* Should be set to 0x0101 */
@@ -59,6 +59,7 @@ typedef struct {
     BOOL Reserved1;
     BOOL Reserved2;
 } PLUGIN_INFO;
+#endif //__PLUGIN_INFO__
 
 typedef struct {
     BOOL Present;
@@ -66,8 +67,8 @@ typedef struct {
     int  Plugin;
 } CONTROL;
 
-typedef struct {
-/*  DWORD Value;
+typedef union {
+    DWORD Value;
     struct {
         unsigned R_DPAD       : 1;
         unsigned L_DPAD       : 1;
@@ -77,7 +78,6 @@ typedef struct {
         unsigned Z_TRIG       : 1;
         unsigned B_BUTTON     : 1;
         unsigned A_BUTTON     : 1;
-
 
         unsigned R_CBUTTON    : 1;
         unsigned L_CBUTTON    : 1;
@@ -92,11 +92,6 @@ typedef struct {
 
         signed   X_AXIS       : 8;
     };
-*/
-    unsigned short button;
-    char  stick_y;
-    char  stick_x;
-    unsigned char  errno;
 } BUTTONS;
 
 typedef struct {
@@ -239,7 +234,6 @@ EXPORT void CALL WM_KeyDown( WPARAM wParam, LPARAM lParam );
 /******************************************************************
   Function: WM_KeyUp
   Purpose:  To pass the WM_KEYUP message from the emulator to the 
-
             plugin.
   input:    wParam and lParam of the WM_KEYDOWN message.
   output:   none

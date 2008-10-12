@@ -887,9 +887,9 @@ GetKeys( int Control, BUTTONS *Keys )
     // read joystick state
     SDL_JoystickUpdate();
 
-    controller[Control].buttons.button = 0;
-    controller[Control].buttons.stick_x = 0;
-    controller[Control].buttons.stick_y = 0;
+    controller[Control].buttons.Value = 0;
+    //controller[Control].buttons.stick_x = 0;
+    //controller[Control].buttons.stick_y = 0;
 
     if( controller[Control].device >= 0 )
     {
@@ -897,22 +897,22 @@ GetKeys( int Control, BUTTONS *Keys )
         {
             if( controller[Control].button[b].button >= 0 )
                 if( SDL_JoystickGetButton( controller[Control].joystick, controller[Control].button[b].button ) )
-                    controller[Control].buttons.button |= button_bits[b];
+                    controller[Control].buttons.Value |= button_bits[b];
 
             if( controller[Control].button[b].axis >= 0 )
             {
                 axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].button[b].axis );
                 if( (controller[Control].button[b].axis_dir < 0) && (axis_val <= -6000) )
-                    controller[Control].buttons.button |= button_bits[b];
+                    controller[Control].buttons.Value |= button_bits[b];
                 else if( (controller[Control].button[b].axis_dir > 0) && (axis_val >= 6000) )
-                    controller[Control].buttons.button |= button_bits[b];
+                    controller[Control].buttons.Value |= button_bits[b];
             }
 
             if( controller[Control].button[b].hat >= 0 )
             {
                 if( controller[Control].button[b].hat_pos > 0 )
                     if( SDL_JoystickGetHat( controller[Control].joystick, controller[Control].button[b].hat ) & controller[Control].button[b].hat_pos )
-                        controller[Control].buttons.button |= button_bits[b];
+                        controller[Control].buttons.Value |= button_bits[b];
             }
         }
         for( b = 0; b < 2; b++ )
@@ -996,9 +996,9 @@ GetKeys( int Control, BUTTONS *Keys )
                     axis_val = -80;
 
             if( b == 0 )
-                controller[Control].buttons.stick_x = axis_val;
+                controller[Control].buttons.X_AXIS = axis_val;
             else
-                controller[Control].buttons.stick_y = axis_val;
+                controller[Control].buttons.Y_AXIS = axis_val;
         }
     }
 
@@ -1015,16 +1015,16 @@ GetKeys( int Control, BUTTONS *Keys )
             if( controller[Control].button[b].key == SDLK_UNKNOWN || ((int) controller[Control].button[b].key) < 0)
                 continue;
             if( keystate[controller[Control].button[b].key] )
-                controller[Control].buttons.button |= button_bits[b];
+                controller[Control].buttons.Value |= button_bits[b];
         }
         for( b = 0; b < 2; b++ )
         {
             // from the N64 func ref: The 3D Stick data is of type signed char and in
             // the range between 80 and -80. (32768 / 409 = ~80.1)
             if( b == 0 )
-                axis_val = controller[Control].buttons.stick_x;
+                axis_val = controller[Control].buttons.X_AXIS;
             else
-                axis_val = -controller[Control].buttons.stick_y;
+                axis_val = -controller[Control].buttons.Y_AXIS;
 
             if( controller[Control].axis[b].key_a != SDLK_UNKNOWN && ((int) controller[Control].axis[b].key_a) > 0)
                 if( keystate[controller[Control].axis[b].key_a] )
@@ -1034,9 +1034,9 @@ GetKeys( int Control, BUTTONS *Keys )
                     axis_val = -axis_max_val;
 
             if( b == 0 )
-                controller[Control].buttons.stick_x = axis_val;
+                controller[Control].buttons.X_AXIS = axis_val;
             else
-                controller[Control].buttons.stick_y = -axis_val;
+                controller[Control].buttons.Y_AXIS = -axis_val;
         }
     }
 
@@ -1049,7 +1049,7 @@ GetKeys( int Control, BUTTONS *Keys )
             if( controller[Control].button[b].mouse < 1 )
                 continue;
             if( mstate & SDL_BUTTON(controller[Control].button[b].mouse) )
-                controller[Control].buttons.button |= button_bits[b];
+                controller[Control].buttons.Value |= button_bits[b];
         }
     }
 
@@ -1067,7 +1067,7 @@ GetKeys( int Control, BUTTONS *Keys )
                         axis_val = -80;
                     else if (axis_val > 80)
                         axis_val = 80;
-                    controller[Control].buttons.stick_y = axis_val;
+                    controller[Control].buttons.Y_AXIS = axis_val;
                 }
                 if (event.motion.yrel)
                 {
@@ -1076,7 +1076,7 @@ GetKeys( int Control, BUTTONS *Keys )
                         axis_val = -80;
                     else if (axis_val > 80)
                         axis_val = 80;
-                    controller[Control].buttons.stick_x = -axis_val;
+                    controller[Control].buttons.X_AXIS = -axis_val;
                 }
             }
             else if (event.type == SDL_MOUSEBUTTONUP)
@@ -1102,14 +1102,14 @@ GetKeys( int Control, BUTTONS *Keys )
 #ifdef _DEBUG
     printf( "Controller #%d value: 0x%8.8X\n", Control, *(int *)&controller[Control].buttons );
 #endif
-    *(int *)Keys = *(int *)&controller[Control].buttons;
+    *Keys = controller[Control].buttons;
 
     /* handle mempack / rumblepak switching (only if rumble is active on joystick) */
 #ifdef __linux__
     if (controller[Control].event_joystick != 0)
     {
         struct input_event play;
-        if (controller[Control].buttons.button & button_bits[14])
+        if (controller[Control].buttons.Value & button_bits[14])
         {
             controller[Control].control.Plugin = PLUGIN_MEMPAK;
             play.type = EV_FF;
@@ -1118,7 +1118,7 @@ GetKeys( int Control, BUTTONS *Keys )
             if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
                 perror("Error starting rumble effect");
         }
-        if (controller[Control].buttons.button & button_bits[15])
+        if (controller[Control].buttons.Value & button_bits[15])
         {
             controller[Control].control.Plugin = PLUGIN_RAW;
             play.type = EV_FF;
