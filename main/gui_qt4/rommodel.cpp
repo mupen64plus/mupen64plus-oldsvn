@@ -165,125 +165,125 @@ int RomModel::columnCount(const QModelIndex& parent) const
 QVariant RomModel::data(const QModelIndex& index, int role) const
 {
     QVariant data;
-    if (!index.isValid() || m_romList.isEmpty() || 
-        index.row()>m_romList.size()) {
-        return data;
+
+    if (index.isValid() && (index.row() < m_romList.size())) {
+        const core::cache_entry* entry = m_romList[index.row()];
+
+        if (role == Qt::DisplayRole || role == Sort) {
+            char* buffer;
+            switch(index.column()) {
+                case Country:
+                    data = countryName(entry->countrycode);
+                    break;
+                case GoodName:
+                    data = QString(entry->inientry->goodname);
+                    break;
+                case Status:
+                    data = entry->inientry->status;
+                    break;
+                case UserComments:
+                    data = QString(entry->usercomments);
+                    break;
+                case FileName:
+                    if (core::config_get_bool("RomBrowserShowFullPaths", FALSE)) {
+                        data = entry->filename;
+                    } else {
+                        data = QFileInfo(entry->filename).fileName();
+                    }
+                    break;
+                case MD5Hash:
+                    int counter;
+                    buffer = (char*)calloc(33,sizeof(char));
+                    for ( counter = 0; counter < 16; ++counter )
+                        std::sprintf(buffer+counter*2, "%02X", entry->md5[counter]);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                case InternalName:
+                    data = QString(entry->internalname);
+                    break;
+                case CRC1:
+                    data = QString().sprintf("%08X", entry->crc1);
+                    break;
+                case CRC2:
+                    data = QString().sprintf("%08X", entry->crc2);
+                    break;
+                case SaveType:
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::savestring(entry->inientry->savetype, buffer);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                case Players:
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::playersstring(entry->inientry->players, buffer);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                case Size:
+                    data = tr("%0 Mbit").arg((entry->romsize*8) / 1024 / 1024);
+                    break;
+                case CompressionType:
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::compressionstring(entry->compressiontype, buffer);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                case ImageType:
+                    buffer = (char*)calloc(32,sizeof(char));
+                    core::imagestring(entry->imagetype, buffer);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                case CICChip:
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::cicstring(entry->cic, buffer);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                case Rumble:
+                    buffer = (char*)calloc(16,sizeof(char));
+                    core::rumblestring(entry->inientry->rumble, buffer);
+                    data = QString(buffer);
+                    free(buffer);
+                    break;
+                default:
+                    data = tr("Internal error");
+                    break;
+            }
+        } else if (role == Qt::FontRole) {
+            switch(index.column()) {
+                case Size:
+                case InternalName:
+                case MD5Hash:
+                case CRC1:
+                case CRC2:
+                    data = QFont("monospace");
+                    break;
+            }
+        } else if (role == Qt::TextAlignmentRole) {
+            switch(index.column()) {
+                case Size:
+                case MD5Hash:
+                case CRC1:
+                case CRC2:
+                    data = Qt::AlignRight;
+                    break;
+            }
+        } else if (role == Qt::DecorationRole) {
+            switch(index.column()) {
+                case Country:
+                    data = countryFlag(entry->countrycode);
+                    break;
+                }
+        //Assign Role enums here to retrive information.
+        } else if (role == FullPath) {
+            data = entry->filename;
+        } else if (role == ArchiveFile) {
+            data = entry->archivefile;
+        }
     }
 
-    const core::cache_entry* entry = m_romList[index.row()];
-    if (role == Qt::DisplayRole || role == Sort) {
-        char* buffer;
-        switch(index.column()) {
-            case Country:
-                data = countryName(entry->countrycode);
-                break;
-            case GoodName:
-                data = QString(entry->inientry->goodname);
-                break;
-            case Status:
-                data = entry->inientry->status;
-                break;
-            case UserComments:
-                data = QString(entry->usercomments);
-                break;
-            case FileName:
-                if (core::config_get_bool("RomBrowserShowFullPaths", FALSE)) {
-                    data = entry->filename;
-                } else {
-                    data = QFileInfo(entry->filename).fileName();
-                }
-                break;
-            case MD5Hash:
-                int counter;
-                buffer = (char*)calloc(33,sizeof(char));
-                for ( counter = 0; counter < 16; ++counter ) 
-                    std::sprintf(buffer+counter*2, "%02X", entry->md5[counter]);
-                data = QString(buffer);
-                free(buffer);
-                break;
-            case InternalName:
-                data = QString(entry->internalname);
-                break;
-            case CRC1:
-                data = QString().sprintf("%08X", entry->crc1);
-                break;
-            case CRC2:
-                data = QString().sprintf("%08X", entry->crc2);
-                break;
-            case SaveType:
-                buffer = (char*)calloc(16,sizeof(char));
-                core::savestring(entry->inientry->savetype, buffer);
-                data = QString(buffer);
-                free(buffer);
-                break;
-            case Players:
-                buffer = (char*)calloc(16,sizeof(char));
-                core::playersstring(entry->inientry->players, buffer);
-                data = QString(buffer);
-                free(buffer);
-                break;
-            case Size:
-                data = tr("%0 Mbit").arg((entry->romsize*8) / 1024 / 1024);
-                break;
-            case CompressionType:
-                buffer = (char*)calloc(16,sizeof(char));
-                core::compressionstring(entry->compressiontype, buffer);
-                data = QString(buffer);
-                free(buffer);
-                break;
-            case ImageType:
-                buffer = (char*)calloc(32,sizeof(char));
-                core::imagestring(entry->imagetype, buffer);
-                data = QString(buffer);
-                free(buffer);
-                break;
-            case CICChip:
-                buffer = (char*)calloc(16,sizeof(char));
-                core::cicstring(entry->cic, buffer);
-                data = QString(buffer);
-                free(buffer);
-                break;
-            case Rumble:
-                buffer = (char*)calloc(16,sizeof(char));
-                core::rumblestring(entry->inientry->rumble, buffer);
-                data = QString(buffer);
-                free(buffer);
-                break;
-            default:
-                data = tr("Internal error");
-                break;
-        }
-    } else if (role == Qt::FontRole) {
-        switch(index.column()) {
-            case Size:
-            case InternalName:
-            case MD5Hash:
-            case CRC1:
-            case CRC2:
-                data = QFont("monospace");
-                break;
-        }
-    } else if (role == Qt::TextAlignmentRole) {
-        switch(index.column()) {
-            case Size:
-            case MD5Hash:
-            case CRC1:
-            case CRC2:
-                data = Qt::AlignRight;
-                break;
-        }
-    } else if (role == Qt::DecorationRole) {
-        switch(index.column()) {
-            case Country:
-                data = countryFlag(entry->countrycode);
-                break;
-            }
-    //Assign Role enums here to retrive information.
-    } else if (role == FullPath) {
-        data = entry->filename;
-    } else if (role == ArchiveFile) {
-        data = entry->archivefile;
-    }
     return data;
 }
 
