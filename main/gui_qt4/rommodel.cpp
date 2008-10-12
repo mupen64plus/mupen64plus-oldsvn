@@ -113,16 +113,16 @@ void RomModel::update(unsigned int roms, unsigned short clear)
     if (roms > arrayroms) {
         core::cache_entry *entry;
         entry = core::g_romcache.top;
-        unsigned int romcounter;
 
         //Advance cache pointer.
-        for (romcounter=0; romcounter < arrayroms; romcounter++) {
+        for (unsigned i = 0; i < arrayroms; i++) {
             entry = entry->next;
-            if((entry==NULL))
-                { return; }
+            if (!entry) {
+                return;
+            }
         }
 
-        for (romcounter = 0; (romcounter<roms) && (entry!=NULL); romcounter++) {
+        for (unsigned i = 0; (i < roms) && (entry != NULL); i++) {
             //Actually add entries to RomModel
             m_romList << entry;
             //printf("Added: %s\n", entry->inientry->goodname);
