@@ -327,37 +327,49 @@ unsigned char* load_archive_rom(const char* filename, int* romsize, unsigned cha
     zipromfile = unzOpen(filename);
     if(zipromfile!=NULL) 
         {
-        unzGoToFirstFile(zipromfile);
-        /* Get first valid rom in archive. */
-        do
+        if(unzGoToFirstFile(zipromfile)==UNZ_OK)
             {
-            unzGetCurrentFileInfo(zipromfile, &fileinfo, szFileName, 255, 
-            szExtraField, 255, szComment, 255);
-            unzOpenCurrentFile(zipromfile);
-            if(fileinfo.uncompressed_size>=4&&filecounter>=*archivefile)
+            /* Get first valid rom in archive. */
+            do
                 {
-                unzReadCurrentFile(zipromfile, buffer, 4);
-                if(is_valid_rom(buffer))
-                    {
-                    *compressiontype = ZIP_COMPRESSION;
-                    *romsize = fileinfo.uncompressed_size;
-                    localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
-                    if(localrom==NULL)
-                        {
-                        fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
-                        return NULL;
-                        }
-                    unzOpenCurrentFile(zipromfile);
-                    unzReadCurrentFile(zipromfile, localrom, *loadlength);
-                    unzCloseCurrentFile(zipromfile);
-                    romread = 1;
+                if(unzGetCurrentFileInfo(zipromfile, &fileinfo, szFileName, 255, 
+                szExtraField, 255, szComment, 255)!=UNZ_OK)
                     break;
+                if(unzOpenCurrentFile(zipromfile)!=UNZ_OK)
+                    break;
+
+                if(fileinfo.uncompressed_size>=4&&filecounter>=*archivefile)
+                    {
+                    if(unzReadCurrentFile(zipromfile, buffer, 4)!=4)
+                        break;
+                    if(is_valid_rom(buffer))
+                        {
+                        unzOpenCurrentFile(zipromfile);
+                        *romsize = fileinfo.uncompressed_size;
+                        localrom = (unsigned char*)malloc(*loadlength*sizeof(unsigned char));
+                        if(localrom==NULL)
+                            {
+                            fprintf(stderr, "%s, %d: Out of memory!\n", __FILE__, __LINE__);
+                            return NULL;
+                            }
+
+                        if(unzReadCurrentFile(zipromfile, localrom, *loadlength)==*loadlength)
+                            {
+                            *compressiontype = ZIP_COMPRESSION;
+                            unzCloseCurrentFile(zipromfile);
+                            romread = 1;
+                            break;
+                            }
+                        else
+                            free(localrom);
+                        }
                     }
+                ++filecounter;
                 }
-            ++filecounter;
+            while ((status=unzGoToNextFile(zipromfile)) != UNZ_END_OF_LIST_OF_FILE);
+
+            unzClose(zipromfile);
             }
-        while ((status=unzGoToNextFile(zipromfile)) != UNZ_END_OF_LIST_OF_FILE);
-        unzClose(zipromfile);
         }
     else
         {
