@@ -942,11 +942,8 @@ romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2)
     if(g_romdatabase.comment==NULL) 
         return &empty_entry;
 
-    char buffer[3];
-    snprintf(buffer, sizeof(buffer), "%X", crc1);
-
     romdatabase_search* search;
-    search = g_romdatabase.crc_lists[hexconvert(buffer)];
+    search = g_romdatabase.crc_lists[((crc1 >> 24) & 0xff)];
 
     while (search != NULL && search->entry.crc1 != crc1 && search->entry.crc2 != crc2)
         search = search->next_crc;
