@@ -567,7 +567,7 @@ static void callback_rom_properties(GtkWidget* widget, gpointer data)
 
 static void callback_configure_rombrowser(GtkWidget* widget, gpointer data)
 {
-    gtk_widget_show_all(g_ConfigDialog.dialog);
+    show_configure();
     gtk_notebook_set_current_page(GTK_NOTEBOOK(g_ConfigDialog.notebook), 2);
 }
 

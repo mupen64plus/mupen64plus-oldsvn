@@ -247,7 +247,7 @@ static void addRomDirectory(const gchar* dirname)
 }
 
 /* Get a directory name from the user and attempt to add it. */
-static void callback_romDirectoryAdd(GtkWidget* widget, gpointer data)
+static void callback_directory_add(GtkWidget* widget, gpointer data)
 {
     GtkWidget* file_chooser;
 
@@ -274,8 +274,17 @@ static void callback_romDirectoryAdd(GtkWidget* widget, gpointer data)
     gtk_widget_destroy(file_chooser);
 }
 
+/* Remove all directory name(s) from model. */
+static void callback_directory_remove_all(GtkWidget *widget, gpointer data)
+{
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
+    gtk_tree_selection_select_all(selection);
+    gtk_list_store_clear(GTK_LIST_STORE(model));
+}
+
 /* Remove selected directory name(s) from model. */
-static void callback_romDirectoryRemove(GtkWidget *widget, gpointer data)
+static void callback_directory_remove(GtkWidget *widget, gpointer data)
 {
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
@@ -509,10 +518,8 @@ void show_configure(void)
     int index, i;
     char *name, *combo;
 
-    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_ConfigDialog.romDirectoryList));
-    gtk_tree_selection_select_all(selection);
+    callback_directory_remove_all(NULL, NULL);
 
-    callback_romDirectoryRemove(NULL, NULL);
     for(i = 0; i < config_get_number("NumRomDirs", 0); i++)
         {
         char buffer[30];
@@ -1210,14 +1217,20 @@ void create_configDialog(void)
     /* Create a new vertical button box with top alignment. */
     vbox = gtk_vbutton_box_new();
     gtk_button_box_set_layout(GTK_BUTTON_BOX(vbox), GTK_BUTTONBOX_START);
+    gtk_box_set_spacing(GTK_BOX(vbox), 5);
 
     button = gtk_button_new_from_stock(GTK_STOCK_ADD);
     gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
-    g_signal_connect(button, "clicked", G_CALLBACK(callback_romDirectoryAdd), NULL);
+    g_signal_connect(button, "clicked", G_CALLBACK(callback_directory_add), NULL);
 
     button = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
     gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
-    g_signal_connect(button, "clicked", G_CALLBACK(callback_romDirectoryRemove), NULL);
+    g_signal_connect(button, "clicked", G_CALLBACK(callback_directory_remove), NULL);
+
+    button = gtk_button_new_with_mnemonic(tr("Remo_val All"));
+    gtk_button_set_image(GTK_BUTTON(button), gtk_image_new_from_stock(GTK_STOCK_REMOVE,  GTK_ICON_SIZE_BUTTON));
+    gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
+    g_signal_connect(button, "clicked", G_CALLBACK(callback_directory_remove_all), NULL);
 
     gtk_box_pack_start(GTK_BOX(hbox1), scrolled_window, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox1), vbox, FALSE, FALSE, 0);
