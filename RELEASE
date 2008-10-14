@@ -1,6 +1,6 @@
-Mupen64Plus v1.4-branch development
------------------------------------
-*** Merged from trunk:
+Mupen64Plus v1.4.1 - October 13, 2008
+-------------------------------------
+Bugfixes:
  - r587: issue #111: close screenshot file after saving
  - r605: fix from Tub for free() bug in main/util.c/list_delete()
  - r608: another couple of memory leak fixes from Tub, in main/config.c
