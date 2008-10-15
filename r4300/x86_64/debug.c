@@ -30,7 +30,7 @@
 
 #include "../../memory/memory.h"
 
-void debug()
+void debug(void)
 {
 #ifdef COMPARE_CORE
    compare_core();
@@ -96,7 +96,7 @@ void debug()
 
 //static void dyna_stop() {}
 
-void stop_it()
+void stop_it(void)
 {
    if (dynacore)
      {

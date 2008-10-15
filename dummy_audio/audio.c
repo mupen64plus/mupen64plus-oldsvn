@@ -25,7 +25,7 @@
 
 #include "Audio_1.1.h"
 
-AUDIO_INFO AudioInfo;
+static AUDIO_INFO AudioInfo;
 
 
 EXPORT void CALL
@@ -87,7 +87,7 @@ InitiateAudio( AUDIO_INFO Audio_Info )
     return TRUE;
 }
 
-EXPORT void CALL RomOpen()
+EXPORT void CALL RomOpen(void)
 {
 }
 
@@ -97,7 +97,7 @@ RomClosed( void )
 }
 
 EXPORT void CALL
-ProcessAlist( void )
+ProcessAList( void )
 {
 }
 

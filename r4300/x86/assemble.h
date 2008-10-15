@@ -61,10 +61,10 @@ extern int branch_taken;
 
 void debug();
 
-
-inline void put8(unsigned char octet);
-inline void put32(unsigned int dword);
-inline void put16(unsigned short word);
+void jump_start_rel8();
+void jump_end_rel8();
+void jump_start_rel32();
+void jump_end_rel32();
 
 void push_reg32(int reg32);
 void mov_eax_memoffs32(unsigned int *memoffs32);

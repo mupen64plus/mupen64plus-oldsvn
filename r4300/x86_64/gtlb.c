@@ -28,7 +28,7 @@
 #include "../r4300.h"
 #include "../ops.h"
 
-void gentlbwi()
+void gentlbwi(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[104]);
@@ -41,7 +41,7 @@ void gentlbwi()
    genupdate_system(0);*/
 }
 
-void gentlbp()
+void gentlbp(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[105]);
@@ -54,7 +54,7 @@ void gentlbp()
    genupdate_system(0);*/
 }
 
-void gentlbr()
+void gentlbr(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[106]);
@@ -67,7 +67,7 @@ void gentlbr()
    genupdate_system(0);*/
 }
 
-void generet()
+void generet(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[108]);
@@ -82,7 +82,7 @@ void generet()
    jmp_reg32(EAX);*/
 }
 
-void gentlbwr()
+void gentlbwr(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[107]);

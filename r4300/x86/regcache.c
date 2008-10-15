@@ -45,7 +45,7 @@ void init_cache(precomp_instr* start)
      r0 = (unsigned int*)reg;
 }
 
-void free_all_registers()
+void free_all_registers(void)
 {
 #if defined(PROFILE_R4300)
   int freestart = code_length;
@@ -140,7 +140,7 @@ void free_register(int reg)
      }
 }
 
-int lru_register()
+int lru_register(void)
 {
    unsigned int oldest_access = 0xFFFFFFFF;
    int i, reg = 0;
@@ -860,7 +860,7 @@ void build_wrappers(precomp_instr *instr, int start, int end, precomp_block* blo
      }
 }
 
-void simplify_access()
+void simplify_access(void)
 {
    int i;
    dst->local_addr = code_length;

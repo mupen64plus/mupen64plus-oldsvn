@@ -28,7 +28,7 @@
 #include "../r4300.h"
 #include "../ops.h"
 
-void genadd_d()
+void genadd_d(void)
 {
 #ifdef INTERPRET_ADD_D
     gencallinterp((unsigned int)ADD_D, 0);
@@ -43,7 +43,7 @@ void genadd_d()
 #endif
 }
 
-void gensub_d()
+void gensub_d(void)
 {
 #ifdef INTERPRET_SUB_D
    gencallinterp((unsigned int)SUB_D, 0);
@@ -58,7 +58,7 @@ void gensub_d()
 #endif
 }
 
-void genmul_d()
+void genmul_d(void)
 {
 #ifdef INTERPRET_MUL_D
    gencallinterp((unsigned int)MUL_D, 0);
@@ -73,7 +73,7 @@ void genmul_d()
 #endif
 }
 
-void gendiv_d()
+void gendiv_d(void)
 {
 #ifdef INTERPRET_DIV_D
    gencallinterp((unsigned int)DIV_D, 0);
@@ -88,7 +88,7 @@ void gendiv_d()
 #endif
 }
 
-void gensqrt_d()
+void gensqrt_d(void)
 {
 #ifdef INTERPRET_SQRT_D
    gencallinterp((unsigned int)SQRT_D, 0);
@@ -102,7 +102,7 @@ void gensqrt_d()
 #endif
 }
 
-void genabs_d()
+void genabs_d(void)
 {
 #ifdef INTERPRET_ABS_D
    gencallinterp((unsigned int)ABS_D, 0);
@@ -116,7 +116,7 @@ void genabs_d()
 #endif
 }
 
-void genmov_d()
+void genmov_d(void)
 {
 #ifdef INTERPRET_MOV_D
    gencallinterp((unsigned int)MOV_D, 0);
@@ -131,7 +131,7 @@ void genmov_d()
 #endif
 }
 
-void genneg_d()
+void genneg_d(void)
 {
 #ifdef INTERPRET_NEG_D
    gencallinterp((unsigned int)NEG_D, 0);
@@ -145,7 +145,7 @@ void genneg_d()
 #endif
 }
 
-void genround_l_d()
+void genround_l_d(void)
 {
 #ifdef INTERPRET_ROUND_L_D
    gencallinterp((unsigned int)ROUND_L_D, 0);
@@ -160,7 +160,7 @@ void genround_l_d()
 #endif
 }
 
-void gentrunc_l_d()
+void gentrunc_l_d(void)
 {
 #ifdef INTERPRET_TRUNC_L_D
    gencallinterp((unsigned int)TRUNC_L_D, 0);
@@ -175,7 +175,7 @@ void gentrunc_l_d()
 #endif
 }
 
-void genceil_l_d()
+void genceil_l_d(void)
 {
 #ifdef INTERPRET_CEIL_L_D
    gencallinterp((unsigned int)CEIL_L_D, 0);
@@ -190,7 +190,7 @@ void genceil_l_d()
 #endif
 }
 
-void genfloor_l_d()
+void genfloor_l_d(void)
 {
 #ifdef INTERPRET_FLOOR_L_D
    gencallinterp((unsigned int)FLOOR_L_D, 0);
@@ -205,7 +205,7 @@ void genfloor_l_d()
 #endif
 }
 
-void genround_w_d()
+void genround_w_d(void)
 {
 #ifdef INTERPRET_ROUND_W_D
    gencallinterp((unsigned int)ROUND_W_D, 0);
@@ -220,7 +220,7 @@ void genround_w_d()
 #endif
 }
 
-void gentrunc_w_d()
+void gentrunc_w_d(void)
 {
 #ifdef INTERPRET_TRUNC_W_D
    gencallinterp((unsigned int)TRUNC_W_D, 0);
@@ -235,7 +235,7 @@ void gentrunc_w_d()
 #endif
 }
 
-void genceil_w_d()
+void genceil_w_d(void)
 {
 #ifdef INTERPRET_CEIL_W_D
    gencallinterp((unsigned int)CEIL_W_D, 0);
@@ -250,7 +250,7 @@ void genceil_w_d()
 #endif
 }
 
-void genfloor_w_d()
+void genfloor_w_d(void)
 {
 #ifdef INTERPRET_FLOOR_W_D
    gencallinterp((unsigned int)FLOOR_W_D, 0);
@@ -265,7 +265,7 @@ void genfloor_w_d()
 #endif
 }
 
-void gencvt_s_d()
+void gencvt_s_d(void)
 {
 #ifdef INTERPRET_CVT_S_D
    gencallinterp((unsigned int)CVT_S_D, 0);
@@ -278,7 +278,7 @@ void gencvt_s_d()
 #endif
 }
 
-void gencvt_w_d()
+void gencvt_w_d(void)
 {
 #ifdef INTERPRET_CVT_W_D
    gencallinterp((unsigned int)CVT_W_D, 0);
@@ -291,7 +291,7 @@ void gencvt_w_d()
 #endif
 }
 
-void gencvt_l_d()
+void gencvt_l_d(void)
 {
 #ifdef INTERPRET_CVT_L_D
    gencallinterp((unsigned int)CVT_L_D, 0);
@@ -304,7 +304,7 @@ void gencvt_l_d()
 #endif
 }
 
-void genc_f_d()
+void genc_f_d(void)
 {
 #ifdef INTERPRET_C_F_D
    gencallinterp((unsigned int)C_F_D, 0);
@@ -314,7 +314,7 @@ void genc_f_d()
 #endif
 }
 
-void genc_un_d()
+void genc_un_d(void)
 {
 #ifdef INTERPRET_C_UN_D
    gencallinterp((unsigned int)C_UN_D, 0);
@@ -333,7 +333,7 @@ void genc_un_d()
 #endif
 }
 
-void genc_eq_d()
+void genc_eq_d(void)
 {
 #ifdef INTERPRET_C_EQ_D
    gencallinterp((unsigned int)C_EQ_D, 0);
@@ -352,7 +352,7 @@ void genc_eq_d()
 #endif
 }
 
-void genc_ueq_d()
+void genc_ueq_d(void)
 {
 #ifdef INTERPRET_C_UEQ_D
    gencallinterp((unsigned int)C_UEQ_D, 0);
@@ -372,7 +372,7 @@ void genc_ueq_d()
 #endif
 }
 
-void genc_olt_d()
+void genc_olt_d(void)
 {
 #ifdef INTERPRET_C_OLT_D
    gencallinterp((unsigned int)C_OLT_D, 0);
@@ -391,7 +391,7 @@ void genc_olt_d()
 #endif
 }
 
-void genc_ult_d()
+void genc_ult_d(void)
 {
 #ifdef INTERPRET_C_ULT_D
    gencallinterp((unsigned int)C_ULT_D, 0);
@@ -411,7 +411,7 @@ void genc_ult_d()
 #endif
 }
 
-void genc_ole_d()
+void genc_ole_d(void)
 {
 #ifdef INTERPRET_C_OLE_D
    gencallinterp((unsigned int)C_OLE_D, 0);
@@ -430,7 +430,7 @@ void genc_ole_d()
 #endif
 }
 
-void genc_ule_d()
+void genc_ule_d(void)
 {
 #ifdef INTERPRET_C_ULE_D
    gencallinterp((unsigned int)C_ULE_D, 0);
@@ -450,7 +450,7 @@ void genc_ule_d()
 #endif
 }
 
-void genc_sf_d()
+void genc_sf_d(void)
 {
 #ifdef INTERPRET_C_SF_D
    gencallinterp((unsigned int)C_SF_D, 0);
@@ -466,7 +466,7 @@ void genc_sf_d()
 #endif
 }
 
-void genc_ngle_d()
+void genc_ngle_d(void)
 {
 #ifdef INTERPRET_C_NGLE_D
    gencallinterp((unsigned int)C_NGLE_D, 0);
@@ -485,7 +485,7 @@ void genc_ngle_d()
 #endif
 }
 
-void genc_seq_d()
+void genc_seq_d(void)
 {
 #ifdef INTERPRET_C_SEQ_D
    gencallinterp((unsigned int)C_SEQ_D, 0);
@@ -504,7 +504,7 @@ void genc_seq_d()
 #endif
 }
 
-void genc_ngl_d()
+void genc_ngl_d(void)
 {
 #ifdef INTERPRET_C_NGL_D
    gencallinterp((unsigned int)C_NGL_D, 0);
@@ -524,7 +524,7 @@ void genc_ngl_d()
 #endif
 }
 
-void genc_lt_d()
+void genc_lt_d(void)
 {
 #ifdef INTERPRET_C_LT_D
    gencallinterp((unsigned int)C_LT_D, 0);
@@ -543,7 +543,7 @@ void genc_lt_d()
 #endif
 }
 
-void genc_nge_d()
+void genc_nge_d(void)
 {
 #ifdef INTERPRET_C_NGE_D
    gencallinterp((unsigned int)C_NGE_D, 0);
@@ -563,7 +563,7 @@ void genc_nge_d()
 #endif
 }
 
-void genc_le_d()
+void genc_le_d(void)
 {
 #ifdef INTERPRET_C_LE_D
    gencallinterp((unsigned int)C_LE_D, 0);
@@ -582,7 +582,7 @@ void genc_le_d()
 #endif
 }
 
-void genc_ngt_d()
+void genc_ngt_d(void)
 {
 #ifdef INTERPRET_C_NGT_D
    gencallinterp((unsigned int)C_NGT_D, 0);

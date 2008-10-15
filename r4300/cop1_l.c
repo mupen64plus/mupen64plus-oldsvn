@@ -22,7 +22,7 @@
 #include "r4300.h"
 #include "macros.h"
 
-void CVT_S_L()
+void CVT_S_L(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -30,7 +30,7 @@ void CVT_S_L()
    PC++;
 }
 
-void CVT_D_L()
+void CVT_D_L(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();

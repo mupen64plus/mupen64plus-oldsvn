@@ -26,7 +26,7 @@
 #include "../r4300.h"
 #include "../ops.h"
 
-void gencvt_s_l()
+void gencvt_s_l(void)
 {
 #ifdef INTERPRET_CVT_S_L
    gencallinterp((unsigned int)CVT_S_L, 0);
@@ -39,7 +39,7 @@ void gencvt_s_l()
 #endif
 }
 
-void gencvt_d_l()
+void gencvt_d_l(void)
 {
 #ifdef INTERPRET_CVT_D_L
    gencallinterp((unsigned int)CVT_D_L, 0);

@@ -29,7 +29,7 @@
 #include "../r4300.h"
 #include "../ops.h"
 
-void gencvt_s_w()
+void gencvt_s_w(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);
@@ -45,7 +45,7 @@ void gencvt_s_w()
 #endif
 }
 
-void gencvt_d_w()
+void gencvt_d_w(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);

@@ -30,7 +30,7 @@
 #include "../ops.h"
 #include "../macros.h"
 
-void genadd_s()
+void genadd_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[119]);
@@ -48,7 +48,7 @@ void genadd_s()
 #endif
 }
 
-void gensub_s()
+void gensub_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[120]);
@@ -66,7 +66,7 @@ void gensub_s()
 #endif
 }
 
-void genmul_s()
+void genmul_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[121]);
@@ -84,7 +84,7 @@ void genmul_s()
 #endif
 }
 
-void gendiv_s()
+void gendiv_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[122]);
@@ -102,7 +102,7 @@ void gendiv_s()
 #endif
 }
 
-void gensqrt_s()
+void gensqrt_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[123]);
@@ -119,7 +119,7 @@ void gensqrt_s()
 #endif
 }
 
-void genabs_s()
+void genabs_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[124]);
@@ -136,7 +136,7 @@ void genabs_s()
 #endif
 }
 
-void genmov_s()
+void genmov_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[125]);
@@ -152,7 +152,7 @@ void genmov_s()
 #endif
 }
 
-void genneg_s()
+void genneg_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[126]);
@@ -169,7 +169,7 @@ void genneg_s()
 #endif
 }
 
-void genround_l_s()
+void genround_l_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[127]);
@@ -187,7 +187,7 @@ void genround_l_s()
 #endif
 }
 
-void gentrunc_l_s()
+void gentrunc_l_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[128]);
@@ -205,7 +205,7 @@ void gentrunc_l_s()
 #endif
 }
 
-void genceil_l_s()
+void genceil_l_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[129]);
@@ -223,7 +223,7 @@ void genceil_l_s()
 #endif
 }
 
-void genfloor_l_s()
+void genfloor_l_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[130]);
@@ -241,7 +241,7 @@ void genfloor_l_s()
 #endif
 }
 
-void genround_w_s()
+void genround_w_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[127]);
@@ -259,7 +259,7 @@ void genround_w_s()
 #endif
 }
 
-void gentrunc_w_s()
+void gentrunc_w_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[128]);
@@ -277,7 +277,7 @@ void gentrunc_w_s()
 #endif
 }
 
-void genceil_w_s()
+void genceil_w_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[129]);
@@ -295,7 +295,7 @@ void genceil_w_s()
 #endif
 }
 
-void genfloor_w_s()
+void genfloor_w_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[130]);
@@ -313,7 +313,7 @@ void genfloor_w_s()
 #endif
 }
 
-void gencvt_d_s()
+void gencvt_d_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);
@@ -329,7 +329,7 @@ void gencvt_d_s()
 #endif
 }
 
-void gencvt_w_s()
+void gencvt_w_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);
@@ -345,7 +345,7 @@ void gencvt_w_s()
 #endif
 }
 
-void gencvt_l_s()
+void gencvt_l_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);
@@ -361,7 +361,7 @@ void gencvt_l_s()
 #endif
 }
 
-void genc_f_s()
+void genc_f_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -374,7 +374,7 @@ void genc_f_s()
 #endif
 }
 
-void genc_un_s()
+void genc_un_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -396,7 +396,7 @@ void genc_un_s()
 #endif
 }
 
-void genc_eq_s()
+void genc_eq_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -418,7 +418,7 @@ void genc_eq_s()
 #endif
 }
 
-void genc_ueq_s()
+void genc_ueq_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -441,7 +441,7 @@ void genc_ueq_s()
 #endif
 }
 
-void genc_olt_s()
+void genc_olt_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -463,7 +463,7 @@ void genc_olt_s()
 #endif
 }
 
-void genc_ult_s()
+void genc_ult_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -486,7 +486,7 @@ void genc_ult_s()
 #endif
 }
 
-void genc_ole_s()
+void genc_ole_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -508,7 +508,7 @@ void genc_ole_s()
 #endif
 }
 
-void genc_ule_s()
+void genc_ule_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -531,7 +531,7 @@ void genc_ule_s()
 #endif
 }
 
-void genc_sf_s()
+void genc_sf_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -550,7 +550,7 @@ void genc_sf_s()
 #endif
 }
 
-void genc_ngle_s()
+void genc_ngle_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -572,7 +572,7 @@ void genc_ngle_s()
 #endif
 }
 
-void genc_seq_s()
+void genc_seq_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -594,7 +594,7 @@ void genc_seq_s()
 #endif
 }
 
-void genc_ngl_s()
+void genc_ngl_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -617,7 +617,7 @@ void genc_ngl_s()
 #endif
 }
 
-void genc_lt_s()
+void genc_lt_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -639,7 +639,7 @@ void genc_lt_s()
 #endif
 }
 
-void genc_nge_s()
+void genc_nge_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -662,7 +662,7 @@ void genc_nge_s()
 #endif
 }
 
-void genc_le_s()
+void genc_le_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -684,7 +684,7 @@ void genc_le_s()
 #endif
 }
 
-void genc_ngt_s()
+void genc_ngt_s(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);

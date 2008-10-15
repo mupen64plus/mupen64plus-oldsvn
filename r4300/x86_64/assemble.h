@@ -71,12 +71,6 @@ extern int branch_taken;
 
 void debug();
 
-
-inline void put8(unsigned char octet);
-inline void put16(unsigned short word);
-inline void put32(unsigned int dword);
-inline void put64(unsigned long long qword);
-
 void jump_start_rel8();
 void jump_end_rel8();
 void jump_start_rel32();

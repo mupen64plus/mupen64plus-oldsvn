@@ -27,7 +27,7 @@
 #include "../r4300.h"
 #include "../ops.h"
 
-void gentlbwi()
+void gentlbwi(void)
 {
    gencallinterp((unsigned int)TLBWI, 0);
    /*dst->local_addr = code_length;
@@ -37,7 +37,7 @@ void gentlbwi()
    genupdate_system(0);*/
 }
 
-void gentlbp()
+void gentlbp(void)
 {
    gencallinterp((unsigned int)TLBP, 0);
    /*dst->local_addr = code_length;
@@ -47,7 +47,7 @@ void gentlbp()
    genupdate_system(0);*/
 }
 
-void gentlbr()
+void gentlbr(void)
 {
    gencallinterp((unsigned int)TLBR, 0);
    /*dst->local_addr = code_length;
@@ -57,7 +57,7 @@ void gentlbr()
    genupdate_system(0);*/
 }
 
-void generet()
+void generet(void)
 {
    gencallinterp((unsigned int)ERET, 1);
    /*dst->local_addr = code_length;
@@ -69,7 +69,7 @@ void generet()
    jmp_reg32(EAX);*/
 }
 
-void gentlbwr()
+void gentlbwr(void)
 {
    gencallinterp((unsigned int)TLBWR, 0);
 }

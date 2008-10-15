@@ -29,7 +29,7 @@
 #include "../r4300.h"
 #include "../ops.h"
 
-void genmfc0()
+void genmfc0(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[109]);
@@ -37,7 +37,7 @@ void genmfc0()
     gencallinterp((unsigned long long)MFC0, 0);
 }
 
-void genmtc0()
+void genmtc0(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[110]);

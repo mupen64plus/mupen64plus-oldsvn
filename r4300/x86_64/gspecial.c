@@ -36,7 +36,7 @@
 #   define offsetof(TYPE,MEMBER) ((unsigned int) &((TYPE*)0)->MEMBER)
 #endif
 
-void gensll()
+void gensll(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[55]);
@@ -52,7 +52,7 @@ void gensll()
 #endif
 }
 
-void gensrl()
+void gensrl(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[56]);
@@ -68,7 +68,7 @@ void gensrl()
 #endif
 }
 
-void gensra()
+void gensra(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[57]);
@@ -84,7 +84,7 @@ void gensra()
 #endif
 }
 
-void gensllv()
+void gensllv(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[58]);
@@ -114,7 +114,7 @@ void gensllv()
 #endif
 }
 
-void gensrlv()
+void gensrlv(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[59]);
@@ -144,7 +144,7 @@ void gensrlv()
 #endif
 }
 
-void gensrav()
+void gensrav(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[60]);
@@ -174,7 +174,7 @@ void gensrav()
 #endif
 }
 
-void genjr()
+void genjr(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[61]);
@@ -212,7 +212,8 @@ void genjr()
    and_eax_imm32(0xFFFFF000);
    cmp_eax_imm32(dst_block->start & 0xFFFFF000);
    je_near_rj(0);
-   temp = code_length;
+
+   jump_start_rel32();
    
    mov_m32abs_reg32(&jump_to_address, EBX);
    mov_reg64_imm64(RAX, (unsigned long long) (dst+1));
@@ -220,10 +221,7 @@ void genjr()
    mov_reg64_imm64(RAX, (unsigned long long) jump_to_func);
    call_reg64(RAX);  /* will never return from call */
 
-   temp2 = code_length;
-   code_length = temp-4;
-   put32(temp2 - temp);
-   code_length = temp2;
+   jump_end_rel32();
 
    mov_reg64_imm64(RSI, (unsigned long long) dst_block->block);
    mov_reg32_reg32(EAX, EBX);
@@ -246,7 +244,7 @@ void genjr()
 #endif
 }
 
-void genjalr()
+void genjalr(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[62]);
@@ -258,7 +256,6 @@ void genjalr()
    unsigned int diff = (unsigned int) offsetof(precomp_instr, local_addr);
    unsigned int diff_need = (unsigned int) offsetof(precomp_instr, reg_cache_infos.need_map);
    unsigned int diff_wrap = (unsigned int) offsetof(precomp_instr, reg_cache_infos.jump_wrapper);
-   unsigned int temp, temp2;
    
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
@@ -290,7 +287,8 @@ void genjalr()
    and_eax_imm32(0xFFFFF000);
    cmp_eax_imm32(dst_block->start & 0xFFFFF000);
    je_near_rj(0);
-   temp = code_length;
+
+   jump_start_rel32();
    
    mov_m32abs_reg32(&jump_to_address, EBX);
    mov_reg64_imm64(RAX, (unsigned long long) (dst+1));
@@ -298,10 +296,7 @@ void genjalr()
    mov_reg64_imm64(RAX, (unsigned long long) jump_to_func);
    call_reg64(RAX);  /* will never return from call */
 
-   temp2 = code_length;
-   code_length = temp-4;
-   put32(temp2 - temp);
-   code_length = temp2;
+   jump_end_rel32();
 
    mov_reg64_imm64(RSI, (unsigned long long) dst_block->block);
    mov_reg32_reg32(EAX, EBX);
@@ -324,7 +319,7 @@ void genjalr()
 #endif
 }
 
-void gensyscall()
+void gensyscall(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[63]);
@@ -339,11 +334,11 @@ void gensyscall()
 #endif
 }
 
-void gensync()
+void gensync(void)
 {
 }
 
-void genmfhi()
+void genmfhi(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[64]);
@@ -358,7 +353,7 @@ void genmfhi()
 #endif
 }
 
-void genmthi()
+void genmthi(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[65]);
@@ -373,7 +368,7 @@ void genmthi()
 #endif
 }
 
-void genmflo()
+void genmflo(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[66]);
@@ -388,7 +383,7 @@ void genmflo()
 #endif
 }
 
-void genmtlo()
+void genmtlo(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[67]);
@@ -403,7 +398,7 @@ void genmtlo()
 #endif
 }
 
-void gendsllv()
+void gendsllv(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[68]);
@@ -435,7 +430,7 @@ void gendsllv()
 #endif
 }
 
-void gendsrlv()
+void gendsrlv(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[69]);
@@ -467,7 +462,7 @@ void gendsrlv()
 #endif
 }
 
-void gendsrav()
+void gendsrav(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[70]);
@@ -499,7 +494,7 @@ void gendsrav()
 #endif
 }
 
-void genmult()
+void genmult(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[71]);
@@ -517,7 +512,7 @@ void genmult()
 #endif
 }
 
-void genmultu()
+void genmultu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[72]);
@@ -535,7 +530,7 @@ void genmultu()
 #endif
 }
 
-void gendiv()
+void gendiv(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[73]);
@@ -556,7 +551,7 @@ void gendiv()
 #endif
 }
 
-void gendivu()
+void gendivu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[74]);
@@ -577,7 +572,7 @@ void gendivu()
 #endif
 }
 
-void gendmult()
+void gendmult(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[75]);
@@ -585,7 +580,7 @@ void gendmult()
    gencallinterp((unsigned long long)DMULT, 0);
 }
 
-void gendmultu()
+void gendmultu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[76]);
@@ -603,7 +598,7 @@ void gendmultu()
 #endif
 }
 
-void genddiv()
+void genddiv(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[77]);
@@ -611,7 +606,7 @@ void genddiv()
    gencallinterp((unsigned long long)DDIV, 0);
 }
 
-void genddivu()
+void genddivu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[78]);
@@ -619,7 +614,7 @@ void genddivu()
    gencallinterp((unsigned long long)DDIVU, 0);
 }
 
-void genadd()
+void genadd(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[79]);
@@ -643,7 +638,7 @@ void genadd()
 #endif
 }
 
-void genaddu()
+void genaddu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[80]);
@@ -667,7 +662,7 @@ void genaddu()
 #endif
 }
 
-void gensub()
+void gensub(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[81]);
@@ -694,7 +689,7 @@ void gensub()
 #endif
 }
 
-void gensubu()
+void gensubu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[82]);
@@ -721,7 +716,7 @@ void gensubu()
 #endif
 }
 
-void genand()
+void genand(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[83]);
@@ -745,7 +740,7 @@ void genand()
 #endif
 }
 
-void genor()
+void genor(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[84]);
@@ -769,7 +764,7 @@ void genor()
 #endif
 }
 
-void genxor()
+void genxor(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[85]);
@@ -793,7 +788,7 @@ void genxor()
 #endif
 }
 
-void gennor()
+void gennor(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[86]);
@@ -824,7 +819,7 @@ void gennor()
 #endif
 }
 
-void genslt()
+void genslt(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[87]);
@@ -842,7 +837,7 @@ void genslt()
 #endif
 }
 
-void gensltu()
+void gensltu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[88]);
@@ -860,7 +855,7 @@ void gensltu()
 #endif
 }
 
-void gendadd()
+void gendadd(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[89]);
@@ -884,7 +879,7 @@ void gendadd()
 #endif
 }
 
-void gendaddu()
+void gendaddu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[90]);
@@ -908,7 +903,7 @@ void gendaddu()
 #endif
 }
 
-void gendsub()
+void gendsub(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[91]);
@@ -935,7 +930,7 @@ void gendsub()
 #endif
 }
 
-void gendsubu()
+void gendsubu(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[92]);
@@ -962,7 +957,7 @@ void gendsubu()
 #endif
 }
 
-void genteq()
+void genteq(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[96]);
@@ -970,7 +965,7 @@ void genteq()
    gencallinterp((unsigned long long)TEQ, 0);
 }
 
-void gendsll()
+void gendsll(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[93]);
@@ -986,7 +981,7 @@ void gendsll()
 #endif
 }
 
-void gendsrl()
+void gendsrl(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[94]);
@@ -1002,7 +997,7 @@ void gendsrl()
 #endif
 }
 
-void gendsra()
+void gendsra(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[95]);
@@ -1018,7 +1013,7 @@ void gendsra()
 #endif
 }
 
-void gendsll32()
+void gendsll32(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[97]);
@@ -1034,7 +1029,7 @@ void gendsll32()
 #endif
 }
 
-void gendsrl32()
+void gendsrl32(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[98]);
@@ -1050,7 +1045,7 @@ void gendsrl32()
 #endif
 }
 
-void gendsra32()
+void gendsra32(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[99]);

@@ -24,7 +24,7 @@
 #include "ops.h"
 #include "interupt.h"
 
-void MFC0()
+void MFC0(void)
 {
    switch(PC->f.r.nrd)
      {
@@ -38,7 +38,7 @@ void MFC0()
    PC++;
 }
 
-void MTC0()
+void MTC0(void)
 {
    switch(PC->f.r.nrd)
      {

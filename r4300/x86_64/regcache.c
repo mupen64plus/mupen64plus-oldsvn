@@ -49,7 +49,7 @@ void init_cache(precomp_instr* start)
   r0 = (unsigned long long *) reg;
 }
 
-void free_all_registers()
+void free_all_registers(void)
 {
 #if defined(PROFILE_R4300)
   int freestart = code_length;
@@ -90,7 +90,7 @@ void free_all_registers()
 #endif
 }
 
-void free_registers_move_start()
+void free_registers_move_start(void)
 {
   /* flush all dirty registers and clear needed_registers table */
   free_all_registers();
@@ -141,7 +141,7 @@ void free_register(int reg)
   free_since[reg] = dst+1;
 }
 
-void flush_registers()
+void flush_registers(void)
 {
   precomp_instr *last;
   int i;
@@ -171,7 +171,7 @@ void flush_registers()
   }
 }
 
-void reload_registers()
+void reload_registers(void)
 {
   int i;
 
@@ -189,7 +189,7 @@ void reload_registers()
   }
 }
 
-void stack_save_registers()
+void stack_save_registers(void)
 {
   int i;
 
@@ -202,7 +202,7 @@ void stack_save_registers()
   }
 }
 
-void stack_load_registers()
+void stack_load_registers(void)
 {
   int i;
 
@@ -215,9 +215,9 @@ void stack_load_registers()
   }
 }
 
-int lru_register()
+int lru_register(void)
 {
-   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFL;
+   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFULL;
    int i, reg = 0;
    for (i=0; i<8; i++)
      {
@@ -230,9 +230,9 @@ int lru_register()
    return reg;
 }
 
-int lru_base_register() /* EBP cannot be used as a base register for SIB addressing byte */
+int lru_base_register(void) /* EBP cannot be used as a base register for SIB addressing byte */
 {
-   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFL;
+   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFULL;
    int i, reg = 0;
    for (i=0; i<8; i++)
      {
@@ -259,7 +259,7 @@ void set_register_state(int reg, unsigned int *addr, int _dirty, int _is64bits)
 int lock_register(int reg)
 {
    free_register(reg);
-   last_access[reg] = (precomp_instr *) 0xFFFFFFFFFFFFFFFFLL;
+   last_access[reg] = (precomp_instr *) 0xFFFFFFFFFFFFFFFFULL;
    reg_content[reg] = NULL;
    return reg;
 }
@@ -717,7 +717,7 @@ void build_wrappers(precomp_instr *instr, int start, int end, precomp_block* blo
      }
 }
 
-void simplify_access()
+void simplify_access(void)
 {
    int i;
    dst->local_addr = code_length;

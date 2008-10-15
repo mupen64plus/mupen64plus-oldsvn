@@ -33,7 +33,7 @@
 
 #include "../../memory/memory.h"
 
-void genmfc1()
+void genmfc1(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[111]);
@@ -50,7 +50,7 @@ void genmfc1()
 #endif
 }
 
-void gendmfc1()
+void gendmfc1(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[112]);
@@ -67,7 +67,7 @@ void gendmfc1()
 #endif
 }
 
-void gencfc1()
+void gencfc1(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[113]);
@@ -84,7 +84,7 @@ void gencfc1()
 #endif
 }
 
-void genmtc1()
+void genmtc1(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[114]);
@@ -99,7 +99,7 @@ void genmtc1()
 #endif
 }
 
-void gendmtc1()
+void gendmtc1(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[115]);
@@ -116,7 +116,7 @@ void gendmtc1()
 #endif
 }
 
-void genctc1()
+void genctc1(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[116]);

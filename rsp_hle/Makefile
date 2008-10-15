@@ -33,7 +33,7 @@ ifeq ($(GUI),GTK2)
 endif
 
 # list of object files to generate
-OBJECTS = main.o disasm.o jpeg.o ucode3.o ucode2.o ucode1.o ucode3mp3.o
+OBJECTS = main.o jpeg.o ucode3.o ucode2.o ucode1.o ucode3mp3.o
 
 # build targets
 all: version.h mupen64_hle_rsp_azimer.so

@@ -32,7 +32,7 @@
 
 #include "../../memory/memory.h"
 
-void genmfc1()
+void genmfc1(void)
 {
 #ifdef INTERPRET_MFC1
    gencallinterp((unsigned int)MFC1, 0);
@@ -46,7 +46,7 @@ void genmfc1()
 #endif
 }
 
-void gendmfc1()
+void gendmfc1(void)
 {
 #ifdef INTERPRET_DMFC1
    gencallinterp((unsigned int)DMFC1, 0);
@@ -60,7 +60,7 @@ void gendmfc1()
 #endif
 }
 
-void gencfc1()
+void gencfc1(void)
 {
 #ifdef INTERPRET_CFC1
    gencallinterp((unsigned int)CFC1, 0);
@@ -74,7 +74,7 @@ void gencfc1()
 #endif
 }
 
-void genmtc1()
+void genmtc1(void)
 {
 #ifdef INTERPRET_MTC1
    gencallinterp((unsigned int)MTC1, 0);
@@ -86,7 +86,7 @@ void genmtc1()
 #endif
 }
 
-void gendmtc1()
+void gendmtc1(void)
 {
 #ifdef INTERPRET_DMTC1
    gencallinterp((unsigned int)DMTC1, 0);
@@ -100,7 +100,7 @@ void gendmtc1()
 #endif
 }
 
-void genctc1()
+void genctc1(void)
 {
 #ifdef INTERPRET_CTC1
    gencallinterp((unsigned int)CTC1, 0);

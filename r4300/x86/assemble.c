@@ -72,6 +72,39 @@ static void add_jump(unsigned int pc_addr, unsigned int mi_addr)
    jumps_number++;
 }
 
+static void put8(unsigned char octet)
+{
+   (*inst_pointer)[code_length] = octet;
+   code_length++;
+   if (code_length == max_code_length)
+     {
+    max_code_length += 1000;
+    *inst_pointer = realloc(*inst_pointer, max_code_length);
+     }
+}
+
+static void put16(unsigned short word)
+{
+   if ((code_length+2) >= max_code_length)
+     {
+    max_code_length += 1000;
+    *inst_pointer = realloc(*inst_pointer, max_code_length);
+     }
+   *((unsigned short *)(&(*inst_pointer)[code_length])) = word;
+   code_length+=2;
+}
+
+static void put32(unsigned int dword)
+{
+   if ((code_length+4) >= max_code_length)
+     {
+    max_code_length += 1000;
+    *inst_pointer = realloc(*inst_pointer, max_code_length);
+     }
+   *((unsigned int *)(&(*inst_pointer)[code_length])) = dword;
+   code_length+=4;
+}
+
 void passe2(precomp_instr *dest, int start, int end, precomp_block *block)
 {
    unsigned int i, real_code_length, addr_dest;
@@ -95,37 +128,43 @@ void passe2(precomp_instr *dest, int start, int end, precomp_block *block)
    code_length = real_code_length;
 }
 
-inline void put8(unsigned char octet)
+static unsigned int g_jump_start8 = 0;
+static unsigned int g_jump_start32 = 0;
+
+void jump_start_rel8(void)
 {
-   (*inst_pointer)[code_length] = octet;
-   code_length++;
-   if (code_length == max_code_length)
-     {
-    max_code_length += 1000;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
-     }
+  g_jump_start8 = code_length;
 }
 
-inline void put32(unsigned int dword)
+void jump_start_rel32(void)
 {
-   if ((code_length+4) >= max_code_length)
-     {
-    max_code_length += 1000;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
-     }
-   *((unsigned int *)(&(*inst_pointer)[code_length])) = dword;
-   code_length+=4;
+  g_jump_start32 = code_length;
 }
 
-inline void put16(unsigned short word)
+void jump_end_rel8(void)
 {
-   if ((code_length+2) >= max_code_length)
-     {
-    max_code_length += 1000;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
-     }
-   *((unsigned short *)(&(*inst_pointer)[code_length])) = word;
-   code_length+=2;
+  unsigned int jump_end = code_length;
+  int jump_vec = jump_end - g_jump_start8;
+
+  if (jump_vec > 127 || jump_vec < -128)
+  {
+    printf("Error: 8-bit relative jump too long! From %x to %x\n", g_jump_start8, jump_end);
+    asm(" int $3; ");
+  }
+
+  code_length = g_jump_start8 - 1;
+  put8(jump_vec);
+  code_length = jump_end;
+}
+
+void jump_end_rel32(void)
+{
+  unsigned int jump_end = code_length;
+  int jump_vec = jump_end - g_jump_start32;
+
+  code_length = g_jump_start32 - 4;
+  put32(jump_vec);
+  code_length = jump_end;
 }
 
 void push_reg32(int reg32)
@@ -637,17 +676,17 @@ void jmp(unsigned int mi_addr)
    add_jump(code_length-4, mi_addr);
 }
 
-void cdq()
+void cdq(void)
 {
    put8(0x99);
 }
 
-void cwde()
+void cwde(void)
 {
    put8(0x98);
 }
 
-void cbw()
+void cbw(void)
 {
    put8(0x66);
    put8(0x98);
@@ -660,7 +699,7 @@ void mov_m32_reg32(unsigned int *m32, unsigned int reg32)
    put32((unsigned int)(m32));
 }
 
-void ret()
+void ret(void)
 {
    put8(0xC3);
 }
@@ -1033,7 +1072,7 @@ void xor_reg8_imm8(int reg8, unsigned char imm8)
    put8(imm8);
 }
 
-void nop()
+void nop(void)
 {
    put8(0x90);
 }
@@ -1122,7 +1161,7 @@ void fstp_preg32_dword(int reg32)
    put8(0x18 + reg32);
 }
 
-void fchs()
+void fchs(void)
 {
    put8(0xD9);
    put8(0xE0);
@@ -1226,13 +1265,13 @@ void fmul_preg32_qword(int reg32)
    put8(0x08 + reg32);
 }
 
-void fsqrt()
+void fsqrt(void)
 {
    put8(0xD9);
    put8(0xFA);
 }
 
-void fabs_()
+void fabs_(void)
 {
    put8(0xD9);
    put8(0xE1);

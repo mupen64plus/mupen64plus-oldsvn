@@ -31,7 +31,7 @@
 #include "../macros.h"
 #include "../exception.h"
 
-void gensll()
+void gensll(void)
 {
 #ifdef INTERPRET_SLL
    gencallinterp((unsigned int)SLL, 0);
@@ -44,7 +44,7 @@ void gensll()
 #endif
 }
 
-void gensrl()
+void gensrl(void)
 {
 #ifdef INTERPRET_SRL
    gencallinterp((unsigned int)SRL, 0);
@@ -57,7 +57,7 @@ void gensrl()
 #endif
 }
 
-void gensra()
+void gensra(void)
 {
 #ifdef INTERPRET_SRA
    gencallinterp((unsigned int)SRA, 0);
@@ -70,7 +70,7 @@ void gensra()
 #endif
 }
 
-void gensllv()
+void gensllv(void)
 {
 #ifdef INTERPRET_SLLV
    gencallinterp((unsigned int)SLLV, 0);
@@ -97,7 +97,7 @@ void gensllv()
 #endif
 }
 
-void gensrlv()
+void gensrlv(void)
 {
 #ifdef INTERPRET_SRLV
    gencallinterp((unsigned int)SRLV, 0);
@@ -124,7 +124,7 @@ void gensrlv()
 #endif
 }
 
-void gensrav()
+void gensrav(void)
 {
 #ifdef INTERPRET_SRAV
    gencallinterp((unsigned int)SRAV, 0);
@@ -151,7 +151,7 @@ void gensrav()
 #endif
 }
 
-void genjr()
+void genjr(void)
 {
 #ifdef INTERPRET_JR
    gencallinterp((unsigned int)JR, 1);
@@ -163,7 +163,6 @@ void genjr()
      (unsigned int)(&dst->reg_cache_infos.need_map) - (unsigned int)(dst);
    unsigned int diff_wrap =
      (unsigned int)(&dst->reg_cache_infos.jump_wrapper) - (unsigned int)(dst);
-   unsigned int temp, temp2;
    
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
@@ -189,17 +188,15 @@ void genjr()
    and_eax_imm32(0xFFFFF000);
    cmp_eax_imm32(dst_block->start & 0xFFFFF000);
    je_near_rj(0);
-   temp = code_length;
+
+   jump_start_rel32();
    
    mov_m32_reg32(&jump_to_address, EBX);
    mov_m32_imm32((unsigned int*)(&PC), (unsigned int)(dst+1));
    mov_reg32_imm32(EAX, (unsigned int)jump_to_func);
    call_reg32(EAX);
    
-   temp2 = code_length;
-   code_length = temp-4;
-   put32(temp2 - temp);
-   code_length = temp2;
+   jump_end_rel32();
    
    mov_reg32_reg32(EAX, EBX);
    sub_eax_imm32(dst_block->start);
@@ -220,7 +217,7 @@ void genjr()
 #endif
 }
 
-void genjalr()
+void genjalr(void)
 {
 #ifdef INTERPRET_JALR
    gencallinterp((unsigned int)JALR, 0);
@@ -232,7 +229,6 @@ void genjalr()
      (unsigned int)(&dst->reg_cache_infos.need_map) - (unsigned int)(dst);
    unsigned int diff_wrap =
      (unsigned int)(&dst->reg_cache_infos.jump_wrapper) - (unsigned int)(dst);
-   unsigned int temp, temp2;
    
    if (((dst->addr & 0xFFF) == 0xFFC && 
        (dst->addr < 0x80000000 || dst->addr >= 0xC0000000))||no_compiled_jump)
@@ -264,17 +260,15 @@ void genjalr()
    and_eax_imm32(0xFFFFF000);
    cmp_eax_imm32(dst_block->start & 0xFFFFF000);
    je_near_rj(0);
-   temp = code_length;
+
+   jump_start_rel32();
    
    mov_m32_reg32(&jump_to_address, EBX);
    mov_m32_imm32((unsigned int*)(&PC), (unsigned int)(dst+1));
    mov_reg32_imm32(EAX, (unsigned int)jump_to_func);
    call_reg32(EAX);
    
-   temp2 = code_length;
-   code_length = temp-4;
-   put32(temp2 - temp);
-   code_length = temp2;
+   jump_end_rel32();
    
    mov_reg32_reg32(EAX, EBX);
    sub_eax_imm32(dst_block->start);
@@ -295,7 +289,7 @@ void genjalr()
 #endif
 }
 
-void gensyscall()
+void gensyscall(void)
 {
 #ifdef INTERPRET_SYSCALL
    gencallinterp((unsigned int)SYSCALL, 0);
@@ -307,11 +301,11 @@ void gensyscall()
 #endif
 }
 
-void gensync()
+void gensync(void)
 {
 }
 
-void genmfhi()
+void genmfhi(void)
 {
 #ifdef INTERPRET_MFHI
    gencallinterp((unsigned int)MFHI, 0);
@@ -326,7 +320,7 @@ void genmfhi()
 #endif
 }
 
-void genmthi()
+void genmthi(void)
 {
 #ifdef INTERPRET_MTHI
    gencallinterp((unsigned int)MTHI, 0);
@@ -341,7 +335,7 @@ void genmthi()
 #endif
 }
 
-void genmflo()
+void genmflo(void)
 {
 #ifdef INTERPRET_MFLO
    gencallinterp((unsigned int)MFLO, 0);
@@ -356,7 +350,7 @@ void genmflo()
 #endif
 }
 
-void genmtlo()
+void genmtlo(void)
 {
 #ifdef INTERPRET_MTLO
    gencallinterp((unsigned int)MTLO, 0);
@@ -371,7 +365,7 @@ void genmtlo()
 #endif
 }
 
-void gendsllv()
+void gendsllv(void)
 {
 #ifdef INTERPRET_DSLLV
    gencallinterp((unsigned int)DSLLV, 0);
@@ -419,7 +413,7 @@ void gendsllv()
 #endif
 }
 
-void gendsrlv()
+void gendsrlv(void)
 {
 #ifdef INTERPRET_DSRLV
    gencallinterp((unsigned int)DSRLV, 0);
@@ -467,7 +461,7 @@ void gendsrlv()
 #endif
 }
 
-void gendsrav()
+void gendsrav(void)
 {
 #ifdef INTERPRET_DSRAV
    gencallinterp((unsigned int)DSRAV, 0);
@@ -515,7 +509,7 @@ void gendsrav()
 #endif
 }
 
-void genmult()
+void genmult(void)
 {
 #ifdef INTERPRET_MULT
    gencallinterp((unsigned int)MULT, 0);
@@ -530,7 +524,7 @@ void genmult()
 #endif
 }
 
-void genmultu()
+void genmultu(void)
 {
 #ifdef INTERPRET_MULTU
    gencallinterp((unsigned int)MULTU, 0);
@@ -545,7 +539,7 @@ void genmultu()
 #endif
 }
 
-void gendiv()
+void gendiv(void)
 {
 #ifdef INTERPRET_DIV
    gencallinterp((unsigned int)DIV, 0);
@@ -563,7 +557,7 @@ void gendiv()
 #endif
 }
 
-void gendivu()
+void gendivu(void)
 {
 #ifdef INTERPRET_DIVU
    gencallinterp((unsigned int)DIVU, 0);
@@ -581,12 +575,12 @@ void gendivu()
 #endif
 }
 
-void gendmult()
+void gendmult(void)
 {
    gencallinterp((unsigned int)DMULT, 0);
 }
 
-void gendmultu()
+void gendmultu(void)
 {
 #ifdef INTERPRET_DMULTU
    gencallinterp((unsigned int)DMULTU, 0);
@@ -625,17 +619,17 @@ void gendmultu()
 #endif
 }
 
-void genddiv()
+void genddiv(void)
 {
    gencallinterp((unsigned int)DDIV, 0);
 }
 
-void genddivu()
+void genddivu(void)
 {
    gencallinterp((unsigned int)DDIVU, 0);
 }
 
-void genadd()
+void genadd(void)
 {
 #ifdef INTERPRET_ADD
    gencallinterp((unsigned int)ADD, 0);
@@ -660,7 +654,7 @@ void genadd()
 #endif
 }
 
-void genaddu()
+void genaddu(void)
 {
 #ifdef INTERPRET_ADDU
    gencallinterp((unsigned int)ADDU, 0);
@@ -685,7 +679,7 @@ void genaddu()
 #endif
 }
 
-void gensub()
+void gensub(void)
 {
 #ifdef INTERPRET_SUB
    gencallinterp((unsigned int)SUB, 0);
@@ -710,7 +704,7 @@ void gensub()
 #endif
 }
 
-void gensubu()
+void gensubu(void)
 {
 #ifdef INTERPRET_SUBU
    gencallinterp((unsigned int)SUBU, 0);
@@ -735,7 +729,7 @@ void gensubu()
 #endif
 }
 
-void genand()
+void genand(void)
 {
 #ifdef INTERPRET_AND
    gencallinterp((unsigned int)AND, 0);
@@ -768,7 +762,7 @@ void genand()
 #endif
 }
 
-void genor()
+void genor(void)
 {
 #ifdef INTERPRET_OR
    gencallinterp((unsigned int)OR, 0);
@@ -801,7 +795,7 @@ void genor()
 #endif
 }
 
-void genxor()
+void genxor(void)
 {
 #ifdef INTERPRET_XOR
    gencallinterp((unsigned int)XOR, 0);
@@ -834,7 +828,7 @@ void genxor()
 #endif
 }
 
-void gennor()
+void gennor(void)
 {
 #ifdef INTERPRET_NOR
    gencallinterp((unsigned int)NOR, 0);
@@ -871,7 +865,7 @@ void gennor()
 #endif
 }
 
-void genslt()
+void genslt(void)
 {
 #ifdef INTERPRET_SLT
    gencallinterp((unsigned int)SLT, 0);
@@ -893,7 +887,7 @@ void genslt()
 #endif
 }
 
-void gensltu()
+void gensltu(void)
 {
 #ifdef INTERPRET_SLTU
    gencallinterp((unsigned int)SLTU, 0);
@@ -915,7 +909,7 @@ void gensltu()
 #endif
 }
 
-void gendadd()
+void gendadd(void)
 {
 #ifdef INTERPRET_DADD
    gencallinterp((unsigned int)DADD, 0);
@@ -948,7 +942,7 @@ void gendadd()
 #endif
 }
 
-void gendaddu()
+void gendaddu(void)
 {
 #ifdef INTERPRET_DADDU
    gencallinterp((unsigned int)DADDU, 0);
@@ -981,7 +975,7 @@ void gendaddu()
 #endif
 }
 
-void gendsub()
+void gendsub(void)
 {
 #ifdef INTERPRET_DSUB
    gencallinterp((unsigned int)DSUB, 0);
@@ -1014,7 +1008,7 @@ void gendsub()
 #endif
 }
 
-void gendsubu()
+void gendsubu(void)
 {
 #ifdef INTERPRET_DSUBU
    gencallinterp((unsigned int)DSUBU, 0);
@@ -1047,12 +1041,12 @@ void gendsubu()
 #endif
 }
 
-void genteq()
+void genteq(void)
 {
    gencallinterp((unsigned int)TEQ, 0);
 }
 
-void gendsll()
+void gendsll(void)
 {
 #ifdef INTERPRET_DSLL
    gencallinterp((unsigned int)DSLL, 0);
@@ -1074,7 +1068,7 @@ void gendsll()
 #endif
 }
 
-void gendsrl()
+void gendsrl(void)
 {
 #ifdef INTERPRET_DSRL
    gencallinterp((unsigned int)DSRL, 0);
@@ -1096,7 +1090,7 @@ void gendsrl()
 #endif
 }
 
-void gendsra()
+void gendsra(void)
 {
 #ifdef INTERPRET_DSRA
    gencallinterp((unsigned int)DSRA, 0);
@@ -1118,7 +1112,7 @@ void gendsra()
 #endif
 }
 
-void gendsll32()
+void gendsll32(void)
 {
 #ifdef INTERPRET_DSLL32
    gencallinterp((unsigned int)DSLL32, 0);
@@ -1133,7 +1127,7 @@ void gendsll32()
 #endif
 }
 
-void gendsrl32()
+void gendsrl32(void)
 {
 #ifdef INTERPRET_DSRL32
    gencallinterp((unsigned int)DSRL32, 0);
@@ -1148,7 +1142,7 @@ void gendsrl32()
 #endif
 }
 
-void gendsra32()
+void gendsra32(void)
 {
 #ifdef INTERPRET_DSRA32
    gencallinterp((unsigned int)DSRA32, 0);

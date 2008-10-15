@@ -26,7 +26,7 @@
 
 #include "../memory/memory.h"
 
-void MFC1()
+void MFC1(void)
 {
    if (check_cop1_unusable()) return;
    rrt32 = *((int*)reg_cop1_simple[rfs]);
@@ -34,14 +34,14 @@ void MFC1()
    PC++;
 }
 
-void DMFC1()
+void DMFC1(void)
 {
    if (check_cop1_unusable()) return;
    rrt = *((long long*)reg_cop1_double[rfs]);
    PC++;
 }
 
-void CFC1()
+void CFC1(void)
 {  
    if (check_cop1_unusable()) return;
    if (rfs==31)
@@ -57,21 +57,21 @@ void CFC1()
    PC++;
 }
 
-void MTC1()
+void MTC1(void)
 {
    if (check_cop1_unusable()) return;
    *((int*)reg_cop1_simple[rfs]) = rrt32;
    PC++;
 }
 
-void DMTC1()
+void DMTC1(void)
 {
    if (check_cop1_unusable()) return;
    *((long long*)reg_cop1_double[rfs]) = rrt;
    PC++;
 }
 
-void CTC1()
+void CTC1(void)
 {
    if (check_cop1_unusable()) return;
    if (rfs==31)
