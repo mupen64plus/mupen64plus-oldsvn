@@ -46,8 +46,6 @@ static BOOL firstTime = TRUE;
 void loadPlugin();
 #endif
 
-void disasm(FILE *f, unsigned int t[0x1000/4]);
-
 __declspec(dllexport) void CloseDLL (void)
 {
 }
@@ -306,12 +304,6 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
          f = fopen("dmem.dat", "wb");
          fwrite(rsp.RDRAM + task->ucode_data, task->ucode_data_size, 1, f);
          fclose(f);
-
-         f = fopen("disasm.txt", "wb");
-         memcpy(rsp.DMEM, rsp.RDRAM+task->ucode_data, task->ucode_data_size);
-         memcpy(rsp.IMEM+0x80, rsp.RDRAM+task->ucode, 0xF7F);
-         disasm(f, (unsigned int*)(rsp.IMEM));
-         fclose(f);
       }
     else
       {
@@ -321,10 +313,6 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
 
          f = fopen("dmem.dat", "wb");
          fwrite(rsp.DMEM, 0x1000, 1, f);
-         fclose(f);
-
-         f = fopen("disasm.txt", "wb");
-         disasm(f, (unsigned int*)(rsp.IMEM));
          fclose(f);
       }
      }
