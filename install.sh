@@ -80,7 +80,7 @@ $INSTALL -D -m 0755 mupen64plus "${BINDIR}/mupen64plus"
 $INSTALL -d -v "${MANDIR}"
 $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}"
 $INSTALL -d -v "${LIBDIR}"
-$INSTALL -m 0755 plugins/* "${LIBDIR}"
+$INSTALL -m 0644 plugins/* "${LIBDIR}"
 
 printf "Done.\n"
 
