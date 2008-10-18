@@ -42,19 +42,24 @@ included LGPL file for the terms and conditions of the GNU Lesser General Public
   - http://oglft.sourceforge.net/index.html
   - http://directory.fsf.org/project/OGLFT/
 
-Additionally, mupen includes a number of libraries licensed under other OSI approved licenses:
+Additionally, mupen includes a number of components licensed under other OSI approved licenses:
 
-The GPL-licensed:
+The GPL license:
    * LZMA decoder by Igor Pavlov and Lasse Collin
    * 7zip SDK simple C decoder by Igor Pavlov
 
-The BSD-licensed minizip by Gilles Vollant and others,
-   - ftp://ftp.info-zip.org/pub/infozip/license.html
+The BSD license:
+   * minizip by Gilles Vollant and others, ftp://ftp.info-zip.org/pub/infozip/license.html
 
-The zlib/libpng-licensed:
+The zlib/libpng license:
    * Adler-32 by Mark Adler
    * libpng by Glenn Randers-Pehrson, Peter Deutsch, and Guy Eric Schalnat
    * MD5 hasing code by Peter Deutsch
 
-The (zlib-like) bzip2-licensed: (a copy of the license is provided in main/bzip2/LICENSE)
-   * libbzip2 by Julian R Seward.
+The (zlib-like) bzip2 license:
+   * libbzip2 by Julian R Seward. (a copy of the license is provided in main/bzip2/LICENSE)
+
+The Bitstream license:
+   * The font(s) in the fonts/ directory are licensed by the Bitstream license, which may be
+     found in the doc/font-license.txt file.
+
