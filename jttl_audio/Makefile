@@ -66,7 +66,7 @@ clean:
 	rm -f *.o *.so
 
 # build rules
-version.h: .svn/entries
+version.h: FORCE
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         ../main/version.template > version.h
 	@$(MV) version.h ../main/version.h
@@ -77,4 +77,6 @@ version.h: .svn/entries
 jttl_audio.so: $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SRC_LIBS) -o $@
 	$(STRIP) $@
+
+FORCE:
 

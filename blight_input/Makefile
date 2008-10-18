@@ -28,17 +28,12 @@ OBJ_BLIGHT = \
 	pad.o
 
 # build targets
-all: version.h blight_input.so
+all: blight_input.so
 
 clean:
 	rm -f *.o *.so ttftoh arial.ttf.c
 
 # build rules
-version.h: .svn/entries
-	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
-        ../main/version.template > version.h
-	@$(MV) version.h ../main/version.h
-
 .c.o:
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) $(FREETYPE_FLAGS) -c $<
 

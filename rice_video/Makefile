@@ -136,7 +136,7 @@ clean:
 rebuild: clean all
 
 # build rules
-version.h: .svn/entries
+version.h: FORCE
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         ../main/version.template > version.h
 	@$(MV) version.h ../main/version.h
@@ -146,4 +146,6 @@ version.h: .svn/entries
 
 .c.o:
 	$(CC) -o $*.o $(CFLAGS) -c $<
+
+FORCE:
 

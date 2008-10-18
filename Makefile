@@ -299,8 +299,9 @@ targets:
 	@echo "    DBG_COMPARE=1 == enable core-synchronized r4300 debugging"
 	@echo "    DBG_PROFILE=1 == dump profiling data for r4300 dynarec to data file"
 #	@echo "    RELEASE=1     == inhibit SVN info from version strings"
-# The RELEASE flag is hidden from view as it should only be used internally.  It only affects
-# the version strings
+#	@echo "    VER=x.y.z     == use this version number when RELEASE=1"
+# The RELEASE and VER flags are hidden from view as they should only be used internally.
+# They only affect the version strings
 
 all: version.h $(ALL)
 
@@ -334,7 +335,7 @@ clean:
 rebuild: clean all
 
 # build rules
-version.h: .svn/entries
+version.h: FORCE
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         main/version.template > version.h
 	@$(MV) version.h main/version.h

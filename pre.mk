@@ -143,12 +143,12 @@ INSTALL = ginstall
 MUPEN_RELEASE = 1.4
 
 ifneq ($(RELEASE),)
-  MUPEN_VERSION = $(MUPEN_RELEASE)
-  PLUGIN_VERSION = $(MUPEN_RELEASE)
+  MUPEN_VERSION = $(VER)
+  PLUGIN_VERSION = $(VER)
 else 
   ifeq ($(shell svn info ./ 2>/dev/null),)
-    MUPEN_VERSION = $(MUPEN_RELEASE)"-development"
-    PLUGIN_VERSION = $(MUPEN_RELEASE)"-development"
+    MUPEN_VERSION = $(MUPEN_RELEASE)-development
+    PLUGIN_VERSION = $(MUPEN_RELEASE)-development
   else
     SVN_REVISION = $(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')
     SVN_BRANCH = $(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')

@@ -111,7 +111,7 @@ targets:
 	@echo "    GUI=GTK2      == Build gtk+-2 GUI"
 	@echo "    GUI=QT4       == Build Qt4 GUI"
 
-all: version.h $(TARGET)
+all: $(TARGET)
 
 $(TARGET): $(QT_EXTRA) $(OBJECTS)
 	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
@@ -145,11 +145,6 @@ rebuild: clean $(TARGET)
 
 
 # build rules
-version.h: .svn/entries
-	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
-        ../main/version.template > version.h
-	@$(MV) version.h ../main/version.h
-
 .SUFFIXES: .o .cpp .c
 .cpp.o:
 # in case this was invoked because a header changed and the compilation fails,
