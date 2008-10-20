@@ -47,12 +47,13 @@
 #define DUMP_INPUT_STATE    1
 #define DUMP_GZIP           0
 
-#define DEFAULT_INPUT_DELAY 4  // starting delay in frames
+#define DEFAULT_INPUT_DELAY 12  // starting delay in frames
 #define MAX_PLAYERS         4
 #define MAX_CLIENTS         10
 #define MAX_PACKET_SIZE     1024
 #define VI_PER_FRAME        4
 #define VI_PER_MSSYNC       300  // number of VI's before sending sync to master server (5sec)
+#define FRAME_LATENCY_SCALE 4 // byte in frame * scale = delay in ms
 #define FRAME_BUFFER_LENGTH 64  // should be nearly double max frame latency
 #define QUEUE_HEAP_LEN      64  // number of items in priority queue
 
@@ -89,7 +90,8 @@ typedef struct TFrame {
     Uint16  eID;
     Uint8   peer;
     Sint8   lag;
-} Frame;//sizeof=4
+    Uint8   late;
+} Frame;//sizeof=5
 
 typedef struct TJoinRequest {
     Uint16      eID;
@@ -181,7 +183,8 @@ typedef struct TMupenClient {
         u_int8_t            inputDelay;
         u_int32_t           numConnected;
         u_int32_t           myID;
-        u_int32_t           timems;
+        u_int32_t           timeStamp;
+        u_int32_t           frameStamp;
         //BOOL                isWaitingForServer;
         BOOL                isListening;
         BOOL                isEnabled;

@@ -49,7 +49,7 @@ int netInitialize(MupenClient *mClient) {
     MasterServerCloseGame();
 #ifdef DUMP_TIMING_DATA
     mClient->timeDump = gzopen("timing.csv.gz","wb");
-    gzprintf(mClient->timeDump,"frame,peer,timems,latencyms,latencyfm\n");
+    gzprintf(mClient->timeDump,"frame,peer,timestamp,deltams,latems,localms,remotems,latencyfm,predoffms\n");
 #endif
 #ifdef DUMP_INPUT_STATE
     mClient->inputDump = gzopen("input.csv.gz","wb");
@@ -66,7 +66,6 @@ int netStartNetplay(MupenClient *mClient, NetPlaySettings netSettings) {
         else
             return 0;
     }
-    else
     return 1;
 }
 
@@ -87,6 +86,10 @@ int netMain(MupenClient *mClient) {
     static unsigned int lastSent=0xFFFFFFFF,
                         lastKeepAlive=0xFFFFFFFF;
 
+    if( processEventQueue(mClient) ) {
+        mClient->frameCounter++;
+    }
+
     if (mClient->numConnected>0 && (mClient->frameCounter % VI_PER_FRAME)==0 &&
             lastSent!=mClient->frameCounter) {
         clientSendFrame(mClient);
@@ -100,10 +103,6 @@ int netMain(MupenClient *mClient) {
     }
 
     clientProcessMessages(mClient);
-
-    if( processEventQueue(mClient) ) {
-        mClient->frameCounter++;
-    }
 
     return 0;
 }

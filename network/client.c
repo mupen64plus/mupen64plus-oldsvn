@@ -126,16 +126,39 @@ int clientSendMessage(MupenClient *Client) {
 }
 
 void clientProcessFrame(MupenClient *Client) {
+
     FrameChunk* curChunk = (FrameChunk*) Client->packet->data;
     int len=Client->packet->len-sizeof(Frame);
     int player=curChunk->header.peer;
     unsigned int frame=SDLNet_Read16(&(curChunk->header.eID));
+    int late = curChunk->header.late;
+    if(frame >= Client->frameCounter + FRAME_BUFFER_LENGTH - Client->inputDelay) {
+        fprintf(stderr,"[NETPLAY]Discarded packet for frame %d (it's currently frame %d)\n", frame, (Client->frameCounter/VI_PER_FRAME));
+        return;
+    }
+
+    if((Client->lag[player]-Client->lag_local[player])>0)
+        Client->timeStamp+=(Client->lag[player]-Client->lag_local[player]);
+
+    Client->lag_local[player] = curChunk->header.lag;
+    int delay=(gettimeofday_msec() - Client->timeStamp - (late*FRAME_LATENCY_SCALE)) - (((((signed int)frame) * VI_PER_FRAME) - ((signed int)Client->frameStamp) ) * 16.666666);
+    Client->lag[player] = ( (((int)Client->lag[player]) * 3 + (delay / FRAME_LATENCY_SCALE)) / 4);
+
+    //now move curChunk pointer to end of frame header
     curChunk=((void *)curChunk)+sizeof(Frame);
+    static int prevtime=0;
+    int time;
     //fprintf(stderr,"Host %d-%d lag time local: %d remote: %d\n", player, frame, Client->lag[player], Client->lag_local[player]);
 #ifdef DUMP_TIMING_DATA
-    unsigned int timervalue = (rompause==0)?gettimeofday_msec()-Client->timems:Client->timems;
     //printf("%d %d %d %d\n",gettimeofday_msec(),Client->timems,rompause,timervalue);
-    gzprintf(Client->timeDump,"%f,%d,%d,%d,%f\n",Client->frameCounter / (1.0f*VI_PER_FRAME),player,timervalue,Client->playerEvent[frame%FRAME_BUFFER_LENGTH][Client->myID].timer==frame?timervalue-Client->playerEvent[frame%FRAME_BUFFER_LENGTH][Client->myID].timems:-1,frameDelta(Client, frame * VI_PER_FRAME) / (VI_PER_FRAME*1.0f));
+    int offset=(Client->lag[player]-Client->lag_local[player])*FRAME_LATENCY_SCALE;
+    time = gettimeofday_msec();
+    if(prevtime==0)
+        prevtime = time;
+    double framedelay = ((gettimeofday_msec()-Client->timeStamp) / 16.6666666+Client->frameStamp)/4-frame;
+    fprintf(stderr,"TIMING(%d,%f): %d stampfme: %d fme: %d delay %d diff %f ts %d\n", frame,Client->frameCounter/4.0, gettimeofday_msec(), Client->frameStamp, frame*VI_PER_FRAME, delay,framedelay,Client->timeStamp);
+    gzprintf(Client->timeDump,"%f,%d,%d,%d,%d,%d,%d,%f,%d\n",Client->frameCounter / (1.0f*VI_PER_FRAME),player,time,time-prevtime,late*FRAME_LATENCY_SCALE,Client->lag[player],Client->lag_local[player],framedelay,offset);
+    prevtime=time;
 #endif //DUMP_TIMING_DATA
     while(len>0) {
         switch(curChunk->type) {
@@ -143,7 +166,7 @@ void clientProcessFrame(MupenClient *Client) {
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timer=frame;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].value=curChunk->input.buttons.Value;
             Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].control=((curChunk->input.buttons.Value & 0x8000) != 0);
-            Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timems = gettimeofday_msec()-Client->timems;
+            Client->playerEvent[frame%FRAME_BUFFER_LENGTH][curChunk->input.player].timems = gettimeofday_msec();
             //fprintf(stderr,"chunk player: %d frame: %d data: %08x control %d\n", curChunk->input.player,frame,curChunk->input.buttons.Value,curChunk->input.player);
             len-=sizeof(InputChunk);
           break;
@@ -155,9 +178,12 @@ void clientProcessFrame(MupenClient *Client) {
 
 void clientSendFrame(MupenClient *Client) {
     int i;
+
     FrameChunk *chunk = (FrameChunk*) Client->packet->data;
+    int delay=(16 + gettimeofday_msec() - Client->timeStamp) - ((Client->frameCounter - Client->frameStamp)*16.66666666);
+fprintf(stderr,"Send %d, delta %dms\n",Client->frameCounter,delay);
 #ifdef DUMP_TIMING_DATA
-    unsigned int timervalue = (rompause==0)?gettimeofday_msec()-Client->timems:Client->timems;    gzprintf(Client->timeDump,"%f,%d,%d,%d,%f\n",Client->frameCounter / (1.0f*VI_PER_FRAME),Client->myID,timervalue,0,0.0f);
+    //gzprintf(Client->timeDump,"%f,%d,%d,%d,%d,%f,%d\n",Client->frameCounter / (1.0f*VI_PER_FRAME),Client->myID,gettimeofday_msec(),Client->lag[Client->myID],Client->lag_local[Client->myID],0.0f,0);
 #endif //DUMP_TIMING_DATA
 
     // Get input here, this is temporary but should resolve some issues
@@ -172,7 +198,7 @@ void clientSendFrame(MupenClient *Client) {
     NetPlayerUpdate *localUpdate = &(Client->playerEvent[bufInd][Client->myID]);
     localUpdate->timer = (Client->frameCounter/VI_PER_FRAME);
     localUpdate->value = Keys.Value & 0xFFFF7FFF;
-    localUpdate->timems = rompause?Client->timems:gettimeofday_msec()-Client->timems;
+    localUpdate->timems = gettimeofday_msec();
     for(i=0; i<Client->numConnected-1;i++){
         int curID=sourceID(Client->myID, i);
         Client->packet->address=Client->player[curID].address;
@@ -180,6 +206,7 @@ void clientSendFrame(MupenClient *Client) {
         SDLNet_Write16((Client->frameCounter/VI_PER_FRAME)&FRAME_MASK,&(chunk->header.eID));
         chunk->header.peer=Client->myID;
         chunk->header.lag=Client->lag[curID];
+        chunk->header.late=delay/FRAME_LATENCY_SCALE;
         chunk = (FrameChunk*)(((char*)chunk)+sizeof(Frame));
 
         chunk->input.type = CHUNK_INPUT;
@@ -213,7 +240,7 @@ void clientProcessMessages(MupenClient *Client) {
 
     //if (!(Client->isListening))
     //    return; // exit now if the client isnt' connected
-
+//fprintf(stderr,"process msgs %dms\n",gettimeofday_msec());
     SDLNet_CheckSockets(Client->socketSet, 0);
     while (SDLNet_SocketReady(Client->socket)) {
         n = SDLNet_UDP_Recv(Client->socket, Client->packet);
@@ -322,8 +349,10 @@ void clientProcessMessages(MupenClient *Client) {
                     Client->myID = SDLNet_Read32(Client->packet->data+4);
                     Client->numConnected = SDLNet_Read32(Client->packet->data+8);
                     Uint32 remoteID = SDLNet_Read32(Client->packet->data+12);
-
                     Client->player[remoteID].address=Client->packet->address;
+
+                    Client->frameStamp=Client->frameCounter+1;
+                    Client->timeStamp=gettimeofday_msec();
 
                     flushEventQueue(Client);
                     Client->eventQueue[Client->numQueued]->evt=EVENT_INPUT;
@@ -341,23 +370,7 @@ void clientProcessMessages(MupenClient *Client) {
                 break;
               default://We likely have a frame
                 if(frameID<=FRAME_MASK) {
-                    int diff = frameDelta(Client, frameID * VI_PER_FRAME);
-                    int absdiff=diff;
-                    if(absdiff < 0) absdiff*=-1;
-                    if((absdiff/VI_PER_FRAME) < (FRAME_BUFFER_LENGTH/2)-1) {
-                        //NetPlayerUpdate* frEvt=Client->playerevent[frameID%FRAME_BUFFER_LENGTH];
-                        Uint8 host = Client->packet->data[2];
-                        char lag = Client->packet->data[3];
-                        int curID = sourceID(Client->myID,0);
-                        Client->lag[host] = ((((int)Client->lag[host])*3)/4) + diff;
-                        Client->lag_local[host] = lag;
-                        adjust = (lag - Client->lag[host])/4;
-                        setSpeed(100+(adjust));
-                        clientProcessFrame(Client);
-                    } else
-                        fprintf(stderr,"[NETPLAY]Discarded packet for frame %d (it's currently frame %d)\n",
-                            frameID, (Client->frameCounter/VI_PER_FRAME));
-                    
+                    clientProcessFrame(Client);
                 } else {
                     fprintf(stderr,"[NETPLAY]Unknown Frame header: %04X len:%d\n",
                         frameID,Client->packet->len);
@@ -467,20 +480,20 @@ int processEventQueue(MupenClient *Client) {
                         if(rompause==0) {
                             fprintf(stderr,"[NETPLAY] Out of sync at frame %f (%d) player: %d\n", frame/(1.0f*VI_PER_FRAME), curUpdate->timer, i);
                             rompause=1;
-                            Client->timems=gettimeofday_msec()-Client->timems;
+                            //Client->timems=gettimeofday_msec()-Client->timems;
                         }
-                        fprintf(stderr,"[NETPLAY] Skip cycle %d != %d\n", curUpdate->timer,frame/VI_PER_FRAME);
+                        //fprintf(stderr,"[NETPLAY] Skip cycle %d != %d\n", curUpdate->timer,frame/VI_PER_FRAME);
                         return 0;
                     }
                 }
                 else {
                     if(curUpdate->control==1) {
                         curUpdate->control=0;
-                        if(rompause)
+/*                        if(rompause)
                             Client->timems=gettimeofday_msec()-Client->timems;
                         else
                             Client->timems=gettimeofday_msec()-Client->timems;
-
+*/
                         rompause=!rompause;
                         printf("Unpause event frame %d\n",frame);
                         if(Client->emuState==paused) {
@@ -492,7 +505,7 @@ int processEventQueue(MupenClient *Client) {
                     }
                     if(rompause==1 && Client->emuState==running) {
                         rompause=0;
-                        Client->timems=gettimeofday_msec()-Client->timems;
+                        //Client->timems=gettimeofday_msec()-Client->timems;
                     }
                     Client->playerKeys[i].Value=curUpdate->value;
 //if(curUpdate->value != 0) fprintf(stderr,"curUpdate->value = %08X :%d :%d\n", curUpdate->value, i, Client->frameCounter);

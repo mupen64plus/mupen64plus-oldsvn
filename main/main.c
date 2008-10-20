@@ -548,6 +548,7 @@ void new_vi(void)
     static unsigned int CounterTime = 0;
     static unsigned int CalculatedTime ;
     static int VI_Counter = 0;
+    static int Connected = 0;
 
 #ifdef DBG
     if(debugger_mode) debugger_frontend_vi();
@@ -556,12 +557,14 @@ void new_vi(void)
     start_section(IDLE_SECTION);
 
     do {
+        if(Connected==0 && g_NetplayClient.numConnected>1 && l_NetSettings.hostname[0]=='\0')
+                Connected=gettimeofday_msec();
+        else if(Connected > 0 && gettimeofday_msec()-Connected > 2000) {
+                netplayReady();
+                Connected=-1;
+        }
+
         netMain(&g_NetplayClient); //may adjust l_SpeedFactor
-
-        double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
-        int time;
-        VI_Counter++;
-
 #ifdef WITH_LIRC
         lircCheckInput();
 #endif
@@ -570,10 +573,18 @@ void new_vi(void)
         refresh_stat();
 #endif
 
+ 
+        double AdjustedLimit = VILimitMilliseconds * 100.0 / l_SpeedFactor;  // adjust for selected emulator speed
+        int time;
+        VI_Counter++;
+
+
         if(LastFPSTime == 0)
         {
             LastFPSTime = gettimeofday_msec();
             CounterTime = gettimeofday_msec();
+            g_NetplayClient.timeStamp=CounterTime;
+            g_NetplayClient.frameStamp=0;//g_NetplayClient.frameCounter;
             return;
         }
         CurrentFPSTime = gettimeofday_msec();
@@ -582,21 +593,28 @@ void new_vi(void)
 
         if (Dif < AdjustedLimit) 
         {
-            CalculatedTime = CounterTime + AdjustedLimit * VI_Counter;
+            CalculatedTime = g_NetplayClient.timeStamp + AdjustedLimit * (g_NetplayClient.frameCounter - g_NetplayClient.frameStamp);//CounterTime + AdjustedLimit * VI_Counter;
             time = (int)(CalculatedTime - CurrentFPSTime);
-            if (time > 0)
+            /*while (time > 0)
             {
-                usleep(time * 1000);
-            }
-            CurrentFPSTime = CurrentFPSTime + time;
+                usleep(1000);
+                clientProcessMessages(&g_NetplayClient);
+                time=CalculatedTime-gettimeofday_msec();
+            }*/
+            if(time > 0)
+                usleep(time*1000);
+            CurrentFPSTime = gettimeofday_msec();//CurrentFPSTime + time;
         }
+
         if (CurrentFPSTime - CounterTime >= 1000.0 ) 
         {
-            CounterTime = gettimeofday_msec();
-            VI_Counter = 0 ;
+            CounterTime += 1000;//((1666.66666 / l_SpeedFactor) * VI_Counter);//= gettimeofday_msec();
+            printf("Time skew %d ms (%d) frame: %fms, %d frames last second  %f\n",gettimeofday_msec()-CounterTime,l_SpeedFactor,AdjustedLimit,VI_Counter, AdjustedLimit*VI_Counter);
+
+            VI_Counter=0 ;
         }
         LastFPSTime = CurrentFPSTime ;
-    } while (rompause);
+    } while (rompause==1 && stop==0);
 
     end_section(IDLE_SECTION);
 

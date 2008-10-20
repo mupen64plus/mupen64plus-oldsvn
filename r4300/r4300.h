@@ -40,7 +40,7 @@ extern precomp_instr *PC;
 
 extern precomp_block *blocks[0x100000], *actual;
 
-extern int stop, llbit, rompause;
+extern volatile int stop, llbit, rompause;
 extern long long int reg[32], hi, lo;
 extern long long int local_rs, local_rt;
 extern unsigned int reg_cop0[32];

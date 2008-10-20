@@ -44,7 +44,7 @@
 
 unsigned int dynacore = 0, interpcore = 0;
 int no_compiled_jump = 0;
-int stop, llbit, rompause;
+volatile int stop, llbit, rompause;
 long long int reg[32], hi, lo;
 long long int local_rs, local_rt;
 unsigned int reg_cop0[32];
