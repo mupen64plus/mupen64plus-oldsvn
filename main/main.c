@@ -468,20 +468,20 @@ int pauseContinueEmulation(void)
         return 1;
 
     if (rompause)
-    {
+        {
 #ifndef NO_GUI
         gui_set_state(GUI_STATE_RUNNING);
         g_romcache.rcspause = 1;
 #endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
         if(msg)
-        {
+            {
             osd_delete_message(msg);
             msg = NULL;
+            }
         }
-    }
     else
-    {
+        {
 #ifndef NO_GUI
         gui_set_state(GUI_STATE_PAUSED);
         g_romcache.rcspause = 0;
@@ -492,7 +492,7 @@ int pauseContinueEmulation(void)
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Paused\n"));
         msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused\n"));
         osd_message_set_static(msg);
-    }
+        }
 
     rompause = !rompause;
     return rompause;
@@ -604,27 +604,34 @@ void new_vi(void)
 /*********************************************************************************************************
 * sdl event filter
 */
-static int sdl_event_filter( const SDL_Event *event )
+int sdl_event_filter(void)
 {
+if (g_EmulatorRunning==0)
+return 0;
+
+ SDL_Event event;
+if (SDL_PollEvent(&event) == 0)
+ { return 1; }
+
     static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
     char *event_str = NULL;
 
-    switch( event->type )
+    switch(event.type)
     {
         // user clicked on window close button
         case SDL_QUIT:
             stopEmulation();
             break;
         case SDL_KEYDOWN:
-            switch( event->key.keysym.sym )
+            switch(event.key.keysym.sym )
             {
                 case SDLK_ESCAPE:
                     stopEmulation();
                     break;
                 case SDLK_RETURN:
                     // Alt+Enter toggles fullscreen
-                    if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
+                    if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT))
                         changeWindow();
                     break;
                 case SDLK_F5:
@@ -633,7 +640,7 @@ static int sdl_event_filter( const SDL_Event *event )
                 case SDLK_F7:
                     savestates_job |= LOADSTATE;
                     break;
-                case SDLK_F9:
+                 case SDLK_F9:
                     add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
                     add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
                     break;
@@ -651,10 +658,11 @@ static int sdl_event_filter( const SDL_Event *event )
                 // Pause
                 case SDLK_PAUSE:
                     main_pause();
+                    printf("Working\n");
                     break;
 
                 default:
-                    switch (event->key.keysym.unicode)
+                    switch (event.key.keysym.unicode)
                     {
                         case '0':
                         case '1':
@@ -666,7 +674,7 @@ static int sdl_event_filter( const SDL_Event *event )
                         case '7':
                         case '8':
                         case '9':
-                            savestates_select_slot( event->key.keysym.unicode - '0' );
+                            savestates_select_slot(event.key.keysym.unicode - '0');
                             break;
                         // volume mute/unmute
                         case 'm':
@@ -702,14 +710,13 @@ static int sdl_event_filter( const SDL_Event *event )
 
                         // pass all other keypresses to the input plugin
                         default:
-                            keyDown( 0, event->key.keysym.sym );
+                            keyDown( 0, event.key.keysym.sym );
                     }
             }
-            return 0;
             break;
 
         case SDL_KEYUP:
-            switch( event->key.keysym.sym )
+            switch( event.key.keysym.sym )
             {
                 case SDLK_ESCAPE:
                     break;
@@ -721,12 +728,12 @@ static int sdl_event_filter( const SDL_Event *event )
                     osd_delete_message(msgFF);
                     break;
                 default:
-                    keyUp( 0, event->key.keysym.sym );
+                    keyUp( 0, event.key.keysym.sym );
             }
-            return 0;
             break;
+}
 
-        // if joystick action is detected, check if it's mapped to a special function
+/*        // if joystick action is detected, check if it's mapped to a special function
         case SDL_JOYAXISMOTION:
             // axis events have to be above a certain threshold to be valid
             if(event->jaxis.value > -15000 && event->jaxis.value < 15000)
@@ -771,7 +778,11 @@ static int sdl_event_filter( const SDL_Event *event )
             return 0;
             break;
     }
+*/
 
+if (g_EmulatorRunning==0)
+return 0;
+else
     return 1;
 }
 
@@ -819,12 +830,15 @@ static int emulationThread( void *_arg )
     no_compiled_jump = config_get_bool("NoCompiledJump", FALSE);
 
     // init sdl
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_ShowCursor(0);
-    SDL_EnableKeyRepeat(0, 0);
+#ifndef NO_GUI
+    gui_sdl_init(sdl_event_filter);
+#endif
+    //SDL_Init(SDL_INIT_VIDEO);
+    //SDL_ShowCursor(0);
+    //SDL_EnableKeyRepeat(0, 0);
+    //SDL_EnableUNICODE(1);
 
-    SDL_SetEventFilter(sdl_event_filter);
-    SDL_EnableUNICODE(1);
+    //SDL_SetEventFilter(sdl_event_filter);
 
     /* Determine which plugins to use:
      *  -If valid plugin was specified at the commandline, use it

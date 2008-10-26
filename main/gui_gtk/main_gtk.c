@@ -74,6 +74,30 @@ static Uint32 g_GuiThreadID = 0; /* Main gui thread. */
 * GUI interfaces.
 */
 
+void gui_sdl_init(int function(void))
+{
+   Uint32 self = SDL_ThreadID();
+    /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
+    if (self != g_GuiThreadID)
+        gdk_threads_enter();
+
+   if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {
+      fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
+      return; }
+
+   // SDL_ShowCursor(0);
+   //SDL_EnableKeyRepeat(0, 0);
+   SDL_EnableUNICODE(1);
+
+
+ g_idle_add(function, (gpointer)NULL); 
+
+if (self != g_GuiThreadID)
+        gdk_threads_leave();
+
+    return;
+}
+
 /* Parse gui-specific arguments, remove them from argument list,
  * and create gtk gui in thread-safe manner, but do not display.
  */
@@ -185,7 +209,9 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
     Uint32 self = SDL_ThreadID();
     if(self!=g_GuiThreadID)
-        gdk_threads_enter();
+        {gdk_threads_enter(); printf("Entering\n"); }
+    else
+         printf("Same thread.\n"); 
 
     if(messagetype==GUI_MESSAGE_INFO)
         {
@@ -243,11 +269,11 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
             response = gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
             }
-        }
 
-    gdk_threads_leave();
-    g_main_context_iteration(NULL, FALSE);
-    gdk_threads_enter();
+        gdk_threads_leave();
+        g_main_context_iteration(NULL, FALSE);
+        gdk_threads_enter();
+        }
 
    if (self != g_GuiThreadID)
        gdk_threads_leave();
@@ -265,19 +291,24 @@ void gui_set_state(gui_state_t state)
         return;
 
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
-    if(self!=g_GuiThreadID)
+    if(self != g_GuiThreadID)
+        {
         gdk_threads_enter();
+        printf("Different thread?\n");
+        }
+    else
+        printf("Same thread?\n");
 
-    if(state==GUI_STATE_STOPPED)
+    if(state == GUI_STATE_STOPPED)
         enabled = paused = FALSE;
 
-    if(state==GUI_STATE_RUNNING)
+    if(state == GUI_STATE_RUNNING)
         {
         enabled = TRUE;
         paused = FALSE;
         }
 
-    if(state==GUI_STATE_PAUSED)
+    if(state == GUI_STATE_PAUSED)
         enabled = paused = TRUE;
 
     g_signal_handlers_block_by_func(g_MainWindow.playButtonItem, callback_start_emulation, NULL);

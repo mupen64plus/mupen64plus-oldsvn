@@ -67,6 +67,8 @@ typedef enum gui_state
 /* Allow the core to send hints to the GUI as to the state of the emulator. */
 void gui_set_state(gui_state_t state);
 
+void gui_sdl_init(int function(void));
+
 /* TODO: Add debugger GUI APIs here. */
 
 #endif /* __GUI_H__ */
