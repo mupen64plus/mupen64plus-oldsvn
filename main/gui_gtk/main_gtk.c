@@ -73,29 +73,28 @@ static Uint32 g_GuiThreadID = 0; /* Main gui thread. */
 /*********************************************************************************************************
 * GUI interfaces.
 */
-
-void gui_sdl_init(int function(void))
+void gui_sdl_init()
 {
    Uint32 self = SDL_ThreadID();
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
     if (self != g_GuiThreadID)
         gdk_threads_enter();
 
-   if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {
-      fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-      return; }
+   if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+      {
+      fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
+      return;
+      }
 
-   // SDL_ShowCursor(0);
-   //SDL_EnableKeyRepeat(0, 0);
+   SDL_ShowCursor(0);
+   SDL_EnableKeyRepeat(0, 0);
    SDL_EnableUNICODE(1);
 
+   //g_idle_add_full(G_PRIORITY_LOW, sdl_event_filter, (gpointer)NULL, NULL); 
+    SDL_SetEventFilter(sdl_event_filter);
 
- g_idle_add(function, (gpointer)NULL); 
-
-if (self != g_GuiThreadID)
+    if (self != g_GuiThreadID)
         gdk_threads_leave();
-
-    return;
 }
 
 /* Parse gui-specific arguments, remove them from argument list,

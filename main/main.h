@@ -22,6 +22,7 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
+#include <SDL.h>
 #include <SDL_thread.h>
 
 /* globals */
@@ -48,6 +49,8 @@ int gui_enabled(void);
 
 void new_frame();
 void new_vi();
+
+int sdl_event_filter(const SDL_Event *event);
 
 void startEmulation(void);
 void stopEmulation(void);
