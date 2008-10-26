@@ -243,13 +243,13 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
             response = gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
             }
+
+        gdk_threads_leave();
+        g_main_context_iteration(NULL, FALSE);
+        gdk_threads_enter();
         }
 
-    gdk_threads_leave();
-    g_main_context_iteration(NULL, FALSE);
-    gdk_threads_enter();
-
-   if (self != g_GuiThreadID)
+    if (self != g_GuiThreadID)
        gdk_threads_leave();
 
     return response == GTK_RESPONSE_ACCEPT;
