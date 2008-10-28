@@ -66,5 +66,6 @@ void take_next_screenshot(void);
 void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char* format, ...);
 void error_message(const char* format, ...);
 
+int sdl_event_filter(void);
 #endif /* __MAIN_H__ */
 

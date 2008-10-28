@@ -604,36 +604,35 @@ void new_vi(void)
 /*********************************************************************************************************
 * sdl event filter
 */
-int sdl_event_filter(const SDL_Event *event)
+int sdl_event_filter(void)
 {
-//if (g_EmulatorRunning==0)
-//return 0;
-
- //SDL_Event event;
-//if (SDL_PollEvent(&event) == 0)
- //{ return 1; }
-
+    static SDL_Event event;
     static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
+
+    if (g_EmulatorRunning==0)
+        return 0;
+
+    if (SDL_PollEvent(&event) == 0)
+        return 1;
+
     char *event_str = NULL;
 
-    switch(event->type)
+    switch(event.type)
     {
         // user clicked on window close button
         case SDL_QUIT:
             stopEmulation();
-            gdk_threads_leave();
             break;
         case SDL_KEYDOWN:
-            switch(event->key.keysym.sym )
+            switch(event.key.keysym.sym )
             {
                 case SDLK_ESCAPE:
                     stopEmulation();
-                    gdk_threads_leave();
                     break;
                 case SDLK_RETURN:
                     // Alt+Enter toggles fullscreen
-                    if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
+                    if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT))
                         changeWindow();
                     break;
                 case SDLK_F5:
@@ -664,7 +663,7 @@ int sdl_event_filter(const SDL_Event *event)
                     break;
 
                 default:
-                    switch (event->key.keysym.unicode)
+                    switch (event.key.keysym.unicode)
                     {
                         case '0':
                         case '1':
@@ -676,7 +675,7 @@ int sdl_event_filter(const SDL_Event *event)
                         case '7':
                         case '8':
                         case '9':
-                            savestates_select_slot(event->key.keysym.unicode - '0');
+                            savestates_select_slot(event.key.keysym.unicode - '0');
                             break;
                         // volume mute/unmute
                         case 'm':
@@ -712,13 +711,13 @@ int sdl_event_filter(const SDL_Event *event)
 
                         // pass all other keypresses to the input plugin
                         default:
-                            keyDown( 0, event->key.keysym.sym );
+                            keyDown( 0, event.key.keysym.sym );
                     }
             }
             break;
 
         case SDL_KEYUP:
-            switch( event->key.keysym.sym )
+            switch( event.key.keysym.sym )
             {
                 case SDLK_ESCAPE:
                     break;
@@ -730,7 +729,7 @@ int sdl_event_filter(const SDL_Event *event)
                     osd_delete_message(msgFF);
                     break;
                 default:
-                    keyUp( 0, event->key.keysym.sym );
+                    keyUp( 0, event.key.keysym.sym );
             }
             break;
 }
@@ -782,10 +781,11 @@ int sdl_event_filter(const SDL_Event *event)
     }
 */
 
-//if (g_EmulatorRunning==0)
-//return 1;
-//else
-    return 0;
+if (g_EmulatorRunning==0)
+return 0;
+else
+    return 1;
+
 }
 
 /*********************************************************************************************************
@@ -835,11 +835,6 @@ static int emulationThread( void *_arg )
 #ifndef NO_GUI
     gui_sdl_init();
 #endif
-    //SDL_Init(SDL_INIT_VIDEO);
-    //SDL_ShowCursor(0);
-    //SDL_EnableKeyRepeat(0, 0);
-    //SDL_EnableUNICODE(1);
-
     //SDL_SetEventFilter(sdl_event_filter);
 
     /* Determine which plugins to use:
@@ -868,12 +863,14 @@ static int emulationThread( void *_arg )
 
     // initialize memory, and do byte-swapping if it's not been done yet
     if (g_MemHasBeenBSwapped == 0)
-        {
+    {
         init_memory(1);
         g_MemHasBeenBSwapped = 1;
-        }
+    }
     else
+    {
         init_memory(0);
+    }
 
     // load the plugins and attach the ROM to them
     plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
@@ -950,7 +947,6 @@ static int emulationThread( void *_arg )
     g_EmulatorRunning = 0;
 
     SDL_Quit();
-
     return 0;
 }
 

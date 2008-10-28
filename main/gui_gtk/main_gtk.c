@@ -73,28 +73,37 @@ static Uint32 g_GuiThreadID = 0; /* Main gui thread. */
 /*********************************************************************************************************
 * GUI interfaces.
 */
+
+gboolean sdl_wrapper(gpointer data)
+{
+    return (gboolean)sdl_event_filter();
+}
+
 void gui_sdl_init()
 {
-   Uint32 self = SDL_ThreadID();
+    Uint32 self = SDL_ThreadID();
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
+
     if (self != g_GuiThreadID)
         gdk_threads_enter();
 
-   if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
-      {
-      fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-      return;
-      }
+    printf("Only calling when SDL is running...\n");
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+        {
+        fprintf(stderr, "Error, could not initialize SDL: %s\n", SDL_GetError());
+        return; 
+        }
 
-   SDL_ShowCursor(0);
-   SDL_EnableKeyRepeat(0, 0);
-   SDL_EnableUNICODE(1);
+    SDL_ShowCursor(0);
+    SDL_EnableKeyRepeat(0, 0);
+    SDL_EnableUNICODE(1);
 
-   //g_idle_add_full(G_PRIORITY_LOW, sdl_event_filter, (gpointer)NULL, NULL); 
-    SDL_SetEventFilter(sdl_event_filter);
+    gdk_threads_add_idle_full(G_PRIORITY_LOW, sdl_wrapper, NULL, NULL);
 
     if (self != g_GuiThreadID)
         gdk_threads_leave();
+
+    return;
 }
 
 /* Parse gui-specific arguments, remove them from argument list,
@@ -178,10 +187,6 @@ void gui_update_rombrowser(unsigned int roms, unsigned short clear)
         gdk_threads_enter();
 
     rombrowser_refresh(roms, clear);
-
-    gdk_threads_leave();
-    while(g_main_context_iteration(NULL, FALSE));
-    gdk_threads_enter();
 
     if (self != g_GuiThreadID)
         gdk_threads_leave();
@@ -268,11 +273,7 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
             response = gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
             }
-
-        gdk_threads_leave();
-        g_main_context_iteration(NULL, FALSE);
-        gdk_threads_enter();
-        }
+         }
 
    if (self != g_GuiThreadID)
        gdk_threads_leave();
