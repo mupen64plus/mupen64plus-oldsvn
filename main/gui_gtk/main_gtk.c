@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <SDL.h>
 #include <SDL_thread.h>
 
 #include <gtk/gtk.h>
@@ -68,7 +69,7 @@ static void create_mainWindow(void);
 
 /* Globals. */
 SMainWindow g_MainWindow;
-static Uint32 g_GuiThreadID = 0; /* Main gui thread. */
+Uint32 g_GuiThreadID = 0; /* Main gui thread. */
 
 /*********************************************************************************************************
 * GUI interfaces.
@@ -76,10 +77,20 @@ static Uint32 g_GuiThreadID = 0; /* Main gui thread. */
 
 gboolean sdl_wrapper(gpointer data)
 {
-    return (gboolean)sdl_event_filter();
+     static SDL_Event event;
+
+     if (g_EmulatorRunning == 0)
+         return 0;
+
+     if (SDL_PollEvent(&event) == 0)
+         return 1;
+     else
+         sdl_event_filter(&event);
+
+     return 1;
 }
 
-void gui_sdl_init()
+void gui_sdl_init(void)
 {
     Uint32 self = SDL_ThreadID();
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
@@ -87,18 +98,8 @@ void gui_sdl_init()
     if (self != g_GuiThreadID)
         gdk_threads_enter();
 
-    printf("Only calling when SDL is running...\n");
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        {
-        fprintf(stderr, "Error, could not initialize SDL: %s\n", SDL_GetError());
-        return; 
-        }
-
-    SDL_ShowCursor(0);
-    SDL_EnableKeyRepeat(0, 0);
-    SDL_EnableUNICODE(1);
-
-    gdk_threads_add_idle_full(G_PRIORITY_LOW, sdl_wrapper, NULL, NULL);
+    //gdk_threads_add_idle_full(G_PRIORITY_LOW, sdl_wrapper, NULL, NULL);
+    gdk_threads_add_timeout(5, sdl_wrapper, NULL);
 
     if (self != g_GuiThreadID)
         gdk_threads_leave();
@@ -213,9 +214,7 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
     Uint32 self = SDL_ThreadID();
     if(self!=g_GuiThreadID)
-        {gdk_threads_enter(); printf("Entering\n"); }
-    else
-         printf("Same thread.\n"); 
+        gdk_threads_enter();
 
     if(messagetype==GUI_MESSAGE_INFO)
         {
@@ -292,12 +291,7 @@ void gui_set_state(gui_state_t state)
 
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
     if(self != g_GuiThreadID)
-        {
         gdk_threads_enter();
-        printf("Different thread?\n");
-        }
-    else
-        printf("Same thread?\n");
 
     if(state == GUI_STATE_STOPPED)
         enabled = paused = FALSE;

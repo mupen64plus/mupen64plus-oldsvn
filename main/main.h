@@ -50,8 +50,6 @@ int gui_enabled(void);
 void new_frame();
 void new_vi();
 
-int sdl_event_filter(const SDL_Event *event);
-
 void startEmulation(void);
 void stopEmulation(void);
 int pauseContinueEmulation(void);
@@ -66,6 +64,7 @@ void take_next_screenshot(void);
 void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char* format, ...);
 void error_message(const char* format, ...);
 
-int sdl_event_filter(void);
+int sdl_event_filter(const SDL_Event *event);
+
 #endif /* __MAIN_H__ */
 

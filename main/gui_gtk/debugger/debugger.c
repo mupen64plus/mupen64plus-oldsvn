@@ -23,7 +23,10 @@
 **/
 
 #include <glib.h>
+
 #include "debugger.h"
+
+#include "../main_gtk.h"
 
 GdkColor    color_modif,    // Color of modified register.
                    color_ident;    // Unchanged register.
@@ -44,65 +47,55 @@ void init_debugger_frontend()
 
     debugger_font_desc = pango_font_description_from_string("Monospace 9");
 
-    gdk_threads_enter();
+    Uint32 self = SDL_ThreadID();
+    /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
+
+    if (self != g_GuiThreadID)
+        gdk_threads_enter();
+
     init_registers();
-    gdk_threads_leave();
-
-    gdk_threads_enter();
     init_desasm();
-    gdk_threads_leave();
-    /*
-    gdk_threads_enter();
+     /*
     init_breakpoints();
-    gdk_threads_leave();
-    
-    gdk_threads_enter();
     init_memedit();
-    gdk_threads_leave();
-    
-    gdk_threads_enter();
     init_varlist();
-    gdk_threads_leave();
-
-    gdk_threads_enter();
     init_TLBwindow();
-    gdk_threads_leave();
     */
+
+    if (self != g_GuiThreadID)
+        gdk_threads_leave();
 
     if(dynacore!=0)
       error_message("You are trying to use the debugger with the dynamic-recompiler.  This is unfinished, and many features of the debugger WILL NOT WORK PROPERLY.  If you have a bug you'd like to report, try it first using the debugger with either of the interpreted cores.");
 
 }
 
-
 void update_debugger_frontend()
 // Update debugger state and display.
 {
-    if(registers_opened) {
+    Uint32 self = SDL_ThreadID();
+    /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
+
+    if (self != g_GuiThreadID)
         gdk_threads_enter();
+
+    if(registers_opened)
         update_registers();
-        gdk_threads_leave();
-    }
-    if(desasm_opened) {
-        gdk_threads_enter();
-        update_desasm( PC->addr );
-        gdk_threads_leave();
-    }
-    if(regTLB_opened) {
-        gdk_threads_enter();
+
+    if(desasm_opened)
+        update_desasm(PC->addr);
+
+    if(regTLB_opened)
         update_TLBwindow();
-        gdk_threads_leave();
-    }
-    if(memedit_opened) {
-        gdk_threads_enter();
+
+    if(memedit_opened)
         update_memory_editor();
-        gdk_threads_leave();
-    }
-    if(varlist_opened) {
-        gdk_threads_enter();
+
+    if(varlist_opened)
         update_varlist();
+
+    if (self != g_GuiThreadID)
         gdk_threads_leave();
-    }
 }
 
 

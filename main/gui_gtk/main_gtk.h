@@ -25,6 +25,8 @@
 #ifndef __MAIN_GTK_H__
 #define __MAIN_GTK_H__
 
+#include <SDL_thread.h>
+
 #include <gtk/gtk.h>
 
 #include "../gui.h"
@@ -113,6 +115,7 @@ typedef struct
     GtkWidget* statusBarHBox; /* Container object for statusbar, toggle visability. */
 } SMainWindow;
 
+extern Uint32 g_GuiThreadID;
 extern SMainWindow g_MainWindow;
 extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star, *staroff;
 

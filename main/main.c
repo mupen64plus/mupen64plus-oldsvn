@@ -403,6 +403,16 @@ void startEmulation(void)
         return;
     }
 
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+        {
+        fprintf(stderr, "Error, could not initialize SDL: %s\n", SDL_GetError());
+        return; 
+        }
+
+    SDL_ShowCursor(0);
+    SDL_EnableKeyRepeat(0, 0);
+    SDL_EnableUNICODE(1);
+
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
     {
@@ -604,35 +614,27 @@ void new_vi(void)
 /*********************************************************************************************************
 * sdl event filter
 */
-int sdl_event_filter(void)
+int sdl_event_filter( const SDL_Event *event )
 {
-    static SDL_Event event;
     static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
-
-    if (g_EmulatorRunning==0)
-        return 0;
-
-    if (SDL_PollEvent(&event) == 0)
-        return 1;
-
     char *event_str = NULL;
 
-    switch(event.type)
+    switch( event->type )
     {
         // user clicked on window close button
         case SDL_QUIT:
             stopEmulation();
             break;
         case SDL_KEYDOWN:
-            switch(event.key.keysym.sym )
+            switch( event->key.keysym.sym )
             {
                 case SDLK_ESCAPE:
                     stopEmulation();
                     break;
                 case SDLK_RETURN:
                     // Alt+Enter toggles fullscreen
-                    if(event.key.keysym.mod & (KMOD_LALT | KMOD_RALT))
+                    if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
                         changeWindow();
                     break;
                 case SDLK_F5:
@@ -641,7 +643,7 @@ int sdl_event_filter(void)
                 case SDLK_F7:
                     savestates_job |= LOADSTATE;
                     break;
-                 case SDLK_F9:
+                case SDLK_F9:
                     add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
                     add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
                     break;
@@ -659,11 +661,10 @@ int sdl_event_filter(void)
                 // Pause
                 case SDLK_PAUSE:
                     main_pause();
-                    printf("Working\n");
                     break;
 
                 default:
-                    switch (event.key.keysym.unicode)
+                    switch (event->key.keysym.unicode)
                     {
                         case '0':
                         case '1':
@@ -675,7 +676,7 @@ int sdl_event_filter(void)
                         case '7':
                         case '8':
                         case '9':
-                            savestates_select_slot(event.key.keysym.unicode - '0');
+                            savestates_select_slot( event->key.keysym.unicode - '0' );
                             break;
                         // volume mute/unmute
                         case 'm':
@@ -711,13 +712,14 @@ int sdl_event_filter(void)
 
                         // pass all other keypresses to the input plugin
                         default:
-                            keyDown( 0, event.key.keysym.sym );
+                            keyDown( 0, event->key.keysym.sym );
                     }
             }
+            return 0;
             break;
 
         case SDL_KEYUP:
-            switch( event.key.keysym.sym )
+            switch( event->key.keysym.sym )
             {
                 case SDLK_ESCAPE:
                     break;
@@ -729,12 +731,12 @@ int sdl_event_filter(void)
                     osd_delete_message(msgFF);
                     break;
                 default:
-                    keyUp( 0, event.key.keysym.sym );
+                    keyUp( 0, event->key.keysym.sym );
             }
+            return 0;
             break;
-}
 
-/*        // if joystick action is detected, check if it's mapped to a special function
+        // if joystick action is detected, check if it's mapped to a special function
         case SDL_JOYAXISMOTION:
             // axis events have to be above a certain threshold to be valid
             if(event->jaxis.value > -15000 && event->jaxis.value < 15000)
@@ -779,13 +781,8 @@ int sdl_event_filter(void)
             return 0;
             break;
     }
-*/
 
-if (g_EmulatorRunning==0)
-return 0;
-else
     return 1;
-
 }
 
 /*********************************************************************************************************
@@ -830,12 +827,6 @@ static int emulationThread( void *_arg )
 #endif
 
     no_compiled_jump = config_get_bool("NoCompiledJump", FALSE);
-
-    // init sdl
-#ifndef NO_GUI
-    gui_sdl_init();
-#endif
-    //SDL_SetEventFilter(sdl_event_filter);
 
     /* Determine which plugins to use:
      *  -If valid plugin was specified at the commandline, use it
@@ -913,6 +904,14 @@ static int emulationThread( void *_arg )
 
     /* Startup message on the OSD */
     osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
+
+    /* Setup SDL input handling. */
+#ifndef NO_GUI
+    if(l_GuiEnabled)
+        gui_sdl_init();
+    else
+#endif
+        SDL_SetEventFilter(sdl_event_filter);
 
     /* call r4300 CPU core and run the game */
     r4300_reset_hard();
