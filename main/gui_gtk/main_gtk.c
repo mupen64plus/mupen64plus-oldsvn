@@ -156,10 +156,6 @@ void gui_update_rombrowser(unsigned int roms, unsigned short clear)
 
     rombrowser_refresh(roms, clear);
 
-    gdk_threads_leave();
-    while(g_main_context_iteration(NULL, FALSE));
-    gdk_threads_enter();
-
     if (self != g_GuiThreadID)
         gdk_threads_leave();
 
@@ -243,10 +239,6 @@ int gui_message(gui_message_t messagetype , const char* format, ...)
             response = gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
             }
-
-        gdk_threads_leave();
-        g_main_context_iteration(NULL, FALSE);
-        gdk_threads_enter();
         }
 
     if (self != g_GuiThreadID)
