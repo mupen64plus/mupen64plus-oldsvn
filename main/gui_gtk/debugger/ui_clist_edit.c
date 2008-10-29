@@ -1,17 +1,23 @@
-/*
- * Mupen64Plus main/gui_gtk/debugger/ui_clist_edit.c
- * 
- * (SLIK) SimpLIstic sKin functions
- * (C) 2002 John Ellis
- *
- * Author: John Ellis
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- * 
- * This software is released under the GNU General Public License (GNU GPL).
- * Please read the included file COPYING for more information.
- * This software comes with no warranty of any kind, use at your own risk!
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - ui_clist_edit.c                                         *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 John Ellis                                         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +27,6 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "ui_clist_edit.h"
-
 
 #define POPUP_H_PADDING 3
 #define COLUMN_PADDING 3    /* stolen from gtkclist.c */

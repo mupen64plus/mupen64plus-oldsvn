@@ -699,7 +699,7 @@ void romdatabase_open(void)
         return;
 
     /* Setup empty_entry. */
-    empty_entry.goodname = NULL;
+    empty_entry.goodname = "";
     for(counter=0; counter<16; ++counter)
        empty_entry.md5[counter]=0;
     empty_entry.refmd5 = NULL;

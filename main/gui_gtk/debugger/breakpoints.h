@@ -19,8 +19,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __GUIGTK_BREAKPOINTS_H__
-#define __GUIGTK_BREAKPOINTS_H__
+#ifndef __GTK_BREAKPOINTS_H__
+#define __GTK_BREAKPOINTS_H__
 
 #include <gtk/gtk.h>
 
@@ -37,5 +37,5 @@ void get_breakpoint_display_string(char* buf, breakpoint* bpt);
 int add_breakpoint(uint32 address);
 void update_breakpoints();
 
-#endif  /* __GUIGTK_BREAKPOINTS_H__ */
+#endif  /* __GTK_BREAKPOINTS_H__ */
 

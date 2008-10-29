@@ -19,8 +19,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __GUIGTK_REGISTERS_H__
-#define __GUIGTK_REGISTERS_H__
+#ifndef __REGISTERS_H__
+#define __REGISTERS_H__
 
 #include <stdlib.h>
 #include <string.h>
@@ -44,5 +44,5 @@ void init_registers();
 void update_registers();
 GtkCList* init_hwreg_clist(int n, char** regnames);
 
-#endif /* __GUIGTK_REGISTERS_H__ */
+#endif /* __REGISTERS_H__ */
 
