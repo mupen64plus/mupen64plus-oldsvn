@@ -608,6 +608,7 @@ static int sdl_event_filter( const SDL_Event *event )
 {
     static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
+    static BYTE StopRumble[6] = {0x23, 0x01, 0x03, 0xc0, 0x1b, 0x00};
     char *event_str = NULL;
 
     switch( event->type )
@@ -632,6 +633,10 @@ static int sdl_event_filter( const SDL_Event *event )
                     break;
                 case SDLK_F7:
                     savestates_job |= LOADSTATE;
+                     controllerCommand(0, StopRumble);
+                     controllerCommand(1, StopRumble);
+                     controllerCommand(2, StopRumble);
+                     controllerCommand(3, StopRumble);
                     break;
                 case SDLK_F9:
                     add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
