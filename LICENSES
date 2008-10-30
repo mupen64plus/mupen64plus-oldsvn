@@ -37,6 +37,9 @@ The Rice Video plugin is GPL-licensed and was originally written by:
   * Rice1964
   * Mudlord
 
+Mupen64Plus includes a GPL-license demo rom written by:
+  *  Marshallh
+
 The OGLFT library used for the On-Screen Display is based on GPL/LGPL-licensed code Copyright 2002 lignum Computing. Please see the included doc/lgpl-license file for the terms and conditions of the GNU Lesser General Public License. More information about this library is available at the following websites:
   - http://oglft.sourceforge.net/index.html
   - http://directory.fsf.org/project/OGLFT/
