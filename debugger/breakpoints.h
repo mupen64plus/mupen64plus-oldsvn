@@ -52,10 +52,10 @@ typedef struct _breakpoint {
 extern int g_NumBreakpoints;
 extern breakpoint g_Breakpoints[];
 
-
 int add_breakpoint( uint32 address );
 int add_breakpoint_struct(breakpoint* newbp);
 void remove_breakpoint_by_address( uint32 address );
+void remove_breakpoint_by_num( int bpt );
 void enable_breakpoint( int breakpoint );
 void disable_breakpoint( int breakpoint );
 int check_breakpoints( uint32 address );
