@@ -33,10 +33,12 @@
 
 #include "osd.h"
 
+extern "C" {
 #include "../main/main.h"
 #include "../main/util.h"
 #include "../main/rom.h"
 #include "../main/translate.h"
+}
 
 static char  l_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline
 
@@ -114,8 +116,6 @@ static int SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, in
 /*********************************************************************************************************
 * Global screenshot functions
 */
-
-
 extern "C" void SetScreenshotDir(const char *chDir)
 {
     // copy directory path
@@ -207,8 +207,6 @@ extern "C" void TakeScreenshot(int iFrameNumber)
     // free the memory
     free(pucFrame);
     // print message -- this allows developers to capture frames and use them in the regression test
-    printf("Captured screenshot for frame %i\n", iFrameNumber);
-
-    osd_new_message(OSD_BOTTOM_LEFT, tr("Captured screenshot."));
+    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Captured screenshot for frame %i.\n"), iFrameNumber);
 }
 
