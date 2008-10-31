@@ -55,8 +55,7 @@ static GtkWidget * init_FGR_col()
 
 void init_FGR()
 {
-    GtkWidget *boxH1,
-            *boxV1;
+    GtkWidget *boxH1;
     int i;
 
     FGR_opened = 1;

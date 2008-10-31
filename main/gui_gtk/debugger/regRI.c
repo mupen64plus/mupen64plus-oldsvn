@@ -78,7 +78,7 @@ void update_regRI()
     for (i=0; i<5; i++) {
         if (gui_fantom_reg_RI[i] != (uint32)(*regptrsRI[i])) {
             gui_fantom_reg_RI[i] = (uint32)(*regptrsRI[i]);
-            sprintf(txt, "%.8lX", *regptrsRI[i]);
+            sprintf(txt, "%.8X", *regptrsRI[i]);
             gtk_clist_set_text(GTK_CLIST(clRegRI), i, 1, txt);
             gtk_clist_set_background(GTK_CLIST(clRegRI), i, &color_modif);
         } else {

@@ -19,9 +19,14 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "memedit.h"
 #include <math.h>
+
 #include <gdk/gdkkeysyms.h>
+
+#include "memedit.h"
+
+#include "../../main.h"
+#include "../../translate.h"
 
 GtkTextBuffer *textbuf;
 GtkTextTag *textfont;
@@ -47,7 +52,7 @@ static void on_close();
 
 void update_memory_editor()
 {
-    int i, j, k;
+    int i, j;
     char line[linelen + 1];
     char* buf;
     uint32 addr;
@@ -181,7 +186,7 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
     GtkTextIter cursor_iter;
     int cursorpos, linepos, linenum;
     uint32 key, addr;
-    uint8 byte;
+    uint8 byte = 0;
     
     //Figure out what was typed.
     //todo: make this not suck
@@ -412,7 +417,7 @@ static void on_menu_select(GtkMenuItem *menuitem, gpointer user_data)
 {
     gchar* text;
     GtkTextIter start, end;
-    uint32 startaddr, endaddr, numbytes;
+    uint32 startaddr, endaddr = 0, numbytes;
     uint8 byte;
     int i;
     breakpoint newbp;

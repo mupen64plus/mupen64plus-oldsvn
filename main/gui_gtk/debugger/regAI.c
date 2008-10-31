@@ -84,7 +84,7 @@ void update_regAI()
     for (i=0; i<6; i++) {
         if (gui_fantom_reg_AI[i] != (uint32)(*regptrsAI[i])) {
             gui_fantom_reg_AI[i] = (uint32)(*regptrsAI[i]);
-            sprintf(txt, "%.8lX", *regptrsAI[i]);
+            sprintf(txt, "%.8X", *regptrsAI[i]);
             gtk_clist_set_text(GTK_CLIST(clRegAI), i, 1, txt );
             gtk_clist_set_background(GTK_CLIST(clRegAI), i, &color_modif);
         } else {

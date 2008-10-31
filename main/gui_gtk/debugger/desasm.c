@@ -447,7 +447,6 @@ static void on_click( GtkTreeView *widget, GtkTreePath *path,
   uint32 clicked_address;
   int break_number;
   GtkTreeIter iter;
-  gint depth;
 
   if(gtk_tree_path_get_depth(path) > 1)
     return;// do nothing if it is recompiler disassembly

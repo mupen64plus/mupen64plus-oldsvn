@@ -83,7 +83,7 @@ void update_regSI()
     for (i=0; i<4; i++) {
         if (gui_fantom_reg_SI[i] != (uint32)(*regptrsSI[i])) {
             gui_fantom_reg_SI[i] = (uint32)(*regptrsSI[i]);
-            sprintf(txt, "%.8lX", *regptrsSI[i]);
+            sprintf(txt, "%.8X", *regptrsSI[i]);
             gtk_clist_set_text(GTK_CLIST(clRegSI), i, 1, txt);
             gtk_clist_set_background(GTK_CLIST(clRegSI), i, &color_modif);
         } else {

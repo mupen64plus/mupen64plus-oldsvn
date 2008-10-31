@@ -175,13 +175,13 @@ void update_TLB()
             gui_fantom_tlb_entry[i].mask    = tlb_e[i].mask;
             sprintf( txt[0], "%hX", tlb_e[i].mask);
             gui_fantom_tlb_entry[i].vpn2    = tlb_e[i].vpn2;
-            sprintf( txt[1], "%lX", tlb_e[i].vpn2);
+            sprintf( txt[1], "%X", tlb_e[i].vpn2);
             gui_fantom_tlb_entry[i].g   = tlb_e[i].g;
             sprintf( txt[2], "%hhX", tlb_e[i].g);
             gui_fantom_tlb_entry[i].asid    = tlb_e[i].asid;
             sprintf( txt[3], "%hhX", tlb_e[i].asid);
             gui_fantom_tlb_entry[i].pfn_even= tlb_e[i].pfn_even;
-            sprintf( txt[4], "%lX", tlb_e[i].pfn_even);
+            sprintf( txt[4], "%X", tlb_e[i].pfn_even);
             gui_fantom_tlb_entry[i].c_even  = tlb_e[i].c_even;
             sprintf( txt[5], "%hhX", tlb_e[i].c_even);
             gui_fantom_tlb_entry[i].d_even  = tlb_e[i].d_even;
@@ -189,7 +189,7 @@ void update_TLB()
             gui_fantom_tlb_entry[i].v_even  = tlb_e[i].v_even;
             sprintf( txt[7], "%hhX", tlb_e[i].v_even);
             gui_fantom_tlb_entry[i].pfn_odd = tlb_e[i].pfn_odd;
-            sprintf( txt[8], "%lX", tlb_e[i].pfn_odd);
+            sprintf( txt[8], "%X", tlb_e[i].pfn_odd);
             gui_fantom_tlb_entry[i].c_odd   = tlb_e[i].c_odd;
             sprintf( txt[9], "%hhX", tlb_e[i].c_odd);
             gui_fantom_tlb_entry[i].d_odd   = tlb_e[i].d_odd;
@@ -199,20 +199,20 @@ void update_TLB()
             gui_fantom_tlb_entry[i].r   = tlb_e[i].r;
             sprintf( txt[12], "%hhX", tlb_e[i].r);
     //gui_fantom_tlb_entry[i].check_parity_mask = tlb_e[i].check_parity_mask; NOT USED?
-        
+
             gui_fantom_tlb_entry[i].start_even = tlb_e[i].start_even;
-            sprintf( txt[13], "%lX", tlb_e[i].start_even);
+            sprintf( txt[13], "%X", tlb_e[i].start_even);
             gui_fantom_tlb_entry[i].end_even   = tlb_e[i].end_even;
-            sprintf( txt[14], "%lX", tlb_e[i].end_even);
+            sprintf( txt[14], "%X", tlb_e[i].end_even);
             gui_fantom_tlb_entry[i].phys_even  = tlb_e[i].phys_even;
-            sprintf( txt[15], "%lX", tlb_e[i].phys_even);
+            sprintf( txt[15], "%X", tlb_e[i].phys_even);
             gui_fantom_tlb_entry[i].start_odd  = tlb_e[i].start_odd;
-            sprintf( txt[16], "%lX", tlb_e[i].start_odd);
+            sprintf( txt[16], "%X", tlb_e[i].start_odd);
             gui_fantom_tlb_entry[i].end_odd    = tlb_e[i].end_odd;
-            sprintf( txt[17], "%lX", tlb_e[i].end_odd);
+            sprintf( txt[17], "%X", tlb_e[i].end_odd);
             gui_fantom_tlb_entry[i].phys_odd   = tlb_e[i].phys_odd;
-            sprintf( txt[18], "%lX", tlb_e[i].phys_odd);
-    
+            sprintf( txt[18], "%X", tlb_e[i].phys_odd);
+
             gtk_clist_insert( GTK_CLIST(clTLBentries), i, txt);
             gtk_clist_set_background( GTK_CLIST(clTLBentries), i, &color_modif);
         }

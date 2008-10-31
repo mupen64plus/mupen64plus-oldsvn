@@ -91,7 +91,7 @@ void update_regPI()
     for (i=0; i<13; i++) {
         if (gui_fantom_reg_PI[i] != (uint32)(*regptrsPI[i])) {
             gui_fantom_reg_PI[i] = (uint32)(*regptrsPI[i]);
-            sprintf(txt, "%.8lX", *regptrsPI[i]);
+            sprintf(txt, "%.8X", *regptrsPI[i]);
             gtk_clist_set_text(GTK_CLIST(clRegPI), i, 1, txt);
             gtk_clist_set_background(GTK_CLIST(clRegPI), i, &color_modif);
         } else {

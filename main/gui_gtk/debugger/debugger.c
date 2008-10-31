@@ -21,7 +21,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <glib.h>
+
 #include "debugger.h"
+
+#include "../../main.h"
 
 GdkColor    color_modif,    // Color of modified register.
                    color_ident;    // Unchanged register.

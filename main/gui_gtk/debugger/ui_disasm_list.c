@@ -25,6 +25,7 @@
 #include "debugger.h"
 
 #include "../../../debugger/memory.h"
+#include "../../../debugger/decoder.h"
 
 static void         disasm_list_init            (DisasmList      *pkg_tree);
 static void         disasm_list_class_init      (DisasmListClass *klass);
@@ -273,7 +274,7 @@ disasm_list_get_iter (GtkTreeModel *tree_model,
                       GtkTreePath  *path)
 {
   DisasmList    *disasm_list;
-  gint          *indices, n, depth;
+  gint          *indices, depth;
 
   g_assert(DISASM_IS_LIST(tree_model));
   g_assert(path!=NULL);
@@ -347,7 +348,6 @@ disasm_list_get_value (GtkTreeModel *tree_model,
 {
   char opcode[64];
   char args[128];
-  char buffer[256];
   uint32 instr;
   long laddr;
 
@@ -361,7 +361,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
     switch(column)
     {
     case 0:
-      sprintf(opcode, "%08X", iter->user_data);
+      sprintf(opcode, "%08lX", (long)iter->user_data);
       g_value_set_string(value, opcode);
       break;
     case 1:
@@ -369,7 +369,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
       if((get_memory_flags((uint32)(long)iter->user_data) & MEM_FLAG_READABLE) != 0)
     {
       instr = read_memory_32((uint32)(long)iter->user_data);
-      r4300_decode_op( instr, opcode, args, iter->user_data );
+      r4300_decode_op( instr, opcode, args, (long)iter->user_data );
     }
       else
     {
@@ -391,9 +391,9 @@ disasm_list_get_value (GtkTreeModel *tree_model,
     case 0:
       laddr = (long) get_recompiled_addr((uint32)(long) iter->user_data, (int)(long) iter->user_data2);
       if (sizeof(void *) == 4)
-        sprintf(opcode, "[%08X]", laddr);
+        sprintf(opcode, "[%08lX]", laddr);
       else
-        sprintf(opcode, "[%016llX]", laddr);
+        sprintf(opcode, "[%016lX]", laddr);
       g_value_set_string(value, opcode);
       break;
     case 1:

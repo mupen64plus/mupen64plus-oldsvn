@@ -19,8 +19,12 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "varlist.h"
 #include <inttypes.h>
+
+#include "varlist.h"
+
+#include "../../translate.h"
+#include "../../main.h"
 //#include <ieee754.h>
 
 enum { //Treeview columns
@@ -94,10 +98,8 @@ void init_varlist()
     GtkTreeViewColumn *col[Num_Columns];
     GtkWidget *hbox, *vbox, *buAdd, *buRemove, *buAutoRefresh,
         *buImport;
-    GValue cell_editable, type_val, model_val, model_col;
-    GtkTreeStore *type_list;
-    GtkTreeIter iter;
-    
+    GValue cell_editable;
+
     varlist_auto_update = 0;
     iter_stamp = 0xD06FECE5; //unique stamp value (increments)
     

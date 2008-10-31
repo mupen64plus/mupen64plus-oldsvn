@@ -27,6 +27,9 @@
 
 #include "breakpoints.h"
 
+#include "../../translate.h"
+#include "../../main.h"
+
 static int selected[BREAKPOINTS_MAX_NUMBER];
 
 static void on_row_selection(GtkCList *clist, gint row);
@@ -159,8 +162,6 @@ void get_breakpoint_display_string(char* buf, breakpoint* bpt)
 
 void update_breakpoints( )
 {
-    int num_rows=0;
-
     char line[1][64];
     line[0][0] = 0;
 
@@ -174,7 +175,7 @@ void update_breakpoints( )
     for( i=0; i < g_NumBreakpoints; i++ )
     {
         get_breakpoint_display_string(line[0], &g_Breakpoints[i]);
-        printf("%s\n", line);
+        printf("%s\n", line[0]);
         gtk_clist_set_text( GTK_CLIST(clBreakpoints), i, 0, line[0] );
         if(BPT_CHECK_FLAG(g_Breakpoints[i], BPT_FLAG_ENABLED))
             gtk_clist_set_background( GTK_CLIST(clBreakpoints), i, &color_BPEnabled);
@@ -267,7 +268,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
         
     //Read address
     //printf("Address \"%s\"\n", &line[i]);
-    i = sscanf(&line[i], "%lX %lx", &newbp.address, &newbp.endaddr);
+    i = sscanf(&line[i], "%X %x", &newbp.address, &newbp.endaddr);
     if(!i)
     {
         error_message(tr("Invalid address."));

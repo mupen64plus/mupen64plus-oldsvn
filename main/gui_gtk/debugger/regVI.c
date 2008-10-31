@@ -92,7 +92,7 @@ void update_regVI()
     for (i=0; i<15; i++) {
         if (gui_fantom_reg_VI[i] != (uint32)(*regptrsVI[i])) {
             gui_fantom_reg_VI[i] = (uint32)(*regptrsVI[i]);
-            sprintf(txt, "%.8lX", *regptrsVI[i]);
+            sprintf(txt, "%.8X", *regptrsVI[i]);
             gtk_clist_set_text(GTK_CLIST(clRegVI), i, 1, txt);
             gtk_clist_set_background(GTK_CLIST(clRegVI), i, &color_modif);
         } else {

@@ -154,7 +154,7 @@ void update_regPC()
     char txt[128];
 
     instr = read_memory_32( PC->addr );
-    sprintf(txt, "%.16lX: 0x%.8lX", PC->addr, instr );
+    sprintf(txt, "%.16X: 0x%.8X", PC->addr, instr );
     gtk_entry_set_text(GTK_ENTRY (enRegPC), txt );
 }
 
@@ -164,7 +164,7 @@ void update_regPreviousPC()
 
     //TODO: print binary of the instruction.
     //sprintf(txt, "%.16lX: 0x%.8lX", PC->addr, PC->instr );
-    sprintf(txt, "%.16lX", previousPC );
+    sprintf(txt, "%.16X", previousPC );
     gtk_entry_set_text(GTK_ENTRY (enRegPreviousPC), txt );
 }
 
