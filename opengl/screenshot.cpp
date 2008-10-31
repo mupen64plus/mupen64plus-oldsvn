@@ -119,8 +119,8 @@ static int SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, in
 extern "C" void SetScreenshotDir(const char *chDir)
 {
     // copy directory path
-    strncpy(l_SshotDir, chDir, PATH_MAX - 2);
-    l_SshotDir[PATH_MAX - 2] = '\0';
+    strncpy(l_SshotDir, chDir, PATH_MAX - 1);
+    l_SshotDir[PATH_MAX - 1] = '\0';
 
     // if path is empty, then return
     if (l_SshotDir[0] == '\0')
@@ -155,14 +155,15 @@ extern "C" void TakeScreenshot(int iFrameNumber)
     char *pch, ch;
     filepath[0] = 0;
     filename[0] = 0;
-    strcpy(filepath, l_SshotDir);
+    strncpy(filepath, l_SshotDir, sizeof(filepath));
+    filepath[PATH_MAX-1] = '\0';
     if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
         strcat(filepath, "/");
 
     // add the game's name to the end, convert to lowercase, convert spaces to underscores
     pch = filepath + strlen(filepath);
-    strncpy(pch, (char *) ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
-    pch[20] = 0;
+    strncpy(pch, (char*) ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
+    pch[20] = '\0';
     do
     {
         ch = *pch;
