@@ -426,11 +426,6 @@ void startEmulation(void)
     {
         main_pause();
     }
-
-#ifndef NO_GUI
-    gui_set_state(GUI_STATE_RUNNING);
-    g_romcache.rcspause = 1;
-#endif
 }
 
 void stopEmulation(void)
@@ -445,16 +440,16 @@ void stopEmulation(void)
         if(g_EmulatorRunning)
             SDL_WaitThread(g_EmulationThread, NULL);
 
-#ifndef NO_GUI
-        gui_set_state(GUI_STATE_STOPPED);
-        g_romcache.rcspause = 0;
-#endif
-
 #ifdef __WIN32__
         plugin_close_plugins();
 #endif
         g_EmulatorRunning = 0;
         g_EmulationThread = 0;
+
+#ifndef NO_GUI
+        gui_set_state(GUI_STATE_STOPPED);
+        g_romcache.rcspause = 0;
+#endif
 
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation stopped.\n"));
     }
@@ -892,6 +887,11 @@ static int emulationThread( void *_arg )
 
     // setup rendering callback from video plugin to the core, for screenshots and On-Screen-Display
     setRenderingCallback(video_plugin_render_callback);
+
+#ifndef NO_GUI
+    gui_set_state(GUI_STATE_RUNNING);
+    g_romcache.rcspause = 1;
+#endif
 
 #ifdef WITH_LIRC
     lircStart();

@@ -102,6 +102,7 @@ void gui_init(int* argc, char*** argv)
     create_rom_properties();
     callback_theme_changed(NULL, NULL);
     gui_set_state(GUI_STATE_STOPPED);
+    gdk_threads_leave();
 }
 
 /* Display GUI components to the screen. */
@@ -496,16 +497,19 @@ static void callback_start_emulation(GtkWidget* widget, gpointer data)
             }
         }
 
+    gdk_threads_leave();
     startEmulation();
 }
 
 static void callback_pause_emulation(GtkWidget* widget, gpointer data)
 {
+    gdk_threads_leave();
     pauseContinueEmulation();
 }
 
 static void callback_stop_emulation(GtkWidget* widget, gpointer data)
 {
+    gdk_threads_leave();
     stopEmulation();
 }
 

@@ -362,7 +362,7 @@ void plugin_exec_config_with_wid(const char *name, HWND wid)
 
     if(p && p->handle)
     {
-        switch (p->type)
+        /* switch (p->type)
         {
             case PLUGIN_TYPE_CONTROLLER:
                 plugin_load_input_plugin(name);
@@ -377,6 +377,7 @@ void plugin_exec_config_with_wid(const char *name, HWND wid)
                 plugin_load_audio_plugin(name);
                 break;
         }
+*/
         dllConfig = dlsym(p->handle, "DllConfig");
         if(dllConfig)
             dllConfig(wid);
