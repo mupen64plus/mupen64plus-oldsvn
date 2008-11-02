@@ -1124,7 +1124,7 @@ static void create_toolbar(void)
 
     g_MainWindow.stopButtonItem = GTK_WIDGET(gtk_toggle_tool_button_new());
     gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(g_MainWindow.stopButtonItem), g_MainWindow.stopButtonImage);
-    gtk_tool_button_set_label(GTK_TOOL_BUTTON(g_MainWindow.pauseButtonItem), tr("Stop"));
+    gtk_tool_button_set_label(GTK_TOOL_BUTTON(g_MainWindow.stopButtonItem), tr("Stop"));
     gtk_widget_set_tooltip_text(g_MainWindow.stopButtonItem, tr("Stop Emulation"));
     g_signal_connect(g_MainWindow.stopButtonItem, "toggled", G_CALLBACK(callback_stop_emulation), NULL);
     gtk_toolbar_insert(GTK_TOOLBAR(g_MainWindow.toolBar), GTK_TOOL_ITEM(g_MainWindow.stopButtonItem), 4);
