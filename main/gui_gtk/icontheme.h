@@ -23,11 +23,11 @@
 
 #include <gtk/gtk.h>
 
-#ifndef __CHECKICONTHEME_H__
-#define __CHECKICONTHEME_H__
+#ifndef __ICONTHEME_H__
+#define __ICONTHEME_H__
 
 gboolean check_icon_theme();
 void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
 
-#endif /* __CHECKICONTHEME_H__ */
+#endif /* __ICONTHEME_H__ */
 
