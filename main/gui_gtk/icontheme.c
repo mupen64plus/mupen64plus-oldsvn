@@ -72,7 +72,7 @@ void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force)
         g_object_unref(pixbuf);
 
     if(usefallbacks&&!force)
-        pixbuf = gtk_icon_theme_load_icon(icontheme, icon, size,  0, NULL);
+        pixbuf = gtk_icon_theme_load_icon(icontheme, icon, size, GTK_ICON_LOOKUP_NO_SVG, NULL);
     else
         {
         char buffer[128];
