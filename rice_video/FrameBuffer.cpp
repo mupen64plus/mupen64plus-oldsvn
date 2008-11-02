@@ -1245,6 +1245,7 @@ void FrameBufferManager::SetRenderTexture(void)
     }
     else if( defaultRomOptions.bDoubleSizeForSmallTxtrBuf && newRenderTextureInfo.N64Width<=128 && newRenderTextureInfo.N64Height<=128)
     {
+        printf("Using\n");
         newRenderTextureInfo.bufferWidth = newRenderTextureInfo.N64Width*2;
         newRenderTextureInfo.bufferHeight = newRenderTextureInfo.N64Height*2;
     }
@@ -1637,16 +1638,6 @@ void FrameBufferManager::ActiveTextureBuffer(void)
             //  CRender::GetRender()->LoadTxtrBufFromRDRAM();
             //}
         }
-        else
-        {
-            if( CDeviceBuilder::m_deviceGeneralType == DIRECTX_DEVICE )
-            {
-                TRACE1("Error to set Render Target: %d", idxToUse);
-                TRACE1("Addr = %08X", gRenderTextureInfos[idxToUse].CI_Info.dwAddr);
-                TRACE2("Width = %d, Height=%d", gRenderTextureInfos[idxToUse].N64Width, gRenderTextureInfos[idxToUse].N64Height);
-            }
-        }   
-
 
         TXTRBUF_DUMP(TRACE2("Rendering to render_texture %d, addr=%08X", idxToUse, g_CI.dwAddr));
         DEBUGGER_PAUSE_AND_DUMP_NO_UPDATE(NEXT_RENDER_TEXTURE, 

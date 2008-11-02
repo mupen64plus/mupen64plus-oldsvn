@@ -83,7 +83,6 @@ OBJECTS = OGLGraphicsContext.o \
 	OGLDecodedMux.o \
 	CNvTNTCombiner.o \
 	GeneralCombiner.o \
-	DirectXDecodedMux.o \
 	liblinux/pngerror.o \
 	liblinux/inflate.o \
 	liblinux/pngrio.o \
@@ -105,11 +104,19 @@ OBJECTS = OGLGraphicsContext.o \
 	OGLRenderExt.o
 
 GTKOBJECTS = \
-	gui_gtk2/messagebox_gtk2.o
+	gui_gtk2/main_gtk2.o \
+	gui_gtk2/messagebox_gtk2.o \
+        gui_gtk2/icontheme.o
 
-LDFLAGS += $(GTK_LIBS)
-CFLAGS += -DUSE_GTK $(GTK_FLAGS)
-OBJECTS += $(GTKOBJECTS)
+ifneq ($(findstring $(GUI), GTK2 QT4),)
+  CFLAGS += $(GTK_FLAGS)
+  LDFLAGS += -DUSE_GTK $(GTK_LIBS)
+  OBJECTS += $(GTKOBJECTS)
+endif
+
+ifeq ($(GUI),NONE)
+  OBJECTS += gui_none.o messagebox_nogui.o
+endif
 
 # build targets
 targets:
@@ -127,7 +134,7 @@ targets:
 all: version.h ricevideo.so
 
 ricevideo.so: $(OBJECTS)
-	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
+	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 	$(STRIP) $@
 
 clean:

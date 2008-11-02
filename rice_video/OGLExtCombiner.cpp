@@ -43,12 +43,14 @@ COGLColorCombiner4v2::COGLColorCombiner4v2(CRender *pRender)
     m_pDecodedMux = new DecodedMuxForOGL14V2;
 }
 
+
 COGLColorCombiner2::COGLColorCombiner2(CRender *pRender)
         :COGLColorCombiner4(pRender)
 {
-    delete m_pDecodedMux;
-    m_pDecodedMux = new CDirectXDecodedMux;     // Use Mux for DirectX because we support only 1 texture for each stage
+    //delete m_pDecodedMux;
+    //m_pDecodedMux = new CDirectXDecodedMux;     // Use Mux for DirectX because we support only 1 texture for each stage
     m_ppGeneralDecodedMux = &m_pDecodedMux;
+    printf("WARNING!!! Code removed, this function should never be called...\n");
 }
 
 //////////////////////////////////////////////////////////////////////////

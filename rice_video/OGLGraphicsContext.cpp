@@ -122,7 +122,7 @@ bool COGLGraphicsContext::Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth,
      }
    
    char caption[500];
-   sprintf(caption, "RiceVideoLinux N64 Plugin %s", MUPEN_VERSION);
+   sprintf(caption, "RiceVideo Mupen64Plus %s", PLUGIN_VERSION);
    SDL_WM_SetCaption(caption, caption);
    SetWindowMode();
 
