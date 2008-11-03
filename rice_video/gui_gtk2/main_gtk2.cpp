@@ -148,7 +148,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     options.OpenglRenderSetting = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.combinerTypeCombo));
     switch(gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo)))
         {
-        case 1: options.OpenglDepthBufferSetting = 16;
+        case 0: options.OpenglDepthBufferSetting = 16; break;
         default: options.OpenglDepthBufferSetting = 32;
         }
 
@@ -680,7 +680,7 @@ static void show_config()
     gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.combinerTypeCombo), options.OpenglRenderSetting);
     switch(options.OpenglDepthBufferSetting)
         {
-        case 32: gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo), 1);
+        case 32: gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo), 1); break;
         default: gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo), 0);
         }
 
