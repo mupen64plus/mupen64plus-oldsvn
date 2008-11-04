@@ -60,6 +60,7 @@
 
 #include "CombinerDefs.h"
 #include "DecodedMux.h"
+#include "DirectXDecodedMux.h"
 
 #include "blender.h"
 

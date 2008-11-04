@@ -245,8 +245,15 @@ void DumpTexture(int tex, TextureChannel channel = TXT_RGB )
 
 void DumpRenderTexture(int tex=-1)
 {
-    debuggerDrawRenderTextureNo = tex;
-    debuggerDrawRenderTexture = true;
+    if( CDeviceBuilder::GetBuilder()->GetGeneralDeviceType() == DIRECTX_DEVICE )
+    {
+        g_pFrameBufferManager->DisplayRenderTexture(tex);
+    }
+    else
+    {
+        debuggerDrawRenderTextureNo = tex;
+        debuggerDrawRenderTexture = true;
+    }
 }
 
 void DumpTextureToFile(int tex, TextureChannel channel = TXT_RGB)
@@ -579,7 +586,7 @@ void __cdecl DebuggerAppendMsg(const char * Message, ...)
 void DebuggerPause()
 {
     char temp[300];
-    sprintf(temp, "%s Debug %s: Paused ", project_name, PLUGIN_VERSION) ;
+    sprintf(temp,"%s Debug %s:Paused ",project_name, MUPEN_VERSION) ;
 
     while( debuggerPause )
     {
@@ -591,7 +598,7 @@ void DebuggerPause()
         usleep(100 * 1000);
         debuggerPause = false;
     }
-    sprintf(temp, "%s Debug %s", project_name, PLUGIN_VERSION) ;
+    sprintf(temp,"%s Debug %s",project_name, MUPEN_VERSION) ;
 }
 
 void __cdecl LOG_UCODE(const char* szFormat, ...)

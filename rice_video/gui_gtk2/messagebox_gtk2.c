@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - messagebox_gtk2.c                                       *
+ *   Mupen64plus - messagebox.c                                            *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
@@ -24,8 +24,85 @@
 
 #include <gtk/gtk.h>
 
+#include "../winlnxdefs.h"
+#include "../Graphics_1.3.h"
 #include "../messagebox.h"
-#include "icontheme.h"
+
+static char l_IconDir[PATH_MAX] = {'\0'};
+static GtkIconTheme* icontheme;
+static gboolean usefallbacks;
+
+gboolean check_icon_theme()
+{
+    icontheme = gtk_icon_theme_get_default();
+    if(gtk_icon_theme_has_icon(icontheme, "media-playback-start")&&
+       gtk_icon_theme_has_icon(icontheme, "media-playback-pause")&&
+       gtk_icon_theme_has_icon(icontheme, "media-playback-stop")&&
+       gtk_icon_theme_has_icon(icontheme, "view-fullscreen")&&
+       gtk_icon_theme_has_icon(icontheme, "preferences-system")&&
+       gtk_icon_theme_has_icon(icontheme, "dialog-warning")&&
+       gtk_icon_theme_has_icon(icontheme, "dialog-error")&&
+       gtk_icon_theme_has_icon(icontheme, "dialog-question")&&
+       gtk_icon_theme_has_icon(icontheme, "video-display")&&
+       gtk_icon_theme_has_icon(icontheme, "audio-card")&&
+       gtk_icon_theme_has_icon(icontheme, "input-gaming")&&
+       gtk_icon_theme_has_icon(icontheme, "window-close")&&
+       gtk_icon_theme_has_icon(icontheme, "document-save")&&
+       gtk_icon_theme_has_icon(icontheme, "document-save-as")&&
+       gtk_icon_theme_has_icon(icontheme, "document-revert")&&
+       gtk_icon_theme_has_icon(icontheme, "document-open")&&
+       gtk_icon_theme_has_icon(icontheme, "gtk-about"))
+        usefallbacks = TRUE;
+    else
+        usefallbacks = FALSE;
+
+    return usefallbacks;
+}
+
+/* Set image to a themed icon of size from gtk iconset or NULL unless using fallback. 
+ * Force allows for the use of packaged icons with a gtk iconset.
+ */
+void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force)
+{
+    GdkPixbuf* pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
+    if(pixbuf)
+        g_object_unref(pixbuf);
+
+    if(usefallbacks&&!force)
+        pixbuf = gtk_icon_theme_load_icon(icontheme, icon, size,  0, NULL);
+    else
+        {
+        char buffer[PATH_MAX];
+        snprintf(buffer, sizeof(buffer), "%s/%dx%d/%s.png", l_IconDir, size, size, icon);
+        pixbuf = gdk_pixbuf_new_from_file(buffer, NULL);
+        }
+    gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+}
+
+/* If theme changes, update application with images from new theme, or fallbacks. */
+static void callback_theme_changed(GtkWidget* widget, gpointer data)
+{
+    check_icon_theme();
+}
+
+EXPORT void CALL SetInstallDir(char* installDir)
+{
+    snprintf(l_IconDir, sizeof(l_IconDir), "%s/icons", installDir);
+}
+
+void gui_init()
+{
+    GtkIconTheme* icontheme = gtk_icon_theme_get_default();
+    g_signal_connect(icontheme, "changed", G_CALLBACK(callback_theme_changed), NULL);
+}
+
+char* get_iconpath(char* iconfile)
+{
+    static char path[PATH_MAX];
+    strncpy(path, l_IconDir, sizeof(path));
+    strcat(path, iconfile);
+    return path;
+}
 
 int messagebox(const char* title, int flags, const char* fmt, ...)
 {

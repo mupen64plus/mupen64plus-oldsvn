@@ -502,14 +502,14 @@ TxtrCacheEntry * CTextureManager::CreateNewCacheEntry(uint32 dwAddr, uint32 dwWi
         pEntry = new TxtrCacheEntry;
         if (pEntry == NULL)
         {
-            //_VIDEO_DisplayTemporaryMessage("Error to create an texture entry");
+            _VIDEO_DisplayTemporaryMessage("Error to create an texture entry");
             return NULL;
         }
 
         pEntry->pTexture = CDeviceBuilder::GetBuilder()->CreateTexture(dwWidth, dwHeight);
         if (pEntry->pTexture == NULL || pEntry->pTexture->GetTexture() == NULL)
         {
-            //_VIDEO_DisplayTemporaryMessage("Error to create an texture");
+            _VIDEO_DisplayTemporaryMessage("Error to create an texture");
             TRACE2("Warning, unable to create %d x %d texture!", dwWidth, dwHeight);
         }
         else
@@ -702,7 +702,7 @@ TxtrCacheEntry * CTextureManager::GetTexture(TxtrInfo * pgti, bool fromTMEM, boo
         if (pEntry == NULL)
         {
             g_lastTextureEntry = pEntry;
-            //_VIDEO_DisplayTemporaryMessage("Fail to create new texture entry");
+            _VIDEO_DisplayTemporaryMessage("Fail to create new texture entry");
             return NULL;
         }
     }

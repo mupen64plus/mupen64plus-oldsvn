@@ -149,15 +149,12 @@ Matrix  dkrMatrixTransposed __attribute__((aligned(16)));
 N64Light        gRSPn64lights[16];
 
 
-void ProcessVertexData(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
-{
-#ifndef NO_ASM
-    if(status.isSSEEnabled)
-        ProcessVertexDataSSE(dwAddr, dwV0, dwNum);
-    else
-#endif
-        ProcessVertexDataNoSSE(dwAddr, dwV0, dwNum);
-}
+void (*ProcessVertexData)(uint32 dwAddr, uint32 dwV0, uint32 dwNum)=NULL;
+
+/*
+ *  
+ */
+
 
 /*n.x = (g_normal.x * matWorld.m00) + (g_normal.y * matWorld.m10) + (g_normal.z * matWorld.m20);
 n.y = (g_normal.x * matWorld.m01) + (g_normal.y * matWorld.m11) + (g_normal.z * matWorld.m21);
@@ -625,6 +622,17 @@ void NormalizeNormalVec()
 
 void InitRenderBase()
 {
+#if !defined(NO_ASM)
+    if( status.isSSEEnabled && !g_curRomInfo.bPrimaryDepthHack && options.enableHackForGames != HACK_FOR_NASCAR)
+    {
+        ProcessVertexData = ProcessVertexDataSSE;
+    }
+    else
+#endif
+    {
+        ProcessVertexData = ProcessVertexDataNoSSE;
+    }
+
     gRSPfFogMin = gRSPfFogMax = 0.0f;
     windowSetting.fMultX = windowSetting.fMultY = 2.0f;
     windowSetting.vpLeftW = windowSetting.vpTopW = 0;
@@ -2330,11 +2338,21 @@ void HackZ(std::vector<XVECTOR3>& points)
 
 void HackZAll()
 {
-    for( uint32 i=0; i<gRSP.numVertices; i++)
+    if( CDeviceBuilder::m_deviceGeneralType == DIRECTX_DEVICE )
+    {
+        for( uint32 i=0; i<gRSP.numVertices; i++)
+        {
+            g_vtxBuffer[i].z = HackZ(g_vtxBuffer[i].z);
+        }
+    }
+    else
+    {
+        for( uint32 i=0; i<gRSP.numVertices; i++)
         {
             float w = g_vtxProjected5[i][3];
             g_vtxProjected5[i][2] = HackZ(g_vtxProjected5[i][2]/w)*w;
         }
+    }
 }
 
 

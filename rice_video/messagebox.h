@@ -23,6 +23,8 @@
 #ifndef __MESSAGEBOX_H__
 #define __MESSAGEBOX_H__
 
+#include <gtk/gtk.h>
+
 /* Flags. */
 
 /* Type of messagebox, i.e. what buttons does it contain. */
@@ -70,9 +72,18 @@ but do not currently do anything in our Gtk2 implementation. */
 
 #define MB_RTLREADING =           (0x00100000) /* Handled by translation and internationalization subsystems. */
 
-/* Returns 1 if the first button was clicked, 2 for the second and 3 for the third. 
-Note, this is NOT the same behavior as the Win32 API. */
-int messagebox(const char *title, int flags, const char *fmt, ... );
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    /* Returns 1 if the first button was clicked, 2 for the second and 3 for the third. 
+    Note, this is NOT the same behavior as the Win32 API. */
+    int messagebox(const char *title, int flags, const char *fmt, ... );
+//#define MessageBox(*title, flags, *fmt, ... ) messagebox(*title, flags, *fmt, ... );
+    void gui_init();
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* __MESSAGEBOX_H__ */
 

@@ -20,14 +20,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _RICE_CONFIG_H_
 #define _RICE_CONFIG_H_
 
-#include "winlnxdefs.h"
+#include "typedefs.h"
 
-#ifndef bool
-#define bool unsigned int
-#endif
+typedef enum
+{
+    OGL_DEVICE,
+    OGL_1_1_DEVICE,
+    OGL_1_2_DEVICE,
+    OGL_1_3_DEVICE,
+    OGL_1_4_DEVICE,
+    OGL_1_4_V2_DEVICE,
+    OGL_TNT2_DEVICE,
+    NVIDIA_OGL_DEVICE,
+    OGL_FRAGMENT_PROGRAM,
 
-#define INI_FILE        "RiceVideoLinux.ini"
-#define CONFIG_FILE     "RiceVideo.cfg"
+    DIRECTX_DEVICE,
+    DIRECTX_9_DEVICE,
+    DIRECTX_8_DEVICE,
+    DIRECTX_7_DEVICE,
+    DIRECTX_6_DEVICE,
+    DIRECTX_5_DEVICE,
+    XBOX_DIRECTX_DEVICE,
+} SupportedDeviceType;
 
 enum DirectXCombinerType
 {
@@ -42,6 +56,13 @@ enum DirectXCombinerType
     DX_PIXEL_SHADER,
     DX_SEMI_PIXEL_SHADER,
 };
+
+
+typedef struct
+{
+    const char* name;
+    SupportedDeviceType type;
+} RenderEngineSetting;
 
 enum {
     FRM_BUF_NONE,
@@ -97,6 +118,19 @@ enum {
 };
 
 enum {
+    TEXTURE_NO_ENHANCEMENT,
+    TEXTURE_2X_ENHANCEMENT,
+    TEXTURE_2XSAI_ENHANCEMENT,
+    TEXTURE_HQ2X_ENHANCEMENT,
+    TEXTURE_LQ2X_ENHANCEMENT,
+    TEXTURE_HQ4X_ENHANCEMENT,
+    TEXTURE_SHARPEN_ENHANCEMENT,
+    TEXTURE_SHARPEN_MORE_ENHANCEMENT,
+    TEXTURE_EXTERNAL,
+    TEXTURE_MIRRORED,
+};
+
+enum {
     SCREEN_UPDATE_DEFAULT = 0,
     SCREEN_UPDATE_AT_VI_UPDATE = 1,
     SCREEN_UPDATE_AT_VI_CHANGE = 2,
@@ -105,6 +139,17 @@ enum {
     SCREEN_UPDATE_AT_1ST_PRIMITIVE = 5,
     SCREEN_UPDATE_BEFORE_SCREEN_CLEAR = 6,
     SCREEN_UPDATE_AT_VI_UPDATE_AND_DRAWN = 7,   // Update screen at VI origin is updated and the screen has been drawn
+};
+
+enum {
+    ONSCREEN_DISPLAY_NOTHING = 0,
+    ONSCREEN_DISPLAY_DLIST_PER_SECOND,
+    ONSCREEN_DISPLAY_FRAME_PER_SECOND,
+    ONSCREEN_DISPLAY_DEBUG_INFORMATION_ONLY,
+    ONSCREEN_DISPLAY_TEXT_FROM_CORE_ONLY,
+    ONSCREEN_DISPLAY_DLIST_PER_SECOND_WITH_CORE_MSG,
+    ONSCREEN_DISPLAY_FRAME_PER_SECOND_WITH_CORE_MSG,
+    ONSCREEN_DISPLAY_DEBUG_INFORMATION_WITH_CORE_MSG,
 };
 
 enum HACK_FOR_GAMES
@@ -144,7 +189,7 @@ enum HACK_FOR_GAMES
     HACK_FOR_TOPGEARRALLY,
     HACK_FOR_DUKE_NUKEM,
     HACK_FOR_ZELDA_MM,
-    HACK_FOR_MARIO_KART
+    HACK_FOR_MARIO_KART,
 };
 
 enum {
@@ -168,14 +213,14 @@ typedef struct {
     BOOL    bFullTMEM;
     BOOL    bUseFullTMEM;
 
-    unsigned int  bDisplayOnscreenFPS;
-    unsigned int  FPSColor;
+    uint32  bDisplayOnscreenFPS;
+    uint32  FPSColor;
     BOOL    bShowFPS;
 
-    unsigned int  forceTextureFilter;
-    unsigned int  textureEnhancement;
-    unsigned int  textureEnhancementControl;
-    unsigned int  textureQuality;
+    uint32  forceTextureFilter;
+    uint32  textureEnhancement;
+    uint32  textureEnhancementControl;
+    uint32  textureQuality;
     BOOL    bTexRectOnly;
     BOOL    bSmallTextureOnly;
     BOOL    bDumpTexturesToFiles;
@@ -184,19 +229,19 @@ typedef struct {
     int     RenderBufferSetting;
 
     int     DirectXDepthBufferSetting;
-    unsigned int  DirectXAntiAliasingValue;
-    unsigned int  DirectXAnisotropyValue;
+    uint32  DirectXAntiAliasingValue;
+    uint32  DirectXAnisotropyValue;
 
-    unsigned int  DirectXMaxFSAA;
-    unsigned int  DirectXMaxAnisotropy;
+    uint32  DirectXMaxFSAA;
+    uint32  DirectXMaxAnisotropy;
     int     DirectXCombiner;
     int     DirectXDevice;
 
     int     OpenglDepthBufferSetting;
     int     OpenglRenderSetting;
-    unsigned int  colorQuality;
+    uint32  colorQuality;
 
-    enum HACK_FOR_GAMES enableHackForGames;
+    HACK_FOR_GAMES  enableHackForGames;
 } GlobalOptions;
 
 extern GlobalOptions options;
@@ -229,10 +274,10 @@ extern FrameBufferOptions frameBufferOptions;
 BOOL InitConfiguration(void);
 
 typedef struct {
-    unsigned int  N64FrameBufferEmuType;
-    unsigned int  N64FrameBufferWriteBackControl;
-    unsigned int  N64RenderToTextureEmuType;
-    unsigned int  screenUpdateSetting;
+    uint32  N64FrameBufferEmuType;
+    uint32  N64FrameBufferWriteBackControl;
+    uint32  N64RenderToTextureEmuType;
+    uint32  screenUpdateSetting;
     BOOL    bNormalCombiner;
     BOOL    bNormalBlender;
     BOOL    bFastTexCRC;
@@ -253,13 +298,13 @@ typedef struct IniSection
     char    name[50];
 
     // Options with changeable default values
-    unsigned int  dwNormalCombiner;
-    unsigned int  dwNormalBlender;
-    unsigned int  dwFastTextureCRC;
-    unsigned int  dwAccurateTextureMapping;
-    unsigned int  dwFrameBufferOption;
-    unsigned int  dwRenderToTextureOption;
-    unsigned int  dwScreenUpdateSetting;
+    uint32  dwNormalCombiner;
+    uint32  dwNormalBlender;
+    uint32  dwFastTextureCRC;
+    uint32  dwAccurateTextureMapping;
+    uint32  dwFrameBufferOption;
+    uint32  dwRenderToTextureOption;
+    uint32  dwScreenUpdateSetting;
 
     // Options with FALSE as default values
     BOOL    bDisableBlender;
@@ -281,57 +326,57 @@ typedef struct IniSection
 
     int     VIWidth;
     int     VIHeight;
-    unsigned int  UseCIWidthAndRatio;
+    uint32  UseCIWidthAndRatio;
 
-    unsigned int dwFullTMEM;
+    uint32  dwFullTMEM;
     BOOL    bTxtSizeMethod2;
     BOOL    bEnableTxtLOD;
 } section;
 
 extern bool bIniIsChanged;
 extern char szIniFileName[300];
-
-void WriteIniFile();
+    void WriteIniFile();
 BOOL ReadIniFile();
-void OutputSectionDetails(unsigned int i, FILE* fh);
-int FindIniEntry(unsigned int dwCRC1, unsigned int dwCRC2, unsigned char nCountryID, char* szName); 
+    void OutputSectionDetails(uint32 i, FILE * fh);
+int FindIniEntry(uint32 dwCRC1, uint32 dwCRC2, uint8 nCountryID, char* szName); 
 
-typedef struct
+
+struct ROMHeader
 {
-    unsigned char  x1, x2, x3, x4;
-    unsigned int dwClockRate;
-    unsigned int dwBootAddressOffset;
-    unsigned int dwRelease;
-    unsigned int dwCRC1;
-    unsigned int dwCRC2;
-    unsigned long long qwUnknown1;
+    uint8  x1, x2, x3, x4;
+    uint32 dwClockRate;
+    uint32 dwBootAddressOffset;
+    uint32 dwRelease;
+    uint32 dwCRC1;
+    uint32 dwCRC2;
+    uint64   qwUnknown1;
     char  szName[20];
-    unsigned int dwUnknown2;
-    unsigned short wUnknown3;
-    unsigned char nUnknown4;
-    unsigned char nManufacturer;
-    unsigned short wCartID;
-    char nCountryID;
-    unsigned char nUnknown5;
-} ROMHeader;
+    uint32 dwUnknown2;
+    uint16  wUnknown3;
+    uint8  nUnknown4;
+    uint8  nManufacturer;
+    uint16  wCartID;
+    s8    nCountryID;
+    uint8  nUnknown5;
+};
 
 typedef struct 
 {
     // Other info from the rom. This is for convenience
-    unsigned char szGameName[50+1];
-    char nCountryID;
+    TCHAR   szGameName[50+1];
+    s8  nCountryID;
 
     // Copy of the ROM header
     ROMHeader   romheader;
 
     // With changeable default values
-    unsigned int dwNormalCombiner;
-    unsigned int dwNormalBlender;
-    unsigned int dwAccurateTextureMapping;
-    unsigned int dwFastTextureCRC;
-    unsigned int dwFrameBufferOption;
-    unsigned int dwRenderToTextureOption;
-    unsigned int dwScreenUpdateSetting;
+    uint32  dwNormalCombiner;
+    uint32  dwNormalBlender;
+    uint32  dwAccurateTextureMapping;
+    uint32  dwFastTextureCRC;
+    uint32  dwFrameBufferOption;
+    uint32  dwRenderToTextureOption;
+    uint32  dwScreenUpdateSetting;
 
     // With FALSE as its default values
     BOOL    bForceScreenClear;
@@ -352,19 +397,18 @@ typedef struct
     BOOL    bDisableCulling;
     int     VIWidth;
     int     VIHeight;
-    unsigned int UseCIWidthAndRatio;
+    uint32  UseCIWidthAndRatio;
 
-    unsigned int dwFullTMEM;
+    uint32  dwFullTMEM;
     BOOL    bTxtSizeMethod2;
     BOOL    bEnableTxtLOD;
-    BOOL    bTexturesInitialized;
 } GameSetting, *LPGAMESETTING;
 
 typedef struct
 {
-    char nCountryID;
+    s8  nCountryID;
     char* szName;
-    unsigned int nTvType;
+    uint32 nTvType;
 } CountryIDInfo;
 
 
@@ -376,9 +420,11 @@ void ROM_GetRomNameFromHeader(TCHAR * szName, ROMHeader * pHdr);
 
 #define TV_SYSTEM_NTSC      1
 #define TV_SYSTEM_PAL       0
-unsigned int CountryCodeToTVSystem(unsigned int countryCode);
+uint32 CountryCodeToTVSystem(uint32 countryCode);
+
 
 //#define COMPLETE_N64_TMEM
+
 
 enum {
     PSH_OPTIONS,
@@ -390,7 +436,8 @@ enum {
 };
 
 void CreateOptionsDialogs(HWND hParent);
-void WriteConfiguration();
+
+void ShowConfigBox();
 
 #endif
 

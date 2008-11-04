@@ -146,11 +146,7 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     options.bShowFPS = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.showFPSCheck));
 
     options.OpenglRenderSetting = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.combinerTypeCombo));
-    switch(gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo)))
-        {
-        case 0: options.OpenglDepthBufferSetting = 16; break;
-        default: options.OpenglDepthBufferSetting = 32;
-        }
+    options.OpenglDepthBufferSetting = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo));
 
     options.textureQuality = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.textureQualityCombo));
     options.forceTextureFilter = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.textureFilterCombo));
@@ -678,12 +674,7 @@ static void show_config()
 
     //OpenGL
     gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.combinerTypeCombo), options.OpenglRenderSetting);
-    switch(options.OpenglDepthBufferSetting)
-        {
-        case 32: gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo), 1); break;
-        default: gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo), 0);
-        }
-
+    gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.depthBufferSettingCombo), options.OpenglDepthBufferSetting);
     gtk_widget_set_sensitive(g_ConfigDialog.combinerTypeCombo, !status.bGameIsRunning);
     gtk_widget_set_sensitive(g_ConfigDialog.depthBufferSettingCombo, !status.bGameIsRunning);
 
