@@ -25,8 +25,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "stdafx.h"
 #include "messagebox.h"
+#include "gui.h"
 
 #include "../main/version.h"
+
+const char *project_name =  "Rice Video";
 
 PluginStatus status;
 char generalText[256];
@@ -39,7 +42,7 @@ uint32* g_pRDRAMu32 = NULL;
 signed char *g_pRDRAMs8 = NULL;
 unsigned char *g_pRDRAMu8 = NULL;
 
-static char g_ConfigDir[PATH_MAX] = {0};
+char g_ConfigDir[PATH_MAX] = {0};
 
 CCritSect g_CritialSection;
 
@@ -66,69 +69,13 @@ RECT frameWriteByCPURectArray[20][20];
 bool frameWriteByCPURectFlag[20][20];
 std::vector<uint32> frameWriteRecord;
 
-//---------------------------------------------------------------------------------------
-
-void GetPluginDir( char * Directory ) 
-{
-   if(strlen(g_ConfigDir) > 0)
-   {
-      strncpy(Directory, g_ConfigDir, PATH_MAX);
-      // make sure there's a trailing '/'
-      if(Directory[strlen(Directory)-1] != '/')
-          strncat(Directory, "/", PATH_MAX - strlen(Directory));
-   }
-   else
-   {
-      char path[PATH_MAX];
-      int n = readlink("/proc/self/exe", path, PATH_MAX);
-      if(n == -1) strcpy(path, "./");
-      else
-        {
-           char path2[PATH_MAX];
-           int i;
-           
-           path[n] = '\0';
-           strcpy(path2, path);
-           for (i=strlen(path2)-1; i>0; i--)
-             {
-                if(path2[i] == '/') break;
-             }
-           if(i == 0) strcpy(path, "./");
-           else
-             {
-                DIR *dir;
-                struct dirent *entry;
-                int gooddir = 0;
-                
-                path2[i+1] = '\0';
-                dir = opendir(path2);
-                while((entry = readdir(dir)) != NULL)
-                  {
-              if(!strcmp(entry->d_name, "plugins"))
-                gooddir = 1;
-                  }
-                closedir(dir);
-                if(!gooddir) strcpy(path, "./");
-             }
-        }
-      int i;
-      for(i=strlen(path)-1; i>0; i--)
-        {
-           if(path[i] == '/') break;
-        }
-      path[i+1] = '\0';
-      strcat(path, "plugins/");
-      strcpy(Directory, path);
-   }
-}
-
 //-------------------------------------------------------------------------------------
 EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 {
 #ifdef _DEBUG
-    sprintf(PluginInfo->Name, "%s %s Debug",project_name, PLUGIN_VERSION);
+    sprintf(PluginInfo->Name, "%s %s Debug", project_name, PLUGIN_VERSION);
 #else
-    sprintf(PluginInfo->Name, "%s %s",project_name, PLUGIN_VERSION);
+    sprintf(PluginInfo->Name, "%s %s", project_name, PLUGIN_VERSION);
 #endif
     PluginInfo->Version        = 0x0103;
     PluginInfo->Type           = PLUGIN_TYPE_GFX;
@@ -140,22 +87,14 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 
 EXPORT void CALL DllAbout ( HWND hParent )
 {
-    char temp[300];
-    sprintf(temp,"%s %s \nOpenGL 1.1-1.4/ATI/Nvidia TNT/Geforce Extension\n", project_name, PLUGIN_VERSION);
-    MsgInfo(temp);
+    messagebox("About Rice Video", MB_OK | MB_ICONINFORMATION, "Rice Video Mupen64Plus "PLUGIN_VERSION"\nOriginal code by Rice1964.\nGtk GUI by Blight and Tillin9.\nFixes and features by Blight, Dave2001, Mudlord, Richard42, Tillin9, and others.");
 }
-
 
 //---------------------------------------------------------------------------------------
 
 EXPORT void CALL DllTest ( HWND hParent )
 {
-    MsgInfo((char*)"TODO: Test");
-}
-
-EXPORT void CALL DllConfig ( HWND hParent )
-{
-   ShowConfigBox();
+        messagebox("Rice Video Test", MB_OK | MB_ICONINFORMATION, "[Rice Video]: Test not implemented.");
 }
 
 void ChangeWindowStep2()
@@ -201,6 +140,7 @@ void Ini_StoreRomOptions(LPGAMESETTING pGameSetting);
 void GenerateCurrentRomOptions();
 
 extern void InitExternalTextures(void);
+
 void StartVideo(void)
 {
     windowSetting.dps = windowSetting.fps = -1;
@@ -243,26 +183,24 @@ void StartVideo(void)
     try {
         CDeviceBuilder::GetBuilder()->CreateGraphicsContext();
         CGraphicsContext::InitWindowInfo();
-        
+
         windowSetting.bDisplayFullscreen = FALSE;
         bool res = CGraphicsContext::Get()->Initialize(g_GraphicsInfo.hWnd, g_GraphicsInfo.hStatusBar, 640, 480, TRUE);
         CDeviceBuilder::GetBuilder()->CreateRender();
         CRender::GetRender()->Initialize();
-        
-        if( res )
-        {
+
+        if(res)
             DLParser_Init();
-        }
-        
         status.bGameIsRunning = true;
     }
     catch(...)
-    {
+        {
         ErrorMsg("Error to start video");
         throw 0;
-    }
-   
+        }
+
     g_CritialSection.Unlock();
+    gui_update();
 }
 
 extern void CloseExternalTextures(void);
@@ -275,9 +213,9 @@ void StopVideo()
         status.ToToggleFullScreen = FALSE;
     }
 
-    g_CritialSection.Lock();
     status.bGameIsRunning = false;
-
+    gui_update();
+    g_CritialSection.Lock();
 
     try {
         CloseExternalTextures();
@@ -682,21 +620,30 @@ void UpdateScreenStep2 (void)
 
 EXPORT void CALL UpdateScreen(void)
 {
+    static unsigned int lastTick = 0;
+    static int frames = 0;
+
     if(options.bShowFPS)
     {
-        static unsigned int lastTick=0;
-        static int frames=0;
         unsigned int nowTick = SDL_GetTicks();
         frames++;
         if(lastTick + 5000 <= nowTick)
         {
             char caption[200];
-            sprintf(caption, "RiceVideoLinux N64 Plugin %s - %.3f VI/S", PLUGIN_VERSION, frames/5.0);
+            sprintf(caption, "RiceVideo Mupen64Plus %s - %.3f VI/S", PLUGIN_VERSION, frames/5.0);
             SDL_WM_SetCaption(caption, caption);
             frames = 0;
             lastTick = nowTick;
         }
     }
+    else if(lastTick!=0)
+        {
+        char caption[200];
+        sprintf(caption, "RiceVideo Mupen64Plus %s", PLUGIN_VERSION);
+        SDL_WM_SetCaption(caption, caption);
+        lastTick = 0;
+        }
+
 #ifdef USING_THREAD
     if (videoThread)
     {
@@ -731,8 +678,7 @@ EXPORT BOOL CALL GetFullScreenStatus(void);
 EXPORT void CALL SetOnScreenText(char *msg)
 {
     status.CPUCoreMsgIsSet = true;
-    memset(&status.CPUCoreMsgToDisplay, 0, 256);
-    strncpy(status.CPUCoreMsgToDisplay, msg, 255);
+    snprintf(status.CPUCoreMsgToDisplay, 256, msg);
 }
 
 EXPORT BOOL CALL GetFullScreenStatus(void)
@@ -781,7 +727,7 @@ void __cdecl MsgInfo (char * Message, ...)
     va_end( ap );
 
     sprintf(generalText, "%s %s",project_name, PLUGIN_VERSION);
-   messagebox(generalText, MB_OK|MB_ICONINFORMATION, Msg);
+    messagebox(generalText, MB_OK|MB_ICONINFORMATION, Msg);
 }
 
 void __cdecl ErrorMsg (const char* Message, ...)
@@ -945,7 +891,6 @@ EXPORT void CALL FBRead(uint32 addr)
     g_pFrameBufferManager->FrameBufferReadByCPU(addr);
 }
 
-
 /******************************************************************
   Function: FrameBufferWrite
   Purpose:  This function is called to notify the dll that the
@@ -963,10 +908,6 @@ EXPORT void CALL FBRead(uint32 addr)
 EXPORT void CALL FBWrite(uint32 addr, uint32 size)
 {
     g_pFrameBufferManager->FrameBufferWriteByCPU(addr, size);
-}
-
-void _VIDEO_DisplayTemporaryMessage(const char *Message)
-{
 }
 
 /************************************************************************
@@ -1084,7 +1025,7 @@ EXPORT void CALL ReadScreen(void **dest, int *width, int *height)
          GL_RGB, GL_UNSIGNED_BYTE, *dest );
    glReadBuffer( oldMode );
 }
-    
+
 /******************************************************************
    NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
          ORIGINAL SPEC
@@ -1096,7 +1037,7 @@ EXPORT void CALL ReadScreen(void **dest, int *width, int *height)
 *******************************************************************/
 EXPORT void CALL SetConfigDir(char *configDir)
 {
-    strncpy(g_ConfigDir, configDir, PATH_MAX);
+    snprintf(g_ConfigDir, PATH_MAX, configDir);
 }
 
 /******************************************************************

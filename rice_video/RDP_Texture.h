@@ -1304,7 +1304,7 @@ void PrepareTextures()
                 {
                     pEntry = gTextureManager.GetBlackTexture();
                     CRender::g_pRender->SetCurrentTexture( tilenos[i], pEntry->pTexture, 4, 4, pEntry);
-                    _VIDEO_DisplayTemporaryMessage("Fail to load texture, use black to replace");
+                    //_VIDEO_DisplayTemporaryMessage("Fail to load texture, use black to replace");
                 }
 
             }

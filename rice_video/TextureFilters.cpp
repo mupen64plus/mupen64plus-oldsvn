@@ -901,7 +901,6 @@ typedef struct {
 CSortedList<uint64,ExtTxtrInfo> gTxtrDumpInfos;
 CSortedList<uint64,ExtTxtrInfo> gHiresTxtrInfos;
 
-extern void GetPluginDir( char * Directory );
 extern char * right(char * src, int nchars);
 
 BOOL PathIsDirectory(char* name)
@@ -998,7 +997,7 @@ BOOL PathFileExists(char* pszPath)
 
 void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo> &infos, bool extraCheck, bool bRecursive)
 {
-    if( PathIsDirectory(foldername) == FALSE )  return;
+    if(PathIsDirectory(foldername) == FALSE)  return;
 
     char texturefilename[_MAX_PATH];
     IMAGE_INFO  imgInfo;
@@ -1238,14 +1237,12 @@ const char *subfolders[] = {
 void FindAllDumpedTextures(void)
 {
     char    foldername[PATH_MAX];
-    GetPluginDir(foldername);
-    if(foldername[strlen(foldername) - 1] != '/') strcat(foldername, "/");
-    strcat(foldername,"texture_dump/");
+    snprintf(foldername, sizeof(foldername), "%stexture_dump/", g_ConfigDir);
 
     CheckAndCreateFolder(foldername);
 
-    strcat(foldername,(const char*)g_curRomInfo.szGameName);
-    strcat(foldername,"/");
+    strcat(foldername, (const char*)g_curRomInfo.szGameName);
+    strcat(foldername, "/");
 
     gTxtrDumpInfos.clear();
     if( !PathFileExists(foldername) )
@@ -1278,23 +1275,19 @@ void FindAllDumpedTextures(void)
 
 void FindAllHiResTextures(void)
 {
-    char    foldername[PATH_MAX];
-    GetPluginDir(foldername);
-    if(foldername[strlen(foldername) - 1] != '/') strcat(foldername, "/");
-    strcat(foldername,"hires_texture/");
+    char foldername[PATH_MAX];
+    snprintf(foldername, sizeof(foldername), "%shires_texture/", g_ConfigDir);
     CheckAndCreateFolder(foldername);
 
     strcat(foldername,(const char*)g_curRomInfo.szGameName);
     strcat(foldername,"/");
     gHiresTxtrInfos.clear();
-    if( !PathFileExists(foldername) )
-    {
+    if(!PathFileExists(foldername))
         return;
-    }
     else
     {
         gHiresTxtrInfos.clear();
-        FindAllTexturesFromFolder(foldername,gHiresTxtrInfos, true, true);
+        FindAllTexturesFromFolder(foldername, gHiresTxtrInfos, true, true);
     }
 }
 
@@ -1330,9 +1323,10 @@ void InitHiresTextures(void)
 {
 if( options.bLoadHiResTextures )
     {
-    printf("Texture loading option is enabled");
-    printf("Finding all hires textures");
+    printf("Texture loading option is enabled.\n");
+    printf("Finding all hires textures.\n");
     FindAllHiResTextures();
+    g_curRomInfo.bTexturesInitialized = TRUE;
     }
 }
 
@@ -1340,17 +1334,21 @@ void InitTextureDump(void)
 {
 if( options.bDumpTexturesToFiles )
     {
-    printf("Texture dump option is enabled");
-    printf("Finding all dumpped textures");
+    printf("Texture dump option is enabled.\n");
+    printf("Finding all dumpped textures.\n");
     FindAllDumpedTextures();
     }
 }
+
 void InitExternalTextures(void)
 {
-printf("InitExternalTextures\n");
-CloseExternalTextures();
-InitHiresTextures();
-InitTextureDump();
+    printf("InitExternalTextures\n");
+    //CloseExternalTextures();
+    if(!g_curRomInfo.bTexturesInitialized)
+        {
+        InitHiresTextures();
+        InitTextureDump();
+        }
 }
 
 /*
@@ -1448,9 +1446,8 @@ void DumpCachedTexture( TxtrCacheEntry &entry )
         char filename2[PATH_MAX];
         char filename3[PATH_MAX];
         char gamefolder[PATH_MAX];
-        GetPluginDir(gamefolder);
-        
-        strcat(gamefolder,"texture_dump/");
+        snprintf(gamefolder, sizeof(gamefolder), "%stexture_dump/", g_ConfigDir);
+
         strcat(gamefolder,(const char*)g_curRomInfo.szGameName);
         strcat(gamefolder,"/");
 

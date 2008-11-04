@@ -112,7 +112,8 @@ bool COGLGraphicsContext::Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth,
    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, colorBufferDepth);
    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthBufferDepth);
-   
+   printf("(II) Color buffer depth: %d\n", colorBufferDepth);
+
    printf("(II) Setting video mode %dx%d...\n", (int)windowSetting.uDisplayWidth, (int)windowSetting.uDisplayHeight);
    if(!(m_pScreen = SDL_SetVideoMode(windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, colorBufferDepth, videoFlags)))
      {
@@ -122,7 +123,7 @@ bool COGLGraphicsContext::Initialize(HWND hWnd, HWND hWndStatus, uint32 dwWidth,
      }
    
    char caption[500];
-   sprintf(caption, "RiceVideoLinux N64 Plugin %s", MUPEN_VERSION);
+   sprintf(caption, "RiceVideo Mupen64Plus %s", PLUGIN_VERSION);
    SDL_WM_SetCaption(caption, caption);
    SetWindowMode();
 

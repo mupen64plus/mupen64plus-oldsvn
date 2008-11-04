@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define uint64 unsigned long long
 
 typedef unsigned char               uint8;
-
 typedef signed char                 s8; 
 typedef int                     s32;
 typedef unsigned int                u32;
@@ -283,13 +282,10 @@ typedef struct
 {
     short y;
     short x;
-    
     short flag;
     short z;
-    
     short tv;
     short tu;
-    
     union {
         struct {
             uint8 a;
@@ -305,14 +301,11 @@ typedef struct
 {
     short y;
     short x;
-    
     uint8 a;
     uint8 b;
     short z;
-    
     uint8 g;
     uint8 r;
-    
 } FiddledVtxDKR;
 
 typedef struct 
@@ -337,7 +330,7 @@ typedef struct {
         CDirectXTexture *   m_pCDirectXTexture;
         COGLTexture *       m_pCOGLTexture;
     };
-    
+
     uint32 m_dwTileWidth;
     uint32 m_dwTileHeight;
     float m_fTexWidth;
@@ -409,11 +402,6 @@ typedef struct {
     int number;
     uint32  setting;
 } BufferSettingInfo;
-
-typedef struct {
-    const char* description;
-    uint32 setting;
-} SettingInfo;
 
 typedef union {
     uint8   g_Tmem8bit[0x1000];
