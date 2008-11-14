@@ -134,8 +134,7 @@ static int execute_cheat(unsigned int address, unsigned short value, unsigned sh
 
 static int gs_button_pressed(void)
 {
-    return key_pressed('g') ||
-           key_pressed('G') ||
+    return key_pressed(config_get_number("Kbd Mapping GS Button", SDLK_g)) ||
            event_active(config_get_string("Joy Mapping GS Button", ""));
 }
 

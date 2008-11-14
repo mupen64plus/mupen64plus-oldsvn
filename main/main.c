@@ -613,118 +613,93 @@ static int sdl_event_filter( const SDL_Event *event )
             stopEmulation();
             break;
         case SDL_KEYDOWN:
-            switch( event->key.keysym.sym )
+            /* check for the only 2 hard-coded key commands: Alt-enter for fullscreen and 0-9 for save state slot */
+            if (event->key.keysym.sym == SDLK_RETURN && event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
             {
-                case SDLK_ESCAPE:
-                    stopEmulation();
-                    break;
-                case SDLK_RETURN:
-                    // Alt+Enter toggles fullscreen
-                    if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
-                        changeWindow();
-                    break;
-                case SDLK_F5:
-                    savestates_job |= SAVESTATE;
-                    break;
-                case SDLK_F7:
-                    savestates_job |= LOADSTATE;
-                     controllerCommand(0, StopRumble);
-                     controllerCommand(1, StopRumble);
-                     controllerCommand(2, StopRumble);
-                     controllerCommand(3, StopRumble);
-                    break;
-                case SDLK_F9:
-                    add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
-                    add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
-                    break;
-                case SDLK_F10:
-                    main_speeddown(5);
-                    break;
-                case SDLK_F11:
-                    main_speedup(5);
-                    break;
-                case SDLK_F12:
-                    // set flag so that screenshot will be taken at the end of frame rendering
-                    take_next_screenshot();
-                    break;
-
-                // Pause
-                case SDLK_PAUSE:
-                    main_pause();
-                    break;
-
-                default:
-                    switch (event->key.keysym.unicode)
-                    {
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            savestates_select_slot( event->key.keysym.unicode - '0' );
-                            break;
-                        // volume mute/unmute
-                        case 'm':
-                        case 'M':
-                            volumeMute();
-                            main_draw_volume_osd();
-                            break;
-                        // increase volume
-                        case ']':
-                            volumeUp();
-                            main_draw_volume_osd();
-                            break;
-                        // decrease volume
-                        case '[':
-                            volumeDown();
-                            main_draw_volume_osd();
-                            break;
-                        // fast-forward
-                        case 'f':
-                        case 'F':
-                            SavedSpeedFactor = l_SpeedFactor;
-                            l_SpeedFactor = 250;
-                            setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                            // set fast-forward indicator
-                            msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
-                            osd_message_set_static(msgFF);
-                            break;
-                        // frame advance
-                        case '/':
-                        case '?':
-                            main_advance_one();
-                            break;
-
-                        // pass all other keypresses to the input plugin
-                        default:
-                            keyDown( 0, event->key.keysym.sym );
-                    }
+                changeWindow();
             }
+            else if (event->key.keysym.unicode >= '0' && event->key.keysym.unicode <= '9')
+            {
+                savestates_select_slot( event->key.keysym.unicode - '0' );
+            }
+            /* check all of the configurable commands */
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Stop", SDLK_ESCAPE))
+                stopEmulation();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Fullscreen", 0))
+                changeWindow();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Save State", SDLK_F5))
+                savestates_job |= SAVESTATE;
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Load State", SDLK_F7))
+            {
+                savestates_job |= LOADSTATE;
+                controllerCommand(0, StopRumble);
+                controllerCommand(1, StopRumble);
+                controllerCommand(2, StopRumble);
+                controllerCommand(3, StopRumble);
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Increment Slot", 0))
+                savestates_inc_slot();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Reset", SDLK_F9))
+            {
+                add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Speed Down", SDLK_F10))
+                main_speeddown(5);
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Speed Up",SDLK_F11))
+                main_speedup(5);
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Screenshot", SDLK_F12))
+                // set flag so that screenshot will be taken at the end of frame rendering
+                take_next_screenshot();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Pause", SDLK_PAUSE))
+                main_pause();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Mute", SDLK_m))
+            {
+                volumeMute();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Increase Volume", SDLK_RIGHTBRACKET))
+            {
+                volumeUp();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Decrease Volume", SDLK_LEFTBRACKET))
+            {
+                volumeDown();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Fast Forward", SDLK_f))
+            {
+                SavedSpeedFactor = l_SpeedFactor;
+                l_SpeedFactor = 250;
+                setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                // set fast-forward indicator
+                msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
+                osd_message_set_static(msgFF);
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Frame Advanve", SDLK_SLASH))
+                main_advance_one();
+            // pass all other keypresses to the input plugin
+            else keyDown( 0, event->key.keysym.sym );
+
             return 0;
-            break;
 
         case SDL_KEYUP:
-            switch( event->key.keysym.sym )
+            if(event->key.keysym.sym == config_get_number("Kbd Mapping Stop", SDLK_ESCAPE))
             {
-                case SDLK_ESCAPE:
-                    break;
-                case SDLK_f:
-                    // cancel fast-forward
-                    l_SpeedFactor = SavedSpeedFactor;
-                    setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                    // remove message
-                    osd_delete_message(msgFF);
-                    break;
-                default:
-                    keyUp( 0, event->key.keysym.sym );
+                return 0;
             }
+            else if(event->key.keysym.sym == config_get_number("Kbd Mapping Fast Forward", SDLK_f))
+            {
+                // cancel fast-forward
+                l_SpeedFactor = SavedSpeedFactor;
+                setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                // remove message
+                osd_delete_message(msgFF);
+            }
+            else keyUp( 0, event->key.keysym.sym );
+
             return 0;
-            break;
 
         // if joystick action is detected, check if it's mapped to a special function
         case SDL_JOYAXISMOTION:
