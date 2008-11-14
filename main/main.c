@@ -1381,6 +1381,7 @@ int main(int argc, char *argv[])
 {
     char dirpath[PATH_MAX];
     int i;
+    int retval = EXIT_SUCCESS;
     printf(" __  __                         __   _  _   ____  _             \n");  
     printf("|  \\/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \\| |_   _ ___ \n");
     printf("| |\\/| | | | | '_ \\ / _ \\ '_ \\| '_ \\| || |_| |_) | | | | / __|  \n");
@@ -1486,64 +1487,56 @@ int main(int argc, char *argv[])
     }
 
     // only display gui if user wants it
-    if(l_GuiEnabled)
+    if (l_GuiEnabled)
         gui_display();
 #endif
 
     // if rom file was specified, run it
     if (l_Filename)
     {
-        if(open_rom(l_Filename, l_RomNumber) < 0 && !l_GuiEnabled)
+        if (open_rom(l_Filename, l_RomNumber) >= 0)
         {
-            // cleanup and exit
-            cheat_delete_all();
-#ifndef NO_GUI
-            g_romcache.rcstask = RCS_SHUTDOWN;
-#endif
-            romdatabase_close();
-            plugin_delete_list();
-            tr_delete_languages();
-            config_delete();
-            exit(1);
+            startEmulation();
         }
-
-        startEmulation();
+        else if (!l_GuiEnabled)
+        {
+            retval = 1;
+        }
     }
     // Rom file must be specified in nogui mode
-    else if(!l_GuiEnabled)
+    else if (!l_GuiEnabled)
     {
         error_message("Rom file must be specified in nogui mode.");
         printUsage(argv[0]);
-
-        // cleanup and exit
-        cheat_delete_all();
-        romdatabase_close();
-        plugin_delete_list();
-        tr_delete_languages();
-        config_delete();
-        exit(1);
+        retval = 1;
     }
 
 #ifndef NO_GUI
     // give control of this thread to the gui
-    if(l_GuiEnabled)
+    if (l_GuiEnabled)
+    {
         gui_main_loop();
+        stopEmulation();
+    }
+#endif
+
     // free allocated memory
     if (l_TestShotList != NULL)
         free(l_TestShotList);
 
     // cleanup and exit
-    stopEmulation();
     config_write();
     cheat_write_config();
     cheat_delete_all();
+#ifndef NO_GUI
     g_romcache.rcstask = RCS_SHUTDOWN;
+#endif
     romdatabase_close();
     plugin_delete_list();
     tr_delete_languages();
     config_delete();
-#endif
-    return EXIT_SUCCESS;
+
+    return retval;
 }
 
 #ifdef __WIN32__
