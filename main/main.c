@@ -677,7 +677,7 @@ static int sdl_event_filter( const SDL_Event *event )
                 msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
                 osd_message_set_static(msgFF);
             }
-            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Frame Advanve", SDLK_SLASH))
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Frame Advance", SDLK_SLASH))
                 main_advance_one();
             // pass all other keypresses to the input plugin
             else keyDown( 0, event->key.keysym.sym );
