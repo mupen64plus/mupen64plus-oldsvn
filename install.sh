@@ -36,16 +36,17 @@ fi
 
 usage()
 {
-	printf "usage: $(basename $0) [PREFIX] [SHAREDIR] [BINDIR] [LIBDIR] [MANDIR]
+printf "usage: $(basename $0) [PREFIX] [SHAREDIR] [BINDIR] [LIBDIR] [MANDIR] [APPLICATIONSDIR]
 \tPREFIX   - installation directories prefix (default: /usr/local)
 \tSHAREDIR - path to Mupen64Plus shared data files (default: \$PREFIX/share/mupen64plus)
 \tBINDIR   - path to Mupen64Plus binary program files (default: \$PREFIX/bin)
 \tLIBDIR   - path to Mupen64Plus plugins (default: \$SHAREDIR/plugins)
 \tMANDIR   - path to manual files (default: \$PREFIX/man/man1)
+\tAPPLICATIONSDIR - path to place .desktop file in (default: \$PREFIX/share/applications)
 "
 }
 
-if [ $# -gt 5 ]; then
+if [ $# -gt 6 ]; then
 	usage
 	exit 1
 fi
@@ -55,6 +56,7 @@ SHAREDIR="${2:-${PREFIX}/share/mupen64plus}"
 BINDIR="${3:-${PREFIX}/bin}"
 LIBDIR="${4:-${SHAREDIR}/plugins}"
 MANDIR="${5:-${PREFIX}/man/man1}"
+APPLICATIONSDIR="${6:-${PREFIX}/share/applications}"
 
 printf "Installing Mupen64Plus to ${PREFIX}\n"
 $INSTALL -d -v "${SHAREDIR}"
@@ -80,6 +82,9 @@ $INSTALL -d -v "${MANDIR}"
 $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}"
 $INSTALL -d -v "${LIBDIR}"
 $INSTALL -m 0644 plugins/* "${LIBDIR}"
+$INSTALL -d -v "${APPLICATIONSDIR}"
+$INSTALL -m 0644 mupen64plus.desktop "${APPLICATIONSDIR}"
+
 
 printf "Done.\n"
 

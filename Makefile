@@ -89,8 +89,11 @@ endif
 ifeq ($(MANDIR),)
   MANDIR := $(PREFIX)/man/man1
 endif
+ifeq ($(APPLICATIONSDIR),)
+  APPLICATIONSDIR := $(PREFIX)/share/applications
+endif
 
-INSTALLOPTS := $(PREFIX) $(SHAREDIR) $(BINDIR) $(LIBDIR) $(MANDIR)
+INSTALLOPTS := $(PREFIX) $(SHAREDIR) $(BINDIR) $(LIBDIR) $(MANDIR) $(APPLICATIONSDIR)
 
 # set Freetype flags
 FREETYPEINC = $(shell pkg-config --cflags freetype2)
@@ -305,7 +308,7 @@ targets:
 
 all: version.h $(ALL)
 
-mupen64plus: version.h $(OBJECTS)
+mupen64plus: mupen64plus.desktop version.h $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) $(LIBS) -ldl -o $@
 	$(STRIP) $@
 
@@ -327,7 +330,7 @@ clean:
 	$(MAKE) -C mupen64_input clean
 	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
 	$(RM) -f ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
-	$(RM) -f mupen64plus
+	$(RM) -f mupen64plus mupen64plus.desktop
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
 	$(RM) -f main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
@@ -335,6 +338,9 @@ clean:
 rebuild: clean all
 
 # build rules
+mupen64plus.desktop: FORCE
+	@sed s:SHARE_DIR:"$(SHAREDIR)": mupen64plus.desktop.in > mupen64plus.desktop
+
 version.h: FORCE
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         main/version.template > version.h

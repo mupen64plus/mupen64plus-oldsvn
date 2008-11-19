@@ -26,12 +26,13 @@ export PATH="/bin:/usr/bin"
 
 usage()
 {
-	printf "usage: $(basename $0) [PREFIX] [SHAREDIR] [BINDIR] [LIBDIR] [MANDIR]
+printf "usage: $(basename $0) [PREFIX] [SHAREDIR] [BINDIR] [LIBDIR] [MANDIR] [APPLICATIONSDIR]
 \tPREFIX   - installation directories prefix (default: /usr/local)
 \tSHAREDIR - path to Mupen64Plus shared data files (default: \$PREFIX/share/mupen64plus)
 \tBINDIR   - path to Mupen64Plus binary program files (default: \$PREFIX/bin)
 \tLIBDIR   - path to Mupen64Plus plugins (default: \$SHAREDIR/plugins)
 \tMANDIR   - path to manual files (default: \$PREFIX/man/man1)
+\tAPPLICATIONSDIR - path to .desktop files (default: \$PREFIX/share/applications)
 "
 }
 
@@ -45,6 +46,7 @@ SHAREDIR="${2:-${PREFIX}/share/mupen64plus}"
 BINDIR="${3:-${PREFIX}/bin}"
 LIBDIR="${4:-${SHAREDIR}/plugins}"
 MANDIR="${5:-${PREFIX}/man/man1}"
+APPLICATIONSDIR=
 
 printf "Uninstalling Mupen64Plus from ${PREFIX}\n"
 printf "Removing ${BINDIR}/mupen64plus\n"
@@ -55,5 +57,8 @@ printf "Removing ${SHAREDIR}\n"
 rm -rf "${SHAREDIR}"
 printf "Removing man page\n"
 rm -f "${MANDIR}/mupen64plus.1.gz"
+printf "Removing .desktop file\n"
+rm -f "${APPLICATIONSDIR}/mupen64plus.desktop"
+rmdir "${APPLICATIONSDIR}"
 printf "Done.\n"
 
