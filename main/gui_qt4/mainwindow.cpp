@@ -407,6 +407,7 @@ void MainWindow::customEvent(QEvent* event)
             event->setAccepted(
                 confirmMessage(static_cast<ConfirmEvent*>(event)->message)
             );
+            break;
         case PluginGuiQueryEventType:
             pluginGuiQueryEvent(static_cast<PluginGuiQueryEvent*>(event));
             break;
