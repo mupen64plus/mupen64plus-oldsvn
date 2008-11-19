@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *   Mupen64plus - messagebox_qt4.cpp                                      *
-*   Mupen64Plus homepage: http://code->google->com/p/mupen64plus/           *
+*   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
 *   Copyright (C) 2008 slougi                                             *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
