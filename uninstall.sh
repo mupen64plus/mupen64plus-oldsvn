@@ -36,7 +36,7 @@ printf "usage: $(basename $0) [PREFIX] [SHAREDIR] [BINDIR] [LIBDIR] [MANDIR] [AP
 "
 }
 
-if [ $# -gt 5 ]; then
+if [ $# -gt 6 ]; then
 	usage
 	exit 1
 fi
@@ -46,7 +46,7 @@ SHAREDIR="${2:-${PREFIX}/share/mupen64plus}"
 BINDIR="${3:-${PREFIX}/bin}"
 LIBDIR="${4:-${SHAREDIR}/plugins}"
 MANDIR="${5:-${PREFIX}/man/man1}"
-APPLICATIONSDIR=
+APPLICATIONSDIR="${6:-${PREFIX}/man/man1}"
 
 printf "Uninstalling Mupen64Plus from ${PREFIX}\n"
 printf "Removing ${BINDIR}/mupen64plus\n"
