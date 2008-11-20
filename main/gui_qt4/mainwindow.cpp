@@ -25,8 +25,9 @@
 #include "mainwidget.h"
 #include "globals.h"
 #include "rommodel.h"
-
 #include "settingsdialog.h"
+
+#include <SDL_video.h>
 
 namespace core {
     extern "C" {
@@ -90,10 +91,8 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-#ifdef __WIN32__
     delete m_renderWindow;
     m_renderWindow = 0;
-#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -106,12 +105,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_bool("StatusBarVisible", actionShowStatusbar->isChecked());
     core::config_put_bool("ToolBarVisible", actionShowToolbar->isChecked());
     core::config_put_bool("FilterVisible", actionShowFilter->isChecked());
-#ifdef __WIN32__
-    if (m_renderWindow) {
-        m_renderWindow->close();
-        m_renderWindow->deleteLater();
-    }
-#endif
 }
 
 void MainWindow::pluginGuiQueryEvent(PluginGuiQueryEvent* event)
@@ -178,8 +171,6 @@ void MainWindow::pluginGuiQueryEvent(PluginGuiQueryEvent* event)
     return;
 }
 
-#ifdef __WIN32__
-
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 {
     if (obj == m_renderWindow) {
@@ -196,7 +187,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             {
                 QKeyEvent* qke = static_cast<QKeyEvent*>(ev);
                 foreach (QObject* child, children()) {
-                    if (QAction*a = qobject_cast<QAction*>(child)) {
+                    if (QAction* a = qobject_cast<QAction*>(child)) {
                         QKeySequence seq(qke->key() + qke->modifiers());
                         if (seq == a->shortcut()) {
                             a->activate(QAction::Trigger);
@@ -204,13 +195,16 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                     }
                 }
             }
+            return true;
+            break;
+        default:
             return false;
+            break;
         }
     } else {
         return QMainWindow::eventFilter(obj, ev);
     }
 }
-#endif
 
 void MainWindow::showInfoMessage(const QString& msg)
 {
@@ -296,18 +290,17 @@ void MainWindow::emulationPauseContinue()
 void MainWindow::emulationStop()
 {
     core::stopEmulation();
-#ifdef __WIN32__
-    if (m_renderWindow) {
-        m_renderWindow->close();
-        m_renderWindow->deleteLater();
-   }
-#endif
 }
 
-void MainWindow::fullScreenToggle()
+void MainWindow::fullScreenToggle(bool full)
 {
-    if(core::g_EmulatorRunning)
-        core::changeWindow();
+    if(!m_renderWindow.isNull()) {
+        if (full) {
+            m_renderWindow->showFullScreen();
+        } else {
+            m_renderWindow->showNormal();
+        }
+    }
 }
 
 void MainWindow::saveStateSave()
@@ -419,15 +412,14 @@ void MainWindow::customEvent(QEvent* event)
 
 void MainWindow::startEmulation()
 {
-#ifdef __WIN32__
     m_renderWindow = new QWidget;
     m_renderWindow->addActions(actions());
     m_renderWindow->installEventFilter(this);
     m_renderWindow->show();
-    core::g_RenderWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
-    core::g_StatusBar = reinterpret_cast<core::HWND__*>(statusBar()->winId());
-#endif
-
+    core::g_RenderWindow = (core::HWND) m_renderWindow->winId();
+    core::g_StatusBar = (core::HWND) statusBar()->winId();
+    setenv("SDL_WINDOWID", qPrintable(QString::number(m_renderWindow->winId())),
+            1);
     core::startEmulation();
 }
 
@@ -488,8 +480,8 @@ void MainWindow::setupActions()
     connect(actionShowFilter, SIGNAL(toggled(bool)),
             mainWidget, SLOT(showFilter(bool)));
     actionFullScreen->setIcon(icon("view-fullscreen.png"));
-    connect(actionFullScreen, SIGNAL(triggered()),
-            this, SLOT(fullScreenToggle()));
+    connect(actionFullScreen, SIGNAL(toggled(bool)),
+            this, SLOT(fullScreenToggle(bool)));
     actionConfigureMupen64Plus->setIcon(icon("preferences-system.png"));
     connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
             this, SLOT(configDialogShow()));
@@ -544,5 +536,15 @@ void MainWindow::setState(core::gui_state_t state)
     actionStart->setChecked(play);
     actionPause->setChecked(pause);
     actionStop->setChecked(stop);
-}
 
+    if (stop && !m_renderWindow.isNull()) {
+        m_renderWindow->close();
+        m_renderWindow->deleteLater();
+    }
+
+    if (play && !m_renderWindow.isNull()) {
+        if (SDL_Surface* s = SDL_GetVideoSurface()) {
+            m_renderWindow->setFixedSize(s->w, s->h);
+        }
+    }
+}
