@@ -25,9 +25,8 @@
 #include "mainwidget.h"
 #include "globals.h"
 #include "rommodel.h"
-#include "settingsdialog.h"
 
-#include <SDL_video.h>
+#include "settingsdialog.h"
 
 namespace core {
     extern "C" {
@@ -40,7 +39,7 @@ namespace core {
     }
 }
 
-MainWindow::MainWindow()
+MainWindow::MainWindow() 
 : QMainWindow(0)
 , m_statusBarLabel(0)
 , m_uiActions(0)
@@ -91,8 +90,10 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+#ifdef __WIN32__
     delete m_renderWindow;
     m_renderWindow = 0;
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -105,71 +106,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_bool("StatusBarVisible", actionShowStatusbar->isChecked());
     core::config_put_bool("ToolBarVisible", actionShowToolbar->isChecked());
     core::config_put_bool("FilterVisible", actionShowFilter->isChecked());
+#ifdef __WIN32__
+    if (m_renderWindow) {
+        m_renderWindow->close();
+        m_renderWindow->deleteLater();
+    }
+#endif
 }
 
-void MainWindow::pluginGuiQueryEvent(PluginGuiQueryEvent* event)
-{
-    QMessageBox mb(QWidget::find(event->window));
-    mb.setWindowTitle(event->title);
-    mb.setText(event->message);
-    mb.setIconPixmap(QPixmap::fromImage(event->image));
-
-    QAbstractButton *button1, *button2, *button3;
-    button1 = button2 = button3 = 0;
-
-    switch( event->flags & 0x000000FF )
-    {
-    case MB_ABORTRETRYIGNORE:
-        button1 = mb.addButton(QWidget::tr("Abort"), QMessageBox::RejectRole);
-        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
-        button3 = mb.addButton(QWidget::tr("Ignore"), QMessageBox::AcceptRole);
-        break;
-
-    case MB_CANCELTRYCONTINUE:
-        button1 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
-        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
-        button3 = mb.addButton(QWidget::tr("Continue"), QMessageBox::AcceptRole);
-        break;
-
-    case MB_OKCANCEL:
-        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
-        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
-        break;
-
-    case MB_RETRYCANCEL:
-        button1 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
-        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
-        break;
-
-    case MB_YESNO:
-        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
-        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
-        break;
-
-    case MB_YESNOCANCEL:
-        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
-        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
-        button3 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
-        break;
-
-    case MB_OK:
-    default:
-        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
-    }
-
-    mb.exec();
-
-    if (button1 == mb.clickedButton()) {
-        event->result = 1;
-    } else if (button2 == mb.clickedButton()) {
-        event->result = 2;
-    } else if (button3 == mb.clickedButton()) {
-        event->result = 3;
-    }
-
-    event->waitCondition->wakeAll();
-    return;
-}
+#ifdef __WIN32__
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 {
@@ -187,7 +132,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             {
                 QKeyEvent* qke = static_cast<QKeyEvent*>(ev);
                 foreach (QObject* child, children()) {
-                    if (QAction* a = qobject_cast<QAction*>(child)) {
+                    if (QAction*a = qobject_cast<QAction*>(child)) {
                         QKeySequence seq(qke->key() + qke->modifiers());
                         if (seq == a->shortcut()) {
                             a->activate(QAction::Trigger);
@@ -195,16 +140,13 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                     }
                 }
             }
-            return true;
-            break;
-        default:
             return false;
-            break;
         }
     } else {
         return QMainWindow::eventFilter(obj, ev);
     }
 }
+#endif
 
 void MainWindow::showInfoMessage(const QString& msg)
 {
@@ -290,17 +232,18 @@ void MainWindow::emulationPauseContinue()
 void MainWindow::emulationStop()
 {
     core::stopEmulation();
+#ifdef __WIN32__
+    if (m_renderWindow) {
+        m_renderWindow->close();
+        m_renderWindow->deleteLater();
+   }
+#endif
 }
 
-void MainWindow::fullScreenToggle(bool full)
+void MainWindow::fullScreenToggle()
 {
-    if(!m_renderWindow.isNull()) {
-        if (full) {
-            m_renderWindow->showFullScreen();
-        } else {
-            m_renderWindow->showNormal();
-        }
-    }
+    if(core::g_EmulatorRunning)
+        core::changeWindow();
 }
 
 void MainWindow::saveStateSave()
@@ -396,30 +339,23 @@ void MainWindow::customEvent(QEvent* event)
         case AlertEventType:
             showAlertMessage(static_cast<AlertEvent*>(event)->message);
             break;
-        case ConfirmEventType:
-            event->setAccepted(
-                confirmMessage(static_cast<ConfirmEvent*>(event)->message)
-            );
-            break;
-        case PluginGuiQueryEventType:
-            pluginGuiQueryEvent(static_cast<PluginGuiQueryEvent*>(event));
-            break;
         default:
-            qWarning("Got unknown custom event of type %d!", event->type());
+            qDebug("Got unknown custom event of type %d!", event->type());
             break;
     }
 }
 
 void MainWindow::startEmulation()
 {
+#ifdef __WIN32__
     m_renderWindow = new QWidget;
     m_renderWindow->addActions(actions());
     m_renderWindow->installEventFilter(this);
     m_renderWindow->show();
-    core::g_RenderWindow = (core::HWND) m_renderWindow->winId();
-    core::g_StatusBar = (core::HWND) statusBar()->winId();
-    setenv("SDL_WINDOWID", qPrintable(QString::number(m_renderWindow->winId())),
-            1);
+    core::g_RenderWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
+    core::g_StatusBar = reinterpret_cast<core::HWND__*>(statusBar()->winId());
+#endif
+
     core::startEmulation();
 }
 
@@ -480,8 +416,8 @@ void MainWindow::setupActions()
     connect(actionShowFilter, SIGNAL(toggled(bool)),
             mainWidget, SLOT(showFilter(bool)));
     actionFullScreen->setIcon(icon("view-fullscreen.png"));
-    connect(actionFullScreen, SIGNAL(toggled(bool)),
-            this, SLOT(fullScreenToggle(bool)));
+    connect(actionFullScreen, SIGNAL(triggered()),
+            this, SLOT(fullScreenToggle()));
     actionConfigureMupen64Plus->setIcon(icon("preferences-system.png"));
     connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
             this, SLOT(configDialogShow()));
@@ -536,15 +472,5 @@ void MainWindow::setState(core::gui_state_t state)
     actionStart->setChecked(play);
     actionPause->setChecked(pause);
     actionStop->setChecked(stop);
-
-    if (stop && !m_renderWindow.isNull()) {
-        m_renderWindow->close();
-        m_renderWindow->deleteLater();
-    }
-
-    if (play && !m_renderWindow.isNull()) {
-        if (SDL_Surface* s = SDL_GetVideoSurface()) {
-            m_renderWindow->setFixedSize(s->w, s->h);
-        }
-    }
 }
+

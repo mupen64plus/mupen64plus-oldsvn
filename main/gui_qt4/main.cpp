@@ -118,10 +118,7 @@ int gui_message(gui_message_t messagetype, const char *format, ...)
     } else if (messagetype == 2) {
         //0 - indicates user selected no
         //1 - indicates user selected yes
-        ConfirmEvent e;
-        e.message = buffer;
-        application->sendEvent(mainWindow, &e);
-        response = e.isAccepted();
+        response = mainWindow->confirmMessage(buffer);
     }
 
     return response;

@@ -19,12 +19,8 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <QApplication>
-#include <QWidget>
-#include <QEvent>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QImage>
+#include <QPushButton>
+#include <QMessageBox>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -37,19 +33,6 @@
 
 #include "Gfx1.3.h"
 #include "messagebox.h"
-
-class PluginGuiQueryEvent : public QEvent
-{
-    public:
-        PluginGuiQueryEvent() : QEvent(Type(1003)) {}
-        QString message;
-        QString title;
-        QImage image;
-        int flags;
-        QWaitCondition* waitCondition;
-        int result;
-        WId window;
-};
 
 static const int MAX = 2048;
 
@@ -64,52 +47,84 @@ int messagebox(const char *title, int flags, const char *fmt, ...)
     vsnprintf( buf, MAX, fmt, ap );
     va_end( ap );
 
-    PluginGuiQueryEvent* e = new PluginGuiQueryEvent;
-    e->message = buf;
-    e->title = title;
-    e->flags = flags;
-    e->result = -1;
-    e->window = gfx.hWnd;
-
-    QMutex m;
-    QWaitCondition w;
-    e->waitCondition = &w;
+    QMessageBox mb(QWidget::find(gfx.hWnd));
+    mb.setWindowTitle(title);
+    mb.setText(buf);
 
     switch( flags & 0x00000F00 )
     {
         case MB_ICONWARNING:
-            e->image = QImage(messagebox_warn_xpm);
+            mb.setIconPixmap(QPixmap(messagebox_warn_xpm));
             break;
 
         case MB_ICONINFORMATION:
-            e->image = QImage(messagebox_info_xpm);
+            mb.setIconPixmap(QPixmap(messagebox_info_xpm));
             break;
 
         case MB_ICONQUESTION:
-            e->image = QImage(messagebox_quest_xpm);
+            mb.setIconPixmap(QPixmap(messagebox_quest_xpm));
             break;
 
         case MB_ICONERROR:
-            e->image = QImage(messagebox_error_xpm);
+            mb.setIconPixmap(QPixmap(messagebox_error_xpm));
             break;
     }
 
-    QObject* target = 0;
-    foreach (QWidget* w, qApp->topLevelWidgets()) {
-        if (w->inherits("MainWindow")) {
-            target = w;
-            break;
-        }
+    QAbstractButton *button1, *button2, *button3;
+    button1 = button2 = button3 = 0;
+
+    switch( flags & 0x000000FF )
+    {
+    case MB_ABORTRETRYIGNORE:
+        button1 = mb.addButton(QWidget::tr("Abort"), QMessageBox::RejectRole);
+        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button3 = mb.addButton(QWidget::tr("Ignore"), QMessageBox::AcceptRole);
+        break;
+
+    case MB_CANCELTRYCONTINUE:
+        button1 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button3 = mb.addButton(QWidget::tr("Continue"), QMessageBox::AcceptRole);
+        break;
+
+    case MB_OKCANCEL:
+        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
+        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_RETRYCANCEL:
+        button1 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_YESNO:
+        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
+        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
+        break;
+
+    case MB_YESNOCANCEL:
+        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
+        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
+        button3 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_OK:
+    default:
+        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
     }
 
-    if (target) {
-        qApp->postEvent(target, e);
-        m.lock();
-        w.wait(&m);
-        m.unlock();
+    mb.exec();
+
+    if (button1 == mb.clickedButton()) {
+        return 1;
+    } else if (button2 == mb.clickedButton()) {
+        return 2;
+    } else if (button3 == mb.clickedButton()) {
+        return 3;
     }
 
-    return e->result;
+    assert(false); // we should never get here
+    return 1;
 }
 
 } // extern "C"
