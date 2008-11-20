@@ -28,7 +28,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File" >
@@ -197,6 +197,9 @@
    </property>
   </action>
   <action name="actionFullScreen" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
    <property name="text" >
     <string>&amp;Full Screen</string>
    </property>
