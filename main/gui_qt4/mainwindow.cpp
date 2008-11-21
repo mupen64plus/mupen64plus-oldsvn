@@ -39,7 +39,7 @@ namespace core {
     }
 }
 
-MainWindow::MainWindow() 
+MainWindow::MainWindow()
 : QMainWindow(0)
 , m_statusBarLabel(0)
 , m_uiActions(0)
@@ -112,6 +112,70 @@ void MainWindow::closeEvent(QCloseEvent *event)
         m_renderWindow->deleteLater();
     }
 #endif
+}
+
+void MainWindow::pluginGuiQueryEvent(PluginGuiQueryEvent* event)
+{
+    QMessageBox mb(QWidget::find(event->window));
+    mb.setWindowTitle(event->title);
+    mb.setText(event->message);
+    mb.setIconPixmap(QPixmap::fromImage(event->image));
+
+    QAbstractButton *button1, *button2, *button3;
+    button1 = button2 = button3 = 0;
+
+    switch( event->flags & 0x000000FF )
+    {
+    case MB_ABORTRETRYIGNORE:
+        button1 = mb.addButton(QWidget::tr("Abort"), QMessageBox::RejectRole);
+        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button3 = mb.addButton(QWidget::tr("Ignore"), QMessageBox::AcceptRole);
+        break;
+
+    case MB_CANCELTRYCONTINUE:
+        button1 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button3 = mb.addButton(QWidget::tr("Continue"), QMessageBox::AcceptRole);
+        break;
+
+    case MB_OKCANCEL:
+        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
+        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_RETRYCANCEL:
+        button1 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_YESNO:
+        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
+        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
+        break;
+
+    case MB_YESNOCANCEL:
+        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
+        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
+        button3 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_OK:
+    default:
+        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
+    }
+
+    mb.exec();
+
+    if (button1 == mb.clickedButton()) {
+        event->result = 1;
+    } else if (button2 == mb.clickedButton()) {
+        event->result = 2;
+    } else if (button3 == mb.clickedButton()) {
+        event->result = 3;
+    }
+
+    event->waitCondition->wakeAll();
+    return;
 }
 
 #ifdef __WIN32__
@@ -339,8 +403,16 @@ void MainWindow::customEvent(QEvent* event)
         case AlertEventType:
             showAlertMessage(static_cast<AlertEvent*>(event)->message);
             break;
+        case ConfirmEventType:
+            event->setAccepted(
+                confirmMessage(static_cast<ConfirmEvent*>(event)->message)
+            );
+            break;
+        case PluginGuiQueryEventType:
+            pluginGuiQueryEvent(static_cast<PluginGuiQueryEvent*>(event));
+            break;
         default:
-            qDebug("Got unknown custom event of type %d!", event->type());
+            qWarning("Got unknown custom event of type %d!", event->type());
             break;
     }
 }
