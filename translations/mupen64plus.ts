@@ -3,1004 +3,6 @@
 <context>
     <name></name>
     <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="216"/>
-        <source>New Rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="258"/>
-        <source>New Cheat</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="299"/>
-        <source>Are you sure you want to delete cheat &quot;%s&quot;?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="315"/>
-        <source>Are you sure you want to delete rom &quot;%s&quot; and all of its cheats?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="592"/>
-        <source>Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="397"/>
-        <source>CRC:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="544"/>
-        <source>Address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="559"/>
-        <source>Value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="606"/>
-        <source>Disabled</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="610"/>
-        <source>Enabled  (Session)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="616"/>
-        <source>Enabled (Always)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="676"/>
-        <source>No cheats found. Click
- &quot;New Rom&quot; to begin.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="730"/>
-        <source>Configure Cheats</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="767"/>
-        <source>_New Rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="771"/>
-        <source>New _Cheat</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/cheatdialog.c" line="775"/>
-        <source>_Delete</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="237"/>
-        <source>The directory you selected is already in the list.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="255"/>
-        <source>Select Rom Directory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="756"/>
-        <source>Map Special Function</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="768"/>
-        <source>Press a controller button for:
-&quot;%s&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1147"/>
-        <source>Configure</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="919"/>
-        <source>Main Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="925"/>
-        <source>CPU Core</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="931"/>
-        <source>_Interpreter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="934"/>
-        <source>_Dynamic recompiler</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="937"/>
-        <source>_Pure interpreter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="941"/>
-        <source>Compatibility</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="953"/>
-        <source>Miscellaneous</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="962"/>
-        <source>Icons</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="963"/>
-        <source>Text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="964"/>
-        <source>Icons &amp; Text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="966"/>
-        <source>Toolbar st_yle:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="975"/>
-        <source>Small</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="976"/>
-        <source>Medium</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="977"/>
-        <source>Large</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="979"/>
-        <source>Toolbar si_ze:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="985"/>
-        <source>A_uto increment save slot</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="988"/>
-        <source>Ask _before loading bad dump/ hacked rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="991"/>
-        <source>On _screen display enabled</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="994"/>
-        <source>Always start in _full screen mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="999"/>
-        <source>Plugins</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1005"/>
-        <source>_Graphics Plugin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1164"/>
-        <source>Config</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1165"/>
-        <source>Test</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1166"/>
-        <source>About</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1049"/>
-        <source>A_udio Plugin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1093"/>
-        <source>_Input Plugin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1137"/>
-        <source>_RSP Plugin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1182"/>
-        <source>Rom Browser</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1187"/>
-        <source>Rom Directories</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1230"/>
-        <source>Remo_val All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1238"/>
-        <source>Recursively _scan rom directories</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1241"/>
-        <source>Show _full paths in filenames</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1256"/>
-        <source>Input Mappings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1276"/>
-        <source>Keyboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1286"/>
-        <source>Controller</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/configdialog.c" line="1294"/>
-        <source>Click to change</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/debugger/breakpoints.c" line="274"/>
-        <source>Invalid address.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/debugger/breakpoints.c" line="289"/>
-        <source>Cannot add any more breakpoints.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/debugger/memedit.c" line="435"/>
-        <source>not implemented yet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="207"/>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="218"/>
-        <source>Confirm</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="415"/>
-        <source>Emulation is running. Do you want to stop it?
-
-Note: in order to play another rom, you must first stop this one. </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="421"/>
-        <source>Open Rom...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="479"/>
-        <source>There is no Rom loaded. Do you want to load one?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="584"/>
-        <source>Emulation is not running.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="531"/>
-        <source>Save as...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="569"/>
-        <source>Load...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="629"/>
-        <source>No graphics plugin selected! Do you
-want to select one?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="644"/>
-        <source>No audio plugin selected! Do you
-want to select one?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="659"/>
-        <source>No input plugin selected! Do you
-want to select one?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="674"/>
-        <source>No RSP plugin selected! Do you
-want to select one?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="760"/>
-        <source>Emulation needs to be restarted in order
-to activate the debugger. Do you want
-this to happen?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="832"/>
-        <source>_File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="836"/>
-        <source>_Open Rom...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="843"/>
-        <source>_Close Rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="852"/>
-        <source>_Quit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="861"/>
-        <source>_Emulation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="865"/>
-        <source>_Start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="871"/>
-        <source>_Pause</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="878"/>
-        <source>S_top</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="887"/>
-        <source>Sa_ve State</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="894"/>
-        <source>Save State _as...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="900"/>
-        <source>_Load State</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="907"/>
-        <source>L_oad State from...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="916"/>
-        <source>_Current Save State Slot</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="925"/>
-        <source> Slot _%d</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="939"/>
-        <source>_Options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="943"/>
-        <source>_Configure...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="951"/>
-        <source>_Graphics Settings...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="957"/>
-        <source>_Audio Settings...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="963"/>
-        <source>_Input Settings...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="969"/>
-        <source>_RSP Settings...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="977"/>
-        <source>C_heats...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="981"/>
-        <source>_Full Screen</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="990"/>
-        <source>_View</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="997"/>
-        <source> _Toolbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1002"/>
-        <source> _Filter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1007"/>
-        <source> _Statusbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1020"/>
-        <source>_Debugger</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1023"/>
-        <source> _Enable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1027"/>
-        <source>_Registers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1031"/>
-        <source>_Breakpoints</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1035"/>
-        <source>_TLB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1039"/>
-        <source>_Memory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1043"/>
-        <source>_Variables</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1064"/>
-        <source>_Help</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1068"/>
-        <source>_About...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1105"/>
-        <source>Open Rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1113"/>
-        <source>Start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1114"/>
-        <source>Start Emulation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1120"/>
-        <source>Pause</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1121"/>
-        <source>Pause/ Continue Emulation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1127"/>
-        <source>Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1128"/>
-        <source>Stop Emulation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1135"/>
-        <source>Save State</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1140"/>
-        <source>Load State</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/main_gtk.c" line="1152"/>
-        <source>Fullscreen</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="804"/>
-        <source>F_ilter:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="844"/>
-        <source>Country</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="846"/>
-        <source>Good Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="848"/>
-        <source>Status</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="284"/>
-        <source>User Comments</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="852"/>
-        <source>File Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="854"/>
-        <source>MD5 Hash</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="856"/>
-        <source>CRC1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="858"/>
-        <source>CRC2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="860"/>
-        <source>Internal Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="862"/>
-        <source>Save Types</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="864"/>
-        <source>Players</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="866"/>
-        <source>Size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="868"/>
-        <source>Compression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="870"/>
-        <source>Image Type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="872"/>
-        <source>CIC Chip</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="874"/>
-        <source>Rumble</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="907"/>
-        <source>Play Rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="139"/>
-        <source>Rom Properties</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="921"/>
-        <source>Refresh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="927"/>
-        <source>Configure Rombrowser</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/rombrowser.c" line="933"/>
-        <source>Configure Columns</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="143"/>
-        <source>Rom Info:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="153"/>
-        <source>Good Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="160"/>
-        <source>Country:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="172"/>
-        <source>File Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="179"/>
-        <source>Status:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="191"/>
-        <source>Full Path:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="198"/>
-        <source>Internal Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="205"/>
-        <source>MD5 Hash:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="212"/>
-        <source>CRC1:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="220"/>
-        <source>CRC2:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="228"/>
-        <source>Size:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="236"/>
-        <source>Save Type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="244"/>
-        <source>Compression:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="252"/>
-        <source>Players:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="260"/>
-        <source>Image Type:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="268"/>
-        <source>Rumble:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_gtk/romproperties.c" line="276"/>
-        <source>CIC Chip:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="286"/>
-        <source>Playback speed:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="316"/>
-        <source>Volume Not Supported.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="320"/>
-        <source>Volume</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="353"/>
-        <source>There is no Rom loaded.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="372"/>
-        <source>No graphics plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="383"/>
-        <source>No audio plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="394"/>
-        <source>No input plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="405"/>
-        <source>No RSP plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="427"/>
-        <source>Couldn&apos;t spawn core thread!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="431"/>
-        <source>Emulation started (PID: %d)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="444"/>
-        <source>Stopping emulation.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="463"/>
-        <source>Emulation stopped.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="480"/>
-        <source>Emulation continued.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="497"/>
-        <source>Paused
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="686"/>
-        <source>Fast Forward</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="925"/>
-        <source>The core thread recieved a SIGSEGV signal.
-This means it tried to access protected memory.
-Maybe you have set a wrong ucode for one of the plugins!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="1455"/>
-        <source>Config Dir:  %s
-Install Dir: %s
-Plugin Dir:  %s
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="1456"/>
-        <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="1469"/>
-        <source>Couldn&apos;t spawn rom cache thread!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="451"/>
-        <source>The rom you are trying to load is probably a bad dump!
-Be warned that this will probably give unexpected results.
-Do you still want to run it?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="455"/>
-        <source>The rom you are trying to load is probably a bad dump!
-Be warned that this will probably give unexpected results.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="466"/>
-        <source>The rom you are trying to load is probably a hack!
-Be warned that this will probably give unexpected results.
-Do you still want to run it?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="470"/>
-        <source>The rom you are trying to load is probably a hack!
-Be warned that this will probably give unexpected results.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="484"/>
-        <source>Emulation is running. Do you want to
-stop it and load the selected rom?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="523"/>
-        <source>Couldn&apos;t load Rom!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="658"/>
-        <source>Rom closed.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/romcache.c" line="289"/>
-        <source>Rescanning rom cache.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/romcache.c" line="292"/>
-        <source>Rom cache up to date. %d ROM%s.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/romcache.c" line="536"/>
-        <source>Added ROMs %d-%d.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="60"/>
-        <source>Selected state file: %s</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="64"/>
-        <source>Selected state slot: %d</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="193"/>
-        <source>Saved state to: %s</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="226"/>
-        <source>Error: state file &apos;%s&apos; doesn&apos;t exist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="235"/>
-        <source>Error: Unrecognized savestate format.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="249"/>
-        <source>Error: Savestate version (%08x) doesn&apos;t match current version (%08x).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="258"/>
-        <source>Load state error: Saved state ROM doesn&apos;t match current ROM.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="327"/>
-        <source>State loaded from: %s</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../main/util.c" line="539"/>
         <source>Demo</source>
         <translation type="unfinished"></translation>
@@ -1170,6 +172,214 @@ stop it and load the selected rom?</source>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../main/savestates.c" line="60"/>
+        <source>Selected state file: %s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="64"/>
+        <source>Selected state slot: %d</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="193"/>
+        <source>Saved state to: %s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="226"/>
+        <source>Error: state file &apos;%s&apos; doesn&apos;t exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="235"/>
+        <source>Error: Unrecognized savestate format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="249"/>
+        <source>Error: Savestate version (%08x) doesn&apos;t match current version (%08x).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="258"/>
+        <source>Load state error: Saved state ROM doesn&apos;t match current ROM.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="327"/>
+        <source>State loaded from: %s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/romcache.c" line="289"/>
+        <source>Rescanning rom cache.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/romcache.c" line="292"/>
+        <source>Rom cache up to date. %d ROM%s.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/romcache.c" line="536"/>
+        <source>Added ROMs %d-%d.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="451"/>
+        <source>The rom you are trying to load is probably a bad dump!
+Be warned that this will probably give unexpected results.
+Do you still want to run it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="455"/>
+        <source>The rom you are trying to load is probably a bad dump!
+Be warned that this will probably give unexpected results.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="466"/>
+        <source>The rom you are trying to load is probably a hack!
+Be warned that this will probably give unexpected results.
+Do you still want to run it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="470"/>
+        <source>The rom you are trying to load is probably a hack!
+Be warned that this will probably give unexpected results.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="484"/>
+        <source>Emulation is running. Do you want to
+stop it and load the selected rom?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="523"/>
+        <source>Couldn&apos;t load Rom!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="658"/>
+        <source>Rom closed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="207"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="286"/>
+        <source>Playback speed:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="316"/>
+        <source>Volume Not Supported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="320"/>
+        <source>Volume</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="353"/>
+        <source>There is no Rom loaded.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="372"/>
+        <source>No graphics plugin specified.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="383"/>
+        <source>No audio plugin specified.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="394"/>
+        <source>No input plugin specified.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="405"/>
+        <source>No RSP plugin specified.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="427"/>
+        <source>Couldn&apos;t spawn core thread!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="431"/>
+        <source>Emulation started (PID: %d)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="444"/>
+        <source>Stopping emulation.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="463"/>
+        <source>Emulation stopped.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="480"/>
+        <source>Emulation continued.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="497"/>
+        <source>Paused
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="686"/>
+        <source>Fast Forward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="925"/>
+        <source>The core thread recieved a SIGSEGV signal.
+This means it tried to access protected memory.
+Maybe you have set a wrong ucode for one of the plugins!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="1455"/>
+        <source>Config Dir:  %s
+Install Dir: %s
+Plugin Dir:  %s
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="1456"/>
+        <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="1469"/>
+        <source>Couldn&apos;t spawn rom cache thread!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MainWidget</name>
@@ -1189,12 +399,12 @@ stop it and load the selected rom?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwidget.h" line="80"/>
+        <location filename="../main/gui_qt4/mainwidget.ui" line="13"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwidget.h" line="81"/>
+        <location filename="../main/gui_qt4/mainwidget.ui" line="24"/>
         <source>&amp;Filter:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1244,162 +454,162 @@ stop it and load the selected rom?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="190"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="16"/>
         <source>Mupen64Plus</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="217"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="36"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="218"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="45"/>
         <source>&amp;Emulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="219"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="60"/>
         <source>&amp;Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="220"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="72"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="221"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="85"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="191"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="116"/>
         <source>&amp;Open Rom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="192"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="119"/>
         <source>Ctrl+O</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="193"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="124"/>
         <source>&amp;Close Rom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="194"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="127"/>
         <source>Ctrl+W</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="195"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="132"/>
         <source>&amp;Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="196"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="135"/>
         <source>Ctrl+Q</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="197"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="143"/>
         <source>&amp;Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="198"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="151"/>
         <source>&amp;Pause</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="199"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="154"/>
         <source>Space</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="200"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="162"/>
         <source>S&amp;top</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="201"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="165"/>
         <source>Esc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="202"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="170"/>
         <source>Sa&amp;ve State</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="203"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="173"/>
         <source>Ctrl+F7</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="204"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="178"/>
         <source>Save State &amp;as...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="205"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="183"/>
         <source>&amp;Load State</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="206"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="186"/>
         <source>Ctrl+F5</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="207"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="191"/>
         <source>L&amp;oad State from...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="208"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="196"/>
         <source>&amp;Current Save State Slot...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="209"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="201"/>
         <source>&amp;Full Screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="210"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="204"/>
         <source>Alt+Return</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="211"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="209"/>
         <source>&amp;Configure Mupen64Plus</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="212"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="214"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="213"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="219"/>
         <source>About &amp;Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="214"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="230"/>
         <source>Show &amp;Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="215"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="241"/>
         <source>Show &amp;Statusbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_mainwindow.h" line="216"/>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="252"/>
         <source>Show F&amp;ilter</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1463,22 +673,22 @@ stop it and load the selected rom?</source>
 <context>
     <name>RomDirectoriesListWidget</name>
     <message>
-        <location filename="../main/gui_qt4/ui_romdirectorieslistwidget.h" line="81"/>
+        <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="13"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_romdirectorieslistwidget.h" line="82"/>
+        <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="24"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_romdirectorieslistwidget.h" line="83"/>
+        <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="31"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_romdirectorieslistwidget.h" line="84"/>
+        <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="38"/>
         <source>Remove All</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1486,92 +696,92 @@ stop it and load the selected rom?</source>
 <context>
     <name>RomInfoDialog</name>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="337"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="19"/>
         <source>Rom Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="338"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="31"/>
         <source>Good Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="340"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="54"/>
         <source>File Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="342"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="77"/>
         <source>Country:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="345"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="129"/>
         <source>Status:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="347"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="152"/>
         <source>Players:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="349"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="175"/>
         <source>Rumble:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="351"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="198"/>
         <source>Save Type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="353"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="221"/>
         <source>Internal Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="355"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="249"/>
         <source>Size:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="357"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="277"/>
         <source>CRC1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="359"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="305"/>
         <source>CRC2:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="361"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="333"/>
         <source>MD5 Hash:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="363"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="361"/>
         <source>Full Path:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="365"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="384"/>
         <source>Compression:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="367"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="407"/>
         <source>Image Type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="369"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="430"/>
         <source>CIC Chip:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_rominfodialog.h" line="371"/>
+        <location filename="../main/gui_qt4/rominfodialog.ui" line="450"/>
         <source>User Comments</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1747,117 +957,117 @@ stop it and load the selected rom?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="510"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="13"/>
         <source>Mupen64Plus Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="513"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="117"/>
         <source>CPU Core</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="514"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="123"/>
         <source>&amp;Interpreter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="515"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="130"/>
         <source>Dynamic &amp;Recompiler</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="516"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="137"/>
         <source>&amp;Pure Interpreter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="517"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="147"/>
         <source>Compatibility</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="518"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="153"/>
         <source>Disable compiled &amp;jump</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="519"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="160"/>
         <source>&amp;Disable Memory Expansion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="520"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="170"/>
         <source>Miscellaneous</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="521"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="176"/>
         <source>A&amp;uto-increment save slot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="522"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="183"/>
         <source>Ask &amp;before loading bad dump/hacked rom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="523"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="190"/>
         <source>On &amp;screen display enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="524"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="197"/>
         <source>Always start in &amp;full screen mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="525"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="227"/>
         <source>Graphics Plugin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="542"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="421"/>
         <source>Config</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="543"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="428"/>
         <source>Test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="544"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="435"/>
         <source>About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="530"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="282"/>
         <source>Audio Plugin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="535"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="337"/>
         <source>Input Plugin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="540"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="392"/>
         <source>RSP Plugin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="545"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="454"/>
         <source>Directories</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="546"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="466"/>
         <source>&amp;Scan directories recursively</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/ui_settingsdialog.h" line="547"/>
+        <location filename="../main/gui_qt4/settingsdialog.ui" line="473"/>
         <source>Show &amp;full paths in filenames</source>
         <translation type="unfinished"></translation>
     </message>
