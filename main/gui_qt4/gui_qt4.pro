@@ -72,4 +72,5 @@ SOURCES += globals.cpp \
            rominfodialog.cpp \
            rommodel.cpp \
            settingsdialog.cpp \
-           starlabel.cpp
+           starlabel.cpp \
+           translate.cpp

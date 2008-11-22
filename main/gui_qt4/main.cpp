@@ -26,6 +26,8 @@
 #include <QApplication>
 #include <QAbstractEventDispatcher>
 #include <QMessageBox>
+#include <QTranslator>
+#include <QLocale>
 
 #include <cstdio>
 #include <cstdarg>
@@ -34,8 +36,10 @@
 #include "mainwindow.h"
 #include "globals.h"
 
+// ugly globals
 static MainWindow* mainWindow = 0;
 static QApplication* application = 0;
+static QTranslator* translator = 0;
 
 namespace core {
 extern "C" {
@@ -51,12 +55,24 @@ void gui_init(int *argc, char ***argv)
 {
     application = new QApplication(*argc, *argv);
 
+    QString locale = QLocale::system().name();
+    QString translation = QString("mupen64plus_%1").arg(locale);
+    QString path = QString("%1translations").arg(get_installpath());
+    translator = new QTranslator;
+    if (!translator->load(translation, path)) {
+        qDebug("Could not load translation %s. Looked in %s.",
+                  qPrintable(translation), qPrintable(path));
+    }
+
+    application->installTranslator(translator);
+
 #ifndef __WIN32__
     if (QAbstractEventDispatcher::instance()->inherits("QEventDispatcherGlib")) {
         delete application;
         application = 0;
         gtk_init(argc, argv);
         application = new QApplication(*argc, *argv);
+        application->installTranslator(translator);
     } else {
         QMessageBox::warning(0,
             QObject::tr("No Glib Integration"),
@@ -68,9 +84,11 @@ void gui_init(int *argc, char ***argv)
                          by default.</p></html>"));
     }
 #endif
+
     application->setOrganizationName("Mupen64Plus");
     application->setApplicationName("Mupen64Plus");
     application->setWindowIcon(icon("mupen64plus.png"));
+
     mainWindow = new MainWindow;
 }
 
@@ -86,11 +104,13 @@ void gui_display(void)
 void gui_main_loop(void)
 {
     application->exec();
+    config_write();
     delete mainWindow;
     mainWindow = 0;
     delete application;
     application = 0;
-    config_write();
+    delete translator;
+    translator = 0;
 }
 
 int gui_message(gui_message_t messagetype, const char *format, ...)

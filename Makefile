@@ -104,7 +104,6 @@ OBJ_CORE = \
 	main/main.o \
 	main/romcache.o \
 	main/util.o \
-	main/translate.o \
 	main/cheat.o \
 	main/config.o \
 	main/adler32.o \
@@ -264,6 +263,8 @@ ifeq ($(GUI), QT4)
   OBJECTS += $(OBJ_QT4_GUI)
   LIBS += $(QT_LIBS) $(GTK_LIBS)
 else
+  # we reimplement the translation functions in the Qt gui
+  OBJECTS += main/translate.o
   ifneq ($(GUI), NONE)
     OBJECTS += $(OBJ_GTK_GUI)
     LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
@@ -334,6 +335,7 @@ clean:
 	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
 	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
 	$(RM) -f main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
+	$(RM) -f translations/*.qm
 
 rebuild: clean all
 
@@ -357,6 +359,9 @@ main/gui_qt4/Makefile:
 
 main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
 	${MAKE} -C main/gui_qt4
+# Run lrelease only on ts files with locale suffix, makes no sense to run it on
+# the template
+	${LRELEASE} translations/*_*.ts
 
 plugins/blight_input.so: FORCE
 	$(MAKE) -C blight_input all

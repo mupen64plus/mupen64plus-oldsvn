@@ -84,6 +84,9 @@ $INSTALL -d -v "${LIBDIR}"
 $INSTALL -m 0644 plugins/* "${LIBDIR}"
 $INSTALL -d -v "${APPLICATIONSDIR}"
 $INSTALL -m 0644 mupen64plus.desktop "${APPLICATIONSDIR}"
+$INSTALL -d -v "${SHAREDIR}/translations"
+$INSTALL -m 0644 translations/*.qm "${SHAREDIR}/translations"
+
 
 
 printf "Done.\n"
