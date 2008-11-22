@@ -354,7 +354,10 @@ void startEmulation(void)
         return;
     }
 
-    // make sure all plugins are specified before running
+    /* Determine which plugins to use:
+    *  -If valid plugin was specified at the commandline, use it
+    *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
+    */
     if(g_GfxPlugin)
     {
         gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
@@ -402,6 +405,12 @@ void startEmulation(void)
         error_message(tr("No RSP plugin specified."));
         return;
     }
+
+    // load the plugins. Do this outside the emulation thread for GUI
+    // related things which cannot be done outside the main thread.
+    // Examples: GTK Icon theme setup in Rice which otherwise hangs forever
+    // with the Qt4 interface.
+    plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
 
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
@@ -801,30 +810,6 @@ static int emulationThread( void *_arg )
     SDL_SetEventFilter(sdl_event_filter);
     SDL_EnableUNICODE(1);
 
-    /* Determine which plugins to use:
-     *  -If valid plugin was specified at the commandline, use it
-     *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
-     */
-    if(g_GfxPlugin)
-        gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
-    else
-        gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
-
-    if(g_AudioPlugin)
-        audio_plugin = plugin_name_by_filename(g_AudioPlugin);
-    else
-        audio_plugin = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
-
-    if(g_InputPlugin)
-        input_plugin = plugin_name_by_filename(g_InputPlugin);
-    else
-        input_plugin = plugin_name_by_filename(config_get_string("Input Plugin", ""));
-
-    if(g_RspPlugin)
-        RSP_plugin = plugin_name_by_filename(g_RspPlugin);
-    else
-        RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
-
     // initialize memory, and do byte-swapping if it's not been done yet
     if (g_MemHasBeenBSwapped == 0)
     {
@@ -836,8 +821,7 @@ static int emulationThread( void *_arg )
         init_memory(0);
     }
 
-    // load the plugins and attach the ROM to them
-    plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
+    // Attach rom to plugins
     romOpen_gfx();
     romOpen_audio();
     romOpen_input();
