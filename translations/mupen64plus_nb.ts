@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="1.1" language="nb">
-<defaultcodec></defaultcodec>
+<!DOCTYPE TS><TS>
 <context>
     <name></name>
     <message>
@@ -77,7 +75,7 @@
     </message>
     <message>
         <source>.z64 (native)</source>
-        <translation>.z64 (opprinnelig)</translation>
+        <translation type="unfinished">.z64 (opprinnelig)</translation>
     </message>
     <message>
         <source>.v64 (byteswapped)</source>
@@ -129,7 +127,7 @@
     </message>
     <message>
         <source>Flash RAM</source>
-        <translation type="unfinished">Flash RAM</translation>
+        <translation>Flash RAM</translation>
     </message>
     <message>
         <source>Controller Pack</source>
@@ -196,14 +194,13 @@ Vil du fortsatt kjøre det?</translation>
 Be warned that this will probably give unexpected results.
 </source>
         <translation>Rom&apos;en du prøver å laste er sansynligvis en dårlig dump!
-Du er advart, dette vil sansyligvis gi uventede resultater.
-</translation>
+Du er advart, dette vil sansyligvis gi uventede resultater.</translation>
     </message>
     <message>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
-        <translation type="unfinished">Rom&apos;en du laster er sansynligvis et hack!
+        <translation>Rom&apos;en du laster er sansynligvis et hack!
 Du er advart, dette vil sansyligvis gi uventede resultater.
 Vil du fortsatt kjøre det?</translation>
     </message>
@@ -211,9 +208,8 @@ Vil du fortsatt kjøre det?</translation>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 </source>
-        <translation type="unfinished">Rom&apos;en du laster er sansynligvis et hack!
-Du er advart, dette vil sansyligvis gi uventede resultater.
-</translation>
+        <translation>Rom&apos;en du laster er sansynligvis et hack!
+Du er advart, dette vil sansyligvis gi uventede resultater.</translation>
     </message>
     <message>
         <source>Emulation is running. Do you want to
@@ -282,17 +278,19 @@ stoppe den og laste valgt rom?</translation>
     <message>
         <source>Emulation stopped.
 </source>
-        <translation>Emulering stoppet.</translation>
+        <translation>Emulering stoppet.
+</translation>
     </message>
     <message>
         <source>Emulation continued.
 </source>
-        <translation>Emulering fortsatte.</translation>
+        <translation>Emulering fortsatte.
+</translation>
     </message>
     <message>
         <source>Paused
 </source>
-        <translation>Pauset(new line)
+        <translation>Pauset
 </translation>
     </message>
     <message>
@@ -312,14 +310,14 @@ Kanskje du har satt feil ukode for en av plugin&apos;ene!</translation>
 Install Dir: %s
 Plugin Dir:  %s
 </source>
-        <translation>Konfigurasjonsmappe: %s
+        <translation>Konfigurasjonsmappe:  %s
 Innstallasjonsmappe: %s
-Pluginmappe: %s
+Pluginmappe:  %s
 </translation>
     </message>
     <message>
         <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
-        <translation>Konfigurasjonsmappe: &quot;%s&quot;, Installasjonsmappe: &quot;%s&quot;, Pluginmappe: &quot;%s&quot;</translation>
+        <translation>Konfigurasjonsmappe: &quot;%s&quot;, Installasjonsmappe: &quot;%s&quot;, Pluginmappe:  &quot;%s&quot;</translation>
     </message>
     <message>
         <source>Couldn&apos;t spawn rom cache thread!</source>
@@ -369,7 +367,8 @@ Pluginmappe: %s
     </message>
     <message>
         <source>%n rom(s)</source>
-        <translation>%n rom(er)</translation>
+        <translation>%n rom(er)
+        </translation>
     </message>
     <message>
         <source>About Mupen64Plus</source>
@@ -377,7 +376,7 @@ Pluginmappe: %s
     </message>
     <message>
         <source>&lt;html&gt;&lt;b&gt;Mupen64Plus N64 Emulator&lt;/b&gt;&lt;br/&gt;            &lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Home...&lt;/a&gt;            &lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;b&gt;Mupen64Plus N64 Emulator&lt;/b&gt;&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Hjem...&lt;/a&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;b&gt;Mupen64Plus N64 Emulator&lt;/b&gt;&lt;br/&gt;            &lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Hjem...&lt;/a&gt;            &lt;/html&gt;</translation>
     </message>
     <message>
         <source>Slot &amp;%1</source>
@@ -520,7 +519,7 @@ Pluginmappe: %s
     </message>
     <message>
         <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib                          mainloop integration. Plugins that use Gtk+                          &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;                         &lt;p&gt;To fix this, install a Qt version with glib                          main loop support. Most distributions provide this                          by default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;p&gt;Ditt Qt bibliotek ble kompilert uten glib(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)hovedloop integrasjon. Plugin som bruker Gtk+(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)&lt;b&gt;vil&lt;/b&gt; krasje emulatoren!&lt;/p&gt;(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)&lt;p&gt;For å fikse dette, installer en Qt versjon med glib(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)hoved loop støtte. De fleste distribusjoner tilbyr dette(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)(sp)som standard.&lt;/p&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;p&gt;Ditt Qt bibliotek ble kompilert uten glib                          hovedloop integrasjon. Plugin som bruker Gtk+                          &lt;b&gt;vil&lt;/b&gt; krasje emulatoren!&lt;/p&gt;                         &lt;p&gt;For å fikse dette, installer en Qt versjon med glib                          hoved loop støtte. De fleste distribusjoner tilbyr dette                          som standard.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -645,7 +644,7 @@ Pluginmappe: %s
     </message>
     <message>
         <source>CIC Chip:</source>
-        <translation type="unfinished">CIC Chip:</translation>
+        <translation>CIC Chip:</translation>
     </message>
     <message>
         <source>User Comments</source>
@@ -768,7 +767,7 @@ Pluginmappe: %s
     </message>
     <message>
         <source>CIC Chip</source>
-        <translation type="unfinished">CIC Chip</translation>
+        <translation>CIC Chip</translation>
     </message>
     <message>
         <source>Rumble</source>
@@ -863,7 +862,7 @@ Pluginmappe: %s
     </message>
     <message>
         <source>Input Plugin</source>
-        <translation type="unfinished">Input Plugin</translation>
+        <translation>Input Plugin</translation>
     </message>
     <message>
         <source>RSP Plugin</source>
@@ -875,11 +874,11 @@ Pluginmappe: %s
     </message>
     <message>
         <source>&amp;Scan directories recursively</source>
-        <translation type="unfinished">&amp;Skan kataloger ...</translation>
+        <translation>&amp;Skan kataloger rekursivt</translation>
     </message>
     <message>
         <source>Show &amp;full paths in filenames</source>
-        <translation type="unfinished">Vis hele stien i &amp;filnavn</translation>
+        <translation>Vis hele stien i &amp;filnavn</translation>
     </message>
 </context>
 </TS>
