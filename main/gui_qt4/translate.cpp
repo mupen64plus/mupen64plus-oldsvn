@@ -19,7 +19,7 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <QObject>
+#include <QCoreApplication>
 #include <QMap>
 
 #include "../translate.h"
@@ -35,7 +35,7 @@ extern "C" {
     int tr_set_language(const char *name) { Q_UNUSED(name); return 0; }
     const char *tr(const char *text) {
         // update the translation every time, it might have changed
-        translations[text] = QObject::tr(text);
+        translations[text] = QCoreApplication::translate("", text);
         return qPrintable(translations[text]);
     }
 }
