@@ -112,7 +112,8 @@ const char * config_get_string( const char *key, const char *def )
     SConfigValue *val = config_findValue( key );
     if (!val)
     {
-        config_put_string(key, def);
+        if (def != NULL)
+            config_put_string(key, def);
         return def;
     }
 
