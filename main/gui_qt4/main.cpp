@@ -28,6 +28,7 @@
 #include <QMessageBox>
 #include <QTranslator>
 #include <QLocale>
+#include <QtGlobal>
 
 #include <cstdio>
 #include <cstdarg>
@@ -66,7 +67,7 @@ void gui_init(int *argc, char ***argv)
 
     application->installTranslator(translator);
 
-#ifndef __WIN32__
+#ifdef Q_WS_X11
     if (QAbstractEventDispatcher::instance()->inherits("QEventDispatcherGlib")) {
         delete application;
         application = 0;
