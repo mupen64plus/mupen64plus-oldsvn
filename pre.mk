@@ -97,25 +97,41 @@ GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
 GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
 
 # set Qt flags and libraries
+# some distros append -qt4 to the binaries so look for those first
 ifeq ($(GUI), QT4)
    ifneq ($(USES_QT4),)
-    QMAKE       = ${shell which qmake 2>/dev/null}
+    QMAKE       = ${shell which qmake-qt4 2>/dev/null}
+    ifeq ($(QMAKE),)
+      QMAKE = ${shell which qmake 2>/dev/null}
+    endif
     ifeq ($(QMAKE),)
       $(error qmake from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    MOC         = $(shell which moc 2>/dev/null)
+    MOC = $(shell which moc-qt4 2>/dev/null)
+    ifeq ($(MOC),)
+      MOC = $(shell which moc 2>/dev/null)
+    endif
     ifeq ($(MOC),)
       $(error moc from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    UIC         = $(shell which uic 2>/dev/null)
+    UIC         = $(shell which uic-qt4 2>/dev/null)
+    ifeq ($(UIC),)
+      UIC = $(shell which uic 2>/dev/null)
+    endif
     ifeq ($(UIC),)
       $(error uic from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    RCC         = $(shell which rcc 2>/dev/null)
+    RCC         = $(shell which rcc-qt4 2>/dev/null)
+    ifeq ($(RCC),)
+      RCC = $(shell which rcc 2>/dev/null)
+    endif
     ifeq ($(RCC),)
       $(error rcc from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    LRELEASE    = $(shell which lrelease 2>/dev/null)
+    LRELEASE    = $(shell which lrelease-qt4 2>/dev/null)
+    ifeq ($(LRELEASE),)
+      LRELEASE = $(shell which lrelease 2>/dev/null)
+    endif
     ifeq ($(LRELEASE),)
       $(error lrelease from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
