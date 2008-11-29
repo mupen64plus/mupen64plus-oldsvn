@@ -843,7 +843,7 @@ DllConfig( HWND hParent )
 #elif defined( GUI_GTK )
         configure_gtk( controller );
 #endif
-        write_configuration();
+        /* write_configuration() should be called in the configure_ function above */
     }
 }
 
