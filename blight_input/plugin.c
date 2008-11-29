@@ -164,6 +164,7 @@ void read_configuration( void )
     int cont, plugged, plugin, mouse, i, b, dev;
     char line[200], device[200], key_a[200], key_b[200], button_a[200], button_b[200],
              axis[200], axis_a[200], axis_b[200], button[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
+    char chAxisDir;
     const char *p;
     char path[PATH_MAX];
 
@@ -267,7 +268,7 @@ void read_configuration( void )
                     controller[cont].axis[b - Y_AXIS].button_a = -1;
                 if( sscanf( button_b, "%d", &controller[cont].axis[b - Y_AXIS].button_b ) != 1 )
                     controller[cont].axis[b - Y_AXIS].button_b = -1;
-                num = sscanf( axis_a, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_a, (char *)&controller[cont].axis[b - Y_AXIS].axis_dir_a );
+                num = sscanf( axis_a, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_a, &chAxisDir );
                 if( num != 2 )
                 {
                     controller[cont].axis[b - Y_AXIS].axis_a = -1;
@@ -275,13 +276,15 @@ void read_configuration( void )
                 }
                 else
                 {
-                    if( controller[cont].axis[b - Y_AXIS].axis_dir_a == '+' )
+                    if( chAxisDir == '+' )
                         controller[cont].axis[b - Y_AXIS].axis_dir_a = 1;
-                    if( controller[cont].axis[b - Y_AXIS].axis_dir_a == '-' )
+                    else if( chAxisDir == '-' )
                         controller[cont].axis[b - Y_AXIS].axis_dir_a = -1;
+                    else
+                        controller[cont].axis[b - Y_AXIS].axis_dir_a = 0;
                 }
               
-                num = sscanf( axis_b, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_b, (char *)&controller[cont].axis[b - Y_AXIS].axis_dir_b );
+                num = sscanf( axis_b, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_b, &chAxisDir);
                 if( num != 2 )
                 {
                     controller[cont].axis[b - Y_AXIS].axis_b = -1;
@@ -289,10 +292,12 @@ void read_configuration( void )
                 }
                 else
                 {
-                    if( controller[cont].axis[b - Y_AXIS].axis_dir_b == '+' )
+                    if( chAxisDir == '+' )
                         controller[cont].axis[b - Y_AXIS].axis_dir_b = 1;
-                    if( controller[cont].axis[b - Y_AXIS].axis_dir_b == '-' )
+                    else if( chAxisDir == '-' )
                         controller[cont].axis[b - Y_AXIS].axis_dir_b = -1;
+                    else
+                        controller[cont].axis[b - Y_AXIS].axis_dir_b = 0;
                 }
                 if( sscanf( hat, "%d", &controller[cont].axis[b - Y_AXIS].hat ) != 1 )
                     controller[cont].axis[b - Y_AXIS].hat = -1;
@@ -311,7 +316,7 @@ void read_configuration( void )
 #ifdef _DEBUG
                 printf( "%s, %d: num = %d, key = %s, button = %s, axis = %s, hat = %s, hat_pos = %s, mbutton = %s\n", __FILE__, __LINE__, num, key_a, button_a, axis, hat, hat_pos_a, mbutton );
 #endif
-                num = sscanf( axis, "%d%c", &controller[cont].button[b].axis, (char *)&controller[cont].button[b].axis_dir );
+                num = sscanf( axis, "%d%c", &controller[cont].button[b].axis, &chAxisDir );
                 if( num != 2 )
                 {
                     controller[cont].button[b].axis = -1;
@@ -319,10 +324,12 @@ void read_configuration( void )
                 }
                 else
                 {
-                    if( controller[cont].button[b].axis_dir == '+' )
+                    if( chAxisDir == '+' )
                         controller[cont].button[b].axis_dir = 1;
-                    else if( controller[cont].button[b].axis_dir == '-' )
+                    else if( chAxisDir == '-' )
                         controller[cont].button[b].axis_dir = -1;
+                    else
+                        controller[cont].button[b].axis_dir = 0;
                 }
                 if( sscanf( key_a, "%d", (int *)&controller[cont].button[b].key ) != 1 )
                     controller[cont].button[b].key = -1;
