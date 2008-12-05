@@ -19,16 +19,17 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <QApplication>
-#include <QAbstractEventDispatcher>
-#include <QMessageBox>
-#include <QTranslator>
-#include <QLocale>
 #include <QtGlobal>
 
 #ifdef Q_WS_X11
 # include <gtk/gtk.h>
 #endif
+
+#include <QApplication>
+#include <QAbstractEventDispatcher>
+#include <QMessageBox>
+#include <QTranslator>
+#include <QLocale>
 
 #include <cstdio>
 #include <cstdarg>
