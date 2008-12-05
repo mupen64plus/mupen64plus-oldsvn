@@ -259,6 +259,9 @@ ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
 endif
+ifneq ($(GUI), NONE)
+  MISC_DEPS = mupen64plus.desktop
+endif
 ifeq ($(GUI), QT4)
   OBJECTS += $(OBJ_QT4_GUI)
   LIBS += $(QT_LIBS) $(GTK_LIBS)
@@ -309,7 +312,7 @@ targets:
 
 all: version.h $(ALL)
 
-mupen64plus: mupen64plus.desktop version.h $(OBJECTS)
+mupen64plus: $(MISC_DEPS) version.h $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) $(LIBS) -ldl -o $@
 	$(STRIP) $@
 

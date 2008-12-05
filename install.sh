@@ -81,13 +81,20 @@ $INSTALL -D -m 0755 mupen64plus "${BINDIR}/mupen64plus"
 $INSTALL -d -v "${MANDIR}"
 $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}"
 $INSTALL -d -v "${LIBDIR}"
-$INSTALL -m 0644 plugins/* "${LIBDIR}"
-$INSTALL -d -v "${APPLICATIONSDIR}"
-$INSTALL -m 0644 mupen64plus.desktop "${APPLICATIONSDIR}"
-$INSTALL -d -v "${SHAREDIR}/translations"
-$INSTALL -m 0644 translations/*.qm "${SHAREDIR}/translations"
-
-
+if [ -f mupen64plus.desktop ]
+then
+    $INSTALL -m 0644 mupen64plus.desktop "${APPLICATIONSDIR}"
+fi
+if [ -f plugins/*.so ]
+then
+    $INSTALL -m 0644 plugins/* "${LIBDIR}"
+    $INSTALL -d -v "${APPLICATIONSDIR}"
+fi
+if [ -f translations/*.qm ]
+then
+    $INSTALL -d -v "${SHAREDIR}/translations"
+    $INSTALL -m 0644 translations/*.qm "${SHAREDIR}/translations"
+fi
 
 printf "Done.\n"
 
