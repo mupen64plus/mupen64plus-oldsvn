@@ -85,12 +85,12 @@ if [ -f mupen64plus.desktop ]
 then
     $INSTALL -m 0644 mupen64plus.desktop "${APPLICATIONSDIR}"
 fi
-if [ -f plugins/*.so ]
+if [ "x$(ls plugins/)" != "x" ]
 then
     $INSTALL -m 0644 plugins/* "${LIBDIR}"
     $INSTALL -d -v "${APPLICATIONSDIR}"
 fi
-if [ -f translations/*.qm ]
+if [ "x$(ls translations/*.qm 2>/dev/null)" != "x" ]
 then
     $INSTALL -d -v "${SHAREDIR}/translations"
     $INSTALL -m 0644 translations/*.qm "${SHAREDIR}/translations"
