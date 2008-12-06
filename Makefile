@@ -22,10 +22,12 @@
 # include pre-make file with a bunch of definitions
 USES_QT4 = true
 USES_GTK2 = true
-include ./pre.mk
 
-# local CFLAGS, LIBS, and LDFLAGS
-LDFLAGS += -lz -lm -lpng -lfreetype
+ifeq ($(WIN32),1)
+  include ./pre.mk.win32
+else
+  include ./pre.mk
+endif
 
 ifeq ($(OS), LINUX)
   LDFLAGS += -Wl,-export-dynamic
@@ -260,7 +262,9 @@ ifeq ($(LIRC), 1)
   LDFLAGS += -llirc_client
 endif
 ifneq ($(GUI), NONE)
-  MISC_DEPS = mupen64plus.desktop
+  ifneq ($(OS), WINDOWS)
+    MISC_DEPS = mupen64plus.desktop
+  endif
 endif
 ifeq ($(GUI), QT4)
   OBJECTS += $(OBJ_QT4_GUI)
@@ -291,6 +295,7 @@ targets:
 	@echo "    GUI=NONE      == build without GUI support"
 	@echo "    GUI=GTK2      == build with GTK2 GUI support (default)"
 	@echo "    GUI=QT4       == build with QT4 GUI support"
+	@echo "    WIN32=1       == mingw build"
 	@echo "  Install Options:"
 	@echo "    PREFIX=path   == install/uninstall prefix (default: /usr/local/)"
 	@echo "    SHAREDIR=path == path to install shared data (default: PREFIX/share/mupen64plus/)"
@@ -313,8 +318,10 @@ targets:
 all: version.h $(ALL)
 
 mupen64plus: $(MISC_DEPS) version.h $(OBJECTS)
-	$(CXX) $(OBJECTS) $(LDFLAGS) $(LIBS) -ldl -o $@
+	$(CXX) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
+ifneq ($(OS), WINDOWS)
 	$(STRIP) $@
+endif
 
 install:
 	./install.sh $(INSTALLOPTS)
@@ -347,9 +354,13 @@ mupen64plus.desktop: FORCE
 	@sed s:SHARE_DIR:"$(SHAREDIR)": mupen64plus.desktop.in > mupen64plus.desktop
 
 version.h: FORCE
+ifneq ($(OS), WINDOWS)
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         main/version.template > version.h
 	@$(MV) version.h main/version.h
+else
+	copy version.win32.h main\version.h
+endif
 
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
@@ -362,9 +373,14 @@ main/gui_qt4/Makefile:
 
 main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
 	${MAKE} -C main/gui_qt4
+ifneq ($(OS), WINDOWS)
 # Run lrelease only on ts files with locale suffix, makes no sense to run it on
-# the template
+# the template. For some reason this fails on windows.
 	${LRELEASE} translations/*_*.ts
+else
+# I wonder whether we can avoid this somehow
+	copy main\gui_qt4\release\libgui_qt4.a main\gui_qt4
+endif
 
 plugins/blight_input.so: FORCE
 	$(MAKE) -C blight_input all
