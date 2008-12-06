@@ -49,6 +49,7 @@ namespace core {
 #endif
 
 #include "mainwindow.h"
+#include "winuser.h"
 
 MainWindow::MainWindow()
 : QMainWindow(0)
@@ -214,6 +215,22 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                         }
                     }
                 }
+                
+                core::WPARAM wParam = 0;
+                core::LPARAM lParam = 0;
+                int key = qke->key();
+                if ((key >= Qt::Key_0 && key <= Qt::Key_9)
+                    || (key >= Qt::Key_A && key <= Qt::Key_Z)) {
+                        // In these cases the Qt and windows definitions match
+                    wParam = (core::WPARAM) key;
+                } else if (key >= Qt::Key_Left && key <= Qt::Key_Right) {
+                    wParam = (core::WPARAM) key - Qt::Key_Left + VK_LEFT;;
+                } else if (key == Qt::Key_Return || key == Qt::Key_Enter) {
+                    wParam = VK_RETURN;
+                } else if (key == Qt::Key_Space) {
+                    wParam = VK_SPACE;
+                }
+                core::keyUp(wParam, lParam);
             }
             return false;
         }
