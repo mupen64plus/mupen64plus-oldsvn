@@ -30,7 +30,7 @@ ARCH = 32BITS
 OS = WINDOWS
 
 # SDL
-CFLAGS += -I${SDL_DIR}/include/SDL
+CFLAGS += -I${SDL_DIR}/include/SDL -I${SDL_DIR}/include
 LDFLAGS += -L${SDL_DIR}/lib -lSDL
 
 # gnuwin32
