@@ -35,7 +35,7 @@ HINSTANCE   hInstance;
 
 char        pluginName[] = "glN64 v0.4.1";
 char        *screenDirectory;
-u32 last_good_ucode = 0;
+u32 last_good_ucode = (u32) -1;
 void (*CheckInterrupts)( void );
 char        configdir[PATH_MAX] = {0};
 void (*renderCallback)() = NULL;
