@@ -97,10 +97,6 @@ endif
 
 INSTALLOPTS := $(PREFIX) $(SHAREDIR) $(BINDIR) $(LIBDIR) $(MANDIR) $(APPLICATIONSDIR)
 
-# set Freetype flags
-FREETYPEINC = $(shell pkg-config --cflags freetype2)
-CFLAGS += $(FREETYPEINC)
-
 # list of object files to generate
 OBJ_CORE = \
 	main/main.o \
@@ -330,6 +326,7 @@ uninstall:
 	./uninstall.sh $(INSTALLOPTS)
 
 clean:
+ifneq ($(OS), WINDOWS)
 	$(MAKE) -C blight_input clean
 	$(MAKE) -C dummy_audio clean
 	$(MAKE) -C dummy_video clean
@@ -339,13 +336,18 @@ clean:
 	$(MAKE) -C jttl_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
-	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
-	$(RM) -f ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
-	$(RM) -f mupen64plus mupen64plus.desktop
-	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
-	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
-	$(RM) -f main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
-	$(RM) -f translations/*.qm
+	$(RM_F) ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
+	$(RM_F) ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
+	$(RM_F) mupen64plus mupen64plus.desktop
+	$(RM_F) plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
+	$(RM_F) plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
+	$(RM_F) main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
+	$(RM_F) translations/*.qm
+else
+	del /S *.o *.so mupen64plus.exe moc_* *.a *.qm
+	cd main\gui_qt4
+	del /S ui_*.h
+endif
 
 rebuild: clean all
 
@@ -372,7 +374,7 @@ main/gui_qt4/Makefile:
 	${QMAKE} main/gui_qt4/gui_qt4.pro -o main/gui_qt4/Makefile
 
 main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
-	${MAKE} -C main/gui_qt4
+	${MAKE} -C main/gui_qt4 CXXFLAGS="${CFLAGS}"
 ifneq ($(OS), WINDOWS)
 # Run lrelease only on ts files with locale suffix, makes no sense to run it on
 # the template. For some reason this fails on windows.

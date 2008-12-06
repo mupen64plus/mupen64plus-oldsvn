@@ -60,6 +60,7 @@ ifeq ($(OS),OSX)
 STRIP	= strip -x 
 endif
 RM      = del
+RM_F    = del /F /Q
 MV      = move
 CP      = copy
 MD      = mkdir

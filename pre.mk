@@ -75,6 +75,10 @@ endif
 FREETYPE_LIBS	= $(shell freetype-config --libs)
 FREETYPE_FLAGS	= $(shell freetype-config --cflags)
 
+# set Freetype flags
+FREETYPEINC = $(shell pkg-config --cflags freetype2)
+CFLAGS += $(FREETYPEINC)
+
 # detect GUI options
 ifeq ($(GUI),)
   GUI = GTK2
@@ -152,6 +156,7 @@ ifeq ($(OS),OSX)
 STRIP	= strip -x 
 endif
 RM      = rm
+RM_F    = rm -f
 MV      = mv
 CP      = cp
 MD      = mkdir
