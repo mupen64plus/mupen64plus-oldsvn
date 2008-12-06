@@ -24,6 +24,7 @@
 SDL_DIR = C:\SDL-1.2.13
 DLFCN-WIN32_DIR = C:\dlfcn-win32-static-r8
 GNUWIN32_DIR = C:\GnuWin32
+SDL_TTF_DIR = C:\SDL_ttf-2.0.9
 
 CPU = X86
 ARCH = 32BITS
@@ -59,10 +60,9 @@ endif
 ifeq ($(OS),OSX)
 STRIP	= strip -x 
 endif
-RM      = del
-RM_F    = del /F /Q
-MV      = move
-CP      = copy
+RM      = rm
+MV      = mv
+CP      = cp
 MD      = mkdir
 QMAKE   = qmake
 LRELEASE = lrelease

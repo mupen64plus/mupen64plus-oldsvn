@@ -21,11 +21,13 @@ else
 endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-SDLTTF_LIBS	= -lSDL_ttf -LC:\SDL_ttf-2.0.9\lib
+SDLTTF_LIBS	= -lSDL_ttf
 CFLAGS += -DGUI_SDL -DPIC
 
 ifneq ($(OS), WINDOWS)
   CFLAGS += -fpic
+else
+  SDLTTF_LIBS += -L$(SDL_TTF_DIR)\lib
 endif
 
 # list of object files to generate
