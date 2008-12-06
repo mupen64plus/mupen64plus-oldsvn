@@ -48,7 +48,7 @@ clean:
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) $(FREETYPE_FLAGS) -c $<
 
 blight_input.$(SO_EXTENSION): $(OBJ_BLIGHT)
-	$(CC) -o $@ -shared $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SDLTTF_LIBS) $(FREETYPE_LIBS)
+	$(CC) -o $@ -shared $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SDLTTF_LIBS) $(FREETYPE_LIBS) $^
 ifneq ($(OS), WINDOWS)
 	$(STRIP) $@
 endif

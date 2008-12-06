@@ -149,12 +149,10 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         QList<QAction*> slotActions;
         QLabel* m_statusBarLabel;
         QActionGroup* m_uiActions;
-#ifdef __WIN32__
         QPointer<QWidget> m_renderWindow;
 
     protected:
         bool eventFilter(QObject *obj, QEvent *ev);
-#endif
 };
 
 #endif // __MAINWINDOW_H__

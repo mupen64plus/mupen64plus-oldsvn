@@ -91,6 +91,8 @@ void gui_init(int *argc, char ***argv)
     application->setApplicationName("Mupen64Plus");
     application->setWindowIcon(icon("mupen64plus.png"));
 
+    application->setKeyboardInputInterval(0);
+
     mainWindow = new MainWindow;
 }
 

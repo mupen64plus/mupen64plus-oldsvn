@@ -374,13 +374,14 @@ main/gui_qt4/Makefile:
 	${QMAKE} main/gui_qt4/gui_qt4.pro -o main/gui_qt4/Makefile
 
 main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
-	${MAKE} -C main/gui_qt4 CXXFLAGS="${CFLAGS}"
 ifneq ($(OS), WINDOWS)
+	${MAKE} -C main/gui_qt4
 # Run lrelease only on ts files with locale suffix, makes no sense to run it on
 # the template. For some reason this fails on windows.
 	${LRELEASE} translations/*_*.ts
 else
 # I wonder whether we can avoid this somehow
+	${MAKE} -C main/gui_qt4 CXXFLAGS="${CFLAGS}"
 	copy main\gui_qt4\release\libgui_qt4.a main\gui_qt4
 endif
 

@@ -60,6 +60,8 @@
 #define test_bit(bit, array)    ((array[LONG(bit)] >> OFF(bit)) & 1)
 #endif //__linux__
 
+#include "winuser.h"
+
 static unsigned short button_bits[] = {
     0x0001,  // R_DPAD
     0x0002,  // L_DPAD
@@ -82,6 +84,8 @@ static unsigned short button_bits[] = {
 static SController controller[4];   // 4 controllers
 static int romopen = 0;         // is a rom opened
 static char configdir[PATH_MAX] = {0};  // holds config dir path
+
+Uint8 myKeyState[SDLK_LAST];
 
 static const char *button_names[] = {
     "DPad R",       // R_DPAD
@@ -876,6 +880,65 @@ GetDllInfo( PLUGIN_INFO *PluginInfo )
     PluginInfo->Type = PLUGIN_TYPE_CONTROLLER;
 }
 
+/* Helper function to handle the SDL keys */
+static void
+doSdlKeys(Uint8* keystate)
+{
+    int c, b, axis_val, axis_max_val, axis_val_tmp;
+    int grabmouse = -1;
+
+    axis_max_val = 80;
+    if (keystate[SDLK_LCTRL])
+        axis_max_val -= 40;
+    if (keystate[SDLK_LSHIFT])
+        axis_max_val -= 20;
+
+    for( c = 0; c < 4; c++ )
+    {
+        for( b = 0; b < 16; b++ )
+        {
+            if( controller[c].button[b].key == SDLK_UNKNOWN || ((int) controller[c].button[b].key) < 0)
+                continue;
+            if( keystate[controller[c].button[b].key] )
+                controller[c].buttons.Value |= button_bits[b];
+        }
+        for( b = 0; b < 2; b++ )
+        {
+            // from the N64 func ref: The 3D Stick data is of type signed char and in
+            // the range between 80 and -80. (32768 / 409 = ~80.1)
+            if( b == 0 )
+                axis_val = controller[c].buttons.X_AXIS;
+            else
+                axis_val = -controller[c].buttons.Y_AXIS;
+
+            if( controller[c].axis[b].key_a != SDLK_UNKNOWN && ((int) controller[c].axis[b].key_a) > 0)
+                if( keystate[controller[c].axis[b].key_a] )
+                    axis_val = axis_max_val;
+            if( controller[c].axis[b].key_b != SDLK_UNKNOWN && ((int) controller[c].axis[b].key_b) > 0)
+                if( keystate[controller[c].axis[b].key_b] )
+                    axis_val = -axis_max_val;
+
+            if( b == 0 )
+                controller[c].buttons.X_AXIS = axis_val;
+            else
+                controller[c].buttons.Y_AXIS = -axis_val;
+        }
+        if (controller[c].mouse)
+        {
+            if (keystate[SDLK_LCTRL] && keystate[SDLK_LALT])
+            {
+                grabmouse = 0;
+            }
+            if (grabmouse >= 0)
+            {
+                // grab/ungrab mouse
+                SDL_WM_GrabInput( grabmouse ? SDL_GRAB_ON : SDL_GRAB_OFF );
+                SDL_ShowCursor( grabmouse ? 0 : 1 );
+            }
+        }
+    }
+}
+
 /******************************************************************
   Function: GetKeys
   Purpose:  To get the current state of the controllers buttons.
@@ -889,14 +952,13 @@ GetKeys( int Control, BUTTONS *Keys )
 {
     int b, axis_val, axis_max_val, axis_val_tmp;
     SDL_Event event;
-    Uint8 *keystate = SDL_GetKeyState( NULL );
+
+    // Handle keyboard input first
+    doSdlKeys( SDL_GetKeyState( NULL ) );
+    doSdlKeys( myKeyState );
 
     // read joystick state
     SDL_JoystickUpdate();
-
-    controller[Control].buttons.Value = 0;
-    //controller[Control].buttons.stick_x = 0;
-    //controller[Control].buttons.stick_y = 0;
 
     if( controller[Control].device >= 0 )
     {
@@ -1009,44 +1071,6 @@ GetKeys( int Control, BUTTONS *Keys )
         }
     }
 
-    // read keyboard state
-// else if( controller[Control].device == DEVICE_KEYBOARD )
-    {
-        axis_max_val = 80;
-        if (keystate[SDLK_LCTRL])
-            axis_max_val -= 40;
-        if (keystate[SDLK_LSHIFT])
-            axis_max_val -= 20;
-        for( b = 0; b < 16; b++ )
-        {
-            if( controller[Control].button[b].key == SDLK_UNKNOWN || ((int) controller[Control].button[b].key) < 0)
-                continue;
-            if( keystate[controller[Control].button[b].key] )
-                controller[Control].buttons.Value |= button_bits[b];
-        }
-        for( b = 0; b < 2; b++ )
-        {
-            // from the N64 func ref: The 3D Stick data is of type signed char and in
-            // the range between 80 and -80. (32768 / 409 = ~80.1)
-            if( b == 0 )
-                axis_val = controller[Control].buttons.X_AXIS;
-            else
-                axis_val = -controller[Control].buttons.Y_AXIS;
-
-            if( controller[Control].axis[b].key_a != SDLK_UNKNOWN && ((int) controller[Control].axis[b].key_a) > 0)
-                if( keystate[controller[Control].axis[b].key_a] )
-                    axis_val = axis_max_val;
-            if( controller[Control].axis[b].key_b != SDLK_UNKNOWN && ((int) controller[Control].axis[b].key_b) > 0)
-                if( keystate[controller[Control].axis[b].key_b] )
-                    axis_val = -axis_max_val;
-
-            if( b == 0 )
-                controller[Control].buttons.X_AXIS = axis_val;
-            else
-                controller[Control].buttons.Y_AXIS = -axis_val;
-        }
-    }
-
     // process mouse events
     {
         Uint8 mstate = SDL_GetMouseState( NULL, NULL );
@@ -1094,16 +1118,6 @@ GetKeys( int Control, BUTTONS *Keys )
                 }
             }
         }
-        if (keystate[SDLK_LCTRL] && keystate[SDLK_LALT])
-        {
-            grabmouse = 0;
-        }
-        if (grabmouse >= 0)
-        {
-            // grab/ungrab mouse
-            SDL_WM_GrabInput( grabmouse ? SDL_GRAB_ON : SDL_GRAB_OFF );
-            SDL_ShowCursor( grabmouse ? 0 : 1 );
-        }
     }
 
 #ifdef _DEBUG
@@ -1136,6 +1150,10 @@ GetKeys( int Control, BUTTONS *Keys )
         }
     }
 #endif /* __linux__ */
+
+    controller[Control].buttons.Value = 0;
+    //controller[Control].buttons.stick_x = 0;
+    //controller[Control].buttons.stick_y = 0;
 }
 
 static void InitiateRumble(int cntrl)
@@ -1257,6 +1275,11 @@ void InitiateControllers( CONTROL_INFO ControlInfo )
     // reset controllers
     memset( controller, 0, sizeof( SController ) * 4 );
 
+    for ( i = 0; i < SDLK_LAST; i++)
+    {
+        myKeyState[i] = 0;
+    }
+
     // read configuration
     read_configuration();
 
@@ -1370,6 +1393,25 @@ RomOpen( void )
     romopen = 1;
 }
 
+static SDLKey
+translateKey( WPARAM wParam )
+{
+    SDLKey key = 0;
+
+    // for a-z and 0-9 keys windows provides no defines
+    if (wParam >= 0x41 && wParam <= 0x5a) {
+        key = wParam - 0x41 + SDLK_a;
+    } else if (wParam >= 0x30 && wParam <= 0x39) {
+        key = wParam - 0x30 + SDLK_0;
+    } else if (wParam == VK_RETURN) {
+        key = SDLK_RETURN;
+    } else if (wParam == VK_SPACE) {
+        key = SDLK_SPACE;
+    }
+
+    return key;
+}
+
 /******************************************************************
   Function: WM_KeyDown
   Purpose:  To pass the WM_KeyDown message from the emulator to the
@@ -1380,6 +1422,7 @@ RomOpen( void )
 void
 WM_KeyDown( WPARAM wParam, LPARAM lParam )
 {
+    myKeyState[translateKey(wParam)] = 1;
 }
 
 /******************************************************************
@@ -1392,6 +1435,7 @@ WM_KeyDown( WPARAM wParam, LPARAM lParam )
 void
 WM_KeyUp( WPARAM wParam, LPARAM lParam )
 {
+    myKeyState[translateKey(wParam)] = 0;
 }
 
 /******************************************************************
