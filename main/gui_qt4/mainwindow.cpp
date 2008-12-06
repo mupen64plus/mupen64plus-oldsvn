@@ -21,7 +21,6 @@
 
 #include <QtGui>
 
-#include "mainwindow.h"
 #include "mainwidget.h"
 #include "globals.h"
 #include "rommodel.h"
@@ -38,6 +37,18 @@ namespace core {
         #include "../config.h"
     }
 }
+
+#ifdef __WIN32__
+# undef MB_ABORTRETRYIGNORE
+# undef MB_CANCELTRYCONTINUE
+# undef MB_OK
+# undef MB_OKCANCEL
+# undef MB_RETRYCANCEL
+# undef MB_YESNO
+# undef MB_YESNOCANCEL
+#endif
+
+#include "mainwindow.h"
 
 MainWindow::MainWindow()
 : QMainWindow(0)
@@ -523,6 +534,12 @@ void MainWindow::setupActions()
 }
 
 void MainWindow::setState(core::gui_state_t state)
+{
+    QMetaObject::invokeMethod(this, "setStateImplementation",
+                              Qt::QueuedConnection, Q_ARG(int, state));
+}
+
+void MainWindow::setStateImplementation(int state)
 {
     bool pause, stop, play;
     pause = stop = play = false;

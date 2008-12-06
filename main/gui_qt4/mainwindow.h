@@ -135,6 +135,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void configDialogShow();
         void itemCountUpdate(int count);
         void aboutDialogShow();
+        void setStateImplementation(int state);
 
     protected:
         void customEvent(QEvent* event);
