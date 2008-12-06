@@ -240,3 +240,5 @@ else   # set variables for debugging symbols
     STRIP = true
   endif
 endif
+
+SO_EXTENSION = so

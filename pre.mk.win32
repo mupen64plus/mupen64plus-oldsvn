@@ -83,3 +83,5 @@ ifeq ($(NO_ASM), 1)
   CFLAGS += -DNO_ASM
 endif
 
+
+SO_EXTENSION = dll

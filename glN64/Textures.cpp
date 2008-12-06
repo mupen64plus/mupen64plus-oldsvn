@@ -867,7 +867,7 @@ void TextureCache_Update( u32 t )
     u32 tileWidth, maskWidth, loadWidth, lineWidth, clampWidth, height;
     u32 tileHeight, maskHeight, loadHeight, lineHeight, clampHeight, width;
 
-    if (cache.enable2xSaI != OGL.enable2xSaI)
+    if (cache.enable2xSaI != (unsigned int) OGL.enable2xSaI)
     {
         TextureCache_Destroy();
         TextureCache_Init();

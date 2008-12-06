@@ -22,7 +22,11 @@
 
 # include pre-make file with a bunch of definitions
 USES_GTK2 = true
-include ../pre.mk
+ifeq ($(WIN32),1)
+  include ../pre.mk.win32
+else
+  include ../pre.mk
+endif
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += $(SDL_FLAGS) -fpic -DPIC -Wall

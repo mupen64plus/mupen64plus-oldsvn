@@ -23,11 +23,19 @@
 # include pre-make file with a bunch of definitions
 USES_QT4 = true
 USES_GTK2 = true
-include ../pre.mk
+ifeq ($(WIN32),1)
+  include ../pre.mk.win32
+else
+  include ../pre.mk
+endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -D__LINUX__ -Wall
+CFLAGS += -DPIC -D__LINUX__ -Wall
 LDFLAGS += $(GTHREAD_LIBS)
+
+ifneq ($(OS), WINDOWS)
+  CFLAGS += -fpic
+endif
 
 ifeq ($(GUI), NONE)
   OBJECTS = Config_nogui.o
@@ -75,10 +83,10 @@ OBJECTS += glN64.o \
 	F3DWRUS.o
 
 # build targets
-all: glN64.so
+all: glN64.$(SO_EXTENSION)
 
 clean:
-	rm -f *.o *.so ui_gln64config.*
+	rm -f *.o *.$(SO_EXTENSION) ui_gln64config.*
 
 # build rules
 .cpp.o:
@@ -87,8 +95,8 @@ clean:
 ui_gln64config.h: gln64config.ui
 	$(UIC) $< -o $@
 
-glN64.so: $(OBJECTS)
-	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -o $@
+glN64.$(SO_EXTENSION): $(OBJECTS)
+	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -shared -o $@
 	$(STRIP) $@
 
 glN64.o: glN64.cpp

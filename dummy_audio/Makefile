@@ -20,7 +20,11 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 # include pre-make file with a bunch of definitions
-include ../pre.mk
+ifeq ($(WIN32),1)
+  include ../pre.mk.win32
+else
+  include ../pre.mk
+endif
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -fpic -DPIC
@@ -29,16 +33,18 @@ CFLAGS += -fpic -DPIC
 OBJECTS = audio.o
 
 # build targets
-all: dummyaudio.so
+all: dummyaudio.$(SO_EXTENSION)
 
 clean:
-	rm -f *.o *.so
+	rm -f *.o *.$(SO_EXTENSION)
 
 # build rules
 .c.o:
 	$(CC) -o $@ $(CFLAGS) -c $<
 
-dummyaudio.so: $(OBJECTS)
-	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) -o $@
+dummyaudio.$(SO_EXTENSION): $(OBJECTS)
+	$(CC) -shared $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) -o $@
+ifneq ($(OS), WINDOWS)
 	$(STRIP) $@
+endif
 

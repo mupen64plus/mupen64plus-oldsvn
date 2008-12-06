@@ -33,8 +33,10 @@ static const char *pluginDir = 0;
 
 static inline const char *GetPluginDir()
 {
-        static char path[PATH_MAX];
-
+    static char path[PATH_MAX];
+#ifdef __WIN32__
+    strncpy(path, ".", PATH_MAX);
+#else
     if(strlen(configdir) > 0)
     {
         strncpy(path, configdir, PATH_MAX);
@@ -66,8 +68,9 @@ static inline const char *GetPluginDir()
                    strncat(path, "/plugins", PATH_MAX);
 #ifdef __USE_GNU
         }
-#endif
+#endif // __USE_GNU
     }
+#endif // __WIN32__
         return path;
 }
 
