@@ -314,7 +314,7 @@ targets:
 all: version.h $(ALL)
 
 mupen64plus: $(MISC_DEPS) version.h $(OBJECTS)
-	$(CXX) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
+	$(CXX) $(OBJECTS) $(LDFLAGS) $(CORE_LDFLAGS) $(LIBS) -o $@
 ifneq ($(OS), WINDOWS)
 	$(STRIP) $@
 endif

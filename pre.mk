@@ -184,8 +184,8 @@ else
 endif
 
 # set base CFLAGS and LDFLAGS
-CFLAGS += -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing 
-LDFLAGS += -lz -lm -lpng -lfreetype -ldl
+CFLAGS += -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
+CORE_LDFLAGS += -lz -lm -lpng -lfreetype -ldl
 
 # set special flags per-system
 ifeq ($(CPU), X86)
