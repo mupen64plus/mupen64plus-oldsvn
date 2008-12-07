@@ -222,8 +222,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                     || (key >= Qt::Key_A && key <= Qt::Key_Z)) {
                         // In these cases the Qt and windows definitions match
                     wParam = (core::WPARAM) key;
-                } else if (key >= Qt::Key_Left && key <= Qt::Key_Right) {
-                    wParam = (core::WPARAM) key - Qt::Key_Left + VK_LEFT;;
+                } else if (key >= Qt::Key_Left && key <= Qt::Key_Down) {
+                    wParam = (core::WPARAM) key - Qt::Key_Down + VK_DOWN;
                 } else if (key == Qt::Key_Return || key == Qt::Key_Enter) {
                     wParam = VK_RETURN;
                 } else if (key == Qt::Key_Space) {

@@ -1407,6 +1407,14 @@ translateKey( WPARAM wParam )
         key = SDLK_RETURN;
     } else if (wParam == VK_SPACE) {
         key = SDLK_SPACE;
+    } else if (wParam == VK_LEFT) {
+        key = SDLK_LEFT;
+    } else if (wParam == VK_RIGHT) {
+        key = SDLK_RIGHT;
+    } else if (wParam == VK_UP) {
+        key = SDLK_UP;
+    } else if (wParam == VK_DOWN) {
+        key = SDLK_DOWN;
     }
 
     return key;
