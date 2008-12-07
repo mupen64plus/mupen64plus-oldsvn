@@ -91,7 +91,7 @@ void gui_init(int *argc, char ***argv)
     application->setApplicationName("Mupen64Plus");
     application->setWindowIcon(icon("mupen64plus.png"));
 
-    application->setKeyboardInputInterval(0);
+    application->setAttribute(Qt::AA_NativeWindows);
 
     mainWindow = new MainWindow;
 }
