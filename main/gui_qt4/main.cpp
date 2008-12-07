@@ -91,7 +91,9 @@ void gui_init(int *argc, char ***argv)
     application->setApplicationName("Mupen64Plus");
     application->setWindowIcon(icon("mupen64plus.png"));
 
+#if QT_VERSION >= 0x040000
     application->setAttribute(Qt::AA_NativeWindows);
+#endif
 
     mainWindow = new MainWindow;
 }
