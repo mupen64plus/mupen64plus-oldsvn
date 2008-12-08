@@ -199,6 +199,7 @@ set(sources
 )
 
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
+    add_definitions(-DNO_GUI)
     set(sources
         ${sources}
         ${r4300_x86_dynarec_sources}
@@ -223,7 +224,6 @@ if(NOT MUPEN_RELEASE)
 endif(NOT MUPEN_RELEASE)
 
 if(CMAKE_HOST_UNIX)
-    message("running svn info")
     execute_process(
     COMMAND svn info .
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -266,6 +266,11 @@ configure_file(version.h backend/main/version.h)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 message(${CMAKE_CURRENT_SOURCE_DIR})
 
+# default to no gui
+if(NOT ui)
+    set(ui none)
+endif(NOT ui)
+
 if(ui STREQUAL none)
     add_definitions(-DNO_GUI)
 elseif(ui STREQUAL qt4)
@@ -306,3 +311,12 @@ endif(ui STREQUAL none)
 
 add_executable(mupen64plus ${sources})
 target_link_libraries(mupen64plus ${libraries})
+
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    set(link_flags "${link_flags} -Wl,-export-dynamic")
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
+        set(link_flags "${link_flags} -z execstack")
+    endif(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
+endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+
+set_target_properties(mupen64plus PROPERTIES LINK_FLAGS "${link_flags}")
