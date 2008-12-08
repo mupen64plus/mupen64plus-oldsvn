@@ -29,8 +29,8 @@
 
 namespace core {
     extern "C" {
-        #include "../config.h"
-        #include "../main.h"
+        #include "backend/main/config.h"
+        #include "backend/main/main.h"
     }
 }
 

@@ -25,7 +25,7 @@
 
 #include "main_gtk.h"
 
-#include "../main.h"
+#include "backend/main/main.h"
 
 static GtkIconTheme* icontheme;
 static gboolean usefallbacks;

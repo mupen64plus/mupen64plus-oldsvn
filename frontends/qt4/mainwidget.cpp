@@ -43,7 +43,7 @@
 
 namespace core {
     extern "C" {
-        #include "../romcache.h"
+        #include "backend/main/romcache.h"
     }
 }
 

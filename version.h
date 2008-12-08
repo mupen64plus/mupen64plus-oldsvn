@@ -19,15 +19,13 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Version macros automatically replaced by Makefiles. */
-
 #ifndef __VERSION_H__
 #define __VERSION_H__
 
 #define MUPEN_NAME "Mupen64Plus"
 
-#define MUPEN_VERSION "win-devel"
-#define PLUGIN_VERSION "win-devel"
+#define MUPEN_VERSION "@MUPEN_VERSION@"
+#define PLUGIN_VERSION "@PLUGIN_VERSION@"
 
 #endif /* __VERSION_H__ */
 

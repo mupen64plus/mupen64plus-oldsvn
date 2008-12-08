@@ -34,11 +34,11 @@
 #include "romproperties.h"
 #include "main_gtk.h"
 
-#include "../main.h" 
-#include "../util.h"
-#include "../config.h"
-#include "../translate.h"
-#include "../rom.h"
+#include "backend/main/main.h" 
+#include "backend/main/util.h"
+#include "backend/main/config.h"
+#include "backend/main/translate.h"
+#include "backend/main/rom.h"
 
 /* Globals. */
 GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star, *staroff;

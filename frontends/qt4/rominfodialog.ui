@@ -473,7 +473,7 @@
   <customwidget>
    <class>StarLabel</class>
    <extends>QLabel</extends>
-   <header>starlabel.h</header>
+   <header>frontends/qt4/starlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

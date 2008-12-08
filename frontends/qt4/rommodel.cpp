@@ -34,11 +34,11 @@
 
 namespace core {
     extern "C" {
-        #include "../rom.h"
-        #include "../romcache.h"
-        #include "../main.h"
-        #include "../config.h"
-        #include "../util.h"
+        #include "backend/main/rom.h"
+        #include "backend/main/romcache.h"
+        #include "backend/main/main.h"
+        #include "backend/main/config.h"
+        #include "backend/main/util.h"
     }
 }
 

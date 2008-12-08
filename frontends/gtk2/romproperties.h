@@ -27,7 +27,7 @@
 
 #include <gtk/gtk.h>
 
-#include "../romcache.h"
+#include "backend/main/romcache.h"
 
 typedef struct
 {

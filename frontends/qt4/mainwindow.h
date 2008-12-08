@@ -35,7 +35,7 @@ class QWaitCondition;
 
 extern "C" {
     namespace core {
-        #include "../gui.h"
+        #include "backend/main/gui.h"
     }
 }
 

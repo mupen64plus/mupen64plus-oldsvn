@@ -36,18 +36,18 @@
 #include "rombrowser.h"
 #include "icontheme.h"
 
-#include "../main.h"
-#include "../romcache.h"
-#include "../config.h"
-#include "../translate.h"
-#include "../util.h"
-#include "../winlnxdefs.h"
-#include "../plugin.h"
-#include "../savestates.h"
+#include "backend/main/main.h"
+#include "backend/main/romcache.h"
+#include "backend/main/config.h"
+#include "backend/main/translate.h"
+#include "backend/main/util.h"
+#include "backend/main/winlnxdefs.h"
+#include "backend/main/plugin.h"
+#include "backend/main/savestates.h"
 
-#include "../../opengl/osd.h"
+#include "backend/opengl/osd.h"
 
-#include "../../r4300/r4300.h"
+#include "backend/r4300/r4300.h"
 
 /* Globals. */
 SConfigDialog g_ConfigDialog;

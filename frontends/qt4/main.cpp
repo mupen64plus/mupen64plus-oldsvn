@@ -46,10 +46,10 @@ static QTranslator* translator = 0;
 namespace core {
 extern "C" {
 
-#include "../version.h"
-#include "../main.h"
-#include "../config.h"
-#include "../gui.h"
+#include "backend/main/version.h"
+#include "backend/main/main.h"
+#include "backend/main/config.h"
+#include "backend/main/gui.h"
 
 // Initializes gui subsystem. Also parses AND REMOVES any gui-specific commandline
 // arguments. This is called before mupen64plus parses any of its commandline options.

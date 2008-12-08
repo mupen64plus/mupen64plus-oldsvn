@@ -494,7 +494,7 @@
   <customwidget>
    <class>RomDirectoriesListWidget</class>
    <extends>QWidget</extends>
-   <header>romdirectorieslistwidget.h</header>
+   <header>frontends/qt4/romdirectorieslistwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

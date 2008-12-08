@@ -30,12 +30,12 @@
 
 namespace core {
     extern "C" {
-        #include "../gui.h"
-        #include "../main.h"
-        #include "../plugin.h"
-        #include "../savestates.h"
-        #include "../rom.h"
-        #include "../config.h"
+        #include "backend/main/gui.h"
+        #include "backend/main/main.h"
+        #include "backend/main/plugin.h"
+        #include "backend/main/savestates.h"
+        #include "backend/main/rom.h"
+        #include "backend/main/config.h"
     }
 }
 

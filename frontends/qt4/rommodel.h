@@ -28,9 +28,9 @@
 #include <QPair>
 #include <QChar>
 
-extern "C" {
-    namespace core {
-        #include "../romcache.h"
+namespace core {
+    extern "C" {
+        #include "backend/main/romcache.h"
     }
 }
 

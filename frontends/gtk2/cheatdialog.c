@@ -23,9 +23,9 @@
 
 #include "main_gtk.h"
 #include "cheatdialog.h"
-#include "../cheat.h"
-#include "../translate.h"
-#include "../util.h"
+#include "backend/main/cheat.h"
+#include "backend/main/translate.h"
+#include "backend/main/util.h"
 
 /** globals **/
 static GtkWidget *g_CheatView = NULL;

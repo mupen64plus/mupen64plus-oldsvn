@@ -26,8 +26,8 @@
 #include "rombrowser.h"
 #include "main_gtk.h"
 
-#include "../translate.h"
-#include "../main.h"
+#include "backend/main/translate.h"
+#include "backend/main/main.h"
 
 #include <gtk/gtk.h>
 #include <stdio.h>

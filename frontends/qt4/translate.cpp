@@ -22,7 +22,7 @@
 #include <QCoreApplication>
 #include <QMap>
 
-#include "../translate.h"
+#include "backend/main/translate.h"
 
 // We need the pointers to remain valid after the tr call returns, so cache the
 // translations

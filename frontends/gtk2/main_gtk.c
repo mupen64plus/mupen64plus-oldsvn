@@ -39,14 +39,14 @@
 #include "romproperties.h"
 #include "icontheme.h"
 
-#include "../version.h"
-#include "../main.h"
-#include "../config.h"
-#include "../util.h"
-#include "../translate.h"
-#include "../savestates.h"
-#include "../plugin.h"
-#include "../rom.h"
+#include "backend/main/version.h"
+#include "backend/main/main.h"
+#include "backend/main/config.h"
+#include "backend/main/util.h"
+#include "backend/main/translate.h"
+#include "backend/main/savestates.h"
+#include "backend/main/plugin.h"
+#include "backend/main/rom.h"
 
 #ifdef DBG
 #include "debugger/registers.h"     //temporary includes for the debugger menu
@@ -55,7 +55,7 @@
 #include "debugger/memedit.h"       //debugger window is open
 #include "debugger/varlist.h"
 
-#include "../../debugger/debugger.h"
+#include "backend/main/backend/main/debugger/debugger.h"
 #endif
 
 /* Necessary function prototypes. */

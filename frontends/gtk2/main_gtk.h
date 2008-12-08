@@ -27,7 +27,7 @@
 
 #include <gtk/gtk.h>
 
-#include "../gui.h"
+#include "backend/main/gui.h"
 
 typedef struct
 {
