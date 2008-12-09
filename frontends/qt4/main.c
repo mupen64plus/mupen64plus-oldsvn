@@ -85,7 +85,6 @@ static void parseCommandLine(int argc, char **argv);
 static int emulationThread( void *_arg );
 extern int rom_cache_system( void *_arg );
 
-
 #ifdef __WIN32__
 static void sighandler( int signal );
 #else

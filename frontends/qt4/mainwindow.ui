@@ -15,8 +15,14 @@
   <property name="windowTitle" >
    <string>Mupen64Plus</string>
   </property>
+  <property name="unifiedTitleAndToolBarOnMac" >
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget" >
    <layout class="QVBoxLayout" name="verticalLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
     <item>
      <widget class="MainWidget" native="1" name="mainWidget" />
     </item>
@@ -28,7 +34,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File" >
@@ -110,6 +116,7 @@
    <addaction name="actionCurrentSaveStateSlot" />
    <addaction name="separator" />
    <addaction name="actionFullScreen" />
+   <addaction name="actionConfigureMupen64Plus" />
   </widget>
   <action name="actionOpenRom" >
    <property name="text" >

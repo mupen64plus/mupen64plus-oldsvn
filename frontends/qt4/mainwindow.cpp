@@ -451,6 +451,7 @@ void MainWindow::customEvent(QEvent* event)
 
 void MainWindow::startEmulation()
 {
+#ifdef Q_WS_WIN
     m_renderWindow = new QWidget;
     m_renderWindow->addActions(actions());
     m_renderWindow->installEventFilter(this);
@@ -463,6 +464,7 @@ void MainWindow::startEmulation()
     setenv("SDL_WINDOWID",
             qPrintable(winId),
             1);
+#endif // Q_WS_WIN
 
     core::startEmulation();
 }
