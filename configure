@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This should be rewritten as a shell script
+
+from optparse import OptionParser
+import os
+
+p = OptionParser()
+p.add_option("-p", "--prefix", dest="prefix",
+             help="Install prefix [default: /usr/local]",
+             metavar="PREFIX", default="/usr/local")
+p.add_option("-i", "--interface", dest="interface",
+             help="User interface [default: none. available: none, gtk2, qt4.]",
+             metavar="INTERFACE", default="none")
+(opts, args) = p.parse_args()
+opts = dict(opts.__dict__)
+cmd = "cmake .. -Dui=%(interface)s -DCMAKE_INSTALL_PREFIX=%(prefix)s" % opts
+os.system("mkdir -p build")
+retval = os.system("cd build && %s" % cmd)
+
+if retval == 0:
+    print
+    print "Configured successfully. To build: `cd build && make`"
+    print "To clean up, remove the build dir."

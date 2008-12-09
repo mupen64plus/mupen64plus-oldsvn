@@ -1,5 +1,15 @@
 project(mupen64plus)
 cmake_minimum_required(VERSION 2.6)
+set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
+
+ADD_CUSTOM_TARGET(uninstall
+  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+
 
 find_package(SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
@@ -191,30 +201,21 @@ set(ui_gtk2_sources
 )
 
 # shared source
-set(sources
-    ${core_sources}
-    ${memory_sources}
-    ${opengl_sources}
-    ${r4300_common_sources}
-)
+set(sources ${core_sources}
+            ${memory_sources}
+            ${opengl_sources}
+            ${r4300_common_sources})
 
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
-    add_definitions(-DNO_GUI)
-    set(sources
-        ${sources}
-        ${r4300_x86_dynarec_sources}
-    )
+    set(sources ${sources}
+                ${r4300_x86_dynarec_sources})
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
-    set(sources
-        ${sources}
-        ${r4300_x86_64_dynarec_sources}
-    )
-else(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
-    set(sources
-        ${sources}
-        ${r4300_empty_dynarec_sources}
-    )
-endif(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
+    set(sources ${sources}
+                ${r4300_x86_64_dynarec_sources})
+else()
+    set(sources ${sources}
+                ${r4300_empty_dynarec_sources})
+endif()
 
 set(MUPEN_VERSION "unknown")
 set(PLUGIN_VERSION "unknown")
@@ -224,36 +225,28 @@ if(NOT MUPEN_RELEASE)
 endif(NOT MUPEN_RELEASE)
 
 if(CMAKE_HOST_UNIX)
-    execute_process(
-    COMMAND svn info .
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE SVN_INFO
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+    execute_process(COMMAND svn info .
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    OUTPUT_VARIABLE SVN_INFO
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if(SVN_INFO)
-        execute_process(
-        COMMAND svn info .
-        COMMAND sed -n "/^Revision: /s/^Revision: //p"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE SVN_REVISION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        execute_process(
-        COMMAND svn info .
-        COMMAND sed -n "/^URL: /s/.*mupen64plus.//1p"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE SVN_BRANCH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        execute_process(
-        COMMAND svn info .
-        COMMAND md5sum
-        COMMAND sed "/.*/s/ -//;/^d41d8cd98f00b204e9800998ecf8427e/d"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE SVN_DIFFHASH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
+        execute_process(COMMAND svn info .
+                        COMMAND sed -n "/^Revision: /s/^Revision: //p"
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        OUTPUT_VARIABLE SVN_REVISION
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND svn info .
+                        COMMAND sed -n "/^URL: /s/.*mupen64plus.//1p"
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        OUTPUT_VARIABLE SVN_BRANCH
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND svn info .
+                        COMMAND md5sum
+                        COMMAND sed "/.*/s/ -//;/^d41d8cd98f00b204e9800998ecf8427e/d"
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        OUTPUT_VARIABLE SVN_DIFFHASH
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
 
         set(MUPEN_VERSION ${MUPEN_RELEASE}-${SVN_BRANCH}-${SVN_REVISION} ${SVN_DIFFHASH})
         set(PLUGIN_VERSION ${MUPEN_RELEASE}-${SVN_BRANCH}-${SVN_REVISION})
@@ -264,7 +257,6 @@ configure_file(version.h backend/main/version.h)
 
 # add source and build dir to include path, things that generate code need this
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-message(${CMAKE_CURRENT_SOURCE_DIR})
 
 # default to no gui
 if(NOT ui)
@@ -286,12 +278,10 @@ elseif(ui STREQUAL qt4)
     qt4_wrap_ui(ui_sources ${ui_qt4_ui_files})
     qt4_wrap_cpp(moc_sources ${ui_qt4_qobject_headers})
 
-    set(sources
-        ${sources}
-        ${ui_qt4_sources}
-        ${ui_sources}
-        ${moc_sources}
-    )
+    set(sources ${sources}
+                ${ui_qt4_sources}
+                ${ui_sources}
+                ${moc_sources})
 elseif(ui STREQUAL gtk2)
     pkg_search_module(GTK2 REQUIRED gtk+-2.0)
     include_directories(${GTK2_INCLUDE_DIRS})
@@ -303,11 +293,9 @@ elseif(ui STREQUAL gtk2)
     link_directories(${GTHREAD2_LIBRARY_DIRS})
     set(libraries ${libraries} ${GTHREAD2_LIBRARIES})
 
-    set(sources
-        ${sources}
-        ${ui_gtk2_sources}
-    )
-endif(ui STREQUAL none)
+    set(sources ${sources}
+                ${ui_gtk2_sources})
+endif()
 
 add_executable(mupen64plus ${sources})
 target_link_libraries(mupen64plus ${libraries})
@@ -316,7 +304,28 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(link_flags "${link_flags} -Wl,-export-dynamic")
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
         set(link_flags "${link_flags} -z execstack")
-    endif(CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
-endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    endif()
+endif()
 
 set_target_properties(mupen64plus PROPERTIES LINK_FLAGS "${link_flags}")
+
+set(BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(SHARE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/mupen64plus)
+set(MAN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/man)
+set(XDG_APPS_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/applications)
+
+install(TARGETS mupen64plus
+        DESTINATION ${BIN_INSTALL_DIR})
+install(DIRECTORY icons config doc lang
+        DESTINATION ${SHARE_INSTALL_DIR}
+        PATTERN ".svn" EXCLUDE)
+install(FILES mupen64plus.ini
+        DESTINATION ${SHARE_INSTALL_DIR})
+install(FILES doc/mupen64plus.1.gz
+        DESTINATION ${MAN_INSTALL_DIR})
+
+if(NOT ui STREQUAL none)
+    configure_file(mupen64plus.desktop.in mupen64plus.desktop)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mupen64plus.desktop
+            DESTINATION ${XDG_APPS_INSTALL_DIR})
+endif()
