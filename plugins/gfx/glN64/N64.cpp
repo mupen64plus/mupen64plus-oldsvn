@@ -1,7 +1,7 @@
 #ifndef __LINUX__
 # include <windows.h>
 #else
-# include "../main/winlnxdefs.h"
+# include "backend/main/winlnxdefs.h"
 #endif // __LINUX__
 #include "N64.h"
 #include "Types.h"

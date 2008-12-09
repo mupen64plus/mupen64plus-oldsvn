@@ -7,7 +7,7 @@
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-#include "../main/winlnxdefs.h"
+#include "backend/main/winlnxdefs.h"
 
 #include "NV_register_combiners.h"
 #include "OpenGL.h"

@@ -3,8 +3,9 @@
 #include <commctrl.h>
 #include <process.h>
 #else
+#define MAINDEF
 #include <string.h>
-#include "../main/winlnxdefs.h"
+#include "backend/main/winlnxdefs.h"
 #endif
 
 #ifdef QT4_GUI

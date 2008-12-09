@@ -13,7 +13,7 @@
 #include "Textures.h"
 #include "OpenGL.h"
 
-#include "../main/winlnxdefs.h"
+#include "backend/main/winlnxdefs.h"
 
 static GtkWidget *configWindow = NULL;
 //static GtkWidget *bitdepthCombo[2], *resolutionCombo[2];

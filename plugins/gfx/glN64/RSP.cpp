@@ -1,7 +1,7 @@
 #ifndef __LINUX__
 # include <windows.h>
 #else
-# include "../main/winlnxdefs.h"
+# include "backend/main/winlnxdefs.h"
 
 # ifndef min
 #  define min(a,b) ((a) < (b) ? (a) : (b))

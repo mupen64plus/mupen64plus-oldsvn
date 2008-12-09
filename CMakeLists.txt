@@ -71,12 +71,12 @@ set(core_sources
 )
 
 # Qt4 reimplements the translation functions
-if(NOT ui STREQUAL qt4)
+if(NOT UI_QT4)
     set(core_sources
         ${core_sources}
         backend/main/translate.c
     )
-endif(NOT ui STREQUAL qt4)
+endif(NOT UI_QT4)
 
 set(lirc_sources
     backend/main/lirc.c
@@ -263,16 +263,7 @@ configure_file(version.h.in version.h)
 # add source and build dir to include path, things that generate code need this
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-# default to no gui
-if(NOT ui)
-    set(ui none)
-endif(NOT ui)
-
-if(ui STREQUAL none)
-    add_definitions(-DNO_GUI)
-    set(sources ${sources}
-                ${ui_cli_sources})
-elseif(ui STREQUAL qt4)
+if(UI_QT4)
     find_package(Qt4 REQUIRED)
     include(${QT_USE_FILE})
     set(libraries ${libraries} ${QT_LIBRARIES})
@@ -289,7 +280,7 @@ elseif(ui STREQUAL qt4)
                 ${ui_qt4_sources}
                 ${ui_sources}
                 ${moc_sources})
-elseif(ui STREQUAL gtk2)
+elseif(UI_GTK2)
     pkg_search_module(GTK2 REQUIRED gtk+-2.0)
     include_directories(${GTK2_INCLUDE_DIRS})
     link_directories(${GTK2_LIBRARY_DIRS})
@@ -302,7 +293,34 @@ elseif(ui STREQUAL gtk2)
 
     set(sources ${sources}
                 ${ui_gtk2_sources})
+else()
+    add_definitions(-DNO_GUI)
+    set(sources ${sources}
+                ${ui_cli_sources})
 endif()
+
+set(plugin_dirs
+    plugins/gfx/dummy_video
+    plugins/gfx/glN64
+#     plugins/gfx/glide64
+#     plugins/gfx/rice_video
+#     plugins/input/blight_input
+#     plugins/input/dummy_input
+#     plugins/mupen64_input
+#     plugins/rsp/rsp_hle
+#     plugins/sound/dummy_audio
+#     plugins/sound/jttl_audio
+)
+
+set(BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(SHARE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/mupen64plus)
+set(MAN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/man)
+set(XDG_APPS_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/applications)
+set(PLUGIN_INSTALL_DIR ${SHARE_INSTALL_DIR}/plugins)
+
+foreach(plugin_dir ${plugin_dirs})
+    add_subdirectory(${plugin_dir})
+endforeach()
 
 add_executable(mupen64plus ${sources})
 target_link_libraries(mupen64plus ${libraries})
@@ -315,11 +333,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux)
 endif()
 
 set_target_properties(mupen64plus PROPERTIES LINK_FLAGS "${link_flags}")
-
-set(BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-set(SHARE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/mupen64plus)
-set(MAN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/man)
-set(XDG_APPS_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/applications)
 
 install(TARGETS mupen64plus
         DESTINATION ${BIN_INSTALL_DIR})

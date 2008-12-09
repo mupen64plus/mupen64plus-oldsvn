@@ -31,7 +31,7 @@
 #include "Textures.h"
 #include "OpenGL.h"
 
-#include "../main/winlnxdefs.h"
+#include "backend/main/winlnxdefs.h"
 
 #include "OpenGL.h"
 #include "Config.h"

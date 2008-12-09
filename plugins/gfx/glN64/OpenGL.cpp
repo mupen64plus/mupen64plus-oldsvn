@@ -19,7 +19,7 @@
 #endif
 #define timeGetTime() time(NULL)
 
-#include "../main/winlnxdefs.h"
+#include "backend/main/winlnxdefs.h"
 
 #include "glN64.h"
 #include "OpenGL.h"

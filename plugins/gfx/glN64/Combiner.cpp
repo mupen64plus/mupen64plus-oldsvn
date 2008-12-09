@@ -3,7 +3,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
 
-#include "../main/winlnxdefs.h"
+#include "backend/main/winlnxdefs.h"
 
 #include "OpenGL.h"
 #include "Combiner.h"

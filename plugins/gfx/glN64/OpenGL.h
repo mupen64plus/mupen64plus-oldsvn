@@ -1,8 +1,8 @@
 #ifndef OPENGL_H
 #define OPENGL_H
 
-# include "../main/winlnxdefs.h"
-# include "SDL.h"
+#include "backend/main/winlnxdefs.h"
+#include "SDL.h"
 
 //#include "glATI.h"
 #include "gSP.h"

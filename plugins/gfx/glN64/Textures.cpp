@@ -5,7 +5,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
 
-#include "../main/winlnxdefs.h"
+#include "backend/main/winlnxdefs.h"
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif

@@ -4,7 +4,7 @@
 #ifndef __LINUX__
 # include <windows.h>
 #else
-# include "../main/winlnxdefs.h"
+# include "backend/main/winlnxdefs.h"
 # include "SDL.h"
 # include "SDL_thread.h"
 #endif

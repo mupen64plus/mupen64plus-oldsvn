@@ -5,7 +5,7 @@
 #include <windows.h>
 //#include <commctrl.h>
 #else
-# include "../main/winlnxdefs.h"
+# include "backend/main/winlnxdefs.h"
 #endif
 
 #ifndef PATH_MAX

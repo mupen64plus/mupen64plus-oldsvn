@@ -25,7 +25,7 @@
 #ifndef __LINUX__
 #include <windows.h>
 #else
-# include "../main/winlnxdefs.h"
+# include "backend/main/winlnxdefs.h"
 #endif
 
 extern char         pluginName[];

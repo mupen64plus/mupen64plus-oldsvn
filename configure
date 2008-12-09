@@ -11,11 +11,11 @@ p.add_option("-p", "--prefix", dest="prefix",
              help="Install prefix [default: /usr/local]",
              metavar="PREFIX", default="/usr/local")
 p.add_option("-i", "--interface", dest="interface",
-             help="User interface [default: none. available: none, gtk2, qt4.]",
-             metavar="INTERFACE", default="none")
+             help="User interface [default: CLI. available: CLI, GTK2, QT4.]",
+             metavar="INTERFACE", default="CLI")
 (opts, args) = p.parse_args()
 opts = dict(opts.__dict__)
-cmd = "cmake .. -Dui=%(interface)s -DCMAKE_INSTALL_PREFIX=%(prefix)s" % opts
+cmd = "cmake .. -DUI_%(interface)s -DCMAKE_INSTALL_PREFIX=%(prefix)s" % opts
 os.system("mkdir -p build")
 retval = os.system("cd build && %s" % cmd)
 
