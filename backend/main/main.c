@@ -767,10 +767,6 @@ static int emulationThread( void *_arg )
 #if !defined(__WIN32__)
     struct sigaction sa;
 #endif
-    const char *gfx_plugin = NULL,
-               *audio_plugin = NULL,
-           *input_plugin = NULL,
-           *RSP_plugin = NULL;
 
     // install signal handler, but only if we're running in GUI mode
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)

@@ -35,6 +35,10 @@
 #include "../r4300/interupt.h"
 #include "../r4300/r4300.h"
 
+#ifndef __WIN32__
+# include <libgen.h>
+#endif
+
 CONTROL Controls[4];
 
 static char l_PluginDir[PATH_MAX] = {0};
