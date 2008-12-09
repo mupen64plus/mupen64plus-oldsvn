@@ -18,4 +18,20 @@ FOREACH(file ${files})
   ELSE(EXISTS "$ENV{DESTDIR}${file}")
     MESSAGE(STATUS "File \"$ENV{DESTDIR}${file}\" does not exist.")
   ENDIF(EXISTS "$ENV{DESTDIR}${file}")
+  GET_FILENAME_COMPONENT(directory "$ENV{DESTDIR}${file}" PATH)
+  IF(IS_DIRECTORY "${directory}")
+    FILE(GLOB files "${directory}/*")
+    LIST(LENGTH files num_files)
+    IF(${num_files} EQUAL 0)
+      MESSAGE(STATUS "Uninstalling \"${directory}\"")
+      EXEC_PROGRAM(
+        "@CMAKE_COMMAND@" ARGS "-E remove_directory \"${directory}\""
+        OUTPUT_VARIABLE rm_out
+        RETURN_VALUE rm_retval
+        )
+      IF("${rm_retval}" STREQUAL 0)
+        MESSAGE(STATUS "Removed directory \"${directory}\"")
+      ENDIF("${rm_retval}" STREQUAL 0)
+    ENDIF(${num_files} EQUAL 0)
+  ENDIF(IS_DIRECTORY "${directory}")
 ENDFOREACH(file)
