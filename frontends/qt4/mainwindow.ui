@@ -16,7 +16,7 @@
    <string>Mupen64Plus</string>
   </property>
   <property name="unifiedTitleAndToolBarOnMac" >
-   <bool>true</bool>
+   <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget" >
    <layout class="QVBoxLayout" name="verticalLayout" >
@@ -141,6 +141,9 @@
    <property name="shortcut" >
     <string>Ctrl+Q</string>
    </property>
+   <property name="menuRole" >
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionStart" >
    <property name="checkable" >
@@ -214,6 +217,9 @@
   <action name="actionConfigureMupen64Plus" >
    <property name="text" >
     <string>&amp;Configure Mupen64Plus</string>
+   </property>
+   <property name="menuRole" >
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionAbout" >
