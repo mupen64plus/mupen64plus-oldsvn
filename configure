@@ -15,7 +15,7 @@ p.add_option("-i", "--interface", dest="interface",
              metavar="INTERFACE", default="CLI")
 (opts, args) = p.parse_args()
 opts = dict(opts.__dict__)
-cmd = "cmake .. -DUI_%(interface)s -DCMAKE_INSTALL_PREFIX=%(prefix)s" % opts
+cmd = "cmake .. -DUI_%(interface)s=1 -DCMAKE_INSTALL_PREFIX=%(prefix)s" % opts
 os.system("mkdir -p build")
 retval = os.system("cd build && %s" % cmd)
 
