@@ -46,7 +46,8 @@ static QTranslator* translator = 0;
 namespace core {
 extern "C" {
 
-#include "backend/main/version.h"
+#include "version.h"
+
 #include "backend/main/main.h"
 #include "backend/main/config.h"
 #include "backend/main/gui.h"
@@ -101,14 +102,14 @@ void gui_init(int *argc, char ***argv)
 // display GUI components to the screen
 void gui_display(void)
 {
-    mainWindow->show();
-    QApplication::instance()->processEvents();
-    QApplication::instance()->sendPostedEvents();
+    application->processEvents();
+    application->sendPostedEvents();
 }
 
 // Give control of thread to the gui
 void gui_main_loop(void)
 {
+    mainWindow->show();
     application->exec();
     config_write();
     delete mainWindow;
@@ -121,9 +122,6 @@ void gui_main_loop(void)
 
 int gui_message(gui_message_t messagetype, const char *format, ...)
 {
-    if (!gui_enabled())
-        return 0;
-
     va_list ap;
     char buffer[2049];
     int response = 0;
@@ -160,9 +158,6 @@ void gui_update_rombrowser(unsigned int roms, unsigned short clear)
 
 void gui_set_state(gui_state_t state)
 {
-     if (!gui_enabled())
-        return;
-
     mainWindow->setState(state);
 }
 

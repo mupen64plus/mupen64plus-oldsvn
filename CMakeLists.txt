@@ -38,7 +38,6 @@ set(core_sources
     backend/main/adler32.c
     backend/main/cheat.c
     backend/main/config.c
-    backend/main/main.c
     backend/main/md5.c
     backend/main/plugin.c
     backend/main/rom.c
@@ -160,6 +159,7 @@ set(r4300_x86_64_dynarec_sources
 set(ui_qt4_sources
     frontends/qt4/globals.cpp
     frontends/qt4/main.cpp
+    frontends/qt4/main.c
     frontends/qt4/mainwidget.cpp
     frontends/qt4/mainwindow.cpp
     frontends/qt4/romdelegate.cpp
@@ -195,9 +195,14 @@ set(ui_gtk2_sources
     frontends/gtk2/cheatdialog.c
     frontends/gtk2/configdialog.c
     frontends/gtk2/icontheme.c
-    frontends/gtk2/main_gtk.c
     frontends/gtk2/rombrowser.c
+    frontends/gtk2/main_gtk.c
+    frontends/gtk2/main.c
     frontends/gtk2/romproperties.c
+)
+
+set(ui_cli_sources
+    frontends/cli/main.c
 )
 
 # shared source
@@ -248,12 +253,12 @@ if(CMAKE_HOST_UNIX)
                         OUTPUT_VARIABLE SVN_DIFFHASH
                         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-        set(MUPEN_VERSION ${MUPEN_RELEASE}-${SVN_BRANCH}-${SVN_REVISION} ${SVN_DIFFHASH})
-        set(PLUGIN_VERSION ${MUPEN_RELEASE}-${SVN_BRANCH}-${SVN_REVISION})
+        set(MUPEN_VERSION "${MUPEN_RELEASE} ${SVN_BRANCH} r${SVN_REVISION} ${SVN_DIFFHASH}")
+        set(PLUGIN_VERSION "${MUPEN_RELEASE} ${SVN_BRANCH} r${SVN_REVISION}")
     endif(SVN_INFO)
 endif(CMAKE_HOST_UNIX)
 
-configure_file(version.h backend/main/version.h)
+configure_file(version.h.in version.h)
 
 # add source and build dir to include path, things that generate code need this
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
@@ -265,6 +270,8 @@ endif(NOT ui)
 
 if(ui STREQUAL none)
     add_definitions(-DNO_GUI)
+    set(sources ${sources}
+                ${ui_cli_sources})
 elseif(ui STREQUAL qt4)
     find_package(Qt4 REQUIRED)
     include(${QT_USE_FILE})

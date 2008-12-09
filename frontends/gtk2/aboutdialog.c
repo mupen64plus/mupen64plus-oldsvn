@@ -24,8 +24,9 @@
 #include "aboutdialog.h"
 #include "main_gtk.h"
 
+#include "version.h"
+
 #include "backend/main/main.h"
-#include "backend/main/version.h"
 #include "backend/main/translate.h"
 
 #include <gtk/gtk.h>

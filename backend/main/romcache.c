@@ -303,7 +303,6 @@ int rom_cache_system(void* _arg)
 
     printf("Rom cache system terminated!\n");
     clear_cache();
-    SDL_WaitThread(g_RomCacheThread, NULL);
     return 1;
 }
 

@@ -32,8 +32,6 @@ extern int g_TakeScreenshot;
 extern int g_OsdEnabled;
 extern int g_Fullscreen;
 extern int g_EmulatorRunning;
-extern SDL_Thread* g_EmulationThread;
-extern SDL_Thread* g_RomCacheThread;
 extern char* g_GfxPlugin;
 extern char* g_AudioPlugin;
 extern char* g_InputPlugin;
@@ -44,7 +42,6 @@ char* get_installpath(void);
 char* get_savespath(void);
 char* get_iconspath(void);
 char* get_iconpath(const char *iconfile);
-int gui_enabled(void);
 
 void new_frame();
 void new_vi();

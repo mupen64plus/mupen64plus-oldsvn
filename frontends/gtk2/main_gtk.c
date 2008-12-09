@@ -39,7 +39,8 @@
 #include "romproperties.h"
 #include "icontheme.h"
 
-#include "backend/main/version.h"
+#include "version.h"
+
 #include "backend/main/main.h"
 #include "backend/main/config.h"
 #include "backend/main/util.h"
@@ -168,9 +169,6 @@ void gui_update_rombrowser(unsigned int roms, unsigned short clear)
  */
 int gui_message(gui_message_t messagetype , const char* format, ...)
 {
-    if(!gui_enabled()||messagetype>GUI_MESSAGE_ERROR)
-        return 0;
-
     gint response = 0;
 
     va_list ap;
@@ -253,9 +251,6 @@ void gui_set_state(gui_state_t state)
 {
     Uint32 self = SDL_ThreadID();
     gboolean enabled, paused;
-
-    if(!gui_enabled()||state>GUI_STATE_RUNNING)
-        return;
 
     /* If we're calling from a thread other than the main gtk thread, take gdk lock. */
     if(self!=g_GuiThreadID)

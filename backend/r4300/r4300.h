@@ -61,6 +61,7 @@ void init_blocks();
 void r4300_reset_hard();
 void r4300_reset_soft();
 void r4300_execute();
+void r4300_stop();
 void pure_interpreter();
 void compare_core();
 void jump_to_func();
