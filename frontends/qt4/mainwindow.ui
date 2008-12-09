@@ -226,10 +226,16 @@
    <property name="text" >
     <string>&amp;About</string>
    </property>
+   <property name="menuRole" >
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionAboutQt" >
    <property name="text" >
     <string>About &amp;Qt</string>
+   </property>
+   <property name="menuRole" >
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionShowToolbar" >
