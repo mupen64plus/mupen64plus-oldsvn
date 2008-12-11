@@ -25,6 +25,7 @@
 #include "debugger.h"
 
 #include "../../main.h"
+#include "../../config.h"
 
 GdkColor    color_modif,    // Color of modified register.
                    color_ident;    // Unchanged register.
@@ -70,7 +71,7 @@ void init_debugger_frontend()
     gdk_threads_leave();
     */
 
-    if(dynacore!=0)
+    if(dynacore==CORE_DYNAREC)
       error_message("You are trying to use the debugger with the dynamic-recompiler.  This is unfinished, and many features of the debugger WILL NOT WORK PROPERLY.  If you have a bug you'd like to report, try it first using the debugger with either of the interpreted cores.");
 
 }

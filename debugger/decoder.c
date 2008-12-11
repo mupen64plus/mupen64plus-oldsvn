@@ -1187,6 +1187,8 @@ void r4300_decode_op( uint32 instr, char *opcode, char *arguments, int counter )
     /* Split it up */
     if( (result = sscanf( buffer, "%s %s", opcode, arguments )) == 1 )
         strcpy( arguments, " " );
+    else
+        strcpy( arguments, buffer + 16);
 }
 
 /* Disassemble */

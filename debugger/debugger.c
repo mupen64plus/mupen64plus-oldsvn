@@ -80,14 +80,18 @@ void update_debugger()
                 log_breakpoint(PC->addr, BPT_FLAG_EXEC, 0);
         }
     }
-    else if ( previousPC == PC->addr )
-    {
+    else if ( previousPC == PC->addr ) {
         return;
     }
-    update_debugger_frontend();
+    if(run==0) {
+        update_debugger_frontend();
+
+        // Emulation thread is blocked until a button is clicked.
+        SDL_mutexP(mutex);
+        SDL_CondWait(debugger_done_cond, mutex);
+        SDL_mutexV(mutex);
+    }
 
     previousPC = PC->addr;
-    // Emulation thread is blocked until a button is clicked.
-    SDL_CondWait(debugger_done_cond, mutex);
 }
 
