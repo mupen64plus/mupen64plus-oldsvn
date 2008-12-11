@@ -1128,13 +1128,9 @@ static void SWR(){
     mr4kd_sprintf( op, "SWR", mot, pc, "%ns%rt, %ih(%rs)" );
 }
 
-/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 static void CACHE(){
-    sprintf(op, "[2F] CACHE");
-    sprintf(args, "op%d, 0x%.4X(reg%d)", (mot>>16)&0x1F, mot&0xFFFF, (mot>>21)&0x1F);
-    //Creuser "op"
+    mr4kd_sprintf( op, "CACHE", mot, pc, "%ns%rt, %ih(%rs)");
 }
-/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 
 static void LL(){
     mr4kd_sprintf( op, "LL", mot, pc, "%ns%rt, %ih(%rs)" );
