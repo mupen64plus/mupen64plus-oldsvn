@@ -338,8 +338,6 @@ ifneq ($(OS), WINDOWS)
 	$(MAKE) -C mupen64_input clean
 	$(RM_F) plugins/mupen64_input.$(SO_EXTENSION) blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.$(SO_EXTENSION) plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION)
 	$(RM_F) plugins/dummyaudio.$(SO_EXTENSION) plugins/dummyvideo.$(SO_EXTENSION) plugins/jttl_audio.$(SO_EXTENSION) plugins/glN64.$(SO_EXTENSION) plugins/ricevideo.$(SO_EXTENSION) plugins/glide64.$(SO_EXTENSION)
-	$(RM_F) main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
-	$(RM_F) translations/*.qm
 endif
 
 clean-core:
@@ -347,6 +345,8 @@ ifneq ($(OS), WINDOWS)
 	$(RM_F) ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
 	$(RM_F) ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
 	$(RM_F) mupen64plus mupen64plus.desktop
+	$(RM_F) main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
+	$(RM_F) translations/*.qm
 else
 	del /S *.o *.$(SO_EXTENSION) mupen64plus.exe moc_* *.a *.qm
 	cd main\gui_qt4
