@@ -744,7 +744,7 @@ EXPORT void CALL SetConfigDir(char* configDir)
     strncpy(configdir, configDir, PATH_MAX);
 }
 
-EXPORT void CALL ProcessAlist()
+EXPORT void CALL ProcessAList()
 {
 }
 

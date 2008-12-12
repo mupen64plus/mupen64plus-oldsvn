@@ -226,33 +226,33 @@ void search_plugins()
 #endif
     dir = opendir(cwd);
     if(dir != NULL)
-        {
+    {
         while((entry = readdir(dir)) != NULL)
-            {
+        {
             HMODULE handle;/*has been typedef'd as void*  */
 
             strcpy(name, cwd);
             strcat(name, "/");
             strcat(name, entry->d_name);
             if (getExtension(entry->d_name) != NULL && strcmp(getExtension(entry->d_name),".so")==0)
-                {
+            {
                 handle = dlopen(name, RTLD_NOW); /* Load the library. */
                 if (handle)
-                    {
+                {
                     PLUGIN_INFO PluginInfo;
                     getDllInfo = dlsym(handle, "GetDllInfo"); /* Get function address. */
                     if (getDllInfo)
-                        {
+                    {
                         getDllInfo(&PluginInfo);
                         if(PluginInfo.Type==PLUGIN_TYPE_AUDIO)
                             insert_plugin(liste_plugins, name, PluginInfo.Name, handle, PluginInfo.Type, 0);
-                        }
                     }
                 }
             }
+        }
 
         closedir(dir);
-        }
+    }
 
     current = liste_plugins;
 }
@@ -287,6 +287,9 @@ static DWORD fake_AI_BITRATE_REG;
 /*loads our new RSP audio plugin... or not.*/
 BOOL loadPlugin() 
 {
+#ifdef DEBUG
+    printf("RSP: Attmepting to load audio plugin: %s\n", audioname);
+#endif
     audiohandle = dlopen(get_handle(liste_plugins, audioname), RTLD_NOW);
     if(!audiohandle)
         return FALSE;
@@ -308,17 +311,16 @@ BOOL loadPlugin()
 
     initiateAudio = dlsym(audiohandle, "InitiateAudio");
     if(initiateAudio==NULL)
-        {
+    {
         fprintf(stderr, "RSP failed to load audio plugin initilization\n");
         return FALSE;
-        }
-
+    }
     processAList = dlsym(audiohandle, "ProcessAList");
-    if(processAList!=NULL)
-        {
+    if(processAList==NULL)
+    {
         fprintf(stderr, "RSP failed to load alist processer\n");
         return FALSE;
-        }
+    }
 
     initiateAudio(audio_info);
     printf("RSP audio plugin loaded!\n");

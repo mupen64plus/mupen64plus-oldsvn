@@ -97,6 +97,6 @@ RomClosed( void )
 }
 
 EXPORT void CALL
-ProcessAlist( void )
+ProcessAList( void )
 {
 }
