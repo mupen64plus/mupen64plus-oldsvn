@@ -55,6 +55,8 @@ static void on_scroll(GtkAdjustment *adjustment, gpointer user_data);
 #ifdef DOUBLESCROLL
 static void on_linear_scroll(GtkAdjustment *adjustment, gpointer user_data);
 #endif //DOUBLESCROLL
+static gboolean on_scroll_wheel(GtkWidget *widget, GdkEventScroll *event, 
+                            gpointer user_data);
 
 static gboolean on_scrollclick(GtkWidget *bar, GdkEventButton*, gpointer user_data);
 static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton*, gpointer user_data);
@@ -112,12 +114,13 @@ void init_desasm()
     desasm_opened = 1;
     
     winDesasm = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+
     sprintf( title, "%s - %s", "Debugger", DEBUGGER_VERSION );
     gtk_window_set_title( GTK_WINDOW(winDesasm), title );
-    gtk_window_set_default_size( GTK_WINDOW(winDesasm), 380, 500);
-    gtk_container_set_border_width( GTK_CONTAINER(winDesasm), 2);
+    gtk_window_set_default_size( GTK_WINDOW(winDesasm), 380, 500 );
+    gtk_container_set_border_width( GTK_CONTAINER(winDesasm), 2 );
 
-    gtk_window_set_deletable( GTK_WINDOW(winDesasm), FALSE);
+    gtk_window_set_deletable( GTK_WINDOW(winDesasm), FALSE );
 
     boxH1 = gtk_hbox_new( FALSE, 0 );
 
@@ -191,6 +194,8 @@ void init_desasm()
 
     gtk_widget_show_all( winDesasm );
 
+    gdk_window_set_events( winDesasm->window, GDK_ALL_EVENTS_MASK );
+
     //=== Signal Connection ===========================/
     gtk_signal_connect( GTK_OBJECT(clDesasm), "row-activated",
                     GTK_SIGNAL_FUNC(on_click), NULL );
@@ -200,6 +205,10 @@ void init_desasm()
     gtk_signal_connect( GTK_OBJECT(ajLinear), "value-changed",
             GTK_SIGNAL_FUNC(on_linear_scroll), NULL );
 #endif
+    gtk_signal_connect( GTK_OBJECT(winDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
+    gtk_signal_connect( GTK_OBJECT(swDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
+    gtk_signal_connect( GTK_OBJECT(scrollbar1), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
+    gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar(swDesasm)), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
 
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar((GtkScrolledWindow *) swDesasm)), "button-press-event", GTK_SIGNAL_FUNC(on_scrollclick), NULL);
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar((GtkScrolledWindow *) swDesasm)), "button-release-event", GTK_SIGNAL_FUNC(on_scrollrelease), NULL);
@@ -374,6 +383,17 @@ static void on_linear_scroll(GtkAdjustment *adjustment, gpointer usr)
   update_desasm( (uint32) addtest );
 }
 #endif
+
+static gboolean on_scroll_wheel(GtkWidget *widget, GdkEventScroll *event,
+                            gpointer user_data)
+{
+  if(event->direction==GDK_SCROLL_UP)        addtest-=4;
+  else if(event->direction==GDK_SCROLL_DOWN) addtest+=4;
+  else return FALSE;
+
+  update_desasm( (uint32) addtest );
+  return TRUE;
+}
 
 static void on_scroll(GtkAdjustment *adjustment, gpointer user_data)
 {
