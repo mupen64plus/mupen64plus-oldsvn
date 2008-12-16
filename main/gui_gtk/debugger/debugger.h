@@ -29,6 +29,7 @@
 #include <glib.h>
 
 #include "../../../debugger/debugger.h"
+#include "../../../main/version.h"
 
 #include "breakpoints.h"
 #include "desasm.h"
@@ -37,7 +38,7 @@
 #include "memedit.h"
 #include "varlist.h"
 
-#define DEBUGGER_VERSION "0.0.3"
+#define DEBUGGER_VERSION PLUGIN_VERSION
 
 extern GdkColor    color_modif,    // Color of modified register.
                    color_ident;    // Unchanged register.

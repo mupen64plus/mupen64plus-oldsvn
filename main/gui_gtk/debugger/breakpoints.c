@@ -165,7 +165,8 @@ void update_breakpoints( )
     char line[1][64];
     line[0][0] = 0;
 
-    printf("update_breakpoints()\n");
+    if(!breakpoints_opened) return;
+
     gtk_clist_freeze( GTK_CLIST(clBreakpoints) );
     gtk_clist_clear( GTK_CLIST(clBreakpoints) );
     int i;
@@ -175,7 +176,7 @@ void update_breakpoints( )
     for( i=0; i < g_NumBreakpoints; i++ )
     {
         get_breakpoint_display_string(line[0], &g_Breakpoints[i]);
-        printf("%s\n", line[0]);
+        //printf("%s\n", line[0]);
         gtk_clist_set_text( GTK_CLIST(clBreakpoints), i, 0, line[0] );
         if(BPT_CHECK_FLAG(g_Breakpoints[i], BPT_FLAG_ENABLED))
             gtk_clist_set_background( GTK_CLIST(clBreakpoints), i, &color_BPEnabled);

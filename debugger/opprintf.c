@@ -91,14 +91,14 @@ static char *registers_a_cop[] =
 {
     "Index",    "Random",   "EntryLo0",
     "EntryLo1", "Context",  "PageMask",
-    "Wired",    "Reserved", "BadVAddr",
+    "Wired",    "Resrvd07", "BadVAddr",
     "Count",    "EntryHi",  "Compare",
     "Status",   "Cause",    "EPC", "PRevID",
     "Config",   "LLAddr",   "WatchLo",
-    "WatchHi",  "XContext", "Reserved",
-    "Reserved", "Reserved", "Reserved", 
-    "Reserved", "PErr",     "CacheErr", "TagLo", 
-    "TagHi",    "ErrorEPC", "Reserved"
+    "WatchHi",  "XContext", "Resrvd21",
+    "Resrvd22", "Resrvd23", "Resrvd24", 
+    "Resrvd25", "PErr",     "CacheErr", "TagLo", 
+    "TagHi",    "ErrorEPC", "Resrvd31"
 };
 
 /* The configuration word */
@@ -219,7 +219,7 @@ int mr4kd_sprintf ( char *dest, char *name, uint32 instruction, uint32 pc, char 
             
             /* Branch address */
             case TOKEN('b', 'r'):
-             d += sprintf( &dest[d], MR4KD_FLAG_GET(MR4KD_HLOWER) ? "0x%08x" : "0x%08X", (((int)(pc & 0xFFFFFFF) + (short)(instruction & 0xFFFF) * 4) | 0x80000000) );
+             d += sprintf( &dest[d], MR4KD_FLAG_GET(MR4KD_HLOWER) ? "0x%08x" : "0x%08X", ((unsigned int)pc + 4 + (short)(instruction & 0xFFFF) * 4) );
             break;
             
             /* Jump target */

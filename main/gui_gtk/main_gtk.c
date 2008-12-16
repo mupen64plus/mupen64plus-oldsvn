@@ -327,6 +327,7 @@ void gui_set_state(gui_state_t state)
 
 static gint callback_mainWindowDeleteEvent(GtkWidget* widget, GdkEvent* event, gpointer data)
 {
+    stopEmulation();
     gtk_main_quit();
     return TRUE; /* Don't delete main window here. */
 }

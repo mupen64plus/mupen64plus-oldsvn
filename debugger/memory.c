@@ -110,7 +110,7 @@ void decode_recompiled(uint32 addr)
     if(blocks[addr>>12]->block[(addr&0xFFF)/4].ops == NOTCOMPILED)
     //      recompile_block((int *) SP_DMEM, blocks[addr>>12], addr);
       {
-    strcpy(opcode_recompiled[0],"NOTCOMPILED");
+    strcpy(opcode_recompiled[0],"INVLD");
     strcpy(args_recompiled[0],"NOTCOMPILED");
     opaddr_recompiled[0] = (void *) 0;
     addr_recompiled=0;

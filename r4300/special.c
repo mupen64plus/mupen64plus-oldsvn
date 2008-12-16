@@ -26,6 +26,7 @@
 #include "macros.h"
 
 #include "../memory/memory.h"
+#include "../debugger/debugger.h"
 
 void NOP(void)
 {
@@ -79,6 +80,9 @@ void JR(void)
    local_rs32 = irs32;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -93,6 +97,9 @@ void JALR(void)
    local_rs32 = rrs32;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;

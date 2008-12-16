@@ -95,6 +95,11 @@ void FIN_BLOCK()
    if (!delay_slot)
      {
     jump_to((PC-1)->addr+4);
+/*#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
+Used by dynarec only, check should be unnecessary
+*/
     PC->ops();
     if (dynacore) dyna_jump();
      }
@@ -104,6 +109,11 @@ void FIN_BLOCK()
     precomp_instr *inst = PC;
     jump_to((PC-1)->addr+4);
     
+/*#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
+Used by dynarec only, check should be unnecessary
+*/
     if (!skip_jump)
       {
          PC->ops();
@@ -121,6 +131,9 @@ void J()
 {
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -136,6 +149,9 @@ void J_OUT()
    jump_target = (PC->addr & 0xF0000000) | (PC->f.j.inst_index<<2);
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -158,6 +174,9 @@ void JAL()
 {
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -178,6 +197,9 @@ void JAL_OUT()
    jump_target = (PC->addr & 0xF0000000) | (PC->f.j.inst_index<<2);
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -207,6 +229,9 @@ void BEQ()
    local_rt = irt;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -223,6 +248,9 @@ void BEQ_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -251,6 +279,9 @@ void BNE()
    local_rt = irt;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -267,6 +298,9 @@ void BNE_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -294,6 +328,9 @@ void BLEZ()
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -309,6 +346,9 @@ void BLEZ_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -336,6 +376,9 @@ void BGTZ()
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -351,6 +394,9 @@ void BGTZ_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -433,6 +479,9 @@ void BEQL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -455,6 +504,9 @@ void BEQL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -489,6 +541,9 @@ void BNEL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -511,6 +566,9 @@ void BNEL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -545,6 +603,9 @@ void BLEZL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -567,6 +628,9 @@ void BLEZL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -601,6 +665,9 @@ void BGTZL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -623,6 +690,9 @@ void BGTZL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -1349,6 +1419,12 @@ void NOTCOMPILED()
       }
     else printf("not compiled exception\n");
      }
+/*#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
+The preceeding update_debugger SHOULD be unnecessary since it should have been
+called before NOTCOMPILED would have been executed
+*/
    PC->ops();
    if (dynacore)
      dyna_jump();
@@ -1451,9 +1527,10 @@ void update_count()
    if (delay_slot)
      compare_core();
 #endif
-#ifdef DBG
-   if (debugger_mode) update_debugger();
+/*#ifdef DBG
+   if (debugger_mode && !delay_slot) update_debugger();
 #endif
+*/
 }
 
 void init_blocks()
@@ -1743,11 +1820,10 @@ void r4300_execute()
             virtual_to_physical_address(PC->addr, 2);
             compare_core();
 #endif
-            PC->ops();
 #ifdef DBG
-            if (debugger_mode)
-                update_debugger();
+            if (debugger_mode) update_debugger();
 #endif
+            PC->ops();
         }
     }
 #if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))

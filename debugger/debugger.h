@@ -48,13 +48,11 @@ extern uint32 previousPC;
 void init_debugger();
 void update_debugger();
 void uninit_debugger();
+void debugger_step();
 
 extern void init_debugger_frontend();
 extern void update_debugger_frontend();
 extern void debugger_frontend_vi();
-
-extern SDL_cond  *debugger_done_cond;
-extern SDL_mutex *mutex;
 
 #endif /* __DEBUGGER_H__ */
 

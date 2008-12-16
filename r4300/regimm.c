@@ -25,12 +25,16 @@
 #include "macros.h"
 
 #include "../memory/memory.h"
+#include "../debugger/debugger.h"
 
 void BLTZ(void)
 {
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -46,6 +50,9 @@ void BLTZ_OUT(void)
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -73,6 +80,9 @@ void BGEZ(void)
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -88,6 +98,9 @@ void BGEZ_OUT(void)
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -116,6 +129,9 @@ void BLTZL(void)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -135,6 +151,9 @@ void BLTZL_OUT(void)
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -166,6 +185,9 @@ void BGEZL(void)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -185,6 +207,9 @@ void BGEZL_OUT(void)
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -218,6 +243,9 @@ void BLTZAL(void)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -238,6 +266,9 @@ void BLTZAL_OUT(void)
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -270,6 +301,9 @@ void BGEZAL(void)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -290,6 +324,9 @@ void BGEZAL_OUT(void)
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -324,6 +361,9 @@ void BLTZALL(void)
       {
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -349,6 +389,9 @@ void BLTZALL_OUT(void)
          jump_target = (int)PC->f.i.immediate;
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -386,6 +429,9 @@ void BGEZALL(void)
       {
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -411,6 +457,9 @@ void BGEZALL_OUT(void)
          jump_target = (int)PC->f.i.immediate;
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger();
+#endif
          PC->ops();
          update_count();
          delay_slot=0;

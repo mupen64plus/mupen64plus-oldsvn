@@ -32,12 +32,11 @@
 // to differanciate between update (need reload) and scroll (doesn't need reload)
 // to reorganise whole code.
 
-#define DOUBLESCROLL   1
+#define DOUBLESCROLL
 #define SCROLLRANGE    1.0f
 #define SCROLLSLOW     0.1f
 #define SCROLLSLOWAMT  ((int)(100/SCROLLSLOW))
  
-static uint16 max_row=0.1;   //i plan to update this value on widget resizing.
 static uint32 previous_focus;
 
 static GtkWidget *clDesasm, *buRun;
@@ -135,7 +134,6 @@ void init_desasm()
     GtkCellRenderer    *renderer;
     GtkTreeViewColumn  *col;
     renderer = gtk_cell_renderer_text_new();
-    gtk_cell_renderer_set_fixed_size(renderer, 90, 9);
     col = gtk_tree_view_column_new_with_attributes("Address", renderer, "text", 0, NULL);
     gtk_tree_view_column_set_cell_data_func(col, renderer, disasm_set_color, NULL, NULL);
 
@@ -144,11 +142,11 @@ void init_desasm()
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
     col = gtk_tree_view_column_new_with_attributes("Opcode", renderer, "text", 1, NULL);
     gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-    gtk_tree_view_column_set_fixed_width(col, 82);
+    gtk_tree_view_column_set_fixed_width(col, 72);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
     col = gtk_tree_view_column_new_with_attributes("Args", renderer, "text", 2, NULL);
     gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-    gtk_tree_view_column_set_fixed_width(col, 64);
+    gtk_tree_view_column_set_fixed_width(col, 140);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
 
     ajLogari = (GtkAdjustment *) gtk_adjustment_new(0, 0, SCROLLRANGE, 0.01, 0.1, 0.0);
@@ -159,7 +157,7 @@ void init_desasm()
 
     gtk_container_add((GtkContainer *) swDesasm, clDesasm);
     //This replaces clDesasm's adjustments with swDesasm's, so...
-    ajDesasm = (GtkAdjustment *) gtk_adjustment_new(0, 0, 1, 1, max_row, max_row);
+    ajDesasm = (GtkAdjustment *) gtk_adjustment_new(0, 0, 1, 1, 0.1, 0.1);
 
     //we replace it's vertical adjustment, with our own
     gtk_widget_set_scroll_adjustments(clDesasm, gtk_range_get_adjustment((GtkRange *)((GtkScrolledWindow *)swDesasm)->hscrollbar), ajDesasm);
@@ -329,7 +327,7 @@ static void on_run()
     } else {
         run = 2;
         //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child),"Pause"); //avoid deadlock
-        SDL_CondSignal(debugger_done_cond);
+        debugger_step();
     }
 }
 
@@ -339,7 +337,7 @@ static void on_step()
     if(run == 2) {
         //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
     } else {
-        SDL_CondSignal(debugger_done_cond);
+        debugger_step();
     }
     run = 0;
 }

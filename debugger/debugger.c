@@ -26,7 +26,7 @@
 // State of the Emulation Thread:
 // 0 -> pause, 2 -> run.
 
-int g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
+int g_DebuggerEnabled = 0;    // whether the debugger is enabled or not
 int debugger_mode;
 int run;
 
@@ -56,13 +56,15 @@ void uninit_debugger()
     mutex = NULL;
     SDL_DestroyCond(debugger_done_cond);
     debugger_done_cond = NULL;
+    debugger_mode = 0;
 }
 
 //]=-=-=-=-=-=-=-=-=-=-=-=-=[ Mise-a-Jour Debugger ]=-=-=-=-=-=-=-=-=-=-=-=-=[
 
 void update_debugger()
 // Update debugger state and display.
-// Should be called after each R4300 instruction.
+// Should be called after each R4300 instruction
+// Checks for breakpoint hits on PC
 {
     int bpt;
     
@@ -95,3 +97,7 @@ void update_debugger()
     previousPC = PC->addr;
 }
 
+void debugger_step()
+{
+    SDL_CondSignal(debugger_done_cond);
+}

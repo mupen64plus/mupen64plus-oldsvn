@@ -3091,10 +3091,10 @@ void pure_interpreter()
    PC = malloc(sizeof(precomp_instr));
    PC->addr = last_addr = interp_addr;
 
-#ifdef DBG
+/*#ifdef DBG
          if (debugger_mode)
            update_debugger();
-#endif
+#endif*/
 
    while (!stop)
      {
@@ -3105,14 +3105,14 @@ void pure_interpreter()
 #endif
     //if (Count > 0x2000000) printf("inter:%x,%x\n", interp_addr,op);
     //if ((Count+debug_count) > 0xabaa2c) stop=1;
-    interp_ops[((op >> 26) & 0x3F)]();
-
-    //Count = (unsigned int)Count + 2;
-    //if (interp_addr == 0x80000180) last_addr = interp_addr;
 #ifdef DBG
     PC->addr = interp_addr;
     if (debugger_mode) update_debugger();
 #endif
+    interp_ops[((op >> 26) & 0x3F)]();
+
+    //Count = (unsigned int)Count + 2;
+    //if (interp_addr == 0x80000180) last_addr = interp_addr;
      }
    PC->addr = interp_addr;
 }

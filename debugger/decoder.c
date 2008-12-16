@@ -2,6 +2,8 @@
  *   Mupen64plus - decoder.c                                               *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2002 davFr                                              *
+ *   Copyright (C) 2008 ZZT32                                              *
+ *   Copyright (C) 2008 DarkJezter                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,7 +30,7 @@ static char *args;
 static int pc;
 
 static void RESERV(){
-    sprintf(op, "0x%08X", mot);
+    sprintf(op, "INVLD(%02X)       0x%08X", (mot>>26)&0x3F, mot);
 }
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ SPECIAL ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
@@ -457,11 +459,11 @@ static void LUI(){
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ cop0 ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void MFC0(){
-    mr4kd_sprintf( op, "MFC0", mot, pc, "%ns%rt, %rd" );
+    mr4kd_sprintf( op, "MFC0", mot, pc, "%ns%rt, %cp" );
 }   
 
 static void MTC0(){
-    mr4kd_sprintf( op, "MTC0", mot, pc, "%ns%rt, %rd" );
+    mr4kd_sprintf( op, "MTC0", mot, pc, "%ns%rt, %cp" );
 }
 
 

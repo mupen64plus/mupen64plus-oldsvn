@@ -127,11 +127,7 @@ int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags )
                 
             run = 0;
             switch_button_to_run();
-            update_debugger_frontend();
-            
-             previousPC = PC->addr;
-            // Emulation thread is blocked until a button is clicked.
-            SDL_CondWait(debugger_done_cond, mutex);
+            update_debugger();
             
             return bpt;
         }

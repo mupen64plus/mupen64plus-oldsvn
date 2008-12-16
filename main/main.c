@@ -444,6 +444,9 @@ void stopEmulation(void)
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Stopping emulation.\n"));
         rompause = 0;
         stop_it();
+#ifdef DBG
+        if(debugger_mode) debugger_step();
+#endif        
 
         // wait until emulation thread is done before continuing
         if(g_EmulatorRunning)
@@ -877,7 +880,7 @@ static int emulationThread( void *_arg )
 #endif // WITH_LIRC
 
 #ifdef DBG
-    if (g_DebuggerEnabled)
+    if (debugger_mode)
         uninit_debugger();
 #endif
 
