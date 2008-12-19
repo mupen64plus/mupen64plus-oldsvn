@@ -103,7 +103,7 @@ bool macSetBundlePath(char* buffer)
     {
         printf("yes\n");
         // executable is inside an app bundle, use app bundle-relative paths
-        sprintf(buffer, "%s/Contents/Resources/plugins", path);
+        sprintf(buffer, "%s/Contents/Resources/", path);
         return true;
     }
     else
@@ -113,7 +113,6 @@ bool macSetBundlePath(char* buffer)
     }
 }
 #endif
-
 
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
@@ -1303,6 +1302,11 @@ static void setPaths(void)
     // if install dir was not specified at the commandline, look for it in the executable's directory
     if (strlen(l_InstallDir) == 0)
     {
+#ifdef __APPLE__
+        macSetBundlePath(buf);
+        strncpy(l_InstallDir, buf, PATH_MAX);
+        strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
+#else
         buf[0] = '\0';
         int n = readlink("/proc/self/exe", buf, PATH_MAX);
         if (n > 0)
@@ -1312,6 +1316,7 @@ static void setPaths(void)
             strncpy(l_InstallDir, buf, PATH_MAX);
             strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
         }
+#endif
         // if it's not in the executable's directory, try a couple of default locations
         if (buf[0] == '\0' || !isfile(buf))
         {
@@ -1461,12 +1466,7 @@ int main(int argc, char *argv[])
     cheat_read_config();
 
     // try to get plugin folder path from the mupen64plus config file (except on mac where app bundles may be used)
-#ifdef __APPLE__
-    if(!macSetBundlePath(dirpath))
-        strncpy(dirpath, config_get_string("PluginDirectory", ""), PATH_MAX-1);
-#else //ifndef !__APPLE__
     strncpy(dirpath, config_get_string("PluginDirectory", ""), PATH_MAX-1);
-#endif
         
     dirpath[PATH_MAX-1] = '\0';
     // if it's not set in the config file, use the /plugins/ sub-folder of the installation directory
