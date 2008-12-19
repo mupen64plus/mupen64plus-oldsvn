@@ -26,6 +26,11 @@
  * if you want to implement an interface, you should look here
  */
  
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#define _7ZIP_UINT32_DEFINED // avoid stupid conflicts between native types and 7zip types
+#endif
+ 
 #ifndef __WIN32__
 # include <ucontext.h> // extra signal types (for portability)
 # include <libgen.h> // basename, dirname
@@ -78,6 +83,37 @@
 #ifdef WITH_LIRC
 #include "lirc.h"
 #endif //WITH_LIRC
+
+#ifdef __APPLE__
+// dynamic data path detection onmac
+bool macSetBundlePath(char* buffer)
+{
+    printf("checking whether we are using an app bundle... ");
+    // the following code will enable mupen to find its plugins when placed in an app bundle on mac OS X.
+    // returns true if path is set, returns false if path was not set
+    char path[1024];
+    CFBundleRef main_bundle = CFBundleGetMainBundle(); assert(main_bundle);
+    CFURLRef main_bundle_URL = CFBundleCopyBundleURL(main_bundle); assert(main_bundle_URL);
+    CFStringRef cf_string_ref = CFURLCopyFileSystemPath( main_bundle_URL, kCFURLPOSIXPathStyle); assert(cf_string_ref);
+    CFStringGetCString(cf_string_ref, path, 1024, kCFStringEncodingASCII);
+    CFRelease(main_bundle_URL);
+    CFRelease(cf_string_ref);
+    
+    if(strstr( path, ".app" ) != 0)
+    {
+        printf("yes\n");
+        // executable is inside an app bundle, use app bundle-relative paths
+        sprintf(buffer, "%s/Contents/Resources/plugins", path);
+        return true;
+    }
+    else
+    {
+        printf("no\n");
+        return false;
+    }
+}
+#endif
+
 
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
@@ -1424,8 +1460,14 @@ int main(int argc, char *argv[])
 
     cheat_read_config();
 
-    // try to get plugin folder path from the mupen64plus config file
+    // try to get plugin folder path from the mupen64plus config file (except on mac where app bundles may be used)
+#ifdef __APPLE__
+    if(!macSetBundlePath(dirpath))
+        strncpy(dirpath, config_get_string("PluginDirectory", ""), PATH_MAX-1);
+#else //ifndef !__APPLE__
     strncpy(dirpath, config_get_string("PluginDirectory", ""), PATH_MAX-1);
+#endif
+        
     dirpath[PATH_MAX-1] = '\0';
     // if it's not set in the config file, use the /plugins/ sub-folder of the installation directory
     if (strlen(dirpath) < 2)
