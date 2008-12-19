@@ -25,12 +25,18 @@ set -e
 
 export PATH=/bin:/usr/bin
 
+GINSTALLFLAG=-D
+
 if command -v ginstall >/dev/null 2>&1; then
     INSTALL=ginstall
 elif install --help >/dev/null 2>&1; then
     INSTALL=install
+elif [ -e "`which install 2>/dev/null`" ]; then 
+    printf "warning: GNU install not found, assuming BSD install\n" >&2
+    INSTALL=install
+    GINSTALLFLAG=
 else
-    printf "error: GNU install not found\n" >&2
+    printf "error: install tool not found\n" >&2
     exit 1
 fi
 
@@ -77,7 +83,7 @@ $INSTALL -d -v "${SHAREDIR}/icons/16x16"
 $INSTALL -m 0644 icons/16x16/* "${SHAREDIR}/icons/16x16"
 $INSTALL -d -v "${SHAREDIR}/lang"
 $INSTALL -m 0644 lang/* "${SHAREDIR}/lang"
-$INSTALL -D -m 0755 mupen64plus "${BINDIR}/mupen64plus"
+$INSTALL $GINSTALLFLAG -m 0755 mupen64plus "${BINDIR}/mupen64plus"
 $INSTALL -d -v "${MANDIR}"
 $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}"
 $INSTALL -d -v "${LIBDIR}"

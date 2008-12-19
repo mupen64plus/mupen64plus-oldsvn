@@ -54,6 +54,7 @@ ifeq ("$(UNAME)","linux")
 endif
 ifeq ("$(UNAME)","Darwin")
   OS = OSX
+  LDFLAGS += -liconv -lpng
 endif
 
 ifeq ($(OS),)
