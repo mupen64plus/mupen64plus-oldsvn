@@ -88,29 +88,29 @@ unsigned long long int* rdword;
 static unsigned int trash;
 
 // hash tables of read functions
-void (*readmem[0xFFFF])();
-void (*readmemb[0xFFFF])();
-void (*readmemh[0xFFFF])();
-void (*readmemd[0xFFFF])();
+void (*readmem[0x10000])();
+void (*readmemb[0x10000])();
+void (*readmemh[0x10000])();
+void (*readmemd[0x10000])();
 
 // hash tables of write functions
-void (*writemem[0xFFFF])();
-void (*writememb[0xFFFF])();
-void (*writememd[0xFFFF])();
-void (*writememh[0xFFFF])();
+void (*writemem[0x10000])();
+void (*writememb[0x10000])();
+void (*writememd[0x10000])();
+void (*writememh[0x10000])();
 
 // memory sections
-static unsigned int *readrdramreg[0xFFFF];
-static unsigned int *readrspreg[0xFFFF];
-static unsigned int *readrsp[0xFFFF];
-static unsigned int *readmi[0xFFFF];
-static unsigned int *readvi[0xFFFF];
-static unsigned int *readai[0xFFFF];
-static unsigned int *readpi[0xFFFF];
-static unsigned int *readri[0xFFFF];
-static unsigned int *readsi[0xFFFF];
-static unsigned int *readdp[0xFFFF];
-static unsigned int *readdps[0xFFFF];
+static unsigned int *readrdramreg[0x10000];
+static unsigned int *readrspreg[0x10000];
+static unsigned int *readrsp[0x10000];
+static unsigned int *readmi[0x10000];
+static unsigned int *readvi[0x10000];
+static unsigned int *readai[0x10000];
+static unsigned int *readpi[0x10000];
+static unsigned int *readri[0x10000];
+static unsigned int *readsi[0x10000];
+static unsigned int *readdp[0x10000];
+static unsigned int *readdps[0x10000];
 
 // the frameBufferInfos
 static FrameBufferInfo frameBufferInfos[6];
