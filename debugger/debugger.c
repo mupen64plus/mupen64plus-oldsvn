@@ -50,7 +50,7 @@ void init_debugger()
     debugger_done_cond = SDL_CreateCond();
 }
 
-void uninit_debugger()
+void destroy_debugger()
 {
     SDL_DestroyMutex(mutex);
     mutex = NULL;
@@ -61,7 +61,7 @@ void uninit_debugger()
 
 //]=-=-=-=-=-=-=-=-=-=-=-=-=[ Mise-a-Jour Debugger ]=-=-=-=-=-=-=-=-=-=-=-=-=[
 
-void update_debugger()
+void update_debugger(uint32 pc)
 // Update debugger state and display.
 // Should be called after each R4300 instruction
 // Checks for breakpoint hits on PC
@@ -69,9 +69,9 @@ void update_debugger()
     int bpt;
     
     if(run==2) {
-        bpt = check_breakpoints(PC->addr);
+        bpt = check_breakpoints(pc);
         if( bpt==-1 ) {
-            previousPC = PC->addr;
+            //previousPC = pc;
             return;
         }
         else {
@@ -79,14 +79,14 @@ void update_debugger()
             switch_button_to_run();
             
             if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_LOG))
-                log_breakpoint(PC->addr, BPT_FLAG_EXEC, 0);
+                log_breakpoint(pc, BPT_FLAG_EXEC, 0);
         }
     }
-    else if ( previousPC == PC->addr ) {
+    else if ( previousPC == pc ) {
         return;
     }
     if(run==0) {
-        update_debugger_frontend();
+        update_debugger_frontend( pc );
 
         // Emulation thread is blocked until a button is clicked.
         SDL_mutexP(mutex);
@@ -94,7 +94,7 @@ void update_debugger()
         SDL_mutexV(mutex);
     }
 
-    previousPC = PC->addr;
+    previousPC = pc;
 }
 
 void debugger_step()

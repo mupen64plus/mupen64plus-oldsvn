@@ -77,9 +77,11 @@ void init_debugger_frontend()
 }
 
 
-void update_debugger_frontend()
+void update_debugger_frontend( uint32 pc )
 // Update debugger state and display.
 {
+    //printf("Update_debugger_frontend( %08x );\n",pc);
+
     if(registers_opened) {
         gdk_threads_enter();
         update_registers();
@@ -87,7 +89,7 @@ void update_debugger_frontend()
     }
     if(desasm_opened) {
         gdk_threads_enter();
-        update_desasm( PC->addr );
+        update_disassembler( pc );
         gdk_threads_leave();
     }
     if(regTLB_opened) {

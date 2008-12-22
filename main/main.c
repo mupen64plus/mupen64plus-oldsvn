@@ -480,7 +480,11 @@ void stopEmulation(void)
         rompause = 0;
         stop_it();
 #ifdef DBG
-        if(debugger_mode) debugger_step();
+        if(debugger_mode)
+        {
+            
+            debugger_step();
+        }
 #endif        
 
         // wait until emulation thread is done before continuing
@@ -916,7 +920,7 @@ static int emulationThread( void *_arg )
 
 #ifdef DBG
     if (debugger_mode)
-        uninit_debugger();
+        destroy_debugger();
 #endif
 
     if (g_OsdEnabled)

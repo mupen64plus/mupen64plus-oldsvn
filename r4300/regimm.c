@@ -33,7 +33,7 @@ void BLTZ(void)
    PC++;
    delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
    PC->ops();
    update_count();
@@ -51,7 +51,7 @@ void BLTZ_OUT(void)
    PC++;
    delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
    PC->ops();
    update_count();
@@ -81,7 +81,7 @@ void BGEZ(void)
    PC++;
    delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
    PC->ops();
    update_count();
@@ -99,7 +99,7 @@ void BGEZ_OUT(void)
    PC++;
    delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
    PC->ops();
    update_count();
@@ -130,7 +130,7 @@ void BLTZL(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -152,7 +152,7 @@ void BLTZL_OUT(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -186,7 +186,7 @@ void BGEZL(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -208,7 +208,7 @@ void BGEZL_OUT(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -244,7 +244,7 @@ void BLTZAL(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -267,7 +267,7 @@ void BLTZAL_OUT(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -302,7 +302,7 @@ void BGEZAL(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -325,7 +325,7 @@ void BGEZAL_OUT(void)
     PC++;
     delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
     PC->ops();
     update_count();
@@ -362,7 +362,7 @@ void BLTZALL(void)
          PC++;
          delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
          PC->ops();
          update_count();
@@ -390,7 +390,7 @@ void BLTZALL_OUT(void)
          PC++;
          delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
          PC->ops();
          update_count();
@@ -430,7 +430,7 @@ void BGEZALL(void)
          PC++;
          delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
          PC->ops();
          update_count();
@@ -458,7 +458,7 @@ void BGEZALL_OUT(void)
          PC++;
          delay_slot=1;
 #ifdef DBG
-            if (debugger_mode) update_debugger();
+            if (debugger_mode) update_debugger(PC->addr);
 #endif
          PC->ops();
          update_count();

@@ -46,12 +46,12 @@ extern int run;
 extern uint32 previousPC;
 
 void init_debugger();
-void update_debugger();
-void uninit_debugger();
+void update_debugger(uint32 pc);
+void destroy_debugger();
 void debugger_step();
 
 extern void init_debugger_frontend();
-extern void update_debugger_frontend();
+extern void update_debugger_frontend( uint32 pc );
 extern void debugger_frontend_vi();
 
 #endif /* __DEBUGGER_H__ */

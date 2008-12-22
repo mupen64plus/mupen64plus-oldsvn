@@ -279,12 +279,12 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     
     if(breakpoints_editing)
     {
-        printf("Updating breakpoint #%u on 0x%08X - 0x%08X flags 0x%08X\n", ced->row, newbp.address, newbp.endaddr, newbp.flags);
-        memcpy(&g_Breakpoints[ced->row], &newbp, sizeof(breakpoint));
+        //printf("Updating breakpoint #%u on 0x%08X - 0x%08X flags 0x%08X\n", ced->row, newbp.address, newbp.endaddr, newbp.flags);
+        replace_breakpoint_num(ced->row, &newbp);
     }
     else
     {
-        printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
+        //printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
         if(add_breakpoint_struct(&newbp) == -1)
         {
             error_message(tr("Cannot add any more breakpoints."));
@@ -295,7 +295,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer)(long) newbp.address );
     
     update_breakpoints();
-        refresh_desasm();
+    refresh_desasm();
     return FALSE; //don't add the typed string, update_breakpoints() handles it
 }
 

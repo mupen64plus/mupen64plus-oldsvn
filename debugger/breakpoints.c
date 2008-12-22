@@ -41,7 +41,6 @@ int add_breakpoint( uint32 address )
     enable_breakpoint(g_NumBreakpoints);
 
     return g_NumBreakpoints++;
-
 }
 
 int add_breakpoint_struct(breakpoint* newbp)
@@ -50,31 +49,76 @@ int add_breakpoint_struct(breakpoint* newbp)
         printf("BREAKPOINTS_MAX_NUMBER have been reached.\n");//REMOVE ME
         return -1;
     }
+
     memcpy(&g_Breakpoints[g_NumBreakpoints], newbp, sizeof(breakpoint));
-    printf("newbp %08X - %08X\n", g_Breakpoints[g_NumBreakpoints].address, g_Breakpoints[g_NumBreakpoints].endaddr);
+
+    if(BPT_CHECK_FLAG(g_Breakpoints[g_NumBreakpoints], BPT_FLAG_ENABLED))
+    {
+        BPT_CLEAR_FLAG(g_Breakpoints[g_NumBreakpoints], BPT_FLAG_ENABLED);
+        enable_breakpoint( g_NumBreakpoints );
+    }
+    
     return g_NumBreakpoints++;
 }
 
-void enable_breakpoint( int breakpoint )
+void enable_breakpoint( int bpt)
 {
-    BPT_SET_FLAG(g_Breakpoints[breakpoint], BPT_FLAG_ENABLED);
-    //TODO: Must setup breakpoint checks in r4300
+    breakpoint *curBpt = g_Breakpoints + bpt;
+    uint64 bptAddr;
+    
+    if(BPT_CHECK_FLAG((*curBpt), BPT_FLAG_READ)) {
+        for(bptAddr = curBpt->address; bptAddr <= (curBpt->endaddr | 0xFFFF); bptAddr+=0x10000)
+            if(lookup_breakpoint(bptAddr & 0xFFFF0000, 0xFFFF, BPT_FLAG_ENABLED | BPT_FLAG_READ) == -1)
+                activate_memory_break_read(bptAddr);
+    }
+
+    if(BPT_CHECK_FLAG((*curBpt), BPT_FLAG_WRITE)) {
+        for(bptAddr = curBpt->address; bptAddr <= (curBpt->endaddr | 0xFFFF); bptAddr+=0x10000)
+            if(lookup_breakpoint(bptAddr & 0xFFFF0000, 0xFFFF, BPT_FLAG_ENABLED | BPT_FLAG_WRITE) == -1)
+                activate_memory_break_write(bptAddr);
+    }
+    
+    BPT_SET_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED);
 }
 
-void disable_breakpoint( int breakpoint )
+void disable_breakpoint( int bpt )
 {
-    BPT_CLEAR_FLAG(g_Breakpoints[breakpoint], BPT_FLAG_ENABLED);
-    //TODO: Must setup breakpoint checks in r4300
+    breakpoint *curBpt = g_Breakpoints + bpt;
+    uint64 bptAddr;
+
+    BPT_CLEAR_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED);
+
+    if(BPT_CHECK_FLAG((*curBpt), BPT_FLAG_READ)) {
+        for(bptAddr = curBpt->address; bptAddr <= ((unsigned long)(curBpt->endaddr | 0xFFFF)); bptAddr+=0x10000)
+            if(lookup_breakpoint(bptAddr & 0xFFFF0000, 0xFFFF, BPT_FLAG_ENABLED | BPT_FLAG_READ) == -1)
+                deactivate_memory_break_read(bptAddr);
+    }
+
+    if(BPT_CHECK_FLAG((*curBpt), BPT_FLAG_WRITE)) {
+        for(bptAddr = curBpt->address; bptAddr <= ((unsigned long)(curBpt->endaddr | 0xFFFF)); bptAddr+=0x10000)
+            if(lookup_breakpoint(bptAddr & 0xFFFF0000, 0xFFFF, BPT_FLAG_ENABLED | BPT_FLAG_WRITE) == -1)
+                deactivate_memory_break_write(bptAddr);
+    }
+
+    BPT_CLEAR_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED);
 }
 
 void remove_breakpoint_by_num( int bpt )
 {
-    g_Breakpoints[bpt]=g_Breakpoints[--g_NumBreakpoints];
+    int curBpt;
+    
+    if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED))
+        disable_breakpoint( bpt );
+
+    for(curBpt=bpt+1; curBpt<g_NumBreakpoints; curBpt++)
+        g_Breakpoints[curBpt-1]=g_Breakpoints[curBpt];
+    
+    g_NumBreakpoints--;
 }
 
 void remove_breakpoint_by_address( uint32 address )
 {
-    int bpt = lookup_breakpoint( address, 0 );
+    int bpt = lookup_breakpoint( address, 0, 0 );
     if(bpt==-1)
         {
         printf("Tried to remove Nonexistant breakpoint %x!", address);
@@ -83,52 +127,72 @@ void remove_breakpoint_by_address( uint32 address )
         remove_breakpoint_by_num( bpt );
 }
 
-int lookup_breakpoint( uint32 address, uint32 flags)
+void replace_breakpoint_num( int bpt, breakpoint* copyofnew )
 {
-    int i=0;
-    while( i != g_NumBreakpoints )
+    
+    if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED))
+        disable_breakpoint( bpt );
+
+    memcpy(&(g_Breakpoints[bpt]), copyofnew, sizeof(breakpoint));
+
+    if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED))
     {
-        if((address >= g_Breakpoints[i].address) && (address <= g_Breakpoints[i].endaddr) && (!flags || ((g_Breakpoints[i].flags & flags) == flags)))
+        BPT_CLEAR_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED);
+        enable_breakpoint( bpt );
+    }
+}
+
+int lookup_breakpoint( uint32 address, uint32 size, uint32 flags)
+{
+    int i;
+    uint64 endaddr = ((uint64)address) + ((uint64)size);
+    
+    for( i=0; i < g_NumBreakpoints; i++)
+    {
+        if((g_Breakpoints[i].flags & flags) == flags)
         {
-            //printf("Bpt %d (0x%08X - 0x%08X) matches 0x%08X\n", i, g_Breakpoints[i].address,
-            //  g_Breakpoints[i].endaddr, address);
-            return i;
+            if(g_Breakpoints[i].endaddr < g_Breakpoints[i].address)
+            {
+                if((endaddr >= g_Breakpoints[i].address) || 
+                    (address <= g_Breakpoints[i].endaddr))
+                        return i;
+            }
+            else // endaddr >= address
+            {
+                if((endaddr >= g_Breakpoints[i].address) && 
+                    (address <= g_Breakpoints[i].endaddr))
+                        return i;
+            }
         }
-        else
-            i++;
     }
     return -1;
 }
 
 int check_breakpoints( uint32 address )
 {
-    int bpt=lookup_breakpoint( address, BPT_FLAG_ENABLED | BPT_FLAG_EXEC );
-    if( (bpt != -1) && BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_ENABLED))
-        return bpt;
-    return -1;
+    return lookup_breakpoint( address, 0, BPT_FLAG_ENABLED | BPT_FLAG_EXEC );
 }
 
 
-int check_breakpoints_on_mem_access( uint32 address, uint32 size, uint32 flags )
+int check_breakpoints_on_mem_access( uint32 pc, uint32 address, uint32 size, uint32 flags )
 {
     //This function handles memory read/write breakpoints. size specifies the address
     //range to check, flags specifies the flags that all need to be set.
     //It automatically stops and updates the debugger on hit, so the memory access
     //functions only need to call it and can discard the result.
-    
     int i, bpt;
-    for(i=address; i<=(address + size); i++)
+    if(run == 2)
     {
-        bpt=lookup_breakpoint( address, flags );
+        bpt=lookup_breakpoint( address, size, flags );
         if(bpt != -1)
         {
             if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_LOG))
-                log_breakpoint(PC->addr, flags, address);
-                
+                log_breakpoint(pc, flags, address);
+            
             run = 0;
             switch_button_to_run();
-            update_debugger();
-            
+            update_debugger(pc);
+        
             return bpt;
         }
     }

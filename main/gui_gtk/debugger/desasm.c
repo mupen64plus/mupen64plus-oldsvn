@@ -38,6 +38,7 @@
 #define SCROLLSLOWAMT  ((int)(100/SCROLLSLOW))
  
 static uint32 previous_focus;
+static uint32 currentPC = 0;
 
 static GtkWidget *clDesasm, *buRun;
 static DisasmList *cmDesasm;
@@ -74,7 +75,7 @@ void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
     {
       if(check_breakpoints((long) iter->user_data) != -1)
     {
-      if(PC->addr == ((long) iter->user_data))
+      if(currentPC == ((long) iter->user_data))
         g_object_set(G_OBJECT(cell), "cell-background-gdk", 
              &color_PC_on_BP, "cell-background-set", TRUE, NULL);
       else
@@ -83,7 +84,7 @@ void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
     }
       else
     {
-      if(PC->addr == ((long) iter->user_data))
+      if(currentPC == ((long) iter->user_data))
         g_object_set(G_OBJECT(cell), "cell-background-gdk", &color_PC,
              "cell-background-set", TRUE, NULL);
       else
@@ -244,6 +245,12 @@ unsigned int addtest=0x00;
 unsigned int prevadd=0x00;
 unsigned int mousedown=0x00;
 float prev=0.0f;
+
+void update_disassembler( uint32 pc )
+{
+    currentPC=pc;
+    update_desasm( pc );
+}
 
 
 void update_desasm( uint32 focused_address )
@@ -473,7 +480,7 @@ static void on_click( GtkTreeView *widget, GtkTreePath *path,
 
   clicked_address =(uint32)(long) iter.user_data;
 
-  break_number = lookup_breakpoint(clicked_address, BPT_FLAG_EXEC);
+  break_number = lookup_breakpoint(clicked_address, 0, BPT_FLAG_EXEC);
 
   if( break_number==-1 ) {
     add_breakpoint( clicked_address );

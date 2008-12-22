@@ -1061,63 +1061,65 @@ static void update_MI_intr_mask_reg()
 
 void update_SP()
 {
-   if (sp_register.w_sp_status_reg & 0x1)
-     sp_register.halt = 0;
-   if (sp_register.w_sp_status_reg & 0x2)
-     sp_register.halt = 1;
-   if (sp_register.w_sp_status_reg & 0x4)
-     sp_register.broke = 0;
-   if (sp_register.w_sp_status_reg & 0x8)
-     {
-    MI_register.mi_intr_reg &= 0xFFFFFFFE;
-    check_interupt();
-     }
-   if (sp_register.w_sp_status_reg & 0x10)
-     {
-    MI_register.mi_intr_reg |= 1;
-    check_interupt();
-     }
-   if (sp_register.w_sp_status_reg & 0x20)
-     sp_register.single_step = 0;
-   if (sp_register.w_sp_status_reg & 0x40)
-     sp_register.single_step = 1;
-   if (sp_register.w_sp_status_reg & 0x80)
-     sp_register.intr_break = 0;
-   if (sp_register.w_sp_status_reg & 0x100)
-     sp_register.intr_break = 1;
-   if (sp_register.w_sp_status_reg & 0x200)
-     sp_register.signal0 = 0;
-   if (sp_register.w_sp_status_reg & 0x400)
-     sp_register.signal0 = 1;
-   if (sp_register.w_sp_status_reg & 0x800)
-     sp_register.signal1 = 0;
-   if (sp_register.w_sp_status_reg & 0x1000)
-     sp_register.signal1 = 1;
-   if (sp_register.w_sp_status_reg & 0x2000)
-     sp_register.signal2 = 0;
-   if (sp_register.w_sp_status_reg & 0x4000)
-     sp_register.signal2 = 1;
-   if (sp_register.w_sp_status_reg & 0x8000)
-     sp_register.signal3 = 0;
-   if (sp_register.w_sp_status_reg & 0x10000)
-     sp_register.signal3 = 1;
-   if (sp_register.w_sp_status_reg & 0x20000)
-     sp_register.signal4 = 0;
-   if (sp_register.w_sp_status_reg & 0x40000)
-     sp_register.signal4 = 1;
-   if (sp_register.w_sp_status_reg & 0x80000)
-     sp_register.signal5 = 0;
-   if (sp_register.w_sp_status_reg & 0x100000)
-     sp_register.signal5 = 1;
-   if (sp_register.w_sp_status_reg & 0x200000)
-     sp_register.signal6 = 0;
-   if (sp_register.w_sp_status_reg & 0x400000)
-     sp_register.signal6 = 1;
-   if (sp_register.w_sp_status_reg & 0x800000)
-     sp_register.signal7 = 0;
-   if (sp_register.w_sp_status_reg & 0x1000000)
-     sp_register.signal7 = 1;
-   sp_register.sp_status_reg = ((sp_register.halt) |
+    if (sp_register.w_sp_status_reg & 0x1)
+        sp_register.halt = 0;
+    if (sp_register.w_sp_status_reg & 0x2)
+        sp_register.halt = 1;
+    if (sp_register.w_sp_status_reg & 0x4)
+        sp_register.broke = 0;
+    if (sp_register.w_sp_status_reg & 0x8)
+    {
+        MI_register.mi_intr_reg &= 0xFFFFFFFE;
+        check_interupt();
+    }
+    
+    if (sp_register.w_sp_status_reg & 0x10)
+    {
+        MI_register.mi_intr_reg |= 1;
+        check_interupt();
+    }
+    
+    if (sp_register.w_sp_status_reg & 0x20)
+        sp_register.single_step = 0;
+    if (sp_register.w_sp_status_reg & 0x40)
+        sp_register.single_step = 1;
+    if (sp_register.w_sp_status_reg & 0x80)
+        sp_register.intr_break = 0;
+    if (sp_register.w_sp_status_reg & 0x100)
+        sp_register.intr_break = 1;
+    if (sp_register.w_sp_status_reg & 0x200)
+        sp_register.signal0 = 0;
+    if (sp_register.w_sp_status_reg & 0x400)
+        sp_register.signal0 = 1;
+    if (sp_register.w_sp_status_reg & 0x800)
+        sp_register.signal1 = 0;
+    if (sp_register.w_sp_status_reg & 0x1000)
+        sp_register.signal1 = 1;
+    if (sp_register.w_sp_status_reg & 0x2000)
+        sp_register.signal2 = 0;
+    if (sp_register.w_sp_status_reg & 0x4000)
+        sp_register.signal2 = 1;
+    if (sp_register.w_sp_status_reg & 0x8000)
+        sp_register.signal3 = 0;
+    if (sp_register.w_sp_status_reg & 0x10000)
+        sp_register.signal3 = 1;
+    if (sp_register.w_sp_status_reg & 0x20000)
+        sp_register.signal4 = 0;
+    if (sp_register.w_sp_status_reg & 0x40000)
+        sp_register.signal4 = 1;
+    if (sp_register.w_sp_status_reg & 0x80000)
+        sp_register.signal5 = 0;
+    if (sp_register.w_sp_status_reg & 0x100000)
+        sp_register.signal5 = 1;
+    if (sp_register.w_sp_status_reg & 0x200000)
+        sp_register.signal6 = 0;
+    if (sp_register.w_sp_status_reg & 0x400000)
+        sp_register.signal6 = 1;
+    if (sp_register.w_sp_status_reg & 0x800000)
+        sp_register.signal7 = 0;
+    if (sp_register.w_sp_status_reg & 0x1000000)
+        sp_register.signal7 = 1;
+    sp_register.sp_status_reg = ((sp_register.halt) |
                 (sp_register.broke << 1) |
                 (sp_register.dma_busy << 2) |
                 (sp_register.dma_full << 3) |
@@ -1131,157 +1133,268 @@ void update_SP()
                 (sp_register.signal4 << 11) |
                 (sp_register.signal5 << 12) |
                 (sp_register.signal6 << 13) |
-                (sp_register.signal7 << 14)
-                );
-   //if (get_event(SP_INT)) return;
-   if (!(sp_register.w_sp_status_reg & 0x1) && 
-       !(sp_register.w_sp_status_reg & 0x4)) return;
-   if (!sp_register.halt && !sp_register.broke)
-     {
-    int save_pc = rsp_register.rsp_pc & ~0xFFF;
-    if (SP_DMEM[0xFC0/4] == 1)
-      {
-         // unprotecting old frame buffers
-         if(fBGetFrameBufferInfo && fBRead && fBWrite && 
-        frameBufferInfos[0].addr)
-           {
-          int i;
-          for(i=0; i<6; i++)
+                (sp_register.signal7 << 14));
+    
+    //if (get_event(SP_INT)) return;
+    if (!(sp_register.w_sp_status_reg & 0x1) && 
+        !(sp_register.w_sp_status_reg & 0x4)) return;
+    if (!sp_register.halt && !sp_register.broke)
+    {
+        int save_pc = rsp_register.rsp_pc & ~0xFFF;
+        if (SP_DMEM[0xFC0/4] == 1)
+        {
+            // unprotecting old frame buffers
+            if(fBGetFrameBufferInfo && fBRead && fBWrite && 
+            frameBufferInfos[0].addr)
             {
-               if(frameBufferInfos[i].addr)
-             {
-                int j;
-                int start = frameBufferInfos[i].addr & 0x7FFFFF;
-                int end = start + frameBufferInfos[i].width*
-                                  frameBufferInfos[i].height*
-                                  frameBufferInfos[i].size - 1;
-                start = start >> 16;
-                end = end >> 16;
-                for(j=start; j<=end; j++)
-                  {
-                 readmem[0x8000+j] = read_rdram;
-                 readmem[0xa000+j] = read_rdram;
-                 readmemb[0x8000+j] = read_rdramb;
-                 readmemb[0xa000+j] = read_rdramb;
-                 readmemh[0x8000+j] = read_rdramh;
-                 readmemh[0xa000+j] = read_rdramh;
-                 readmemd[0x8000+j] = read_rdramd;
-                 readmemd[0xa000+j] = read_rdramd;
-                 writemem[0x8000+j] = write_rdram;
-                 writemem[0xa000+j] = write_rdram;
-                 writememb[0x8000+j] = write_rdramb;
-                 writememb[0xa000+j] = write_rdramb;
-                 writememh[0x8000+j] = write_rdramh;
-                 writememh[0xa000+j] = write_rdramh;
-                 writememd[0x8000+j] = write_rdramd;
-                 writememd[0xa000+j] = write_rdramd;
-                  }
-             }
+                int i;
+                for(i=0; i<6; i++)
+                {
+                    if(frameBufferInfos[i].addr)
+                    {
+                        int j;
+                        int start = frameBufferInfos[i].addr & 0x7FFFFF;
+                        int end = start + frameBufferInfos[i].width*
+                                    frameBufferInfos[i].height*
+                                    frameBufferInfos[i].size - 1;
+                        start = start >> 16;
+                        end = end >> 16;
+
+                        for(j=start; j<=end; j++)
+                        {
+#ifdef DBG
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0x8000+j] = read_rdram_break;
+                                readmemb[0x8000+j] = read_rdramb_break;
+                                readmemh[0x8000+j] = read_rdramh_break;
+                                readmemd[0xa000+j] = read_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0x8000+j] = read_rdram;
+                            readmemb[0x8000+j] = read_rdramb;
+                            readmemh[0x8000+j] = read_rdramh;
+                            readmemd[0xa000+j] = read_rdramd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0xa000+j] = read_rdram_break;
+                                readmemb[0xa000+j] = read_rdramb_break;
+                                readmemh[0xa000+j] = read_rdramh_break;
+                                readmemd[0x8000+j] = read_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0xa000+j] = read_rdram;
+                            readmemb[0xa000+j] = read_rdramb;
+                            readmemh[0xa000+j] = read_rdramh;
+                            readmemd[0x8000+j] = read_rdramd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0x8000+j] = write_rdram_break;
+                                writememb[0x8000+j] = write_rdramb_break;
+                                writememh[0x8000+j] = write_rdramh_break;
+                                writememd[0x8000+j] = write_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0x8000+j] = write_rdram;
+                            writememb[0x8000+j] = write_rdramb;
+                            writememh[0x8000+j] = write_rdramh;
+                            writememd[0x8000+j] = write_rdramd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0xa000+j] = write_rdram_break;
+                                writememb[0xa000+j] = write_rdramb_break;
+                                writememh[0xa000+j] = write_rdramh_break;
+                                writememd[0xa000+j] = write_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0xa000+j] = write_rdram;
+                            writememb[0xa000+j] = write_rdramb;
+                            writememh[0xa000+j] = write_rdramh;
+                            writememd[0xa000+j] = write_rdramd;
+#ifdef DBG
+                            }
+#endif
+                        }
+                    }
+                }
             }
-           }
          
-         //processDList();
-         rsp_register.rsp_pc &= 0xFFF;
-         start_section(GFX_SECTION);
-         doRspCycles(100);
-         end_section(GFX_SECTION);
-         rsp_register.rsp_pc |= save_pc;
-         new_frame();
+            //processDList();
+            rsp_register.rsp_pc &= 0xFFF;
+            start_section(GFX_SECTION);
+            doRspCycles(100);
+            end_section(GFX_SECTION);
+            rsp_register.rsp_pc |= save_pc;
+            new_frame();
          
-         MI_register.mi_intr_reg &= ~0x21;
-         sp_register.sp_status_reg &= ~0x303;
-         update_count();
-         add_interupt_event(SP_INT, 1000);
-         add_interupt_event(DP_INT, 1000);
+            MI_register.mi_intr_reg &= ~0x21;
+            sp_register.sp_status_reg &= ~0x303;
+            update_count();
+            add_interupt_event(SP_INT, 1000);
+            add_interupt_event(DP_INT, 1000);
          
-         // protecting new frame buffers
-         if(fBGetFrameBufferInfo && fBRead && fBWrite) fBGetFrameBufferInfo(frameBufferInfos);
-         if(fBGetFrameBufferInfo && fBRead && fBWrite &&
-        frameBufferInfos[0].addr)
+            // protecting new frame buffers
+            if(fBGetFrameBufferInfo && fBRead && fBWrite) 
+                fBGetFrameBufferInfo(frameBufferInfos);
+            if(fBGetFrameBufferInfo && fBRead && fBWrite 
+                && frameBufferInfos[0].addr)
            {
-          int i;
-          for(i=0; i<6; i++)
-            {
-               if(frameBufferInfos[i].addr)
-             {
-                int j;
-                int start = frameBufferInfos[i].addr & 0x7FFFFF;
-                int end = start + frameBufferInfos[i].width*
-                                  frameBufferInfos[i].height*
-                                  frameBufferInfos[i].size - 1;
-                int start1 = start;
-                int end1 = end;
-                start >>= 16;
-                end >>= 16;
-                for(j=start; j<=end; j++)
-                  {
-                 readmem[0x8000+j] = read_rdramFB;
-                 readmem[0xa000+j] = read_rdramFB;
-                 readmemb[0x8000+j] = read_rdramFBb;
-                 readmemb[0xa000+j] = read_rdramFBb;
-                 readmemh[0x8000+j] = read_rdramFBh;
-                 readmemh[0xa000+j] = read_rdramFBh;
-                 readmemd[0x8000+j] = read_rdramFBd;
-                 readmemd[0xa000+j] = read_rdramFBd;
-                 writemem[0x8000+j] = write_rdramFB;
-                 writemem[0xa000+j] = write_rdramFB;
-                 writememb[0x8000+j] = write_rdramFBb;
-                 writememb[0xa000+j] = write_rdramFBb;
-                 writememh[0x8000+j] = write_rdramFBh;
-                 writememh[0xa000+j] = write_rdramFBh;
-                 writememd[0x8000+j] = write_rdramFBd;
-                 writememd[0xa000+j] = write_rdramFBd;
-                  }
-                start <<= 4;
-                end <<= 4;
-                for(j=start; j<=end; j++)
-                  {
-                 if(j>=start1 && j<=end1) framebufferRead[j]=1;
-                 else framebufferRead[j] = 0;
-                  }
-                if(firstFrameBufferSetting)
-                  {
-                 firstFrameBufferSetting = 0;
-                 fast_memory = 0;
-                 for(j=0; j<0x100000; j++)
-                   invalid_code[j] = 1;
-                  }
-             }
+                int i;
+                for(i=0; i<6; i++)
+                {
+                    if(frameBufferInfos[i].addr)
+                    {
+                        int j;
+                        int start = frameBufferInfos[i].addr & 0x7FFFFF;
+                        int end = start + frameBufferInfos[i].width*
+                                        frameBufferInfos[i].height*
+                                        frameBufferInfos[i].size - 1;
+                        int start1 = start;
+                        int end1 = end;
+                        start >>= 16;
+                        end >>= 16;
+                        for(j=start; j<=end; j++)
+                        {
+ #ifdef DBG
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0x8000+j] = read_rdramFB_break;
+                                readmemb[0x8000+j] = read_rdramFBb_break;
+                                readmemh[0x8000+j] = read_rdramFBh_break;
+                                readmemd[0xa000+j] = read_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0x8000+j] = read_rdramFB;
+                            readmemb[0x8000+j] = read_rdramFBb;
+                            readmemh[0x8000+j] = read_rdramFBh;
+                            readmemd[0xa000+j] = read_rdramFBd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0xa000+j] = read_rdramFB_break;
+                                readmemb[0xa000+j] = read_rdramFBb_break;
+                                readmemh[0xa000+j] = read_rdramFBh_break;
+                                readmemd[0x8000+j] = read_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0xa000+j] = read_rdramFB;
+                            readmemb[0xa000+j] = read_rdramFBb;
+                            readmemh[0xa000+j] = read_rdramFBh;
+                            readmemd[0x8000+j] = read_rdramFBd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0x8000+j] = write_rdramFB_break;
+                                writememb[0x8000+j] = write_rdramFBb_break;
+                                writememh[0x8000+j] = write_rdramFBh_break;
+                                writememd[0x8000+j] = write_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0x8000+j] = write_rdramFB;
+                            writememb[0x8000+j] = write_rdramFBb;
+                            writememh[0x8000+j] = write_rdramFBh;
+                            writememd[0x8000+j] = write_rdramFBd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0xa000+j] = write_rdramFB_break;
+                                writememb[0xa000+j] = write_rdramFBb_break;
+                                writememh[0xa000+j] = write_rdramFBh_break;
+                                writememd[0xa000+j] = write_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0xa000+j] = write_rdramFB;
+                            writememb[0xa000+j] = write_rdramFBb;
+                            writememh[0xa000+j] = write_rdramFBh;
+                            writememd[0xa000+j] = write_rdramFBd;
+#ifdef DBG
+                            }
+#endif
+                        }
+                        start <<= 4;
+                        end <<= 4;
+                        for(j=start; j<=end; j++)
+                        {
+                            if(j>=start1 && j<=end1) framebufferRead[j]=1;
+                            else framebufferRead[j] = 0;
+                        }
+                        
+                        if(firstFrameBufferSetting)
+                        {
+                            firstFrameBufferSetting = 0;
+                            fast_memory = 0;
+                            for(j=0; j<0x100000; j++)
+                                invalid_code[j] = 1;
+                        }
+                    }
+                }
             }
-           }
-      }
-    else if (SP_DMEM[0xFC0/4] == 2)
-      {
-         //processAList();
-         rsp_register.rsp_pc &= 0xFFF;
-         start_section(AUDIO_SECTION);
-         doRspCycles(100);
-         end_section(AUDIO_SECTION);
-         rsp_register.rsp_pc |= save_pc;
+        }
+        else if (SP_DMEM[0xFC0/4] == 2)
+        {
+            //processAList();
+            rsp_register.rsp_pc &= 0xFFF;
+            start_section(AUDIO_SECTION);
+            doRspCycles(100);
+            end_section(AUDIO_SECTION);
+            rsp_register.rsp_pc |= save_pc;
          
-         MI_register.mi_intr_reg &= ~0x1;
-         sp_register.sp_status_reg &= ~0x303;
-         update_count();
-         //add_interupt_event(SP_INT, 500);
-         add_interupt_event(SP_INT, 4000);
-      }
-    else
-      {
-         //printf("other task\n");
-         rsp_register.rsp_pc &= 0xFFF;
-         doRspCycles(100);
-         rsp_register.rsp_pc |= save_pc;
+            MI_register.mi_intr_reg &= ~0x1;
+            sp_register.sp_status_reg &= ~0x303;
+            update_count();
+            //add_interupt_event(SP_INT, 500);
+            add_interupt_event(SP_INT, 4000);
+        }
+        else
+        {
+            //printf("other task\n");
+            rsp_register.rsp_pc &= 0xFFF;
+            doRspCycles(100);
+            rsp_register.rsp_pc |= save_pc;
          
-         MI_register.mi_intr_reg &= ~0x1;
-         sp_register.sp_status_reg &= ~0x203;
-         update_count();
-         add_interupt_event(SP_INT, 0/*100*/);
-      }
-    //printf("unknown task type\n");
-    /*if (hle) execute_dlist();
-    //if (hle) processDList();
-    else sp_register.halt = 0;*/
-     }
+            MI_register.mi_intr_reg &= ~0x1;
+            sp_register.sp_status_reg &= ~0x203;
+            update_count();
+            add_interupt_event(SP_INT, 0/*100*/);
+        }
+        //printf("unknown task type\n");
+        /*if (hle) execute_dlist();
+        //if (hle) processDList();
+        else sp_register.halt = 0;*/
+    }
 }
 
 void update_DPC()
@@ -1419,33 +1532,21 @@ void write_nomemd()
 
 void read_rdram()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned int *)(rdramb + (address & 0xFFFFFF)));
 }
 
 void read_rdramb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(rdramb + ((address & 0xFFFFFF)^S8));
 }
 
 void read_rdramh()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short *)(rdramb + ((address & 0xFFFFFF)^S16)));
 }
 
 void read_rdramd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*(unsigned int *)(rdramb + (address & 0xFFFFFF))) << 32) |
      ((*(unsigned int *)(rdramb + (address & 0xFFFFFF) + 4)));
 }
@@ -1540,33 +1641,21 @@ void read_rdramFBd()
 
 void write_rdram()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned int *)(rdramb + (address & 0xFFFFFF))) = word;
 }
 
 void write_rdramb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((rdramb + ((address & 0xFFFFFF)^S8))) = byte;
 }
 
 void write_rdramh()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16))) = hword;
 }
 
 void write_rdramd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned int *)(rdramb + (address & 0xFFFFFF))) = dword >> 32;
    *((unsigned int *)(rdramb + (address & 0xFFFFFF) + 4 )) = dword & 0xFFFFFFFF;
 }
@@ -1966,114 +2055,75 @@ void write_rsp_regd()
 
 void read_rsp()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ); //FIXME: access breakpoints not tested in these functions; possibly should be using address_low here
-    #endif
    *rdword = *(readrsp[*address_low]);
 }
 
 void read_rspb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned char*)readrsp[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_rsph()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short*)((unsigned char*)readrsp[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_rspd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*readrsp[*address_low])<<32) |
      *readrsp[*address_low+4];
 }
 
 void write_rsp()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *readrsp[*address_low] = word;
 }
 
 void write_rspb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned char*)readrsp[*address_low & 0xfffc]
      + ((*address_low&3)^S8) ) = byte;
 }
 
 void write_rsph()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned short*)((unsigned char*)readrsp[*address_low & 0xfffc]
                + ((*address_low&3)^S16) )) = hword;
 }
 
 void write_rspd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *readrsp[*address_low] = dword >> 32;
    *readrsp[*address_low+4] = dword & 0xFFFFFFFF;
 }
 
 void read_dp()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(readdp[*address_low]);
 }
 
 void read_dpb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned char*)readdp[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_dph()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short*)((unsigned char*)readdp[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_dpd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*readdp[*address_low])<<32) |
      *readdp[*address_low+4];
 }
 
 void write_dp()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0xc:
@@ -2103,9 +2153,6 @@ void write_dp()
 
 void write_dpb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0xc:
@@ -2161,9 +2208,6 @@ void write_dpb()
 
 void write_dph()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0xc:
@@ -2203,9 +2247,6 @@ void write_dph()
 
 void write_dpd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -2233,114 +2274,75 @@ void write_dpd()
 
 void read_dps()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(readdps[*address_low]);
 }
 
 void read_dpsb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned char*)readdps[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_dpsh()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short*)((unsigned char*)readdps[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_dpsd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*readdps[*address_low])<<32) |
      *readdps[*address_low+4];
 }
 
 void write_dps()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *readdps[*address_low] = word;
 }
 
 void write_dpsb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned char*)readdps[*address_low & 0xfffc]
      + ((*address_low&3)^S8) ) = byte;
 }
 
 void write_dpsh()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned short*)((unsigned char*)readdps[*address_low & 0xfffc]
                + ((*address_low&3)^S16) )) = hword;
 }
 
 void write_dpsd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *readdps[*address_low] = dword >> 32;
    *readdps[*address_low+4] = dword & 0xFFFFFFFF;
 }
 
 void read_mi()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(readmi[*address_low]);
 }
 
 void read_mib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned char*)readmi[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_mih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short*)((unsigned char*)readmi[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_mid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*readmi[*address_low])<<32) |
      *readmi[*address_low+4];
 }
 
 void write_mi()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2360,9 +2362,6 @@ void write_mi()
 
 void write_mib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2390,9 +2389,6 @@ void write_mib()
 
 void write_mih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2416,9 +2412,6 @@ void write_mih()
 
 void write_mid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2438,9 +2431,6 @@ void write_mid()
 
 void read_vi()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2454,9 +2444,6 @@ void read_vi()
 
 void read_vib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2474,9 +2461,6 @@ void read_vib()
 
 void read_vih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2492,9 +2476,6 @@ void read_vih()
 
 void read_vid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    switch(*address_low)
      {
       case 0x10:
@@ -2509,9 +2490,6 @@ void read_vid()
 
 void write_vi()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2541,9 +2519,6 @@ void write_vi()
 
 void write_vib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    int temp;
    switch(*address_low)
      {
@@ -2590,9 +2565,6 @@ void write_vib()
 
 void write_vih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    int temp;
    switch(*address_low)
      {
@@ -2633,9 +2605,6 @@ void write_vih()
 
 void write_vid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2669,9 +2638,6 @@ void write_vid()
 
 void read_ai()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    switch(*address_low)
      {
       case 0x4:
@@ -2689,9 +2655,6 @@ void read_ai()
 
 void read_aib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    unsigned int len;
    switch(*address_low)
      {
@@ -2715,9 +2678,6 @@ void read_aib()
 
 void read_aih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    unsigned int len;
    switch(*address_low)
      {
@@ -2740,9 +2700,6 @@ void read_aih()
 
 void read_aid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -2762,9 +2719,6 @@ void read_aid()
 
 void write_ai()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    unsigned int delay=0;
    switch(*address_low)
      {
@@ -2853,9 +2807,6 @@ void write_ai()
 
 void write_aib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    int temp;
    unsigned int delay=0;
    switch(*address_low)
@@ -2954,9 +2905,6 @@ void write_aib()
 
 void write_aih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    int temp;
    unsigned int delay=0;
    switch(*address_low)
@@ -3048,9 +2996,6 @@ void write_aih()
 
 void write_aid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    unsigned int delay=0;
    switch(*address_low)
      {
@@ -3135,44 +3080,29 @@ void write_aid()
 
 void read_pi()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(readpi[*address_low]);
 }
 
 void read_pib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned char*)readpi[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_pih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short*)((unsigned char*)readpi[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_pid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*readpi[*address_low])<<32) |
      *readpi[*address_low+4];
 }
 
 void write_pi()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3207,9 +3137,6 @@ void write_pi()
 
 void write_pib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3271,9 +3198,6 @@ void write_pib()
 
 void write_pih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3325,9 +3249,6 @@ void write_pih()
 
 void write_pid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x8:
@@ -3358,114 +3279,75 @@ void write_pid()
 
 void read_ri()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(readri[*address_low]);
 }
 
 void read_rib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned char*)readri[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_rih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short*)((unsigned char*)readri[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_rid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*readri[*address_low])<<32) |
      *readri[*address_low+4];
 }
 
 void write_ri()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *readri[*address_low] = word;
 }
 
 void write_rib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned char*)readri[*address_low & 0xfffc]
      + ((*address_low&3)^S8) ) = byte;
 }
 
 void write_rih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *((unsigned short*)((unsigned char*)readri[*address_low & 0xfffc]
                + ((*address_low&3)^S16) )) = hword;
 }
 
 void write_rid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    *readri[*address_low] = dword >> 32;
    *readri[*address_low+4] = dword & 0xFFFFFFFF;
 }
 
 void read_si()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(readsi[*address_low]);
 }
 
 void read_sib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned char*)readsi[*address_low & 0xfffc]
            + ((*address_low&3)^S8) );
 }
 
 void read_sih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short*)((unsigned char*)readsi[*address_low & 0xfffc]
                  + ((*address_low&3)^S16) ));
 }
 
 void read_sid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long int)(*readsi[*address_low])<<32) |
      *readsi[*address_low+4];
 }
 
 void write_si()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3493,9 +3375,6 @@ void write_si()
 
 void write_sib()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3538,9 +3417,6 @@ void write_sib()
 
 void write_sih()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3575,9 +3451,6 @@ void write_sih()
 
 void write_sid()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    switch(*address_low)
      {
       case 0x0:
@@ -3672,9 +3545,6 @@ static unsigned int lastwrite = 0;
 
 void read_rom()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    if (lastwrite)
      {
     *rdword = lastwrite;
@@ -3686,42 +3556,27 @@ void read_rom()
 
 void read_romb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *(rom + ((address^S8) & 0x03FFFFFF));
 }
 
 void read_romh()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = *((unsigned short *)(rom + ((address^S16) & 0x03FFFFFF)));
 }
 
 void read_romd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
    *rdword = ((unsigned long long)(*((unsigned int *)(rom+(address&0x03FFFFFF))))<<32)|
      *((unsigned int *)(rom + ((address+4)&0x03FFFFFF)));
 }
 
 void write_rom()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
    lastwrite = word;
 }
 
 void read_pif()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3735,9 +3590,6 @@ void read_pif()
 
 void read_pifb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3751,9 +3603,6 @@ void read_pifb()
 
 void read_pifh()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3768,9 +3617,6 @@ void read_pifh()
 
 void read_pifd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_READ);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3785,9 +3631,6 @@ void read_pifd()
 
 void write_pif()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 4, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3811,9 +3654,6 @@ void write_pif()
 
 void write_pifb()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 1, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3837,9 +3677,6 @@ void write_pifb()
 
 void write_pifh()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 2, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
@@ -3864,9 +3701,6 @@ void write_pifh()
 
 void write_pifd()
 {
-    #ifdef DBG
-    check_breakpoints_on_mem_access(address, 8, BPT_FLAG_ENABLED | BPT_FLAG_WRITE);
-    #endif
 #ifdef EMU64_DEBUG
    if ((*address_low > 0x7FF) || (*address_low < 0x7C0))
      {
