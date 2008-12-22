@@ -170,7 +170,7 @@ void init_desasm()
     //gtk_container_add(boxH1, swDesasm);
 
 #ifdef DOUBLESCROLL    
-    ajLinear = (GtkAdjustment *) gtk_adjustment_new(0,0,((float)0xFFFFFFFF),0xFFFF,0xFFFFFF,0);
+    ajLinear = (GtkAdjustment *) gtk_adjustment_new(0,0,((float)0xFFFFFFFF),0x4,0x60,0);
 
     scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(ajLinear));
     //gtk_container_add(boxH1, scrollbar1);
@@ -209,7 +209,8 @@ void init_desasm()
     gtk_signal_connect( GTK_OBJECT(winDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
     gtk_signal_connect( GTK_OBJECT(swDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
     gtk_signal_connect( GTK_OBJECT(scrollbar1), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
-    gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar(swDesasm)), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
+    gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar(
+            GTK_SCROLLED_WINDOW(swDesasm))), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
 
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar((GtkScrolledWindow *) swDesasm)), "button-press-event", GTK_SIGNAL_FUNC(on_scrollclick), NULL);
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar((GtkScrolledWindow *) swDesasm)), "button-release-event", GTK_SIGNAL_FUNC(on_scrollrelease), NULL);
