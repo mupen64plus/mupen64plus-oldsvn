@@ -10,7 +10,8 @@ endif
 
 GLUI_PREFIX	= /home/zig/Dev/gl/glui/src
 GLUT_PREFIX	= /home/zig/Dev/glui/glut-3.7/
-GLUI_LIBS	= $(GLUI_PREFIX)/lib/libglui.a -lglut
+#GLUI_LIBS	= $(GLUI_PREFIX)/lib/libglui.a -lglut
+GLUI_LIBS	= -lglui -lglut
 #$(GLUT_PREFIX)/lib/glut/libglut.so.3.7 #-lglut
 GLUI_INCS	= -I$(GLUI_PREFIX)/include
 
@@ -159,7 +160,7 @@ ifeq ("$(RDP_DEBUG)", "1")
 CFLAGS += -DRDP_DEBUG
 endif
 
-all: $(TARGET) $(TARGET2) $(TARGET3) $(TARGET4) $(TARGET5) instruction
+all: $(TARGET) $(TARGET2) $(TARGET3) $(TARGET4) $(TARGET5) copy_plugins
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(GTK_LIBS) $(LOUT)$@ $(OBJECTS) $(LDFLAGS) $(DLFLAGS) $(SDL_LIB)
@@ -199,6 +200,10 @@ $(TARGET3): $(OBJECTS3)
 
 instruction:
 	$(warning please copy $(TARGET2) and $(TARGET4) in the plugins/ folder of the emulator)
+
+copy_plugins:
+	cp $(TARGET2) ../plugins
+	cp $(TARGET4) ../plugins
 
 clean:
 	rm -rf $(OBJECTS) $(ALL)

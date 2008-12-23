@@ -120,7 +120,7 @@ __declspec(dllexport) void InitiateRSP ( RSP_INFO Rsp_Info, DWORD * CycleCount)
   printf("INITIATE RSP\n");
   rsp_init(Rsp_Info);
   memset(rsp_dmem, 0, 0x2000);
-  *CycleCount = 0;
+  //*CycleCount = 0; //Causes segfault, doesn't seem to be used anyway
 }
 
 __declspec(dllexport) void InitiateRSPDebugger ( DEBUG_INFO DebugInfo)
