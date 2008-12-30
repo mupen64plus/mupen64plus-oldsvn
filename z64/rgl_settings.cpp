@@ -42,12 +42,16 @@ int rglReadSettings()
   sprintf(line, "%s/Plugin/z64gl.conf", rgl_cwd);
   fp = fopen(line, "r");
 #else
+  char configName[PATH_MAX];
+
   strcpy(rgl_cwd, ".");
-  fp = fopen("plugins/z64gl.conf", "r");
+  strcpy(configName, g_ConfigDir);
+  strcat(configName, "z64gl.conf");
+  fp = fopen(configName, "r");
 #endif
 
   if (!fp) {
-    //LOGERROR("Couldn't open z64gl config file\n");
+    LOGERROR("Couldn't open z64gl config file\n");
     return -1;
   }
 

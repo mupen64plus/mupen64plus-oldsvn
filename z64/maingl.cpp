@@ -32,6 +32,8 @@
 
 extern GFX_INFO gfx;
 
+char g_ConfigDir[PATH_MAX] = {0};
+
 #ifdef THREADED
 volatile static int waiting;
 SDL_sem * rdpCommandSema;
@@ -119,6 +121,9 @@ EXPORT void CALL DllTest ( HWND hParent )
 EXPORT void CALL ReadScreen(void **dest, long *width, long *height)
 {
   LOG("ReadScreen\n");
+
+  *width = rglSettings.resX;
+  *height = rglSettings.resY;
 }
 
 EXPORT void CALL DrawScreen (void)
@@ -242,6 +247,21 @@ EXPORT void CALL UpdateScreen (void)
     rglUpdate();
   }
 }
+
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetConfigDir
+  Purpose:  To pass the location where config files should be read/
+            written to.
+  input:    path to config directory
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetConfigDir(char *configDir)
+{
+    strncpy(g_ConfigDir, configDir, PATH_MAX);
+}
+
 
 EXPORT void CALL ViStatusChanged (void)
 {

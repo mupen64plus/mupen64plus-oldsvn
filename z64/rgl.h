@@ -34,6 +34,10 @@
 
 #include "glshader.h"
 
+#include <limits.h> //for PATH_MAX
+
+extern char g_ConfigDir[PATH_MAX];
+
 // highly experimental AND slow
 //#define RGL_EXACT_BLEND
 
