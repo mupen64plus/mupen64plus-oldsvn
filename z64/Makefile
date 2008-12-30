@@ -206,7 +206,8 @@ copy_plugins:
 	cp $(TARGET4) ../plugins
 
 clean:
-	rm -rf $(OBJECTS) $(ALL)
+	rm -rf $(OBJECTS) $(OBJECTS2) $(OBJECTS3) $(OBJECTS4) $(OBJECTS5)
+	rm -rf $(TARGET) $(TARGET2) $(TARGET3) $(TARGET4) $(TARGET5)
 
 rebuild: clean $(ALL)
 
