@@ -6,20 +6,21 @@ else
 GTK_FLAGS = `pkg-config gtk+-2.0 --cflags` -D_GTK2
 GTK_LIBS = `pkg-config gtk+-2.0 --libs`
 endif
+  include ../pre.mk
+else
+  include ../pre.mk.win32
 endif
 
-GLUI_PREFIX	= /home/zig/Dev/gl/glui/src
-GLUT_PREFIX	= /home/zig/Dev/glui/glut-3.7/
-#GLUI_LIBS	= $(GLUI_PREFIX)/lib/libglui.a -lglut
 GLUI_LIBS	= -lglui -lglut
-#$(GLUT_PREFIX)/lib/glut/libglut.so.3.7 #-lglut
-GLUI_INCS	= -I$(GLUI_PREFIX)/include
+#GLUI_INCS	= -I$(GLUI_PREFIX)/include
+GLUI_INCS	= 
 
 ifneq ("$(WIN32)", "1")
 FTGL_PREFIX	= /usr/
 else
 FTGL_PREFIX	= /usr/mingw32/usr/
 endif
+
 FTGL_INCS	= `$(FTGL_PREFIX)bin/freetype-config --cflags` -I$(FTGL_PREFIX)include/FTGL
 FTGL_LIBS	= -lftgl `$(FTGL_PREFIX)bin/freetype-config --libs`
 
@@ -29,8 +30,8 @@ CXX	= g++
 LD	= g++
 STRIP	= strip
 #CFLAGS	= -g -DGCC -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) $(GLUI_INCS) $(FTGL_INCS) -O2 -mtune=athlon-xp -ffast-math -funroll-loops -m3dnow -mmmx -msse -msse2 #-mfpmath=sse #-fomit-frame-pointer
-CFLAGS	= -g -DGCC -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) $(GLUI_INCS) $(FTGL_INCS) -O1 -ffast-math -m3dnow -mmmx -msse -msse2
-LDFLAGS	= -g -rdynamic -lGL -lGLU -lGLEW -L/usr/X11R6/lib $(GLUI_LIBS) $(FTGL_LIBS) `sdl-config --libs` -lz
+CFLAGS	+= -g -DGCC -DUSE_GTK $(SDL_FLAGS) $(GTK_FLAGS) $(GLUI_INCS) $(FTGL_INCS) -fpic -DPIC -Wall
+LDFLAGS	+= -g -rdynamic -lGL -lGLU -lGLEW -L/usr/X11R6/lib $(GLUI_LIBS) $(FTGL_LIBS) -lz $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 DLFLAGS = -shared -Wl,-Bsymbolic
 O	= o
 COUT	= -c -o #
@@ -160,7 +161,7 @@ ifeq ("$(RDP_DEBUG)", "1")
 CFLAGS += -DRDP_DEBUG
 endif
 
-all: $(TARGET) $(TARGET2) $(TARGET3) $(TARGET4) $(TARGET5) copy_plugins
+all: $(TARGET) $(TARGET2) $(TARGET3) $(TARGET4) $(TARGET5) instruction
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(GTK_LIBS) $(LOUT)$@ $(OBJECTS) $(LDFLAGS) $(DLFLAGS) $(SDL_LIB)
@@ -200,10 +201,6 @@ $(TARGET3): $(OBJECTS3)
 
 instruction:
 	$(warning please copy $(TARGET2) and $(TARGET4) in the plugins/ folder of the emulator)
-
-copy_plugins:
-	cp $(TARGET2) ../plugins
-	cp $(TARGET4) ../plugins
 
 clean:
 	rm -rf $(OBJECTS) $(OBJECTS2) $(OBJECTS3) $(OBJECTS4) $(OBJECTS5)

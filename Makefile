@@ -239,7 +239,9 @@ PLUGINS	= plugins/blight_input.$(SO_EXTENSION) \
           plugins/glide64.$(SO_EXTENSION) \
           plugins/jttl_audio.$(SO_EXTENSION) \
           plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION) \
-          plugins/mupen64_input.$(SO_EXTENSION)
+          plugins/mupen64_input.$(SO_EXTENSION) \
+          plugins/z64-rsp.$(SO_EXTENSION) \
+          plugins/z64gl.$(SO_EXTENSION)
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -336,8 +338,10 @@ ifneq ($(OS), WINDOWS)
 	$(MAKE) -C jttl_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
+	$(MAKE) -C z64 clean
 	$(RM_F) plugins/mupen64_input.$(SO_EXTENSION) blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.$(SO_EXTENSION) plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION)
 	$(RM_F) plugins/dummyaudio.$(SO_EXTENSION) plugins/dummyvideo.$(SO_EXTENSION) plugins/jttl_audio.$(SO_EXTENSION) plugins/glN64.$(SO_EXTENSION) plugins/ricevideo.$(SO_EXTENSION) plugins/glide64.$(SO_EXTENSION)
+	$(RM_F) plugins/z64-rsp.$(SO_EXTENSION) plugins/z64gl.$(SO_EXTENSION)
 endif
 
 clean-core:
@@ -438,6 +442,14 @@ plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION): FORCE
 plugins/mupen64_input.$(SO_EXTENSION): FORCE
 	$(MAKE) -C mupen64_input all
 	@$(CP) ./mupen64_input/mupen64_input.$(SO_EXTENSION) ./plugins/mupen64_input.$(SO_EXTENSION)
+
+plugins/z64gl.$(SO_EXTENSION): FORCE
+	$(MAKE) -C z64 z64gl.$(SO_EXTENSION)
+	@$(CP) ./z64/z64gl.$(SO_EXTENSION) ./plugins/z64gl.$(SO_EXTENSION)
+
+plugins/z64-rsp.$(SO_EXTENSION): FORCE
+	$(MAKE) -C z64 z64-rsp.$(SO_EXTENSION)
+	@$(CP) ./z64/z64-rsp.$(SO_EXTENSION) ./plugins/z64-rsp.$(SO_EXTENSION)
 
 # This is used to force the plugin builds
 FORCE:
