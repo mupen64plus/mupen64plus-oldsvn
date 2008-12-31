@@ -2257,7 +2257,7 @@ void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
 			// Calculates reciprocal
 
 			int del = (VS1REG & 7);
-			int sel = VEC_EL_2(EL, 7-del);
+			int sel = VEC_EL_2(EL, del);
 			INT32 rec;
 
 			rec = (INT16)(VREG_S(VS2REG, sel));
@@ -2320,7 +2320,7 @@ void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
 			// Calculates reciprocal low part
 
 			int del = (VS1REG & 7);
-			int sel = VEC_EL_2(EL, 7-del);
+			int sel = VEC_EL_2(EL, del);
 			INT32 rec;
 
 			rec = ((UINT16)(VREG_S(VS2REG, sel)) | ((UINT32)(rsp.reciprocal_high) << 16));
@@ -2390,7 +2390,7 @@ void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
 			// Calculates reciprocal high part
 
 			int del = (VS1REG & 7);
-			int sel = VEC_EL_2(EL, 7-del);
+			int sel = VEC_EL_2(EL, del);
 
 			rsp.reciprocal_high = VREG_S(VS2REG, sel);
 
@@ -2428,7 +2428,7 @@ void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
 			// Calculates reciprocal square-root low part
 
 			int del = (VS1REG & 7);
-			int sel = VEC_EL_2(EL, 7-del);
+			int sel = VEC_EL_2(EL, del);
 			INT32 sqr;
 
 			sqr = (UINT16)(VREG_S(VS2REG, sel)) | ((UINT32)(rsp.square_root_high) << 16);
@@ -2503,7 +2503,7 @@ void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
 			// Calculates reciprocal square-root high part
 
 			int del = (VS1REG & 7);
-			int sel = VEC_EL_2(EL, 7-del);
+			int sel = VEC_EL_2(EL, del);
 
 			rsp.square_root_high = VREG_S(VS2REG, sel);
 

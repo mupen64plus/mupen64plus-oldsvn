@@ -55,7 +55,7 @@ int rdp_dump;
 #endif
 
 #define MAXCMD 0x100000
-static uint32_t rdp_cmd_data[MAXCMD+32];
+static uint32_t rdp_cmd_data[MAXCMD+44];
 static volatile int rdp_cmd_ptr = 0;
 static volatile int rdp_cmd_cur = 0;
 static int rdp_cmd_left = 0;

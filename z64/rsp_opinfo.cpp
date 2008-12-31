@@ -521,7 +521,7 @@ void rsp_get_opinfo(UINT32 op, rsp_opinfo_t * info)
     case RSP_VRSQH:
 		{
 			int del = (VS1REG & 7);
-			int sel = VEC_EL_2(EL, 7-del);
+			int sel = VEC_EL_2(EL, del);
       
       RSP_SET_VEC_I(info->used, VS2REG, sel);
       
