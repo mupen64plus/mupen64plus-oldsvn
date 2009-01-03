@@ -152,10 +152,10 @@ void create_rom_properties()
 
     label = gtk_label_new(tr("Good Name:"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0);
-    g_RomPropDialog.filenameEntry = gtk_entry_new();
-    gtk_entry_set_editable(GTK_ENTRY(g_RomPropDialog.filenameEntry), FALSE);
+    g_RomPropDialog.goodnameEntry = gtk_entry_new();
+    gtk_entry_set_editable(GTK_ENTRY(g_RomPropDialog.goodnameEntry), FALSE);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, GTK_FILL, GTK_EXPAND, 0, 0);
-    gtk_table_attach_defaults(GTK_TABLE(table), g_RomPropDialog.filenameEntry, 1, 4, 0, 1);
+    gtk_table_attach_defaults(GTK_TABLE(table), g_RomPropDialog.goodnameEntry, 1, 4, 0, 1);
 
     label = gtk_label_new(tr("Country:"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0);
@@ -171,10 +171,10 @@ void create_rom_properties()
 
     label = gtk_label_new(tr("File Name:"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0);
-    g_RomPropDialog.goodnameEntry = gtk_entry_new();
-    gtk_entry_set_editable(GTK_ENTRY(g_RomPropDialog.goodnameEntry), FALSE);
+    g_RomPropDialog.filenameEntry = gtk_entry_new();
+    gtk_entry_set_editable(GTK_ENTRY(g_RomPropDialog.filenameEntry), FALSE);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3, GTK_FILL, GTK_EXPAND, 0, 0);
-    gtk_table_attach_defaults(GTK_TABLE(table), g_RomPropDialog.goodnameEntry, 1, 4, 2, 3);
+    gtk_table_attach_defaults(GTK_TABLE(table), g_RomPropDialog.filenameEntry, 1, 4, 2, 3);
 
     label = gtk_label_new(tr("Status:"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0);
