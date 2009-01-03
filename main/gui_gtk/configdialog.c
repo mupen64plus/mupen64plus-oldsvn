@@ -81,7 +81,7 @@ static struct input_mapping mappings[] =
         },
         {
             "Pause emulation",
-            "Pause",
+            "P",
             "Joy Mapping Pause",
             NULL
         },
