@@ -185,7 +185,7 @@ else
 endif
 
 # set base CFLAGS and LDFLAGS
-CFLAGS += -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing -fstack-protector-all
+CFLAGS += -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
 CORE_LDFLAGS += -lz -lm -lpng -lfreetype -ldl
 
 # set special flags per-system
@@ -243,3 +243,4 @@ else   # set variables for debugging symbols
 endif
 
 SO_EXTENSION = so
+
