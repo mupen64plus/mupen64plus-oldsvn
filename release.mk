@@ -73,7 +73,7 @@ src: FORCE
 	rm -f ../$(SRCNAME)/*~
 	rm -f ../$(SRCNAME)/*.cache
 	# zip it up and delete the directory
-	cd .. ; tar c $(SRCNAME) | gzip > $(SRCNAME).tar.gz
+	cd .. ; zip -r $(SRCNAME).zip $(SRCNAME)
 	rm -rf ../$(SRCNAME)
 
 bin-32: FORCE
@@ -89,24 +89,22 @@ bin-32: FORCE
 	mkdir ../$(BINNAME_32)/icons
 	mkdir ../$(BINNAME_32)/lang
 	mkdir ../$(BINNAME_32)/plugins
-	mkdir ../$(BINNAME_32)/roms
 	# copy files into binary structure
 	cp ./mupen64plus ../$(BINNAME_32)/
-	cp ./mupen64plus.ini ../$(BINNAME_32)/
 	cp ./*.sh ../$(BINNAME_32)/
-	cp ./*.desktop ../$(BINNAME_32)/
+	cp ./*.TXT ../$(BINNAME_32)/
 	cp ./README ../$(BINNAME_32)/
 	cp ./RELEASE ../$(BINNAME_32)/
 	cp ./LICENSES ../$(BINNAME_32)/
+	cp ./GPL ../$(BINNAME_32)/
 	cp ./config/* ../$(BINNAME_32)/config
 	cp ./doc/* ../$(BINNAME_32)/doc
 	cp ./fonts/* ../$(BINNAME_32)/fonts
 	cp ./icons/* ../$(BINNAME_32)/icons
 	cp ./lang/* ../$(BINNAME_32)/lang
 	cp ./plugins/*.so ../$(BINNAME_32)/plugins
-	cp ./roms/* ../$(BINNAME_32)/roms
 	# zip it up and delete the directory
-	cd .. ; tar c $(BINNAME_32) | gzip > $(BINNAME_32).tar.gz
+	cd .. ; zip -r $(BINNAME_32).zip $(BINNAME_32)
 	rm -rf ../$(BINNAME_32)
 
 bin-64: FORCE
@@ -122,24 +120,22 @@ bin-64: FORCE
 	mkdir ../$(BINNAME_64)/icons
 	mkdir ../$(BINNAME_64)/lang
 	mkdir ../$(BINNAME_64)/plugins
-	mkdir ../$(BINNAME_64)/roms
 	# copy files into binary structure
 	cp ./mupen64plus ../$(BINNAME_64)/
-	cp ./mupen64plus.ini ../$(BINNAME_64)/
 	cp ./*.sh ../$(BINNAME_64)/
-	cp ./*.desktop ../$(BINNAME_64)/
+	cp ./*.TXT ../$(BINNAME_64)/
 	cp ./README ../$(BINNAME_64)/
 	cp ./RELEASE ../$(BINNAME_64)/
 	cp ./LICENSES ../$(BINNAME_64)/
+	cp ./GPL ../$(BINNAME_64)/
 	cp ./config/* ../$(BINNAME_64)/config
 	cp ./doc/* ../$(BINNAME_64)/doc
 	cp ./fonts/* ../$(BINNAME_64)/fonts
 	cp ./icons/* ../$(BINNAME_64)/icons
 	cp ./lang/* ../$(BINNAME_64)/lang
 	cp ./plugins/*.so ../$(BINNAME_64)/plugins
-	cp ./roms/* ../$(BINNAME_64)/roms
 	# zip it up and delete the directory
-	cd .. ; tar c $(BINNAME_64) | gzip > $(BINNAME_64).tar.gz
+	cd .. ; zip -r $(BINNAME_64).zip $(BINNAME_64)
 	rm -rf ../$(BINNAME_64)
 
 FORCE:
