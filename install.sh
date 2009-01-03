@@ -70,7 +70,7 @@ $INSTALL -d -v "${SHAREDIR}/config"
 $INSTALL -m 0644 config/* "${SHAREDIR}/config"
 $INSTALL -m 0644 mupen64plus.ini "${SHAREDIR}/"
 $INSTALL -d -v "${SHAREDIR}/doc"
-$INSTALL -m 0644 doc/HiRezTexture.txt "${SHAREDIR}/doc"
+$INSTALL -m 0644 doc/* "${SHAREDIR}/doc"
 $INSTALL -d -v "${SHAREDIR}/fonts"
 $INSTALL -m 0644 fonts/* "${SHAREDIR}/fonts"
 $INSTALL -d -v "${SHAREDIR}/icons"
@@ -89,12 +89,12 @@ $INSTALL -m 0644 doc/mupen64plus.1.gz "${MANDIR}"
 $INSTALL -d -v "${LIBDIR}"
 if [ -f mupen64plus.desktop ]
 then
+    $INSTALL -d -v "${APPLICATIONSDIR}"
     $INSTALL -m 0644 mupen64plus.desktop "${APPLICATIONSDIR}"
 fi
 if [ "x$(ls plugins/)" != "x" ]
 then
     $INSTALL -m 0644 plugins/* "${LIBDIR}"
-    $INSTALL -d -v "${APPLICATIONSDIR}"
 fi
 if [ "x$(ls translations/*.qm 2>/dev/null)" != "x" ]
 then
