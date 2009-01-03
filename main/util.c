@@ -645,10 +645,10 @@ void cicstring(unsigned char cic, char *string)
         strcpy(string, tr("CIC-NUS-6103"));
         break;
     case CIC_NUS_6105:
-        strcpy(string, tr("CIC-NUS-6104"));
+        strcpy(string, tr("CIC-NUS-6105"));
         break;
     case CIC_NUS_6106:
-        strcpy(string, tr("CIC-NUS-6105"));
+        strcpy(string, tr("CIC-NUS-6106"));
         break;
     default:
         string[0] = '\0';
