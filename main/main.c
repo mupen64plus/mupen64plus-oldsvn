@@ -702,7 +702,7 @@ static int sdl_event_filter( const SDL_Event *event )
             else if (event->key.keysym.sym == config_get_number("Kbd Mapping Screenshot", SDLK_F12))
                 // set flag so that screenshot will be taken at the end of frame rendering
                 take_next_screenshot();
-            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Pause", SDLK_PAUSE))
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Pause", SDLK_p))
                 main_pause();
             else if (event->key.keysym.sym == config_get_number("Kbd Mapping Mute", SDLK_m))
             {
