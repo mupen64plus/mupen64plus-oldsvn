@@ -1,3 +1,64 @@
+Mupen64Plus v1.5 - January 4, 2009
+----------------------------------
+Major New Features:
+ - support for Macintosh OSX platform with Intel CPUs
+ - Qt4 GUI by slougi, Tillin9, and others
+ - Rom Cache System (r636, others), by Tillin9, Okaygo, and Hasone.
+Minor New Features:
+ - r1235: Debugger: memory breakpoint speedup
+ - r1170-1178,1181: QT GUI: translations for English, Norwegian, German, and Dutch
+ - r1155: Use configurable key commands for special emulator functions
+ - r1134: got our own custom test ROM, courtesy of Marshallh
+ - r1046: debugger: new r4300 disassembler from ZZT32
+ - r829: jttl_audio: added GTK GUI configuration dialog
+ - r793: soft reset (hit F9)
+ - r782: jttl_audio: both SDL-based and OSS-based volume control methods are now supported
+ - r765: added savestate conversion tool to be able to load pre-v1.5 savestate files
+ - r711: 7-zip support
+ - r692: Multi-file Zip support
+ - r667: GTK GUI: user-configurable columns in ROM browser
+ - r659: LZMA archive support
+ - r638: BZip2 archive support
+ - r629,634: LIRC - added support for speedup, slowdown, pause, and frame advance
+Updates:
+ - r1007,1032: GTK GUI improvements
+ - r970, 1019: use SDL threading support instead of pthreads
+ - r935,938,940: Gtk GUI updates for core and Jttl
+ - r642,655-657,663,664,747,759,761-763,768-770,774,775,780,781,783,786,787,825,828,931: mupen64plus.ini updates: Good Names, stars, EEPROM types, players, rumble support
+Bugfixes:
+ - r1247: rsp_hle: memory overwrite bug with Zelda:OOT
+ - r1234: out of bound array bug in memory access function handlers
+ - r1222,1223,1228,1229: Debugger fixes
+ - r1183: Blight Input: sometimes the axis direction would flip
+ - r1133: Added stop rumble to load savestate, fixes issue 165
+ - r1077: GTK GUI bugfixes
+ - r1063: rice video: crash in MMX/SSE checking functions
+ - r800: logical error in strcpy loop in util.c
+ - r798: small bugfixes in blight_input: 1. only save config file after running config dialog, not every time DLL is closed.  2. If rumble is not available on a controller, don't allow user to switch between rumble and mempack.  3. If rumble is selected in config file but not available on a controller, select mempack instead.
+ - r789: 3 glN64 bugfixes (segfaults on a 64-bit system in Perfect Dark): prevent clamp values from being negative, handle TMEM wrap-arounds from wacky height/line values in texture cache load and texture CRC functions
+ - r788: rice video: add checks for uint32 height/width parameters which can be negative, causing segfault on 64-bit systems
+ - r784: 64-bit problem causing GUI crashes - gotta save/restore all the callee-saved registers around the dynarec
+ - r758: fixed some savestate problems
+ - r748: Fixed 64-bit dynarec crash in genj_idle() and genjal_idle()
+ - r715: Bugfixes thanks to Valgrind. Two using strcpy with source and destination overlay, i.e. strcpy(p,p+1)
+ - r700: set ScreenUpdateSetting=1 in rice video ini file for Conkers BFD
+ - r694: require bash shell scripting for install.sh
+ - r686: fixed OSD crash bug after running a game, disabling OSD, then running another game
+ - r684: OGLFT measuring functions were taking a huge chunk of CPU time.  Refactored code to measure only once and store the line size and the message sizes instead of re-measuring all the time.  This eliminated nearly all of the OSD overhead on my PC
+ - r681: Refactored OGLFT to do color setting outside of glyph compiling, so the OSD fading doesnt force bitmaps to be continually recreated with calls to renderGlyph.  Seems to have cut the excessive cpu usage of the OSD about by half
+ - r680: removed many unused classes from OGLFT font library code
+ - r676: bugfix in my BYTESWAP macros
+ - r674: Removed glide64/Tmem_nasm.asm source file and the project dependency on nasm/yasm assemblers
+ - r673: removed inline assembly sections in rdp_loadblock and rdp_loadtile, including their dependency on functions in Tmem_nasm.asm.  Replaced with new C code.  This fixes a segfault on some 64-bit source builds
+ - r669: string function causing crash on 64-bit linux
+ - r667: issue #88 - added basic view menu in GTK GUI
+ - r628,633: Small patch to get glide64.so to compile with O3 optimizations
+ - r622: Fixed segfault in Glide64 as per issue 133
+ - r619: fix LIRC build to integrate w/ new screenshot mechanism
+ - r608: another couple of memory leak fixes from Tub, in main/config.c
+ - r605: fix from Tub for free() bug in main/util.c/list_delete()
+ - r587: issue #111: close screenshot file after saving
+
 Mupen64Plus v1.4 - June 14, 2008
 -----------------------------------
  - New feature: Graphical debugger for R4300 core

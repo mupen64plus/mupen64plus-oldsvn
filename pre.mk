@@ -166,7 +166,7 @@ PROF    = gprof
 INSTALL = ginstall
 
 # create SVN version defines
-MUPEN_RELEASE = 1.4
+MUPEN_RELEASE = 1.5
 
 ifneq ($(RELEASE),)
   MUPEN_VERSION = $(VER)
