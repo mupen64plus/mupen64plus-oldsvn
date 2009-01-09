@@ -275,12 +275,12 @@ void value_data_func(GtkTreeViewColumn *tree_column, GtkCellRenderer *cell, GtkT
             
             case Type_float:
                 addr = read_memory_32_unaligned(addr);
-                sprintf(str, "%f", *((float*)&addr)); //magic conversion to IEEE754. I have no idea how this works.
+                sprintf(str, "%g", *((float*)&addr)); //magic conversion to IEEE754. I have no idea how this works.
             break;
             
             case Type_double:
                 magic = read_memory_64_unaligned(addr);
-                sprintf(str, "%f", *((double*)&magic));
+                sprintf(str, "%lg", *((double*)&magic));
             break;
             
             default:            sprintf(str, "??? (%X)", type); break;
