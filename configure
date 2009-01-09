@@ -157,20 +157,39 @@ def constructParser(config):
                                 action='callback', callback=config.setOption )
     debug.add_option('--disable-profiling',  
                                 action='callback', callback=config.setOption )
-                                
     
     parser.add_option_group(debug)
+    
+    paths = OptionGroup(parser, 'Path Options')
+    paths.add_option('--prefix-dir', metavar="DIR", nargs=1, type='string',
+                                help='sets the prefix for install',
+                                action='callback', callback=config.setOption )
+    paths.add_option('--data-dir', metavar="DIR", nargs=1, type='string',
+                                help='path to install shared data',
+                                action='callback', callback=config.setOption )
+    paths.add_option('--binary-dir', metavar="DIR", nargs=1, type='string',
+                                help='path to install the binaries',
+                                action='callback', callback=config.setOption )
+    paths.add_option('--plugin-dir', metavar="DIR", nargs=1, type='string',
+                                help='path to install the plugins',
+                                action='callback', callback=config.setOption )
+    paths.add_option('--man-dir', metavar="DIR", nargs=1, type='string',
+                                help='path to the manual page',
+                                action='callback', callback=config.setOption )
+                                
+    
+    parser.add_option_group(paths)
     
     option = OptionGroup(parser, 'Configure Script Options')
     option.add_option('-q', '--quiet', help='suppress output', 
                                 action='store_false', dest='verbose', default=True)
-    option.add_option('-p', '--pretend', help='do not save changes',
+    option.add_option('-n', '--nosave', help='do not save changes',
                                 action='store_false', dest='save', default=True)
     option.add_option('-f', '--force', help='ignore errors during read',
                                 action='store_true', dest='force', default=False)
-    option.add_option('-d', '--defaults', help='load default settings',
-                                action='store_true', dest='defaults', default=False)
-    option.add_option('-n', '--no-deps', help='skip dependancy checks',
+    option.add_option('-p', '--previous', help='load previous settings',
+                                action='store_true', dest='previous', default=False)
+    option.add_option('-d', '--no-deps', help='skip dependancy checks',
                                 action='store_false', dest='checkdeps', default=True)
     
     parser.add_option_group(option)
@@ -179,7 +198,7 @@ def constructParser(config):
 
 
 class ConfigFile(dict):
-    """Handler for make compatable config files"""
+    """Handler for make-compatable config files"""
         
     def setOption(self, option, opt, value, parser):
         if opt == '--enable-debuggui':
@@ -228,7 +247,19 @@ class ConfigFile(dict):
             self['DBG_PROFILE']='1'
         elif opt == '--disable-profiling':
             self['DBG_PROFILE']='0'
-            
+        
+        #Handle path options
+        elif opt == '--prefix-dir':
+            self['PREFIX']=value
+        elif opt == '--data-dir':
+            self['SHAREDIR']=value
+        elif opt == '--binary-dir':
+            self['BINDIR']=value
+        elif opt == '--plugin-dir':
+            self['LIBDIR']=value
+        elif opt == '--man-dir':
+            self['MANDIR']=value
+
         #Handle option mismatches
         else:
             raise OptionValueError( ''.join('Invalid option: ', opt) )
@@ -295,6 +326,7 @@ class ShellTest:
         self.__value = False
         
     def result(self):
+        """Process dep to see if it passes or not, and does so recursively"""
         for dep in self.__deps:
             if not dep:
                 return -1
@@ -309,6 +341,7 @@ class ShellTest:
         return self.__value
     
     def failedDep(self):
+        """Returns string describing the reason this dep failed"""
         for dep in self.__deps:
             if not dep:
                 return dep.failedDep()
@@ -340,18 +373,11 @@ def main():
 
     if len(args) > 0:
         parser.error('try "./configure --help"')
-    #if( (config['Z64']=='1' or config['RiceVideo']=='1' or config['GlN64']=='1'
-    #    or config['Glide64']=='1' or config['DummyVideo']=='1')
-    #    and (config['Z64']=='1' or config['RspHle']=='1')
-    #    and (config['JttlAudio']=='1' or config['DummyAudio']=='1')
-    #    and (config['BlightInput']=='1' or  config['MupenInput']=='1' 
-    #    or config['DummyInput']=='1') ):
-    if(options.defaults):
-        if(options.verbose):
-            print "Loading default settings"
-        config = ConfigFile('')
-    else:
+
+    if(options.previous):
         config = ConfigFile()
+    else:
+        config = ConfigFile('')
         
     config.update(configChanges)
 
