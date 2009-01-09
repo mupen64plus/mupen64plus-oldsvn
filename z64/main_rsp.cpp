@@ -50,7 +50,7 @@ static void dump()
 
 __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
 {
-	DWORD TaskType = *(DWORD*)(z64_rspinfo.DMEM + 0xFC0);
+    DWORD TaskType = *(DWORD*)(z64_rspinfo.DMEM + 0xFC0);
 
 #if 0
   if (TaskType == 1) {
@@ -69,33 +69,33 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
     }
   }
 #endif
-	
-// 	if (TaskType == 1) {
-// 		if (z64_rspinfo.ProcessDList != NULL) {
-// 			z64_rspinfo.ProcessDList();
-// 		}
-// 		*z64_rspinfo.SP_STATUS_REG |= (0x0203 );
-// 		if ((*z64_rspinfo.SP_STATUS_REG & SP_STATUS_INTR_BREAK) != 0 ) {
-// 			*z64_rspinfo.MI_INTR_REG |= R4300i_SP_Intr;
-// 			z64_rspinfo.CheckInterrupts();
-// 		}
 
-// 		*z64_rspinfo.DPC_STATUS_REG &= ~0x0002;
-// 		return Cycles;
+// if (TaskType == 1) {
+//   if (z64_rspinfo.ProcessDList != NULL) {
+//     z64_rspinfo.ProcessDList();
+//   }
+//   *z64_rspinfo.SP_STATUS_REG |= (0x0203 );
+//   if ((*z64_rspinfo.SP_STATUS_REG & SP_STATUS_INTR_BREAK) != 0 ) {
+//     *z64_rspinfo.MI_INTR_REG |= R4300i_SP_Intr;
+//     z64_rspinfo.CheckInterrupts();
 //   }
 
-  if (TaskType == 2) {
-		if (z64_rspinfo.ProcessAList != NULL) {
-			z64_rspinfo.ProcessAList();
-		}
-		*z64_rspinfo.SP_STATUS_REG |= (0x0203 );
-		if ((*z64_rspinfo.SP_STATUS_REG & SP_STATUS_INTR_BREAK) != 0 ) {
-			*z64_rspinfo.MI_INTR_REG |= R4300i_SP_Intr;
-			z64_rspinfo.CheckInterrupts();
-		}
-		return Cycles;
-	}  
+// *z64_rspinfo.DPC_STATUS_REG &= ~0x0002;
+// return Cycles;
+//   }
 
+/*  if (TaskType == 2) {
+      if (z64_rspinfo.ProcessAList != NULL) {
+        z64_rspinfo.ProcessAList();
+      }
+      *z64_rspinfo.SP_STATUS_REG |= (0x0203 );
+      if ((*z64_rspinfo.SP_STATUS_REG & SP_STATUS_INTR_BREAK) != 0 ) {
+        *z64_rspinfo.MI_INTR_REG |= R4300i_SP_Intr;
+        z64_rspinfo.CheckInterrupts();
+      }
+      return Cycles;
+    }  
+*/
 
   rsp_execute(0x10000000);
   
@@ -104,11 +104,11 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
 
 __declspec(dllexport) void GetDllInfo ( PLUGIN_INFO * PluginInfo )
 {
-	PluginInfo->Version = 0x0101;
-	PluginInfo->Type = PLUGIN_TYPE_RSP;
-	sprintf(PluginInfo->Name,"z64 RSP emulation Plugin");
-	PluginInfo->NormalMemory = FALSE;
-	PluginInfo->MemoryBswaped = TRUE;
+    PluginInfo->Version = 0x0101;
+    PluginInfo->Type = PLUGIN_TYPE_RSP;
+    sprintf(PluginInfo->Name,"z64 RSP emulation Plugin");
+    PluginInfo->NormalMemory = FALSE;
+    PluginInfo->MemoryBswaped = TRUE;
 }
 
 // __declspec(dllexport) void GetRspDebugInfo ( RSPDEBUG_INFO * RSPDebugInfo )
