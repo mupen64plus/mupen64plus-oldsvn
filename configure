@@ -331,7 +331,7 @@ class ShellTest:
         """Process dep to see if it passes or not, and does so recursively"""
         for dep in self.__deps:
             if not dep:
-                return -1
+                return False
         if(self.__checked == False):
             #print ''.join(["Checking if ",self.message])
             self.__checked = True
