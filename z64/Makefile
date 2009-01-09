@@ -11,9 +11,8 @@ else
   include ../pre.mk.win32
 endif
 
-GLUI_LIBS	= -lglui -lglut
-#GLUI_INCS	= -I$(GLUI_PREFIX)/include
-GLUI_INCS	= 
+GLUI_LIBS	= #-lglui -lglut
+GLUI_INCS	= #
 
 ifneq ("$(WIN32)", "1")
 FTGL_PREFIX	= /usr/
@@ -31,7 +30,7 @@ LD	= g++
 STRIP	= strip
 #CFLAGS	= -g -DGCC -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) $(GLUI_INCS) $(FTGL_INCS) -O2 -mtune=athlon-xp -ffast-math -funroll-loops -m3dnow -mmmx -msse -msse2 #-mfpmath=sse #-fomit-frame-pointer
 CFLAGS	+= -g -DGCC -DUSE_GTK $(SDL_FLAGS) $(GTK_FLAGS) $(GLUI_INCS) $(FTGL_INCS) -fpic -DPIC -Wall
-LDFLAGS	+= -g -rdynamic -lGL -lGLU -lGLEW -L/usr/X11R6/lib $(GLUI_LIBS) $(FTGL_LIBS) -lz $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
+LDFLAGS	+= -g -rdynamic -L/usr/X11R6/lib $(GLUI_LIBS) $(FTGL_LIBS) -lz $(SDL_LIBS) $(PLUGIN_LDFLAGS)
 DLFLAGS = -shared -Wl,-Bsymbolic
 O	= o
 COUT	= -c -o #
@@ -115,7 +114,7 @@ OBJECTS4 = \
 	rgl_rendermode.$(O) \
 	rgl_geometry.$(O) \
 	rgl_debugger.$(O) \
-	rgl_glut.$(O) \
+#	rgl_glut.$(O) \
 	rgl_osdep.$(O) \
 	rdp.$(O) \
 	glshader.$(O) \
@@ -144,7 +143,7 @@ TARGET3 = tester
 TARGET3LD = -ldl
 TARGET4 = z64gl.so
 TARGET5 = zbench64
-TARGET4LD = -lGLEW -lIL
+TARGET4LD = #-lGLEW -lIL
 else
 TARGET	= z64.dll
 TARGET2	= z64-rsp.dll
