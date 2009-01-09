@@ -114,7 +114,7 @@ OBJECTS4 = \
 	rgl_rendermode.$(O) \
 	rgl_geometry.$(O) \
 	rgl_debugger.$(O) \
-#	rgl_glut.$(O) \
+	rgl_glut.$(O) \
 	rgl_osdep.$(O) \
 	rdp.$(O) \
 	glshader.$(O) \
@@ -143,7 +143,7 @@ TARGET3 = tester
 TARGET3LD = -ldl
 TARGET4 = z64gl.so
 TARGET5 = zbench64
-TARGET4LD = #-lGLEW -lIL
+TARGET4LD = -lGLEW #-lIL
 else
 TARGET	= z64.dll
 TARGET2	= z64-rsp.dll
