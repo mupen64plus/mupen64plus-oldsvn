@@ -244,6 +244,10 @@ ifneq ($(OS), FREEBSD)
       LDFLAGS += -m32 -m elf_i386
     endif
   endif
+else
+  ifeq($(ARCH_DETECTED), 64BITS_32)
+    $(error Do not use the BITS=32 option with FreeBSD, use -m32 and -m elf_i386)
+  endif
 endif
 ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN

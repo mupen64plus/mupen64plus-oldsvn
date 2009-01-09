@@ -22,6 +22,7 @@
 
 import sys
 import subprocess
+import os
 from optparse import OptionParser, OptionGroup, OptionValueError
 
 defaultFile = 'configure.gen'
@@ -47,17 +48,20 @@ def checkDeps(config, options):
     """Checks dependancies, and disables options requiring unmet deps"""
     pkgTest = ShellTest(['which','pkg-config'],'pkg-config not installed')
     gtkTest = ShellTest(['pkg-config','gtk+-2.0'],'gtk+-2.0 not installed')
-    sdlTest = ShellTest(['which','sdl-config'],'sdl not installed')
-    z64Test = ShellTest()
-    glewTest = ShellTest(['which','glewinfo'],'Glew not installed')
-    ftglTest = ShellTest(['pkg-config','ftgl'],'Ftgl not installed')
-
-    lircTest = ShellTest(['which','ircat'],'LIRC not installed')
-
     gtkTest.addDep(pkgTest)
-    ftglTest.addDep(pkgTest)
+
+    sdlTest = ShellTest(['which','sdl-config'],'sdl not installed')
+    
+    glewTest = CompileTest('GL/glew.h','-lGLEW','Glew not installed')
+    ftglTest = CompileTest('FTGL/FTGL.h','-lftgl','Ftgl not installed')
+    
+    z64Test = ShellTest()
     z64Test.addDep(glewTest)
     z64Test.addDep(ftglTest)
+
+    lircTest = CompileTest('lirc/lirc_client.h','-llirc_client','LIRC not installed')
+    
+    dbgTest = CompileTest('dis-asm.h',msgStr='binutils not installed')
 
     # perform checks
     if(config['Z64']=='1') and not z64Test:
@@ -72,6 +76,11 @@ def checkDeps(config, options):
         if(options.verbose):
             sys.stderr.write('Disabling LIRC support: ')
             sys.stderr.write(lircTest.failedDep())
+            sys.stderr.write('\n')
+    
+    if(config['DBG']=='1') and not dbgTest:
+            sys.stderr.write('Disabling Graphical Debugger: ')
+            sys.stderr.write(dbgTest.failedDep())
             sys.stderr.write('\n')
 
 def printSettings(config):
@@ -262,7 +271,7 @@ class ConfigFile(dict):
 
         #Handle option mismatches
         else:
-            raise OptionValueError( ''.join('Invalid option: ', opt) )
+            raise OptionValueError( ''.join(['Invalid option: ', opt]) )
 
     def initialize(self, defaultDict=defaultOpts):
         self.__loaderror = False
@@ -321,74 +330,112 @@ class ConfigFile(dict):
 class ShellTest:
     """Class to execute some shell command and store the results"""
     def __init__(self,cmdStr='pwd',msgStr=''):
-        self.__message = msgStr
-        self.__deps = []
+        self.message = msgStr
+        self.deps = []
         self.__command = cmdStr
-        self.__checked = False
-        self.__value = False
+        self.checked = False
+        self.value = False
         
     def result(self):
         """Process dep to see if it passes or not, and does so recursively"""
-        for dep in self.__deps:
-            if not dep:
-                return False
-        if(self.__checked == False):
+        if(self.checked == False):
             #print ''.join(["Checking if ",self.message])
-            self.__checked = True
+            self.checked = True
             try:
-                self.__value = (subprocess.call(self.__command,
+                self.value = (subprocess.call(self.__command,
                         stdout=subprocess.PIPE,stderr=subprocess.PIPE)) == 0
             except OSError:
-                self.__value = False
-        return self.__value
+                self.value = False
+        return self.value
     
     def failedDep(self):
         """Returns string describing the reason this dep failed"""
-        for dep in self.__deps:
+        for dep in self.deps:
             if not dep:
                 return dep.failedDep()
-        return self.__message
+        return self.message
 
     def findDep(self, find):
         """Returns true if the dependancy 'find' is a dependancy of this dep"""
         if(self == find):
             return True
-        for dep in self.__deps:
+        for dep in self.deps:
             if dep.findDep(find):
                 return True
         return False
         
     def addDep(self, dep):
-        self.__deps.append(dep)
-        self.__checked = False
+        self.deps.append(dep)
+        self.checked = False
         assert(dep.findDep(self) == False) #avoid circular dependancy graphs
 
     def __nonzero__(self):
+        for dep in self.deps:
+            if not dep:
+                return False
         return self.result()
 
-def main():
+class CompileTest(ShellTest):
+    """Class to build a test app and compile it with gcc"""
+    def __init__(self,hdrStr='stdio.h',libStr='-lm',msgStr=''):
+        self.message = msgStr
+        self.deps = []
+        self.__header = hdrStr
+        self.__library = libStr
+        self.checked = False
+        self.value = False
+        
+    def result(self):
+        """Gets result by creating tmp.c file and running gcc"""
+        if(self.checked == False):
+            #print ''.join(["Checking if ",self.message])
+            self.checked = True
+            try:
+                try:
+                    srcfile = open('./tmp.c','w')
+                    srcfile.write(''.join(['#include<',self.__header,'>\nint main(void){}\n']))
+                finally:
+                    srcfile.close()
+                try:
+                    self.value=(subprocess.call(['gcc','tmp.c',self.__library,'-o tmp.out'])==0)
+                                        #stdout=subprocess.PIPE,stderr=subprocess.PIPE) == 0)
+                except OSError:
+                    assert("Could not execute gcc"==0)
+            finally:
+                try:
+                    os.remove('./tmp.c')
+                except OSError: 
+                    pass
+                try:
+                    os.remove('./tmp.out')
+                except OSError: 
+                    pass
+        return self.value
 
+def main():
+    #get options and apply new settings to configChanges
     configChanges = ConfigFile('',[])
     parser = constructParser(configChanges)
-    
-    (options,args) = parser.parse_args() #get options and apply new settings to config
+    (options,args) = parser.parse_args() 
 
-    if len(args) > 0:
+    if len(args) > 0: #should be no extra args after parsing
         parser.error('try "./configure --help"')
 
     if(options.previous):
-        config = ConfigFile()
+        config = ConfigFile() #load settings from existing
     else:
-        config = ConfigFile('')
+        config = ConfigFile('') #load default settings
         
-    config.update(configChanges)
+    config.update(configChanges) #apply settings from command line
 
     if(options.checkdeps):
-        checkDeps(config, options) #check that current settings are valid
+        checkDeps(config, options) #check that current settings have deps met
 
     if(options.verbose):
         printSettings(config)
-    
+        
+    #do not write settings if we were told not to, or if settings were loaded with errors
+    #unless forced to save
     if(options.save and (options.force or not config.getError()) ):
         if(options.verbose):
             print "\nSaving settings to:", defaultFile
