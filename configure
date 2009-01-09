@@ -265,6 +265,8 @@ class ConfigFile(dict):
             raise OptionValueError( ''.join('Invalid option: ', opt) )
 
     def initialize(self, defaultDict=defaultOpts):
+        self.__loaderror = False
+        self.clear()
         self.update( defaultDict )
 
     def load(self, fileName=defaultFile):
