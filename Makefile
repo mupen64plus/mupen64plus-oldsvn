@@ -19,6 +19,13 @@
 # *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+# include output from configure script
+-include ./configure.gen
+#This will eventually be necessary to build
+#ifndef CONFIGURE.GEN
+#  $(error Run ./configure before make)
+#endif
+
 # include pre-make file with a bunch of definitions
 USES_QT4 = true
 USES_GTK2 = true
