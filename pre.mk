@@ -245,7 +245,7 @@ ifneq ($(OS), FREEBSD)
     endif
   endif
 else
-  ifeq($(ARCH_DETECTED), 64BITS_32)
+  ifeq ($(ARCH_DETECTED), 64BITS_32)
     $(error Do not use the BITS=32 option with FreeBSD, use -m32 and -m elf_i386)
   endif
 endif

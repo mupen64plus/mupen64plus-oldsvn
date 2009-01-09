@@ -54,7 +54,7 @@ def checkDeps(config, options):
     
     glewTest = CompileTest('GL/glew.h','-lGLEW','Glew not installed')
     ftglTest = ShellTest(['pkg-config','ftgl'],'Ftgl not installed')
-    
+    ftglTest.addDep(pkgTest)
     z64Test = ShellTest()
     z64Test.addDep(glewTest)
     z64Test.addDep(ftglTest)
