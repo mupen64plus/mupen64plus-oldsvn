@@ -36,12 +36,18 @@ else
   include ./pre.mk
 endif
 
+ifeq ($(OS), FREEBSD)
+  LDFLAGS += -Wl,-export-dynamic
+endif
 ifeq ($(OS), LINUX)
   LDFLAGS += -Wl,-export-dynamic
 endif
 
 # set executable stack as a linker option for X86 architecture, for dynamic recompiler
 ifeq ($(CPU), X86)
+  ifeq ($(OS), FREEBSD)
+    LDFLAGS += -z execstack
+  endif
   ifeq ($(OS), LINUX)
     LDFLAGS += -z execstack
   endif
@@ -166,7 +172,7 @@ OBJ_CORE = \
 # handle dynamic recompiler objects
 ifneq ($(NO_ASM), 1)
   ifeq ($(CPU), X86)
-    ifeq ($(ARCH), 64BITS)
+    ifeq ($(ARCH_DETECTED), 64BITS)
       DYNAREC = x86_64
     else
       DYNAREC = x86

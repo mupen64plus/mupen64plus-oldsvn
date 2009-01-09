@@ -23,6 +23,7 @@
 #define __ROMCACHE_H__
 
 #include <limits.h> 
+#include <time.h>
 #include "md5.h"
 
 #define COMMENT_MAXLENGTH 256
