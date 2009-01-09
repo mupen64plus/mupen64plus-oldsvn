@@ -200,12 +200,12 @@ int mr4kd_sprintf ( char *dest, char *name, uint32 instruction, uint32 pc, char 
             case TOKEN('r', 'd'): d += mr4kd_rcpy_gpr( &dest[d], _RD(instruction) ); break;
             
             /* FPRs */
-            case TOKEN('f', 's'): d += mr4kd_rcpy_fpr( &dest[d], _RS(instruction) ); break;
-            case TOKEN('f', 't'): d += mr4kd_rcpy_fpr( &dest[d], _RT(instruction) ); break;
-            case TOKEN('f', 'd'): d += mr4kd_rcpy_fpr( &dest[d], _RD(instruction) ); break;
+            case TOKEN('f', 's'): d += mr4kd_rcpy_fpr( &dest[d], _FS(instruction) ); break;
+            case TOKEN('f', 't'): d += mr4kd_rcpy_fpr( &dest[d], _FT(instruction) ); break;
+            case TOKEN('f', 'd'): d += mr4kd_rcpy_fpr( &dest[d], _FD(instruction) ); break;
             
             /* COP */
-            case TOKEN('c', 'p'): d += sprintf( &dest[d], "%s", registers_a_cop[_RD(instruction)] ); break;
+            case TOKEN('c', 'p'): d += sprintf( &dest[d], "%s", registers_a_cop[_FS(instruction)] ); break;
             
             /* Immediate (hex) */
             case TOKEN('i', 'h'):
