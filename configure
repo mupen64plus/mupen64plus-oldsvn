@@ -23,7 +23,7 @@
 import sys
 import subprocess
 import os
-from optparse import OptionParser, OptionGroup, OptionValueError
+from optparse import OptionParser, OptionGroup, OptionValueError, SUPPRESS_HELP
 
 defaultFile = 'configure.gen'
 
@@ -35,7 +35,7 @@ defaultOpts = {
 'DBG' : '0', 'DBGSYM' : '0', 'LIRC' : '1', 'Z64' : '1' , 'GUI' : 'GTK2',
 'PREFIX' : '/usr/local', 'SHAREDIR' : '$(PREFIX)/share/mupen64plus',
 'BINDIR' : '$(PREFIX)/bin', 'LIBDIR':'$(SHAREDIR)/plugins',
-'MANDIR' : '$(PREFIX)/man/man1',
+'MANDIR' : '$(PREFIX)/man/man1','PROFILE':'0',
 'CONFIGURE.GEN' : 'Included' }
 
 defaultHeader = """# configure.gen
@@ -43,6 +43,41 @@ defaultHeader = """# configure.gen
 # DO NOT MODIFY
 
 """
+
+optionTable = [
+# Format: ['option string','make variable','value to assign',
+#          'Group Identifier','help string']
+#   ** 'value=None' : option takes argument
+['--enable-debuggui', 'DBG','1','OPT','add core debugger'],
+['--disable-debuggui','DBG','0','OPT','remove core debugger'],
+['--enable-lirc',    'LIRC','1','OPT','add lirc support'],
+['--disable-lirc',   'LIRC','0','OPT','remove lirc support'],
+['--with-nogui',   'GUI','NONE','OPT','build without GUI'],
+['--with-gtk2gui', 'GUI','GTK2','OPT','build with GTK2 GUI'],
+['--with-qt4gui',   'GUI','QT4','OPT','build with QT4 GUI'],
+['--with-z64',        'Z64','1','PLG','enable Zilmars lle rsp plugin'],
+['--without-z64',     'Z64','0','PLG','disable Zilmars lle rsp plugin'],
+['--enable-debug', 'DBGSYM','1','DBG','add debugging symbols'],
+['--disable-debug','DBGSYM','0','DBG','remove debugging symbols'],
+['--enable-gprof','PROFILE','1','DBG','enable gprof profiling'],
+['--disable-gprof','PROFILE','0','DBG','disable gprof profiling'],
+['--enable-dbgcore','DBG_CORE','1','DBG','print r4300 debug printfs'],
+['--disable-dbgcore','DBG_CORE','0','DBG','disable r4300 debug printfs'],
+['--enable-corecount','DBG_COUNT','1','DBG','print r4300 instruction count (64bit only)'],
+['--disable-corecount','DBG_COUNT','0','DBG','disable r4300 instruction count (64bit only)'],
+['--enable-corecomp','DBG_COMPARE','1','DBG','enable r4300 core synched debugging'],
+['--disable-corecomp','DBG_COMPARE','0','DBG','disable r4300 core synched debugging'],
+['--enable-profiling','DBG_PROFILE','1','DBG','dump r4300 dynarec profiling data'],
+['--disable-profiling','DBG_PROFILE','0','DBG','disable r4300 dynarec profiling data'],
+['--prefix-dir','PREFIX',None,'PTH','sets the prefix for install'],
+['--data-dir','SHAREDIR',None,'PTH','path to install shared data'],
+['--binary-dir','BINDIR',None,'PTH','path to install the binaries'],
+['--plugin-dir','LIBDIR',None,'PTH','path to install the plugins'],
+['--man-dir','MANDIR',None,'PTH','path to the manual page'],
+]
+
+optionHeading = { 'OPT':'Optional Features','PLG':'Plugin Options',
+                    'DBG':'Debugging Options', 'PTH':'Path Options'}
 
 def checkDeps(config, options):
     """Checks dependancies, and disables options requiring unmet deps"""
@@ -113,83 +148,21 @@ def printSettings(config):
     
 def constructParser(config):
     parser = OptionParser()
-
-    feat = OptionGroup(parser, 'Optional Features')
-    feat.add_option('--enable-debuggui', help='add core debugger',
-                                action='callback', callback=config.setOption )
-    feat.add_option('--disable-debuggui', help='remove core debugger',
-                                action='callback', callback=config.setOption )
-    feat.add_option('--enable-lirc', help='add lirc support',
-                                action='callback', callback=config.setOption )
-    feat.add_option('--disable-lirc', help='remove lirc support',
-                                action='callback', callback=config.setOption )
-    feat.add_option('--with-nogui', help='build without GUI',
-                                action='callback', callback=config.setOption )
-    feat.add_option('--with-gtk2gui', help='build with GTK2 GUI',
-                                action='callback', callback=config.setOption )
-    feat.add_option('--with-qt4gui', help='build with QT4 GUI',
-                                action='callback', callback=config.setOption )
-
-    parser.add_option_group(feat)
-
-    plugin = OptionGroup(parser, 'Plugins')
-    plugin.add_option('--with-z64', help="enable Zilmar's lle rsp plugin",
-                                action='callback', callback=config.setOption )
-    plugin.add_option('--without-z64', help="disable Zilmar's lle rsp plugin",
-                                action='callback', callback=config.setOption )
-
-    parser.add_option_group(plugin)
-
-    debug = OptionGroup(parser, 'Debugging Options')
-    debug.add_option('--enable-debug', help='add debugging symbols', 
-                                action='callback', callback=config.setOption )
-    debug.add_option('--disable-debug', help='remove debugging symbols', 
-                                action='callback', callback=config.setOption )
-    debug.add_option('--enable-gprof', help='enable gprof profiling',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--disable-gprof', help='disable gprof profiling',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--enable-dbgcore', help='print r4300 debug printfs',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--disable-dbgcore', help='disable r4300 debug printfs',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--enable-corecount', 
-                                help='print r4300 instruction count (64bit only)',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--disable-corecount',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--enable-corecomp', 
-                                help='enable r4300 core synched debugging',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--disable-corecomp', 
-                                action='callback', callback=config.setOption )
-    debug.add_option('--enable-profiling',  
-                                help='dump r4300 dynarec profiling data',
-                                action='callback', callback=config.setOption )
-    debug.add_option('--disable-profiling',  
-                                action='callback', callback=config.setOption )
-    
-    parser.add_option_group(debug)
-    
-    paths = OptionGroup(parser, 'Path Options')
-    paths.add_option('--prefix-dir', metavar="DIR", nargs=1, type='string',
-                                help='sets the prefix for install',
-                                action='callback', callback=config.setOption )
-    paths.add_option('--data-dir', metavar="DIR", nargs=1, type='string',
-                                help='path to install shared data',
-                                action='callback', callback=config.setOption )
-    paths.add_option('--binary-dir', metavar="DIR", nargs=1, type='string',
-                                help='path to install the binaries',
-                                action='callback', callback=config.setOption )
-    paths.add_option('--plugin-dir', metavar="DIR", nargs=1, type='string',
-                                help='path to install the plugins',
-                                action='callback', callback=config.setOption )
-    paths.add_option('--man-dir', metavar="DIR", nargs=1, type='string',
-                                help='path to the manual page',
-                                action='callback', callback=config.setOption )
-                                
-    
-    parser.add_option_group(paths)
+    for heading in optionHeading:
+        group = OptionGroup(parser, optionHeading[heading])
+        for entry in optionTable: 
+            if entry[3]==heading:
+                if entry[2]==None: # we have an option with an arg
+                    group.add_option(entry[0], help=entry[4], metavar="DIR",
+                        nargs=1, type='string', action='callback',
+                        callback=config.setOption )
+                else:
+                    if entry[2]==defaultOpts[entry[1]]:
+                        hlpstr=SUPPRESS_HELP
+                    else: hlpstr=entry[4]
+                    group.add_option(entry[0], help=hlpstr,
+                        action='callback', callback=config.setOption )
+        parser.add_option_group(group)
     
     option = OptionGroup(parser, 'Configure Script Options')
     option.add_option('-q', '--quiet', help='suppress output', 
@@ -212,68 +185,15 @@ class ConfigFile(dict):
     """Handler for make-compatable config files"""
         
     def setOption(self, option, opt, value, parser):
-        if opt == '--enable-debuggui':
-            self['DBG']='1'
-        elif opt == '--disable-debuggui':
-            self['DBG']='0'
-        elif opt == '--enable-lirc':
-            self['LIRC']='1'
-        elif opt == '--disable-lirc':
-            self['LIRC']='0'
-        elif opt == '--with-nogui':
-            self['GUI']='NONE'
-        elif opt == '--with-gtk2gui':
-            self['GUI']='GTK2'
-        elif opt == '--with-qt4gui':
-            self['GUI']='QT4'
-            
-        #Handle plugin options
-        elif opt == '--with-z64':
-            self['Z64']='1'
-        elif opt == '--without-z64':
-            self['Z64']='0'
-
-        #Handle debugging options
-        elif opt == '--enable-debug':
-            self['DBGSYM']='1'
-        elif opt == '--disable-debug':
-            self['DBGSYM']='0'
-        elif opt == '--enable-gprof':
-            self['PROFILE']='1'
-        elif opt == '--disable-gprof':
-            self['PROFILE']='0'
-        elif opt == '--enable-dbgcore':
-            self['DBG_CORE']='1'
-        elif opt == '--disable-dbgcore':
-            self['DBG_CORE']='0'
-        elif opt == '--enable-corecount':
-            self['DBG_COUNT']='1'
-        elif opt == '--disable-corecount':
-            self['DBG_COUNT']='0'
-        elif opt == '--enable-corecomp':
-            self['DBG_COMPARE']='1'
-        elif opt == '--disable-corecomp':
-            self['DBG_COMPARE']='0'
-        elif opt == '--enable-profiling':
-            self['DBG_PROFILE']='1'
-        elif opt == '--disable-profiling':
-            self['DBG_PROFILE']='0'
-        
-        #Handle path options
-        elif opt == '--prefix-dir':
-            self['PREFIX']=value
-        elif opt == '--data-dir':
-            self['SHAREDIR']=value
-        elif opt == '--binary-dir':
-            self['BINDIR']=value
-        elif opt == '--plugin-dir':
-            self['LIBDIR']=value
-        elif opt == '--man-dir':
-            self['MANDIR']=value
-
-        #Handle option mismatches
-        else:
-            raise OptionValueError( ''.join(['Invalid option: ', opt]) )
+        for entry in optionTable:
+            if opt==entry[0]:
+                if entry[2]==None:
+                    self[entry[1]]=value
+                else:
+                    self[entry[1]]=entry[2]
+                return
+        #Handle option mismatches - shouldn't be possible
+        raise OptionValueError( ''.join(['Invalid option: ', opt]) )
 
     def initialize(self, defaultDict=defaultOpts):
         self.__loaderror = False
