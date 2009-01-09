@@ -239,9 +239,11 @@ PLUGINS	= plugins/blight_input.$(SO_EXTENSION) \
           plugins/glide64.$(SO_EXTENSION) \
           plugins/jttl_audio.$(SO_EXTENSION) \
           plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION) \
-          plugins/mupen64_input.$(SO_EXTENSION) \
-          plugins/z64-rsp.$(SO_EXTENSION) \
+          plugins/mupen64_input.$(SO_EXTENSION)
+ifeq ($(Z64), 1)
+PLUGINS +=plugins/z64-rsp.$(SO_EXTENSION) \
           plugins/z64gl.$(SO_EXTENSION)
+endif
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -294,6 +296,7 @@ targets:
 	@echo "    GUI=GTK2      == build with GTK2 GUI support (default)"
 	@echo "    GUI=QT4       == build with QT4 GUI support"
 	@echo "    WIN32=1       == mingw build"
+	@echo "    Z64=1         == include z64 rsp plugin"
 	@echo "  Install Options:"
 	@echo "    PREFIX=path   == install/uninstall prefix (default: /usr/local/)"
 	@echo "    SHAREDIR=path == path to install shared data (default: PREFIX/share/mupen64plus/)"
