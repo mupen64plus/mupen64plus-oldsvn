@@ -216,7 +216,11 @@ else
 endif
 
 # set base CFLAGS and LDFLAGS
-CFLAGS += -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
+CFLAGS += -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
+ifneq ($(OS), FREEBSD)
+  CFLAGS += -pipe -O3
+endif
+
 ifeq ($(OS), FREEBSD)
   CORE_LDFLAGS += -lz -lm -lpng -lfreetype
 else
@@ -224,23 +228,18 @@ else
 endif
 
 # set special flags per-system
-ifeq ($(CPU), X86)
-  ifeq ($(ARCH_DETECTED), 64BITS)
-    ifneq ($(OS), FREEBSD)
+ifneq ($(OS), FREEBSD)
+  ifeq ($(CPU), X86)
+    ifeq ($(ARCH_DETECTED), 64BITS)
       CFLAGS += -march=athlon64
+    else
+      CFLAGS += -mmmx -msse -march=i686 -mtune=pentium-m
+      ifneq ($(PROFILE), 1)
+        CFLAGS += -fomit-frame-pointer
+      endif
     endif
-  else
-    CFLAGS += -mmmx -msse
-    ifneq ($(OS), FREEBSD)
-      CFLAGS += -march=i686 -mtune=pentium-m
-    endif
-    ifneq ($(PROFILE), 1)
-      CFLAGS += -fomit-frame-pointer
-    endif
-  endif
-  # tweak flags for 32-bit build on 64-bit system
-  ifeq ($(ARCH_DETECTED), 64BITS_32)
-    ifneq ($(OS), FREEBSD)
+    # tweak flags for 32-bit build on 64-bit system
+    ifeq ($(ARCH_DETECTED), 64BITS_32)
       CFLAGS += -m32
       LDFLAGS += -m32 -m elf_i386
     endif
