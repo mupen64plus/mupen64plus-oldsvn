@@ -39,8 +39,13 @@ extern "C" {
 
 #define PLUGIN_TYPE_AUDIO           3
 
+#ifndef __sgi
 #define EXPORT                      __declspec(dllexport)
 #define CALL                        _cdecl
+#else
+#define EXPORT
+#define CALL
+#endif
 
 #define SYSTEM_NTSC                 0
 #define SYSTEM_PAL                  1

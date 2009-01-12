@@ -1589,7 +1589,7 @@ void r4300_reset_soft()
       CIC_Chip = 2;
    }
 
-   switch(ROM_HEADER->Country_code&0xFF)
+   switch(ssb(ROM_HEADER->Country_code)&0xFF)
      {
       case 0x44:
       case 0x46:

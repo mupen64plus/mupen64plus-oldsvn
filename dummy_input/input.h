@@ -22,7 +22,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 #include <windows.h>
 #else
 # include "../main/winlnxdefs.h"

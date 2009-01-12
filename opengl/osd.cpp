@@ -33,7 +33,7 @@ extern "C" {
 
 #define FONT_FILENAME "font.ttf"
 
-#ifdef __WIN32__
+#if defined (__WIN32__) || defined(__sgi)
 # warning This hack should be fixed at some point
 # define glActiveTexture(x)
 #endif

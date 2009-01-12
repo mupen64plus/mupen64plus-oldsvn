@@ -44,7 +44,11 @@ else
 endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC
+ifneq ($(OS), IRIX)
+  CFLAGS += -fpic -DPIC
+else
+  LDFLAGS += -shared
+endif
 
 # list of object files to generate
 OBJECTS = main.o volume.o

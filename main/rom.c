@@ -577,9 +577,9 @@ int open_rom(const char* filename, unsigned int archivefile)
         printf ("Manufacturer: Nintendo\n");
     else
         printf("Manufacturer: %x\n", (unsigned int)(ROM_HEADER->Manufacturer_ID));
-    printf("Cartridge_ID: %x\n", ROM_HEADER->Cartridge_ID);
+    printf("Cartridge_ID: %x\n", ssb(ROM_HEADER->Cartridge_ID));
 
-    countrycodestring(ROM_HEADER->Country_code, buffer);
+    countrycodestring(ssb(ROM_HEADER->Country_code), buffer);
     printf("Country: %s\n", buffer);
     printf ("PC = %x\n", sl((unsigned int)ROM_HEADER->PC));
 

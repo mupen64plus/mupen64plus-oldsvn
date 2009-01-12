@@ -18,7 +18,12 @@ include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
 SDLTTF_LIBS	= -lSDL_ttf
-CFLAGS += -DGUI_SDL -fpic -DPIC
+ifneq ($(OS), IRIX)
+  CFLAGS += -DGUI_SDL -fpic -DPIC
+else
+  CFLAGS += -DGUI_SDL -LANG:anonymous_unions=ON
+  LDFLAGS += -shared
+endif
 
 # list of object files to generate
 OBJ_BLIGHT = \

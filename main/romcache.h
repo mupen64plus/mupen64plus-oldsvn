@@ -24,6 +24,9 @@
 
 #include <limits.h> 
 #include "md5.h"
+#ifdef __sgi
+#include <sys/time.h>
+#endif
 
 #define COMMENT_MAXLENGTH 256
 

@@ -47,6 +47,9 @@
 #include "../savestates.h"
 #include "../plugin.h"
 #include "../rom.h"
+#ifdef __sgi
+#include "../irix.h"
+#endif
 
 #ifdef DBG
 #include "debugger/registers.h"     //temporary includes for the debugger menu

@@ -158,6 +158,10 @@ OBJ_CORE = \
 	r4300/regimm.o \
 	r4300/tlb.o
 
+ifeq ($(OS),IRIX)
+  OBJ_CORE += main/irix.o
+endif
+
 # handle dynamic recompiler objects
 ifneq ($(NO_ASM), 1)
   ifeq ($(CPU), X86)
@@ -253,7 +257,9 @@ LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 # add extra objects and libraries for selected options
 ifeq ($(DBG), 1)
   OBJECTS +=  $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
-  LIBS += -lopcodes -lbfd
+  ifneq ($(OS), IRIX)
+    LIBS += -lopcodes -lbfd
+  endif
 endif
 ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)

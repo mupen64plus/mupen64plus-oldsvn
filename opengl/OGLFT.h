@@ -24,6 +24,9 @@
 #define OGLFT_H
 
 #include <cmath>
+#ifdef __sgi
+#include <math.h>
+#endif
 #include <map>
 #include <list>
 #include <vector>

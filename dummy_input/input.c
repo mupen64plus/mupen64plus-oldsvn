@@ -27,7 +27,7 @@
 char pluginName[] = "No Input";
 char configdir[PATH_MAX] = {0};
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 {

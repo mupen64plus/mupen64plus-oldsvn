@@ -251,6 +251,8 @@ extern unsigned char *rdramb;
 ((mot & 0x00FF0000) >>  8) | \
 ((mot & 0xFF000000) >> 24) \
 )
+#define sb(mot) mot
+#define ssb(court) court
 
 #define S8 3
 #define S16 2
@@ -259,6 +261,15 @@ extern unsigned char *rdramb;
 #else
 
 #define sl(mot) mot
+#define sb(mot) \
+( \
+((mot & 0x000000FF) << 24) | \
+((mot & 0x0000FF00) <<  8) | \
+((mot & 0x00FF0000) >>  8) | \
+((mot & 0xFF000000) >> 24) \
+)
+#define ssb(court) (((court & 0x00FF) <<  8) | ((court & 0xFF00) >>  8))
+
 #define S8 0
 #define S16 0
 #define Sh16 0

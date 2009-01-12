@@ -40,10 +40,6 @@ void *opaddr_recompiled[564];
 
 disassemble_info dis_info;
 
-#define CHECK_MEM(address) \
-   if (!invalid_code[(address) >> 12] && blocks[(address) >> 12]->block[((address) & 0xFFF) / 4].ops != NOTCOMPILED) \
-     invalid_code[(address) >> 12] = 1;
-
 void process_opcode_out(void *strm, const char *fmt, ...){
   va_list ap = {0};
   va_start(ap, fmt);
@@ -215,6 +211,26 @@ char* get_recompiled(uint32 addr, int index)
     return NULL;
 }
 
+char* get_recompiled_opcode(uint32 addr, int index)
+{
+    return NULL;
+}
+
+void * get_recompiled_addr(uint32 addr, int index)
+{
+    return 0;
+}
+
+char* get_recompiled_args(uint32 addr, int index)
+{
+    return NULL;
+}
+
+int get_has_recompiled(uint32 addr)
+{
+    return 0;
+}
+
 int get_num_recompiled(uint32 addr)
 {
     return 0;
@@ -227,6 +243,9 @@ void init_host_disassembler(void)
 
 #endif
 
+#define CHECK_MEM(address) \
+   if (!invalid_code[(address) >> 12] && blocks[(address) >> 12]->block[((address) & 0xFFF) / 4].ops != NOTCOMPILED) \
+     invalid_code[(address) >> 12] = 1;
 
 void update_memory(void){
   int i;
@@ -296,7 +315,7 @@ void write_memory_32(uint32 addr, uint32 value){
     {
     case MEM_RDRAM:
       *((uint32 *)(rdramb + (addr & 0xFFFFFF))) = value;
-      CHECK_MEM(addr)
+      CHECK_MEM(addr);
       break;
     }
 }

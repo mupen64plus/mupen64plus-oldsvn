@@ -25,7 +25,11 @@ USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC
+ifneq ($(OS),IRIX)
+  CFLAGS += -fpic -DPIC
+else
+  LDFLAGS += -shared
+endif
 
 ifeq ($(GUI),GTK2)
   CFLAGS += $(GTK_FLAGS) -DUSE_GTK

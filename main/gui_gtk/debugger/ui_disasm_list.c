@@ -324,7 +324,7 @@ disasm_list_get_path (GtkTreeModel *tree_model,
 
   path = gtk_tree_path_new();
 
-  gtk_tree_path_append_index(path, ((unsigned int)(long)(iter->user_data - disasm_list->startAddr)) / 4 + PRELINES);
+  gtk_tree_path_append_index(path, ((unsigned int)(long)((unsigned int)iter->user_data - disasm_list->startAddr)) / 4 + PRELINES);
 
   if(((long)iter->user_data2)!=-1)
       gtk_tree_path_append_index(path, ((uint32)(long)iter->user_data2));
@@ -435,14 +435,14 @@ disasm_list_iter_next (GtkTreeModel  *tree_model,
         return FALSE;
       }
     iter->stamp    = disasm_list->stamp;
-    iter->user_data+= 4;
+    iter->user_data= (gpointer)((unsigned long)iter->user_data + 4);
   }
   else // recompiler line
   {
     if ((long) iter->user_data2 + 1 >= get_num_recompiled((uint32)(long) iter->user_data))
         return FALSE;
     iter->stamp    = disasm_list->stamp;
-    iter->user_data2++;
+    iter->user_data2 = (gpointer)((unsigned long)iter->user_data2 + 1);
   }
   return TRUE;
 }
@@ -477,7 +477,7 @@ disasm_list_iter_children (GtkTreeModel *tree_model,
 
     /* Set iter to first item in list */
     iter->stamp     = disasm_list->stamp;
-    iter->user_data = (gpointer)(long) disasm_list->startAddr-PRELINES;
+    iter->user_data = (gpointer)((long) disasm_list->startAddr-PRELINES);
     iter->user_data2= (gpointer) -1;
   }
   else if ((long) parent->user_data2 == -1)

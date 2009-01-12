@@ -224,7 +224,9 @@ void shld_reg32_reg32_imm8(unsigned int reg1, unsigned int reg2, unsigned char i
 void cmp_preg32pimm32_imm8(int reg32, unsigned int imm32, unsigned char imm8);
 void test_m32_imm32(unsigned int *m32, unsigned int imm32);
 void fldcw_m16(unsigned short* m16);
+#ifndef __sgi
 void fsqrt();
+#endif
 void fabs_();
 void fistp_preg32_qword(int reg32);
 void fistp_preg32_dword(int reg32);

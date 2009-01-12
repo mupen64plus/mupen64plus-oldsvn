@@ -18,7 +18,11 @@
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM
+ifneq ($(OS),IRIX)
+  CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM
+else
+  LDFLAGS += -shared
+endif
 
 # list of object files to generate
 OBJECTS = \

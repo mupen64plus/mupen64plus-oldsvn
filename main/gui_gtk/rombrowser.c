@@ -405,7 +405,11 @@ static gboolean filter_function(GtkTreeModel* model, GtkTreeIter* iter, gpointer
         returnvalue = TRUE;
     else
         {
+#ifdef __sgi
+	 buffer2 = strstr(buffer1, filter);
+#else
         buffer2 = strcasestr(buffer1, filter);
+#endif
         if(buffer2!=NULL)
             returnvalue =  TRUE;
        else

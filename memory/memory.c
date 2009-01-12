@@ -57,7 +57,12 @@ RI_register ri_register;
 AI_register ai_register;
 DPC_register dpc_register;
 DPS_register dps_register;
+#ifdef __sgi
+unsigned int rdram[0x800000/4];
+#pragma align_symbol [rdram, 16]
+#else
 unsigned int rdram[0x800000/4]  __attribute__((aligned(16)));
+#endif
 unsigned char *rdramb = (unsigned char *)(rdram);
 unsigned int SP_DMEM[0x1000/4*2];
 unsigned int *SP_IMEM = SP_DMEM+0x1000/4;
@@ -2771,7 +2776,7 @@ void write_ai()
       case 0x4:
     ai_register.ai_len = word;
     aiLenChanged();
-    switch(ROM_HEADER->Country_code&0xFF)
+    switch(ssb(ROM_HEADER->Country_code)&0xFF)
       {
        case 0x44:
        case 0x46:
@@ -2825,7 +2830,7 @@ void write_ai()
     if (ai_register.ai_dacrate != word)
       {
          ai_register.ai_dacrate = word;
-         switch(ROM_HEADER->Country_code&0xFF)
+         switch(ssb(ROM_HEADER->Country_code)&0xFF)
            {
         case 0x44:
         case 0x46:
@@ -2869,7 +2874,7 @@ void write_aib()
       + ((*address_low&3)^S8) ) = byte;
     ai_register.ai_len = temp;
     aiLenChanged();
-    switch(ROM_HEADER->Country_code&0xFF)
+    switch(ssb(ROM_HEADER->Country_code)&0xFF)
       {
        case 0x44:
        case 0x46:
@@ -2925,7 +2930,7 @@ void write_aib()
     if (ai_register.ai_dacrate != temp)
       {
          ai_register.ai_dacrate = temp;
-         switch(ROM_HEADER->Country_code&0xFF)
+         switch(ssb(ROM_HEADER->Country_code)&0xFF)
            {
         case 0x44:
         case 0x46:
@@ -2968,7 +2973,7 @@ void write_aih()
                 + ((*address_low&3)^S16) )) = hword;
     ai_register.ai_len = temp;
     aiLenChanged();
-    switch(ROM_HEADER->Country_code&0xFF)
+    switch(ssb(ROM_HEADER->Country_code)&0xFF)
       {
        case 0x44:
        case 0x46:
@@ -3019,7 +3024,7 @@ void write_aih()
     if (ai_register.ai_dacrate != temp)
       {
          ai_register.ai_dacrate = temp;
-         switch(ROM_HEADER->Country_code&0xFF)
+         switch(ssb(ROM_HEADER->Country_code)&0xFF)
            {
         case 0x44:
         case 0x46:
@@ -3058,7 +3063,7 @@ void write_aid()
     ai_register.ai_dram_addr = dword >> 32;
     ai_register.ai_len = dword & 0xFFFFFFFF;
     aiLenChanged();
-    switch(ROM_HEADER->Country_code&0xFF)
+    switch(ssb(ROM_HEADER->Country_code)&0xFF)
       {
        case 0x44:
        case 0x46:
@@ -3105,7 +3110,7 @@ void write_aid()
     if (ai_register.ai_dacrate != dword >> 32)
       {
          ai_register.ai_dacrate = dword >> 32;
-         switch(ROM_HEADER->Country_code&0xFF)
+         switch(ssb(ROM_HEADER->Country_code)&0xFF)
            {
         case 0x44:
         case 0x46:

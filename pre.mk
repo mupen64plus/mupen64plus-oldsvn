@@ -43,6 +43,11 @@ ifeq ("$(UNAME)","ppc64")
   ARCH = 64BITS
   NO_ASM = 1
 endif
+ifeq ("$(UNAME)","IP35")
+  CPU = MIPS
+  ARCH = 64BITS
+  NO_ASM = 1
+endif
 
 # detect operation system. Currently just linux and OSX.
 UNAME = $(shell uname -s)
@@ -54,6 +59,12 @@ ifeq ("$(UNAME)","linux")
 endif
 ifeq ("$(UNAME)","Darwin")
   OS = OSX
+endif
+ifeq ("$(UNAME)","IRIX64")
+  OS = IRIX
+endif
+ifeq ("$(UNAME)","IRIX")
+  OS = IRIX
 endif
 
 ifeq ($(OS),)
@@ -88,7 +99,7 @@ endif
 ifeq ($(shell which pkg-config 2>/dev/null),)
   $(error pkg-config not installed!)
 endif
-ifneq ("$(shell pkg-config gtk+-2.0 --modversion | head -c 2)", "2.")
+ifeq ($(shell pkg-config gtk+-2.0 --silence-errors --modversion),)
   $(error No GTK 2.x development libraries found!)
 endif
 # set GTK flags and libraries
@@ -126,9 +137,16 @@ ifeq ($(GUI), QT4)
 endif
 
 # set base program pointers and flags
+ifeq ($(OS),IRIX)
+CC	= c99
+CXX	= CC
+LD	= CC
+STRIP	= ls -l
+else
 CC      = gcc
 CXX     = g++
 LD      = g++
+endif
 ifeq ($(OS),LINUX)
 STRIP	= strip -s
 endif
@@ -163,7 +181,11 @@ else
 endif
 
 # set base CFLAGS and LDFLAGS for all systems
-CFLAGS = -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing 
+ifeq ($(OS),IRIX)
+  CFLAGS = -O3 -mips4 -I/usr/nekoware/include -TARG:platform=IP27:proc=r10000
+else
+  CFLAGS = -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing 
+endif
 LDFLAGS =
 
 # set special flags per-system
@@ -185,6 +207,9 @@ endif
 ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
 endif
+ifeq ($(CPU), MIPS)
+  CFLAGS += -D_BIG_ENDIAN
+endif
 
 # set CFLAGS, LIBS, and LDFLAGS for external dependencies
 ifeq ($(OS),LINUX)
@@ -199,6 +224,10 @@ ifeq ($(OS),LINUX)
 endif
 ifeq ($(OS),OSX)
   LIBGL_LIBS	= -framework OpenGL
+endif
+ifeq ($(OS),IRIX)
+  LIBGL_LIBS	= -lGL -lGLU
+  LDFLAGS += -liconv -lgen
 endif
 
 # set flags for compile options.

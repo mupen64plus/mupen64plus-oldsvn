@@ -40,6 +40,9 @@
 #include <signal.h> // signals
 #include <getopt.h> // getopt_long
 #include <dirent.h>
+#ifdef __sgi
+#include "irix.h"
+#endif
 
 #include <png.h>    // for writing screenshot PNG files
 
@@ -216,7 +219,7 @@ static double VILimitMilliseconds = 1000.0/60.0;
 
 static int GetVILimit(void)
 {
-    switch (ROM_HEADER->Country_code&0xFF)
+    switch (ssb(ROM_HEADER->Country_code)&0xFF)
     {
         // PAL codes
         case 0x44:
@@ -412,7 +415,7 @@ void startEmulation(void)
     // with the Qt4 interface.
     plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
 
-    // in nogui mode, just start the emulator in the main thread
+    // in nogui mode, just start the emulator in the main thread    
     if(!l_GuiEnabled)
     {
         emulationThread(NULL);

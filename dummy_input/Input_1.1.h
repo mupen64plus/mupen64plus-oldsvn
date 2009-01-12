@@ -46,8 +46,13 @@ extern "C" {
  in the next spec
 **********************************************************************************/
 
+#ifndef __sgi
 #define EXPORT                      __declspec(dllexport)
 #define CALL                        _cdecl
+#else
+#define EXPORT
+#define CALL
+#endif
 
 #ifndef __PLUGIN_INFO__
 #define __PLUGIN_INFO__
