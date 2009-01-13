@@ -27,7 +27,7 @@
 #include "Rsp_#1.1.h"
 // #include "z64.h"
 #include "rsp.h"
-//#include "rsp_opinfo.h"
+#include "rsp_opinfo.h"
 #include <math.h>       // sqrt
 #include <assert.h>
 #include <string.h>
@@ -2562,23 +2562,15 @@ if( rsp_sp_status & (SP_STATUS_HALT|SP_STATUS_BROKE))
         rsp_icount = 0;
 }
 
+
+        while (rsp_icount > 0)
+        {
 #ifdef RSPTIMING
   uint64_t lasttime;
   lasttime = RDTSC();
 #endif
-
-        while (rsp_icount > 0)
-        {
                 rsp.ppc = sp_pc;
 
-#ifdef RSPTIMING
-    uint64_t time = lasttime;
-    lasttime = RDTSC();
-    rsp_opinfo_t info;
-    rsp_get_opinfo(op, &info);
-    rsptimings[info.op2] += lasttime - time;
-    rspcounts[info.op2]++;
-#endif
 
                 op = ROPCODE(sp_pc);
 #ifdef GENTRACE
@@ -2782,6 +2774,15 @@ if( rsp_sp_status & (SP_STATUS_HALT|SP_STATUS_BROKE))
                                 break;
                         }
                 }
+
+#ifdef RSPTIMING
+    uint64_t time = lasttime;
+    lasttime = RDTSC();
+    rsp_opinfo_t info;
+    rsp_get_opinfo(op, &info);
+    rsptimings[info.op2] += lasttime - time;
+    rspcounts[info.op2]++;
+#endif
 
 #if LOG_INSTRUCTION_EXECUTION
                 {

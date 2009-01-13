@@ -420,6 +420,7 @@ inline void GENTRACE(const char * s, ...) {
 
 #ifdef RSPTIMING
 extern uint64_t rsptimings[512];
+extern int rspcounts[512];
 #endif
 
 #endif // ifndef _RSP_H_

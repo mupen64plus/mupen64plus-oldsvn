@@ -136,5 +136,35 @@ __declspec(dllexport) void RomClosed (void)
   rsp_gen_cache_miss*100.0f/rsp_gen_cache_hit);
   rsp_gen_cache_hit = rsp_gen_cache_miss = 0;
 
+#ifdef RSPTIMING
+    int i,j;
+    UINT32 op, op2;
+
+    for(i=0; i<0x140;i++) {
+    if (i>=0x100)
+      op = (0x12<<26) | (0x10 << 21) | (i&0x3f);
+    else if (i>=0xc0)
+      op = (0x3a<<26) | ((i&0x1f)<<11);
+    else if (i>=0xa0)
+      op = (0x32<<26) | ((i&0x1f)<<11);
+    else if (i>=0x80)
+      op = (0x12<<26) | ((i&0x1f)<<21);
+    else if (i>=0x40)
+      op = (0<<26) | (i&0x3f);
+    else
+      op = (i&0x3f)<<26;
+
+      char s[128], s2[128];
+      rsp_dasm_one(s, 0x800, op);
+      //rsp_dasm_one(s2, 0x800, op2);
+      if (rsptimings[i])
+        printf("%10g %10g %7d\t%30s\n"
+               /*"%10g %10g %7d\t%30s\n"*/,
+               rsptimings[i]/(rspcounts[i]*1.0f), rsptimings[i]*(1.0f), rspcounts[i], s//,
+               //timings[k]/1.0f/counts[k], counts[k], s2
+              );
+    }
+#endif
+
   rsp_init(z64_rspinfo);
 }
