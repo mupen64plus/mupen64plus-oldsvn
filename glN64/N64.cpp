@@ -1,8 +1,8 @@
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 # include <windows.h>
 #else
 # include "../main/winlnxdefs.h"
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
 #include "N64.h"
 #include "Types.h"
 

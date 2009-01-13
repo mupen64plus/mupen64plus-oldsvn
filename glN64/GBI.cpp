@@ -15,7 +15,7 @@
 #include "F3DWRUS.h"
 #include "F3DPD.h"
 #include "Types.h"
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 # include "Resource.h"
 #elif defined(USE_GTK)
 # include <glib.h>
@@ -107,7 +107,7 @@ void GBI_Unknown( u32 w0, u32 w1 )
 #endif
 }
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 INT_PTR CALLBACK MicrocodeDlgProc( HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
     switch (uMsg)
@@ -361,7 +361,13 @@ MicrocodeInfo *GBI_DetectMicrocode( u32 uc_start, u32 uc_dstart, u16 uc_dsize )
     current->type = NONE;
 
     // See if we can identify it by CRC
+#ifdef _BIG_ENDIAN
+    char uc_crcdata[4096];
+    UnswapCopy( &RDRAM[uc_start & 0x1FFFFFFF], uc_crcdata, 4096 );
+    uc_crc = CRC_Calculate( 0xFFFFFFFF, uc_crcdata, 4096 );
+#else
     uc_crc = CRC_Calculate( 0xFFFFFFFF, &RDRAM[uc_start & 0x1FFFFFFF], 4096 );
+#endif
     for (u32 i = 0; i < sizeof( specialMicrocodes ) / sizeof( SpecialMicrocodeInfo ); i++)
     {
         if (uc_crc == specialMicrocodes[i].crc)
@@ -372,8 +378,13 @@ MicrocodeInfo *GBI_DetectMicrocode( u32 uc_start, u32 uc_dstart, u16 uc_dsize )
     }
 
     // See if we can identify it by text
+#ifdef _BIG_ENDIAN
+    char *uc_data;
+    uc_data = (char *)&RDRAM[uc_dstart & 0x1FFFFFFF];
+#else
     char uc_data[2048];
     UnswapCopy( &RDRAM[uc_dstart & 0x1FFFFFFF], uc_data, 2048 );
+#endif
     strcpy( uc_str, "Not Found" );
 
     for (u32 i = 0; i < 2048; i++)
@@ -442,16 +453,16 @@ MicrocodeInfo *GBI_DetectMicrocode( u32 uc_start, u32 uc_dstart, u16 uc_dsize )
     }
 
     // Let the user choose the microcode
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     current->type = DialogBox( hInstance, MAKEINTRESOURCE( IDD_MICROCODEDLG ), hWnd, MicrocodeDlgProc );
-#else // !__LINUX__
+#else // !__LINUX__ && !__sgi
     printf( "glN64: Warning - unknown ucode!!!\n" );
     if(last_good_ucode != (u32)-1) {
         current->type=last_good_ucode;
     } else {
         current->type = MicrocodeDialog();
     }
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
     return current;
 }
 

@@ -542,14 +542,14 @@ void TextureCache_LoadBackground( CachedTexture *texInfo )
 
         glTexImage2D( GL_TEXTURE_2D, 0, glInternalFormat, texInfo->realWidth << 1, texInfo->realHeight << 1, 0, GL_RGBA, glType, scaledDest );
 
-        free( dest );
         free( scaledDest );
     }
     else
     {
         glTexImage2D( GL_TEXTURE_2D, 0, glInternalFormat, texInfo->realWidth, texInfo->realHeight, 0, GL_RGBA, glType, dest );
-        free( dest );
     }
+    free(dest);
+    free(swapped);
 }
 
 void TextureCache_Load( CachedTexture *texInfo )
@@ -689,14 +689,13 @@ void TextureCache_Load( CachedTexture *texInfo )
 
         glTexImage2D( GL_TEXTURE_2D, 0, glInternalFormat, texInfo->realWidth << 1, texInfo->realHeight << 1, 0, GL_RGBA, glType, scaledDest );
 
-        free( dest );
         free( scaledDest );
     }
     else
     {
         glTexImage2D( GL_TEXTURE_2D, 0, glInternalFormat, texInfo->realWidth, texInfo->realHeight, 0, GL_RGBA, glType, dest );
-        free( dest );
     }
+    free(dest);
 }
 
 u32 TextureCache_CalculateCRC( u32 t, u32 width, u32 height )

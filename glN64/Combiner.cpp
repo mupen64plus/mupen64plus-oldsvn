@@ -7,7 +7,9 @@
 
 #include "OpenGL.h"
 #include "Combiner.h"
+#ifndef __sgi
 #include "NV_register_combiners.h"
+#endif
 #include "texture_env_combine.h"
 #include "texture_env.h"
 #include "Debug.h"
@@ -35,9 +37,11 @@ void Combiner_Init()
             Init_texture_env_combine();
             break;
 
+#ifndef __sgi
         case NV_REGISTER_COMBINERS:
             Init_NV_register_combiners();
             break;
+#endif
     }
     combiner.root = NULL;
 }
@@ -50,9 +54,11 @@ void Combiner_UpdateCombineColors()
             Update_texture_env_combine_Colors( (TexEnvCombiner*)combiner.current->compiled );
             break;
 
+#ifndef __sgi
         case NV_REGISTER_COMBINERS:
             Update_NV_register_combiners_Colors( (RegisterCombiners*)combiner.current->compiled );
             break;
+#endif
     }
 
     gDP.changed &= ~CHANGED_COMBINE_COLORS;
@@ -283,9 +289,11 @@ CachedCombiner *Combiner_Compile( u64 mux )
             cached->compiled = (void*)Compile_texture_env_combine( &color, &alpha );
             break;
 
+#ifndef __sgi
         case NV_REGISTER_COMBINERS:
             cached->compiled = (void*)Compile_NV_register_combiners( &color, &alpha );
             break;
+#endif
     }
 
     return cached;
@@ -400,9 +408,11 @@ void Combiner_SetCombineStates()
             Set_texture_env_combine( (TexEnvCombiner*)combiner.current->compiled );
             break;
 
+#ifndef __sgi
         case NV_REGISTER_COMBINERS:
             Set_NV_register_combiners( (RegisterCombiners*)combiner.current->compiled );
             break;
+#endif
     }
 }
 

@@ -14,7 +14,7 @@
 #include "S2DEX.h"
 #include "VI.h"
 #include "DepthBuffer.h"
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 # include "Resource.h"
 #else
 #include <stdlib.h>
@@ -24,7 +24,7 @@
 # ifndef max
 #  define max(a,b) ((a) > (b) ? (a) : (b))
 # endif
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
 #ifdef DEBUG
 extern u32 uc_crc, uc_dcrc;
@@ -311,6 +311,16 @@ void gSPViewport( u32 v )
         return;
     }
 
+#ifdef _BIG_ENDIAN
+    gSP.viewport.vscale[0] = _FIXED2FLOAT( *(s16*)&RDRAM[address     ], 2 );
+    gSP.viewport.vscale[1] = _FIXED2FLOAT( *(s16*)&RDRAM[address +  2], 2 );
+    gSP.viewport.vscale[2] = _FIXED2FLOAT( *(s16*)&RDRAM[address +  4], 10 );// * 0.00097847357f;
+    gSP.viewport.vscale[3] = *(s16*)&RDRAM[address +  6];
+    gSP.viewport.vtrans[0] = _FIXED2FLOAT( *(s16*)&RDRAM[address +  8], 2 );
+    gSP.viewport.vtrans[1] = _FIXED2FLOAT( *(s16*)&RDRAM[address + 10], 2 );
+    gSP.viewport.vtrans[2] = _FIXED2FLOAT( *(s16*)&RDRAM[address + 12], 10 );// * 0.00097847357f;
+    gSP.viewport.vtrans[3] = *(s16*)&RDRAM[address + 14];
+#else
     gSP.viewport.vscale[0] = _FIXED2FLOAT( *(s16*)&RDRAM[address +  2], 2 );
     gSP.viewport.vscale[1] = _FIXED2FLOAT( *(s16*)&RDRAM[address     ], 2 );
     gSP.viewport.vscale[2] = _FIXED2FLOAT( *(s16*)&RDRAM[address +  6], 10 );// * 0.00097847357f;
@@ -319,6 +329,7 @@ void gSPViewport( u32 v )
     gSP.viewport.vtrans[1] = _FIXED2FLOAT( *(s16*)&RDRAM[address +  8], 2 );
     gSP.viewport.vtrans[2] = _FIXED2FLOAT( *(s16*)&RDRAM[address + 14], 10 );// * 0.00097847357f;
     gSP.viewport.vtrans[3] = *(s16*)&RDRAM[address + 12];
+#endif // _BIG_ENDIAN
 
     gSP.viewport.x      = gSP.viewport.vtrans[0] - gSP.viewport.vscale[0];
     gSP.viewport.y      = gSP.viewport.vtrans[1] - gSP.viewport.vscale[1];

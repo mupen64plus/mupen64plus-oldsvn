@@ -1,4 +1,4 @@
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 # include <windows.h>
 #else
 # include "../main/winlnxdefs.h"
@@ -38,7 +38,11 @@ void RSP_LoadMatrix( f32 mtx[4][4], u32 address )
 
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
+#ifdef _BIG_ENDIAN
+            mtx[i][j] = (GLfloat)(n64Mat->integer[i][j]) + (GLfloat)(n64Mat->fraction[i][j]) * recip;
+#else
             mtx[i][j] = (GLfloat)(n64Mat->integer[i][j^1]) + (GLfloat)(n64Mat->fraction[i][j^1]) * recip;
+#endif
 }
 
 #ifdef RSPTHREAD

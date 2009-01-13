@@ -1,4 +1,4 @@
-#ifndef __LINUX__ //Change me...
+#if !defined(__LINUX__) && !defined(__sgi) //Change me...
 #include <windows.h>
 #include <commctrl.h>
 #include <process.h>
@@ -25,13 +25,13 @@
 #include "Textures.h"
 #include "Combiner.h"
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 HWND        hWnd;
 HWND        hStatusBar;
 //HWND      hFullscreen;
 HWND        hToolBar;
 HINSTANCE   hInstance;
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
 char        pluginName[] = "glN64 v0.4.1";
 char        *screenDirectory;
@@ -40,7 +40,7 @@ void (*CheckInterrupts)( void );
 char        configdir[PATH_MAX] = {0};
 void (*renderCallback)() = NULL;
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 LONG        windowedStyle;
 LONG        windowedExStyle;
 RECT        windowedRect;
@@ -73,7 +73,7 @@ _init( void )
     RSP.thread = NULL;
 # endif
 }
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
 EXPORT void CALL CaptureScreen ( char * Directory )
 {
@@ -157,9 +157,9 @@ EXPORT void CALL ChangeWindow (void)
     SetEvent( RSP.threadMsg[RSPMSG_INITTEXTURES] );
     WaitForSingleObject( RSP.threadFinished, INFINITE );
 #else // RSPTHREAD
-# ifdef __LINUX__
+# if defined(__LINUX__) || defined(__sgi)
     SDL_WM_ToggleFullScreen( OGL.hScreen );
-# endif // __LINUX__
+# endif // __LINUX__ || __sgi
 #endif // !RSPTHREAD
 }
 
@@ -169,7 +169,7 @@ EXPORT void CALL CloseDLL (void)
 
 EXPORT void CALL DllAbout ( HWND hParent )
 {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     MessageBox( hParent, "glN64 v0.4 by Orkin\n\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn", pluginName, MB_OK | MB_ICONINFORMATION );
 #else
 # ifdef QT4_GUI
@@ -179,7 +179,7 @@ EXPORT void CALL DllAbout ( HWND hParent )
 # else
     puts( "glN64 v0.4 by Orkin\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn\nported by blight" );
 # endif // QT4_GUI
-#endif
+#endif //!__LINUX__ && !__sgi
 }
 
 EXPORT void CALL DllConfig ( HWND hParent )
@@ -209,7 +209,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
     PluginInfo->MemoryBswaped = TRUE;
 }
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 BOOL CALLBACK FindToolBarProc( HWND hWnd, LPARAM lParam )
 {
     if (GetWindowLong( hWnd, GWL_STYLE ) & RBS_VARHEIGHT)
@@ -219,23 +219,23 @@ BOOL CALLBACK FindToolBarProc( HWND hWnd, LPARAM lParam )
     }
     return TRUE;
 }
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
 EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info)
 {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     hWnd = Gfx_Info.hWnd;
     hStatusBar = Gfx_Info.hStatusBar;
     hToolBar = NULL;
 
     EnumChildWindows( hWnd, FindToolBarProc,0 );
-#else // !__LINUX__
+#else // !__LINUX__ && !__sgi
     Config_LoadConfig();
     OGL.hScreen = NULL;
 # ifdef RSPTHREAD
     RSP.thread = NULL;
 # endif
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
     DMEM = Gfx_Info.DMEM;
     IMEM = Gfx_Info.IMEM;
     RDRAM = Gfx_Info.RDRAM;
@@ -352,7 +352,7 @@ EXPORT void CALL RomClosed (void)
 EXPORT void CALL RomOpen (void)
 {
 #ifdef RSPTHREAD
-# ifndef __LINUX__
+# if !defined(__LINUX__) && !defined(__sgi)
     DWORD threadID;
     int i;
 
@@ -377,8 +377,8 @@ EXPORT void CALL RomOpen (void)
 
     RSP.thread = CreateThread( NULL, 4096, RSP_ThreadProc, NULL, NULL, &threadID );
     WaitForSingleObject( RSP.threadFinished, INFINITE );
-# else // !__LINUX__
-# endif // __LINUX__
+# else // !__LINUX__ && !__sgi
+# endif // !__LINUX__ && !__sgi
 #else
     RSP_Init();
 #endif

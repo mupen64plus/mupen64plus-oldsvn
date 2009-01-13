@@ -28,6 +28,25 @@ struct gDPCombine
     {
         struct
         {
+#ifdef _BIG_ENDIAN // or __sgi specific ?
+            unsigned    pad     : 8;
+            unsigned    saRGB0  : 4;
+            unsigned    mRGB0   : 5;
+            unsigned    saA0    : 3;
+            unsigned    mA0     : 3;
+            unsigned    saRGB1  : 4;
+            unsigned    mRGB1   : 5;
+            unsigned    sbRGB0  : 4;
+            unsigned    sbRGB1  : 4;
+            unsigned    saA1    : 3;
+            unsigned    mA1     : 3;
+            unsigned    aRGB0   : 3;
+            unsigned    sbA0    : 3;
+            unsigned    aA0     : 3;
+            unsigned    aRGB1   : 3;
+            unsigned    sbA1    : 3;
+            unsigned    aA1     : 3;
+#else
             // muxs1
             unsigned    aA1     : 3;
             unsigned    sbA1    : 3;
@@ -47,11 +66,16 @@ struct gDPCombine
             unsigned    saA0    : 3;
             unsigned    mRGB0   : 5;
             unsigned    saRGB0  : 4;
+#endif // _BIG_ENDIAN
         };
 
         struct
         {
+#ifdef _BIG_ENDIAN
+            u32         muxs0, muxs1;
+#else
             u32         muxs1, muxs0;
+#endif
         };
 
         u64             mux;
@@ -96,6 +120,43 @@ struct gDPInfo
         {
             struct
             {
+#ifdef _BIG_ENDIAN // or __sgi specific ?
+                unsigned int pad : 8;
+                unsigned int pipelineMode : 1;
+                unsigned int unusedColorDither : 1; // unsupported
+                unsigned int cycleType : 2;
+                unsigned int texturePersp : 1;
+                unsigned int textureDetail : 2;
+                unsigned int textureLOD : 1;
+                unsigned int textureLUT : 2;
+                unsigned int textureFilter : 2;
+                unsigned int textureConvert : 3;
+                unsigned int combineKey : 1;
+                unsigned int colorDither : 2;
+                unsigned int alphaDither : 2;
+                unsigned int blendMask : 4;
+                unsigned int c1_m1a : 2;
+                unsigned int c2_m1a : 2;
+                unsigned int c1_m1b : 2;
+                unsigned int c2_m1b : 2;
+                unsigned int c1_m2a : 2;
+                unsigned int c2_m2a : 2;
+                unsigned int c1_m2b : 2;
+                unsigned int c2_m2b : 2;
+                unsigned int textureEdge : 1;
+                unsigned int forceBlender : 1;
+                unsigned int alphaCvgSel : 1;
+                unsigned int cvgXAlpha : 1;
+                unsigned int depthMode : 2;
+                unsigned int cvgDest : 2;
+                unsigned int clearOnCvg : 1;
+                unsigned int imageRead : 1;
+                unsigned int depthUpdate : 1;
+                unsigned int depthCompare : 1;
+                unsigned int AAEnable : 1;
+                unsigned int depthSource : 1;
+                unsigned int alphaCompare : 2;
+#else
                 unsigned int alphaCompare : 2;
                 unsigned int depthSource : 1;
 
@@ -145,14 +206,18 @@ struct gDPInfo
                 unsigned int pipelineMode : 1;
 
                 unsigned int pad : 8;
-
+#endif // _BIG_ENDIAN
             };
 
             u64         _u64;
 
             struct
             {
+#ifdef _BIG_ENDIAN
+                u32         h, l;
+#else
                 u32         l, h;
+#endif
             };
         };
     } otherMode;

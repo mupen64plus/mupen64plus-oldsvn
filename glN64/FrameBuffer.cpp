@@ -1,9 +1,9 @@
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 # include <windows.h>
 #else
 # include "../main/winlnxdefs.h"
 # include <stdlib.h>
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
 #include "OpenGL.h"
 #include "FrameBuffer.h"
 #include "RSP.h"

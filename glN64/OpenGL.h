@@ -7,6 +7,24 @@
 //#include "glATI.h"
 #include "gSP.h"
 
+#ifdef __sgi
+#define glActiveTexture;
+#define glActiveTextureARB;
+#define glClientActiveTextureARB;
+#define glMultiTexCoord2fARB;
+#define glSecondaryColor3fvEXT;
+#define glSecondaryColorPointerEXT;
+#define glFogCoordPointerEXT;
+#define glSecondaryColor3fEXT;
+
+#define glCombinerParameteriNV;
+#define glSecondaryColor3fv;
+#define glCombinerParameterfvNV;
+#define glCombinerOutputNV;
+#define glCombinerInputNV;
+#define glFinalCombinerInputNV;
+#endif
+
 struct GLVertex
 {
     float x, y, z, w;
@@ -20,14 +38,14 @@ struct GLVertex
 
 struct GLInfo
 {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     HGLRC   hRC, hPbufferRC;
     HDC     hDC, hPbufferDC;
     HWND    hWnd;
     HPBUFFERARB hPbuffer;
 #else
     SDL_Surface *hScreen;
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
 
     DWORD   fullscreenWidth, fullscreenHeight, fullscreenBits, fullscreenRefresh;
     DWORD   width, height, windowedWidth, windowedHeight, heightOffset;
@@ -67,7 +85,7 @@ struct GLInfo
     BYTE    triangles[80][3];
     BYTE    numTriangles;
     BYTE    numVertices;
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     HWND    hFullscreenWnd;
 #endif
     BOOL    usePolygonStipple;
@@ -84,7 +102,7 @@ struct GLcolor
     float r, g, b, a;
 };
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 extern PFNGLCOMBINERPARAMETERFVNVPROC glCombinerParameterfvNV;
 extern PFNGLCOMBINERPARAMETERFNVPROC glCombinerParameterfNV;
 extern PFNGLCOMBINERPARAMETERIVNVPROC glCombinerParameterivNV;
@@ -137,7 +155,7 @@ extern PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
 extern PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
 extern PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
 extern PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
 bool OGL_Start();
 void OGL_Stop();
@@ -151,9 +169,9 @@ void OGL_ClearDepthBuffer();
 void OGL_ClearColorBuffer( float *color );
 void OGL_ResizeWindow();
 void OGL_SaveScreenshot();
-#ifdef __LINUX__
+#if defined(__LINUX__) || defined(__sgi)
 void OGL_SwapBuffers();
-#endif // __LINUX__
+#endif // __LINUX__ || __sgi
 void OGL_ReadScreen( void **dest, int *width, int *height );
 
 #endif

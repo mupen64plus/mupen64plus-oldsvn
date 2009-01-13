@@ -13,7 +13,7 @@
 #include "DepthBuffer.h"
 #include "VI.h"
 
-#ifdef __LINUX__
+#if defined(__LINUX__) || defined(__sgi)
 # ifndef min
 #  define min(a,b) ((a) < (b) ? (a) : (b))
 # endif

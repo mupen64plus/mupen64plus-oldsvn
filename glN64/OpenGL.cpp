@@ -37,7 +37,7 @@
 
 GLInfo OGL;
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 // NV_register_combiners functions
 PFNGLCOMBINERPARAMETERFVNVPROC glCombinerParameterfvNV;
 PFNGLCOMBINERPARAMETERFNVPROC glCombinerParameterfNV;
@@ -83,7 +83,7 @@ PFNGLSECONDARYCOLOR3UIVEXTPROC glSecondaryColor3uivEXT;
 PFNGLSECONDARYCOLOR3USEXTPROC glSecondaryColor3usEXT;
 PFNGLSECONDARYCOLOR3USVEXTPROC glSecondaryColor3usvEXT;
 PFNGLSECONDARYCOLORPOINTEREXTPROC glSecondaryColorPointerEXT;
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
 BOOL isExtensionSupported( const char *extension )
 {
@@ -119,7 +119,7 @@ void OGL_InitExtensions()
 {
     if ((OGL.NV_register_combiners = isExtensionSupported( "GL_NV_register_combiners" )))
     {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
         glCombinerParameterfvNV = (PFNGLCOMBINERPARAMETERFVNVPROC)wglGetProcAddress( "glCombinerParameterfvNV" );
         glCombinerParameterfNV = (PFNGLCOMBINERPARAMETERFNVPROC)wglGetProcAddress( "glCombinerParameterfNV" );
         glCombinerParameterivNV = (PFNGLCOMBINERPARAMETERIVNVPROC)wglGetProcAddress( "glCombinerParameterivNV" );
@@ -133,17 +133,17 @@ void OGL_InitExtensions()
         glGetCombinerOutputParameterivNV = (PFNGLGETCOMBINEROUTPUTPARAMETERIVNVPROC)wglGetProcAddress( "glGetCombinerOutputParameterivNV" );
         glGetFinalCombinerInputParameterfvNV = (PFNGLGETFINALCOMBINERINPUTPARAMETERFVNVPROC)wglGetProcAddress( "glGetFinalCombinerInputParameterfvNV" );
         glGetFinalCombinerInputParameterivNV = (PFNGLGETFINALCOMBINERINPUTPARAMETERIVNVPROC)wglGetProcAddress( "glGetFinalCombinerInputParameterivNV" );
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
         glGetIntegerv( GL_MAX_GENERAL_COMBINERS_NV, &OGL.maxGeneralCombiners );
     }
 
     if ((OGL.ARB_multitexture = isExtensionSupported( "GL_ARB_multitexture" )))
     {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
         glActiveTextureARB          = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress( "glActiveTextureARB" );
         glClientActiveTextureARB    = (PFNGLCLIENTACTIVETEXTUREARBPROC)wglGetProcAddress( "glClientActiveTextureARB" );
         glMultiTexCoord2fARB        = (PFNGLMULTITEXCOORD2FARBPROC)wglGetProcAddress( "glMultiTexCoord2fARB" );
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
         glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &OGL.maxTextureUnits );
         OGL.maxTextureUnits = min( 8, OGL.maxTextureUnits ); // The plugin only supports 8, and 4 is really enough
@@ -151,18 +151,18 @@ void OGL_InitExtensions()
 
     if ((OGL.EXT_fog_coord = isExtensionSupported( "GL_EXT_fog_coord" )))
     {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
         glFogCoordfEXT = (PFNGLFOGCOORDFEXTPROC)wglGetProcAddress( "glFogCoordfEXT" );
         glFogCoordfvEXT = (PFNGLFOGCOORDFVEXTPROC)wglGetProcAddress( "glFogCoordfvEXT" );
         glFogCoorddEXT = (PFNGLFOGCOORDDEXTPROC)wglGetProcAddress( "glFogCoorddEXT" );
         glFogCoorddvEXT = (PFNGLFOGCOORDDVEXTPROC)wglGetProcAddress( "glFogCoorddvEXT" );
         glFogCoordPointerEXT = (PFNGLFOGCOORDPOINTEREXTPROC)wglGetProcAddress( "glFogCoordPointerEXT" );
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
     }
 
     if ((OGL.EXT_secondary_color = isExtensionSupported( "GL_EXT_secondary_color" )))
     {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
         glSecondaryColor3bEXT = (PFNGLSECONDARYCOLOR3BEXTPROC)wglGetProcAddress( "glSecondaryColor3bEXT" );
         glSecondaryColor3bvEXT = (PFNGLSECONDARYCOLOR3BVEXTPROC)wglGetProcAddress( "glSecondaryColor3bvEXT" );
         glSecondaryColor3dEXT = (PFNGLSECONDARYCOLOR3DEXTPROC)wglGetProcAddress( "glSecondaryColor3dEXT" );
@@ -180,7 +180,7 @@ void OGL_InitExtensions()
         glSecondaryColor3usEXT = (PFNGLSECONDARYCOLOR3USEXTPROC)wglGetProcAddress( "glSecondaryColor3usEXT" );
         glSecondaryColor3usvEXT = (PFNGLSECONDARYCOLOR3USVEXTPROC)wglGetProcAddress( "glSecondaryColor3usvEXT" );
         glSecondaryColorPointerEXT = (PFNGLSECONDARYCOLORPOINTEREXTPROC)wglGetProcAddress( "glSecondaryColorPointerEXT" );
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
     }
 
     OGL.ARB_texture_env_combine = isExtensionSupported( "GL_ARB_texture_env_combine" );
@@ -259,7 +259,7 @@ void OGL_InitStates()
                                             ((i > (rand() >> 10)) << 0);
     }
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     SwapBuffers( wglGetCurrentDC() );
 #else
     OGL_SwapBuffers();
@@ -274,7 +274,7 @@ void OGL_UpdateScale()
 
 void OGL_ResizeWindow()
 {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     RECT    windowRect, statusRect, toolRect;
 
     if (OGL.fullscreen)
@@ -307,13 +307,13 @@ void OGL_ResizeWindow()
         SetWindowPos( hWnd, NULL, 0, 0, windowRect.right - windowRect.left + 1,
                         windowRect.bottom - windowRect.top + 1 + toolRect.bottom - toolRect.top + 1, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOMOVE );
     }
-#else // !__LINUX__
-#endif // __LINUX__
+#else // !__LINUX__ && !__sgi
+#endif // !__LINUX__ && !__sgi
 }
 
 bool OGL_Start()
 {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     int     pixelFormat;
 
     PIXELFORMATDESCRIPTOR pfd = {
@@ -370,7 +370,7 @@ bool OGL_Start()
         OGL_Stop();
         return FALSE;
     }
-#else // !__LINUX__
+#else // !__LINUX__ && !__sgi
     // init sdl & gl
     const SDL_VideoInfo *videoInfo;
     Uint32 videoFlags = 0;
@@ -433,7 +433,7 @@ bool OGL_Start()
     }
 
     SDL_WM_SetCaption( pluginName, pluginName );
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
 
     OGL_InitExtensions();
     OGL_InitStates();
@@ -454,7 +454,7 @@ void OGL_Stop()
     FrameBuffer_Destroy();
     TextureCache_Destroy();
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     wglMakeCurrent( NULL, NULL );
 
     if (OGL.hRC)
@@ -468,10 +468,10 @@ void OGL_Stop()
         ReleaseDC( hWnd, OGL.hDC );
         OGL.hDC = NULL;
     }
-#else // !__LINUX__
+#else // !__LINUX__ && !__sgi
     SDL_QuitSubSystem( SDL_INIT_VIDEO );
     OGL.hScreen = NULL;
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
 }
 
 void OGL_UpdateCullFace()
@@ -1050,7 +1050,7 @@ static void OGL_png_warn(png_structp png_write, const char *message)
 
 void OGL_SaveScreenshot()
 {
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
     BITMAPFILEHEADER fileHeader;
     BITMAPINFOHEADER infoHeader;
     HANDLE hBitmapFile;
@@ -1103,7 +1103,7 @@ void OGL_SaveScreenshot()
 
     CloseHandle( hBitmapFile );
     free( pixelData );
-#else // !__LINUX__
+#else // !__LINUX__ && !__sgi
     // start by getting the base file path
     char filepath[2048], filename[2048];
     filepath[0] = 0;
@@ -1181,10 +1181,10 @@ void OGL_SaveScreenshot()
     png_destroy_write_struct(&png_write, &png_info);
     free(pixels);
     // all done
-#endif // __LINUX__
+#endif // !__LINUX__ && !__sgi
 }
 
-#ifdef __LINUX__
+#if defined(__LINUX__) || defined(__sgi)
 void
 OGL_SwapBuffers()
 {
@@ -1234,5 +1234,5 @@ void OGL_ReadScreen( void **dest, int *width, int *height )
     glReadBuffer( oldMode );
 }
 
-#endif // __LINUX__
+#endif // __LINUX__ || __sgi
 

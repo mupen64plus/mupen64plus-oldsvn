@@ -1,7 +1,7 @@
 #ifndef GLN64_H
 #define GLN64_H
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 #include <windows.h>
 //#include <commctrl.h>
 #else
@@ -15,13 +15,13 @@
 //#define DEBUG
 //#define RSPTHREAD
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 extern HWND         hWnd;
 //extern HWND           hFullscreen;
 extern HWND         hStatusBar;
 extern HWND         hToolBar;
 extern HINSTANCE    hInstance;
-#endif // !__LINUX__
+#endif // !__LINUX__ && !__sgi
 
 extern char         pluginName[];
 

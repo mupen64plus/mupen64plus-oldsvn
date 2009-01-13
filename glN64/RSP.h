@@ -1,7 +1,7 @@
 #ifndef RSP_H
 #define RSP_H
 
-#ifndef __LINUX__
+#if !defined(__LINUX__) && !defined(__sgi)
 # include <windows.h>
 #else
 # include "../main/winlnxdefs.h"
@@ -23,7 +23,7 @@
 typedef struct
 {
 #ifdef RSPTHREAD
-# ifndef __LINUX__
+# if !defined(__LINUX__) && !defined(__sgi)
     HANDLE thread;
     // Events for thread messages, see defines at the top, or RSP_Thread
     HANDLE          threadMsg[6];
@@ -32,7 +32,7 @@ typedef struct
 # else
     SDL_Thread *thread;
     int        threadMsg[6];
-# endif // !__LINUX__
+# endif // !__LINUX__ && !__sgi
 #endif // RSPTHREAD
 
     u32 PC[18], PCi, busy, halt, close, DList, uc_start, uc_dstart, cmd, nextCmd, count;

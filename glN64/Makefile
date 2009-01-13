@@ -26,8 +26,13 @@ USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -D__LINUX__ -Wall
-LDFLAGS += $(GTHREAD_LIBS)
+ifneq ($(OS),IRIX)
+  CFLAGS += -fpic -DPIC -D__LINUX__ -Wall
+  LDFLAGS += $(GTHREAD_LIBS)
+else
+  CFLAGS += -LANG:anonymous_unions=ON
+  LDFLAGS += $(GTHREAD_LIBS) -shared
+endif
 
 ifeq ($(GUI), NONE)
   OBJECTS = Config_nogui.o
@@ -58,7 +63,6 @@ OBJECTS += glN64.o \
 	DepthBuffer.o \
 	CRC.o \
 	2xSAI.o \
-	NV_register_combiners.o \
 	texture_env.o \
 	texture_env_combine.o \
 	RDP.o \
@@ -73,6 +77,10 @@ OBJECTS += glN64.o \
 	F3DPD.o \
 	F3DDKR.o \
 	F3DWRUS.o
+
+ifneq ($(OS), IRIX)
+  OBJECTS += NV_register_combiners.o
+endif
 
 # build targets
 all: glN64.so
