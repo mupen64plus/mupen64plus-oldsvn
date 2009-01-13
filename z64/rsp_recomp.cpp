@@ -336,12 +336,12 @@ inline void rsp_execute_one(RSP_REGS & rsp, const UINT32 op)
                 {
                         case 0x12:      /* COP2 */
                         {
-        handle_vector_ops(rsp, op);
+        handle_vector_ops(op);
                                 break;
                         }
 
-                        case 0x32:      /* LWC2 */              handle_lwc2(rsp, op); break;
-                        case 0x3a:      /* SWC2 */              handle_swc2(rsp, op); break;
+                        case 0x32:      /* LWC2 */              handle_lwc2(op); break;
+                        case 0x3a:      /* SWC2 */              handle_swc2(op); break;
 
                         default:
                         {
@@ -445,10 +445,10 @@ static int run(RSP_REGS & rsp, gen_t * gen)
                                 {
                                         case 0x00:      /* MFC0 */
             if (RTREG)
-              RTVAL = get_cop0_reg(rsp, RDREG);
+              RTVAL = get_cop0_reg(RDREG);
             break;
                                         case 0x04:      /* MTC0 */
-            set_cop0_reg(rsp, RDREG, RTVAL);
+            set_cop0_reg(RDREG, RTVAL);
             if (rsp.inval_gen) {
               rsp.inval_gen = 0;
               sp_pc = ((bc.flags >>3) + 4)&0xffc;
@@ -526,13 +526,13 @@ static int run(RSP_REGS & rsp, gen_t * gen)
         switch (op >> 26)
         {
           case 0x12:    /* COP2 */
-            handle_vector_ops(rsp, op);
+            handle_vector_ops(op);
             break;
           case 0x32:    /* LWC2 */
-            handle_lwc2(rsp, op);
+            handle_lwc2(op);
             break;
           case 0x3a:    /* SWC2 */
-            handle_swc2(rsp, op);
+            handle_swc2(op);
             break;
         }
     }

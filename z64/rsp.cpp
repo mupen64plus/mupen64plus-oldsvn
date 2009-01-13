@@ -24,10 +24,10 @@
     Written by Ville Linde
 */
 
-// #include "Rsp_#1.1.h"
+#include "Rsp_#1.1.h"
 // #include "z64.h"
 #include "rsp.h"
-#include "rsp_opinfo.h"
+//#include "rsp_opinfo.h"
 #include <math.h>       // sqrt
 #include <assert.h>
 #include <string.h>
@@ -133,35 +133,71 @@ int rspcounts[512];
 #define VS2REG          ((op >> 16) & 0x1f)
 #define EL                      ((op >> 21) & 0xf)
 
-#define VREG_B(reg, offset)             rsp.v[(reg)].b[((offset)^1)]
-#define VREG_S(reg, offset)             rsp.v[(reg)].s[((offset))]
-#define VREG_L(reg, offset)             rsp.v[(reg)].l[((offset))]
+#define S_VREG_B(offset)            (((15 - (offset)) & 0x07) << 3)
+#define S_VREG_S(offset)            (((7 - (offset)) & 0x03) << 4)
+#define S_VREG_L(offset)            (((3 - (offset)) & 0x01) << 5)
+  
+#define M_VREG_B(offset)            ((UINT64)0x00FF << S_VREG_B(offset))
+#define M_VREG_S(offset)            ((UINT64)0x0000FFFFul << S_VREG_S(offset))
+#define M_VREG_L(offset)            ((UINT64)0x00000000FFFFFFFFull << S_VREG_L(offset))
+  
+#define R_VREG_B(reg, offset)       ((rsp.v[(reg)].d[(15 - (offset)) >> 3] >> S_VREG_B(offset)) & 0x00FF)
+#define R_VREG_S(reg, offset)       (INT16)((rsp.v[(reg)].d[(7 - (offset)) >> 2] >> S_VREG_S(offset)) & 0x0000FFFFul)
+#define R_VREG_L(reg, offset)       ((rsp.v[(reg)].d[(3 - (offset)) >> 1] >> S_VREG_L(offset)) & 0x00000000FFFFFFFFull)
+  
+#define W_VREG_B(reg, offset, val)  (rsp.v[(reg)].d[(15 - (offset)) >> 3] = (rsp.v[(reg)].d[(15 - (offset)) >> 3] & ~M_VREG_B(offset)) | (M_VREG_B(offset) & ((UINT64)(val) << S_VREG_B(offset))))
+#define W_VREG_S(reg, offset, val)  (rsp.v[(reg)].d[(7 - (offset)) >> 2] = (rsp.v[(reg)].d[(7 - (offset)) >> 2] & ~M_VREG_S(offset)) | (M_VREG_S(offset) & ((UINT64)(val) << S_VREG_S(offset))))
+#define W_VREG_L(reg, offset, val)  (rsp.v[(reg)].d[(3 - (offset)) >> 1] = (rsp.v[(reg)].d[(3 - (offset)) >> 1] & ~M_VREG_L(offset)) | (M_VREG_L(offset) & ((UINT64)(val) << S_VREG_L(offset))))
 
-//#define VEC_EL_1(x,z)  (vector_elements_1[(x)][(z)])
+
 #define VEC_EL_1(x,z)    (z)
 #define VEC_EL_2(x,z)           (vector_elements_2[(x)][(z)])
 
 #define ACCUM(x)                rsp.accum[((x))].q
-#define ACCUM_H(x)              rsp.accum[((x))].w[3]
-#define ACCUM_M(x)              rsp.accum[((x))].w[2]
-#define ACCUM_L(x)              rsp.accum[((x))].w[1]
+
+#define S_ACCUM_H               (3 << 4)
+#define S_ACCUM_M               (2 << 4)
+#define S_ACCUM_L               (1 << 4)
+  
+#define M_ACCUM_H               (((INT64)0x0000FFFF) << S_ACCUM_H)
+#define M_ACCUM_M               (((INT64)0x0000FFFF) << S_ACCUM_M)
+#define M_ACCUM_L               (((INT64)0x0000FFFF) << S_ACCUM_L)
+  
+#define R_ACCUM_H(x)            ((INT16)((ACCUM(x) >> S_ACCUM_H) & 0x00FFFF))
+#define R_ACCUM_M(x)            ((INT16)((ACCUM(x) >> S_ACCUM_M) & 0x00FFFF))
+#define R_ACCUM_L(x)            ((INT16)((ACCUM(x) >> S_ACCUM_L) & 0x00FFFF))
+  
+#define W_ACCUM_H(x, y)         (ACCUM(x) = (ACCUM(x) & ~M_ACCUM_H) | (M_ACCUM_H & ((INT64)(y) << S_ACCUM_H)))
+#define W_ACCUM_M(x, y)         (ACCUM(x) = (ACCUM(x) & ~M_ACCUM_M) | (M_ACCUM_M & ((INT64)(y) << S_ACCUM_M)))
+#define W_ACCUM_L(x, y)         (ACCUM(x) = (ACCUM(x) & ~M_ACCUM_L) | (M_ACCUM_L & ((INT64)(y) << S_ACCUM_L)))
 
 
-// SSE required alignement
-RSP_REGS rsp __attribute__((aligned(16)));
+
+RSP_REGS rsp;
 static int rsp_icount;
+// RSP Interface
+
+#define rsp_sp_status (*(UINT32*)z64_rspinfo.SP_STATUS_REG)
+#define sp_mem_addr (*(UINT32*)z64_rspinfo.SP_MEM_ADDR_REG)
+#define sp_dram_addr (*(UINT32*)z64_rspinfo.SP_DRAM_ADDR_REG)
+#define sp_semaphore (*(UINT32*)z64_rspinfo.SP_SEMAPHORE_REG)
+
+#define sp_dma_rlength (*(UINT32*)z64_rspinfo.SP_RD_LEN_REG)
+#define sp_dma_wlength (*(UINT32*)z64_rspinfo.SP_WR_LEN_REG)
+
+INT32 sp_dma_length;
 
 /*****************************************************************************/
 
-UINT32 get_cop0_reg(RSP_REGS & rsp, int reg)
+UINT32 get_cop0_reg(int reg)
 {
         if (reg >= 0 && reg < 8)
         {
-                return sp_read_reg(rsp, reg);
+                return sp_read_reg(reg);
         }
         else if (reg >= 8 && reg < 16)
         {
-                return n64_dp_reg_r(rsp, reg - 8, 0x00000000);
+                return n64_dp_reg_r(reg - 8, 0x00000000);
         }
         else
         {
@@ -169,15 +205,15 @@ UINT32 get_cop0_reg(RSP_REGS & rsp, int reg)
         }
 }
 
-void set_cop0_reg(RSP_REGS & rsp, int reg, UINT32 data)
+void set_cop0_reg(int reg, UINT32 data)
 {
         if (reg >= 0 && reg < 8)
         {
-                sp_write_reg(rsp, reg, data);
+                sp_write_reg(reg, data);
         }
         else if (reg >= 8 && reg < 16)
         {
-                n64_dp_reg_w(rsp, reg - 8, data, 0x00000000);
+                n64_dp_reg_w(reg - 8, data, 0x00000000);
         }
         else
         {
@@ -281,7 +317,8 @@ void rsp_init(RSP_INFO info)
   
         sp_pc = 0; //0x4001000;
         rsp.nextpc = ~0;
-  rsp_invalidate(0, 0x1000);
+  //rsp_invalidate(0, 0x1000);
+        rsp.step_count=0;
 }
 
 static void rsp_exit(void)
@@ -336,7 +373,7 @@ void rsp_reset(void)
         rsp.nextpc = ~0;
 }
 
-void handle_lwc2(RSP_REGS & rsp, UINT32 op)
+void handle_lwc2(UINT32 op)
 {
         int i, end;
         UINT32 ea;
@@ -438,11 +475,6 @@ void handle_lwc2(RSP_REGS & rsp, UINT32 op)
 
                         end = index + (16 - (ea & 0xf));
                         if (end > 16) end = 16;
-//       if (end != 16)
-//         printf("LQV %d\n", end-index);
-      //assert(end == 16);
-      assert(end-index >= 8);
-
                         for (i=index; i < end; i++)
                         {
                                 VREG_B(dest, i) = READ8(ea);
@@ -533,14 +565,14 @@ void handle_lwc2(RSP_REGS & rsp, UINT32 op)
                         //
                         // Loads a byte as the bits 14-7 of upper or lower quad, with 4-byte stride
 
-                        fatalerror("RSP: LFV\n");
+//                      fatalerror("RSP: LFV\n");
 
-                        if (index & 0x7)        fatalerror("RSP: LFV: index = %d at %08X\n", index, rsp.ppc);
+                        //if (index & 0x7)      fatalerror("RSP: LFV: index = %d at %08X\n", index, rsp.ppc);
 
                         ea = (base) ? rsp.r[base] + (offset * 16) : (offset * 16);
 
                         // not sure what happens if 16-byte boundary is crossed...
-                        if ((ea & 0xf) > 0)     fatalerror("RSP: LFV: 16-byte boundary crossing at %08X, recheck this!\n", rsp.ppc);
+                        //if ((ea & 0xf) > 0)   fatalerror("RSP: LFV: 16-byte boundary crossing at %08X, recheck this!\n", rsp.ppc);
 
                         end = (index >> 1) + 4;
 
@@ -564,7 +596,7 @@ void handle_lwc2(RSP_REGS & rsp, UINT32 op)
                         ea = (base) ? rsp.r[base] + (offset * 16) : (offset * 16);
 
                         // not sure what happens if 16-byte boundary is crossed...
-                        if ((ea & 0xf) > 0) fatalerror("RSP: LWV: 16-byte boundary crossing at %08X, recheck this!\n", rsp.ppc);
+                        //if ((ea & 0xf) > 0) fatalerror("RSP: LWV: 16-byte boundary crossing at %08X, recheck this!\n", rsp.ppc);
 
                         end = (16 - index) + 16;
 
@@ -594,7 +626,7 @@ void handle_lwc2(RSP_REGS & rsp, UINT32 op)
 
                         element = 7 - (index >> 1);
 
-                        if (index & 1)  fatalerror("RSP: LTV: index = %d\n", index);
+                        //if (index & 1)        fatalerror("RSP: LTV: index = %d\n", index);
 
                         ea = (base) ? rsp.r[base] + (offset * 16) : (offset * 16);
 
@@ -618,7 +650,7 @@ void handle_lwc2(RSP_REGS & rsp, UINT32 op)
         }
 }
 
-void handle_swc2(RSP_REGS & rsp, UINT32 op)
+void handle_swc2(UINT32 op)
 {
         int i, end;
         int eaoffset;
@@ -894,11 +926,11 @@ void handle_swc2(RSP_REGS & rsp, UINT32 op)
                                 ve = 32;
 
                         element = 8 - (index >> 1);
-                        if (index & 0x1)        fatalerror("RSP: STV: index = %d at %08X\n", index, rsp.ppc);
+                        //if (index & 0x1)      fatalerror("RSP: STV: index = %d at %08X\n", index, rsp.ppc);
 
                         ea = (base) ? rsp.r[base] + (offset * 16) : (offset * 16);
 
-                        if (ea & 0x1)           fatalerror("RSP: STV: ea = %08X at %08X\n", ea, rsp.ppc);
+                        //if (ea & 0x1)         fatalerror("RSP: STV: ea = %08X at %08X\n", ea, rsp.ppc);
 
                         eaoffset = (ea & 0xf) + (element * 2);
                         ea &= ~0xf;
@@ -1019,7 +1051,7 @@ INLINE UINT16 SATURATE_ACCUM1(int accum, UINT16 negative, UINT16 positive)
         } while(0)
 
 
-void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
+void handle_vector_ops(UINT32 op)
 {
         int i;
         INT16 vres[8];
@@ -1396,7 +1428,7 @@ void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
                                 int sel = VEC_EL_2(EL, del);
                                 INT32 s1 = (UINT16)VREG_S(VS1REG, del);         // not sign-extended
                                 INT32 s2 = (INT32)(INT16)VREG_S(VS2REG, sel);
-        ACCUM(del) += INT64(s1*s2)<<16;
+        ACCUM(del) += (INT64)(s1*s2)<<16;
       }
 
                         for (i=0; i < 8; i++)
@@ -2255,9 +2287,8 @@ void handle_vector_ops(RSP_REGS & rsp, UINT32 op)
                         // ------------------------------------------------------
                         //
                         // Calculates reciprocal
-
                         int del = (VS1REG & 7);
-                        int sel = VEC_EL_2(EL, del);
+                        int sel = EL&7; //VEC_EL_2(EL, del);
                         INT32 rec;
 
                         rec = (INT16)(VREG_S(VS2REG, sel));
@@ -2525,29 +2556,19 @@ int rsp_execute(int cycles)
 {
         UINT32 op;
 
-        rsp_icount = cycles;
+        rsp_icount=1; //cycles;
+
+        UINT32 ExecutedCycles=0;
+        UINT32 BreakMarker=0;
+        UINT32 WDCHackFlag1=0;
+        UINT32 WDCHackFlag2=0;
 
         sp_pc = /*0x4001000 | */(sp_pc & 0xfff);
-
-//   static char oldimem[0x1000];
-//   if (memcmp(oldimem, rsp_imem, 0x1000)) {
-//     rsp_invalidate(0, 0x1000); // TODO check imem has changed
-//     memcpy(oldimem, rsp_imem, 0x1000);
-//   }
-
-#if 1
-  //if (memcmp(((char *)rdram) +8*1024*1024-5, "ziggy", 5))
-  {
-    rsp_invalidate(0, 0x1000);
-    rsp.inval_gen = 0;
-    while(/*(GENTRACE("pc %x\n", sp_pc), 1) && */rsp_jump(sp_pc) != 1);
-    //   {
-    //     rsp.inval_gen = 0;
-    //   }
-    return cycles;
-  }
-#endif
-
+if( rsp_sp_status & (SP_STATUS_HALT|SP_STATUS_BROKE))
+{
+        printf("Quit due to SP halt/broke on start");
+        rsp_icount = 0;
+}
 
 #ifdef RSPTIMING
   uint64_t lasttime;
@@ -2557,7 +2578,6 @@ int rsp_execute(int cycles)
         while (rsp_icount > 0)
         {
                 rsp.ppc = sp_pc;
-                //CALL_MAME_DEBUG;
 
 #ifdef RSPTIMING
     uint64_t time = lasttime;
@@ -2569,36 +2589,13 @@ int rsp_execute(int cycles)
 #endif
 
                 op = ROPCODE(sp_pc);
-    //fprintf(stderr, "op %8x (%2x) pc %8x\n", op, op>>26, sp_pc);
-#ifndef GENTRACE
+#ifdef GENTRACE
     char s[128];
     rsp_dasm_one(s, sp_pc, op);
     GENTRACE("%2x %3x\t%s\n", ((UINT8*)rsp_dmem)[0x1934], sp_pc, s);
 #endif
-#if 0
-//     static int count;
-//     count++;
-//     if ((count&0xffff) == 0)
-//       printf("%d\n", count);
-    //if (count > 8388608)
-    //if (got_unimp)
-    {
-      char s[128];
-      rsp_dasm_one(s, sp_pc&0xfff, op);
-      fprintf(stderr, "%3x\t%s\n", sp_pc&0xfff, s);
-      int i;
-      for (i=0; i<32; i++)
-        fprintf(stderr, "r%d=%x ", i, rsp.r[i]);
-      fprintf(stderr, "f0=%x f1=%x f2=%x f3=%x\n", rsp.flag[0],
-              rsp.flag[1],rsp.flag[2],rsp.flag[3]);
-    }
-//     static int br;
-//     if (got_unimp && !br) {
-//       br = 1;
-//       rsp_icount = 0;
-//     }
-#endif
-                if (rsp.nextpc != ~0)
+
+                if (rsp.nextpc != ~0)///DELAY SLOT USAGE
                 {
                         sp_pc = /*0x4001000 | */(rsp.nextpc & 0xfff); //rsp.nextpc;
                         rsp.nextpc = ~0;
@@ -2631,6 +2628,8 @@ int rsp_execute(int cycles)
             }
                                                 //sp_set_status(0x3);
                                                 rsp_icount = 0;
+
+                                        BreakMarker=1;
 
 #if LOG_INSTRUCTION_EXECUTION
                                                 fprintf(exec_output, "\n---------- break ----------\n\n");
@@ -2686,8 +2685,8 @@ int rsp_execute(int cycles)
                         {
                                 switch ((op >> 21) & 0x1f)
                                 {
-                                        case 0x00:      /* MFC0 */              if (RTREG) RTVAL = get_cop0_reg(rsp, RDREG); break;
-                                        case 0x04:      /* MTC0 */              set_cop0_reg(rsp, RDREG, RTVAL); break;
+                                        case 0x00:      /* MFC0 */              if (RTREG) RTVAL = get_cop0_reg(RDREG); break;
+                                        case 0x04:      /* MTC0 */              set_cop0_reg(RDREG, RTVAL); break;
                                         default:
             printf("unimplemented cop0 %x (%x)\n", (op >> 21) & 0x1f, op);
             break;
@@ -2721,10 +2720,21 @@ int rsp_execute(int cycles)
                                                 // ------------------------------------------------
                                                 //
 
-            // VP to sign extend or to not sign extend ?
-                                                //if (RTREG) RTVAL = (INT16)rsp.flag[RDREG];
-                                                if (RTREG) RTVAL = rsp.flag[RDREG];
-                                                break;
+                          if (RTREG)
+                          {
+                              if (RDREG == 2)
+                              {
+                                  // Anciliary clipping flags
+                                  RTVAL = rsp.flag[RDREG] & 0x00ff;
+                              }
+                              else
+                              {
+                                  // All other flags are 16 bits but sign-extended at retrieval
+                                  RTVAL = (UINT32)rsp.flag[RDREG] | ( ( rsp.flag[RDREG] & 0x8000 ) ? 0xffff0000 : 0 );
+                              }
+                          }
+                          break;
+
                                         }
                                         case 0x04:      /* MTC2 */
                                         {
@@ -2754,7 +2764,7 @@ int rsp_execute(int cycles)
                                         case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15: case 0x16: case 0x17:
                                         case 0x18: case 0x19: case 0x1a: case 0x1b: case 0x1c: case 0x1d: case 0x1e: case 0x1f:
                                         {
-                                                handle_vector_ops(rsp, op);
+                                                handle_vector_ops(op);
                                                 break;
                                         }
 
@@ -2771,8 +2781,8 @@ int rsp_execute(int cycles)
                         case 0x28:      /* SB */                WRITE8(RSVAL + SIMM16, RTVAL); break;
                         case 0x29:      /* SH */                WRITE16(RSVAL + SIMM16, RTVAL); break;
                         case 0x2b:      /* SW */                WRITE32(RSVAL + SIMM16, RTVAL); break;
-                        case 0x32:      /* LWC2 */              handle_lwc2(rsp, op); break;
-                        case 0x3a:      /* SWC2 */              handle_swc2(rsp, op); break;
+                        case 0x32:      /* LWC2 */              handle_lwc2(op); break;
+                        case 0x3a:      /* SWC2 */              handle_swc2(op); break;
 
                         default:
                         {
@@ -2826,13 +2836,54 @@ int rsp_execute(int cycles)
 
                 }
 #endif
+//              --rsp_icount;
 
-                --rsp_icount;
-        }
+ExecutedCycles++;
+         if( rsp_sp_status & SP_STATUS_SSTEP )
+          {
+              if( rsp.step_count )
+              {
+                  rsp.step_count--;
+              }
+              else
+              {
+                  rsp_sp_status |= SP_STATUS_BROKE;
+              }
+          }
 
-  sp_pc -= 4;
+if( rsp_sp_status & (SP_STATUS_HALT|SP_STATUS_BROKE))
+{
+                rsp_icount = 0;
 
-        return cycles - rsp_icount;
+                if(BreakMarker==0)
+                printf("Quit due to SP halt/broke set by MTC0\n");
+}
+
+///WDC&SR64 hack:VERSION3:1.8x -2x FASTER & safer
+if((WDCHackFlag1==0)&&(rsp.ppc>0x137)&&(rsp.ppc<0x14D))
+WDCHackFlag1=ExecutedCycles;
+if ((WDCHackFlag1!=0)&&((rsp.ppc<=0x137)||(rsp.ppc>=0x14D)))
+WDCHackFlag1=0;
+if ((WDCHackFlag1!=0)&&((ExecutedCycles-WDCHackFlag1)>=0x20)&&(rsp.ppc>0x137)&&(rsp.ppc<0x14D)) 
+{
+//      printf("WDC hack quit 1\n");
+        rsp_icount=0;//32 cycles should be enough
+}
+if((WDCHackFlag2==0)&&(rsp.ppc>0xFCB)&&(rsp.ppc<0xFD5))
+WDCHackFlag2=ExecutedCycles;
+if ((WDCHackFlag2!=0)&&((rsp.ppc<=0xFCB)||(rsp.ppc>=0xFD5)))
+WDCHackFlag2=0;
+if ((WDCHackFlag2!=0)&&((ExecutedCycles-WDCHackFlag2)>=0x20)&&(rsp.ppc>0xFCB)&&(rsp.ppc<0xFD5)) 
+{
+//      printf("WDC hack quit 2\n");
+        rsp_icount=0;//32 cycles should be enough
+}
+
+
+}
+//sp_pc -= 4;
+
+return ExecutedCycles;
 }
 
 /*****************************************************************************/
@@ -2853,136 +2904,86 @@ static void rsp_set_context(void *src)
 }
 
 
-// RSP Interface
 
-#define rsp_sp_status (*(UINT32*)z64_rspinfo.SP_STATUS_REG)
-//static UINT32 rsp_sp_status = 0;
-//static UINT32 cpu_sp_status = SP_STATUS_HALT;
-#define sp_mem_addr (*(UINT32*)z64_rspinfo.SP_MEM_ADDR_REG)
-//static UINT32 sp_mem_addr;
-#define sp_dram_addr (*(UINT32*)z64_rspinfo.SP_DRAM_ADDR_REG)
-//static UINT32 sp_dram_addr;
-
-#define sp_semaphore (*(UINT32*)z64_rspinfo.SP_SEMAPHORE_REG)
-//static UINT32 sp_semaphore;
-
-#define sp_dma_rlength (*(UINT32*)z64_rspinfo.SP_RD_LEN_REG)
-#define sp_dma_wlength (*(UINT32*)z64_rspinfo.SP_WR_LEN_REG)
 
 static void sp_dma(int direction)
 {
         UINT8 *src, *dst;
         int i, j;
-        int cpu = 1;
-
   int length;
   int count;
   int skip;
 
-  // VP is it supposed to be signed or not ?
-  // more probably signed so that skip can be negative (allowing writing backward)
-  INT32 l = direction? sp_dma_wlength : sp_dma_rlength;
+
+  INT32 l = sp_dma_length;
+
+       if (direction)
+       {
+               length = ((l & 0xfff) | 3) + 1;
+       }
+       else
+       {
+               length = ((l & 0xfff) | 7) + 1;
+       }
   
-        length = ((l & 0xfff) | 7) + 1;
-        skip = (l >> 20) + length;
-        count = ((l >> 12) & 0xff)  + 1;
+       skip = (l >> 20) + length;
+       count = ((l >> 12) & 0xff) + 1;
 
-  if (length == 0x1000) return;
-//   if (length == 0)
-//      {
-//              return;
-//      }
+       if (direction == 0)             // RDRAM -> I/DMEM
+       {
+       //UINT32 src_address = sp_dram_addr & ~7;
+       //UINT32 dst_address = (sp_mem_addr & 0x1000) ? 0x4001000 : 0x4000000;
+        src = (UINT8*)&rdram[(sp_dram_addr&~7) / 4];
+        dst = (sp_mem_addr & 0x1000) ? (UINT8*)&rsp_imem[(sp_mem_addr & ~7 & 0xfff) / 4] : (UINT8*)&rsp_dmem[(sp_mem_addr & ~7 &0xfff) / 4];
+       ///cpuintrf_push_context(0);
+#define BYTE8_XOR_BE(a) ((a)^7)// JFG, Ocarina of Time
 
-//      length++;
-
-        //if ((length & 3) != 0)
-        {
-                //fatalerror("sp_dma (%s): sp_dma_length unaligned %08X\n", cpu ? "RSP" : "R4300i", sp_dma_length);
-                //length = (length + 3) & ~3;
-
-                //length &= ~3;
-        }
-
-//      if (sp_mem_addr & 0x3)
-//      {
-//     got_unimp = 1;
-//              fatalerror("sp_dma (%s): sp_mem_addr unaligned: %08X\n", cpu ? "RSP" : "R4300i", sp_mem_addr);
-//      }
-//      if (sp_dram_addr & 0x3)
-//      {
-//     got_unimp = 1;
-//              fatalerror("sp_dma (%s): sp_dram_addr unaligned: %08X\n", cpu ? "RSP" : "R4300i", sp_dram_addr);
-
-//              // Diddy Kong Racing does unaligned DMA?
-//              //sp_dram_addr &= ~0x3;
-//              //sp_dram_addr = (sp_dram_addr + 3) & ~0x3;
-//      }
-
-//      if (count > 0)
-//      {
-//              fatalerror("sp_dma: dma_count = %d\n", count);
-//      }
-//      if (skip > 0)
-//      {
-//              fatalerror("sp_dma: dma_skip = %d\n", skip);
-//      }
-
-        if ((sp_mem_addr & 0xfff) + (count*length) > 0x1000)
-        {
-                fatalerror("sp_dma: dma out of memory area: %08X, count %d, length %08X\n", sp_mem_addr, count, length);
-        }
-
-        if (direction == 0)             // RDRAM -> I/DMEM
-        {
-                src = (UINT8*)&rdram[(sp_dram_addr&~7) / 4];
-                dst = (sp_mem_addr & 0x1000) ? (UINT8*)&rsp_imem[(sp_mem_addr & 0xff8) / 4] : (UINT8*)&rsp_dmem[(sp_mem_addr & 0xff8) / 4];
-
-                //fprintf(stderr, "sp_dma: %08X to %08X, length %08X skip %x count %x\n", sp_dram_addr, sp_mem_addr, length, skip, count);
-
-    for (j=0; j<count; j++) {
-      for (i=0; i < length; i++)
-      {
-        dst[BYTE4_XOR_BE(i + j*length)] = src[BYTE4_XOR_BE(i + j*skip)];
-      }
-    }
-
-    if (sp_mem_addr & 0x1000)
-      rsp_invalidate((sp_mem_addr & 0xfff), count*length);
-    
-    // TODO check this
-//     sp_mem_addr += length*count;
-//     sp_dram_addr += skip*count;
-
-                *z64_rspinfo.SP_DMA_BUSY_REG = 0;
-    *z64_rspinfo.SP_STATUS_REG  &= ~SP_STATUS_DMABUSY;
-  }
-        else                                    // I/DMEM -> RDRAM
-        {
-                src = (sp_mem_addr & 0x1000) ? (UINT8*)&rsp_imem[(sp_mem_addr & 0xff8) / 4] : (UINT8*)&rsp_dmem[(sp_mem_addr & 0xff8) / 4];
-                dst = (UINT8*)&rdram[(sp_dram_addr&~7) / 4];
-
-    //GENTRACE("sp_dma: %08X to %08X, length %08X skip %x count %x\n", sp_mem_addr, sp_dram_addr, length, skip, count);
-
-    for (j=0; j<count; j++)
-      for (i=0; i < length; i++)
-      {
-        dst[BYTE4_XOR_BE(i + j*skip)] = src[BYTE4_XOR_BE(i + j*length)];
-      }
-
-    // TODO check this
-//     sp_mem_addr += length*count;
-//     sp_dram_addr += skip*count;
-
+       for (j=0; j < count; j++)
+       {
+               for (i=0; i < length; i++)
+               {
+                       ///UINT8 b = program_read_byte_64be(src_address + i + (j*skip));
+                       ///program_write_byte_64be(dst_address + (((sp_mem_addr & ~7) + i + (j*length)) & 0xfff), b);
+                       dst[BYTE8_XOR_BE((i + j*length)&0xfff)] = src[BYTE8_XOR_BE(i + j*skip)];
+                }
+       }
+                
+      ///cpuintrf_pop_context();
     *z64_rspinfo.SP_DMA_BUSY_REG = 0;
     *z64_rspinfo.SP_STATUS_REG  &= ~SP_STATUS_DMABUSY;
-        }
+       }
+       else                                    // I/DMEM -> RDRAM
+       {
+       //UINT32 dst_address = sp_dram_addr & ~7;
+       //UINT32 src_address = (sp_mem_addr & 0x1000) ? 0x4001000 : 0x4000000;
+
+        dst = (UINT8*)&rdram[(sp_dram_addr&~7) / 4];
+        src = (sp_mem_addr & 0x1000) ? (UINT8*)&rsp_imem[(sp_mem_addr & ~7 & 0xfff) / 4] : (UINT8*)&rsp_dmem[(sp_mem_addr & ~7 &0xfff) / 4];
+       ///cpuintrf_push_context(0);
+
+       for (j=0; j < count; j++)
+       {
+               for (i=0; i < length; i++)
+               {
+                       ///UINT8 b = program_read_byte_64be(src_address + (((sp_mem_addr & ~7) + i + (j*length)) & 0xfff));
+                       ///program_write_byte_64be(dst_address + i + (j*skip), b);
+        dst[BYTE8_XOR_BE(i + j*skip)] = src[BYTE8_XOR_BE((+i + j*length)&0xfff)];
+                           }
+       }
+
+       ///cpuintrf_pop_context();
+    *z64_rspinfo.SP_DMA_BUSY_REG = 0;
+    *z64_rspinfo.SP_STATUS_REG  &= ~SP_STATUS_DMABUSY;
+       }
+
+
 }
 
 
 
 
 
-UINT32 n64_sp_reg_r(RSP_REGS & rsp, UINT32 offset, UINT32 dummy)
+UINT32 n64_sp_reg_r(UINT32 offset, UINT32 dummy)
 {
         switch (offset)
         {
@@ -3015,8 +3016,10 @@ UINT32 n64_sp_reg_r(RSP_REGS & rsp, UINT32 offset, UINT32 dummy)
         return 0;
 }
 
-UINT32 n64_sp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dummy)
+//UINT32 n64_sp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dummy)
+void n64_sp_reg_w(UINT32 offset, UINT32 data, UINT32 dummy)
 {
+        UINT32 InterruptPending=0;
         if ((offset & 0x10000) == 0)
         {
                 switch (offset & 0xffff)
@@ -3030,23 +3033,29 @@ UINT32 n64_sp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dummy)
                                 break;
 
                         case 0x08/4:            // SP_RD_LEN_REG
-                                sp_dma_rlength = data;
 //                              sp_dma_length = data & 0xfff;
 //                              sp_dma_count = (data >> 12) & 0xff;
 //                              sp_dma_skip = (data >> 20) & 0xfff;
+                                sp_dma_length=data;
                                 sp_dma(0);
                                 break;
 
                         case 0x0c/4:            // SP_WR_LEN_REG
-                                sp_dma_wlength = data;
 //                              sp_dma_length = data & 0xfff;
 //                              sp_dma_count = (data >> 12) & 0xff;
 //                              sp_dma_skip = (data >> 20) & 0xfff;
+                                sp_dma_length=data;
                                 sp_dma(1);
                                 break;
 
                         case 0x10/4:            // SP_STATUS_REG
                         {
+                                if((data&0x1)&&(data&0x2)) 
+                                fatalerror("Clear halt and set halt simultaneously\n");
+                                if((data&0x8)&&(data&0x10))
+                                fatalerror("Clear int and set int simultaneously\n");
+                                if((data&0x20)&&(data&0x40)) 
+                                fatalerror("Clear sstep and set sstep simultaneously\n");
                                 if (data & 0x00000001)          // clear halt
                                 {
           rsp_sp_status &= ~SP_STATUS_HALT;
@@ -3072,15 +3081,19 @@ UINT32 n64_sp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dummy)
                                 if (data & 0x00000008)          // clear interrupt
                                 {
           *z64_rspinfo.MI_INTR_REG &= ~R4300i_SP_Intr;
+///TEMPORARY COMMENTED FOR SPEED
+///               printf("sp_reg_w clear interrupt");
           //clear_rcp_interrupt(SP_INTERRUPT);
                                 }
                                 if (data & 0x00000010)          // set interrupt
                                 {
-          logerror("sp_reg_w set interrupt\n");
                                         //signal_rcp_interrupt(SP_INTERRUPT);
                                 }
                                 if (data & 0x00000020) rsp_sp_status &= ~SP_STATUS_SSTEP;               // clear single step
-                                if (data & 0x00000040) rsp_sp_status |= SP_STATUS_SSTEP;                // set single step
+                                if (data & 0x00000040) {
+                                        rsp_sp_status |= SP_STATUS_SSTEP;  // set single step
+                                        printf("RSP STATUS REG: SSTEP set\n");
+                                }
                                 if (data & 0x00000080) rsp_sp_status &= ~SP_STATUS_INTR_BREAK;  // clear interrupt on break
                                 if (data & 0x00000100) rsp_sp_status |= SP_STATUS_INTR_BREAK;   // set interrupt on break
                                 if (data & 0x00000200) rsp_sp_status &= ~SP_STATUS_SIGNAL0;             // clear signal 0
@@ -3099,6 +3112,13 @@ UINT32 n64_sp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dummy)
                                 if (data & 0x00400000) rsp_sp_status |= SP_STATUS_SIGNAL6;              // set signal 6
                                 if (data & 0x00800000) rsp_sp_status &= ~SP_STATUS_SIGNAL7;             // clear signal 7
                                 if (data & 0x01000000) rsp_sp_status |= SP_STATUS_SIGNAL7;              // set signal 7
+
+                                if(InterruptPending==1)
+                                {
+                                *z64_rspinfo.MI_INTR_REG |= 1;
+                                z64_rspinfo.CheckInterrupts();
+                                InterruptPending=0;
+                                }
                                 break;
                         }
 
@@ -3127,19 +3147,20 @@ UINT32 n64_sp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dummy)
         }
 }
 
-UINT32 sp_read_reg(RSP_REGS & rsp, UINT32 reg)
+UINT32 sp_read_reg(UINT32 reg)
 {
         switch (reg)
         {
                 //case 4:       return rsp_sp_status;
-                default:        return n64_sp_reg_r(rsp, reg, 0x00000000);
+                default:        return n64_sp_reg_r(reg, 0x00000000);
         }
 }
 
-void sp_write_reg(RSP_REGS & rsp, UINT32 reg, UINT32 data)
+
+void sp_write_reg(UINT32 reg, UINT32 data)
 {
         switch (reg)
         {
-                default:        n64_sp_reg_w(rsp, reg, data, 0x00000000); break;
+                default:        n64_sp_reg_w(reg, data, 0x00000000); break;
         }
 }

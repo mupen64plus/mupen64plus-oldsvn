@@ -1,5 +1,6 @@
+#ifndef _Z64_H_
+#define _Z64_H_
 #include <stdint.h>
-#include <SDL/SDL.h>
 
 #define DACRATE_NTSC    (48681812)
 #define DACRATE_PAL     (49656530)
@@ -55,11 +56,6 @@
 #endif
 
 
-
-
-extern SDL_Surface *sdl_Screen;
-extern int screen_width, screen_height;
-
 typedef uint64_t UINT64;
 typedef int64_t INT64;
 typedef uint32_t UINT32;
@@ -69,4 +65,5 @@ typedef int16_t INT16;
 typedef uint8_t UINT8;
 typedef int8_t INT8;
 typedef unsigned int offs_t;
+#endif
 

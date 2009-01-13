@@ -5,6 +5,8 @@
 #include "z64.h"
 #include <math.h>       // sqrt
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>    // memset
 
 #define INLINE inline
 #define fatalerror(s, ...) if (0) ; else { printf(s); exit(0); }
@@ -70,6 +72,8 @@ typedef struct
         UINT32 ppc;
         UINT32 nextpc;
 
+        UINT32 step_count;
+
         int inval_gen;
 
         RSP_INFO ext;
@@ -82,8 +86,8 @@ void rsp_reset(void);
 void rsp_init(RSP_INFO info);
 offs_t rsp_dasm_one(char *buffer, offs_t pc, UINT32 op);
 
-extern UINT32 sp_read_reg(RSP_REGS & rsp, UINT32 reg);
-extern void sp_write_reg(RSP_REGS & rsp, UINT32 reg, UINT32 data);
+extern UINT32 sp_read_reg(UINT32 reg);
+extern void sp_write_reg(UINT32 reg, UINT32 data);
 // extern READ32_HANDLER( n64_dp_reg_r );
 // extern WRITE32_HANDLER( n64_dp_reg_w );
 
@@ -114,10 +118,10 @@ extern void sp_write_reg(RSP_REGS & rsp, UINT32 reg, UINT32 data);
 #define _UIMM26(op)             (op & 0x03ffffff)
 
 
-#define _JUMP(pc) \
+/*#define _JUMP(pc) \
   if ((GENTRACE("_JUMP %x\n", rsp.nextpc), 1) && rsp_jump(rsp.nextpc)) return 1; \
   if (rsp.inval_gen || sp_pc != pc+8) return 0;
-
+*/
 
 #define CARRY_FLAG(x)                   ((rsp.flag[0] & (1 << ((x)))) ? 1 : 0)
 #define CLEAR_CARRY_FLAGS()             { rsp.flag[0] &= ~0xff; }
@@ -134,121 +138,115 @@ extern void sp_write_reg(RSP_REGS & rsp, UINT32 reg, UINT32 data);
 #define SET_ZERO_FLAG(x)                { rsp.flag[0] |= (1 << (8+(x))); }
 #define CLEAR_ZERO_FLAG(x)              { rsp.flag[0] &= ~(1 << (8+(x))); }
 
-#define rsp z64_rsp // to avoid namespace collision with other libs
+//#define rsp z64_rsp // to avoid namespace collision with other libs
 extern RSP_REGS rsp __attribute__((aligned(16)));
 
 
 //#define ROPCODE(pc)           cpu_readop32(pc)
-#define ROPCODE(pc) program_read_dword_32be(rsp, pc | 0x1000)
+#define ROPCODE(pc) program_read_dword_32be(pc | 0x1000)
 
-INLINE UINT8 program_read_byte_32be(RSP_REGS & rsp, UINT32 address)
+INLINE UINT8 program_read_byte_32be(UINT32 address)
 {
   return ((UINT8*)z64_rspinfo.DMEM)[(address&0x1fff)^3];
 }
 
-INLINE UINT16 program_read_word_32be(RSP_REGS & rsp, UINT32 address)
+INLINE UINT16 program_read_word_32be(UINT32 address)
 {
   return ((UINT16*)z64_rspinfo.DMEM)[((address&0x1fff)>>1)^1];
 }
 
-INLINE UINT32 program_read_dword_32be(RSP_REGS & rsp, UINT32 address)
+INLINE UINT32 program_read_dword_32be(UINT32 address)
 {
   return ((UINT32*)z64_rspinfo.DMEM)[(address&0x1fff)>>2];
 }
 
-INLINE void program_write_byte_32be(RSP_REGS & rsp, UINT32 address, UINT8 data)
+INLINE void program_write_byte_32be(UINT32 address, UINT8 data)
 {
   ((UINT8*)z64_rspinfo.DMEM)[(address&0x1fff)^3] = data;
 }
 
-INLINE void program_write_word_32be(RSP_REGS & rsp, UINT32 address, UINT16 data)
+INLINE void program_write_word_32be(UINT32 address, UINT16 data)
 {
   ((UINT16*)z64_rspinfo.DMEM)[((address&0x1fff)>>1)^1] = data;
 }
 
-INLINE void program_write_dword_32be(RSP_REGS & rsp, UINT32 address, UINT32 data)
+INLINE void program_write_dword_32be(UINT32 address, UINT32 data)
 {
   ((UINT32*)z64_rspinfo.DMEM)[(address&0x1fff)>>2] = data;
 }
 
-#define READ8(a) _READ8(rsp, a)
-INLINE UINT8 _READ8(RSP_REGS & rsp, UINT32 address)
+INLINE UINT8 READ8(UINT32 address)
 {
         address = 0x04000000 | (address & 0xfff);
-        return program_read_byte_32be(rsp, address);
+        return program_read_byte_32be(address);
 }
 
-#define READ16(a) _READ16(rsp, a)
-INLINE UINT16 _READ16(RSP_REGS & rsp, UINT32 address)
+INLINE UINT16 READ16(UINT32 address)
 {
         address = 0x04000000 | (address & 0xfff);
 
         if (address & 1)
         {
                 //osd_die("RSP: READ16: unaligned %08X at %08X\n", address, rsp.ppc);
-                return ((program_read_byte_32be(rsp, address+0) & 0xff) << 8) | (program_read_byte_32be(rsp, address+1) & 0xff);
+                return ((program_read_byte_32be(address+0) & 0xff) << 8) | (program_read_byte_32be(address+1) & 0xff);
         }
 
-        return program_read_word_32be(rsp, address);
+        return program_read_word_32be(address);
 }
 
-#define READ32(a) _READ32(rsp, a)
-INLINE UINT32 _READ32(RSP_REGS & rsp, UINT32 address)
+INLINE UINT32 READ32(UINT32 address)
 {
         address = 0x04000000 | (address & 0xfff);
 
         if (address & 3)
         {
     //fatalerror("RSP: READ32: unaligned %08X at %08X\n", address, rsp.ppc);
-                return ((program_read_byte_32be(rsp, address + 0) & 0xff) << 24) |
-                        ((program_read_byte_32be(rsp, address + 1) & 0xff) << 16) |
-                        ((program_read_byte_32be(rsp, address + 2) & 0xff) << 8) |
-                        ((program_read_byte_32be(rsp, address + 3) & 0xff) << 0);
+                return ((program_read_byte_32be(address + 0) & 0xff) << 24) |
+                        ((program_read_byte_32be(address + 1) & 0xff) << 16) |
+                        ((program_read_byte_32be(address + 2) & 0xff) << 8) |
+                        ((program_read_byte_32be(address + 3) & 0xff) << 0);
         }
 
-        return program_read_dword_32be(rsp, address);
+        return program_read_dword_32be(address);
 }
 
 
-#define WRITE8(a, d) _WRITE8(rsp, a, d)
-INLINE void _WRITE8(RSP_REGS & rsp, UINT32 address, UINT8 data)
+INLINE void WRITE8(UINT32 address, UINT8 data)
 {
         address = 0x04000000 | (address & 0xfff);
-        program_write_byte_32be(rsp, address, data);
+        program_write_byte_32be(address, data);
 }
 
-#define WRITE16(a, d) _WRITE16(rsp, a, d)
-INLINE void _WRITE16(RSP_REGS & rsp, UINT32 address, UINT16 data)
+INLINE void WRITE16(UINT32 address, UINT16 data)
 {
         address = 0x04000000 | (address & 0xfff);
 
         if (address & 1)
         {
                 //fatalerror("RSP: WRITE16: unaligned %08X, %04X at %08X\n", address, data, rsp.ppc);
-                program_write_byte_32be(rsp, address + 0, (data >> 8) & 0xff);
-                program_write_byte_32be(rsp, address + 1, (data >> 0) & 0xff);
+                program_write_byte_32be(address + 0, (data >> 8) & 0xff);
+                program_write_byte_32be(address + 1, (data >> 0) & 0xff);
                 return;
         }
 
-        program_write_word_32be(rsp, address, data);
+        program_write_word_32be(address, data);
 }
 
-#define WRITE32(a, d) _WRITE32(rsp, a, d)
-INLINE void _WRITE32(RSP_REGS & rsp, UINT32 address, UINT32 data)
+INLINE void WRITE32(UINT32 address, UINT32 data)
 {
         address = 0x04000000 | (address & 0xfff);
 
         if (address & 3)
         {
                 //fatalerror("RSP: WRITE32: unaligned %08X, %08X at %08X\n", address, data, rsp.ppc);
-                program_write_byte_32be(rsp, address + 0, (data >> 24) & 0xff);
-                program_write_byte_32be(rsp, address + 1, (data >> 16) & 0xff);
-                program_write_byte_32be(rsp, address + 2, (data >> 8) & 0xff);
-                program_write_byte_32be(rsp, address + 3, (data >> 0) & 0xff);
+                program_write_byte_32be(address + 0, (data >> 24) & 0xff);
+                program_write_byte_32be(address + 1, (data >> 16) & 0xff);
+                program_write_byte_32be(address + 2, (data >> 8) & 0xff);
+                program_write_byte_32be(address + 3, (data >> 0) & 0xff);
                 return;
         }
 
-        program_write_dword_32be(rsp, address, data);
+        program_write_dword_32be(address, data);
 }
 
 int rsp_jump(int pc);
@@ -283,13 +281,13 @@ void rsp_execute_one(UINT32 op);
 #define ACCUM_L(x)              rsp.accum[((x))].w[1]
 
 void unimplemented_opcode(UINT32 op);
-void handle_vector_ops(RSP_REGS & rsp, UINT32 op);
-UINT32 get_cop0_reg(RSP_REGS & rsp, int reg);
-void set_cop0_reg(RSP_REGS & rsp, int reg, UINT32 data);
-void handle_lwc2(RSP_REGS & rsp, UINT32 op);
-void handle_swc2(RSP_REGS & rsp, UINT32 op);
+void handle_vector_ops(UINT32 op);
+UINT32 get_cop0_reg(int reg);
+void set_cop0_reg(int reg, UINT32 data);
+void handle_lwc2(UINT32 op);
+void handle_swc2(UINT32 op);
 
-INLINE UINT32 n64_dp_reg_r(RSP_REGS & rsp, UINT32 offset, UINT32 dummy)
+INLINE UINT32 n64_dp_reg_r(UINT32 offset, UINT32 dummy)
 {
         switch (offset)
         {
@@ -315,7 +313,7 @@ INLINE UINT32 n64_dp_reg_r(RSP_REGS & rsp, UINT32 offset, UINT32 dummy)
 
         return 0;
 }
-INLINE void n64_dp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dummy)
+INLINE void n64_dp_reg_w(UINT32 offset, UINT32 data, UINT32 dummy)
 {
         switch (offset)
         {
@@ -327,6 +325,13 @@ INLINE void n64_dp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dumm
                 case 0x04/4:            // DP_END_REG
                         dp_end = data;
                         //rdp_process_list();
+                      if (dp_end<dp_start)//three lines for debugging
+                      {
+           printf("RDP End < RDP Start!");//happens in Stunt Racer with Ville Linde's sp_dma
+                      break;
+           }
+           if (dp_end==dp_start)
+           break;
                         if (z64_rspinfo.ProcessRdpList != NULL) { z64_rspinfo.ProcessRdpList(); }
                         break;
 
@@ -344,7 +349,6 @@ INLINE void n64_dp_reg_w(RSP_REGS & rsp, UINT32 offset, UINT32 data, UINT32 dumm
                         break;
         }
 }
-
 
 #define INTEL86
 #if defined(INTEL86) && defined __GNUC__ && __GNUC__ >= 2
@@ -382,9 +386,8 @@ inline uint64_t RDTSC() {
 #define RDTSC(n) n=0
 #endif
 
-
-#define GENTRACE
-#ifndef GENTRACE
+#ifdef GENTRACE
+#undef GENTRACE
 #include <stdarg.h>
 inline void GENTRACE(const char * s, ...) {
   va_list ap;
@@ -414,8 +417,6 @@ inline void GENTRACE(const char * s, ...) {
 #endif
 //#define GENTRACE printf
 //#define GENTRACE
-
-//#define RSPTIMING
 
 #ifdef RSPTIMING
 extern uint64_t rsptimings[512];

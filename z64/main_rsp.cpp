@@ -1,6 +1,5 @@
 #include "Rsp_#1.1.h"
 #include "rsp.h"
-#include "z64.h"
 
 __declspec(dllexport) void CloseDLL (void)
 {
@@ -50,6 +49,8 @@ static void dump()
 
 __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
 {
+//#define AUDIO_HLE_ALLOWED
+#ifdef AUDIO_HLE_ALLOWED
     DWORD TaskType = *(DWORD*)(z64_rspinfo.DMEM + 0xFC0);
 
 #if 0
@@ -84,7 +85,7 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
 // return Cycles;
 //   }
 
-/*  if (TaskType == 2) {
+if (TaskType == 2) {
       if (z64_rspinfo.ProcessAList != NULL) {
         z64_rspinfo.ProcessAList();
       }
@@ -95,11 +96,11 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
       }
       return Cycles;
     }  
-*/
-
-  rsp_execute(0x10000000);
-  
-  return Cycles;
+#endif
+if (z64_rspinfo.CheckInterrupts==NULL)
+printf("Emulator doesn't provide CheckInterrupts routine\n");
+  return rsp_execute(0x100000);
+//return Cycles;
 }
 
 __declspec(dllexport) void GetDllInfo ( PLUGIN_INFO * PluginInfo )
@@ -119,7 +120,7 @@ __declspec(dllexport) void InitiateRSP ( RSP_INFO Rsp_Info, DWORD * CycleCount)
 {
   printf("INITIATE RSP\n");
   rsp_init(Rsp_Info);
-  memset(rsp_dmem, 0, 0x2000);
+  memset(((UINT32*)z64_rspinfo.DMEM), 0, 0x2000);
   //*CycleCount = 0; //Causes segfault, doesn't seem to be used anyway
 }
 
