@@ -72,13 +72,13 @@ static int labels[256];
 
 static UINT32 prep_gen(int pc, UINT32 crc, int & len)
 {
-	UINT32 op;
+        UINT32 op;
   int br = 0;
 
   branches[nb_branches].start = pc;
 
-	while ( !br )
-	{
+        while ( !br )
+        {
     if (OPI(pc).visit == curvisit) {
       SETLABEL((pc)&0xfff);
       SETLABEL((pc+4)&0xfff);
@@ -87,62 +87,62 @@ static UINT32 prep_gen(int pc, UINT32 crc, int & len)
 
     OPI(pc).visit = curvisit;
     
-		op = ROPCODE(pc);
+                op = ROPCODE(pc);
     crc = ((crc<<1)|(crc>>31))^op^pc;
     pc = (pc+4)&0xfff;
     len++;
 
-		switch (op >> 26)
-		{
-			case 0x00:	/* SPECIAL */
-			{
-				switch (op & 0x3f)
-				{
-					case 0x08:	/* JR */
+                switch (op >> 26)
+                {
+                        case 0x00:      /* SPECIAL */
+                        {
+                                switch (op & 0x3f)
+                                {
+                                        case 0x08:      /* JR */
             br = 1;
             break;
-					case 0x09:	/* JALR */
+                                        case 0x09:      /* JALR */
             //br = 1;
             break;
-					case 0x0d:	/* BREAK */
+                                        case 0x0d:      /* BREAK */
             br = 1;
-						break;
-				}
-				break;
-			}
+                                                break;
+                                }
+                                break;
+                        }
 
-			case 0x01:	/* REGIMM */
-			{
-				switch (RTREG)
-				{
-					case 0x00:	/* BLTZ */
-					case 0x01:	/* BGEZ */
+                        case 0x01:      /* REGIMM */
+                        {
+                                switch (RTREG)
+                                {
+                                        case 0x00:      /* BLTZ */
+                                        case 0x01:      /* BGEZ */
             SETLABEL(REL(SIMM16));
             break;
-					case 0x11:	/* BGEZAL */
+                                        case 0x11:      /* BGEZAL */
             //br = 1;
             break;
-				}
-				break;
-			}
+                                }
+                                break;
+                        }
 
-			case 0x02:	/* J */
+                        case 0x02:      /* J */
         SETLABEL(ABS(UIMM26));
         br = 1;
         break;
-			case 0x04:	/* BEQ */
-			case 0x05:	/* BNE */
-			case 0x06:	/* BLEZ */
-			case 0x07:	/* BGTZ */
+                        case 0x04:      /* BEQ */
+                        case 0x05:      /* BNE */
+                        case 0x06:      /* BLEZ */
+                        case 0x07:      /* BGTZ */
         SETLABEL(REL(SIMM16));
         break;
-			case 0x03:	/* JAL */
+                        case 0x03:      /* JAL */
         //SETLABEL(ABS(UIMM26));
         //br = 1;
         break;
-		}
+                }
 
-	}
+        }
 
   branches[nb_branches++].end = pc;
   assert(nb_branches < sizeof(branches)/sizeof(branches[0]));
@@ -219,8 +219,8 @@ static void rsp_gen(int pc)
       else {
         int nop = 0;
         switch (info.op2) {
-					case RSP_SLL:
-					case RSP_SRL:
+                                        case RSP_SLL:
+                                        case RSP_SRL:
           case RSP_SRA:
             if (RDREG == RTREG && SHIFT == 0) nop = 1;
             break;
@@ -332,23 +332,23 @@ void rsp_invalidate(int begin, int len)
 
 inline void rsp_execute_one(RSP_REGS & rsp, const UINT32 op)
 {
-		switch (op >> 26)
-		{
-			case 0x12:	/* COP2 */
-			{
+                switch (op >> 26)
+                {
+                        case 0x12:      /* COP2 */
+                        {
         handle_vector_ops(rsp, op);
-				break;
-			}
+                                break;
+                        }
 
-			case 0x32:	/* LWC2 */		handle_lwc2(rsp, op); break;
-			case 0x3a:	/* SWC2 */		handle_swc2(rsp, op); break;
+                        case 0x32:      /* LWC2 */              handle_lwc2(rsp, op); break;
+                        case 0x3a:      /* SWC2 */              handle_swc2(rsp, op); break;
 
-			default:
-			{
-				unimplemented_opcode(op);
-				break;
-			}
-		}
+                        default:
+                        {
+                                unimplemented_opcode(op);
+                                break;
+                        }
+                }
 }
 
 static int cond;
@@ -394,14 +394,14 @@ static int run(RSP_REGS & rsp, gen_t * gen)
 #define _JUMP_REL(a) _JUMP_PC(((bc.flags >>3)+4+(a<<2))&0xffc)
 #define _JUMP_REL_L(a, l) _JUMP_PC_L(((bc.flags >>3)+4+(a<<2))&0xffc, l)
 
-      case RSP_SLL:		if (RDREG) RDVAL = (UINT32)RTVAL << SHIFT; break;
-      case RSP_SRL:		if (RDREG) RDVAL = (UINT32)RTVAL >> SHIFT; break;
-      case RSP_SRA:		if (RDREG) RDVAL = (INT32)RTVAL >> SHIFT; break;
-      case RSP_SLLV:		if (RDREG) RDVAL = (UINT32)RTVAL << (RSVAL & 0x1f); break;
-      case RSP_SRLV:		if (RDREG) RDVAL = (UINT32)RTVAL >> (RSVAL & 0x1f); break;
-      case RSP_SRAV:		if (RDREG) RDVAL = (INT32)RTVAL >> (RSVAL & 0x1f); break;
-      case RSP_JR:		_JUMP_PC(RSVAL); break;
-      case RSP_JALR:		_JUMP_PC_L(RSVAL, RDREG); break;
+      case RSP_SLL:             if (RDREG) RDVAL = (UINT32)RTVAL << SHIFT; break;
+      case RSP_SRL:             if (RDREG) RDVAL = (UINT32)RTVAL >> SHIFT; break;
+      case RSP_SRA:             if (RDREG) RDVAL = (INT32)RTVAL >> SHIFT; break;
+      case RSP_SLLV:            if (RDREG) RDVAL = (UINT32)RTVAL << (RSVAL & 0x1f); break;
+      case RSP_SRLV:            if (RDREG) RDVAL = (UINT32)RTVAL >> (RSVAL & 0x1f); break;
+      case RSP_SRAV:            if (RDREG) RDVAL = (INT32)RTVAL >> (RSVAL & 0x1f); break;
+      case RSP_JR:              _JUMP_PC(RSVAL); break;
+      case RSP_JALR:            _JUMP_PC_L(RSVAL, RDREG); break;
       case RSP_BREAK:
       {
         *z64_rspinfo.SP_STATUS_REG |= (SP_STATUS_HALT | SP_STATUS_BROKE );
@@ -411,43 +411,43 @@ static int run(RSP_REGS & rsp, gen_t * gen)
         }
         return 1;
       }
-      case RSP_ADD:		if (RDREG) RDVAL = (INT32)(RSVAL + RTVAL); break;
-      case RSP_ADDU:		if (RDREG) RDVAL = (INT32)(RSVAL + RTVAL); break;
-      case RSP_SUB:		if (RDREG) RDVAL = (INT32)(RSVAL - RTVAL); break;
-      case RSP_SUBU:		if (RDREG) RDVAL = (INT32)(RSVAL - RTVAL); break;
-      case RSP_AND:		if (RDREG) RDVAL = RSVAL & RTVAL; break;
-      case RSP_OR:		if (RDREG) RDVAL = RSVAL | RTVAL; break;
-      case RSP_XOR:		if (RDREG) RDVAL = RSVAL ^ RTVAL; break;
-      case RSP_NOR:		if (RDREG) RDVAL = ~(RSVAL | RTVAL); break;
-      case RSP_SLT:		if (RDREG) RDVAL = (INT32)RSVAL < (INT32)RTVAL; break;
-      case RSP_SLTU:		if (RDREG) RDVAL = (UINT32)RSVAL < (UINT32)RTVAL; break;
-      case RSP_BLTZ:		if ((INT32)(RSVAL) < 0) cond = 1; break;
-      case RSP_BGEZ:		if ((INT32)(RSVAL) >= 0) cond = 1; break;
-      case RSP_BGEZAL:	_LINK(31); if ((INT32)(RSVAL) >= 0) _JUMP_REL(SIMM16); break;
-			case RSP_J:			cond = 1; break;
-			case RSP_JAL:		_JUMP_PC_L(UIMM26<<2, 31); break;
-			case RSP_BEQ:		if (RSVAL == RTVAL) cond = 1; break;
-			case RSP_BNE:		if (RSVAL != RTVAL) cond = 1; break;
-			case RSP_BLEZ:		if ((INT32)RSVAL <= 0) cond = 1; break;
-			case RSP_BGTZ:		if ((INT32)RSVAL > 0) cond = 1; break;
-			case RSP_ADDI:		if (RTREG) RTVAL = (INT32)(RSVAL + SIMM16); break;
-			case RSP_ADDIU:		if (RTREG) RTVAL = (INT32)(RSVAL + SIMM16); break;
-			case RSP_SLTI:		if (RTREG) RTVAL = (INT32)(RSVAL) < ((INT32)SIMM16); break;
-			case RSP_SLTIU:		if (RTREG) RTVAL = (UINT32)(RSVAL) < (UINT32)((INT32)SIMM16); break;
-			case RSP_ANDI:		if (RTREG) RTVAL = RSVAL & UIMM16; break;
-			case RSP_ORI:		if (RTREG) RTVAL = RSVAL | UIMM16; break;
-			case RSP_XORI:		if (RTREG) RTVAL = RSVAL ^ UIMM16; break;
-			case RSP_LUI:		if (RTREG) RTVAL = UIMM16 << 16; break;
+      case RSP_ADD:             if (RDREG) RDVAL = (INT32)(RSVAL + RTVAL); break;
+      case RSP_ADDU:            if (RDREG) RDVAL = (INT32)(RSVAL + RTVAL); break;
+      case RSP_SUB:             if (RDREG) RDVAL = (INT32)(RSVAL - RTVAL); break;
+      case RSP_SUBU:            if (RDREG) RDVAL = (INT32)(RSVAL - RTVAL); break;
+      case RSP_AND:             if (RDREG) RDVAL = RSVAL & RTVAL; break;
+      case RSP_OR:              if (RDREG) RDVAL = RSVAL | RTVAL; break;
+      case RSP_XOR:             if (RDREG) RDVAL = RSVAL ^ RTVAL; break;
+      case RSP_NOR:             if (RDREG) RDVAL = ~(RSVAL | RTVAL); break;
+      case RSP_SLT:             if (RDREG) RDVAL = (INT32)RSVAL < (INT32)RTVAL; break;
+      case RSP_SLTU:            if (RDREG) RDVAL = (UINT32)RSVAL < (UINT32)RTVAL; break;
+      case RSP_BLTZ:            if ((INT32)(RSVAL) < 0) cond = 1; break;
+      case RSP_BGEZ:            if ((INT32)(RSVAL) >= 0) cond = 1; break;
+      case RSP_BGEZAL:  _LINK(31); if ((INT32)(RSVAL) >= 0) _JUMP_REL(SIMM16); break;
+                        case RSP_J:                     cond = 1; break;
+                        case RSP_JAL:           _JUMP_PC_L(UIMM26<<2, 31); break;
+                        case RSP_BEQ:           if (RSVAL == RTVAL) cond = 1; break;
+                        case RSP_BNE:           if (RSVAL != RTVAL) cond = 1; break;
+                        case RSP_BLEZ:          if ((INT32)RSVAL <= 0) cond = 1; break;
+                        case RSP_BGTZ:          if ((INT32)RSVAL > 0) cond = 1; break;
+                        case RSP_ADDI:          if (RTREG) RTVAL = (INT32)(RSVAL + SIMM16); break;
+                        case RSP_ADDIU:         if (RTREG) RTVAL = (INT32)(RSVAL + SIMM16); break;
+                        case RSP_SLTI:          if (RTREG) RTVAL = (INT32)(RSVAL) < ((INT32)SIMM16); break;
+                        case RSP_SLTIU:         if (RTREG) RTVAL = (UINT32)(RSVAL) < (UINT32)((INT32)SIMM16); break;
+                        case RSP_ANDI:          if (RTREG) RTVAL = RSVAL & UIMM16; break;
+                        case RSP_ORI:           if (RTREG) RTVAL = RSVAL | UIMM16; break;
+                        case RSP_XORI:          if (RTREG) RTVAL = RSVAL ^ UIMM16; break;
+                        case RSP_LUI:           if (RTREG) RTVAL = UIMM16 << 16; break;
 
-			case RSP_COP0:
-			{
-				switch ((op >> 21) & 0x1f)
-				{
-					case 0x00:	/* MFC0 */
+                        case RSP_COP0:
+                        {
+                                switch ((op >> 21) & 0x1f)
+                                {
+                                        case 0x00:      /* MFC0 */
             if (RTREG)
               RTVAL = get_cop0_reg(rsp, RDREG);
             break;
-					case 0x04:	/* MTC0 */
+                                        case 0x04:      /* MTC0 */
             set_cop0_reg(rsp, RDREG, RTVAL);
             if (rsp.inval_gen) {
               rsp.inval_gen = 0;
@@ -455,12 +455,12 @@ static int run(RSP_REGS & rsp, gen_t * gen)
               return 2;
             }
             break;
-					default:
+                                        default:
             printf("unimplemented cop0 %x (%x)\n", (op >> 21) & 0x1f, op);
             break;
-				}
-				break;
-			}
+                                }
+                                break;
+                        }
 
       case RSP_MFC2:
       {
@@ -513,25 +513,25 @@ static int run(RSP_REGS & rsp, gen_t * gen)
         rsp.flag[RDREG] = RTVAL & 0xffff;
         break;
       }
-			case RSP_LB:		if (RTREG) RTVAL = (INT32)(INT8)READ8(RSVAL + SIMM16); break;
-			case RSP_LH:		if (RTREG) RTVAL = (INT32)(INT16)READ16(RSVAL + SIMM16); break;
-			case RSP_LW:		if (RTREG) RTVAL = READ32(RSVAL + SIMM16); break;
-			case RSP_LBU:		if (RTREG) RTVAL = (UINT8)READ8(RSVAL + SIMM16); break;
-			case RSP_LHU:		if (RTREG) RTVAL = (UINT16)READ16(RSVAL + SIMM16); break;
-			case RSP_SB:		WRITE8(RSVAL + SIMM16, RTVAL); break;
-			case RSP_SH:		WRITE16(RSVAL + SIMM16, RTVAL); break;
-			case RSP_SW:		WRITE32(RSVAL + SIMM16, RTVAL); break;
+                        case RSP_LB:            if (RTREG) RTVAL = (INT32)(INT8)READ8(RSVAL + SIMM16); break;
+                        case RSP_LH:            if (RTREG) RTVAL = (INT32)(INT16)READ16(RSVAL + SIMM16); break;
+                        case RSP_LW:            if (RTREG) RTVAL = READ32(RSVAL + SIMM16); break;
+                        case RSP_LBU:           if (RTREG) RTVAL = (UINT8)READ8(RSVAL + SIMM16); break;
+                        case RSP_LHU:           if (RTREG) RTVAL = (UINT16)READ16(RSVAL + SIMM16); break;
+                        case RSP_SB:            WRITE8(RSVAL + SIMM16, RTVAL); break;
+                        case RSP_SH:            WRITE16(RSVAL + SIMM16, RTVAL); break;
+                        case RSP_SW:            WRITE32(RSVAL + SIMM16, RTVAL); break;
 
       default:
         switch (op >> 26)
         {
-          case 0x12:	/* COP2 */
+          case 0x12:    /* COP2 */
             handle_vector_ops(rsp, op);
             break;
-          case 0x32:	/* LWC2 */
+          case 0x32:    /* LWC2 */
             handle_lwc2(rsp, op);
             break;
-          case 0x3a:	/* SWC2 */
+          case 0x3a:    /* SWC2 */
             handle_swc2(rsp, op);
             break;
         }
