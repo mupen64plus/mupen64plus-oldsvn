@@ -952,30 +952,29 @@ void handle_swc2(UINT32 op)
         }
 }
 
-INLINE UINT16 SATURATE_ACCUM(int accum, int slice, UINT16 negative, UINT16 positive)
+#define U16MIN    0x0000
+#define U16MAX    0xffff
+
+#define S16MIN    0x8000
+#define S16MAX    0x7fff
+
+INLINE UINT16 SATURATE_ACCUM_U(int accum)
 {
         if ((INT16)ACCUM_H(accum) < 0)
         {
                 if ((UINT16)(ACCUM_H(accum)) != 0xffff)
                 {
-                        return negative;
+                        return U16MIN;
                 }
                 else
                 {
                         if ((INT16)ACCUM_M(accum) >= 0)
                         {
-                                return negative;
+                                return U16MIN;
                         }
                         else
                         {
-                                if (slice == 0)
-                                {
-                                        return ACCUM_L(accum);
-                                }
-                                else if (slice == 1)
-                                {
-                                        return ACCUM_M(accum);
-                                }
+                                return ACCUM_L(accum);
                         }
                 }
         }
@@ -983,24 +982,17 @@ INLINE UINT16 SATURATE_ACCUM(int accum, int slice, UINT16 negative, UINT16 posit
         {
                 if ((UINT16)(ACCUM_H(accum)) != 0)
                 {
-                        return positive;
+                        return U16MAX;
                 }
                 else
                 {
                         if ((INT16)ACCUM_M(accum) < 0)
                         {
-                                return positive;
+                                return U16MAX;
                         }
                         else
                         {
-                                if (slice == 0)
-                                {
-                                        return ACCUM_L(accum);
-                                }
-                                else
-                                {
-                                        return ACCUM_M(accum);
-                                }
+                                return ACCUM_L(accum);
                         }
                 }
         }
@@ -1008,30 +1000,30 @@ INLINE UINT16 SATURATE_ACCUM(int accum, int slice, UINT16 negative, UINT16 posit
         return 0;
 }
 
-INLINE UINT16 SATURATE_ACCUM1(int accum, UINT16 negative, UINT16 positive)
+INLINE UINT16 SATURATE_ACCUM_S(int accum)
 {
         if ((INT16)ACCUM_H(accum) < 0)
         {
                 if ((UINT16)(ACCUM_H(accum)) != 0xffff)
-                        return negative;
+                        return S16MIN;
                 else
                 {
                         if ((INT16)ACCUM_M(accum) >= 0)
-                                return negative;
+                                return S16MIN;
                         else
-        return ACCUM_M(accum);
+                                return ACCUM_M(accum);
                 }
         }
         else
         {
                 if ((UINT16)(ACCUM_H(accum)) != 0)
-                        return positive;
+                        return S16MAX;
                 else
                 {
                         if ((INT16)ACCUM_M(accum) < 0)
-                                return positive;
+                                return S16MAX;
                         else
-        return ACCUM_M(accum);
+                                return ACCUM_M(accum);
                 }
         }
 
@@ -1279,7 +1271,7 @@ void handle_vector_ops(UINT32 op)
                                 INT32 r = s1 * s2;
 
                                 ACCUM(del) += (INT64)(r) << 17;
-                                res = SATURATE_ACCUM(del, 1, 0x8000, 0x7fff);
+                                res = SATURATE_ACCUM_S(del);
 
                                 vres[del] = res;
                         }
@@ -1366,7 +1358,7 @@ void handle_vector_ops(UINT32 op)
                                 ACCUM_M(del) = (UINT16)(r3);
                                 ACCUM_H(del) += (INT16)(r3 >> 16);
 
-                                res = SATURATE_ACCUM(del, 0, 0x0000, 0xffff);
+                                res = SATURATE_ACCUM_U(del);
 
                                 vres[del] = res;
                         }
@@ -1402,7 +1394,7 @@ void handle_vector_ops(UINT32 op)
                                 if ((INT32)(r1) < 0)
                                         ACCUM_H(del) -= 1;
 
-                                res = SATURATE_ACCUM(del, 1, 0x8000, 0x7fff);
+                                res = SATURATE_ACCUM_S(del);
 
                                 vres[del] = res;
                         }
@@ -1434,7 +1426,7 @@ void handle_vector_ops(UINT32 op)
                         for (i=0; i < 8; i++)
                         {
                                 UINT16 res;
-                                res = SATURATE_ACCUM(i, 0, 0x0000, 0xffff);
+                                res = SATURATE_ACCUM_U(i);
         //res = ACCUM_L(i);
 
         VREG_S(VDREG, i) = res;
@@ -1457,7 +1449,7 @@ void handle_vector_ops(UINT32 op)
                                 if ((INT32)(r1) < 0)
                                         ACCUM_H(del) -= 1;
 
-                                res = SATURATE_ACCUM(del, 0, 0x0000, 0xffff);
+                                res = SATURATE_ACCUM_U(del);
 
                                 vres[del] = res;
                         }
@@ -1491,7 +1483,7 @@ void handle_vector_ops(UINT32 op)
                         for (i=0; i < 8; i++)
       {
                                 UINT16 res;
-        res = SATURATE_ACCUM1(i, 0x8000, 0x7fff);
+        res = SATURATE_ACCUM_S(i);
         //res = ACCUM_M(i);
 
         VREG_S(VDREG, i) = res;
@@ -1508,7 +1500,7 @@ void handle_vector_ops(UINT32 op)
 
                                 ACCUM(del) += (INT64)(r) << 32;
 
-                                res = SATURATE_ACCUM(del, 1, 0x8000, 0x7fff);
+                                res = SATURATE_ACCUM_S(del);
 
                                 vres[del] = res;
                         }
