@@ -69,7 +69,7 @@ __declspec(dllexport) void DllTest ( HWND hParent )
 
 static int audio_ucode_detect(OSTask_t *task)
 {
-    if (*(unsigned long*)(rsp.RDRAM + task->ucode_data + 0) != 0x1)
+    if (*(unsigned int*)(rsp.RDRAM + task->ucode_data + 0) != 0x1)
     {
         if (*(rsp.RDRAM + task->ucode_data + (0 ^ (3-S8))) == 0xF)
             return 4;
@@ -78,7 +78,7 @@ static int audio_ucode_detect(OSTask_t *task)
     }
     else
     {
-        if (*(unsigned long*)(rsp.RDRAM + task->ucode_data + 0x30) == 0xF0000F00)
+        if (*(unsigned int*)(rsp.RDRAM + task->ucode_data + 0x30) == 0xF0000F00)
             return 1;
         else
             return 2;
@@ -95,7 +95,7 @@ u32 inst1, inst2;
 
 static int audio_ucode(OSTask_t *task)
 {
-    unsigned long *p_alist = (unsigned long*)(rsp.RDRAM + task->data_ptr);
+    unsigned int *p_alist = (unsigned int*)(rsp.RDRAM + task->data_ptr);
     unsigned int i;
 
     switch(audio_ucode_detect(task))
