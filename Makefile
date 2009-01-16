@@ -244,15 +244,42 @@ OBJ_GTK_DBG_GUI = \
 
 OBJ_QT4_GUI = main/gui_qt4/libgui_qt4.a
 
-PLUGINS	= plugins/blight_input.$(SO_EXTENSION) \
-          plugins/dummyaudio.$(SO_EXTENSION) \
-          plugins/dummyvideo.$(SO_EXTENSION) \
-          plugins/glN64.$(SO_EXTENSION) \
-          plugins/ricevideo.$(SO_EXTENSION) \
-          plugins/glide64.$(SO_EXTENSION) \
-          plugins/jttl_audio.$(SO_EXTENSION) \
-          plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION) \
-          plugins/mupen64_input.$(SO_EXTENSION)
+PLUGINS	= 
+
+ifneq ($(NODUMMY), 1)
+PLUGINS += plugins/dummyaudio.$(SO_EXTENSION) \
+           plugins/dummyvideo.$(SO_EXTENSION) \
+           plugins/dummyinput.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOGLN64), 1)
+PLUGINS += plugins/glN64.$(SO_EXTENSION)
+endif
+
+ifneq ($(NORICE), 1)
+PLUGINS += plugins/ricevideo.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOGLIDE), 1)
+PLUGINS += plugins/glide64.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOHLERSP), 1)
+PLUGINS += plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOMINPUT), 1)
+PLUGINS += plugins/mupen64_input.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOJTTL), 1)
+PLUGINS +=plugins/jttl_audio.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOBLIGHT), 1)
+PLUGINS	+=plugins/blight_input.$(SO_EXTENSION)
+endif
+
 ifeq ($(Z64), 1)
 PLUGINS +=plugins/z64-rsp.$(SO_EXTENSION) \
           plugins/z64gl.$(SO_EXTENSION)
@@ -348,6 +375,7 @@ ifneq ($(OS), WINDOWS)
 	$(MAKE) -C blight_input clean
 	$(MAKE) -C dummy_audio clean
 	$(MAKE) -C dummy_video clean
+	$(MAKE) -C dummy_input clean
 	$(MAKE) -C glN64 clean
 	$(MAKE) -C rice_video clean
 	$(MAKE) -C glide64 clean
@@ -357,7 +385,7 @@ ifneq ($(OS), WINDOWS)
 	$(MAKE) -C z64 clean
 	$(RM_F) plugins/mupen64_input.$(SO_EXTENSION) blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.$(SO_EXTENSION) plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION)
 	$(RM_F) plugins/dummyaudio.$(SO_EXTENSION) plugins/dummyvideo.$(SO_EXTENSION) plugins/jttl_audio.$(SO_EXTENSION) plugins/glN64.$(SO_EXTENSION) plugins/ricevideo.$(SO_EXTENSION) plugins/glide64.$(SO_EXTENSION)
-	$(RM_F) plugins/z64-rsp.$(SO_EXTENSION) plugins/z64gl.$(SO_EXTENSION)
+	$(RM_F) plugins/dummyinput.$(SO_EXTENSION) plugins/z64-rsp.$(SO_EXTENSION) plugins/z64gl.$(SO_EXTENSION)
 endif
 
 clean-core:
@@ -434,6 +462,10 @@ ifneq ($(OS), WINDOWS)
 else
 	copy dummy_video\dummyvideo.dll plugins
 endif
+
+plugins/dummyinput.$(SO_EXTENSION): FORCE
+	$(MAKE) -C dummy_input all
+	@$(CP) ./dummy_input/dummyinput.$(SO_EXTENSION) ./plugins/dummyinput.$(SO_EXTENSION)
 
 plugins/glN64.$(SO_EXTENSION): FORCE
 	$(MAKE) -C glN64 all

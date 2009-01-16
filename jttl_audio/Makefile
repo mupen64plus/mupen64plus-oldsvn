@@ -23,6 +23,7 @@
 # include pre-make file with a bunch of definitions
 USES_GTK2 = true
 include ../pre.mk
+-include ../configure.gen
 
 # test for presence of libsamplerate
 ifneq ($(strip $(shell pkg-config samplerate --modversion 2> /dev/null)),)
