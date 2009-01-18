@@ -62,6 +62,8 @@ static gboolean on_scroll_wheel(GtkWidget *widget, GdkEventScroll *event,
 static gboolean on_scrollclick(GtkWidget *bar, GdkEventButton*, gpointer user_data);
 static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton*, gpointer user_data);
 
+static void on_select( GtkTreeSelection *selection, gpointer user_data );
+
 static void on_step();
 static void on_run();
 static void on_trace();
@@ -75,7 +77,7 @@ void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
 {
   long pc = currentPC;
   if(PC != NULL)
-    pc = PC->addr;        
+    pc = PC->addr;
   
   if ((long) iter->user_data2 == -1 && PC != NULL)
     {
@@ -209,18 +211,23 @@ void init_desasm()
 
     gdk_window_set_events( winDesasm->window, GDK_ALL_EVENTS_MASK );
 
+    gtk_tree_selection_unselect_all( gtk_tree_view_get_selection(
+        GTK_TREE_VIEW(clDesasm)));
+
     //=== Signal Connection ===========================/
     gtk_signal_connect( GTK_OBJECT(clDesasm), "row-activated",
                     GTK_SIGNAL_FUNC(on_click), NULL );
+    g_signal_connect( gtk_tree_view_get_selection(GTK_TREE_VIEW(clDesasm)),
+                    "changed", GTK_SIGNAL_FUNC(on_select), NULL );
     gtk_signal_connect( GTK_OBJECT(ajLogari), "value-changed",
                     GTK_SIGNAL_FUNC(on_scroll), NULL );
 #ifdef DOUBLESCROLL
     gtk_signal_connect( GTK_OBJECT(ajLinear), "value-changed",
             GTK_SIGNAL_FUNC(on_linear_scroll), NULL );
+    gtk_signal_connect( GTK_OBJECT(scrollbar1), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
 #endif
     gtk_signal_connect( GTK_OBJECT(winDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
     gtk_signal_connect( GTK_OBJECT(swDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
-    gtk_signal_connect( GTK_OBJECT(scrollbar1), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar(
             GTK_SCROLLED_WINDOW(swDesasm))), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
 
@@ -275,7 +282,7 @@ void update_desasm( uint32 focused_address )
     addtest=focused_address;
     disasm_list_update((GtkTreeModel *) cmDesasm, focused_address);
 
-#ifdef DOUBLESCROLL     
+#ifdef DOUBLESCROLL
     gtk_adjustment_set_value(ajLinear, ((float)addtest));
 #endif
     if(mousedown==0)
@@ -476,6 +483,13 @@ static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton* evt, gpointer u
   gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange *) bar), 0.5f);
   return FALSE;
 }
+
+static void on_select( GtkTreeSelection *select, gpointer user_data )
+{
+  gtk_tree_selection_unselect_all( select );
+  refresh_desasm();
+}
+
 
 static void on_click( GtkTreeView *widget, GtkTreePath *path, 
                GtkTreeViewColumn *col, gpointer user_data )
