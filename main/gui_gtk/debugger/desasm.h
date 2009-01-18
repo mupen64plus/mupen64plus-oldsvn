@@ -39,6 +39,5 @@ void refresh_desasm();
 void update_disassembler( uint32 pc );
 void update_desasm( uint32 focused_address );
 
-void switch_button_to_run();
 #endif  /* __DESASM_H__ */
 

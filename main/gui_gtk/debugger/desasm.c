@@ -40,7 +40,7 @@
 static uint32 previous_focus;
 static uint32 currentPC = 0;
 
-static GtkWidget *clDesasm, *buRun;
+static GtkWidget *clDesasm;
 static DisasmList *cmDesasm;
 static GtkAdjustment *ajDesasm, *ajLinear, *ajLogari;
 
@@ -64,6 +64,8 @@ static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton*, gpointer user_
 
 static void on_step();
 static void on_run();
+static void on_trace();
+static void on_break();
 static void on_goto();
 
 static void on_close();
@@ -112,7 +114,10 @@ void init_desasm()
       *boxH1,
       *scrollbar1,
       *boxV1,
+      *buRun,
       *buStep,
+      *buTrace,
+      *buBreak,
       *buGoTo,
       *swDesasm;
 
@@ -189,11 +194,14 @@ void init_desasm()
     boxV1 = gtk_vbox_new( FALSE, 2 );
     gtk_box_pack_end( GTK_BOX(boxH1), boxV1, FALSE, FALSE, 0 );
     
-    //buRun = gtk_button_new_with_label( "Run" );
-    buRun = gtk_button_new_with_label( "> \\ ||" );
+    buRun = gtk_button_new_with_label( "Go" );
     gtk_box_pack_start( GTK_BOX(boxV1), buRun, FALSE, FALSE, 5 );
-    buStep = gtk_button_new_with_label( "Next" );
+    buTrace = gtk_button_new_with_label( "Trace" );
+    gtk_box_pack_start( GTK_BOX(boxV1), buTrace, FALSE, FALSE, 0 );
+    buStep = gtk_button_new_with_label( "Step" );
     gtk_box_pack_start( GTK_BOX(boxV1), buStep, FALSE, FALSE, 0 );
+    buBreak = gtk_button_new_with_label( "Break" );
+    gtk_box_pack_start( GTK_BOX(boxV1), buBreak, FALSE, FALSE, 0 );
     buGoTo = gtk_button_new_with_label( "Go To..." );
     gtk_box_pack_start( GTK_BOX(boxV1), buGoTo, FALSE, FALSE, 20 );
 
@@ -220,6 +228,8 @@ void init_desasm()
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar((GtkScrolledWindow *) swDesasm)), "button-release-event", GTK_SIGNAL_FUNC(on_scrollrelease), NULL);
     gtk_signal_connect( GTK_OBJECT(buRun), "clicked", on_run, NULL );
     gtk_signal_connect( GTK_OBJECT(buStep), "clicked", on_step, NULL );
+    gtk_signal_connect( GTK_OBJECT(buTrace), "clicked", on_trace, NULL );
+    gtk_signal_connect( GTK_OBJECT(buBreak), "clicked", on_break, NULL );
     gtk_signal_connect( GTK_OBJECT(buGoTo), "clicked", on_goto, NULL );
     gtk_signal_connect( GTK_OBJECT(winDesasm), "destroy", on_close, NULL );
 
@@ -330,40 +340,36 @@ void refresh_desasm()
 }
 
 
-void switch_button_to_run()
-{ //Is called from debugger.c, when a breakpoint is reached.
-    //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run");
-    //todo: this causes a deadlock or something the second time a
-    //breakpoint hits, breaking the interface. The other lines changing
-    //this label have been commented with the note "avoid deadlock".
-}
-
 
 //]=-=-=-=-=-=-=[ Les Fonctions de Retour des Signaux (CallBack) ]=-=-=-=-=-=-=[
 
 static void on_run()
 {
-    if(run == 2) {
-        run = 0;
-        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
-    } else {
-        run = 2;
-        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child),"Pause"); //avoid deadlock
+    int oldrun = run;
+    run = 2;
+    if(oldrun == 0)
         debugger_step();
-    }
 }
 
 
 static void on_step()
 {
-    if(run == 2) {
-        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
-    } else {
+    if(run == 0)
         debugger_step();
-    }
-    run = 0;
 }
 
+static void on_trace()
+{
+    int oldrun = run;
+    run = 1;
+    if(oldrun == 0)
+        debugger_step();
+}
+
+static void on_break()
+{
+    run = 0;
+}
 
 static void on_goto()
 {//TODO: to open a dialog, get & check the entry, and go there.

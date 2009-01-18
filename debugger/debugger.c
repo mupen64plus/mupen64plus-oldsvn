@@ -67,27 +67,24 @@ void update_debugger(uint32 pc)
 // Checks for breakpoint hits on PC
 {
     int bpt;
-    
-    if(run==2) {
+    /*if ( previousPC == pc ) {
+        printf("update_debugger: previousPC == pc (%08x)\n",pc);
+        return;
+    }*/
+    if(run!=0) {//check if we hit a breakpoint
         bpt = check_breakpoints(pc);
-        if( bpt==-1 ) {
-            //previousPC = pc;
-            return;
-        }
-        else {
+        if( bpt!=-1 ) {
             run = 0;
-            switch_button_to_run();
             
             if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_LOG))
                 log_breakpoint(pc, BPT_FLAG_EXEC, 0);
         }
     }
-    else if ( previousPC == pc ) {
-        return;
+
+    if(run!=2) {
+        update_debugger_frontend( pc );
     }
     if(run==0) {
-        update_debugger_frontend( pc );
-
         // Emulation thread is blocked until a button is clicked.
         SDL_mutexP(mutex);
         SDL_CondWait(debugger_done_cond, mutex);

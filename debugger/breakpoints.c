@@ -190,7 +190,6 @@ int check_breakpoints_on_mem_access( uint32 pc, uint32 address, uint32 size, uin
                 log_breakpoint(pc, flags, address);
             
             run = 0;
-            switch_button_to_run();
             update_debugger(pc);
         
             return bpt;

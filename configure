@@ -174,10 +174,20 @@ def checkDeps(config, options):
             sys.stderr.write(lircTest.failedDep())
             sys.stderr.write('\n')
     
-    if(config['DBG']=='1') and not dbgTest:
-            sys.stderr.write('Disabling Graphical Debugger: ')
-            sys.stderr.write(dbgTest.failedDep())
-            sys.stderr.write('\n')
+    if(config['DBG']=='1'):
+        if not dbgTest:
+            config['DBG'] = '0'
+            if(options.verbose):
+                sys.stderr.write('Disabling Graphical Debugger: ')
+                sys.stderr.write(dbgTest.failedDep())
+                sys.stderr.write('\n')
+        elif config['GUI']=='NONE':
+            config['DBG'] = '0'
+            if(options.verbose):
+                sys.stderr.write('Disabling Graphical Debugger: ')
+                sys.stderr.write('Must have a gui enabled')
+                sys.stderr.write('\n')
+            
     
     #make sure we have at least one of each plugin to proceed
     #Check for video plugins
