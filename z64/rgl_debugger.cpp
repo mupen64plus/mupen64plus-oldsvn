@@ -24,60 +24,60 @@
 
 static const char *saRGBText[] =
 {
-  "PREV",			"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"NOISE",			"1",
-  "0",				"0",				"0",				"0",
-  "0",				"0",				"0",				"0"
+  "PREV",                       "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "NOISE",                        "1",
+  "0",                          "0",                            "0",                            "0",
+  "0",                          "0",                            "0",                            "0"
 };
 
 static const char *sbRGBText[] =
 {
-  "PREV",			"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"CENTER",			"K4",
-  "0",				"0",				"0",				"0",
-  "0",				"0",				"0",				"0"
+  "PREV",                       "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "CENTER",                       "K4",
+  "0",                          "0",                            "0",                            "0",
+  "0",                          "0",                            "0",                            "0"
 };
   
 static const char *mRGBText[] =
 {
-  "PREV",			"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"SCALE",			"PREV_ALPHA",
-  "TEXEL0_ALPHA",		"TEXEL1_ALPHA",		"PRIM_ALPHA",	"SHADE_ALPHA",
-  "ENV_ALPHA",		"LOD_FRACTION",		"PRIM_LOD_FRAC",	"K5",
-  "0",				"0",				"0",				"0",
-  "0",				"0",				"0",				"0",
-  "0",				"0",				"0",				"0",
-  "0",				"0",				"0",				"0"
+  "PREV",                       "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "SCALE",                        "PREV_ALPHA",
+  "TEXEL0_ALPHA",               "TEXEL1_ALPHA",         "PRIM_ALPHA",   "SHADE_ALPHA",
+  "ENV_ALPHA",          "LOD_FRACTION",         "PRIM_LOD_FRAC",        "K5",
+  "0",                          "0",                            "0",                            "0",
+  "0",                          "0",                            "0",                            "0",
+  "0",                          "0",                            "0",                            "0",
+  "0",                          "0",                            "0",                            "0"
   };
 
 static const char *aRGBText[] =
 {
-  "PREV",			"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"1",				"0",
+  "PREV",                       "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "1",                            "0",
 };
 
 static const char *saAText[] =
 {
-  "PREV",			"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"1",				"0",
+  "PREV",                       "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "1",                            "0",
 };
 
 static const char *sbAText[] =
 {
-  "PREV",			"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"1",				"0",
+  "PREV",                       "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "1",                            "0",
 };
   
 static const char *mAText[] =
 {
-  "LOD_FRACTION",		"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"PRIM_LOD_FRAC",	"0",
+  "LOD_FRACTION",               "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "PRIM_LOD_FRAC",        "0",
 };
 
 static const char *aAText[] =
 {
-  "PREV",			"TEXEL0",			"TEXEL1",			"PRIM", 
-  "SHADE",			"ENV",		"1",				"0",
+  "PREV",                       "TEXEL0",                       "TEXEL1",                       "PRIM", 
+  "SHADE",                      "ENV",          "1",                            "0",
 };
 
 const static char * bRGBText[] = { "PREV", "FRAG", "BLEND", "FOG" };
@@ -145,7 +145,7 @@ char * rglCombiner2String(rdpState_t & state)
 #include "rgl_glut.h"
 
 #include <SDL/SDL.h>
-#include <IL/il.h>
+//#include <IL/il.h>
 #include <assert.h>
 
 #include <FTGLTextureFont.h>

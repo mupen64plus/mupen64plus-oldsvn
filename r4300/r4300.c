@@ -1552,10 +1552,10 @@ void init_blocks()
    actual=blocks[0xa4000000>>12];
    init_block((int *) SP_DMEM, blocks[0xa4000000>>12]);
    PC=actual->block+(0x40/4);
-#ifdef DBG
+/*#ifdef DBG //should only be needed by dynamic recompiler
    if (debugger_mode) // debugger shows initial state (before 1st instruction).
      update_debugger(PC->addr);
-#endif
+#endif*/
 }
 
 /* this hard reset function simulates the boot-up state of the R4300 CPU */

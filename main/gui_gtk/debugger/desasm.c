@@ -32,7 +32,7 @@
 // to differanciate between update (need reload) and scroll (doesn't need reload)
 // to reorganise whole code.
 
-#define DOUBLESCROLL
+//#define DOUBLESCROLL
 #define SCROLLRANGE    1.0f
 #define SCROLLSLOW     0.1f
 #define SCROLLSLOWAMT  ((int)(100/SCROLLSLOW))
@@ -71,11 +71,15 @@ static void on_close();
 void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
                        GtkTreeModel *tree_model, GtkTreeIter *iter,gpointer data)
 {
+  long pc = currentPC;
+  if(PC != NULL)
+    pc = PC->addr;        
+  
   if ((long) iter->user_data2 == -1 && PC != NULL)
     {
       if(check_breakpoints((long) iter->user_data) != -1)
     {
-      if(currentPC == ((long) iter->user_data))
+      if(pc == ((long) iter->user_data))
         g_object_set(G_OBJECT(cell), "cell-background-gdk", 
              &color_PC_on_BP, "cell-background-set", TRUE, NULL);
       else
@@ -84,7 +88,7 @@ void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
     }
       else
     {
-      if(currentPC == ((long) iter->user_data))
+      if(pc == ((long) iter->user_data))
         g_object_set(G_OBJECT(cell), "cell-background-gdk", &color_PC,
              "cell-background-set", TRUE, NULL);
       else
@@ -260,9 +264,10 @@ void update_desasm( uint32 focused_address )
 {
     addtest=focused_address;
     disasm_list_update((GtkTreeModel *) cmDesasm, focused_address);
-    
+
+#ifdef DOUBLESCROLL     
     gtk_adjustment_set_value(ajLinear, ((float)addtest));
-    
+#endif
     if(mousedown==0)
       update_log_scroll();
     

@@ -27,7 +27,13 @@ ifneq ("$(WIN32)", "1")
 CC	= gcc
 CXX	= g++
 LD	= g++
-STRIP	= strip
+
+ifneq ("$(DBGSYM)", "1")
+STRIP   = strip
+else
+STRIP	= true
+endif
+
 #CFLAGS	= -g -DGCC -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) $(GLUI_INCS) $(FTGL_INCS) -O2 -mtune=athlon-xp -ffast-math -funroll-loops -m3dnow -mmmx -msse -msse2 #-mfpmath=sse #-fomit-frame-pointer
 CFLAGS	+= -g -DGCC -DUSE_GTK $(SDL_FLAGS) $(GTK_FLAGS) $(GLUI_INCS) $(FTGL_INCS) -fpic -DPIC -Wall
 LDFLAGS	+= -g -rdynamic -L/usr/X11R6/lib $(GLUI_LIBS) $(FTGL_LIBS) -lz $(SDL_LIBS) $(PLUGIN_LDFLAGS)
@@ -36,7 +42,11 @@ O	= o
 COUT	= -c -o #
 LOUT	= -o #
 else
+ifneq ("$(DBGSYM)", "1")
 STRIP	= $(TOOL_PREFIX)strip
+else
+STRIP	= $(TOOL_PREFIX)dir
+endif
 WINDRES	= $(TOOL_PREFIX)windres
 ifeq ("$(MSVC)", "1")
 MSVCP=/mnt/big1/msvc7.1/Vc7

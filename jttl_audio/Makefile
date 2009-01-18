@@ -60,6 +60,10 @@ ifeq ($(GUI),NONE)
   OBJECTS += gui_none.o
 endif
 
+ifeq ($(DBGSYM), 1)
+  STRIP=true
+endif
+
 # build targets
 all: version.h jttl_audio.so
 

@@ -29,7 +29,7 @@
 #include <GL/gl.h>
 
 #ifdef RDP_DEBUG
-#include <IL/il.h>
+//#include <IL/il.h>
 #endif
 
 #include "glshader.h"
