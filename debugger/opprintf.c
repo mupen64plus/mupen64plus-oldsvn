@@ -130,7 +130,7 @@ static int mr4kd_rcpy_fpr ( char *dest, int reg )
     if( mr4kd_conf & MR4KD_RPREFIX )
         dest[i++] = '$';
     
-    for(; registers_a_gpr[reg][s]; i++, s++ )
+    for(; registers_a_fpr[reg][s]; i++, s++ )
         dest[i] = ( (mr4kd_conf & MR4KD_RLOWER) ? tolower(registers_a_fpr[reg][s]) : registers_a_fpr[reg][s] );
     dest[i] = 0;
     

@@ -519,7 +519,6 @@ static void cop0()
 
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ cop1 ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
-
 static void MFC1(){
     mr4kd_sprintf( op, "MFC1", mot, pc, "%ns%rt, %fs" );
 }
@@ -529,19 +528,19 @@ static void DMFC1(){
 }
 
 static void CFC1(){
-    mr4kd_sprintf( op, "CFC1", mot, pc, "%ns%rt, %rd" );
+    mr4kd_sprintf( op, "CFC1", mot, pc, "%ns%rt, %fs" );
 }
 
 static void MTC1(){
-    mr4kd_sprintf( op, "MTC1", mot, pc, "%ns%ft, %rd" );
+    mr4kd_sprintf( op, "MTC1", mot, pc, "%ns%rt, %fs" );
 }
 
 static void DMTC1(){
-    mr4kd_sprintf( op, "DMTC1", mot, pc, "%ns%ft, %rd" );
+    mr4kd_sprintf( op, "DMTC1", mot, pc, "%ns%rt, %fs" );
 }
 
 static void CTC1(){
-    mr4kd_sprintf( op, "CTC1", mot, pc, "%ns%rt, %rd" );
+    mr4kd_sprintf( op, "CTC1", mot, pc, "%ns%rt, %fs" );
 }
 
 
@@ -1045,11 +1044,11 @@ static void BNEL(){
 }
 
 static void BLEZL(){
-    mr4kd_sprintf( op, "BLEZL", mot, pc, "%ns%rs, %rt, %br" );
+    mr4kd_sprintf( op, "BLEZL", mot, pc, "%ns%rs, %br" );
 }
 
 static void BGTZL(){
-    mr4kd_sprintf( op, "BGTZL", mot, pc, "%ns%rs, %rt, %br" );
+    mr4kd_sprintf( op, "BGTZL", mot, pc, "%ns%rs, %br" );
 }
 
 
@@ -1139,7 +1138,7 @@ static void LL(){
 }
 
 static void LWC1(){
-    mr4kd_sprintf( op, "LWC1", mot, pc, "%ns%rt, %ih(%rs)" );
+    mr4kd_sprintf( op, "LWC1", mot, pc, "%ns%ft, %ih(%rs)" );
 }
 
 static void LLD(){
@@ -1147,7 +1146,7 @@ static void LLD(){
 }
 
 static void LDC1(){
-    mr4kd_sprintf( op, "LDC1", mot, pc, "%ns%rt, %ih(%rs)" );
+    mr4kd_sprintf( op, "LDC1", mot, pc, "%ns%ft, %ih(%rs)" );
 }
 
 static void LD(){
@@ -1159,7 +1158,7 @@ static void SC(){
 }
 
 static void SWC1(){
-    mr4kd_sprintf( op, "SWC1", mot, pc, "%ns%rt, %ih(%rs)" );
+    mr4kd_sprintf( op, "SWC1", mot, pc, "%ns%ft, %ih(%rs)" );
 }
 
 static void SCD(){
