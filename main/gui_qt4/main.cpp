@@ -38,10 +38,18 @@
 #include "mainwindow.h"
 #include "globals.h"
 
+#ifdef DBG
+#include "debugger/debuggerwidget.h"
+#include "debugger/registerwidget.h"
+#endif
+
 // ugly globals
 static MainWindow* mainWindow = 0;
 static QApplication* application = 0;
 static QTranslator* translator = 0;
+#ifdef DBG
+static DebuggerWidget* debuggerWidget = 0;
+#endif
 
 namespace core {
 extern "C" {
@@ -96,6 +104,10 @@ void gui_init(int *argc, char ***argv)
 #endif
 
     mainWindow = new MainWindow;
+
+#ifdef DBG
+    debuggerWidget = new DebuggerWidget;
+#endif
 }
 
 // display GUI components to the screen
@@ -117,6 +129,10 @@ void gui_main_loop(void)
     application = 0;
     delete translator;
     translator = 0;
+#ifdef DBG
+    delete debuggerWidget;
+    debuggerWidget = 0;
+#endif
 }
 
 int gui_message(gui_message_t messagetype, const char *format, ...)
@@ -165,6 +181,29 @@ void gui_set_state(gui_state_t state)
 
     mainWindow->setState(state);
 }
+
+#ifdef DBG
+void init_debugger_frontend()
+{
+    debuggerWidget->show();
+//    QApplication::instance()->processEvents();
+//    QApplication::instance()->sendPostedEvents();
+}
+void update_debugger_frontend( unsigned int pc )
+{
+    debuggerWidget->update_desasm(pc);
+}
+
+//Runs each VI for auto-updating views
+void debugger_frontend_vi()
+{
+    //TODO: Implement debugger_frontend_vi
+}
+void switch_button_to_run()
+{
+    //TODO: Implement switch_button_to_run
+}
+#endif
 
 } // extern "C"
 } // namespace core

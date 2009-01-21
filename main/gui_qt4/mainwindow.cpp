@@ -25,6 +25,10 @@
 #include "globals.h"
 #include "rommodel.h"
 #include "settingsdialog.h"
+#ifdef DBG
+#include "debugger/debuggerwidget.h"
+#include "debugger/registerwidget.h"
+#endif
 
 #include <SDL_video.h>
 
@@ -36,6 +40,9 @@ namespace core {
         #include "../savestates.h"
         #include "../rom.h"
         #include "../config.h"
+#ifdef DBG
+        #include "../../debugger/debugger.h"
+#endif
     }
 }
 
@@ -524,6 +531,13 @@ void MainWindow::setupActions()
         }
     }
 
+//TODO #ifdef DBG
+    //Debugger Actions
+    connect(actionEnableDebugger, SIGNAL(triggered()), this, SLOT(debuggerToggle()));
+    connect(actionDisasembler, SIGNAL(triggered()), this, SLOT(disasemblerShow()));
+    connect(actionRegisters, SIGNAL(triggered()), this, SLOT(registersShow()));
+//TODO #endif
+
     //Settings Actions
     connect(actionShowFilter, SIGNAL(toggled(bool)),
             mainWidget, SLOT(showFilter(bool)));
@@ -602,4 +616,31 @@ void MainWindow::setStateImplementation(int state)
         }
     }
 }
+
+//TODO #ifdef DGB
+void MainWindow::debuggerToggle()
+{
+    if (actionEnableDebugger->isChecked()) {
+        actionDisasembler->setEnabled(true);
+        actionRegisters->setEnabled(true);
+        core::g_DebuggerEnabled = 1;
+    }
+    else {
+        core::g_DebuggerEnabled = 0;
+        actionDisasembler->setEnabled(false);
+        actionRegisters->setEnabled(false);
+    }
+}
+
+void MainWindow::disasemblerShow()
+{
+    //TODO: disasemblerShow
+}
+
+void MainWindow::registersShow()
+{
+    RegisterWidget* reg = new RegisterWidget(this);
+    reg->show();
+}
+//TODO #endif
 

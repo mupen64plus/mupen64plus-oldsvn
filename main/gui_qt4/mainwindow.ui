@@ -28,7 +28,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File" >
@@ -74,8 +74,17 @@
     <addaction name="actionAbout" />
     <addaction name="actionAboutQt" />
    </widget>
+   <widget class="QMenu" name="menu_Debug" >
+    <property name="title" >
+     <string>&amp;Debug</string>
+    </property>
+    <addaction name="actionEnableDebugger" />
+    <addaction name="actionDisasembler" />
+    <addaction name="actionRegisters" />
+   </widget>
    <addaction name="menu_File" />
    <addaction name="menu_Emulation" />
+   <addaction name="menu_Debug" />
    <addaction name="menu_Settings" />
    <addaction name="menu_Help" />
   </widget>
@@ -250,6 +259,35 @@
    </property>
    <property name="text" >
     <string>Show F&amp;ilter</string>
+   </property>
+  </action>
+  <action name="actionEnableDebugger" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Enable</string>
+   </property>
+  </action>
+  <action name="actionEnableDebugger" >
+   <property name="text" >
+    <string>EnableDebugger</string>
+   </property>
+  </action>
+  <action name="actionDisasembler" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Disasembler</string>
+   </property>
+  </action>
+  <action name="actionRegisters" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Registers</string>
    </property>
   </action>
  </widget>

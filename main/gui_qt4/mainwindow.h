@@ -136,7 +136,11 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void itemCountUpdate(int count);
         void aboutDialogShow();
         void setStateImplementation(int state);
-
+        
+        void debuggerToggle();
+        void disasemblerShow();
+        void registersShow();
+        
     protected:
         void customEvent(QEvent* event);
         void closeEvent(QCloseEvent* event);

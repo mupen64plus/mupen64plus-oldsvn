@@ -56,6 +56,7 @@ endif
 # set options
 ifeq ($(DBG), 1)
   CFLAGS += -DDBG
+  QMAKE_CXXFLAGS=QMAKE_CXXFLAGS=-DDBG
 endif
 ifeq ($(DBG_COMPARE), 1)
   CFLAGS += -DCOMPARE_CORE
@@ -243,6 +244,9 @@ OBJ_GTK_DBG_GUI = \
 	main/gui_gtk/debugger/ui_disasm_list.o
 
 OBJ_QT4_GUI = main/gui_qt4/libgui_qt4.a
+OBJ_QT4_DBG_GUI = main/gui_qt4/debugger/libguidbg_qt4.a
+QT4_GUI_DEPENDENCIES = main/gui_qt4/Makefile
+QMAKE_CONFIG = CONFIG+=release
 
 PLUGINS	= 
 
@@ -293,14 +297,6 @@ OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
 LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
 
 # add extra objects and libraries for selected options
-ifeq ($(DBG), 1)
-  OBJECTS +=  $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
-  LIBS += -lopcodes -lbfd
-endif
-ifeq ($(LIRC), 1)
-  OBJECTS += $(OBJ_LIRC)
-  LDFLAGS += -llirc_client
-endif
 ifneq ($(GUI), NONE)
   ifneq ($(OS), WINDOWS)
     MISC_DEPS = mupen64plus.desktop
@@ -316,6 +312,22 @@ else
     OBJECTS += $(OBJ_GTK_GUI)
     LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
   endif
+endif
+ifeq ($(DBG), 1)
+  OBJECTS +=  $(OBJ_DBG)
+  ifeq ($(GUI), GTK2)
+    OBJECTS += $(OBJ_GTK_DBG_GUI)
+  endif
+  ifeq ($(GUI), QT4)
+    OBJECTS += $(OBJ_QT4_DBG_GUI)
+    QT4_GUI_DEPENDENCIES += main/gui_qt4/debugger/libguidbg_qt4.a
+    QT4_CONFIG = CONFIG+=debug
+  endif
+  LIBS += -lopcodes -lbfd
+endif
+ifeq ($(LIRC), 1)
+  OBJECTS += $(OBJ_LIRC)
+  LDFLAGS += -llirc_client
 endif
 
 # build targets
@@ -394,6 +406,7 @@ ifneq ($(OS), WINDOWS)
 	$(RM_F) ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
 	$(RM_F) mupen64plus mupen64plus.desktop
 	$(RM_F) main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
+	$(RM_F) main/gui_qt4/debugger/moc_* main/gui_qt4/debugger/ui_*.h main/gui_qt4/debugger/*.o main/gui_qt4/debugger/*.a main/gui_qt4/debugger/Makefile
 	$(RM_F) translations/*.qm
 else
 	del /S *.o *.$(SO_EXTENSION) mupen64plus.exe moc_* *.a *.qm
@@ -424,10 +437,25 @@ endif
 .c.o:
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
-main/gui_qt4/Makefile:
-	${QMAKE} main/gui_qt4/gui_qt4.pro -o main/gui_qt4/Makefile
+main/gui_qt4/debugger/Makefile: FORCE
+	${QMAKE} main/gui_qt4/debugger/guidbg_qt4.pro ${QT4_CONFIG} ${QMAKE_CXXFLAGS} -o main/gui_qt4/debugger/Makefile
 
-main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
+main/gui_qt4/debugger/libguidbg_qt4.a: main/gui_qt4/debugger/Makefile FORCE
+ifneq ($(OS), WINDOWS)
+	${MAKE} -C main/gui_qt4/debugger
+# Run lrelease only on ts files with locale suffix, makes no sense to run it on
+# the template. For some reason this fails on windows.
+#	${LRELEASE} translations/*_*.ts
+else
+# I wonder whether we can avoid this somehow
+	${MAKE} -C main/gui_qt4/debugger CXXFLAGS="${CFLAGS}"
+	copy main\gui_qt4\debugger\release\libgui_qt4.a main\gui_qt4\debugger
+endif
+
+main/gui_qt4/Makefile: FORCE
+	${QMAKE} main/gui_qt4/gui_qt4.pro  ${QT4_CONFIG} ${QMAKE_CXXFLAGS} -o main/gui_qt4/Makefile
+
+main/gui_qt4/libgui_qt4.a: ${QT4_GUI_DEPENDENCIES} FORCE
 ifneq ($(OS), WINDOWS)
 	${MAKE} -C main/gui_qt4
 # Run lrelease only on ts files with locale suffix, makes no sense to run it on

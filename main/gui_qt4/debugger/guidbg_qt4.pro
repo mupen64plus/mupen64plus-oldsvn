@@ -1,7 +1,7 @@
 #/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# *   Mupen64plus - gui_qt4.pro                                             *
+# *   Mupen64plus - guidbg_qt4.pro                                          *
 # *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
-# *   Copyright (C) 2008 Slougi                                             *
+# *   Copyright (C) 2009 olejl                                              *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU General Public License as published by  *
@@ -24,7 +24,6 @@ CONFIG += staticlib
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .
-LIBS += -Lmain/gui_qt4/debugger -llibguidbg_qt4
 
 unix {
     CONFIG += link_pkgconfig
@@ -32,46 +31,11 @@ unix {
 }
 
 # Input
-HEADERS += globals.h \
-           mainwidget.h \
-           mainwindow.h \
-           romdelegate.h \
-           romdirectorieslistwidget.h \
-           rominfodialog.h \
-           rommodel.h \
-           settingsdialog.h \
-           starlabel.h \
-           ../config.h \
-           ../main.h \
-           ../version.h \
-           ../romcache.h \
-           ../md5.h \
-           ../plugin.h \
-           ../winlnxdefs.h \
-           ../util.h \
-           ../savestates.h \
-           ../rom.h \
-           ../7zip/7zMain.h \
-           ../7zip/7zIn.h \
-           ../7zip/7zHeader.h \
-           ../7zip/Types.h \
-           ../7zip/7zItem.h \
-           ../7zip/7zMethodID.h \
-           ../7zip/7zBuffer.h \
-           ../7zip/7zAlloc.h
-FORMS += mainwidget.ui \
-         mainwindow.ui \
-         romdirectorieslistwidget.ui \
-         rominfodialog.ui \
-         settingsdialog.ui
-SOURCES += globals.cpp \
-           main.cpp \
-           mainwidget.cpp \
-           mainwindow.cpp \
-           romdelegate.cpp \
-           romdirectorieslistwidget.cpp \
-           rominfodialog.cpp \
-           rommodel.cpp \
-           settingsdialog.cpp \
-           starlabel.cpp \
-           translate.cpp
+HEADERS += debuggerwidget.h
+HEADERS += registerwidget.h
+HEADERS += tablelistmodel.h
+FORMS += debuggerwidget.ui
+FORMS += registerwidget.ui
+SOURCES += debuggerwidget.cpp
+SOURCES += registerwidget.cpp
+SOURCES += tablelistmodel.cpp
