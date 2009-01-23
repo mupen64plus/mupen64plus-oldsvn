@@ -25,6 +25,8 @@
 #include <QDialog>
 #include "ui_debuggerwidget.h"
 
+class HexSpinBox;
+
 class DebuggerWidget : public QWidget, private Ui_DebuggerWidget
 {
     Q_OBJECT
@@ -42,7 +44,7 @@ class DebuggerWidget : public QWidget, private Ui_DebuggerWidget
 
     private:
         QList<QTreeWidgetItem *> items;
-
+        HexSpinBox *hexSpinBox;
 };
 
 #endif // __DEBUGGERWIDGET_H__

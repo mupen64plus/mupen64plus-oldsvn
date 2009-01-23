@@ -23,6 +23,9 @@
 #include <QDialog>
 
 #include "debuggerwidget.h"
+#include "registerwidget.h"
+#include "hexspinbox.h"
+#include "hexspinboxdialog.h"
 
 // if we include <QtGui> there is no need to include every class used: <QString>, <QFileDialog>,...
 // TODO: Figure out how to bring #ifdef DBG to the .ui file to #ifdef out debugger
@@ -40,12 +43,24 @@ namespace core {
     }
 }
 
+class RegisterWidget;
+
 unsigned int focused_pc, previous_pc;
 
-DebuggerWidget::DebuggerWidget(QWidget *parent)
+DebuggerWidget::DebuggerWidget(QWidget* parent) // : QWidget(parent)
 {
     setupUi(this); // this sets up GUI
  
+    hexSpinBox = new HexSpinBox();
+    previous_pc = 0x00000000;
+    focused_pc = 0x00000000;
+    hexSpinBox->setValue(focused_pc);
+    hexSpinBox->setSingleStep(4);
+    hexSpinBox->setMinimum(0);
+    hexSpinBox->setMaximum(0xffffffff);
+    formLayoutButtons->addWidget(hexSpinBox);
+
+
     // signals/slots mechanism in action
     connect( pushStep, SIGNAL( clicked() ), this, SLOT( onstep() ) ); 
     connect( pushRun, SIGNAL( clicked() ), this, SLOT( onrun() ) ); 
@@ -64,8 +79,6 @@ DebuggerWidget::DebuggerWidget(QWidget *parent)
     QStringList list = str.split(",");
     treeDisasm->setHeaderLabels(list);
     
-    previous_pc = 0x00000000;
-    focused_pc = 0x00000000;
 }
 
 DebuggerWidget::~DebuggerWidget()
@@ -84,6 +97,7 @@ void DebuggerWidget::update_desasm( unsigned int current_pc )
     items.clear();
     
     focused_pc = current_pc;
+    hexSpinBox->setValue(focused_pc);
     for (int i = -4; i<28; i++)
     {
         tmp_pc = current_pc + (i*4);
@@ -117,8 +131,6 @@ void DebuggerWidget::update_desasm( unsigned int current_pc )
     treeDisasm->show();
     items.clear();
 
-    //void QTreeWidget::setItemSelected ( const QTreeWidgetItem * item, bool select )
-    
     previous_pc = focused_pc;
 }
 
@@ -151,13 +163,16 @@ void DebuggerWidget::onbreak()
 
 void DebuggerWidget::ongoto()
 {
-    bool ok;
-    unsigned int tmp_pc;
-    
-    //TODO: Show PC as hex
-    tmp_pc = QInputDialog::getInteger(this, tr("Goto PC"),
-                                      tr("PC:"), focused_pc, 0, 2147483647, 4, &ok);
-    if (ok)
+    unsigned int tmp_pc = 0;
+  
+    HexSpinBoxDialog* d = new HexSpinBoxDialog(focused_pc);
+    if (d->exec())
+    {
+        // TODO: Get hold of the spinbox value ...
+        // tmp_pc = (unsigned int) d->getAcceptedValue;
+        // TODO: Should probably check if it is a valid PC.
+        // Debugger API?
         DebuggerWidget::update_desasm( tmp_pc );
+    }
 }
 

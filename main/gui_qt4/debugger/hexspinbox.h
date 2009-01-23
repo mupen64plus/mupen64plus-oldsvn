@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - tablelistmodel.h                                        *
+ *   Mupen64plus - hexspinbox.h                                            *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2009 olejl                                              *
  *                                                                         *
@@ -19,36 +19,20 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __TABLELISTMODEL_H__
-#define __TABLELISTMODEL_H__
+#ifndef __HEXSPINBOX_H__
+#define __HEXSPINBOX_H__
 
-#include <QAbstractTableModel>
-#include <QStringList>
+#include <QSpinBox>
 
-class TableListModel : public QAbstractTableModel
+class HexSpinBox : public QSpinBox
 {
     Q_OBJECT
-
     public:
-        TableListModel(QObject *parent = 0);
-        TableListModel(QStringList stringValue, int size, QObject *parent = 0);
-        TableListModel(QStringList stringValue, QStringList stringMnemonic, QObject *parent = 0);
-        
-        int rowCount(const QModelIndex &parent = QModelIndex()) const;
-        int columnCount(const QModelIndex &parent = QModelIndex()) const;
+        HexSpinBox(QWidget *parent = 0);
 
-        QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-
-        Qt::ItemFlags flags(const QModelIndex &index) const;
-        bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole);
-        bool insertRows(int position, int rows, const QModelIndex &index=QModelIndex());
-        bool removeRows(int position, int rows, const QModelIndex &index=QModelIndex());
-
-    private:
-        QStringList stringValue;
-        QStringList stringMnemonic;
+        //TODO: overload the default int to unsigned int
+        int valueFromText(const QString &text) const;
+        QString textFromValue(int value) const;
 };
 
-#endif // __TABLELISTMODEL_H__
-
+#endif // __HEXSPINBOX_H__

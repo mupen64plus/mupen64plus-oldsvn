@@ -49,6 +49,7 @@ static QApplication* application = 0;
 static QTranslator* translator = 0;
 #ifdef DBG
 static DebuggerWidget* debuggerWidget = 0;
+static RegisterWidget* registerWidget = 0;
 #endif
 
 namespace core {
@@ -107,6 +108,7 @@ void gui_init(int *argc, char ***argv)
 
 #ifdef DBG
     debuggerWidget = new DebuggerWidget;
+    registerWidget = new RegisterWidget;
 #endif
 }
 
@@ -130,8 +132,11 @@ void gui_main_loop(void)
     delete translator;
     translator = 0;
 #ifdef DBG
-    delete debuggerWidget;
+    if (debuggerWidget->close()) {}
+    if (registerWidget->close()) {}
     debuggerWidget = 0;
+    registerWidget = 0;
+
 #endif
 }
 
@@ -186,12 +191,14 @@ void gui_set_state(gui_state_t state)
 void init_debugger_frontend()
 {
     debuggerWidget->show();
-//    QApplication::instance()->processEvents();
-//    QApplication::instance()->sendPostedEvents();
+    debuggerWidget->setFocus();    
 }
 void update_debugger_frontend( unsigned int pc )
 {
-    debuggerWidget->update_desasm(pc);
+    //TODO: if (debuggerWidget->isVisible)
+        debuggerWidget->update_desasm(pc);
+    //TODO:  if (registerWidget->isVisible)
+        registerWidget->update_registers();
 }
 
 //Runs each VI for auto-updating views

@@ -266,17 +266,12 @@
     <bool>true</bool>
    </property>
    <property name="text" >
-    <string>Enable</string>
-   </property>
-  </action>
-  <action name="actionEnableDebugger" >
-   <property name="text" >
-    <string>EnableDebugger</string>
+    <string>E&amp;nable</string>
    </property>
   </action>
   <action name="actionDisasembler" >
    <property name="enabled" >
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text" >
     <string>&amp;Disasembler</string>
@@ -284,7 +279,7 @@
   </action>
   <action name="actionRegisters" >
    <property name="enabled" >
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text" >
     <string>&amp;Registers</string>

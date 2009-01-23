@@ -34,7 +34,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0" >
-         <layout class="QHBoxLayout" name="horizontalLayout_2" >
+         <layout class="QHBoxLayout" name="horizontalLayoutDisasm" >
           <item>
            <widget class="QTreeWidget" name="treeDisasm" >
             <column>
@@ -47,9 +47,6 @@
          </layout>
         </item>
        </layout>
-       <zorder>treeDisasm</zorder>
-       <zorder>layoutWidget</zorder>
-       <zorder>layoutWidget</zorder>
       </widget>
      </item>
      <item>
@@ -83,7 +80,7 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QFormLayout" name="formLayout_3" >
+         <layout class="QFormLayout" name="formLayoutButtons" >
           <property name="sizeConstraint" >
            <enum>QLayout::SetFixedSize</enum>
           </property>
@@ -131,9 +128,6 @@
          </layout>
         </item>
        </layout>
-       <zorder>pushRun</zorder>
-       <zorder>layoutWidget</zorder>
-       <zorder>layoutWidget</zorder>
       </widget>
      </item>
     </layout>

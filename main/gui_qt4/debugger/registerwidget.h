@@ -35,22 +35,40 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
     public:
         RegisterWidget(QWidget* parent = 0);
         virtual ~RegisterWidget();
-
-        void init_registers();
         void update_registers();
-        void init_fgr(void);
-        void update_fgr(void);
-        long long int gui_fantom_fgr_64[32];
 
+        // variables
+
+        int registers_opened;
 
     private:
-        QStringList stringlistGpr;
+        void init_registers();
+        void init_gpr(void);
+        void init_cop0(void);
+        void init_special(void);
+        void init_cop1(void);
+
+        void update_gpr(void);
+        void update_cop0(void);
+        void update_special(void);
+        void update_cop1(void);
+
+        long long int gui_fantom_gpr_64[32];
+        unsigned int gui_fantom_cop0_32[32];
+        long long int gui_fantom_cop1_64[32];
+
         QStringList stringlistHiLo;
         QStringList stringlistInterupt;
 
+        TableListModel *modelGpr;
+        TableListModel *modelCop0;
+        TableListModel *modelCop1;
         QStringListModel *modelHiLo;
         QStringListModel *modelInterupt;
-        TableListModel *modelGpr;
+
+        QStringList mnemonicGPR;
+        QStringList mnemonicCop0;
+        QStringList mnemonicCop1;
 };
 #endif // __REGISTERWIDGET_H__
 

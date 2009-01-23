@@ -26,40 +26,123 @@
 TableListModel::TableListModel(QObject *parent)
  : QAbstractTableModel(parent) { }
 
+TableListModel::TableListModel(QStringList value, QStringList mnemonic, QObject *parent)
+    : QAbstractTableModel(parent)
+{
+    stringMnemonic = mnemonic;
+    stringValue = value;
+}
+
+TableListModel::TableListModel(QStringList mnemonic, int size, QObject *parent)
+    : QAbstractTableModel(parent)
+{
+    stringMnemonic = mnemonic;
+    for (int i=0;i<mnemonic.size();i++)
+        if (size == 16)
+            stringValue << "XXXXXXXXXXXXXXXX";
+        else if (size == 8)
+            stringValue << "XXXXXXXX";
+        else
+            stringValue << "Not Valid";
+}
+ 
 int TableListModel::rowCount(const QModelIndex & /* parent */) const
 {
-    return 0; //TODO
-//    return TableListModel.height();
+    return stringValue.size();
 }
 
 int TableListModel::columnCount(const QModelIndex & /* parent */) const
 {
-    return 0; //TODO
-//    return TableListModel.width();
-}
-
-void TableListModel::initStringIndex(const QStringList &str)
-{
-    stringIndex = str;
-}
-
-void TableListModel::initStringValue(const QStringList &str)
-{
-    stringValue = str;
+    return 3;
 }
 
 QVariant TableListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || role != Qt::DisplayRole)
         return QVariant();
-    return QVariant(); //TODO: Don't get it ...
+    if (index.column() == 0)
+        return index.row();
+    else if (index.column() == 1)
+        return stringValue.at(index.row());
+    else
+        return stringMnemonic.at(index.row());
 }
 
-QVariant TableListModel::headerData(int /* section */,
-                 Qt::Orientation /* orientation */,
-                 int role) const
+QVariant TableListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role == Qt::SizeHintRole)
-        return QSize(1, 1);
-    return QVariant();
+     if (role != Qt::DisplayRole)
+         return QVariant();
+
+     if (orientation == Qt::Horizontal) {
+         switch (section) {
+             case 0:
+                 return tr("#");
+             case 1:
+                 return tr("Value");
+             case 2:
+                 return tr("Mnemonic");
+             default:
+                 return QVariant();
+         }
+     }
+     return QVariant();
 }
+
+bool TableListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && role == Qt::EditRole) {
+        int row = index.row();
+        QString val;
+
+        if (index.column() == 0)
+            return false;
+        else if (index.column() == 1)
+            val = value.toString();
+        else
+            return false;
+
+        stringValue.replace(row, val);
+        emit(dataChanged(index, index));
+
+        return true;
+    }
+    return false;
+}
+
+Qt::ItemFlags TableListModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+
+    return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+}
+
+bool TableListModel::insertRows(int position, int rows, const QModelIndex &index)
+{
+    Q_UNUSED(index);
+    beginInsertRows(QModelIndex(), position, position+rows-1);
+
+    for (int row=0; row < rows; row++) {
+        QString empty = " ";
+        stringValue.insert(position, empty);
+        stringMnemonic.insert(position, empty);
+    }
+    
+    endInsertRows();
+    return true;
+}
+
+bool TableListModel::removeRows(int position, int rows, const QModelIndex &index)
+{
+    Q_UNUSED(index);
+    beginRemoveRows(QModelIndex(), position, position+rows-1);
+
+    for (int row=0; row < rows; ++row) {
+        stringValue.removeAt(position);
+        stringMnemonic.removeAt(position);
+    }
+
+    endRemoveRows();
+    return true;
+}
+

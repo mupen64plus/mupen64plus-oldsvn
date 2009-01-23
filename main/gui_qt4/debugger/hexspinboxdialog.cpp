@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - tablelistmodel.h                                        *
+ *   Mupen64plus - hexspinboxdialog.cpp                                    *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2009 olejl                                              *
  *                                                                         *
@@ -19,36 +19,39 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __TABLELISTMODEL_H__
-#define __TABLELISTMODEL_H__
+#include <QtGui>
+#include <QDialog>
 
-#include <QAbstractTableModel>
-#include <QStringList>
+#include "hexspinboxdialog.h"
+#include "hexspinbox.h"
 
-class TableListModel : public QAbstractTableModel
+HexSpinBoxDialog::HexSpinBoxDialog(int i, QDialog* parent)
 {
-    Q_OBJECT
+    setupUi(this); // this sets up GUI
+ 
+    hexSpinBox = new HexSpinBox();
+    hexSpinBox->setValue(i);
+    hexSpinBox->setSingleStep(4);
+    hexSpinBox->setMinimum(0);
+    hexSpinBox->setMaximum(0x7fffffff);
+    verticalLayout->addWidget(hexSpinBox);
 
-    public:
-        TableListModel(QObject *parent = 0);
-        TableListModel(QStringList stringValue, int size, QObject *parent = 0);
-        TableListModel(QStringList stringValue, QStringList stringMnemonic, QObject *parent = 0);
-        
-        int rowCount(const QModelIndex &parent = QModelIndex()) const;
-        int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    connect( buttonBox, SIGNAL(accepted()), this, SLOT( onaccepted()));
 
-        QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+}
 
-        Qt::ItemFlags flags(const QModelIndex &index) const;
-        bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole);
-        bool insertRows(int position, int rows, const QModelIndex &index=QModelIndex());
-        bool removeRows(int position, int rows, const QModelIndex &index=QModelIndex());
+HexSpinBoxDialog::~HexSpinBoxDialog()
+{
+    //TODO: Implement destructor
+}
 
-    private:
-        QStringList stringValue;
-        QStringList stringMnemonic;
-};
+void HexSpinBoxDialog::onaccepted()
+{
+    acceptedValue = hexSpinBox->value();
+}
 
-#endif // __TABLELISTMODEL_H__
+int HexSpinBoxDialog::getAcceptedValue()
+{
+    return acceptedValue;
+}
 

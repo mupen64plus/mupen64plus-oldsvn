@@ -5,14 +5,25 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>405</width>
-    <height>692</height>
+    <width>357</width>
+    <height>552</height>
    </rect>
+  </property>
+  <property name="font" >
+   <font>
+    <pointsize>8</pointsize>
+   </font>
   </property>
   <property name="windowTitle" >
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" >
+   <property name="spacing" >
+    <number>0</number>
+   </property>
+   <property name="margin" >
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" >
      <property name="spacing" >
@@ -31,7 +42,73 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4" >
            <item>
-            <widget class="QTableView" name="tableGpr" />
+            <widget class="QTableView" name="tableGpr" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+               <horstretch>6</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font" >
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="lineWidth" >
+              <number>0</number>
+             </property>
+             <property name="dragDropOverwriteMode" >
+              <bool>false</bool>
+             </property>
+             <property name="dragDropMode" >
+              <enum>QAbstractItemView::NoDragDrop</enum>
+             </property>
+             <property name="alternatingRowColors" >
+              <bool>true</bool>
+             </property>
+             <property name="selectionMode" >
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior" >
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <property name="showGrid" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableView" name="tableCop0" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+               <horstretch>5</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font" >
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="lineWidth" >
+              <number>0</number>
+             </property>
+             <property name="dragDropOverwriteMode" >
+              <bool>false</bool>
+             </property>
+             <property name="alternatingRowColors" >
+              <bool>true</bool>
+             </property>
+             <property name="selectionMode" >
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior" >
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <property name="showGrid" >
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -119,7 +196,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_16" >
               <item>
-               <widget class="QListView" name="listHiLo" />
+               <widget class="QListView" name="listHiLo" >
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -147,7 +228,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_15" >
               <item>
-               <widget class="QListView" name="listInterupt" />
+               <widget class="QListView" name="listInterupt" >
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -192,7 +277,31 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_10" >
               <item>
-               <widget class="QListView" name="listCop1" />
+               <widget class="QTableView" name="tableCop1" >
+                <property name="font" >
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
+                <property name="lineWidth" >
+                 <number>0</number>
+                </property>
+                <property name="showDropIndicator" stdset="0" >
+                 <bool>false</bool>
+                </property>
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+                <property name="selectionMode" >
+                 <enum>QAbstractItemView::SingleSelection</enum>
+                </property>
+                <property name="selectionBehavior" >
+                 <enum>QAbstractItemView::SelectRows</enum>
+                </property>
+                <property name="showGrid" >
+                 <bool>false</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -288,7 +397,7 @@
        </widget>
        <widget class="QWidget" name="tabOther" >
         <attribute name="title" >
-         <string>&amp;AI / &amp;VI</string>
+         <string>&amp;AI / VI</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_6" >
          <item>
@@ -312,7 +421,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_10" >
               <item>
-               <widget class="QListView" name="listAi" />
+               <widget class="QListView" name="listAi" >
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -340,7 +453,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_11" >
               <item>
-               <widget class="QListView" name="listVi" />
+               <widget class="QListView" name="listVi" >
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -351,7 +468,7 @@
        </widget>
        <widget class="QWidget" name="tab" >
         <attribute name="title" >
-         <string>&amp;PI / &amp;RI / &amp;SI</string>
+         <string>&amp;PI / RI / SI</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout" >
          <item>
@@ -375,7 +492,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_7" >
               <item>
-               <widget class="QListView" name="listPi" />
+               <widget class="QListView" name="listPi" >
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -403,7 +524,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_8" >
               <item>
-               <widget class="QListView" name="listRi" />
+               <widget class="QListView" name="listRi" >
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -431,7 +556,11 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_9" >
               <item>
-               <widget class="QListView" name="listSi" />
+               <widget class="QListView" name="listSi" >
+                <property name="alternatingRowColors" >
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>

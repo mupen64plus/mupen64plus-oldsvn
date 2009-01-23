@@ -621,20 +621,21 @@ void MainWindow::setStateImplementation(int state)
 void MainWindow::debuggerToggle()
 {
     if (actionEnableDebugger->isChecked()) {
-        actionDisasembler->setEnabled(true);
-        actionRegisters->setEnabled(true);
+//        actionDisasembler->setEnabled(true);
+//        actionRegisters->setEnabled(true);
         core::g_DebuggerEnabled = 1;
     }
     else {
         core::g_DebuggerEnabled = 0;
-        actionDisasembler->setEnabled(false);
-        actionRegisters->setEnabled(false);
+//        actionDisasembler->setEnabled(false);
+//        actionRegisters->setEnabled(false);
     }
 }
 
 void MainWindow::disasemblerShow()
 {
-    //TODO: disasemblerShow
+    DebuggerWidget* dbg = new DebuggerWidget(this);
+    dbg->show();
 }
 
 void MainWindow::registersShow()
