@@ -422,6 +422,8 @@ void write_pifd();
 
 void update_SP();
 void update_DPC();
+void update_MI_intr_mode_reg();
+void update_MI_init_mask_reg();
 
 #endif
 

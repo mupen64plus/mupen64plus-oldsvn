@@ -36,8 +36,11 @@
 #include "../r4300/interupt.h"
 #include "../opengl/osd.h"
 
+#include "zip/unzip.h"
+
 const char* savestate_magic = "M64+SAVE";
 const int savestate_version = 0x00010000;  /* 1.0 */
+const int pj64_magic = 0x23D8A6C8;
 
 extern unsigned int interp_addr;
 
@@ -101,6 +104,15 @@ char* savestates_get_filename()
     length = strlen(ROM_SETTINGS.goodname)+4+1;
     char* filename = (char*)malloc(length);
     snprintf(filename, length, "%s.st%d", ROM_SETTINGS.goodname, slot);
+    return filename;
+}
+
+char* savestates_get_pj64_filename()
+{
+    size_t length;
+    length = strlen((char*)ROM_HEADER->nom)+7+1;
+    char* filename = (char*)malloc(length);
+    snprintf(filename, length, "%s.pj.zip", (char*)ROM_HEADER->nom);
     return filename;
 }
 
@@ -232,9 +244,10 @@ void savestates_load()
     gzread(f, buffer, 8);
     if(strncmp(buffer, savestate_magic, 8)!=0)
         {
-        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Unrecognized savestate format."));
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Not a Mupen64plus savestate format. Checking PJ64..."));
         free(filename);
         gzclose(f);
+        savestates_load_pj64(file);
         return;
         }
 
@@ -326,5 +339,296 @@ void savestates_load()
 
     main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("State loaded from: %s"), filename);
     free(filename);
+}
+
+void savestates_load_pj64()
+{
+    char *file, *filename, buffer[1024], RomHeader[64], szFileName[256], szExtraField[256], szComment[256];
+    unsigned int magic, value, vi_timer, SaveRDRAMSize;
+    int queuelength, i;
+    size_t length;
+    unzFile zipromfile;
+    unz_file_info fileinfo;
+
+    if(fname[0]!=0)  // A specific filename was given.
+        {
+        file = malloc(strlen(fname)+1);
+        strcpy(file, fname);
+        fname[0] = 0;
+        }
+    else
+        {
+        filename = savestates_get_pj64_filename();
+        length = strlen(get_savespath()) + strlen(filename) + 1;
+        file = malloc(length);
+        snprintf(file, length, "%s%s", get_savespath(), filename);
+        free(filename);
+        }
+
+    zipromfile = unzOpen(file); // Open the .zip file.
+    if (zipromfile == NULL)
+    {
+        unzClose(zipromfile);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error loading savestate: '%s' doesn't exist"), file);
+        free(file);
+        return;
+    }
+    if (unzGoToFirstFile(zipromfile)!=UNZ_OK)
+    {
+        unzClose(zipromfile);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error loading savestate. ZIP error #1 in: '%s'"), file);
+        free(file);
+        return;
+    }
+    if(unzGetCurrentFileInfo(zipromfile, &fileinfo, szFileName, 255, 
+        szExtraField, 255, szComment, 255)!=UNZ_OK)
+    {
+        unzClose(zipromfile);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error loading savestate. ZIP error #2 in: '%s'"), file);
+        free(file);
+        return;
+    }
+    if(unzOpenCurrentFile(zipromfile)!=UNZ_OK)
+    {
+        unzClose(zipromfile);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error loading savestate. ZIP error #3 in: '%s'"), file);
+        free(file);
+        return;
+    }
+    if(fileinfo.uncompressed_size<4)
+    {
+        unzClose(zipromfile);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error loading savestate. ZIP error #4 in: '%s'"), file);
+        free(file);
+        return;
+    }
+    // Check for PJ64 magic number
+    unzReadCurrentFile(zipromfile,&magic,4);
+    if (magic != pj64_magic)
+    {
+        unzClose(zipromfile);
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error loading savestate: '%s'. Unrecognized file format."), file);
+        free(file);
+        return; 
+    }
+
+    // SaveRDRAMSize
+    unzReadCurrentFile(zipromfile,&SaveRDRAMSize,4);
+
+    // RomHeader
+    unzReadCurrentFile(zipromfile, RomHeader,0x40);
+    if (memcmp(RomHeader,rom, 0x40) != 0) {
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error loading savestate: Savestate header doesn't match current ROM header."));
+        unzClose(zipromfile);
+        free(file);
+        return;
+    }
+
+    // vi_timer
+    unzReadCurrentFile(zipromfile, &vi_timer,4);
+
+    // Program Counter
+    if(!dynacore&&interpcore)
+        unzReadCurrentFile(zipromfile, &interp_addr,4);
+    else
+    {
+        unzReadCurrentFile(zipromfile, &queuelength,4);
+        for (i = 0; i < 0x100000; i++)
+            invalid_code[i] = 1;
+        jump_to(queuelength);
+    }
+
+    // GPR
+    unzReadCurrentFile(zipromfile, reg,8*32);
+
+    // FPR
+    unzReadCurrentFile(zipromfile, reg_cop1_fgr_64,8*32);
+
+    // CP0
+    unzReadCurrentFile(zipromfile, reg_cop0, 4*32);
+
+    // Initialze the interupts
+    vi_timer += reg_cop0[9]; // Add current Count
+    next_interupt = vi_timer;
+    next_vi = vi_timer;
+    vi_field = 0;
+    *((unsigned int*)&buffer[0]) = VI_INT;
+    *((unsigned int*)&buffer[4]) = vi_timer;
+    *((unsigned int*)&buffer[8]) = 0xFFFFFFFF;
+
+    load_eventqueue_infos(buffer);
+
+    // FPCR
+    unzReadCurrentFile(zipromfile, &FCR0,4);
+    unzReadCurrentFile(zipromfile, &buffer,120);   // Dummy read.
+    unzReadCurrentFile(zipromfile, &FCR31,4);
+
+    // hi / lo
+    unzReadCurrentFile(zipromfile,&hi,8);
+    unzReadCurrentFile(zipromfile,&lo,8);
+
+    // rdram register
+    unzReadCurrentFile(zipromfile, &rdram_register, sizeof(RDRAM_register));
+    
+    // sp_register
+    unzReadCurrentFile(zipromfile, &sp_register.sp_mem_addr_reg, 4);
+    unzReadCurrentFile(zipromfile, &sp_register.sp_dram_addr_reg, 4);
+    unzReadCurrentFile(zipromfile, &sp_register.sp_rd_len_reg, 4);
+    unzReadCurrentFile(zipromfile, &sp_register.sp_wr_len_reg, 4);
+    unzReadCurrentFile(zipromfile, &sp_register.w_sp_status_reg, 4);
+    unzReadCurrentFile(zipromfile, &sp_register.sp_dma_full_reg, 4);
+    unzReadCurrentFile(zipromfile, &sp_register.sp_dma_busy_reg, 4);
+    unzReadCurrentFile(zipromfile, &sp_register.sp_semaphore_reg, 4);
+    unzReadCurrentFile(zipromfile, &value, 4); // SP_PC_REG -> Not part of mupen savestate. Dummy read.
+    unzReadCurrentFile(zipromfile, &value, 4); // SP_IBIST_REG -> Not part of mupen savestate. Dummy read.
+    update_SP();
+
+    // dpc_register
+    unzReadCurrentFile(zipromfile, &dpc_register.dpc_start, 4);
+    unzReadCurrentFile(zipromfile, &dpc_register.dpc_end, 4);
+    unzReadCurrentFile(zipromfile, &dpc_register.dpc_current, 4);
+    unzReadCurrentFile(zipromfile, &dpc_register.w_dpc_status, 4);
+    unzReadCurrentFile(zipromfile, &dpc_register.dpc_clock, 4);
+    unzReadCurrentFile(zipromfile, &dpc_register.dpc_bufbusy, 4);
+    unzReadCurrentFile(zipromfile, &dpc_register.dpc_pipebusy, 4);
+    unzReadCurrentFile(zipromfile, &dpc_register.dpc_tmem, 4);
+    unzReadCurrentFile(zipromfile, &value, 4); // Dummy read ... Keeping up with PJ64
+    unzReadCurrentFile(zipromfile, &value, 4); // Dummy read ... Keeping up with PJ64
+    update_DPC();
+
+    // mi_register
+    unzReadCurrentFile(zipromfile, &MI_register.w_mi_init_mode_reg, 4);
+    unzReadCurrentFile(zipromfile, &MI_register.mi_version_reg, 4);
+    unzReadCurrentFile(zipromfile, &MI_register.mi_intr_reg, 4);
+    unzReadCurrentFile(zipromfile, &MI_register.w_mi_intr_mask_reg, 4);
+    update_MI_intr_mask_reg();
+    update_MI_init_mode_reg();
+
+    // vi_register          
+    unzReadCurrentFile(zipromfile, &vi_register, 4*14);
+
+    // ai_register
+    unzReadCurrentFile(zipromfile, &ai_register, 4*6);
+
+    // TODO: Not avialable in PJ64 savestate
+    // ai_register.next_delay = 0; ai_register.next_len = 0;
+    // ai_register.current_delay = 0;//804629; ai_register.current_len = 0;
+
+    // pi_register
+    unzReadCurrentFile(zipromfile, &pi_register, sizeof(PI_register));
+    
+    // ri_register
+    unzReadCurrentFile(zipromfile, &ri_register, sizeof(RI_register));
+
+    // si_register
+    unzReadCurrentFile(zipromfile, &si_register, sizeof(SI_register));
+
+    // tlb
+    memset(tlb_LUT_r, 0, 0x400000);
+    memset(tlb_LUT_w, 0, 0x400000);
+    TLB_pj64 tlb_pj64;
+    for (i=0;i<32;i++)
+    {
+        unsigned int j;
+
+        unzReadCurrentFile(zipromfile, &tlb_pj64, sizeof(TLB_pj64));
+        tlb_e[i].mask = (short) tlb_pj64.BreakDownPageMask.Mask;
+        tlb_e[i].vpn2 = tlb_pj64.BreakDownEntryHi.VPN2;
+        tlb_e[i].g = (char) tlb_pj64.BreakDownEntryLo0.GLOBAL & tlb_pj64.BreakDownEntryLo1.GLOBAL;
+        tlb_e[i].asid = (unsigned char) tlb_pj64.BreakDownEntryHi.ASID;
+        tlb_e[i].pfn_even = tlb_pj64.BreakDownEntryLo0.PFN;
+        tlb_e[i].c_even = (char) tlb_pj64.BreakDownEntryLo0.C;
+        tlb_e[i].d_even = (char) tlb_pj64.BreakDownEntryLo0.D;
+        tlb_e[i].v_even = (char) tlb_pj64.BreakDownEntryLo0.V;
+        tlb_e[i].pfn_odd = tlb_pj64.BreakDownEntryLo1.PFN;
+        tlb_e[i].c_odd = (char) tlb_pj64.BreakDownEntryLo1.C;
+        tlb_e[i].d_odd = (char) tlb_pj64.BreakDownEntryLo1.D;
+        tlb_e[i].v_odd = (char) tlb_pj64.BreakDownEntryLo1.V;
+
+        // This is copied from TLBWI instruction
+        // tlb_e[i].r = 0;
+        tlb_e[i].start_even = (unsigned int) tlb_e[i].vpn2 << 13;
+        tlb_e[i].end_even = (unsigned int) tlb_e[i].start_even + (tlb_e[i].mask << 12) + 0xFFF;
+        tlb_e[i].phys_even = (unsigned int) tlb_e[i].pfn_even << 12;;
+        tlb_e[i].start_odd = (unsigned int) tlb_e[i].end_even + 1;
+        tlb_e[i].end_odd = (unsigned int) tlb_e[i].start_odd + (tlb_e[i].mask << 12) + 0xFFF;;
+        tlb_e[i].phys_odd = (unsigned int) tlb_e[i].pfn_odd << 12;
+        
+        if (tlb_e[i].v_even)
+        {
+            if (tlb_e[i].start_even < tlb_e[i].end_even &&
+                !(tlb_e[i].start_even >= 0x80000000 && tlb_e[i].end_even < 0xC0000000) &&
+                tlb_e[i].phys_even < 0x20000000)
+            {
+                for (j=tlb_e[i].start_even;j<tlb_e[i].end_even;j++)
+                    tlb_LUT_r[j>>12] = 0x80000000 | (tlb_e[i].phys_even + 
+                                                     (j - tlb_e[i].start_even));
+                if (tlb_e[i].d_even)
+                    for (j=tlb_e[i].start_even;j<tlb_e[i].end_even;j++)
+                        tlb_LUT_w[j>>12] = 0x80000000 | (tlb_e[i].phys_even + (j - tlb_e[i].start_even));
+            }
+            for (j=tlb_e[i].start_even>>12; j<=tlb_e[i].end_even>>12; j++)
+            {
+                if(blocks[j] && blocks[j]->adler32)
+                {
+                    if(blocks[j]->adler32 == 
+                       adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[j]&0x7FF000)/4],0x1000))
+                        invalid_code[j] = 0;
+                }
+            }
+        }
+
+        if (tlb_e[i].v_odd)
+        {
+            if (tlb_e[i].start_odd < tlb_e[i].end_odd &&
+                !(tlb_e[i].start_odd >= 0x80000000 &&
+                  tlb_e[i].end_odd < 0xC0000000) &&
+                tlb_e[i].phys_odd < 0x20000000)
+            {
+                for (j=tlb_e[i].start_odd;j<tlb_e[i].end_odd;j++)
+                    tlb_LUT_r[j>>12] = 0x80000000 | (tlb_e[i].phys_odd + (j - tlb_e[i].start_odd));
+                if (tlb_e[i].d_odd)
+                    for (j=tlb_e[i].start_odd;j<tlb_e[i].end_odd;j++)
+                        tlb_LUT_w[j>>12] = 0x80000000 | (tlb_e[i].phys_odd + (j - tlb_e[i].start_odd));
+            }
+            for (j=tlb_e[i].start_odd>>12; j<=tlb_e[i].end_odd>>12; j++)
+            {
+                if(blocks[j] && blocks[j]->adler32)
+                {
+                    if(blocks[j]->adler32 == adler32(0,(const Bytef*)&rdram[(tlb_LUT_r[j]&0x7FF000)/4],0x1000))
+                        invalid_code[j] = 0;
+                }
+            }
+        }
+    }
+
+    // pif ram
+    unzReadCurrentFile(zipromfile, PIF_RAM, 0x40);
+
+    // RDRAM
+    memset(rdram, 0, 0x800000);
+    unzReadCurrentFile(zipromfile, rdram, SaveRDRAMSize);
+
+    // DMEM
+    unzReadCurrentFile(zipromfile, SP_DMEM, 0x1000);
+    
+    // IMEM
+    unzReadCurrentFile(zipromfile, SP_IMEM, 0x1000);
+
+    // TODO: The following is not available in PJ64 savestate. Keep the values as is.
+    // rsp_register.rsp_pc = 0; rsp_register.rsp_ibist = 0; dps_register.dps_tbist = 0; dps_register.dps_test_mode = 0;
+    // dps_register.dps_buftest_addr = 0; dps_register.dps_buftest_data = 0; llbit = 0;
+    
+    // No flashram info in pj64 savestate.
+    init_flashram();
+
+    unzClose(zipromfile);
+    if(!dynacore&&interpcore)
+        last_addr = interp_addr;
+    else
+        last_addr = PC->addr;
+
+    main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("State loaded from: %s"), file);
+    free(file);
 }
 

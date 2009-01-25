@@ -1008,7 +1008,7 @@ void free_memory()
 {
 }
 
-static void update_MI_init_mode_reg()
+void update_MI_init_mode_reg()
 {
    MI_register.init_length = MI_register.w_mi_init_mode_reg & 0x7F;
    if (MI_register.w_mi_init_mode_reg & 0x80) 
@@ -1035,7 +1035,7 @@ static void update_MI_init_mode_reg()
                    );
 }
 
-static void update_MI_intr_mask_reg()
+void update_MI_intr_mask_reg()
 {
    if (MI_register.w_mi_intr_mask_reg & 0x1)   MI_register.SP_intr_mask = 0;
    if (MI_register.w_mi_intr_mask_reg & 0x2)   MI_register.SP_intr_mask = 1;
