@@ -35,11 +35,13 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
     public:
         RegisterWidget(QWidget* parent = 0);
         virtual ~RegisterWidget();
-        void update_registers();
 
         // variables
 
         int registers_opened;
+
+    public slots:
+        void update_registers();
 
     private:
         void init_registers();

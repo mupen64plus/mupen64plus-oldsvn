@@ -190,15 +190,18 @@ void gui_set_state(gui_state_t state)
 #ifdef DBG
 void init_debugger_frontend()
 {
-    debuggerWidget->show();
-    debuggerWidget->setFocus();    
+    QMetaObject::invokeMethod(debuggerWidget, "show", Qt::QueuedConnection);
+    debuggerWidget->setFocus();
 }
 void update_debugger_frontend( unsigned int pc )
 {
     //TODO: if (debuggerWidget->isVisible)
-        debuggerWidget->update_desasm(pc);
+    QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
+                               Qt::QueuedConnection,
+                               Q_ARG(unsigned int, pc));
     //TODO:  if (registerWidget->isVisible)
-        registerWidget->update_registers();
+    QMetaObject::invokeMethod(registerWidget, "update_registers",
+                               Qt::QueuedConnection);
 }
 
 //Runs each VI for auto-updating views

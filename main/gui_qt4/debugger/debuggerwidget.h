@@ -33,6 +33,8 @@ class DebuggerWidget : public QWidget, private Ui_DebuggerWidget
     public:
         DebuggerWidget(QWidget* parent = 0);
         virtual ~DebuggerWidget();
+
+    public slots:
         void update_desasm ( unsigned int );
 
     private slots:
