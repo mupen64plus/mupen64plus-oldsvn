@@ -220,7 +220,6 @@ void savestates_load()
         filename = malloc(strlen(fname)+1);
         strcpy(file, fname);
         strcpy(filename, fname);
-        fname[0] = 0;
         }
     else
         {
@@ -247,10 +246,11 @@ void savestates_load()
         main_message(0, 1, 1, OSD_BOTTOM_LEFT, tr("Error: Not a Mupen64plus savestate format. Checking PJ64..."));
         free(filename);
         gzclose(f);
-        savestates_load_pj64(file);
+        savestates_load_pj64();
         return;
         }
 
+    fname[0] = 0;
     /* Read savestate file version in big-endian order. */
     gzread(f, inbuf, 4);
     i =            inbuf[0];
@@ -343,7 +343,7 @@ void savestates_load()
 
 void savestates_load_pj64()
 {
-    char *file, *filename, buffer[1024], RomHeader[64], szFileName[256], szExtraField[256], szComment[256];
+    char *file, buffer[1024], RomHeader[64], szFileName[256], szExtraField[256], szComment[256];
     unsigned int magic, value, vi_timer, SaveRDRAMSize;
     int queuelength, i;
     size_t length;
@@ -358,11 +358,10 @@ void savestates_load_pj64()
         }
     else
         {
-        filename = savestates_get_pj64_filename();
-        length = strlen(get_savespath()) + strlen(filename) + 1;
+        file = savestates_get_pj64_filename();
+        length = strlen(get_savespath()) + strlen(file) + 1;
         file = malloc(length);
-        snprintf(file, length, "%s%s", get_savespath(), filename);
-        free(filename);
+        snprintf(file, length, "%s%s", get_savespath(), file);
         }
 
     zipromfile = unzOpen(file); // Open the .zip file.
