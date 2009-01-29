@@ -46,9 +46,12 @@ TableListModel::TableListModel(QStringList mnemonic, int size, QObject *parent)
             stringValue << "Not Valid";
 }
  
-int TableListModel::rowCount(const QModelIndex & /* parent */) const
+int TableListModel::rowCount(const QModelIndex & parent) const
 {
-    return stringValue.size();
+    int rows = 0;
+    if (!parent.isValid())
+        rows = stringValue.size();
+    return rows;
 }
 
 int TableListModel::columnCount(const QModelIndex & /* parent */) const
@@ -58,14 +61,24 @@ int TableListModel::columnCount(const QModelIndex & /* parent */) const
 
 QVariant TableListModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || role != Qt::DisplayRole)
-        return QVariant();
-    if (index.column() == 0)
-        return index.row();
-    else if (index.column() == 1)
-        return stringValue.at(index.row());
-    else
-        return stringMnemonic.at(index.row());
+    QVariant result;
+    int row = index.row();
+
+    if (index.isValid() && role == Qt::DisplayRole) {
+        switch (index.column()) {
+            case 0:
+                result = index.row();
+                break;
+            case 1:
+                result = stringValue.at(row);
+                break;
+            case 2:
+                result = stringMnemonic.at(row);
+                break;
+        }
+    }
+
+    return result;
 }
 
 QVariant TableListModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -90,31 +103,31 @@ QVariant TableListModel::headerData(int section, Qt::Orientation orientation, in
 
 bool TableListModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.isValid() && role == Qt::EditRole) {
-        int row = index.row();
-        QString val;
+    bool retval = false;
+    int row = index.row();
+    int stringCount = stringValue.count();
 
-        if (index.column() == 0)
-            return false;
-        else if (index.column() == 1)
-            val = value.toString();
-        else
-            return false;
-
-        stringValue.replace(row, val);
-        emit(dataChanged(index, index));
-
-        return true;
+    if (index.isValid() && row >= 0 && row < stringCount) {
+        if (index.column() == 1 && role == Qt::EditRole ) {
+            QString val = value.toString();
+            stringValue.replace(row, val);
+            retval = true;
+            emit(dataChanged(index, index));
+        }
     }
-    return false;
+
+    return retval;
 }
 
 Qt::ItemFlags TableListModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid())
-        return Qt::ItemIsEnabled;
+    Qt::ItemFlags flags = QAbstractTableModel::flags(index);
 
-    return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    if (index.isValid()) {
+        flags |= Qt::ItemIsEditable;
+    }
+
+    return flags;
 }
 
 bool TableListModel::insertRows(int position, int rows, const QModelIndex &index)
