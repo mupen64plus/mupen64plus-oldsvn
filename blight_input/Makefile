@@ -20,6 +20,8 @@ else
   include ../pre.mk
 endif
 
+-include ../configure.gen
+
 # local CFLAGS, LIBS, and LDFLAGS
 SDLTTF_LIBS	= -lSDL_ttf
 CFLAGS += -DGUI_SDL -DPIC
@@ -30,6 +32,9 @@ else
   SDLTTF_LIBS += -L$(SDL_TTF_DIR)\lib
 endif
 
+ifeq ($(PLUGINDBG), 1)
+  CFLAGS += -D_DEBUG
+endif
 # list of object files to generate
 OBJ_BLIGHT = \
 	plugin.o \

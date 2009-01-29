@@ -28,7 +28,7 @@ from optparse import OptionParser, OptionGroup, OptionValueError, SUPPRESS_HELP
 defaultFile = 'configure.gen'
 
 defaultOpts = { 
-'NOBLIGHT':'0','NOJTTL':'0','NO_RESAMP':'0','NODUMMY':'0',
+'NOBLIGHT':'0','NOJTTL':'0','NO_RESAMP':'0','NODUMMY':'0','PLUGINDBG':'0',
 'NOGLN64':'0','NORICE':'0','NOGLIDE':'0', 'NOHLERSP':'0','NOMINPUT':'0',
 'DBG_CORE':'0', 'DBG_COUNT':'0', 'DBG_COMPARE':'0', 'DBG_PROFILE':'0',
 'DBG' : '0', 'DBGSYM' : '0', 'LIRC' : '1', 'Z64' : '1' , 'GUI' : 'GTK2',
@@ -88,6 +88,9 @@ optionTable = [
 ['--disable-corecomp','DBG_COMPARE','0','DBG','disable r4300 core synched debugging'],
 ['--enable-profiling','DBG_PROFILE','1','DBG','dump r4300 dynarec profiling data'],
 ['--disable-profiling','DBG_PROFILE','0','DBG','disable r4300 dynarec profiling data'],
+['--enable-plugindebug','PLUGINDBG','1','DBG','enable extra debugging output for all plugins '],
+['--disable-plugindebug','PLUGINDBG','0','DBG','hide extra debugging output for all plugins '],
+
 
 ['--prefix-dir','PREFIX',None,'PTH','sets the prefix for install'],
 ['--data-dir','SHAREDIR',None,'PTH','path to install shared data'],
@@ -234,6 +237,7 @@ def printSettings(config):
     if config['DBG_COUNT']=='1': print "\tR4300 instruction count output"
     if config['DBG_COMPARE']=='1': print "\tR4300 core-synched debugging"
     if config['DBG_PROFILE']=='1': print "\tR4300 dynarec profiling output"
+    if config['PLUGINDBG']=='1': print "\tPlugin debugging output"
     
     print "Plugins:"
     if config['Z64']=='1': print "\tZ64 RSP & Video"

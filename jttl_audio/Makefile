@@ -62,6 +62,12 @@ endif
 
 ifeq ($(DBGSYM), 1)
   STRIP=true
+  CFLAGS += -g
+  LDFLAGS += -g
+endif
+
+ifeq ($(PLUGINDBG), 1)
+  CFLAGS += -DDEBUG
 endif
 
 # build targets
