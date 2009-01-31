@@ -33,6 +33,7 @@ namespace debugger {
     extern "C" {
         #include "../../../debugger/debugger.h"
         #include "../../../debugger/decoder.h"
+        #include "../../../debugger/breakpoints.h"
     }
 }
 
@@ -42,10 +43,6 @@ namespace core {
         #include "../../version.h"
     }
 }
-
-class RegisterWidget;
-
-unsigned int focused_pc, previous_pc;
 
 DebuggerWidget::DebuggerWidget(QWidget* parent)
 {
@@ -112,6 +109,14 @@ void DebuggerWidget::update_desasm( unsigned int current_pc )
             item->setBackgroundColor(0, red);
             item->setBackgroundColor(1, red);
             item->setBackgroundColor(2, red);
+        }
+        if(debugger::check_breakpoints((unsigned int) tmp_pc) != -1)
+        {
+            QColor color;
+            color.setBlue(255);
+            item->setBackgroundColor(0, color);
+            item->setBackgroundColor(1, color);
+            item->setBackgroundColor(2, color);
         }
         items.append(item);
     }

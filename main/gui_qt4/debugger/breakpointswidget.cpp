@@ -78,6 +78,10 @@ void BreakpointsWidget::onadd()
     else if(text.contains("x", Qt::CaseInsensitive)) newbp.flags |= BPT_FLAG_EXEC;
     else if(text.contains("l", Qt::CaseInsensitive)) newbp.flags |= BPT_FLAG_LOG;
     
+    //If none of r/w/x specified, default to exec
+    if(!(newbp.flags & (BPT_FLAG_EXEC | BPT_FLAG_READ | BPT_FLAG_WRITE)))
+        BPT_SET_FLAG(newbp, BPT_FLAG_EXEC);
+
     int first = text.indexOf(QRegExp("[0123456789abcdefABCDEF]"));
     text.remove(0,first);
     int last = text.lastIndexOf(QRegExp("[0123456789abcdefABCDEF]"));
@@ -102,7 +106,7 @@ void BreakpointsWidget::onadd()
                 QMessageBox::Ok);
         return;
     }
-    BreakpointsWidget::update_breakpoint(); 
+    BreakpointsWidget::update_breakpoint();
 }
 
 void BreakpointsWidget::onremove()
