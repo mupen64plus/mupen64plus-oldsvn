@@ -81,6 +81,7 @@
     <addaction name="actionEnableDebugger" />
     <addaction name="actionDisasembler" />
     <addaction name="actionRegisters" />
+    <addaction name="actionBreakpoints" />
    </widget>
    <addaction name="menu_File" />
    <addaction name="menu_Emulation" />
@@ -283,6 +284,11 @@
    </property>
    <property name="text" >
     <string>&amp;Registers</string>
+   </property>
+  </action>
+  <action name="actionBreakpoints" >
+   <property name="text" >
+    <string>&amp;Breakpoints</string>
    </property>
   </action>
  </widget>

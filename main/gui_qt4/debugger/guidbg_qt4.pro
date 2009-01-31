@@ -33,14 +33,17 @@ unix {
 # Input
 HEADERS += debuggerwidget.h
 HEADERS += registerwidget.h
+HEADERS += breakpointswidget.h
 HEADERS += hexspinboxdialog.h
 HEADERS += tablelistmodel.h
 HEADERS += hexspinbox.h
 FORMS += debuggerwidget.ui
 FORMS += registerwidget.ui
+FORMS += breakpointswidget.ui
 FORMS += hexspinboxdialog.ui
 SOURCES += debuggerwidget.cpp
 SOURCES += registerwidget.cpp
+SOURCES += breakpointswidget.cpp
 SOURCES += hexspinboxdialog.cpp
 SOURCES += tablelistmodel.cpp
 SOURCES += hexspinbox.cpp

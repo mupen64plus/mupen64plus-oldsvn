@@ -28,6 +28,7 @@
 #ifdef DBG
 #include "debugger/debuggerwidget.h"
 #include "debugger/registerwidget.h"
+#include "debugger/breakpointswidget.h"
 #endif
 
 #include <SDL_video.h>
@@ -531,12 +532,16 @@ void MainWindow::setupActions()
         }
     }
 
-//TODO #ifdef DBG
+#ifdef DBG
     //Debugger Actions
     connect(actionEnableDebugger, SIGNAL(triggered()), this, SLOT(debuggerToggle()));
     connect(actionDisasembler, SIGNAL(triggered()), this, SLOT(disasemblerShow()));
     connect(actionRegisters, SIGNAL(triggered()), this, SLOT(registersShow()));
-//TODO #endif
+    connect(actionBreakpoints, SIGNAL(triggered()), this, SLOT(breakpointsShow()));
+    menu_Debug->menuAction()->setVisible(true);
+#else
+    menu_Debug->menuAction()->setVisible(false);
+#endif
 
     //Settings Actions
     connect(actionShowFilter, SIGNAL(toggled(bool)),
@@ -634,14 +639,20 @@ void MainWindow::debuggerToggle()
 
 void MainWindow::disasemblerShow()
 {
-    DebuggerWidget* dbg = new DebuggerWidget(this);
-    dbg->show();
+    DebuggerWidget* w = new DebuggerWidget(this);
+    w->show();
 }
 
 void MainWindow::registersShow()
 {
-    RegisterWidget* reg = new RegisterWidget(this);
-    reg->show();
+    RegisterWidget* w = new RegisterWidget(this);
+    w->show();
+}
+
+void MainWindow::breakpointsShow()
+{
+    BreakpointsWidget* w = new BreakpointsWidget(this);
+    w->show();
 }
 //TODO #endif
 

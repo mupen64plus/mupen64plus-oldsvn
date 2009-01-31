@@ -24,7 +24,6 @@ CONFIG += staticlib
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .
-LIBS += -Lmain/gui_qt4/debugger -llibguidbg_qt4
 
 unix {
     CONFIG += link_pkgconfig

@@ -41,6 +41,7 @@
 #ifdef DBG
 #include "debugger/debuggerwidget.h"
 #include "debugger/registerwidget.h"
+#include "debugger/breakpointswidget.h"
 #endif
 
 // ugly globals
@@ -50,6 +51,7 @@ static QTranslator* translator = 0;
 #ifdef DBG
 static DebuggerWidget* debuggerWidget = 0;
 static RegisterWidget* registerWidget = 0;
+static BreakpointsWidget* breakpointsWidget = 0;
 #endif
 
 namespace core {
@@ -109,6 +111,7 @@ void gui_init(int *argc, char ***argv)
 #ifdef DBG
     debuggerWidget = new DebuggerWidget;
     registerWidget = new RegisterWidget;
+    breakpointsWidget = new BreakpointsWidget;
 #endif
 }
 
@@ -134,9 +137,10 @@ void gui_main_loop(void)
 #ifdef DBG
     if (debuggerWidget->close()) {}
     if (registerWidget->close()) {}
+    if (breakpointsWidget->close()) {}
     debuggerWidget = 0;
     registerWidget = 0;
-
+    breakpointsWidget = 0;
 #endif
 }
 
@@ -201,6 +205,10 @@ void update_debugger_frontend( unsigned int pc )
                                Q_ARG(unsigned int, pc));
     //TODO:  if (registerWidget->isVisible)
     QMetaObject::invokeMethod(registerWidget, "update_registers",
+                               Qt::QueuedConnection);
+
+    //TODO:  if (breakpointsWidget->isVisible)
+    QMetaObject::invokeMethod(breakpointsWidget, "update_breakpoints",
                                Qt::QueuedConnection);
 }
 

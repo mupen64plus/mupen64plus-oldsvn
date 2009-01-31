@@ -47,20 +47,10 @@ class RegisterWidget;
 
 unsigned int focused_pc, previous_pc;
 
-DebuggerWidget::DebuggerWidget(QWidget* parent) // : QWidget(parent)
+DebuggerWidget::DebuggerWidget(QWidget* parent)
 {
     setupUi(this); // this sets up GUI
  
-    hexSpinBox = new HexSpinBox();
-    previous_pc = 0x00000000;
-    focused_pc = 0x00000000;
-    hexSpinBox->setValue(focused_pc);
-    hexSpinBox->setSingleStep(4);
-    hexSpinBox->setMinimum(0);
-    hexSpinBox->setMaximum(0xffffffff);
-    formLayoutButtons->addWidget(hexSpinBox);
-
-
     // signals/slots mechanism in action
     connect( pushStep, SIGNAL( clicked() ), this, SLOT( onstep() ) ); 
     connect( pushRun, SIGNAL( clicked() ), this, SLOT( onrun() ) ); 
@@ -77,8 +67,7 @@ DebuggerWidget::DebuggerWidget(QWidget* parent) // : QWidget(parent)
     treeDisasm->setEditTriggers(QAbstractItemView::AllEditTriggers);
     QString str = "Address,Opcode,Args";
     QStringList list = str.split(",");
-    treeDisasm->setHeaderLabels(list);
-    
+    treeDisasm->setHeaderLabels(list);    
 }
 
 DebuggerWidget::~DebuggerWidget()
@@ -88,6 +77,7 @@ DebuggerWidget::~DebuggerWidget()
 
 void DebuggerWidget::update_desasm( unsigned int current_pc )
 {
+
     char opcode[64];
     char args[128];
     unsigned int instr;
@@ -97,7 +87,6 @@ void DebuggerWidget::update_desasm( unsigned int current_pc )
     items.clear();
     
     focused_pc = current_pc;
-    hexSpinBox->setValue(focused_pc);
     for (int i = -4; i<28; i++)
     {
         tmp_pc = current_pc + (i*4);

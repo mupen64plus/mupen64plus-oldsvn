@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - registerwidget.h                                        *
+ *   Mupen64plus - breakpointswidget.h                                      *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2009 olejl                                              *
  *                                                                         *
@@ -19,54 +19,37 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __REGISTERWIDGET_H__
-#define __REGISTERWIDGET_H__
+#ifndef __BREAKPOINTSWIDGET_H__
+#define __BREAKPOINTSWIDGET_H__
 
-#include <QWidget>
-#include <QStringListModel>
+#include <QDialog>
+#include <QStandardItemModel>
 
-#include "ui_registerwidget.h"
+#include "ui_breakpointswidget.h"
 
-class TableListModel;
-
-class RegisterWidget : public QWidget, private Ui_RegisterWidget
+class BreakpointsWidget : public QWidget, private Ui_BreakpointsWidget
 {
     Q_OBJECT
     public:
-        RegisterWidget(QWidget* parent = 0);
-        virtual ~RegisterWidget();
+        BreakpointsWidget(QWidget* parent = 0);
+        virtual ~BreakpointsWidget();
 
     public slots:
-        void update_registers();
+        void update_breakpoint ( );
 
     private:
-        void init_registers();
-        void init_gpr(void);
-        void init_cop0(void);
-        void init_special(void);
-        void init_cop1(void);
+        QString get_breakpoint_display_string(int);
+        QStandardItemModel model;
 
-        void update_gpr(void);
-        void update_cop0(void);
-        void update_special(void);
-        void update_cop1(void);
-
-        long long int gui_fantom_gpr_64[32];
-        unsigned int gui_fantom_cop0_32[32];
-        long long int gui_fantom_cop1_64[32];
-
-        QStringList stringlistHiLo;
-        QStringList stringlistInterupt;
-
-        TableListModel *modelGpr;
-        TableListModel *modelCop0;
-        TableListModel *modelCop1;
-        QStringListModel *modelHiLo;
-        QStringListModel *modelInterupt;
-
-        QStringList mnemonicGPR;
-        QStringList mnemonicCop0;
-        QStringList mnemonicCop1;
+    private slots:
+        void onadd();
+        void onremove();
+        void onenable();
+        void ondisable();
+        void ontoggle();
+        void onedit();
+        void _toggle(int flag);
 };
-#endif // __REGISTERWIDGET_H__
+
+#endif // __BREAKPOINTSWIDGET_H__
 

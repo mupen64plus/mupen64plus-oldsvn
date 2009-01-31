@@ -51,14 +51,11 @@ RegisterWidget::RegisterWidget(QWidget* parent) // : QWidget(parent)
     setWindowTitle(tr("Mupen64Plus Register Viewer"));
     
     RegisterWidget::init_registers();
-    
-    registers_opened = 1;
 }
 
 RegisterWidget::~RegisterWidget()
 {
     //TODO: Implement destructor
-    registers_opened = 0;
 }
 
 void RegisterWidget::init_registers()
@@ -185,7 +182,7 @@ void RegisterWidget::update_special()
 
 void RegisterWidget::update_cop1()
 {
-    //TODO: I can manage to edit individual index'es from here.
+    //TODO: I can't manage to edit individual index'es from here.
     QModelIndex index;
     QString tmp = "XXpos8 testXXXXX";
     index = modelCop1->index(8, 1, QModelIndex());

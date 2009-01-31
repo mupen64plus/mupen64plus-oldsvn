@@ -137,10 +137,12 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void aboutDialogShow();
         void setStateImplementation(int state);
         
+//TODO: #ifdef DGB
         void debuggerToggle();
         void disasemblerShow();
         void registersShow();
-        
+        void breakpointsShow();
+//TODO: #endif        
     protected:
         void customEvent(QEvent* event);
         void closeEvent(QCloseEvent* event);
