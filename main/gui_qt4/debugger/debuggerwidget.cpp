@@ -72,9 +72,8 @@ DebuggerWidget::~DebuggerWidget()
     //TODO: Implement destructor
 }
 
-void DebuggerWidget::update_desasm( unsigned int current_pc )
+void DebuggerWidget::update_desasm( unsigned int pc )
 {
-
     char opcode[64];
     char args[128];
     unsigned int instr;
@@ -83,7 +82,8 @@ void DebuggerWidget::update_desasm( unsigned int current_pc )
     treeDisasm->clear();
     items.clear();
     
-    focused_pc = current_pc;
+    current_pc = pc;
+    focused_pc = pc;
     for (int i = -4; i<28; i++)
     {
         tmp_pc = current_pc + (i*4);

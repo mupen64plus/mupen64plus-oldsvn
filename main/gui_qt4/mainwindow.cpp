@@ -639,14 +639,19 @@ void MainWindow::debuggerToggle()
 
 void MainWindow::disasemblerShow()
 {
-    DebuggerWidget* w = new DebuggerWidget(this);
-    w->show();
+    //TODO
+    QMessageBox::information(this, tr("Information"),
+            tr("Not implemented."),
+            QMessageBox::Ok);
+
 }
 
 void MainWindow::registersShow()
 {
-    RegisterWidget* w = new RegisterWidget(this);
-    w->show();
+    //TODO
+    QMessageBox::information(this, tr("Information"),
+            tr("Not implemented."),
+            QMessageBox::Ok);
 }
 
 void MainWindow::breakpointsShow()

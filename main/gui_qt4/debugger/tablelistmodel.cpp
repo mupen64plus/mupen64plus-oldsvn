@@ -23,27 +23,14 @@
 
 #include "tablelistmodel.h"
 
-TableListModel::TableListModel(QObject *parent)
- : QAbstractTableModel(parent) { }
-
-TableListModel::TableListModel(QStringList value, QStringList mnemonic, QObject *parent)
-    : QAbstractTableModel(parent)
-{
-    stringMnemonic = mnemonic;
-    stringValue = value;
-}
-
 TableListModel::TableListModel(QStringList mnemonic, int size, QObject *parent)
     : QAbstractTableModel(parent)
 {
     stringMnemonic = mnemonic;
-    for (int i=0;i<mnemonic.size();i++)
-        if (size == 16)
-            stringValue << "XXXXXXXXXXXXXXXX";
-        else if (size == 8)
-            stringValue << "XXXXXXXX";
-        else
-            stringValue << "Not Valid";
+    for (int i=0;i<mnemonic.size();i++) {
+        stringValue.append(QString("%1").arg("", size, QChar('X')));
+        bgColor.append(QColor(Qt::white));
+    }
 }
  
 int TableListModel::rowCount(const QModelIndex & parent) const
@@ -64,20 +51,24 @@ QVariant TableListModel::data(const QModelIndex &index, int role) const
     QVariant result;
     int row = index.row();
 
-    if (index.isValid() && role == Qt::DisplayRole) {
-        switch (index.column()) {
-            case 0:
-                result = index.row();
-                break;
-            case 1:
-                result = stringValue.at(row);
-                break;
-            case 2:
-                result = stringMnemonic.at(row);
-                break;
+    if (index.isValid()) {
+        if (role == Qt::DisplayRole) {
+            switch (index.column()) {
+                case 0:
+                    result = index.row();
+                    break;
+                case 1:
+                    result = stringValue.at(row);
+                    break;
+                case 2:
+                    result = stringMnemonic.at(row);
+                    break;
+            }
+        }
+        else if (role == Qt::BackgroundRole) {
+            result = bgColor[row];
         }
     }
-
     return result;
 }
 
@@ -113,9 +104,15 @@ bool TableListModel::setData(const QModelIndex &index, const QVariant &value, in
             stringValue.replace(row, val);
             retval = true;
             emit(dataChanged(index, index));
+            reset();
+        }
+        else if (Qt::BackgroundRole) {
+            bgColor[row] = value.value<QColor>();
+            retval = true;
+            emit(dataChanged(index, index));
+            reset();
         }
     }
-
     return retval;
 }
 

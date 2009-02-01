@@ -53,7 +53,6 @@ static DebuggerWidget* debuggerWidget = 0;
 static RegisterWidget* registerWidget = 0;
 static BreakpointsWidget* breakpointsWidget = 0;
 #endif
-
 namespace core {
 extern "C" {
 
@@ -194,6 +193,7 @@ void gui_set_state(gui_state_t state)
 #ifdef DBG
 void init_debugger_frontend()
 {
+    QMetaObject::invokeMethod(registerWidget, "show", Qt::QueuedConnection);
     QMetaObject::invokeMethod(debuggerWidget, "show", Qt::QueuedConnection);
     debuggerWidget->setFocus();
 }
@@ -208,8 +208,8 @@ void update_debugger_frontend( unsigned int pc )
                                Qt::QueuedConnection);
 
     //TODO:  if (breakpointsWidget->isVisible)
-    QMetaObject::invokeMethod(breakpointsWidget, "update_breakpoints",
-                               Qt::QueuedConnection);
+    // QMetaObject::invokeMethod(breakpointsWidget, "update_breakpoints",
+    //                           Qt::QueuedConnection);
 }
 
 //Runs each VI for auto-updating views

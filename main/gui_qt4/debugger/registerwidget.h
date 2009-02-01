@@ -24,10 +24,20 @@
 
 #include <QWidget>
 #include <QStringListModel>
+#include <QColor>
 
 #include "ui_registerwidget.h"
 
 class TableListModel;
+
+// External variables from core
+// used to check for changes
+const extern long long int reg_cop1_fgr_64[32];
+const extern long long int reg[32];
+const extern long int reg_cop0[32];
+const extern long long int hi;
+const extern long long int lo;
+
 
 class RegisterWidget : public QWidget, private Ui_RegisterWidget
 {
@@ -38,35 +48,63 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
 
     public slots:
         void update_registers();
+        void radio_toggled();
 
     private:
         void init_registers();
-        void init_gpr(void);
-        void init_cop0(void);
-        void init_special(void);
-        void init_cop1(void);
+        void init_gpr();
+        void init_cop0();
+        void init_special();
+        void init_cop1();
+        void init_ai();
+        void init_vi();
+        void init_pi();
+        void init_ri();
+        void init_si();
 
-        void update_gpr(void);
-        void update_cop0(void);
-        void update_special(void);
-        void update_cop1(void);
+        void update_gpr();
+        void update_cop0();
+        void update_special();
+        void update_cop1();
+        void update_ai();
+        void update_vi();
+        void update_pi();
+        void update_ri();
+        void update_si();
 
         long long int gui_fantom_gpr_64[32];
-        unsigned int gui_fantom_cop0_32[32];
+        long int gui_fantom_cop0_32[32];
         long long int gui_fantom_cop1_64[32];
-
-        QStringList stringlistHiLo;
-        QStringList stringlistInterupt;
+        long long int gui_fantom_hi;
+        long long int gui_fantom_lo;
+        unsigned int gui_fantom_reg_Ai[6];
+        unsigned int gui_fantom_reg_Vi[15];
+        unsigned int gui_fantom_reg_Pi[13];
+        unsigned int gui_fantom_reg_Ri[5];
+        unsigned int gui_fantom_reg_Si[4];
 
         TableListModel *modelGpr;
         TableListModel *modelCop0;
+        TableListModel *modelHiLo;
         TableListModel *modelCop1;
-        QStringListModel *modelHiLo;
+        TableListModel *modelAi;
+        TableListModel *modelVi;
+        TableListModel *modelPi;
+        TableListModel *modelRi;
+        TableListModel *modelSi;
         QStringListModel *modelInterupt;
 
         QStringList mnemonicGPR;
         QStringList mnemonicCop0;
+        QStringList mnemonicHiLo;
         QStringList mnemonicCop1;
+        QStringList mnemonicAi;
+        QStringList mnemonicVi;
+        QStringList mnemonicPi;
+        QStringList mnemonicRi;
+        QStringList mnemonicSi;
+        
+        static const int HEIGHT = 15;   // row height in various QTableView
 };
 #endif // __REGISTERWIDGET_H__
 

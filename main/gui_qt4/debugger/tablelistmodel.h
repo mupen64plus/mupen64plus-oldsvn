@@ -24,15 +24,13 @@
 
 #include <QAbstractTableModel>
 #include <QStringList>
+#include <QColor>
 
 class TableListModel : public QAbstractTableModel
 {
     Q_OBJECT
-
     public:
-        TableListModel(QObject *parent = 0);
-        TableListModel(QStringList stringValue, int size, QObject *parent = 0);
-        TableListModel(QStringList stringValue, QStringList stringMnemonic, QObject *parent = 0);
+        TableListModel(QStringList, int, QObject *parent = 0);
         
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -48,6 +46,7 @@ class TableListModel : public QAbstractTableModel
     private:
         QStringList stringValue;
         QStringList stringMnemonic;
+        QList<QColor> bgColor;
 };
 
 #endif // __TABLELISTMODEL_H__

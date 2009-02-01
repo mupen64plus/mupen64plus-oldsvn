@@ -196,9 +196,9 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_16" >
               <item>
-               <widget class="QListView" name="listHiLo" >
-                <property name="alternatingRowColors" >
-                 <bool>true</bool>
+               <widget class="QTableView" name="tableHiLo" >
+                <property name="showGrid" >
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -228,11 +228,7 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_15" >
               <item>
-               <widget class="QListView" name="listInterupt" >
-                <property name="alternatingRowColors" >
-                 <bool>true</bool>
-                </property>
-               </widget>
+               <widget class="QTableView" name="tableInterupt" />
               </item>
              </layout>
             </item>
@@ -345,6 +341,9 @@
                 <property name="text" >
                  <string>&amp;Raw Hex</string>
                 </property>
+                <property name="checked" >
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item>
@@ -421,9 +420,9 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_10" >
               <item>
-               <widget class="QListView" name="listAi" >
-                <property name="alternatingRowColors" >
-                 <bool>true</bool>
+               <widget class="QTableView" name="tableAi" >
+                <property name="showGrid" >
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -453,9 +452,9 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_11" >
               <item>
-               <widget class="QListView" name="listVi" >
-                <property name="alternatingRowColors" >
-                 <bool>true</bool>
+               <widget class="QTableView" name="tableVi" >
+                <property name="showGrid" >
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -492,9 +491,9 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_7" >
               <item>
-               <widget class="QListView" name="listPi" >
-                <property name="alternatingRowColors" >
-                 <bool>true</bool>
+               <widget class="QTableView" name="tablePi" >
+                <property name="showGrid" >
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -524,9 +523,9 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_8" >
               <item>
-               <widget class="QListView" name="listRi" >
-                <property name="alternatingRowColors" >
-                 <bool>true</bool>
+               <widget class="QTableView" name="tableRi" >
+                <property name="showGrid" >
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -556,9 +555,9 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_9" >
               <item>
-               <widget class="QListView" name="listSi" >
-                <property name="alternatingRowColors" >
-                 <bool>true</bool>
+               <widget class="QTableView" name="tableSi" >
+                <property name="showGrid" >
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
