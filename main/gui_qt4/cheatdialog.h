@@ -31,6 +31,7 @@ class QStandardItemModel;
 namespace core {
     extern "C" {
         #include "../cheat.h"
+        #include "../rom.h"
     }
 }
 
@@ -40,6 +41,9 @@ class CheatDialog : public QDialog, private Ui_CheatDialog
     public:
         CheatDialog(QWidget* parent = 0);
         virtual ~CheatDialog();
+
+    private slots:
+        void cheatItemChanged(QStandardItem * item);
 
     private:
         core::list_t m_cheats;

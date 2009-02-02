@@ -40,21 +40,33 @@ void cheat_write_config(void);
 void cheat_delete_all(void);
 void cheat_load_current_rom(void);
 void cheat_unload_current_rom(void);
+void cheat_enable_current_rom(int);
 
 typedef struct cheat_option {
     int code; /* e.g. 0xFF */
     char *description; /* e.g. Music Off */
 } cheat_option_t;
 
+typedef struct cheat_code {
+    unsigned int address;
+    int value;
+    int old_value;
+} cheat_code_t;
+
 typedef struct cheat {
     char *name;
     char *comment;
     int number;
+    int enabled;
+    int always_enabled;
+    int was_enabled;
     list_t codes;
     list_t options;
 } cheat_t;
 
 list_t cheats_for_current_rom(); // use cheats_free to free returned list
+cheat_t *cheat_find_current_rom(int);
+
 void cheats_free(list_t *cheats); // list_t becomes invalid after this!
 
 // rom_cheats_t *cheat_new_rom(void);
