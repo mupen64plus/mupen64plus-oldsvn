@@ -36,6 +36,7 @@ namespace core {
     extern "C" {
         #include "../../config.h"
         #include "../../version.h"
+        #include "../../../r4300/interupt.h"
     }
 }
 
@@ -50,11 +51,11 @@ RegisterWidget::RegisterWidget(QWidget* parent) // : QWidget(parent)
     setupUi(this); // this sets up GUI
  
     // signals/slots mechanism in action
-    connect( radioRawhex, SIGNAL( toggled() ), this, SLOT( radio_toggled() ) );
-    connect( radioSingle, SIGNAL( toggled() ), this, SLOT( radio_toggled() ) );
-    connect( radioDouble, SIGNAL( toggled() ), this, SLOT( radio_toggled() ) );
-    connect( radioWord,   SIGNAL( toggled() ), this, SLOT( radio_toggled() ) );
-    connect( radioLong,   SIGNAL( toggled() ), this, SLOT( radio_toggled() ) );
+    connect( radioRawhex, SIGNAL( toggled(bool) ), this, SLOT( radio_toggled() ) );
+    connect( radioSingle, SIGNAL( toggled(bool) ), this, SLOT( radio_toggled() ) );
+    connect( radioDouble, SIGNAL( toggled(bool) ), this, SLOT( radio_toggled() ) );
+    connect( radioWord,   SIGNAL( toggled(bool) ), this, SLOT( radio_toggled() ) );
+    connect( radioLong,   SIGNAL( toggled(bool) ), this, SLOT( radio_toggled() ) );
     
     // Set window title
     setWindowTitle(tr("Mupen64Plus Register Viewer"));
@@ -130,12 +131,11 @@ void RegisterWidget::init_cop0()
 
 void RegisterWidget::init_special()
 {
+    // PC
     linePC->setText(tr("XXXXXXXXXXXXXXXX: 0xXXXXXXXX"));
     linePrevPC->setText(tr("XXXXXXXXXXXXXXXX"));
  
-    //TODO: interupt list
-
-    //hi/lo
+    // hi/lo
     gui_fantom_hi = 0x12345678;
     gui_fantom_lo = 0x12345678;
     mnemonicHiLo << "Hi" << "Lo";
@@ -145,6 +145,26 @@ void RegisterWidget::init_special()
     tableHiLo->setModel(modelHiLo);
     tableHiLo->resizeColumnsToContents();
     tableHiLo->horizontalHeader()->setStretchLastSection(true);
+    tableHiLo->setRowHeight(0,HEIGHT);
+    tableHiLo->setRowHeight(1,HEIGHT);
+
+    // interupt
+    for (int i=0;i<11;i++)
+        gui_fantom_interupt[i] = 0x1234;
+
+    mnemonicInterupt 
+        << "VI_INT" << "COMPARE_INT" << "CHECK_INT" << "SI_INT" 
+        << "PI_INT" << "SPECIAL_INT" << "AI_INT" << "SP_INT" 
+        << "DP_INT" << "HW2_INT" << "NMI_INT"
+        ;
+    modelInterupt = new TableListModel(mnemonicInterupt, 8);
+    tableInterupt->horizontalHeader()->hide();
+    tableInterupt->verticalHeader()->hide();
+    tableInterupt->setModel(modelInterupt);
+    tableInterupt->resizeColumnsToContents();
+    tableInterupt->horizontalHeader()->setStretchLastSection(true);
+    for (int i=0;i<modelInterupt->rowCount();i++)
+        tableInterupt->setRowHeight(i,HEIGHT);
 }
 
 void RegisterWidget::init_cop1()
@@ -286,10 +306,10 @@ void RegisterWidget::init_si()
         tableSi->setRowHeight(i,HEIGHT);
 }
 
-void RegisterWidget::update_registers()
+void RegisterWidget::update_registers(unsigned int current_pc)
 {
     RegisterWidget::update_gpr();
-    RegisterWidget::update_special();
+    RegisterWidget::update_special(current_pc);
     RegisterWidget::update_cop0();
     RegisterWidget::update_cop1();
     RegisterWidget::update_ai();
@@ -331,7 +351,6 @@ void RegisterWidget::update_cop0()
             newstring = QString("%1").arg(gui_fantom_cop0_32[i], 8, 16, QChar('0')).toUpper();
             modelCop0->setData(index, newstring, Qt::EditRole);
             modelCop0->setData(index, color_CHANGED, Qt::BackgroundRole);
-            // TODO: change color
         }
         else {
             modelCop0->setData(index, color_DEFAULT, Qt::BackgroundRole);
@@ -339,17 +358,22 @@ void RegisterWidget::update_cop0()
     }
 }
 
-void RegisterWidget::update_special()
+void RegisterWidget::update_special(unsigned int current_pc)
 {
     QModelIndex index;
     QString newstring;
+    unsigned int count;
 
     // TODO: PC
-    // unsigned int instr;
-    // unsigned int pc;
-    // pc = debuggerWidget->get_current_pc();
-    // instr = debugger::read_memory_32( pc );
-    // newstring = QString("%1: 0x%2").arg(pc, 16, 16, QChar('0')).arg(instr, 8, 16, QChar('0')).toUpper();
+    unsigned int instr;
+    unsigned int pc;
+    pc = current_pc;
+    instr = debugger::read_memory_32( pc );
+    newstring = QString("%1: 0x%2").arg(pc, 16, 16, QChar('0')).arg(instr, 8, 16, QChar('0')).toUpper();
+    linePC->setText(newstring);
+    newstring = QString("%1").arg(previous_pc, 16, 16, QChar('0')).toUpper();
+    linePrevPC->setText(newstring);
+    previous_pc = pc;
 
     // Hi
     index = modelHiLo->index(0, 1, QModelIndex());
@@ -375,6 +399,24 @@ void RegisterWidget::update_special()
     }
 
     // TODO: Interupt queue
+    int j=1;
+    for (int i=0;i<modelInterupt->rowCount();i++) {
+        count = core::get_event(j);
+        index = modelInterupt->index(i, 1, QModelIndex());
+        if (gui_fantom_interupt[i] != count) {
+            gui_fantom_interupt[i] = count;
+            newstring = QString("%1").arg(gui_fantom_interupt[i], 8, 16, QChar('0')).toUpper();
+            modelInterupt->setData(index, newstring, Qt::EditRole);
+            modelInterupt->setData(index, color_CHANGED, Qt::BackgroundRole);
+            if (gui_fantom_interupt[i] == 0)
+                tableInterupt->setRowHidden(i, true);
+            else
+                tableInterupt->setRowHidden(i, false);                
+        }
+        else
+            modelInterupt->setData(index, color_DEFAULT, Qt::BackgroundRole);            
+        j=j<<1;
+    }
 }
 
 void RegisterWidget::update_cop1()
@@ -386,24 +428,16 @@ void RegisterWidget::update_cop1()
         index = modelCop1->index(i, 1, QModelIndex());
         if (gui_fantom_cop1_64[i] != reg_cop1_fgr_64[i]) {
             gui_fantom_cop1_64[i] = reg_cop1_fgr_64[i];
-            if (radioRawhex->isChecked()) {
+            if (radioRawhex->isChecked())
                 newstring = QString("%1").arg(gui_fantom_cop1_64[i], 16, 16, QChar('0')).toUpper();
-            }
-            else if (radioSingle->isChecked()) {
-                newstring = QString("Not implemented!");
-            }
-            else if (radioDouble->isChecked()) {
-                newstring = QString("Not implemented!");
-            }
-            else if (radioWord->isChecked()) {
-                newstring = QString("Not implemented!");
-            }
-            else if (radioLong->isChecked()) {
-                newstring = QString("Not implemented!");
-            }
-            else {
-                qDebug() << "Strange. No radio buttons checked";
-            }
+            else if (radioSingle->isChecked())
+                newstring = getSingle(gui_fantom_cop1_64[i]);
+            else if (radioDouble->isChecked())
+                newstring = getDouble(gui_fantom_cop1_64[i]);
+            else if (radioWord->isChecked())
+                newstring = getWord(gui_fantom_cop1_64[i]);
+            else if (radioLong->isChecked())
+                newstring = getLong(gui_fantom_cop1_64[i]);
             modelCop1->setData(index, newstring, Qt::EditRole);
             modelCop1->setData(index, color_CHANGED, Qt::BackgroundRole);
         }
@@ -420,25 +454,17 @@ void RegisterWidget::radio_toggled()
 
     for (int i=0;i<32;i++) {
         index = modelCop1->index(i, 1, QModelIndex());
-        if (radioRawhex->isChecked()) {
+        if (radioRawhex->isChecked())
             newstring = QString("%1").arg(gui_fantom_cop1_64[i], 16, 16, QChar('0')).toUpper();
-        }
-        else if (radioSingle->isChecked()) {
-            newstring = QString("Not implemented!");
-        }
-        else if (radioDouble->isChecked()) {
-            newstring = QString("Not implemented!");
-        }
-        else if (radioWord->isChecked()) {
-            newstring = QString("Not implemented!");
-        }
-        else if (radioLong->isChecked()) {
-            newstring = QString("Not implemented!");
-        }
-        else {
-            qDebug() << "Strange. No radio buttons checked";
-        }
-        modelCop1->setData(index, newstring, Qt::EditRole);        
+        else if (radioSingle->isChecked())
+            newstring = getSingle(gui_fantom_cop1_64[i]);
+        else if (radioDouble->isChecked())
+            newstring = getDouble(gui_fantom_cop1_64[i]);
+        else if (radioWord->isChecked())
+            newstring = getWord(gui_fantom_cop1_64[i]);
+        else if (radioLong->isChecked())
+            newstring = getLong(gui_fantom_cop1_64[i]);
+        modelCop1->setData(index, newstring, Qt::EditRole);
     }
 }
 
@@ -547,5 +573,51 @@ void RegisterWidget::update_si()
             modelSi->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+}
+
+QString RegisterWidget::getSingle(long long int val)
+{
+    QString str;
+    float *flt;
+
+    flt = (float *)&val;
+    str.sprintf("%g", *flt);
+    return str;
+}
+
+QString RegisterWidget::getDouble(long long int val)
+{
+    QString str;
+    double *dbl;
+
+    dbl = (double *)&val;
+    str.sprintf("%g", *dbl);
+    return str;
+}
+
+QString RegisterWidget::getWord(long long int val)
+{
+    QString str;
+    float *flt;
+
+    // TODO. Need verification
+    //*reg_cop1_simple[cffd] = *((int*)reg_cop1_simple[cffs]);
+    flt = (float *)&val;
+    *flt = *((int*)flt);
+    str.sprintf("%g", *flt);
+    return str;
+}
+
+QString RegisterWidget::getLong(long long int val)
+{
+    QString str;
+    double *dbl;
+
+    // TODO. Need verification
+    //*reg_cop1_double[cffd] = *((long long*)reg_cop1_double[cffs]);
+    dbl = (double *)&val;
+    *dbl = *((long long*)dbl);
+    str.sprintf("%g", *dbl);
+    return str;
 }
 

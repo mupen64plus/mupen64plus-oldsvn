@@ -153,7 +153,7 @@ QString BreakpointsWidget::get_breakpoint_display_string(int row)
     if(bpt->address == bpt->endaddr)
         address = QString("0x%1").arg(bpt->address, 8, 16, QChar('0')).toUpper();
     else
-        address = QString("0x%1 - 0x%2").arg(bpt->address, 8, 16, QChar('0')).arg(bpt->endaddr, 8, 16, QChar('0')).toUpper();
+        address = QString("%1 - %2").arg(bpt->address, 8, 16, QChar('0')).arg(bpt->endaddr, 8, 16, QChar('0')).toUpper();
 
     str = QString("%1 / %2%3%4%5 %6").arg(status).arg(flagR).arg(flagW).arg(flagX).arg(flagL).arg(address);
     return str;

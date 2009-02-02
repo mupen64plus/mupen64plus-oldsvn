@@ -205,7 +205,8 @@ void update_debugger_frontend( unsigned int pc )
                                Q_ARG(unsigned int, pc));
     //TODO:  if (registerWidget->isVisible)
     QMetaObject::invokeMethod(registerWidget, "update_registers",
-                               Qt::QueuedConnection);
+                               Qt::QueuedConnection,
+                               Q_ARG(unsigned int, pc));
 
     //TODO:  if (breakpointsWidget->isVisible)
     // QMetaObject::invokeMethod(breakpointsWidget, "update_breakpoints",

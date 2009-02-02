@@ -118,31 +118,40 @@
         <attribute name="title" >
          <string>&amp;Special</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_21" >
+        <layout class="QVBoxLayout" name="verticalLayout_3" >
          <item>
           <widget class="QGroupBox" name="groupBox_3" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+            <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize" >
+            <size>
+             <width>0</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="maximumSize" >
+            <size>
+             <width>16777215</width>
+             <height>60</height>
+            </size>
+           </property>
            <property name="title" >
             <string>PC</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_20" >
-            <property name="spacing" >
-             <number>0</number>
-            </property>
-            <property name="margin" >
-             <number>0</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_12" >
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_12" >
-              <item>
-               <widget class="QLineEdit" name="linePC" />
-              </item>
-             </layout>
+             <widget class="QLineEdit" name="linePC" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -150,27 +159,42 @@
          <item>
           <widget class="QGroupBox" name="groupBox_9" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+            <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize" >
+            <size>
+             <width>0</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="maximumSize" >
+            <size>
+             <width>16777215</width>
+             <height>60</height>
+            </size>
+           </property>
            <property name="title" >
             <string>Previous PC</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_17" >
-            <property name="spacing" >
-             <number>0</number>
-            </property>
-            <property name="margin" >
-             <number>0</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_13" >
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_14" >
-              <item>
-               <widget class="QLineEdit" name="linePrevPC" />
-              </item>
-             </layout>
+             <widget class="QLineEdit" name="linePrevPC" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize" >
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -178,31 +202,27 @@
          <item>
           <widget class="QGroupBox" name="groupBox_11" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+            <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
              <horstretch>0</horstretch>
-             <verstretch>1</verstretch>
+             <verstretch>2</verstretch>
             </sizepolicy>
            </property>
            <property name="title" >
             <string>Hi / Lo</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_19" >
-            <property name="spacing" >
-             <number>0</number>
-            </property>
-            <property name="margin" >
-             <number>0</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_14" >
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_16" >
-              <item>
-               <widget class="QTableView" name="tableHiLo" >
-                <property name="showGrid" >
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QTableView" name="tableHiLo" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>2</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="showGrid" >
+               <bool>false</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -210,43 +230,30 @@
          <item>
           <widget class="QGroupBox" name="groupBox_10" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+            <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
              <horstretch>0</horstretch>
-             <verstretch>3</verstretch>
+             <verstretch>4</verstretch>
             </sizepolicy>
            </property>
            <property name="title" >
             <string>Interrupt Queue</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_18" >
-            <property name="spacing" >
-             <number>0</number>
-            </property>
-            <property name="margin" >
-             <number>0</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5" >
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_15" >
-              <item>
-               <widget class="QTableView" name="tableInterupt" />
-              </item>
-             </layout>
+             <widget class="QTableView" name="tableInterupt" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>11</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="showGrid" >
+               <bool>false</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer" >
-           <property name="orientation" >
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>20</width>
-             <height>148</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </widget>
@@ -362,6 +369,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioWord" >
+                <property name="enabled" >
+                 <bool>true</bool>
+                </property>
                 <property name="text" >
                  <string>&amp;Word</string>
                 </property>
@@ -369,6 +379,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioLong" >
+                <property name="enabled" >
+                 <bool>true</bool>
+                </property>
                 <property name="text" >
                  <string>&amp;Long</string>
                 </property>

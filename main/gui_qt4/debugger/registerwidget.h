@@ -38,7 +38,6 @@ const extern long int reg_cop0[32];
 const extern long long int hi;
 const extern long long int lo;
 
-
 class RegisterWidget : public QWidget, private Ui_RegisterWidget
 {
     Q_OBJECT
@@ -47,7 +46,7 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         virtual ~RegisterWidget();
 
     public slots:
-        void update_registers();
+        void update_registers(unsigned int);
         void radio_toggled();
 
     private:
@@ -64,13 +63,18 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
 
         void update_gpr();
         void update_cop0();
-        void update_special();
+        void update_special(unsigned int);
         void update_cop1();
         void update_ai();
         void update_vi();
         void update_pi();
         void update_ri();
         void update_si();
+        
+        QString getDouble(long long int);
+        QString getSingle(long long int);
+        QString getWord(long long int);
+        QString getLong(long long int);
 
         long long int gui_fantom_gpr_64[32];
         long int gui_fantom_cop0_32[32];
@@ -82,21 +86,24 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         unsigned int gui_fantom_reg_Pi[13];
         unsigned int gui_fantom_reg_Ri[5];
         unsigned int gui_fantom_reg_Si[4];
+        unsigned int gui_fantom_interupt[11];
+        unsigned int previous_pc;
 
         TableListModel *modelGpr;
         TableListModel *modelCop0;
         TableListModel *modelHiLo;
+        TableListModel *modelInterupt;
         TableListModel *modelCop1;
         TableListModel *modelAi;
         TableListModel *modelVi;
         TableListModel *modelPi;
         TableListModel *modelRi;
         TableListModel *modelSi;
-        QStringListModel *modelInterupt;
 
         QStringList mnemonicGPR;
         QStringList mnemonicCop0;
         QStringList mnemonicHiLo;
+        QStringList mnemonicInterupt;
         QStringList mnemonicCop1;
         QStringList mnemonicAi;
         QStringList mnemonicVi;
@@ -105,6 +112,17 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         QStringList mnemonicSi;
         
         static const int HEIGHT = 15;   // row height in various QTableView
+        static const int VI_INT = 0x001;
+        static const int COMPARE_INT = 0x002;
+        static const int CHECK_INT   = 0x004;
+        static const int SI_INT      = 0x008;
+        static const int PI_INT      = 0x010;
+        static const int SPECIAL_INT = 0x020;
+        static const int AI_INT      = 0x040;
+        static const int SP_INT      = 0x080;
+        static const int DP_INT      = 0x100;
+        static const int HW2_INT     = 0x200;
+        static const int NMI_INT     = 0x400;
 };
 #endif // __REGISTERWIDGET_H__
 
