@@ -622,9 +622,9 @@ void MainWindow::setStateImplementation(int state)
     }
 }
 
-//TODO #ifdef DGB
 void MainWindow::debuggerToggle()
 {
+#ifdef DGB
     if (actionEnableDebugger->isChecked()) {
 //        actionDisasembler->setEnabled(true);
 //        actionRegisters->setEnabled(true);
@@ -635,29 +635,35 @@ void MainWindow::debuggerToggle()
 //        actionDisasembler->setEnabled(false);
 //        actionRegisters->setEnabled(false);
     }
+#endif
 }
 
 void MainWindow::disasemblerShow()
 {
+#ifdef DGB
     //TODO
     QMessageBox::information(this, tr("Information"),
             tr("Not implemented."),
             QMessageBox::Ok);
 
+#endif
 }
 
 void MainWindow::registersShow()
 {
+#ifdef DGB
     //TODO
     QMessageBox::information(this, tr("Information"),
             tr("Not implemented."),
             QMessageBox::Ok);
+#endif
 }
 
 void MainWindow::breakpointsShow()
 {
+#ifdef DGB
     BreakpointsWidget* w = new BreakpointsWidget(this);
     w->show();
+#endif
 }
-//TODO #endif
 
