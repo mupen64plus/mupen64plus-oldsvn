@@ -34,6 +34,7 @@ namespace core {
         #include "../rom.h"
     }
 }
+Q_DECLARE_METATYPE(core::cheat_t*)
 
 class CheatDialog : public QDialog, private Ui_CheatDialog
 {

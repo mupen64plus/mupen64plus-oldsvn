@@ -149,16 +149,16 @@ QStandardItem* CheatDialog::createItemForCheat(QString name,
         item->setCheckable(true);
     }
     item->setEditable(false);
-    item->setData(static_cast<void*>(cheat));
+    item->setData(QVariant::fromValue(cheat));
     item->setToolTip(QString(cheat->comment));
     return item;
 }
 
 void CheatDialog::cheatItemChanged(QStandardItem * item)
 {
-//TODO
-//    core::cheat_t* cheat;
-//    cheat = ?;
-//    core::cheat_enable_current_rom(cheat->number);
+    // TODO
+    core::cheat_t* cheat;
+    cheat = item->data().value<core::cheat_t*>();
+    core::cheat_enable_current_rom(cheat->number);
 }
 
