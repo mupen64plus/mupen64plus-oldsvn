@@ -40,7 +40,8 @@ void cheat_write_config(void);
 void cheat_delete_all(void);
 void cheat_load_current_rom(void);
 void cheat_unload_current_rom(void);
-void cheat_enable_current_rom(int);
+void cheat_enable_current_rom(int,int);
+void cheat_disable_current_rom(int);
 
 typedef struct cheat_option {
     int code; /* e.g. 0xFF */
@@ -51,6 +52,7 @@ typedef struct cheat_code {
     unsigned int address;
     int value;
     int old_value;
+    int option;     // If this is an option mark it with 0x1, else 0x0
 } cheat_code_t;
 
 typedef struct cheat {

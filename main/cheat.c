@@ -49,9 +49,9 @@ static unsigned short read_address_16bit(unsigned int address)
     return *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S16)));
 }
 
-static unsigned short read_address_8bit(unsigned int address)
+static unsigned char read_address_8bit(unsigned int address)
 {
-    *(unsigned short *)((rdramb + ((address & 0xFFFFFF)^S8)));
+    return *(unsigned char *)((rdramb + ((address & 0xFFFFFF)^S8)));
 }
 
 static void update_address_16bit(unsigned int address, unsigned short new_value)
@@ -80,7 +80,7 @@ static int address_equal_to_16bit(unsigned int address, unsigned short value)
 
 // individual application - returns 0 if we are supposed to skip the next cheat
 // (only really used on conditional codes)
-static int execute_cheat(unsigned int address, unsigned short value, unsigned short *old_value)
+static int execute_cheat(unsigned int address, unsigned short value, int *old_value)
 {
     switch (address & 0xFF000000)
     {
@@ -90,8 +90,8 @@ static int execute_cheat(unsigned int address, unsigned short value, unsigned sh
         case 0xA8000000:
         case 0xF0000000:
             // if pointer to old value is valid and uninitialized, write current value to it
-            if(old_value && *old_value == CHEAT_CODE_MAGIC_VALUE)
-                *old_value = read_address_8bit(address);
+            if(old_value && (*old_value == CHEAT_CODE_MAGIC_VALUE))
+                *old_value = (int) read_address_8bit(address);
             update_address_8bit(address,value);
             return 1;
         case 0x81000000:
@@ -100,8 +100,8 @@ static int execute_cheat(unsigned int address, unsigned short value, unsigned sh
         case 0xA9000000:
         case 0xF1000000:
             // if pointer to old value is valid and uninitialized, write current value to it
-            if(old_value && *old_value == CHEAT_CODE_MAGIC_VALUE)
-                *old_value = read_address_16bit(address);
+            if(old_value && (*old_value == CHEAT_CODE_MAGIC_VALUE))
+                *old_value = (int) read_address_16bit(address);
             update_address_16bit(address,value);
             return 1;
         case 0xD0000000:
@@ -157,7 +157,7 @@ void cheat_apply_cheats(int entry)
 
                         // code should only be written once at boot time
                         if((code->address & 0xF0000000) == 0xF0000000)
-                            execute_cheat(code->address, code->value, (unsigned short *) code->old_value);
+                            execute_cheat(code->address, code->value, &code->old_value);
                     }
                     break;
                 case ENTRY_VI:
@@ -194,7 +194,7 @@ void cheat_apply_cheats(int entry)
                                     (code->address & 0xFF000000) == 0xDB000000))
                                    execute_cheat(code->address, code->value, NULL);
                                 else
-                                   execute_cheat(code->address, code->value, (unsigned short *) code->old_value);
+                                   execute_cheat(code->address, code->value, &code->old_value);
                             }
                             // if condition false, skip next code
                             else
@@ -218,8 +218,8 @@ void cheat_apply_cheats(int entry)
                         {
                             // exclude boot-time cheat codes
                             if((code->address & 0xF0000000) != 0xF0000000)
-                                execute_cheat(code->address, code->value, (unsigned short *) code->old_value);
-                    }
+                                execute_cheat(code->address, code->value, &code->old_value);
+                        }
                     }
                     break;
                 default:
@@ -371,7 +371,7 @@ list_t cheats_for_current_rom()
                 list_foreach(temp, node2)
                 {
                     memset(buf, '\0', PATH_MAX);
-                    if (sscanf(node2->data, "$%x %[a-zA-Z0-9 ]", &value, &buf) == 2)
+                    if (sscanf(node2->data, "$%x %[a-zA-Z0-9 ']", &value, buf) == 2)
                     {
                         option = malloc(sizeof(cheat_option_t));
                         option->code = value;
@@ -402,12 +402,21 @@ list_t cheats_for_current_rom()
             node2 = NULL;
             list_foreach(temp, node2)
             {
+                //TODO: This will not handle the case where all digits in code field
+                // is '?'. Should be handled separately.
                 if (sscanf(node2->data, "%x %x", &address, &value) == 2)
                 {
                     code = malloc(sizeof(cheat_code_t));
                     code->address = address;
+
+                    // If there i a '?' in the data, mark it with code->option = 1
+                    if (strchr(node2->data, '?'))
+                        code->option = 1;
+                    else
+                        code->option = 0;
+
                     code->value = value;
-                    code->old_value = 0;
+                    code->old_value = CHEAT_CODE_MAGIC_VALUE;
                     list_append(&cheat->codes, code);
                 }
                 free(node2->data);
@@ -458,15 +467,47 @@ void cheats_free(list_t *cheats)
 }
 
 /** cheat_enable_current_rom
- *   enables a cheat specified by a number
+ *   enables a cheat specified by number
+ *   if option >= 0 it means that we should
+ *   insert an option
  */
-void cheat_enable_current_rom(int number)
+void cheat_enable_current_rom(int number, int option)
 {
+    list_t node = NULL;
     cheat_t *cheat = NULL;
+    cheat_code_t *code = NULL;
     
     cheat = cheat_find_current_rom(number);
     if (cheat != 0)
         cheat->enabled = 1;
+    if (option>=0) {
+        // If this is an option to set,
+        // search for a code which is supposed
+        // to be patched with the option
+        list_foreach(cheat->codes, node)
+        {
+            code = (cheat_code_t *)node->data;
+            
+            if (code->option) {
+                code->value = option;
+                break;
+            }
+        }
+    }
+}
+
+/** cheat_disable_current_rom
+ *   disables a cheat specified by a number
+ */
+void cheat_disable_current_rom(int number)
+{
+    list_t node = NULL;
+    cheat_t *cheat = NULL;
+    cheat_code_t *code = NULL;
+    
+    cheat = cheat_find_current_rom(number);
+    if (cheat != 0)
+        cheat->enabled = 0;
 }
 
 /** cheat_find_current_rom

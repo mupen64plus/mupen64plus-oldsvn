@@ -20,9 +20,7 @@
 * USA.
 **/
 
-#include <QDebug>
-#include <QStandardItemModel>
-#include <QMap>
+#include <QtGui>
 
 #include "globals.h"
 #include "cheatdialog.h"
@@ -125,7 +123,7 @@ CheatDialog::CheatDialog(QWidget* parent)
                     optionItem = new QStandardItem(option->description);
                     optionItem->setEditable(false);
                     optionItem->setCheckable(true);
-                    optionItem->setData(option->code);
+                    optionItem->setData(QVariant::fromValue(option->code), Qt::UserRole + 2);
                     entry->appendRow(optionItem);
                 }
             }
@@ -149,16 +147,58 @@ QStandardItem* CheatDialog::createItemForCheat(QString name,
         item->setCheckable(true);
     }
     item->setEditable(false);
-    item->setData(QVariant::fromValue(cheat));
+    item->setData(QVariant::fromValue(cheat), Qt::UserRole + 1);
     item->setToolTip(QString(cheat->comment));
     return item;
 }
 
 void CheatDialog::cheatItemChanged(QStandardItem * item)
 {
-    // TODO
+    bool success = true;
     core::cheat_t* cheat;
-    cheat = item->data().value<core::cheat_t*>();
-    core::cheat_enable_current_rom(cheat->number);
+    int code;
+    QStandardItem * parent;
+    cheat = item->data(Qt::UserRole + 1).value<core::cheat_t*>();
+    code = item->data(Qt::UserRole + 2).value<int>();
+    
+    if (item->checkState() == Qt::Checked) {
+        if (cheat)
+            core::cheat_enable_current_rom(cheat->number, -1);
+        else if (code) {
+            parent = item->parent();
+            cheat = parent->data(Qt::UserRole + 1).value<core::cheat_t*>();
+            if (cheat)
+                core::cheat_enable_current_rom(cheat->number, code);
+            else
+                success = false;
+        }
+        else
+            success = false;
+
+        if (!success)
+            QMessageBox::warning(this, tr("Warning"),
+                tr("Failed to apply cheat."),
+                QMessageBox::Ok);
+    }
+    else if (item->checkState() == Qt::Unchecked) {
+        cheat = item->data(Qt::UserRole + 1).value<core::cheat_t*>();
+        code = item->data(Qt::UserRole + 2).value<int>();
+        if (cheat)
+            core::cheat_disable_current_rom(cheat->number);
+        else if (code) {
+            parent = item->parent();
+            cheat = parent->data(Qt::UserRole + 1).value<core::cheat_t*>();
+            if (cheat)
+                core::cheat_disable_current_rom(cheat->number);
+            else
+                success = false;
+        }
+        else
+            success = false;
+        if (!success)
+            QMessageBox::warning(this, tr("Warning"),
+                tr("Failed to un-apply cheat."),
+                QMessageBox::Ok);
+    }
 }
 
