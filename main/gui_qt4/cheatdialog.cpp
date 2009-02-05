@@ -123,7 +123,7 @@ CheatDialog::CheatDialog(QWidget* parent)
                     optionItem = new QStandardItem(option->description);
                     optionItem->setEditable(false);
                     optionItem->setCheckable(true);
-                    optionItem->setData(QVariant::fromValue(option->code), Qt::UserRole + 2);
+                    optionItem->setData(QVariant::fromValue(option->code), CheatOptionRole);
                     entry->appendRow(optionItem);
                 }
             }
@@ -147,7 +147,7 @@ QStandardItem* CheatDialog::createItemForCheat(QString name,
         item->setCheckable(true);
     }
     item->setEditable(false);
-    item->setData(QVariant::fromValue(cheat), Qt::UserRole + 1);
+    item->setData(QVariant::fromValue(cheat), CheatCodeRole);
     item->setToolTip(QString(cheat->comment));
     return item;
 }
@@ -158,15 +158,15 @@ void CheatDialog::cheatItemChanged(QStandardItem * item)
     core::cheat_t* cheat;
     int code;
     QStandardItem * parent;
-    cheat = item->data(Qt::UserRole + 1).value<core::cheat_t*>();
-    code = item->data(Qt::UserRole + 2).value<int>();
+    cheat = item->data(CheatCodeRole).value<core::cheat_t*>();
+    code = item->data(CheatOptionRole).value<int>();
     
     if (item->checkState() == Qt::Checked) {
         if (cheat)
             core::cheat_enable_current_rom(cheat->number, -1);
         else if (code) {
             parent = item->parent();
-            cheat = parent->data(Qt::UserRole + 1).value<core::cheat_t*>();
+            cheat = parent->data(CheatCodeRole).value<core::cheat_t*>();
             if (cheat)
                 core::cheat_enable_current_rom(cheat->number, code);
             else
@@ -181,13 +181,13 @@ void CheatDialog::cheatItemChanged(QStandardItem * item)
                 QMessageBox::Ok);
     }
     else if (item->checkState() == Qt::Unchecked) {
-        cheat = item->data(Qt::UserRole + 1).value<core::cheat_t*>();
-        code = item->data(Qt::UserRole + 2).value<int>();
+        cheat = item->data(CheatCodeRole).value<core::cheat_t*>();
+        code = item->data(CheatOptionRole).value<int>();
         if (cheat)
             core::cheat_disable_current_rom(cheat->number);
         else if (code) {
             parent = item->parent();
-            cheat = parent->data(Qt::UserRole + 1).value<core::cheat_t*>();
+            cheat = parent->data(CheatCodeRole).value<core::cheat_t*>();
             if (cheat)
                 core::cheat_disable_current_rom(cheat->number);
             else
