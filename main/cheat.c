@@ -290,7 +290,7 @@ void cheat_load_current_rom(void)
         snprintf(buf, 23, "%X-%X-C:%X",
                  g_MemHasBeenBSwapped ? sl(ROM_HEADER->CRC1) : ROM_HEADER->CRC1,
                  g_MemHasBeenBSwapped ? sl(ROM_HEADER->CRC2) : ROM_HEADER->CRC2,
-                 ROM_HEADER->Country_code);
+                 (ROM_HEADER->Country_code)&0xff);
         list_foreach(cheat_file->sections, node)
         {
             section = node->data;
