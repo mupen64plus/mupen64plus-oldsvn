@@ -120,7 +120,7 @@ CheatDialog::CheatDialog(QWidget* parent)
                     QStandardItem* optionItem = 0;
                     
                     option = static_cast<core::cheat_option_t*>(node2->data);
-                    optionItem = new QStandardItem(option->description);
+                    optionItem = new QStandardItem(option->description + QString(" (Option)"));
                     optionItem->setEditable(false);
                     optionItem->setCheckable(true);
                     optionItem->setData(QVariant::fromValue(option->code), CheatOptionRole);
@@ -166,6 +166,18 @@ void CheatDialog::cheatItemChanged(QStandardItem * item)
             core::cheat_enable_current_rom(cheat->number, -1);
         else if (code) {
             parent = item->parent();
+            // Only one option can be selected at the time
+            // TODO: Probably not the best way to do it ...
+            for (int i = 0;i<parent->rowCount();i++) {
+                if ((parent->child(i)->checkState() == Qt::Checked) &&
+                    (item->row() != i)) {
+                    item->setCheckState(Qt::Unchecked);
+                    QMessageBox::warning(this, tr("Warning"),
+                        tr("Only one option can be selected for each cheat."),
+                        QMessageBox::Ok);
+                    return;
+                }
+            }
             cheat = parent->data(CheatCodeRole).value<core::cheat_t*>();
             if (cheat)
                 core::cheat_enable_current_rom(cheat->number, code);
