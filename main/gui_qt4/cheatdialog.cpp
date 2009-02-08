@@ -49,67 +49,27 @@ CheatDialog::CheatDialog(QWidget* parent)
             if (QString(cheat->name).contains("\\")) {
                 QStringList parts = QString(cheat->name).split("\\");
                 QStandardItem* parent = 0;
-                QStandardItem* child = 0;
-                QStandardItem* gchild = 0;
-                QStandardItem* ggchild = 0;
                 int name_index = parts.size()-1;
+                QString itemMapIndex = "";
                 
                 for (int lvl = 0;lvl < name_index;lvl++) {
-                    if (lvl == 0) {
-                        if (itemMap.contains(parts.at(lvl))) {
-                            parent = itemMap.value(parts.at(lvl));
-                        } else {
-                            parent = new QStandardItem(parts.at(lvl));
-                            m_model->appendRow(parent);
-                            itemMap[parts.at(lvl)] = parent;
-                        }
-                    }
-                    else if (lvl == 1) {
-                        if (itemMap.contains(parts.at(lvl))) {
-                            child = itemMap.value(parts.at(lvl));
-                        } else {
-                            child = new QStandardItem(parts.at(lvl));
-                            parent->appendRow(child);
-                            itemMap[parts.at(lvl)] = child;
-                        }
-                    }
-                    else if (lvl == 2) {
-                        if (itemMap.contains(parts.at(lvl))) {
-                            gchild = itemMap.value(parts.at(lvl));
-                        } else {
-                            gchild = new QStandardItem(parts.at(lvl));
-                            child->appendRow(gchild);
-                            itemMap[parts.at(lvl)] = gchild;
-                        }
-                    }
-                    else if (lvl == 3) {
-                        if (itemMap.contains(parts.at(lvl))) {
-                            ggchild = itemMap.value(parts.at(lvl));
-                        } else {
-                            ggchild = new QStandardItem(parts.at(lvl));
-                            gchild->appendRow(ggchild);
-                            itemMap[parts.at(lvl)] = ggchild;
-                        }
+                    itemMapIndex = QString(itemMapIndex + parts.at(lvl));
+                    if (itemMap.contains(itemMapIndex))
+                        parent = itemMap.value(itemMapIndex);
+                    else {
+                        entry = new QStandardItem(parts.at(lvl));
+                        if (lvl == 0)
+                            m_model->appendRow(entry);
+                        else
+                            parent->appendRow(entry);
+                        parent = entry;
+                        itemMap[itemMapIndex] = parent;
                     }
                 }                
                 
                 // The last string in the list should be the cheat name.
                 entry = createItemForCheat(parts.at(name_index), cheat);
-                switch (name_index) {
-                    case 1:
-                        parent->appendRow(entry);
-                        break;
-                    case 2:
-                        child->appendRow(entry);
-                        break;
-                    case 3:
-                        gchild->appendRow(entry);
-                        break;
-                    default:
-                        qDebug("[Warning] Cheat: %i subcategories not supported!", name_index);
-                        break;
-                    
-                }
+                parent->appendRow(entry);
             } else {
                 entry = createItemForCheat(cheat->name, cheat);
                 m_model->appendRow(entry);
