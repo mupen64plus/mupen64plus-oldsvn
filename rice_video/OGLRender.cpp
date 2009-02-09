@@ -696,8 +696,16 @@ void OGLRender::RenderReset()
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
 
+    if (options.bWidescreenExtend && !options.bWidescreenStretchHUD)
+    {
+        int offset = (windowSetting.uDisplayWidth - (windowSetting.uDisplayHeight)) / 2;
+        glOrtho(-offset, windowSetting.uDisplayWidth + offset, windowSetting.uDisplayHeight, 0, -1, 1);
+    }
+    else
+    {
+        glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
+    }
     // position viewer 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -890,7 +898,19 @@ void OGLRender::glViewportWrapper(GLint x, GLint y, GLsizei width, GLsizei heigh
         mflag=flag;
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        if( flag )  glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
+        if (flag)
+        {
+            if (options.bWidescreenExtend && !options.bWidescreenStretchHUD)
+            {
+                int fudgeFactor = 0;
+                int offset = (windowSetting.uDisplayWidth - (windowSetting.uDisplayHeight * 4 / 3)) / 2;
+                glOrtho(-offset - fudgeFactor, windowSetting.uDisplayWidth + offset - fudgeFactor, windowSetting.uDisplayHeight, 0, -1, 1);
+            }
+            else
+            {
+                glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
+            }
+        }
         glViewport(x,y,width,height);
     }
 }

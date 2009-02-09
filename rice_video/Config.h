@@ -197,6 +197,10 @@ typedef struct {
     unsigned int  colorQuality;
 
     enum HACK_FOR_GAMES enableHackForGames;
+    
+    BOOL    bWidescreenExtend;
+    BOOL    bWidescreenStretchHUD;
+
 } GlobalOptions;
 
 extern GlobalOptions options;

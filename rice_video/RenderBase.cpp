@@ -85,8 +85,11 @@ inline void RSP_Vtx_Clipping(int i)
         else
         */
         {
-            if( g_vecProjected[i].x > 1 )   g_clipFlag2[i] |= X_CLIP_MAX;
-            if( g_vecProjected[i].x < -1 )  g_clipFlag2[i] |= X_CLIP_MIN;
+            float scaleFactor = 1.0f;
+            if (options.bWidescreenExtend)
+                scaleFactor = (3.0 * windowSetting.uDisplayWidth) / (4.0 * windowSetting.uDisplayHeight);
+            if( g_vecProjected[i].x > scaleFactor )   g_clipFlag2[i] |= X_CLIP_MAX;
+            if( g_vecProjected[i].x < -scaleFactor )  g_clipFlag2[i] |= X_CLIP_MIN;
             if( g_vecProjected[i].y > 1 )   g_clipFlag2[i] |= Y_CLIP_MAX;
             if( g_vecProjected[i].y < -1 )  g_clipFlag2[i] |= Y_CLIP_MIN;
             //if( g_vecProjected[i].z > 1.0f )  g_clipFlag2[i] |= Z_CLIP_MAX;
@@ -842,7 +845,13 @@ void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL)
     VTX_DUMP(TRACE4("  Trans: x=%f, y=%f, z=%f, w=%f",  g_vtxTransformed[dwV].x,g_vtxTransformed[dwV].y,g_vtxTransformed[dwV].z,g_vtxTransformed[dwV].w));
     if( openGL )
     {
-        g_vtxProjected5[vtxIndex][0] = g_vtxTransformed[dwV].x;
+        if (options.bWidescreenExtend)
+        {
+            float s = (4.0 * windowSetting.uDisplayHeight) / (3.0 * windowSetting.uDisplayWidth);
+            g_vtxProjected5[vtxIndex][0] = g_vtxTransformed[dwV].x * s;
+        }
+        else
+            g_vtxProjected5[vtxIndex][0] = g_vtxTransformed[dwV].x;
         g_vtxProjected5[vtxIndex][1] = g_vtxTransformed[dwV].y;
         g_vtxProjected5[vtxIndex][2] = g_vtxTransformed[dwV].z;
         g_vtxProjected5[vtxIndex][3] = g_vtxTransformed[dwV].w;
@@ -2360,6 +2369,18 @@ void UpdateCombinedMatrix()
         {
             gRSPworldProject = gRSPworldProject * reverseY;
         }
+        /* Scales polygons but also screws up sprites
+         * TODO: remove if this is not useful
+        if (options.bWidescreenExtend)
+        {
+            float s = (4.0 * windowSetting.uDisplayHeight) / (3.0 * windowSetting.uDisplayWidth);
+            XMATRIX scaleX(s,0,0,0,
+                           0,1,0,0,
+                           0,0,1,0,
+                           0,0,0,1);
+            gRSPworldProject = gRSPworldProject * scaleX;
+        }
+        */
 #if !defined(NO_ASM)
         if( status.isSSEEnabled )
         {
