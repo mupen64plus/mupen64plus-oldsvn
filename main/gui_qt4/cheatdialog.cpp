@@ -140,13 +140,13 @@ void CheatDialog::cheatItemChanged(QStandardItem* item)
     if (item->checkState() == Qt::Checked) {
         if (code >= 0) {
             // Only one option can be selected at a time.
-            // Deselect all other options and re-enable this one
+            // Deselect all other options
             QStandardItem* parent = item->parent();
             for (int i = 0; i < parent->rowCount(); i++) {
-                parent->child(i)->setCheckState(Qt::Unchecked);
+                if (parent->child(i) != item) {
+                    parent->child(i)->setCheckState(Qt::Unchecked);
+                }
             }
-            item->setCheckState(Qt::Checked);
-            cheat = parent->data(CheatCodeRole).value<core::cheat_t*>();
         }
         if (cheat) {
             core::cheat_enable_current_rom(cheat->number, code);
