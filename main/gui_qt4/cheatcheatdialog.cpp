@@ -26,13 +26,14 @@
 CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDialog(parent)
 {
     setupUi(this);
+
+    // Use this as our internal pointer to the cheat we are working on.
     _cheat = cheat;
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
     connect(pushAdd, SIGNAL(clicked()), this, SLOT(onadd()));
     
     QString name, comment;
     core::list_t node = 0;
-    
   
     name = QString(_cheat->name);
     comment = QString(_cheat->comment);
@@ -53,7 +54,7 @@ CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDia
     tableModel->setHorizontalHeaderItem(0, header0);
     tableModel->setHorizontalHeaderItem(1, header1);
     
-    list_foreach(_cheat->codes, node)
+    list_foreach(_cheat->cheat_codes, node)
     {
         int row = tableModel->rowCount();
         core::cheat_code_t *code = static_cast<core::cheat_code_t*>(node->data);

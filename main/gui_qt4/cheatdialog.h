@@ -51,6 +51,7 @@ class CheatDialog : public QDialog, private Ui_CheatDialog
         void onedit();
         void ondelete();
         void treeViewClicked(const QModelIndex& index);
+        void onaccepted();
 
     private:
         core::list_t m_cheats;

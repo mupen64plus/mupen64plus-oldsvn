@@ -34,6 +34,8 @@
 #define ENTRY_BOOT 0
 #define ENTRY_VI 1
 
+extern list_t g_Cheats;
+
 void cheat_apply_cheats(int entry);
 void cheat_read_config(void);
 void cheat_write_config(void);
@@ -70,7 +72,7 @@ typedef struct cheat {
     int enabled;
     int always_enabled;
     int was_enabled;
-    list_t codes;
+    list_t cheat_codes;
     list_t options;
 } cheat_t;
 

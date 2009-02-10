@@ -38,7 +38,8 @@
 // this seems stupid
 #define CHEAT_CODE_MAGIC_VALUE 0xcafe // use this to know that old_value is uninitialized
 
-#define CHEAT_FILENAME "mupen64plus.cht"
+#define DATABASE_FILENAME "mupen64plus.cht"
+#define CHEAT_FILENAME "cheats.cfg"
 static ini_file *cheat_file = NULL;
 static ini_section *current_rom_section = NULL;
 static list_t current_rom_cheats = NULL;
@@ -155,7 +156,7 @@ void cheat_apply_cheats(int entry)
             switch(entry)
             {
                 case ENTRY_BOOT:
-                    list_foreach(cheat->codes, node2)
+                    list_foreach(cheat->cheat_codes, node2)
                     {
                         code = (cheat_code_t *)node2->data;
 
@@ -165,7 +166,7 @@ void cheat_apply_cheats(int entry)
                     }
                     break;
                 case ENTRY_VI:
-                    list_foreach(cheat->codes, node2)
+                    list_foreach(cheat->cheat_codes, node2)
                     {
                         code = (cheat_code_t *)node2->data;
 
@@ -237,7 +238,7 @@ void cheat_apply_cheats(int entry)
             switch(entry)
             {
                 case ENTRY_VI:
-                    list_foreach(cheat->codes, node2)
+                    list_foreach(cheat->cheat_codes, node2)
                     {
                         code = (cheat_code_t *)node2->data;
               
@@ -256,16 +257,155 @@ void cheat_apply_cheats(int entry)
     }
 }
 
+/** cheat_read_config
+ * First read and parse the DATABASE (PJ64),
+ * then read and parse the CHEAT file.
+*/
 void cheat_read_config(void)
 {
+
+/**
+ * Read and parse the DATABASE (PJ64),
+*/
     char buf[PATH_MAX];
-    snprintf(buf, PATH_MAX, "%s%s", get_installpath(), CHEAT_FILENAME);
+    snprintf(buf, PATH_MAX, "%s%s", get_installpath(), DATABASE_FILENAME);
     cheat_file = ini_file_parse(buf);
+
+/**   Read config file and populate list of supported cheats. Format of cheat file is:
+ *
+ *   {Some Game's CRC}
+ *   name=Some Game
+ *
+ *   [Cheat Name 1]
+ *   enabled=1
+ *   XXXXXXXX YYYY <-- cheat code (address, new value)
+ *   XXXXXXXX YYYY
+ *   XXXXXXXX YYYY
+ * 
+ *
+ *   [Cheat Name 2]
+ *   enabled=0
+ *   XXXXXXXX YYYY
+ *   XXXXXXXX YYYY
+ *   XXXXXXXX YYYY
+ *
+ *   {Another Game's CRC}
+ *   name=Another Game
+ *   ...
+ */
+    char path[PATH_MAX];
+    FILE *f = NULL;
+    char line[2048];
+
+    rom_cheats_t *romcheat = NULL;
+    cheat_t *cheat = NULL;
+    cheat_code_t *cheatcode = NULL;
+
+    snprintf(path, PATH_MAX, "%s%s", get_configpath(), CHEAT_FILENAME);
+    f = fopen(path, "r");
+
+    // if no cheat config file installed, exit quietly
+    if(!f) return;
+
+    // parse file lines
+    while(!feof(f))
+    {
+        if( !fgets( line, 2048, f ) )
+            break;
+
+        trim(line);
+
+        if(strlen(line) == 0 ||
+           line[0] == '#')     // comment
+            continue;
+
+        // beginning of new rom section
+        if (line[0] == '{' && line[strlen(line)-1] == '}')
+        {
+            romcheat = cheat_new_rom();
+            sscanf(line, "{%x %x}", &romcheat->crc1, &romcheat->crc2);
+            continue;
+        }
+
+        // rom name (just informational)
+        if(strncasecmp(line, "name=", 5) == 0)
+        {
+            romcheat->rom_name = strdup(strstr(line, "=")+1);
+            continue;
+        }
+
+        // name of cheat
+        if(line[0] == '[' && line[strlen(line)-1] == ']')
+        {
+            cheat = cheat_new_cheat(romcheat);
+            line[strlen(line)-1] = '\0'; // get rid of trailing ']'
+            cheat->name = strdup(line+1);
+            continue;
+        }
+
+        // cheat always enabled?
+        if(strncasecmp(line, "enabled=", 8) == 0)
+        {
+            sscanf(line, "enabled=%d", &cheat->always_enabled);
+            continue;
+        }
+
+        // else, line must be a cheat code
+        cheatcode = cheat_new_cheat_code(cheat);
+        sscanf(line, "%x %hx", &cheatcode->address, &cheatcode->value);
+    }
+    fclose(f);
 }
 
+/** cheat_write_config
+ *   Write out all cheats to file
+ */
 void cheat_write_config(void)
 {
+    char path[PATH_MAX];
+    FILE *f = NULL;
 
+    list_node_t *node1, *node2, *node3;
+    rom_cheats_t *romcheat = NULL;
+    cheat_t *cheat = NULL;
+    cheat_code_t *cheatcode = NULL;
+
+    // if no cheats, don't bother writing out file
+    if(list_empty(g_Cheats)) return;
+
+    snprintf(path, PATH_MAX, "%s%s", get_configpath(), CHEAT_FILENAME);
+    f = fopen(path, "w");
+    if(!f)
+        return;
+
+    list_foreach(g_Cheats, node1)
+    {
+        romcheat = (rom_cheats_t *)node1->data;
+
+        fprintf(f, "{%.8x %.8x}\n"
+                "name=%s\n",
+                romcheat->crc1,
+                romcheat->crc2,
+                romcheat->rom_name);
+
+        list_foreach(romcheat->cheats, node2)
+        {
+            cheat = (cheat_t *)node2->data;
+
+            fprintf(f, "\n[%s]\n", cheat->name);
+            fprintf(f, "enabled=%d\n", cheat->always_enabled? 1 : 0);
+
+            list_foreach(cheat->cheat_codes, node3)
+            {
+                cheatcode = (cheat_code_t *)node3->data;
+
+                fprintf(f, "%.8x %.4hx\n", cheatcode->address, cheatcode->value);
+            }
+        }
+        fprintf(f, "\n");
+    }
+
+    fclose(f);
 }
 
 void cheat_delete_all(void)
@@ -330,7 +470,7 @@ static cheat_t *find_or_create_cheat(list_t *list, int number)
         cheat->name = NULL;
         cheat->comment = NULL;
         cheat->number = number;
-        cheat->codes = NULL;
+        cheat->cheat_codes = NULL;
         cheat->options = NULL;
         cheat->enabled = 0;
         cheat->was_enabled = 0;
@@ -421,7 +561,7 @@ list_t cheats_for_current_rom()
 
                     code->value = value;
                     code->old_value = CHEAT_CODE_MAGIC_VALUE;
-                    list_append(&cheat->codes, code);
+                    list_append(&cheat->cheat_codes, code);
                 }
                 free(node2->data);
             }
@@ -452,11 +592,11 @@ void cheats_free(list_t *cheats)
         free(cheat->name);
         free(cheat->comment);
 
-        list_foreach(cheat->codes, node2)
+        list_foreach(cheat->cheat_codes, node2)
         {
             free(node2->data);
         }
-        list_delete(&cheat->codes);
+        list_delete(&cheat->cheat_codes);
 
         list_foreach(cheat->options, node2)
         {
@@ -488,7 +628,7 @@ void cheat_enable_current_rom(int number, int option)
         // If this is an option to set,
         // search for a code which is supposed
         // to be patched with the option
-        list_foreach(cheat->codes, node)
+        list_foreach(cheat->cheat_codes, node)
         {
             code = (cheat_code_t *)node->data;
             
@@ -583,7 +723,7 @@ cheat_code_t *cheat_new_cheat_code(cheat_t *cheat)
 
     memset(code, 0, sizeof(cheat_code_t));
     code->old_value = CHEAT_CODE_MAGIC_VALUE; // initialize old_value
-    list_append(&cheat->codes, code);
+    list_append(&cheat->cheat_codes, code);
 
     return code;
 }
@@ -612,13 +752,13 @@ void cheat_delete_rom(rom_cheats_t *romcheat)
             free(cheat->name);
 
         // remove any codes associated with this cheat
-        list_foreach(cheat->codes, node2)
+        list_foreach(cheat->cheat_codes, node2)
         {
             cheatcode = (cheat_code_t *)node2->data;
             if(cheatcode)
                 free(cheatcode);
         }
-        list_delete(&cheat->codes);
+        list_delete(&cheat->cheat_codes);
         free(cheat);
     }
     list_delete(&romcheat->cheats);
@@ -646,13 +786,13 @@ void cheat_delete_cheat(rom_cheats_t *romcheat, cheat_t *cheat)
         free(cheat->name);
 
     // remove any codes associated with this cheat
-    list_foreach(cheat->codes, node)
+    list_foreach(cheat->cheat_codes, node)
     {
         cheatcode = (cheat_code_t *)node->data;
         if(cheatcode)
             free(cheatcode);
     }
-    list_delete(&cheat->codes);
+    list_delete(&cheat->cheat_codes);
 
     // locate node associated with cheat
     cheatnode = list_find_node(romcheat->cheats, cheat);
@@ -673,10 +813,10 @@ void cheat_delete_cheat_code(cheat_t *cheat, cheat_code_t *cheatcode)
         return;
 
     // locate node associated with cheat
-    codenode = list_find_node(cheat->codes, cheatcode);
+    codenode = list_find_node(cheat->cheat_codes, cheatcode);
 
     // free cheat code and remove it from the cheat's code list
     free(cheatcode);
-    list_node_delete(&cheat->codes, codenode);
+    list_node_delete(&cheat->cheat_codes, codenode);
 }
 

@@ -40,6 +40,7 @@ CheatDialog::CheatDialog(QWidget* parent)
     connect(pushEdit, SIGNAL(clicked()), this, SLOT(onedit()));
     connect(pushDelete, SIGNAL(clicked()), this, SLOT(ondelete()));
     connect(treeView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(treeViewClicked(const QModelIndex&)));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
 
     core::list_t node1 = 0;
     core::list_t node2 = 0;
@@ -102,6 +103,33 @@ CheatDialog::CheatDialog(QWidget* parent)
     m_model->appendRow(personal);
 
     // TODO: read .mupen64plus/cheats.cfg and add it here to parent
+    // populate model
+    core::list_node_t *romnode,
+                *cheatnode;
+    core::rom_cheats_t *romcheat;
+    core::cheat_t *cheat;
+
+    list_foreach(core::g_Cheats, romnode) {
+        romcheat = (core::rom_cheats_t *)romnode->data;
+        // add rom name to tree
+        
+        QStandardItem* newrom = 0;
+        newrom = new QStandardItem(romcheat->rom_name);
+        newrom->setData(QVariant::fromValue(romcheat), RomRole);
+        personal->appendRow(newrom);
+
+        // add all cheats for this rom as children in the tree
+        list_foreach(romcheat->cheats, cheatnode)
+            {
+            cheat = (core::cheat_t *)cheatnode->data;
+
+            QStandardItem * newitem;
+            newitem = new QStandardItem(cheat->name);
+            newitem->setData(QVariant::fromValue(cheat), CheatCodeRole);
+            newrom->appendRow(newitem);
+            }        
+    }
+    
     treeView->setModel(m_model);
 }
 
@@ -165,12 +193,12 @@ void CheatDialog::onnew()
     core::cheat_t *cheat = NULL;
     core::rom_cheats_t *romcheat = NULL;
 
-    // If nothing is selected, exit.
     const QModelIndex& index = treeView->selectionModel()->currentIndex();
     if (index.isValid()) {
         item = m_model->itemFromIndex(index);
         romcheat = item->data(RomRole).value<core::rom_cheats_t*>();
     }
+
     // If a rom is selected, make new cheat
     if (romcheat) {
         cheat = core::cheat_new_cheat(romcheat);
@@ -180,7 +208,7 @@ void CheatDialog::onnew()
         cheat->enabled = 0;
         cheat->always_enabled = 0;
         cheat->was_enabled = 0;
-        cheat->codes = NULL;
+        cheat->cheat_codes = NULL;
         cheat->options = NULL;
         CheatCheatDialog* d = new CheatCheatDialog(cheat,this);
         if (d->exec()) {
@@ -190,8 +218,8 @@ void CheatDialog::onnew()
         }
         else {
             cheat_delete_cheat(romcheat, cheat);
-            delete cheat;
         }
+        delete d;
     }
     // otherwise add a new rom
     else {
@@ -210,56 +238,57 @@ void CheatDialog::onnew()
         }
         else {
             cheat_delete_rom(romcheat);
-            delete romcheat;
         }
+        delete d;
     }
 }
 
 void CheatDialog::onedit()
 {
-    core::cheat_t *cheat = NULL;
-    core::rom_cheats_t *romcheat = NULL;
-    QStandardItem * item;
+    core::cheat_t* cheat = NULL;
+    core::rom_cheats_t* romcheat = NULL;
+    QStandardItem* item;
     
     // If nothing is selected, exit.
     const QModelIndex& index = treeView->selectionModel()->currentIndex();
-    if (!index.isValid())
-        return;
-        
-    item = m_model->itemFromIndex(index);
-    romcheat = item->data(RomRole).value<core::rom_cheats_t*>();
-    cheat = item->data(CheatCodeRole).value<core::cheat_t*>();
-    if (romcheat) {
-        CheatRomDialog* d = new CheatRomDialog(romcheat,this);
-        if (d->exec()) {
-            ; //TODO: change name if changed        
-            // TODO: select rom?
-        }
-    }
-    else if (cheat) {
-        CheatCheatDialog* d = new CheatCheatDialog(cheat,this);
-        if (d->exec()) {
-            ; //TODO: rename if name changed
+    if (index.isValid()) {
+        item = m_model->itemFromIndex(index);
+        romcheat = item->data(RomRole).value<core::rom_cheats_t*>();
+        cheat = item->data(CheatCodeRole).value<core::cheat_t*>();
+        if (romcheat) {
+            CheatRomDialog* d = new CheatRomDialog(romcheat,this);
+            d->exec();
+            delete d;
+        } else if (cheat) {
+            CheatCheatDialog* d = new CheatCheatDialog(cheat,this);
+            d->exec();
+            delete d;
         }
     }
 }
 
-    void CheatDialog::ondelete()
+void CheatDialog::ondelete()
 {
     const QModelIndex& index = treeView->selectionModel()->currentIndex();
     const QModelIndex& parent = index.parent();
-    if (parent.isValid())
+
+    if (parent.isValid()) {
         m_model->removeRow(index.row(), parent);
+    }
 }
 
 void CheatDialog::treeViewClicked(const QModelIndex& index)
 {
-    QStandardItem *item;
     core::cheat_t* cheat;
 
-    item = m_model->itemFromIndex(index);
-    cheat = item->data(CheatCodeRole).value<core::cheat_t*>();
-    if (cheat)
+    cheat = m_model->itemFromIndex(index)->data(CheatCodeRole).value<core::cheat_t*>();
+    if (cheat) {
         textDescription->setPlainText(QString(cheat->comment));
+    }
+}
+
+void CheatDialog::onaccepted()
+{
+    core::cheat_write_config();
 }
 
