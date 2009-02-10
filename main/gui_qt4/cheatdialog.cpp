@@ -48,7 +48,7 @@ CheatDialog::CheatDialog(QWidget* parent)
 
     m_cheats = core::cheats_for_current_rom();
     if (m_cheats) {
-        setWindowTitle(QString(core::ROM_SETTINGS.goodname) + " - Cheats");
+        setWindowTitle(tr("%1 - Cheats").arg(core::ROM_SETTINGS.goodname));
         list_foreach(m_cheats, node1) {
             core::cheat_t* cheat = static_cast<core::cheat_t*>(node1->data);
             QStandardItem* entry = 0;
@@ -86,7 +86,7 @@ CheatDialog::CheatDialog(QWidget* parent)
                     QStandardItem* optionItem = 0;
                     
                     option = static_cast<core::cheat_option_t*>(node2->data);
-                    optionItem = new QStandardItem(option->description + QString(" (Option)"));
+                    optionItem = new QStandardItem(tr("%1 (Option)").arg(option->description));
                     optionItem->setEditable(false);
                     optionItem->setCheckable(true);
                     optionItem->setData(QVariant::fromValue(option->code), CheatOptionRole);
@@ -98,7 +98,7 @@ CheatDialog::CheatDialog(QWidget* parent)
 
     m_model->sort(0);
 
-    personal = new QStandardItem(QString("Personal Cheats"));
+    personal = new QStandardItem(tr("Personal Cheats"));
     m_model->appendRow(personal);
 
     // TODO: read .mupen64plus/cheats.cfg and add it here to parent
