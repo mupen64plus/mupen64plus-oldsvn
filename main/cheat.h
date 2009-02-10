@@ -43,6 +43,14 @@ void cheat_unload_current_rom(void);
 void cheat_enable_current_rom(int,int);
 void cheat_disable_current_rom(int);
 
+// represents all cheats for a given rom
+typedef struct rom_cheats {
+    char *rom_name;
+    unsigned int crc1;
+    unsigned int crc2;
+    list_t cheats; // list of cheat_t's
+} rom_cheats_t;
+
 typedef struct cheat_option {
     int code; /* e.g. 0xFF */
     char *description; /* e.g. Music Off */
@@ -71,11 +79,11 @@ cheat_t *cheat_find_current_rom(int);
 
 void cheats_free(list_t *cheats); // list_t becomes invalid after this!
 
-// rom_cheats_t *cheat_new_rom(void);
-// cheat_t *cheat_new_cheat(rom_cheats_t *);
-// cheat_code_t *cheat_new_cheat_code(cheat_t *);
-// void cheat_delete_rom(rom_cheats_t *);
-// void cheat_delete_cheat(rom_cheats_t *, cheat_t *);
-// void cheat_delete_cheat_code(cheat_t *, cheat_code_t *);
+rom_cheats_t *cheat_new_rom(void);
+cheat_t *cheat_new_cheat(rom_cheats_t *);
+cheat_code_t *cheat_new_cheat_code(cheat_t *);
+void cheat_delete_rom(rom_cheats_t *);
+void cheat_delete_cheat(rom_cheats_t *, cheat_t *);
+void cheat_delete_cheat_code(cheat_t *, cheat_code_t *);
 
 #endif // #define CHEAT_H

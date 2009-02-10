@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>574</width>
+    <width>611</width>
     <height>634</height>
    </rect>
   </property>
@@ -18,28 +18,14 @@
   <layout class="QGridLayout" name="gridLayout_3" >
    <item row="0" column="0" >
     <layout class="QGridLayout" name="gridLayout_2" >
-     <item row="2" column="0" >
-      <widget class="QPushButton" name="pushAddCheat" >
-       <property name="text" >
-        <string>Add &amp;Cheat</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" >
-      <widget class="QPushButton" name="pushAddOption" >
-       <property name="text" >
-        <string>Add &amp;Option</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2" >
-      <widget class="QPushButton" name="pushRemove" >
-       <property name="text" >
-        <string>&amp;Remove</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="3" >
+      <widget class="QPushButton" name="pushDelete" >
+       <property name="text" >
+        <string>&amp;Delete</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4" >
       <widget class="QDialogButtonBox" name="buttonBox" >
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
@@ -49,7 +35,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="4" >
+     <item row="1" column="0" colspan="5" >
       <widget class="QTextEdit" name="textDescription" >
        <property name="enabled" >
         <bool>false</bool>
@@ -68,13 +54,27 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0" colspan="4" >
+     <item row="0" column="0" colspan="5" >
       <widget class="QTreeView" name="treeView" >
        <property name="animated" >
         <bool>true</bool>
        </property>
        <property name="headerHidden" >
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" >
+      <widget class="QPushButton" name="pushNew" >
+       <property name="text" >
+        <string>&amp;New</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2" >
+      <widget class="QPushButton" name="pushEdit" >
+       <property name="text" >
+        <string>&amp;Edit</string>
        </property>
       </widget>
      </item>

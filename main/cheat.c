@@ -43,6 +43,10 @@ static ini_file *cheat_file = NULL;
 static ini_section *current_rom_section = NULL;
 static list_t current_rom_cheats = NULL;
 
+// for local cheats stored in cheats.cfg
+list_t g_Cheats = NULL; // list of all supported cheats
+static rom_cheats_t *g_Current = NULL; // current loaded rom
+
 // private functions
 static unsigned short read_address_16bit(unsigned int address)
 {
@@ -538,140 +542,141 @@ cheat_t *cheat_find_current_rom(int number)
 /** cheat_new_rom
  *   creates a new rom_cheats_t structure, appends it to the global list and returns it.
  */
-// rom_cheats_t *cheat_new_rom(void)
-// {
-//     rom_cheats_t *romcheat = malloc(sizeof(rom_cheats_t));
-// 
-//     if(!romcheat)
-//         return NULL;
-// 
-//     memset(romcheat, 0, sizeof(rom_cheats_t));
-//     list_append(&g_Cheats, romcheat);
-// 
-//     return romcheat;
-// }
+rom_cheats_t *cheat_new_rom(void)
+{
+    rom_cheats_t *romcheat = malloc(sizeof(rom_cheats_t));
+
+    if(!romcheat)
+        return NULL;
+
+    memset(romcheat, 0, sizeof(rom_cheats_t));
+    list_append(&g_Cheats, romcheat);
+
+    return romcheat;
+}
 
 /** cheat_new_cheat
  *   creates a new cheat_t structure, appends it to the given rom_cheats_t struct and returns it.
  */
-// cheat_t *cheat_new_cheat(rom_cheats_t *romcheat)
-// {
-//     cheat_t *cheat = malloc(sizeof(cheat_t));
-// 
-//     if(!cheat)
-//         return NULL;
-// 
-//     memset(cheat, 0, sizeof(cheat_t));
-//     list_append(&romcheat->cheats, cheat);
-// 
-//     return cheat;
-// }
+cheat_t *cheat_new_cheat(rom_cheats_t *romcheat)
+{
+    cheat_t *cheat = malloc(sizeof(cheat_t));
+
+    if(!cheat)
+        return NULL;
+
+    memset(cheat, 0, sizeof(cheat_t));
+    list_append(&romcheat->cheats, cheat);
+
+    return cheat;
+}
 
 /** cheat_new_cheat_code
  *   creates a new cheat_code_t structure, appends it to the given cheat_t struct and returns it.
  */
-// cheat_code_t *cheat_new_cheat_code(cheat_t *cheat)
-// {
-//     cheat_code_t *code = malloc(sizeof(cheat_code_t));
-// 
-//     if(!code)
-//         return NULL;
-// 
-//     memset(code, 0, sizeof(cheat_code_t));
-//     code->old_value = CHEAT_CODE_MAGIC_VALUE; // initialize old_value
-//     list_append(&cheat->cheat_codes, code);
-// 
-//     return code;
-// }
+cheat_code_t *cheat_new_cheat_code(cheat_t *cheat)
+{
+    cheat_code_t *code = malloc(sizeof(cheat_code_t));
+
+    if(!code)
+        return NULL;
+
+    memset(code, 0, sizeof(cheat_code_t));
+    code->old_value = CHEAT_CODE_MAGIC_VALUE; // initialize old_value
+    list_append(&cheat->codes, code);
+
+    return code;
+}
 
 /** cheat_delete_rom
  *   deletes given rom structure and removes it from the global list.
  */
-// void cheat_delete_rom(rom_cheats_t *romcheat)
-// {
-//     list_node_t *romnode, *node1, *node2;
-//     cheat_t *cheat;
-//     cheat_code_t *cheatcode;
-// 
-//     if(!romcheat)
-//         return;
-// 
-//     if(romcheat->rom_name)
-//         free(romcheat->rom_name);
-// 
-//     // remove any cheats associated with this rom
-//     list_foreach(romcheat->cheats, node1)
-//     {
-//         cheat = (cheat_t *)node1->data;
-// 
-//         if(cheat->name)
-//             free(cheat->name);
-// 
-//         // remove any codes associated with this cheat
-//         list_foreach(cheat->cheat_codes, node2)
-//         {
-//             cheatcode = (cheat_code_t *)node2->data;
-//             if(cheatcode)
-//                 free(cheatcode);
-//         }
-//         list_delete(&cheat->cheat_codes);
-//         free(cheat);
-//     }
-//     list_delete(&romcheat->cheats);
-// 
-//     // locate node associated with rom
-//     romnode = list_find_node(g_Cheats, romcheat);
-// 
-//     // free rom and remove it from the list
-//     free(romcheat);
-//     list_node_delete(&g_Cheats, romnode);
-// }
+void cheat_delete_rom(rom_cheats_t *romcheat)
+{
+    list_node_t *romnode, *node1, *node2;
+    cheat_t *cheat;
+    cheat_code_t *cheatcode;
+
+    if(!romcheat)
+        return;
+
+    if(romcheat->rom_name)
+        free(romcheat->rom_name);
+
+    // remove any cheats associated with this rom
+    list_foreach(romcheat->cheats, node1)
+    {
+        cheat = (cheat_t *)node1->data;
+
+        if(cheat->name)
+            free(cheat->name);
+
+        // remove any codes associated with this cheat
+        list_foreach(cheat->codes, node2)
+        {
+            cheatcode = (cheat_code_t *)node2->data;
+            if(cheatcode)
+                free(cheatcode);
+        }
+        list_delete(&cheat->codes);
+        free(cheat);
+    }
+    list_delete(&romcheat->cheats);
+
+    // locate node associated with rom
+    romnode = list_find_node(g_Cheats, romcheat);
+
+    // free rom and remove it from the list
+    free(romcheat);
+    list_node_delete(&g_Cheats, romnode);
+}
 
 /** cheat_delete_cheat
  *   deletes given cheat structure and removes it from the given rom's cheat list.
  */
-// void cheat_delete_cheat(rom_cheats_t *romcheat, cheat_t *cheat)
-// {
-//     list_node_t *cheatnode, *node;
-//     cheat_code_t *cheatcode;
-// 
-//     if(!cheat)
-//         return;
-// 
-//     if(cheat->name)
-//         free(cheat->name);
-// 
-//     // remove any codes associated with this cheat
-//     list_foreach(cheat->cheat_codes, node)
-//     {
-//         cheatcode = (cheat_code_t *)node->data;
-//         if(cheatcode)
-//             free(cheatcode);
-//     }
-//     list_delete(&cheat->cheat_codes);
-// 
-//     // locate node associated with cheat
-//     cheatnode = list_find_node(romcheat->cheats, cheat);
-// 
-//     // free cheat and remove it from the rom's cheat list
-//     free(cheat);
-//     list_node_delete(&romcheat->cheats, cheatnode);
-// }
+void cheat_delete_cheat(rom_cheats_t *romcheat, cheat_t *cheat)
+{
+    list_node_t *cheatnode, *node;
+    cheat_code_t *cheatcode;
+
+    if(!cheat)
+        return;
+
+    if(cheat->name)
+        free(cheat->name);
+
+    // remove any codes associated with this cheat
+    list_foreach(cheat->codes, node)
+    {
+        cheatcode = (cheat_code_t *)node->data;
+        if(cheatcode)
+            free(cheatcode);
+    }
+    list_delete(&cheat->codes);
+
+    // locate node associated with cheat
+    cheatnode = list_find_node(romcheat->cheats, cheat);
+
+    // free cheat and remove it from the rom's cheat list
+    free(cheat);
+    list_node_delete(&romcheat->cheats, cheatnode);
+}
 
 /** cheat_delete_cheat_code
  *   deletes given cheat code structure and removes it from the given cheat's code list.
  */
-// void cheat_delete_cheat_code(cheat_t *cheat, cheat_code_t *cheatcode)
-// {
-//     list_node_t *codenode;
-// 
-//     if(!cheatcode)
-//         return;
-// 
-//     // locate node associated with cheat
-//     codenode = list_find_node(cheat->cheat_codes, cheatcode);
-// 
-//     // free cheat code and remove it from the cheat's code list
-//     free(cheatcode);
-//     list_node_delete(&cheat->cheat_codes, codenode);
-// }
+void cheat_delete_cheat_code(cheat_t *cheat, cheat_code_t *cheatcode)
+{
+    list_node_t *codenode;
+
+    if(!cheatcode)
+        return;
+
+    // locate node associated with cheat
+    codenode = list_find_node(cheat->codes, cheatcode);
+
+    // free cheat code and remove it from the cheat's code list
+    free(cheatcode);
+    list_node_delete(&cheat->codes, codenode);
+}
+
