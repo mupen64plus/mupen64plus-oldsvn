@@ -123,65 +123,38 @@ QStandardItem* CheatDialog::createItemForCheat(QString name,
     return item;
 }
 
-void CheatDialog::cheatItemChanged(QStandardItem * item)
+void CheatDialog::cheatItemChanged(QStandardItem* item)
 {
-    bool success = true;
-    core::cheat_t* cheat;
-    int code;
-    QStandardItem * parent;
-    cheat = item->data(CheatCodeRole).value<core::cheat_t*>();
-    code = item->data(CheatOptionRole).value<int>();
-    
-    if (item->checkState() == Qt::Checked) {
-        if (cheat)
-            core::cheat_enable_current_rom(cheat->number, -1);
-        else if (code) {
-            parent = item->parent();
-            // Only one option can be selected at the time
-            // TODO: Probably not the best way to do it ...
-            for (int i = 0;i<parent->rowCount();i++) {
-                if ((parent->child(i)->checkState() == Qt::Checked) &&
-                    (item->row() != i)) {
-                    item->setCheckState(Qt::Unchecked);
-                    QMessageBox::warning(this, tr("Warning"),
-                        tr("Only one option can be selected for each cheat."),
-                        QMessageBox::Ok);
-                    return;
-                }
-            }
-            cheat = parent->data(CheatCodeRole).value<core::cheat_t*>();
-            if (cheat)
-                core::cheat_enable_current_rom(cheat->number, code);
-            else
-                success = false;
-        }
-        else
-            success = false;
+    core::cheat_t* cheat = 0;
+    QVariant codeVariant = item->data(CheatOptionRole);
+    int code = codeVariant.isValid() ? codeVariant.value<int>() : -1;
 
-        if (!success)
-            QMessageBox::warning(this, tr("Warning"),
-                tr("Failed to apply cheat."),
-                QMessageBox::Ok);
-    }
-    else if (item->checkState() == Qt::Unchecked) {
+    if (code >= 0) {
+        cheat = item->parent()->data(CheatCodeRole).value<core::cheat_t*>();
+    } else {
         cheat = item->data(CheatCodeRole).value<core::cheat_t*>();
-        code = item->data(CheatOptionRole).value<int>();
-        if (cheat)
-            core::cheat_disable_current_rom(cheat->number);
-        else if (code) {
-            parent = item->parent();
+    }
+
+    Q_ASSERT(item->checkState() != Qt::PartiallyChecked);
+
+    if (item->checkState() == Qt::Checked) {
+        if (code >= 0) {
+            // Only one option can be selected at a time.
+            // Deselect all other options and re-enable this one
+            QStandardItem* parent = item->parent();
+            for (int i = 0; i < parent->rowCount(); i++) {
+                parent->child(i)->setCheckState(Qt::Unchecked);
+            }
+            item->setCheckState(Qt::Checked);
             cheat = parent->data(CheatCodeRole).value<core::cheat_t*>();
-            if (cheat)
-                core::cheat_disable_current_rom(cheat->number);
-            else
-                success = false;
         }
-        else
-            success = false;
-        if (!success)
-            QMessageBox::warning(this, tr("Warning"),
-                tr("Failed to un-apply cheat."),
-                QMessageBox::Ok);
+        if (cheat) {
+            core::cheat_enable_current_rom(cheat->number, code);
+        }
+    } else if (item->checkState() == Qt::Unchecked) {
+        if (cheat) {
+            core::cheat_disable_current_rom(cheat->number);
+        }
     }
 }
 
