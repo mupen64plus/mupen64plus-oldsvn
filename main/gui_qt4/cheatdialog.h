@@ -57,7 +57,7 @@ class CheatDialog : public QDialog, private Ui_CheatDialog
         core::list_t m_cheats;
         QStandardItemModel* m_model;
         QStandardItem* createItemForCheat(QString name, core::cheat_t* cheat);
-        enum { CheatCodeRole = Qt::UserRole + 1, CheatOptionRole, RomRole };
+        enum { CheatRole = Qt::UserRole + 1, CheatOptionRole, RomRole, CheatCodeRole };
         QStandardItem* personal;
 };
 

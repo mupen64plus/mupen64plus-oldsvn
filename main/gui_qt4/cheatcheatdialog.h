@@ -42,6 +42,7 @@ class CheatCheatDialog : public QDialog, private Ui_CheatCheatDialog
     private slots:
         void onaccepted();
         void onadd();
+        void codeItemChanged(QStandardItem *item);
         
     private:
         core::cheat_t *_cheat;

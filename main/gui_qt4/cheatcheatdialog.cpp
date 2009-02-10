@@ -22,6 +22,7 @@
 #include <QtGui>
 
 #include "cheatcheatdialog.h"
+#include "cheatdialog.h"    //Q_DECLARE_METATYPE(core::cheat_code_t*)
 
 CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDialog(parent)
 {
@@ -58,8 +59,12 @@ CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDia
     {
         int row = tableModel->rowCount();
         core::cheat_code_t *code = static_cast<core::cheat_code_t*>(node->data);
+
         QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
         QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
+
+        row0->setData(QVariant::fromValue(code), Qt::UserRole + 4);
+        row1->setData(QVariant::fromValue(code), Qt::UserRole + 4);
 
         tableModel->setItem(row,0,row0);
         tableModel->setItem(row,1,row1);
@@ -70,6 +75,8 @@ CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDia
         radioAlwayEnabled->setChecked(true);
     tableView->resizeColumnsToContents();
     tableView->horizontalHeader()->setStretchLastSection(true);
+
+    connect(tableModel, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(codeItemChanged(QStandardItem *)));
 }
 
 CheatCheatDialog::~CheatCheatDialog()
@@ -102,7 +109,7 @@ void CheatCheatDialog::onaccepted()
 
 void CheatCheatDialog::onadd()
 {
-    core::cheat_code_t *code = cheat_new_cheat_code(_cheat);
+    core::cheat_code_t* code = cheat_new_cheat_code(_cheat);
     code->address = 0;
     code->value = 0;
     code->old_value = 0;
@@ -111,10 +118,37 @@ void CheatCheatDialog::onadd()
     QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
     QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
 
+    row0->setData(QVariant::fromValue(code), Qt::UserRole + 4);
+    row1->setData(QVariant::fromValue(code), Qt::UserRole + 4);
+
     tableModel->setItem(row,0,row0);
     tableModel->setItem(row,1,row1);
     tableView->resizeColumnsToContents();
     tableView->horizontalHeader()->setStretchLastSection(true);
     tableView->setRowHeight(row,15);
+}
+
+void CheatCheatDialog::codeItemChanged(QStandardItem* item)
+{
+    bool ok;
+    core::cheat_code_t* code = 0;
+    
+    QString str = item->text();
+    QModelIndex index = tableModel->indexFromItem(item);
+    code = item->data(Qt::UserRole + 4).value<core::cheat_code_t*>();
+
+    if (code) {
+        if (index.column() == 0) { // address
+            code->address = str.toUInt(&ok, 16);;
+        } else { // value
+            code->value = str.toUInt(&ok, 16);;
+        }
+        QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
+        QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
+        row0->setData(QVariant::fromValue(code));
+        row1->setData(QVariant::fromValue(code));
+        tableModel->setItem(index.row(),0,row0);
+        tableModel->setItem(index.row(),1,row1);
+    }
 }
 
