@@ -44,6 +44,7 @@ class CheatDialog : public QDialog, private Ui_CheatDialog
     public:
         CheatDialog(QWidget* parent = 0);
         virtual ~CheatDialog();
+        enum { CheatRole = Qt::UserRole + 1, CheatOptionRole, RomRole, CheatCodeRole };
 
     private slots:
         void cheatItemChanged(QStandardItem *item);
@@ -57,7 +58,6 @@ class CheatDialog : public QDialog, private Ui_CheatDialog
         core::list_t m_cheats;
         QStandardItemModel* m_model;
         QStandardItem* createItemForCheat(QString name, core::cheat_t* cheat);
-        enum { CheatRole = Qt::UserRole + 1, CheatOptionRole, RomRole, CheatCodeRole };
         QStandardItem* personal;
 };
 

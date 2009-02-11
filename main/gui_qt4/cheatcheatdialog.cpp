@@ -63,8 +63,8 @@ CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDia
         QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
         QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
 
-        row0->setData(QVariant::fromValue(code), Qt::UserRole + 4);
-        row1->setData(QVariant::fromValue(code), Qt::UserRole + 4);
+        row0->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
+        row1->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
 
         tableModel->setItem(row,0,row0);
         tableModel->setItem(row,1,row1);
@@ -118,8 +118,8 @@ void CheatCheatDialog::onadd()
     QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
     QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
 
-    row0->setData(QVariant::fromValue(code), Qt::UserRole + 4);
-    row1->setData(QVariant::fromValue(code), Qt::UserRole + 4);
+    row0->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
+    row1->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
 
     tableModel->setItem(row,0,row0);
     tableModel->setItem(row,1,row1);
@@ -140,15 +140,13 @@ void CheatCheatDialog::codeItemChanged(QStandardItem* item)
     if (code) {
         if (index.column() == 0) { // address
             code->address = str.toUInt(&ok, 16);;
+            item->setText(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
         } else { // value
             code->value = str.toUInt(&ok, 16);;
+            item->setText(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
         }
-        QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
-        QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
-        row0->setData(QVariant::fromValue(code));
-        row1->setData(QVariant::fromValue(code));
-        tableModel->setItem(index.row(),0,row0);
-        tableModel->setItem(index.row(),1,row1);
+        tableView->resizeColumnsToContents();
+        tableView->horizontalHeader()->setStretchLastSection(true);
     }
 }
 

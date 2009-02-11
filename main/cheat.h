@@ -42,8 +42,6 @@ void cheat_write_config(void);
 void cheat_delete_all(void);
 void cheat_load_current_rom(void);
 void cheat_unload_current_rom(void);
-void cheat_enable_current_rom(int,int);
-void cheat_disable_current_rom(int);
 
 // represents all cheats for a given rom
 typedef struct rom_cheats {
@@ -77,7 +75,6 @@ typedef struct cheat {
 } cheat_t;
 
 list_t cheats_for_current_rom(); // use cheats_free to free returned list
-cheat_t *cheat_find_current_rom(int);
 
 void cheats_free(list_t *cheats); // list_t becomes invalid after this!
 

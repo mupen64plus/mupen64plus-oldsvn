@@ -1557,7 +1557,13 @@ int main(int argc, char *argv[])
     // cleanup and exit
     stopEmulation();
     config_write();
-    cheat_write_config();
+
+/**  Disabling as it seems to be causing some problems
+ * Maybe some of the "objects are already deleted?
+ * Is it required? Cheats should be saved when clicking OK in
+ * The cheats dialog.
+**/
+//    cheat_write_config();
     cheat_delete_all();
     g_romcache.rcstask = RCS_SHUTDOWN;
     romdatabase_close();

@@ -97,38 +97,39 @@ CheatDialog::CheatDialog(QWidget* parent)
         }
     }
 
-    m_model->sort(0);
+    // Adding cheats from cheats.cfg.
+    // Only add if emulator is not running. If emulator is running they will be
+    // added to the 'cheat_load_current_rom'. This is only for editing.
+    if (!core::ROM_HEADER) {
+        personal = new QStandardItem(tr("Personal Cheats"));
+        m_model->appendRow(personal);
 
-    // Adding cheats from cheats.cfg
-    // Sort before these cheats are added,
-    // so they will be added at the end.
-    personal = new QStandardItem(tr("Personal Cheats"));
-    m_model->appendRow(personal);
+        // populate model
+        core::list_node_t*  romnode;
+        core::list_node_t*  cheatnode;
+        core::rom_cheats_t* romcheat;
+        core::cheat_t*      cheat;
 
-    // populate model
-    core::list_node_t*  romnode;
-    core::list_node_t*  cheatnode;
-    core::rom_cheats_t* romcheat;
-    core::cheat_t*      cheat;
+        list_foreach(core::g_Cheats, romnode) {
+            QStandardItem* newrom = 0;
 
-    list_foreach(core::g_Cheats, romnode) {
-        QStandardItem* newrom = 0;
+            romcheat = (core::rom_cheats_t *)romnode->data;
+            newrom = new QStandardItem(romcheat->rom_name);
+            newrom->setData(QVariant::fromValue(romcheat), RomRole);
+            personal->appendRow(newrom);
 
-        romcheat = (core::rom_cheats_t *)romnode->data;
-        newrom = new QStandardItem(romcheat->rom_name);
-        newrom->setData(QVariant::fromValue(romcheat), RomRole);
-        personal->appendRow(newrom);
+            list_foreach(romcheat->cheats, cheatnode)
+                {
+                cheat = (core::cheat_t *)cheatnode->data;
 
-        list_foreach(romcheat->cheats, cheatnode)
-            {
-            cheat = (core::cheat_t *)cheatnode->data;
-
-            QStandardItem * newitem;
-            newitem = createItemForCheat(cheat->name, cheat);
-            newitem->setData(QVariant::fromValue(cheat), CheatRole);
-            newrom->appendRow(newitem);
-            }        
+                QStandardItem * newitem;
+                newitem = createItemForCheat(cheat->name, cheat);
+                newitem->setData(QVariant::fromValue(cheat), CheatRole);
+                newrom->appendRow(newitem);
+                }        
+        }
     }
+    m_model->sort(0);
     treeView->setModel(m_model);
 }
 
@@ -153,6 +154,8 @@ QStandardItem* CheatDialog::createItemForCheat(QString name,
 void CheatDialog::cheatItemChanged(QStandardItem* item)
 {
     core::cheat_t* cheat = 0;
+    core::cheat_code_t* cheatcode = 0;
+    core::list_t node = 0;
     QVariant codeVariant = item->data(CheatOptionRole);
     int code = codeVariant.isValid() ? codeVariant.value<int>() : -1;
 
@@ -176,11 +179,22 @@ void CheatDialog::cheatItemChanged(QStandardItem* item)
             }
         }
         if (cheat) {
-            core::cheat_enable_current_rom(cheat->number, code);
+            cheat->enabled = 1;
+            if (code>=0) {
+                list_foreach(cheat->cheat_codes, node) {
+                    cheatcode = (core::cheat_code_t *)node->data;
+                    // If this is an option to set, search for a code which is supposed
+                    // to be patched with the new codes
+                    if (cheatcode->option) {
+                        cheatcode->value = code;
+                        break;
+                    }
+                }
+            }
         }
     } else if (item->checkState() == Qt::Unchecked) {
         if (cheat) {
-            core::cheat_disable_current_rom(cheat->number);
+            cheat->enabled = 0;
         }
     }
 }

@@ -352,7 +352,7 @@ void cheat_read_config(void)
 
         // else, line must be a cheat code
         cheatcode = cheat_new_cheat_code(cheat);
-        sscanf(line, "%x %hx", &cheatcode->address, &cheatcode->value);
+        sscanf(line, "%x %x", &cheatcode->address, &cheatcode->value);
     }
     fclose(f);
 }
@@ -399,7 +399,7 @@ void cheat_write_config(void)
             {
                 cheatcode = (cheat_code_t *)node3->data;
 
-                fprintf(f, "%.8x %.4hx\n", cheatcode->address, cheatcode->value);
+                fprintf(f, "%.8x %.4x\n", cheatcode->address, cheatcode->value);
             }
         }
         fprintf(f, "\n");
@@ -454,18 +454,17 @@ static cheat_t *find_or_create_cheat(list_t *list, int number)
     cheat_t *cheat = NULL;
     int found = 0;
 
-    list_foreach(*list, node)
-    {
+    list_foreach(*list, node) {
         cheat = node->data;
-        if (cheat->number == number)
-        {
+        if (cheat->number == number) {
             found = 1;
+            break;
+        } else if (cheat->number == -1) {
             break;
         }
     }
 
-    if (!found)
-    {
+    if (!found) {
         cheat = malloc(sizeof(cheat_t));
         cheat->name = NULL;
         cheat->comment = NULL;
@@ -489,6 +488,7 @@ list_t cheats_for_current_rom()
     list_t temp = NULL;
     ini_entry *entry = NULL;
     cheat_t *cheat = NULL;
+    rom_cheats_t *romcheat = NULL;
     int n = 0, len = 0;
     int value = 0;
     unsigned int address = 0;
@@ -574,6 +574,53 @@ list_t cheats_for_current_rom()
 
         cheat = NULL;
     }
+
+    // Adding cheats from cheats.cfg to the 'current_rom_cheats' list.
+    rom_cheats_t *rom_cheat = NULL;
+    code = NULL;
+    node = NULL;
+    node2 = NULL;
+    cheat = NULL;
+    unsigned int crc1, crc2;
+
+    g_Current = NULL;
+    crc1 = g_MemHasBeenBSwapped ? sl(ROM_HEADER->CRC1) : ROM_HEADER->CRC1;
+    crc2 = g_MemHasBeenBSwapped ? sl(ROM_HEADER->CRC2) : ROM_HEADER->CRC2;
+
+    list_foreach(g_Cheats, node) {
+        rom_cheat = (rom_cheats_t *)node->data;
+
+        if(crc1 == rom_cheat->crc1 &&
+           crc2 == rom_cheat->crc2) {
+            g_Current = rom_cheat;
+            break;
+        }
+    }
+
+    // if rom was found, clear any old saved values from cheat codes
+    if(g_Current) {
+        list_foreach(g_Current->cheats, node) {
+            cheat = (cheat_t *)node->data;
+            cheat_t* newcheat;
+            newcheat = find_or_create_cheat(&list, -1);
+            memcpy(newcheat,cheat,sizeof(cheat_t));
+            newcheat->cheat_codes = NULL;
+            newcheat->options = NULL;
+
+            if (cheat->cheat_codes)
+            {
+                list_foreach(cheat->cheat_codes, node2) {
+                    code = (cheat_code_t *)node2->data;
+                    cheat_code_t* newcode;
+                    newcode = malloc(sizeof(cheat_code_t));
+                    memcpy(newcode,code,sizeof(cheat_code_t));
+                    newcode->old_value = CHEAT_CODE_MAGIC_VALUE;
+                    list_append(&newcheat->cheat_codes, newcode);
+                }
+            }
+        }
+    }
+
     current_rom_cheats = list;
     return list;
 }
@@ -585,21 +632,18 @@ void cheats_free(list_t *cheats)
     list_t node1, node2;
     node1 = node2 = NULL;
 
-    list_foreach(*cheats, node1)
-    {
+    list_foreach(*cheats, node1) {
         cheat = node1->data;
-
+        
         free(cheat->name);
         free(cheat->comment);
 
-        list_foreach(cheat->cheat_codes, node2)
-        {
+        list_foreach(cheat->cheat_codes, node2) {
             free(node2->data);
         }
         list_delete(&cheat->cheat_codes);
 
-        list_foreach(cheat->options, node2)
-        {
+        list_foreach(cheat->options, node2) {
             option = node2->data;
             free(option->description);
             free(option);
@@ -608,75 +652,6 @@ void cheats_free(list_t *cheats)
     }
 
     list_delete(cheats);
-}
-
-/** cheat_enable_current_rom
- *   enables a cheat specified by number
- *   if option >= 0 it means that we should
- *   insert an option
- */
-void cheat_enable_current_rom(int number, int option)
-{
-    list_t node = NULL;
-    cheat_t *cheat = NULL;
-    cheat_code_t *code = NULL;
-    
-    cheat = cheat_find_current_rom(number);
-    if (cheat != 0)
-        cheat->enabled = 1;
-    if (option>=0) {
-        // If this is an option to set,
-        // search for a code which is supposed
-        // to be patched with the option
-        list_foreach(cheat->cheat_codes, node)
-        {
-            code = (cheat_code_t *)node->data;
-            
-            if (code->option) {
-                code->value = option;
-                break;
-            }
-        }
-    }
-}
-
-/** cheat_disable_current_rom
- *   disables a cheat specified by a number
- */
-void cheat_disable_current_rom(int number)
-{
-    list_t node = NULL;
-    cheat_t *cheat = NULL;
-    cheat_code_t *code = NULL;
-    
-    cheat = cheat_find_current_rom(number);
-    if (cheat != 0)
-        cheat->enabled = 0;
-}
-
-/** cheat_find_current_rom
- *   finds a cheat based on cheat number and returns the cheat
- */
-cheat_t *cheat_find_current_rom(int number)
-{
-    list_t node = NULL;
-    cheat_t *cheat = NULL;
-    int found = 0;
-
-    list_foreach(current_rom_cheats, node)
-    {
-        cheat = node->data;
-        if (cheat->number == number)
-        {
-            found = 1;
-            break;
-        }
-    }
-
-    if (!found)
-        cheat = NULL;
-
-    return cheat;
 }
 
 /** cheat_new_rom
