@@ -957,6 +957,7 @@ static void sighandler(int signal)
 #else
 static void sighandler(int signal, siginfo_t *info, void *context)
 {
+    struct sigaction sa;
     SDL_Thread *emuThread = g_EmulationThread;
 
     switch( signal )
@@ -1020,6 +1021,11 @@ static void sighandler(int signal, siginfo_t *info, void *context)
 
     if (emuThread != NULL)
         SDL_KillThread(emuThread);
+
+    /* reset to the default signal handler, so we don't loop and catch this signal over and over on non-Linux systems */
+    memset(&sa, 0, sizeof(struct sigaction));
+    sa.sa_handler = SIG_DFL;
+    sigaction(signal, &sa, NULL); 
 }
 #endif /* __WIN32__ */
 
