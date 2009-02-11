@@ -561,3 +561,4 @@ png_do_write_intrapixel(png_row_infop row_info, png_bytep row)
 }
 #endif /* PNG_MNG_FEATURES_SUPPORTED */
 #endif /* PNG_WRITE_SUPPORTED */
+

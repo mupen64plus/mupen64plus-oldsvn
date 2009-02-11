@@ -1,49 +1,38 @@
-/*
- * Mupen64Plus main/gui_gtk/debugger/ui_disasm_list.c
- * 
- * Copyright (C) 2004 Tim-Philipp Muller (tim at centricular dot net)
- * Copyright (C) 2008 DarkJezter
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- *
- * This file is based heavily on Tim-Philipp's GtkTreeModel template
- * code available at: http://scentric.net/tutorial/treeview-tutorial.html
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - ui_disasm_list.c                                        *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 DarkJezter                                         *
+ *   Copyright (C) 2004 Tim-Philipp Muller                                 *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "ui_disasm_list.h"
 #include "debugger.h"
-#include "../../../debugger/memory.h"
 
-/* boring declarations of local functions */
+#include "../../../debugger/memory.h"
+#include "../../../debugger/decoder.h"
 
 static void         disasm_list_init            (DisasmList      *pkg_tree);
-
 static void         disasm_list_class_init      (DisasmListClass *klass);
-
 static void         disasm_list_tree_model_init (GtkTreeModelIface *iface);
-
 static void         disasm_list_finalize        (GObject           *object);
-
 static GtkTreeModelFlags disasm_list_get_flags  (GtkTreeModel      *tree_model);
-
 static gint         disasm_list_get_n_columns   (GtkTreeModel      *tree_model);
-
 static GType        disasm_list_get_column_type (GtkTreeModel      *tree_model,
                                                  gint               index);
 
@@ -285,7 +274,7 @@ disasm_list_get_iter (GtkTreeModel *tree_model,
                       GtkTreePath  *path)
 {
   DisasmList    *disasm_list;
-  gint          *indices, n, depth;
+  gint          *indices, depth;
 
   g_assert(DISASM_IS_LIST(tree_model));
   g_assert(path!=NULL);
@@ -372,7 +361,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
     switch(column)
     {
     case 0:
-      sprintf(opcode, "%08X", iter->user_data);
+      sprintf(opcode, "%08lX", (long)iter->user_data);
       g_value_set_string(value, opcode);
       break;
     case 1:
@@ -380,7 +369,7 @@ disasm_list_get_value (GtkTreeModel *tree_model,
       if((get_memory_flags((uint32)(long)iter->user_data) & MEM_FLAG_READABLE) != 0)
     {
       instr = read_memory_32((uint32)(long)iter->user_data);
-      r4300_decode_op( instr, opcode, args );
+      r4300_decode_op( instr, opcode, args, (long)iter->user_data );
     }
       else
     {
@@ -402,9 +391,9 @@ disasm_list_get_value (GtkTreeModel *tree_model,
     case 0:
       laddr = (long) get_recompiled_addr((uint32)(long) iter->user_data, (int)(long) iter->user_data2);
       if (sizeof(void *) == 4)
-        sprintf(opcode, "[%08X]", laddr);
+        sprintf(opcode, "[%08lX]", laddr);
       else
-        sprintf(opcode, "[%016llX]", laddr);
+        sprintf(opcode, "[%016lX]", laddr);
       g_value_set_string(value, opcode);
       break;
     case 1:
@@ -663,3 +652,4 @@ void disasm_list_update (GtkTreeModel *tree_model, guint address)
     address=0xFFFFFFFC-(POSTLINES*4);
   disasm_list->startAddr = address;
 }
+

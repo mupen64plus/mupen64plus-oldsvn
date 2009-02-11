@@ -1,9 +1,7 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - aboutdialog.c                                           *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2008 Tillin9                                            *
- *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,62 +21,57 @@
 
 /*  aboutdialog.c - Handles the about box */
 
-#include "../main.h"
-#include "../version.h"
-#include "../translate.h"
 #include "aboutdialog.h"
 #include "main_gtk.h"
 
+#include "../main.h"
+#include "../version.h"
+#include "../translate.h"
+
 #include <gtk/gtk.h>
 
-
-/** globals **/
-SAboutDialog g_AboutDialog;
-
-/** function to create the about dialog **/
-int
-create_aboutDialog( void )
+void callback_about_mupen64plus(GtkWidget* widget, gpointer data)
 {
-    GtkWidget *mupenImage = NULL;
-    GtkWidget *hbox;
-    GtkWidget *frame;
-    GtkWidget *label;
-    GtkWidget *button;
+    const gchar* authors[] =
+        {
+        "Richard Goedeken (Richard42)",
+        "John Chadwick (NMN)",
+        "James Hood (Ebenblues)",
+        "Scott Gorman (okaygo)",
+        "Scott Knauert (Tillin9)",
+        "Jesse Dean (DarkJezter)",
+        "Louai Al-Khanji (slougi)",
+        "Bob Forder (orbitaldecay)",
+        "Jason Espinosa (hasone)",
+        "Dylan Wagstaff (Pyromanik)",
+        "HyperHacker",
+        "Hacktarux",
+        "Dave2001",
+        "Zilmar",
+        "Gregor Anich (Blight)",
+        "Juha Luotio (JttL)",
+        "and many more...",
+        NULL
+        };
 
-    g_AboutDialog.dialog = gtk_dialog_new();
-    gtk_window_set_title( GTK_WINDOW(g_AboutDialog.dialog), tr("About " MUPEN_NAME) );
-    gtk_window_set_resizable(GTK_WINDOW(g_AboutDialog.dialog), FALSE);
-    gtk_container_set_border_width( GTK_CONTAINER(g_AboutDialog.dialog), 10 );
+    const gchar* license =
+        "This program is free software; you can redistribute it and/or modify\n"
+        "it under the terms of the GNU General Public License as published by\n"
+        "the Free Software Foundation; either version 2 of the License, or\n"
+        "(at your option) any later version.\n"
+         "\n"
+        "This program is distributed in the hope that it will be useful,\n"
+        "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+        "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+        "GNU General Public License for more details.\n"
+        "\n"
+        "You should have received a copy of the GNU General Public License\n"
+        "along with this program; if not, write to the\n"
+        "Free Software Foundation, Inc.,\n"
+        "51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n";
 
-    // set main window as parent of about window
-    gtk_window_set_transient_for(GTK_WINDOW(g_AboutDialog.dialog), GTK_WINDOW(g_MainWindow.window));
+    GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(get_iconpath("mupen64plus-large.png"), NULL);
 
-    // closing the about window should hide it, not destroy it
-    g_signal_connect(GTK_OBJECT(g_AboutDialog.dialog), "delete-event", GTK_SIGNAL_FUNC(gtk_widget_hide_on_delete), (gpointer)NULL);
-
-    hbox = gtk_hbox_new( FALSE, 5 );
-    gtk_box_pack_start( GTK_BOX(GTK_DIALOG(g_AboutDialog.dialog)->vbox), hbox, FALSE, FALSE, 0 );
-
-    frame = gtk_frame_new( MUPEN_NAME " v" MUPEN_VERSION );
-    gtk_container_set_border_width( GTK_CONTAINER(frame), 10 );
-    gtk_box_pack_start( GTK_BOX(hbox), frame, TRUE, TRUE, 0 );
-
-    label = gtk_label_new(  tr("About Mupen64Plus\n"
-                "Original Mupen64 code by Hacktarux\n"
-                "Gtk GUI by blight\n"
-                "Mupen and RiceVideo 64-bit port by Richard42 and nmn\n"
-                "Glide64 port by Gunther\n"
-                "Fixes and features by Richard42, DarkJezter, Tillin9, ebenblues, nmn, and others\n"
-                "\n") );
-    gtk_misc_set_padding( GTK_MISC(label), 10, 10 );
-    gtk_container_add( GTK_CONTAINER(frame), label );
-
-    mupenImage = gtk_image_new_from_file( get_iconpath("mupen64logo.png") );
-    gtk_box_pack_start( GTK_BOX(hbox), mupenImage, FALSE, FALSE, 0 );
-
-    button = gtk_button_new_from_stock(GTK_STOCK_OK);
-    gtk_box_pack_start( GTK_BOX(GTK_BOX(GTK_DIALOG(g_AboutDialog.dialog)->action_area)), button, TRUE, TRUE, 0 );
-    g_signal_connect_swapped(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide), g_AboutDialog.dialog);
-
-    return 0;
+    gtk_show_about_dialog(GTK_WINDOW(g_MainWindow.window), "version", PLUGIN_VERSION, "copyright", "(C) 2007-2008 The Mupen64Plus Team", "license", license, "website", "http://code.google.com/p/mupen64plus/", "comments", "Mupen64plus is an open source Nintendo 64 emulator.", "authors", authors, "logo", pixbuf, "title", "About Mupen64plus", NULL);
 }
+

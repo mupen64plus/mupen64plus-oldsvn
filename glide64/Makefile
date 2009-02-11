@@ -14,16 +14,13 @@
 #***************************************************************************
 
 # include pre-make file with a bunch of definitions
+USES_QT4 = true
 USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DGCC -DUSE_GTK -Iwrapper/
+CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -fpic -DPIC -DGCC -DUSE_GTK -Iwrapper/
 LDFLAGS += $(PLUGIN_LDFLAGS) $(LIBGL_LIBS) $(SDL_LIBS)
-
-ifeq ($(ARCH), 64BITS)
-  CFLAGS += -fPIC
-endif
 
 ifeq ($(VPDEBUG), 1)
   CFLAGS  += -DVPDEBUG
@@ -63,14 +60,35 @@ WRAPPEROBJECTS = \
 	wrapper/hq4x.o
 
 GTKOBJECTS = \
-	support.o \
-	messagebox.o
+	support_gtk2.o \
+	messagebox_gtk2.o \
+	Config_gtk2.o
 
-OBJECTS	+= $(GTKOBJECTS) $(WRAPPEROBJECTS)
+QT_OBJECTS = \
+	messagebox_qt4.o \
+	config_qt4.o \
+	configdialog_qt4.o
+
+MOC_OBJECTS = \
+	configdialog_qt4.moc
+
+OBJECTS	+= $(WRAPPEROBJECTS)
 TARGET	= glide64.so
 
 CFLAGS += -MMD -MP -MQ $@
-DEPS := $(OBJECTS:.o=.d)
+
+ifeq ($(GUI), QT4)
+  LDFLAGS += $(QT_LIBS)
+  CFLAGS += $(QT_FLAGS) -DQT_NO_STL
+  OBJECTS += $(QT_OBJECTS)
+  QT_EXTRA := $(MOC_OBJECTS) ui_glide64config.h
+else
+  LDFLAGS += $(GTK_LIBS)
+  CFLAGS += -DUSE_GTK $(GTK_FLAGS)
+  OBJECTS += $(GTKOBJECTS)
+endif
+
+DEPS := $(OBJECTS:.o=.d) $(QT_OBJECTS:.o=.d)
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
 endif
@@ -90,12 +108,20 @@ targets:
 	@echo "    VPDEBUG=1     == some kind of debugging"
 	@echo "    RDP_LOG=1     == Dump out RDP instruction data"
 	@echo "    RDP_LOG_ERR=1 == Dump out RDP instruction data + errors"
+	@echo "    GUI=GTK2      == Build gtk+-2 GUI"
+	@echo "    GUI=QT4       == Build Qt4 GUI"
 
-all: version.h $(TARGET)
+all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
-	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
+$(TARGET): $(QT_EXTRA) $(OBJECTS)
+	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 	$(STRIP) $@
+
+ui_glide64config.h: glide64config.ui
+	$(UIC) $< -o $@
+
+configdialog_qt4.moc: configdialog_qt4.h
+	$(MOC) $< -o $@
 
 Main.o: font.h cursor.h
 font.h:	compiletex
@@ -113,17 +139,12 @@ rdp.o: ucode06.h
 
 clean:
 	$(RM) -rf $(OBJECTS) $(TARGET) $(DEPS) compiletex compiletex.o font.h cursor.h
-	$(RM) -rf *.ii *.i *.s
+	$(RM) -rf *.ii *.i *.s *.moc ui_*.h
 
 rebuild: clean $(TARGET)
 
 
 # build rules
-version.h: .svn/entries
-	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
-        ../main/version.template > version.h
-	@$(MV) version.h ../main/version.h
-
 .SUFFIXES: .o .cpp .c
 .cpp.o:
 # in case this was invoked because a header changed and the compilation fails,

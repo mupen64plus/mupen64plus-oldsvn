@@ -97,3 +97,4 @@ void COGLTexture::EndUpdate(DrawInfo *di)
 // Keep in mind that the real texture is not scaled to fix the created opengl texture yet.
 // when the image is need to be scaled, ScaleImageToSurface in CTexure will be called to 
 // scale the image automatically
+

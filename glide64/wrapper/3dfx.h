@@ -23,6 +23,8 @@
 #ifndef __3DFX_H__
 #define __3DFX_H__
 
+#include "glidesys.h"
+
 /*
 ** basic data types
 */
@@ -128,3 +130,4 @@ typedef struct { float r, g, b, a; } FxColor4;
 #endif
 
 #endif /* !__3DFX_H__ */
+

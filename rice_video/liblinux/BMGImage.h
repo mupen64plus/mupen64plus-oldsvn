@@ -166,3 +166,4 @@ void BMG_EXPORT GetLastBMGErrorMessage( const char **msg );
 #endif
 
 #endif
+

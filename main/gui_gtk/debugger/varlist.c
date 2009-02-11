@@ -1,30 +1,30 @@
-/**
- * Mupen64Plus main/gui_gtk/debugger/varlist.c
- *
- * Copyright (C) 2008 HyperHacker (at gmail, dot com)
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - varlist.c                                               *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 HyperHacker                                        *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <inttypes.h>
 
 #include "varlist.h"
-#include <inttypes.h>
+
+#include "../../translate.h"
+#include "../../main.h"
 //#include <ieee754.h>
 
 enum { //Treeview columns
@@ -98,10 +98,8 @@ void init_varlist()
     GtkTreeViewColumn *col[Num_Columns];
     GtkWidget *hbox, *vbox, *buAdd, *buRemove, *buAutoRefresh,
         *buImport;
-    GValue cell_editable, type_val, model_val, model_col;
-    GtkTreeStore *type_list;
-    GtkTreeIter iter;
-    
+    GValue cell_editable;
+
     varlist_auto_update = 0;
     iter_stamp = 0xD06FECE5; //unique stamp value (increments)
     
@@ -277,12 +275,12 @@ void value_data_func(GtkTreeViewColumn *tree_column, GtkCellRenderer *cell, GtkT
             
             case Type_float:
                 addr = read_memory_32_unaligned(addr);
-                sprintf(str, "%f", *((float*)&addr)); //magic conversion to IEEE754. I have no idea how this works.
+                sprintf(str, "%g", *((float*)&addr)); //magic conversion to IEEE754. I have no idea how this works.
             break;
             
             case Type_double:
                 magic = read_memory_64_unaligned(addr);
-                sprintf(str, "%f", *((double*)&magic));
+                sprintf(str, "%lg", *((double*)&magic));
             break;
             
             default:            sprintf(str, "??? (%X)", type); break;
@@ -728,3 +726,4 @@ static void import_file(char* filename)
     
     fclose(file);
 }
+

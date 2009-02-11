@@ -1,9 +1,9 @@
-
-# include "../main/winlnxdefs.h"
 # include <stdlib.h>
 
 #define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
+#include <SDL_opengl.h>
+
+# include "../main/winlnxdefs.h"
 
 #include "OpenGL.h"
 #include "Combiner.h"
@@ -183,3 +183,4 @@ void Set_texture_env( TexEnv *texEnv )
 
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnv->mode );
 }
+

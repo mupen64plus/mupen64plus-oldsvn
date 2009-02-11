@@ -1,31 +1,23 @@
-/**
- * Mupen64 - util.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - util.c                                                  *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
  * Provides common utilities to the rest of the code:
@@ -138,44 +130,44 @@ char *event_to_str(const SDL_Event *event)
  *    Returns 1 if the specified joystick event is currently active. This
  *    function expects an input string of the same form output by event_to_str.
  */
-int event_active(const char *event_str)
+int event_active(const char* event_str)
 {
     char device, joy_input_type, axis_direction;
     int dev_number, input_number, input_value;
     SDL_Joystick *joystick = NULL;
 
-    // empty string
-    if(!event_str || strlen(event_str) == 0) return 0;
+    /* Empty string. */
+    if(!event_str||strlen(event_str)==0)
+        return 0;
 
-    // joystick event
-    if(event_str[0] == 'J')
-    {
-        // parse string depending on type of joystick input
-        switch(event_str[2])
+    /* Parse string depending on type of joystick input. */
+    if(event_str[0]=='J')
         {
-            // axis
+        switch(event_str[2])
+            {
+            /* Axis. */
             case 'A':
                 sscanf(event_str, "%c%d%c%d%c", &device, &dev_number,
                        &joy_input_type, &input_number, &axis_direction);
                 break;
-            // hat
+            /* Hat. ??? */
             case 'H':
                 sscanf(event_str, "%c%d%c%dV%d", &device, &dev_number,
                        &joy_input_type, &input_number, &input_value);
                 break;
-            // button
+            /* Button. */
             case 'B':
                 sscanf(event_str, "%c%d%c%d", &device, &dev_number,
                        &joy_input_type, &input_number);
                 break;
-        }
+            }
 
         joystick = SDL_JoystickOpen(dev_number);
         SDL_JoystickUpdate();
         switch(joy_input_type)
-        {
+            {
             case 'A':
-                if(axis_direction == '-')
+                if(axis_direction=='-')
                     return SDL_JoystickGetAxis(joystick, input_number) < -15000;
                 else
                     return SDL_JoystickGetAxis(joystick, input_number) > 15000;
@@ -187,17 +179,14 @@ int event_active(const char *event_str)
             case 'H':
                 return SDL_JoystickGetHat(joystick, input_number) == input_value;
                 break;
-            default:
-                return 0;
-                break;
+            }
         }
-    }
 
-    // keyboard event
-    if(event_str[0] == 'K')
-    {
-        // TODO
-    }
+    /* TODO: Keyboard event. */
+    /* if(event_str[0]=='K') */
+
+    /* Undefined event. */
+    return 0;
 }
 
 /** key_pressed
@@ -544,7 +533,7 @@ list_node_t *list_find_node(list_t list, void *data)
 
 void countrycodestring(unsigned short countrycode, char *string)
 {
-    switch(countrycode)
+    switch (countrycode)
     {
     case 0:    /* Demo */
         strcpy(string, tr("Demo"));
@@ -599,7 +588,7 @@ void countrycodestring(unsigned short countrycode, char *string)
 
 void compressionstring(unsigned char compressiontype, char *string)
 {
-    switch(compressiontype)
+    switch (compressiontype)
     {
     case UNCOMPRESSED:
         strcpy(string, tr("Uncompressed"));
@@ -626,7 +615,7 @@ void compressionstring(unsigned char compressiontype, char *string)
 
 void imagestring(unsigned char imagetype, char *string)
 {
-    switch(imagetype)
+    switch (imagetype)
     {
     case Z64IMAGE:
         strcpy(string, tr(".z64 (native)"));
@@ -644,7 +633,7 @@ void imagestring(unsigned char imagetype, char *string)
 
 void cicstring(unsigned char cic, char *string)
 {
-    switch(cic)
+    switch (cic)
     {
     case CIC_NUS_6101:
         strcpy(string, tr("CIC-NUS-6101"));
@@ -656,10 +645,10 @@ void cicstring(unsigned char cic, char *string)
         strcpy(string, tr("CIC-NUS-6103"));
         break;
     case CIC_NUS_6105:
-        strcpy(string, tr("CIC-NUS-6104"));
+        strcpy(string, tr("CIC-NUS-6105"));
         break;
     case CIC_NUS_6106:
-        strcpy(string, tr("CIC-NUS-6105"));
+        strcpy(string, tr("CIC-NUS-6106"));
         break;
     default:
         string[0] = '\0';
@@ -668,7 +657,7 @@ void cicstring(unsigned char cic, char *string)
 
 void rumblestring(unsigned char rumble, char *string)
 {
-    switch(rumble)
+    switch (rumble)
     {
     case 1:
         strcpy(string, tr("Yes"));
@@ -683,7 +672,7 @@ void rumblestring(unsigned char rumble, char *string)
 
 void savestring(unsigned char savetype, char *string)
 {
-    switch(savetype)
+    switch (savetype)
     {
     case EEPROM_4KB:
         strcpy(string, tr("Eeprom 4KB"));
@@ -710,14 +699,14 @@ void savestring(unsigned char savetype, char *string)
 
 void playersstring(unsigned char players, char *string)
 {
-    if(players>7)
+    if (players > 7)
         {
         string[0] = '\0';
         return;
         }
 
     unsigned short netplay=0;
-    if(players>4)
+    if (players > 4)
         {
         players-=3;
         netplay=1;
@@ -749,3 +738,24 @@ list_t tokenize_string(const char *string, const char* delim)
     }
     return list;
 }
+
+char* dirfrompath(const char* string)
+{
+    int stringlength, counter;
+    char* buffer;
+
+    stringlength = strlen(string);
+
+    for(counter = stringlength; counter > 0; --counter)
+        {
+        if (string[counter-1] == '/')
+            break;
+        }
+
+    buffer = (char*)malloc((counter+1)*sizeof(char));
+    snprintf(buffer, counter+1, "%s", string);
+    buffer[counter] = '\0';
+
+    return buffer;
+}
+

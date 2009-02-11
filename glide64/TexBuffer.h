@@ -49,3 +49,4 @@ BOOL SwapTextureBuffer();
 BOOL FindTextureBuffer(DWORD addr, WORD width);
 
 #endif  // ifndef TEXBUFFER
+

@@ -157,3 +157,4 @@ void OGL_SwapBuffers();
 void OGL_ReadScreen( void **dest, int *width, int *height );
 
 #endif
+

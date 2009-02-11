@@ -1,25 +1,26 @@
-/*
-* Copyright (C) 2008 Louai Al-Khanji
-*
-* This program is free software; you can redistribute it and/
-* or modify it under the terms of the GNU General Public Li-
-* cence as published by the Free Software Foundation; either
-* version 2 of the Licence, or any later version.
-*
-* This program is distributed in the hope that it will be use-
-* ful, but WITHOUT ANY WARRANTY; without even the implied war-
-* ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU General Public Licence for more details.
-*
-* You should have received a copy of the GNU General Public
-* Licence along with this program; if not, write to the Free
-* Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
-* USA.
-*
-*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - mainwindow.h                                            *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Slougi                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef MUPEN_KDE4_MAINWINDOW_H
-#define MUPEN_KDE4_MAINWINDOW_H
+#ifndef __MAINWINDOW_H__
+#define __MAINWINDOW_H__
 
 #include <QMainWindow>
 #include <QEvent>
@@ -29,26 +30,79 @@
 #include "ui_mainwindow.h"
 
 class QLabel;
+class QActionGroup;
+class QWaitCondition;
+
+extern "C" {
+    namespace core {
+        #include "../gui.h"
+    }
+}
 
 enum CustomEventTypes
 {
     InfoEventType = QEvent::User,
-    AlertEventType
+    AlertEventType,
+    ConfirmEventType,
+    PluginGuiQueryEventType
 };
 
-class InfoEvent : public QEvent
+class MessageEvent : public QEvent
 {
     public:
-        InfoEvent() : QEvent(Type(InfoEventType)) {}
+        MessageEvent(Type type) : QEvent(type) {}
         QString message;
 };
 
-class AlertEvent : public QEvent
+class InfoEvent : public MessageEvent
 {
     public:
-        AlertEvent() : QEvent(Type(AlertEventType)) {}
-        QString message;
+        InfoEvent() : MessageEvent(Type(InfoEventType)) {}
 };
+
+class AlertEvent : public MessageEvent
+{
+    public:
+        AlertEvent() : MessageEvent(Type(AlertEventType)) {}
+};
+
+class ConfirmEvent : public MessageEvent
+{
+    public:
+        ConfirmEvent() : MessageEvent(Type(AlertEventType)) {}
+};
+
+class PluginGuiQueryEvent : public QEvent
+{
+    public:
+        PluginGuiQueryEvent() : QEvent(Type(PluginGuiQueryEventType)) {}
+        QString message;
+        QString title;
+        QImage image;
+        int flags;
+        QWaitCondition* waitCondition;
+        int result;
+        WId window;
+};
+
+// Flags for PluginQueryEvent, from glide64
+
+// The message box contains three push buttons: Abort, Retry, and Ignore.
+#define MB_ABORTRETRYIGNORE     (0x00000001)
+// Microsoft® Windows® 2000/XP: The message box contains three push buttons:
+// Cancel, Try Again, Continue. Use this message box type instead o
+// MB_ABORTRETRYIGNORE.
+#define MB_CANCELTRYCONTINUE        (0x00000002)
+// The message box contains one push button: OK. This is the default.
+#define MB_OK               (0x00000004)
+// The message box contains two push buttons: OK and Cancel.
+#define MB_OKCANCEL         (0x00000008)
+// The message box contains two push buttons: Retry and Cancel.
+#define MB_RETRYCANCEL          (0x00000010)
+// The message box contains two push buttons: Yes and No.
+#define MB_YESNO            (0x00000020)
+// The message box contains three push buttons: Yes, No, and Cancel.
+#define MB_YESNOCANCEL          (0x00000040)
 
 class MainWindow : public QMainWindow, public Ui_MainWindow
 {
@@ -59,7 +113,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
 
         void showInfoMessage(const QString& msg);
         void showAlertMessage(const QString& msg);
-        bool confirmMessage(const QString& msg);
+        void setState(core::gui_state_t state);
 
     private slots:
         void romOpen();
@@ -82,22 +136,25 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void configDialogShow();
         void itemCountUpdate(int count);
         void aboutDialogShow();
+        void setStateImplementation(int state);
 
     protected:
         void customEvent(QEvent* event);
         void closeEvent(QCloseEvent* event);
+        void pluginGuiQueryEvent(PluginGuiQueryEvent* event);
 
     private:
         void startEmulation();
         void setupActions();
+        bool confirmMessage(const QString& msg);
         QList<QAction*> slotActions;
         QLabel* m_statusBarLabel;
-#ifdef __WIN32__
+        QActionGroup* m_uiActions;
         QPointer<QWidget> m_renderWindow;
 
-    protected:        
+    protected:
         bool eventFilter(QObject *obj, QEvent *ev);
-#endif
 };
 
-#endif // MUPEN_KDE4_MAINWINDOW_H
+#endif // __MAINWINDOW_H__
+

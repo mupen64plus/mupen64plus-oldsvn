@@ -358,3 +358,4 @@ void Clamp8bT (unsigned char * tex, DWORD height, DWORD real_width, DWORD clamp_
         dst += line_full;
     }
 }
+

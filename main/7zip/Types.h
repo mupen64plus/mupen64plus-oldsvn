@@ -96,9 +96,11 @@ typedef int HRes;
 #define RINOK(x) { HRes __result_ = (x); if(__result_ != 0) return __result_; }
 #endif
 
+#ifndef Bool
 typedef int Bool;
 #define True 1
 #define False 0
+#endif
 
 #ifdef _MSC_VER
 #define StdCall __stdcall 
@@ -115,3 +117,4 @@ typedef int Bool;
 #endif
 
 #endif
+

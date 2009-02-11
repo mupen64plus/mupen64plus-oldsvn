@@ -326,7 +326,23 @@ void math_init()
   BOOL IsSSE = FALSE;
 #if defined(__GNUC__) && !defined(NO_ASM)
     int edx, eax;
-    asm volatile("cpuid":"=a"(eax),"=d"(edx):"0"(1):"ecx","ebx");
+  #if defined(__x86_64__)
+    asm volatile(" cpuid;        "
+                 : "=a"(eax), "=d"(edx)
+                 : "0"(1)
+                 : "rbx", "rcx"
+                 );
+  #else
+    asm volatile(" push %%ebx;   "
+                 " push %%ecx;   "
+                 " cpuid;        "
+                 " pop %%ecx;    "
+                 " pop %%ebx;    "
+                 : "=a"(eax), "=d"(edx)
+                 : "0"(1)
+                 :
+                 );
+  #endif
     // Check for SSE
     if (edx & (1 << 25))
     IsSSE = TRUE;
@@ -368,3 +384,4 @@ void math_init()
     LOG("SSE detected.\n");
   }
 }
+

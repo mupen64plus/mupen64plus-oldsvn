@@ -56,3 +56,4 @@ texfunc load_table [4][5] = {   // [size][format]
     { Load16bRGBA,  LoadNone, LoadNone, Load16bIA, LoadNone},
     { Load32bRGBA,  LoadNone, LoadNone, LoadNone,  LoadNone}
 };
+

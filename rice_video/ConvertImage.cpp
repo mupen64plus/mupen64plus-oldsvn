@@ -1394,3 +1394,4 @@ void Convert16b(CTexture *pTexture, const TxtrInfo &tinfo)
     pTexture->EndUpdate(&dInfo);
     pTexture->SetOthersVariables();
 }
+

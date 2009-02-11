@@ -1,37 +1,35 @@
-/**
- * Mupen64 - r4300/x86_64/gcop1_d.c
- * Copyright (C) 2007 Richard Goedeken, Hacktarux
- * Based on code written by Hacktarux, Copyright (C) 2002
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * Forum homepage: http://www.emutalk.net/forumdisplay.php?f=50
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
-
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - gcop1_d.c                                               *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2007 Richard Goedeken (Richard42)                       *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
-#include "../recomph.h"
+
 #include "assemble.h"
-#include "../r4300.h"
-#include "../ops.h"
 #include "interpret.h"
 
-void genadd_d()
+#include "../recomph.h"
+#include "../r4300.h"
+#include "../ops.h"
+
+void genadd_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[119]);
@@ -49,7 +47,7 @@ void genadd_d()
 #endif
 }
 
-void gensub_d()
+void gensub_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[120]);
@@ -67,7 +65,7 @@ void gensub_d()
 #endif
 }
 
-void genmul_d()
+void genmul_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[121]);
@@ -85,7 +83,7 @@ void genmul_d()
 #endif
 }
 
-void gendiv_d()
+void gendiv_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[122]);
@@ -103,7 +101,7 @@ void gendiv_d()
 #endif
 }
 
-void gensqrt_d()
+void gensqrt_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[123]);
@@ -120,7 +118,7 @@ void gensqrt_d()
 #endif
 }
 
-void genabs_d()
+void genabs_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[124]);
@@ -137,7 +135,7 @@ void genabs_d()
 #endif
 }
 
-void genmov_d()
+void genmov_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[125]);
@@ -155,7 +153,7 @@ void genmov_d()
 #endif
 }
 
-void genneg_d()
+void genneg_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[126]);
@@ -172,7 +170,7 @@ void genneg_d()
 #endif
 }
 
-void genround_l_d()
+void genround_l_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[127]);
@@ -190,7 +188,7 @@ void genround_l_d()
 #endif
 }
 
-void gentrunc_l_d()
+void gentrunc_l_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[128]);
@@ -208,7 +206,7 @@ void gentrunc_l_d()
 #endif
 }
 
-void genceil_l_d()
+void genceil_l_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[129]);
@@ -226,7 +224,7 @@ void genceil_l_d()
 #endif
 }
 
-void genfloor_l_d()
+void genfloor_l_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[130]);
@@ -244,7 +242,7 @@ void genfloor_l_d()
 #endif
 }
 
-void genround_w_d()
+void genround_w_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[127]);
@@ -262,7 +260,7 @@ void genround_w_d()
 #endif
 }
 
-void gentrunc_w_d()
+void gentrunc_w_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[128]);
@@ -280,7 +278,7 @@ void gentrunc_w_d()
 #endif
 }
 
-void genceil_w_d()
+void genceil_w_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[129]);
@@ -298,7 +296,7 @@ void genceil_w_d()
 #endif
 }
 
-void genfloor_w_d()
+void genfloor_w_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[130]);
@@ -316,7 +314,7 @@ void genfloor_w_d()
 #endif
 }
 
-void gencvt_s_d()
+void gencvt_s_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);
@@ -332,7 +330,7 @@ void gencvt_s_d()
 #endif
 }
 
-void gencvt_w_d()
+void gencvt_w_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);
@@ -348,7 +346,7 @@ void gencvt_w_d()
 #endif
 }
 
-void gencvt_l_d()
+void gencvt_l_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[117]);
@@ -364,7 +362,7 @@ void gencvt_l_d()
 #endif
 }
 
-void genc_f_d()
+void genc_f_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -377,7 +375,7 @@ void genc_f_d()
 #endif
 }
 
-void genc_un_d()
+void genc_un_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -399,7 +397,7 @@ void genc_un_d()
 #endif
 }
 
-void genc_eq_d()
+void genc_eq_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -421,7 +419,7 @@ void genc_eq_d()
 #endif
 }
 
-void genc_ueq_d()
+void genc_ueq_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -444,7 +442,7 @@ void genc_ueq_d()
 #endif
 }
 
-void genc_olt_d()
+void genc_olt_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -466,7 +464,7 @@ void genc_olt_d()
 #endif
 }
 
-void genc_ult_d()
+void genc_ult_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -489,7 +487,7 @@ void genc_ult_d()
 #endif
 }
 
-void genc_ole_d()
+void genc_ole_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -511,7 +509,7 @@ void genc_ole_d()
 #endif
 }
 
-void genc_ule_d()
+void genc_ule_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -534,7 +532,7 @@ void genc_ule_d()
 #endif
 }
 
-void genc_sf_d()
+void genc_sf_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -553,7 +551,7 @@ void genc_sf_d()
 #endif
 }
 
-void genc_ngle_d()
+void genc_ngle_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -575,7 +573,7 @@ void genc_ngle_d()
 #endif
 }
 
-void genc_seq_d()
+void genc_seq_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -597,7 +595,7 @@ void genc_seq_d()
 #endif
 }
 
-void genc_ngl_d()
+void genc_ngl_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -620,7 +618,7 @@ void genc_ngl_d()
 #endif
 }
 
-void genc_lt_d()
+void genc_lt_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -642,7 +640,7 @@ void genc_lt_d()
 #endif
 }
 
-void genc_nge_d()
+void genc_nge_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -665,7 +663,7 @@ void genc_nge_d()
 #endif
 }
 
-void genc_le_d()
+void genc_le_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -687,7 +685,7 @@ void genc_le_d()
 #endif
 }
 
-void genc_ngt_d()
+void genc_ngt_d(void)
 {
 #if defined(COUNT_INSTR)
    inc_m32abs(&instr_count[118]);
@@ -709,3 +707,4 @@ void genc_ngt_d()
    and_m32abs_imm32((unsigned int*)&FCR31, ~0x800000); // 11
 #endif
 }
+

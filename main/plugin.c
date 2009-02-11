@@ -1,31 +1,23 @@
-/**
- * Mupen64 - plugin.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - plugin.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <dlfcn.h>
 #include <stdio.h>
@@ -74,6 +66,7 @@ static void dummy_readController(int Control, BYTE *Command) {}
 static void dummy_keyDown(WPARAM wParam, LPARAM lParam) {}
 static void dummy_keyUp(WPARAM wParam, LPARAM lParam) {}
 static void dummy_setConfigDir(char *configDir) {}
+static void dummy_setInstallDir(char *installDir) {}
 static unsigned int dummy;
 static DWORD dummy_doRspCycles(DWORD Cycles) { return Cycles; };
 static void dummy_initiateRSP(RSP_INFO Rsp_Info, DWORD * CycleCount) {};
@@ -122,6 +115,7 @@ void (*romOpen_input)() = dummy_void;
 void (*keyDown)(WPARAM wParam, LPARAM lParam) = dummy_keyDown;
 void (*keyUp)(WPARAM wParam, LPARAM lParam) = dummy_keyUp;
 void (*setConfigDir)(char *configDir) = dummy_setConfigDir;
+void (*setInstallDir)(char *installDir) = dummy_setInstallDir;
 
 void (*closeDLL_RSP)() = dummy_void;
 DWORD (*doRspCycles)(DWORD Cycles) = dummy_doRspCycles;
@@ -135,7 +129,7 @@ void (*fBGetFrameBufferInfo)(void *p) = dummy_fBGetFrameBufferInfo;
 list_t g_PluginList = NULL;
 
 HINSTANCE g_ProgramInstance = 0;
-HWND g_MainWindow = 0;
+HWND g_RenderWindow = 0;
 HWND g_StatusBar = 0;
 
 void plugin_delete_list(void)
@@ -277,21 +271,24 @@ void plugin_scan_directory(const char *plugindir)
 /* plugin_set_configdir
  *  Sets config dir of all plugins that support the SetConfigDir API call to the given dir.
  */
-void plugin_set_configdir(char *configdir)
+void plugin_set_dirs(char* configdir, char* installdir)
 {
-    plugin *p = NULL;
-    list_node_t *node;
+    plugin* p = NULL;
+    list_node_t* node;
 
     list_foreach(g_PluginList, node)
-    {
-        p = (plugin *)node->data;
+        {
+        p = (plugin*)node->data;
 
         if(p->handle)
-        {
-            // if plugin provides ability to set a config dir, set it.
+            {
+            /* If plugin provides ability to set config or install directories, set them. */
             setConfigDir = dlsym(p->handle, "SetConfigDir");
             if(setConfigDir)
                 setConfigDir(configdir);
+            setInstallDir = dlsym(p->handle, "SetInstallDir");
+            if(setInstallDir)
+                setInstallDir(installdir);
         }
     }
 }
@@ -356,10 +353,17 @@ static void sucre()
 
 void plugin_exec_config(const char *name)
 {
+    plugin_exec_config_with_wid(name, 0);
+}
+
+void plugin_exec_config_with_wid(const char *name, HWND wid)
+{
     plugin *p = plugin_get_by_name(name);
 
     if(p && p->handle)
     {
+         /* Commenting out since this interferes with Rice's initialization on Linux.
+        Added originally for better win32 compatibility? Not sure why.
         switch (p->type)
         {
             case PLUGIN_TYPE_CONTROLLER:
@@ -375,13 +379,20 @@ void plugin_exec_config(const char *name)
                 plugin_load_audio_plugin(name);
                 break;
         }
+       */
+
         dllConfig = dlsym(p->handle, "DllConfig");
         if(dllConfig)
-            dllConfig(0);
+            dllConfig(wid);
     }
 }
 
 void plugin_exec_test(const char *name)
+{
+    plugin_exec_test_with_wid(name, 0);
+}
+
+void plugin_exec_test_with_wid(const char *name, HWND wid)
 {
     plugin *p = plugin_get_by_name(name);
 
@@ -389,11 +400,16 @@ void plugin_exec_test(const char *name)
     {
         dllTest = dlsym(p->handle, "DllTest");
         if(dllTest)
-            dllTest(0);
+            dllTest(wid);
     }
 }
 
 void plugin_exec_about(const char *name)
+{
+    plugin_exec_about_with_wid(name, 0);
+}
+
+void plugin_exec_about_with_wid(const char *name, HWND wid)
 {
     plugin *p = plugin_get_by_name(name);
 
@@ -401,7 +417,7 @@ void plugin_exec_about(const char *name)
     {
         dllAbout = dlsym(p->handle, "DllAbout");
         if(dllAbout)
-            dllAbout(0);
+            dllAbout(wid);
     }
 }
 
@@ -463,9 +479,7 @@ void plugin_load_rsp_plugin(const char* RSP_name)
     rsp_info.ProcessAlistList = processAList;
     rsp_info.ProcessRdpList = processRDPList;
     rsp_info.ShowCFB = showCFB;
-#ifdef __WIN32__
     rsp_info.hInst = g_ProgramInstance;
-#endif
     initiateRSP(rsp_info,(DWORD*) NULL);
      }
    else
@@ -515,10 +529,8 @@ void plugin_load_input_plugin(const char* input_name)
     control_info.MemoryBswaped = TRUE;
     control_info.HEADER = rom;
     control_info.Controls = Controls;
-#ifdef __WIN32__
-    control_info.hMainWindow = g_MainWindow;
+    control_info.hMainWindow = g_RenderWindow;
     control_info.hinst = g_ProgramInstance;
-#endif
     for (i=0; i<4; i++)
       {
          Controls[i].Present = FALSE;
@@ -531,7 +543,7 @@ void plugin_load_input_plugin(const char* input_name)
     }
     else
     {
-        old_initiateControllers(g_MainWindow, Controls);
+        old_initiateControllers(g_RenderWindow, Controls);
     }
      }
    else
@@ -601,10 +613,8 @@ void plugin_load_audio_plugin(const char* audio_name)
     audio_info.AI_DACRATE_REG = &(ai_register.ai_dacrate);
     audio_info.AI_BITRATE_REG = &(ai_register.ai_bitrate);
     audio_info.CheckInterrupts = sucre;
-#ifdef __WIN32__
-    audio_info.hwnd = g_MainWindow;
+    audio_info.hwnd = g_RenderWindow;
     audio_info.hinst = g_ProgramInstance;
-#endif
     initiateAudio(audio_info);
      }
    else
@@ -697,10 +707,8 @@ void plugin_load_gfx_plugin(const char* gfx_name)
     gfx_info.VI_X_SCALE_REG = &(vi_register.vi_x_scale);
     gfx_info.VI_Y_SCALE_REG = &(vi_register.vi_y_scale);
     gfx_info.CheckInterrupts = sucre;
-#ifdef __WIN32__
-    gfx_info.hWnd = g_MainWindow;
+    gfx_info.hWnd = g_RenderWindow;
     gfx_info.hStatusBar = g_StatusBar;
-#endif
     initiateGFX(gfx_info);
      }
    else
@@ -729,3 +737,4 @@ void plugin_close_plugins()
     closeDLL_input();
     closeDLL_RSP();
 }
+

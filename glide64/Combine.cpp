@@ -12574,3 +12574,4 @@ void TexAlphaCombinerToExtension (GrChipID_t tmu)
     cmb.t1a_ext_d_invert = ta_ext_d_invert;
   }
 }
+

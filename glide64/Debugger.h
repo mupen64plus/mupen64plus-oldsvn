@@ -134,3 +134,4 @@ void debug_cacheviewer ();
 void debug_mouse ();
 void debug_keys ();
 void output (float x, float y, BOOL scale, const char *fmt, ...);
+

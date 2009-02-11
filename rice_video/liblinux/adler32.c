@@ -46,3 +46,4 @@ uLong ZEXPORT adler32(adler, buf, len)
     }
     return (s2 << 16) | s1;
 }
+

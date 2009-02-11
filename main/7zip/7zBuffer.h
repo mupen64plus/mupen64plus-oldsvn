@@ -38,3 +38,4 @@ int SzByteBufferCreate(CSzByteBuffer *buffer, size_t newCapacity, void * (*alloc
 void SzByteBufferFree(CSzByteBuffer *buffer, void (*freeFunc)(void *));
 
 #endif
+

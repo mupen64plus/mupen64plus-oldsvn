@@ -422,3 +422,4 @@ void FrameBuffer_ActivateBufferTexture( s16 t, FrameBuffer *buffer )
     FrameBuffer_MoveToTop( buffer );
     TextureCache_ActivateTexture( t, buffer->texture );
 }
+

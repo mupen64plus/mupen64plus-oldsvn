@@ -1,22 +1,23 @@
-/*
-* Copyright (C) 2008 Louai Al-Khanji
-*
-* This program is free software; you can redistribute it and/
-* or modify it under the terms of the GNU General Public Li-
-* cence as published by the Free Software Foundation; either
-* version 2 of the Licence, or any later version.
-*
-* This program is distributed in the hope that it will be use-
-* ful, but WITHOUT ANY WARRANTY; without even the implied war-
-* ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU General Public Licence for more details.
-*
-* You should have received a copy of the GNU General Public
-* Licence along with this program; if not, write to the Free
-* Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
-* USA.
-*
-*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - globals.cpp                                             *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Slougi                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <QIcon>
 #include <QString>
@@ -37,8 +38,9 @@ QStringList romDirectories()
 {
     QStringList dirs;
     for(int i = 0; i < core::config_get_number("NumRomDirs", 0); i++) {
-        char buf[30];
-        sprintf(buf, "RomDirectory[%d]", i);
+        char buf[31];
+        snprintf(buf, 30, "RomDirectory[%d]", i);
+        buf[30] = '\0';
         dirs << core::config_get_string(buf, "");
     }
     dirs.removeAll("");
@@ -76,21 +78,17 @@ void drawStars(QPainter* painter,
                int n,
                int max)
 {
-    static QPixmap star = pixmap("star.png", "16x16");
-    painter->save();
+    static QPixmap enabled = icon("star.png").pixmap(16, 16);
+    static QPixmap disabled = icon("star.png").pixmap(16, 16, QIcon::Disabled);
     for (int i = 0; i < n; i++) {
         QPoint p = r.topLeft();
-        p += QPoint(i * (star.width() + 2), 1);
-        painter->drawPixmap(p, star);
+        p += QPoint(i * (enabled.width() + 2), 1);
+        painter->drawPixmap(p, enabled);
     }
-    if (painter->paintEngine()->hasFeature(QPaintEngine::PorterDuff)) {
-        painter->setCompositionMode(QPainter::CompositionMode_Xor);
-    }
-    painter->setOpacity(0.2);
     for (int i = n; i < max; i++) {
         QPoint p = r.topLeft();
-        p += QPoint(i * (star.width() + 2), 1);
-        painter->drawPixmap(p, star);
+        p += QPoint(i * (disabled.width() + 2), 1);
+        painter->drawPixmap(p, disabled);
     }
-    painter->restore();
 }
+

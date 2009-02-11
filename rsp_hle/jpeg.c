@@ -54,9 +54,12 @@ void jpg_uncompress(OSTask_t *task)
    short* data = (short*)(rsp.RDRAM + task->ucode_data);
    short m[8*32];
    
-   if (!task->flags & 1)
-     {
-    memcpy(&jpg_data, rsp.RDRAM+task->data_ptr, task->data_size);
+   if (!(task->flags & 1))
+   {
+    int copysize = task->data_size;
+    if (copysize > sizeof(jpg_data))
+        copysize = sizeof(jpg_data);
+    memcpy(&jpg_data, rsp.RDRAM+task->data_ptr, copysize);
     q[0] = (short*)(rsp.RDRAM + jpg_data.m1);
     q[1] = (short*)(rsp.RDRAM + jpg_data.m2);
     q[2] = (short*)(rsp.RDRAM + jpg_data.m3);

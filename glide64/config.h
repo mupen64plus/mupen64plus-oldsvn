@@ -24,3 +24,4 @@
 #define GTK2_SUPPORT 1
 
 #endif /* CONFIG_H */
+

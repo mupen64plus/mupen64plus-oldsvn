@@ -27,6 +27,7 @@
 
 #include "gui.h"
 #include "gui_gtk2.h"
+#include "main.h"
 
 #include "../main/winlnxdefs.h"
 #include "../main/version.h"
@@ -344,3 +345,4 @@ void display_test(const char *Message)
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     gtk_widget_show_all(dialog);
 }
+

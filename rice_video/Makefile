@@ -22,10 +22,14 @@
 
 # include pre-make file with a bunch of definitions
 USES_GTK2 = true
-include ../pre.mk
+ifeq ($(WIN32),1)
+  include ../pre.mk.win32
+else
+  include ../pre.mk
+endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -DUSE_GTK -fpic -DPIC -Wall
+CFLAGS += $(SDL_FLAGS) -fpic -DPIC -Wall
 LDFLAGS	+= $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
 # set options
@@ -36,7 +40,7 @@ endif
 
 # list of object files to generate
 OBJECTS = OGLGraphicsContext.o \
-    Debugger.o \
+	Debugger.o \
 	Video.o \
 	Config.o \
 	GraphicsContext.o \
@@ -47,7 +51,6 @@ OBJECTS = OGLGraphicsContext.o \
 	TextureManager.o \
 	RenderBase.o \
 	FrameBuffer.o \
-	messagebox.o \
 	Texture.o \
 	TextureFilters_2xsai.o \
 	TextureFilters_hq2x.o \
@@ -72,7 +75,6 @@ OBJECTS = OGLGraphicsContext.o \
 	ConvertImage16.o \
 	DecodedMux.o \
 	RenderTexture.o \
-	support.o \
 	liblinux/BMGUtils.o \
 	liblinux/pngread.o \
 	liblinux/png.o \
@@ -106,6 +108,13 @@ OBJECTS = OGLGraphicsContext.o \
 	liblinux/inffast.o \
 	OGLRenderExt.o
 
+GTKOBJECTS = \
+	gui_gtk2/messagebox_gtk2.o
+
+LDFLAGS += $(GTK_LIBS)
+CFLAGS += -DUSE_GTK $(GTK_FLAGS)
+OBJECTS += $(GTKOBJECTS)
+
 # build targets
 targets:
 	@echo "RiceVideoLinux N64 Video plugin makefile. "
@@ -131,7 +140,7 @@ clean:
 rebuild: clean all
 
 # build rules
-version.h: .svn/entries
+version.h: FORCE
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         ../main/version.template > version.h
 	@$(MV) version.h ../main/version.h
@@ -142,4 +151,5 @@ version.h: .svn/entries
 .c.o:
 	$(CC) -o $*.o $(CFLAGS) -c $<
 
+FORCE:
 

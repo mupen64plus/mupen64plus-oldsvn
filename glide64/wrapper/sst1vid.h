@@ -146,3 +146,4 @@ typedef FxI32 GrScreenResolution_t;
 #endif
 
 #endif /* __SST1VID_H__ */
+

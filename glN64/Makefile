@@ -23,18 +23,26 @@
 # include pre-make file with a bunch of definitions
 USES_QT4 = true
 USES_GTK2 = true
-include ../pre.mk
+ifeq ($(WIN32),1)
+  include ../pre.mk.win32
+else
+  include ../pre.mk
+endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -fpic -DPIC -D__LINUX__ -Wall
+CFLAGS += -DPIC -D__LINUX__ -Wall
 LDFLAGS += $(GTHREAD_LIBS)
+
+ifneq ($(OS), WINDOWS)
+  CFLAGS += -fpic
+endif
 
 ifeq ($(GUI), NONE)
   OBJECTS = Config_nogui.o
 else
   ifeq ($(GUI), QT4)
     LDFLAGS += $(QT_LIBS)
-    CFLAGS += $(QT_FLAGS)
+    CFLAGS += $(QT_FLAGS) -DQT4_GUI
     OBJECTS = Config_qt4.o
   else
     LDFLAGS += $(GTK_LIBS) 
@@ -75,25 +83,20 @@ OBJECTS += glN64.o \
 	F3DWRUS.o
 
 # build targets
-all: version.h glN64.so
+all: glN64.$(SO_EXTENSION)
 
 clean:
-	rm -f *.o *.so ui_gln64config.*
+	rm -f *.o *.$(SO_EXTENSION) ui_gln64config.*
 
 # build rules
-version.h: .svn/entries
-	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
-        ../main/version.template > version.h
-	@$(MV) version.h ../main/version.h
-
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 ui_gln64config.h: gln64config.ui
 	$(UIC) $< -o $@
 
-glN64.so: $(OBJECTS)
-	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -o $@
+glN64.$(SO_EXTENSION): $(OBJECTS)
+	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(LIBGL_LIBS) -shared -o $@
 	$(STRIP) $@
 
 glN64.o: glN64.cpp

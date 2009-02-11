@@ -28,13 +28,13 @@
 
 extern unsigned int interp_addr;
 
-void address_error_exception()
+void address_error_exception(void)
 {
    printf("address_error_exception\n");
    stop=1;
 }
 
-void TLB_invalid_exception()
+void TLB_invalid_exception(void)
 {
    if (delay_slot)
      {
@@ -137,25 +137,25 @@ void TLB_refill_exception(unsigned int address, int w)
      }
 }
 
-void TLB_mod_exception()
+void TLB_mod_exception(void)
 {
    printf("TLB mod exception\n");
    stop=1;
 }
 
-void integer_overflow_exception()
+void integer_overflow_exception(void)
 {
    printf("integer overflow exception\n");
    stop=1;
 }
 
-void coprocessor_unusable_exception()
+void coprocessor_unusable_exception(void)
 {
    printf("coprocessor_unusable_exception\n");
    stop=1;
 }
 
-void exception_general()
+void exception_general(void)
 {
    update_count();
    Status |= 2;
@@ -198,3 +198,4 @@ void exception_general()
       }
      }
 }
+

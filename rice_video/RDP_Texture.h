@@ -87,11 +87,6 @@ inline uint32 ReverseDXT(uint32 val, uint32 lrs, uint32 width, uint32 size)
 // rewrite these routine by myself.
 // Rice, 02/24/2004
 
-#if !defined(__INTEL_COMPILER) && !defined(__x86_64__) && !defined(NO_ASM)
-static uint32 g_value;
-static uint16 g_value16;
-#endif
-
 inline void UnswapCopy( void *src, void *dest, uint32 numBytes )
 {
 #if defined(__INTEL_COMPILER) && !defined(NO_ASM)
@@ -547,18 +542,18 @@ inline uint32 swapdword( uint32 value )
                :
                );
   return value;
-#elif !defined(NO_ASM) // GCC assumed
-   g_value = value;
-   asm volatile("pusha \n"
-        "mov        g_value, %%eax \n"
-        "bswap  %%eax \n"
-        "mov            %%eax, g_value \n"
-        "popa \n"
-        :
-        :
-        : "memory", "cc"
-        );
-   return g_value;
+#elif defined(__GNUC__) && defined(__i386__) && !defined(NO_ASM)
+  asm volatile("bswapl %0 \n"
+               : "+r"(value)
+               :
+               :
+               );
+   return value;
+#else
+  return ((value & 0xff000000) >> 24) |
+         ((value & 0x00ff0000) >>  8) |
+         ((value & 0x0000ff00) <<  8) |
+         ((value & 0x000000ff) << 24);
 #endif
 }
 
@@ -570,25 +565,16 @@ inline uint16 swapword( uint16 value )
         mov     ax, word ptr [value]
         xchg    ah, al
     }
-#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)) && !defined(NO_ASM)
   asm volatile("xchg  %%al, %%ah    \n"
                : "+a"(value)
                :
                :
                );
   return value;
-#elif !defined(NO_ASM) // GCC assumed
-   g_value16 = value;
-   asm volatile("pusha \n"
-        "mov        g_value16, %%ax \n"
-        "xchg   %%al, %%ah \n"
-        "mov            %%ax, g_value16 \n"
-        "popa \n"
-        :
-        :
-        : "memory", "cc"
-        );
-   return g_value16;
+#else
+  return ((value & 0xff00) >> 8) |
+         ((value & 0x00ff) << 8);
 #endif
 }
 

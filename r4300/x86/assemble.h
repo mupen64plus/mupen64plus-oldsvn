@@ -1,31 +1,23 @@
-/**
- * Mupen64 - assemble.h
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - assemble.h                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef ASSEMBLE_H
 #define ASSEMBLE_H
@@ -69,10 +61,10 @@ extern int branch_taken;
 
 void debug();
 
-
-inline void put8(unsigned char octet);
-inline void put32(unsigned int dword);
-inline void put16(unsigned short word);
+void jump_start_rel8();
+void jump_end_rel8();
+void jump_start_rel32();
+void jump_end_rel32();
 
 void push_reg32(int reg32);
 void mov_eax_memoffs32(unsigned int *memoffs32);
@@ -245,3 +237,4 @@ void fild_preg32_qword(int reg32);
 void fild_preg32_dword(int reg32);
 
 #endif // ASSEMBLE_H
+

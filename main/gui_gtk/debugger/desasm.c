@@ -1,30 +1,30 @@
-/*
- * Mupen64Plus main/gui_gtk/debugger/desasm.c
- * 
- * Copyright (C) 2002 davFr - robind@esiee.fr
- * Copyright (C) 2008 DarkJezter
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - desasm.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 DavFr                                              *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
 #include <math.h>
+
+#include <SDL.h>
+#include <SDL_thread.h>
+
 #include "desasm.h"
 #include "ui_disasm_list.h"
 
@@ -32,15 +32,15 @@
 // to differanciate between update (need reload) and scroll (doesn't need reload)
 // to reorganise whole code.
 
-#define DOUBLESCROLL   1
+//#define DOUBLESCROLL
 #define SCROLLRANGE    1.0f
 #define SCROLLSLOW     0.1f
 #define SCROLLSLOWAMT  ((int)(100/SCROLLSLOW))
  
-static uint16 max_row=0.1;   //i plan to update this value on widget resizing.
 static uint32 previous_focus;
+static uint32 currentPC = 0;
 
-static GtkWidget *clDesasm, *buRun;
+static GtkWidget *clDesasm;
 static DisasmList *cmDesasm;
 static GtkAdjustment *ajDesasm, *ajLinear, *ajLogari;
 
@@ -56,12 +56,18 @@ static void on_scroll(GtkAdjustment *adjustment, gpointer user_data);
 #ifdef DOUBLESCROLL
 static void on_linear_scroll(GtkAdjustment *adjustment, gpointer user_data);
 #endif //DOUBLESCROLL
+static gboolean on_scroll_wheel(GtkWidget *widget, GdkEventScroll *event, 
+                            gpointer user_data);
 
 static gboolean on_scrollclick(GtkWidget *bar, GdkEventButton*, gpointer user_data);
 static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton*, gpointer user_data);
 
+static void on_select( GtkTreeSelection *selection, gpointer user_data );
+
 static void on_step();
 static void on_run();
+static void on_trace();
+static void on_break();
 static void on_goto();
 
 static void on_close();
@@ -69,11 +75,15 @@ static void on_close();
 void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
                        GtkTreeModel *tree_model, GtkTreeIter *iter,gpointer data)
 {
+  long pc = currentPC;
+  if(PC != NULL)
+    pc = PC->addr;
+  
   if ((long) iter->user_data2 == -1 && PC != NULL)
     {
       if(check_breakpoints((long) iter->user_data) != -1)
     {
-      if(PC->addr == ((long) iter->user_data))
+      if(pc == ((long) iter->user_data))
         g_object_set(G_OBJECT(cell), "cell-background-gdk", 
              &color_PC_on_BP, "cell-background-set", TRUE, NULL);
       else
@@ -82,7 +92,7 @@ void disasm_set_color (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
     }
       else
     {
-      if(PC->addr == ((long) iter->user_data))
+      if(pc == ((long) iter->user_data))
         g_object_set(G_OBJECT(cell), "cell-background-gdk", &color_PC,
              "cell-background-set", TRUE, NULL);
       else
@@ -106,19 +116,23 @@ void init_desasm()
       *boxH1,
       *scrollbar1,
       *boxV1,
+      *buRun,
       *buStep,
+      *buTrace,
+      *buBreak,
       *buGoTo,
       *swDesasm;
 
     desasm_opened = 1;
     
     winDesasm = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+
     sprintf( title, "%s - %s", "Debugger", DEBUGGER_VERSION );
     gtk_window_set_title( GTK_WINDOW(winDesasm), title );
-    gtk_window_set_default_size( GTK_WINDOW(winDesasm), 380, 500);
-    gtk_container_set_border_width( GTK_CONTAINER(winDesasm), 2);
+    gtk_window_set_default_size( GTK_WINDOW(winDesasm), 380, 500 );
+    gtk_container_set_border_width( GTK_CONTAINER(winDesasm), 2 );
 
-    gtk_window_set_deletable( GTK_WINDOW(winDesasm), FALSE);
+    gtk_window_set_deletable( GTK_WINDOW(winDesasm), FALSE );
 
     boxH1 = gtk_hbox_new( FALSE, 0 );
 
@@ -135,7 +149,6 @@ void init_desasm()
     GtkCellRenderer    *renderer;
     GtkTreeViewColumn  *col;
     renderer = gtk_cell_renderer_text_new();
-    gtk_cell_renderer_set_fixed_size(renderer, 90, 9);
     col = gtk_tree_view_column_new_with_attributes("Address", renderer, "text", 0, NULL);
     gtk_tree_view_column_set_cell_data_func(col, renderer, disasm_set_color, NULL, NULL);
 
@@ -144,11 +157,11 @@ void init_desasm()
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
     col = gtk_tree_view_column_new_with_attributes("Opcode", renderer, "text", 1, NULL);
     gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-    gtk_tree_view_column_set_fixed_width(col, 82);
+    gtk_tree_view_column_set_fixed_width(col, 72);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
     col = gtk_tree_view_column_new_with_attributes("Args", renderer, "text", 2, NULL);
     gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-    gtk_tree_view_column_set_fixed_width(col, 64);
+    gtk_tree_view_column_set_fixed_width(col, 140);
     gtk_tree_view_append_column( GTK_TREE_VIEW( clDesasm ), col);
 
     ajLogari = (GtkAdjustment *) gtk_adjustment_new(0, 0, SCROLLRANGE, 0.01, 0.1, 0.0);
@@ -159,7 +172,7 @@ void init_desasm()
 
     gtk_container_add((GtkContainer *) swDesasm, clDesasm);
     //This replaces clDesasm's adjustments with swDesasm's, so...
-    ajDesasm = (GtkAdjustment *) gtk_adjustment_new(0, 0, 1, 1, max_row, max_row);
+    ajDesasm = (GtkAdjustment *) gtk_adjustment_new(0, 0, 1, 1, 0.1, 0.1);
 
     //we replace it's vertical adjustment, with our own
     gtk_widget_set_scroll_adjustments(clDesasm, gtk_range_get_adjustment((GtkRange *)((GtkScrolledWindow *)swDesasm)->hscrollbar), ajDesasm);
@@ -168,7 +181,7 @@ void init_desasm()
     //gtk_container_add(boxH1, swDesasm);
 
 #ifdef DOUBLESCROLL    
-    ajLinear = (GtkAdjustment *) gtk_adjustment_new(0,0,((float)0xFFFFFFFF),0xFFFF,0xFFFFFF,0);
+    ajLinear = (GtkAdjustment *) gtk_adjustment_new(0,0,((float)0xFFFFFFFF),0x4,0x60,0);
 
     scrollbar1 = gtk_vscrollbar_new( GTK_ADJUSTMENT(ajLinear));
     //gtk_container_add(boxH1, scrollbar1);
@@ -183,30 +196,47 @@ void init_desasm()
     boxV1 = gtk_vbox_new( FALSE, 2 );
     gtk_box_pack_end( GTK_BOX(boxH1), boxV1, FALSE, FALSE, 0 );
     
-    //buRun = gtk_button_new_with_label( "Run" );
-    buRun = gtk_button_new_with_label( "> \\ ||" );
+    buRun = gtk_button_new_with_label( "Go" );
     gtk_box_pack_start( GTK_BOX(boxV1), buRun, FALSE, FALSE, 5 );
-    buStep = gtk_button_new_with_label( "Next" );
+    buTrace = gtk_button_new_with_label( "Trace" );
+    gtk_box_pack_start( GTK_BOX(boxV1), buTrace, FALSE, FALSE, 0 );
+    buStep = gtk_button_new_with_label( "Step" );
     gtk_box_pack_start( GTK_BOX(boxV1), buStep, FALSE, FALSE, 0 );
+    buBreak = gtk_button_new_with_label( "Break" );
+    gtk_box_pack_start( GTK_BOX(boxV1), buBreak, FALSE, FALSE, 0 );
     buGoTo = gtk_button_new_with_label( "Go To..." );
     gtk_box_pack_start( GTK_BOX(boxV1), buGoTo, FALSE, FALSE, 20 );
 
     gtk_widget_show_all( winDesasm );
 
+    gdk_window_set_events( winDesasm->window, GDK_ALL_EVENTS_MASK );
+
+    gtk_tree_selection_unselect_all( gtk_tree_view_get_selection(
+        GTK_TREE_VIEW(clDesasm)));
+
     //=== Signal Connection ===========================/
     gtk_signal_connect( GTK_OBJECT(clDesasm), "row-activated",
                     GTK_SIGNAL_FUNC(on_click), NULL );
+    g_signal_connect( gtk_tree_view_get_selection(GTK_TREE_VIEW(clDesasm)),
+                    "changed", GTK_SIGNAL_FUNC(on_select), NULL );
     gtk_signal_connect( GTK_OBJECT(ajLogari), "value-changed",
                     GTK_SIGNAL_FUNC(on_scroll), NULL );
 #ifdef DOUBLESCROLL
     gtk_signal_connect( GTK_OBJECT(ajLinear), "value-changed",
             GTK_SIGNAL_FUNC(on_linear_scroll), NULL );
+    gtk_signal_connect( GTK_OBJECT(scrollbar1), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
 #endif
+    gtk_signal_connect( GTK_OBJECT(winDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
+    gtk_signal_connect( GTK_OBJECT(swDesasm), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
+    gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar(
+            GTK_SCROLLED_WINDOW(swDesasm))), "scroll-event", GTK_SIGNAL_FUNC(on_scroll_wheel), NULL );
 
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar((GtkScrolledWindow *) swDesasm)), "button-press-event", GTK_SIGNAL_FUNC(on_scrollclick), NULL);
     gtk_signal_connect( GTK_OBJECT(gtk_scrolled_window_get_vscrollbar((GtkScrolledWindow *) swDesasm)), "button-release-event", GTK_SIGNAL_FUNC(on_scrollrelease), NULL);
     gtk_signal_connect( GTK_OBJECT(buRun), "clicked", on_run, NULL );
     gtk_signal_connect( GTK_OBJECT(buStep), "clicked", on_step, NULL );
+    gtk_signal_connect( GTK_OBJECT(buTrace), "clicked", on_trace, NULL );
+    gtk_signal_connect( GTK_OBJECT(buBreak), "clicked", on_break, NULL );
     gtk_signal_connect( GTK_OBJECT(buGoTo), "clicked", on_goto, NULL );
     gtk_signal_connect( GTK_OBJECT(winDesasm), "destroy", on_close, NULL );
 
@@ -238,6 +268,12 @@ unsigned int prevadd=0x00;
 unsigned int mousedown=0x00;
 float prev=0.0f;
 
+void update_disassembler( uint32 pc )
+{
+    currentPC=pc;
+    update_desasm( pc );
+}
+
 
 void update_desasm( uint32 focused_address )
 //Display disassembled instructions around a 'focused_address'
@@ -245,9 +281,10 @@ void update_desasm( uint32 focused_address )
 {
     addtest=focused_address;
     disasm_list_update((GtkTreeModel *) cmDesasm, focused_address);
-    
+
+#ifdef DOUBLESCROLL
     gtk_adjustment_set_value(ajLinear, ((float)addtest));
-    
+#endif
     if(mousedown==0)
       update_log_scroll();
     
@@ -310,40 +347,36 @@ void refresh_desasm()
 }
 
 
-void switch_button_to_run()
-{ //Is called from debugger.c, when a breakpoint is reached.
-    //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run");
-    //todo: this causes a deadlock or something the second time a
-    //breakpoint hits, breaking the interface. The other lines changing
-    //this label have been commented with the note "avoid deadlock".
-}
-
 
 //]=-=-=-=-=-=-=[ Les Fonctions de Retour des Signaux (CallBack) ]=-=-=-=-=-=-=[
 
 static void on_run()
 {
-    if(run == 2) {
-        run = 0;
-        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
-    } else {
-        run = 2;
-        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child),"Pause"); //avoid deadlock
-        pthread_cond_signal(&debugger_done_cond);
-    }
+    int oldrun = run;
+    run = 2;
+    if(oldrun == 0)
+        debugger_step();
 }
 
 
 static void on_step()
 {
-    if(run == 2) {
-        //gtk_label_set_text( GTK_LABEL (GTK_BIN (buRun)->child), "Run"); //avoid deadlock
-    } else {
-        pthread_cond_signal(&debugger_done_cond);
-    }
-    run = 0;
+    if(run == 0)
+        debugger_step();
 }
 
+static void on_trace()
+{
+    int oldrun = run;
+    run = 1;
+    if(oldrun == 0)
+        debugger_step();
+}
+
+static void on_break()
+{
+    run = 0;
+}
 
 static void on_goto()
 {//TODO: to open a dialog, get & check the entry, and go there.
@@ -376,6 +409,17 @@ static void on_linear_scroll(GtkAdjustment *adjustment, gpointer usr)
   update_desasm( (uint32) addtest );
 }
 #endif
+
+static gboolean on_scroll_wheel(GtkWidget *widget, GdkEventScroll *event,
+                            gpointer user_data)
+{
+  if(event->direction==GDK_SCROLL_UP)        addtest-=4;
+  else if(event->direction==GDK_SCROLL_DOWN) addtest+=4;
+  else return FALSE;
+
+  update_desasm( (uint32) addtest );
+  return TRUE;
+}
 
 static void on_scroll(GtkAdjustment *adjustment, gpointer user_data)
 {
@@ -440,6 +484,13 @@ static gboolean on_scrollrelease(GtkWidget *bar, GdkEventButton* evt, gpointer u
   return FALSE;
 }
 
+static void on_select( GtkTreeSelection *select, gpointer user_data )
+{
+  gtk_tree_selection_unselect_all( select );
+  refresh_desasm();
+}
+
+
 static void on_click( GtkTreeView *widget, GtkTreePath *path, 
                GtkTreeViewColumn *col, gpointer user_data )
 //Add a breakpoint on double-clicked linelines.
@@ -447,7 +498,6 @@ static void on_click( GtkTreeView *widget, GtkTreePath *path,
   uint32 clicked_address;
   int break_number;
   GtkTreeIter iter;
-  gint depth;
 
   if(gtk_tree_path_get_depth(path) > 1)
     return;// do nothing if it is recompiler disassembly
@@ -456,7 +506,7 @@ static void on_click( GtkTreeView *widget, GtkTreePath *path,
 
   clicked_address =(uint32)(long) iter.user_data;
 
-  break_number = lookup_breakpoint(clicked_address, BPT_FLAG_EXEC);
+  break_number = lookup_breakpoint(clicked_address, 0, BPT_FLAG_EXEC);
 
   if( break_number==-1 ) {
     add_breakpoint( clicked_address );
@@ -482,3 +532,4 @@ static void on_close()
   //For now, lets get rid of the close button, and keep this window always open
   //for the execution controls to be accessible
 }
+

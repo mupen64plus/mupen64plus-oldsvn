@@ -944,3 +944,4 @@ grGlideSetVertexLayout( const void *layout );
 #include <glideutl.h>
 
 #endif /* __GLIDE_H__ */
+

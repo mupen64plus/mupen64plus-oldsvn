@@ -32,7 +32,7 @@
 
 uLong ZEXPORT adler32(uLong adler, const Bytef *buf, uInt len);
 
-void TLBR()
+void TLBR(void)
 {
    int index;
    index = Index & 0x1F;
@@ -47,7 +47,7 @@ void TLBR()
    PC++;
 }
 
-void TLBWI()
+void TLBWI(void)
 {
    unsigned int i;
 
@@ -232,7 +232,7 @@ void TLBWI()
    PC++;
 }
 
-void TLBWR()
+void TLBWR(void)
 {
    unsigned int i;
    update_count();
@@ -419,7 +419,7 @@ void TLBWR()
    PC++;
 }
 
-void TLBP()
+void TLBP(void)
 {
    int i;
    Index |= 0x80000000;
@@ -439,7 +439,7 @@ void TLBP()
 
 int jump_marker = 0;
 
-void ERET()
+void ERET(void)
 {
    update_count();
    if (Status & 0x4)

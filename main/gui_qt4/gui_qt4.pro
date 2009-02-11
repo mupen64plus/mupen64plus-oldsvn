@@ -1,7 +1,7 @@
 #/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# *   Mupen64plus - Makefile                                                *
+# *   Mupen64plus - gui_qt4.pro                                             *
 # *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
-# *   Copyright (C) 2008 slougi                                             *
+# *   Copyright (C) 2008 Slougi                                             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU General Public License as published by  *
@@ -28,11 +28,6 @@ INCLUDEPATH += .
 unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += gtk+-2.0 sdl
-}
-
-win32 {
-    message($$cflags)
-    QMAKE_CFLAGS_RELEASE += $$cflags
 }
 
 # Input
@@ -83,7 +78,9 @@ SOURCES += globals.cpp \
            rominfodialog.cpp \
            rommodel.cpp \
            settingsdialog.cpp \
+           cheatdialog.cpp \
            starlabel.cpp \
+           translate.cpp \
            cheatdialog.cpp \
            cheatcheatdialog.cpp \
            cheatromdialog.cpp

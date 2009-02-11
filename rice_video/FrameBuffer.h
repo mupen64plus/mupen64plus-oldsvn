@@ -137,3 +137,4 @@ extern uint16 ConvertRGBATo555(uint32 color32);
 extern void InitTlutReverseLookup(void);
 
 #endif
+

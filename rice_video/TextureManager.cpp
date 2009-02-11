@@ -1539,3 +1539,4 @@ void ConvertTextureRGBAtoI(TxtrCacheEntry* pEntry, bool alpha)
         }
         pEntry->pTexture->EndUpdate(&srcInfo);  }
 }
+

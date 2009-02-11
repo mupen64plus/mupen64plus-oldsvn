@@ -59,3 +59,4 @@ typedef int RECT;
 typedef int PAINTSTRUCT;
 
 #endif /* __WINTYPES_H__ */
+

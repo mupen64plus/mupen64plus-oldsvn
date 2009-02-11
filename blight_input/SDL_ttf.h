@@ -233,3 +233,4 @@ extern DECLSPEC int SDLCALL TTF_WasInit(void);
 #include "close_code.h"
 
 #endif /* _SDL_TTF_H */
+

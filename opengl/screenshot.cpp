@@ -1,32 +1,31 @@
-/**
- * Mupen64Plus - Screenshot.cpp
- * Copyright (C) 2008 Richard Goedeken
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- * 
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - screenshot.c                                            *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Richard42                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <limits.h>
 
 #include <SDL_opengl.h>
 #include <SDL.h>
@@ -34,10 +33,12 @@
 
 #include "osd.h"
 
+extern "C" {
 #include "../main/main.h"
 #include "../main/util.h"
 #include "../main/rom.h"
 #include "../main/translate.h"
+}
 
 static char  l_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline
 
@@ -115,13 +116,11 @@ static int SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, in
 /*********************************************************************************************************
 * Global screenshot functions
 */
-
-
 extern "C" void SetScreenshotDir(const char *chDir)
 {
     // copy directory path
-    strncpy(l_SshotDir, chDir, PATH_MAX - 2);
-    l_SshotDir[PATH_MAX - 2] = '\0';
+    strncpy(l_SshotDir, chDir, PATH_MAX - 1);
+    l_SshotDir[PATH_MAX - 1] = '\0';
 
     // if path is empty, then return
     if (l_SshotDir[0] == '\0')
@@ -151,21 +150,20 @@ extern "C" int ValidScreenshotDir(void)
 
 extern "C" void TakeScreenshot(int iFrameNumber)
 {
-    unsigned char *pchImage = NULL;
-
     // start by getting the base file path
     char filepath[PATH_MAX], filename[PATH_MAX];
     char *pch, ch;
     filepath[0] = 0;
     filename[0] = 0;
-    strcpy(filepath, l_SshotDir);
+    strncpy(filepath, l_SshotDir, sizeof(filepath));
+    filepath[PATH_MAX-1] = '\0';
     if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
         strcat(filepath, "/");
-    
+
     // add the game's name to the end, convert to lowercase, convert spaces to underscores
     pch = filepath + strlen(filepath);
-    strncpy(pch, (char *) ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
-    pch[20] = 0;
+    strncpy(pch, (char*) ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
+    pch[20] = '\0';
     do
     {
         ch = *pch;
@@ -174,7 +172,7 @@ extern "C" void TakeScreenshot(int iFrameNumber)
         else
             *pch++ = tolower(ch);
     } while (ch != 0);
-    
+
     // look for a file
     int i;
     for (i = 0; i < 100; i++)
@@ -209,8 +207,6 @@ extern "C" void TakeScreenshot(int iFrameNumber)
     // free the memory
     free(pucFrame);
     // print message -- this allows developers to capture frames and use them in the regression test
-    printf("Captured screenshot for frame %i\n", iFrameNumber);
-
-    osd_new_message(OSD_BOTTOM_LEFT, tr("Captured screenshot."));
+    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Captured screenshot for frame %i.\n"), iFrameNumber);
 }
 

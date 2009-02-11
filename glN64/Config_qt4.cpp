@@ -33,8 +33,10 @@ static const char *pluginDir = 0;
 
 static inline const char *GetPluginDir()
 {
-        static char path[PATH_MAX];
-
+    static char path[PATH_MAX];
+#ifdef __WIN32__
+    strncpy(path, ".", PATH_MAX);
+#else
     if(strlen(configdir) > 0)
     {
         strncpy(path, configdir, PATH_MAX);
@@ -66,8 +68,9 @@ static inline const char *GetPluginDir()
                    strncat(path, "/plugins", PATH_MAX);
 #ifdef __USE_GNU
         }
-#endif
+#endif // __USE_GNU
     }
+#endif // __WIN32__
         return path;
 }
 
@@ -196,13 +199,27 @@ void Config_LoadConfig()
     fclose( f );
 }
 
-void Config_DoConfig()
+void Config_DoConfig(HWND hParent)
 {
     Config_LoadConfig();
 
-    QDialog dialog;
+    QDialog dialog(QWidget::find(hParent));
     Ui_glN64ConfigDialog ui;
     ui.setupUi(&dialog);
+
+    QString res = QString("%1x%2")
+                    .arg(OGL.fullscreenWidth)
+                    .arg(OGL.fullscreenHeight);
+    ui.resolutionCombo->setEditText(res);
+    ui.forceBilinearFilteringCheck->setChecked(OGL.forceBilinear);
+    ui.twoExSaiTextureScalingCheck->setChecked(OGL.enable2xSaI);
+    ui.anisotropicFilteringCheck->setChecked(OGL.enableAnisotropicFiltering);
+    ui.drawFogCheck->setChecked(OGL.fog);
+    ui.hwFramebufferTexturesCheck->setChecked(OGL.frameBufferTextures);
+    ui.ditheredAlphaTestingCheck->setChecked(OGL.usePolygonStipple);
+    ui.bitDepthCombo->setCurrentIndex(OGL.textureBitDepth);
+    ui.cacheSizeSpin->setValue(cache.maxBytes / 1024 / 1024);
+
     // eek copy paste
     if (dialog.exec() == QDialog::Accepted) {
         FILE *f;
@@ -257,3 +274,4 @@ void Config_DoConfig()
         fclose( f );
     }
 }
+

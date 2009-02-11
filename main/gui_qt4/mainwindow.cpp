@@ -1,34 +1,38 @@
-/*
-* Copyright (C) 2008 Louai Al-Khanji
-*
-* This program is free software; you can redistribute it and/
-* or modify it under the terms of the GNU General Public Li-
-* cence as published by the Free Software Foundation; either
-* version 2 of the Licence, or any later version.
-*
-* This program is distributed in the hope that it will be use-
-* ful, but WITHOUT ANY WARRANTY; without even the implied war-
-* ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU General Public Licence for more details.
-*
-* You should have received a copy of the GNU General Public
-* Licence along with this program; if not, write to the Free
-* Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
-* USA.
-*
-*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - mainwindow.cpp                                          *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Slougi                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <QtGui>
 
-#include "mainwindow.h"
 #include "mainwidget.h"
 #include "globals.h"
 #include "rommodel.h"
 #include "settingsdialog.h"
+
+#include <SDL_video.h>
+
 #include "cheatdialog.h"
 
 namespace core {
     extern "C" {
+        #include "../gui.h"
         #include "../main.h"
         #include "../plugin.h"
         #include "../savestates.h"
@@ -37,12 +41,26 @@ namespace core {
     }
 }
 
-MainWindow::MainWindow() 
+#include "winuser.h"
+
+#undef MB_ABORTRETRYIGNORE
+#undef MB_CANCELTRYCONTINUE
+#undef MB_OK
+#undef MB_OKCANCEL
+#undef MB_RETRYCANCEL
+#undef MB_YESNO
+#undef MB_YESNOCANCEL
+
+#include "mainwindow.h"
+
+MainWindow::MainWindow()
 : QMainWindow(0)
 , m_statusBarLabel(0)
+, m_uiActions(0)
 {
     setupUi(this);
     setupActions();
+    setState(core::GUI_STATE_STOPPED);
     m_statusBarLabel = new QLabel;
     statusBar()->addPermanentWidget(m_statusBarLabel);
 
@@ -86,7 +104,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-#ifdef __WIN32__
+#ifdef Q_WS_WIN
     delete m_renderWindow;
     m_renderWindow = 0;
 #endif
@@ -102,15 +120,76 @@ void MainWindow::closeEvent(QCloseEvent *event)
     core::config_put_bool("StatusBarVisible", actionShowStatusbar->isChecked());
     core::config_put_bool("ToolBarVisible", actionShowToolbar->isChecked());
     core::config_put_bool("FilterVisible", actionShowFilter->isChecked());
-#ifdef __WIN32__
+
     if (m_renderWindow) {
         m_renderWindow->close();
         m_renderWindow->deleteLater();
     }
-#endif
 }
 
-#ifdef __WIN32__
+void MainWindow::pluginGuiQueryEvent(PluginGuiQueryEvent* event)
+{
+    QMessageBox mb(QWidget::find(event->window));
+    mb.setWindowTitle(event->title);
+    mb.setText(event->message);
+    mb.setIconPixmap(QPixmap::fromImage(event->image));
+
+    QAbstractButton *button1, *button2, *button3;
+    button1 = button2 = button3 = 0;
+
+    switch( event->flags & 0x000000FF )
+    {
+    case MB_ABORTRETRYIGNORE:
+        button1 = mb.addButton(QWidget::tr("Abort"), QMessageBox::RejectRole);
+        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button3 = mb.addButton(QWidget::tr("Ignore"), QMessageBox::AcceptRole);
+        break;
+
+    case MB_CANCELTRYCONTINUE:
+        button1 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        button2 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button3 = mb.addButton(QWidget::tr("Continue"), QMessageBox::AcceptRole);
+        break;
+
+    case MB_OKCANCEL:
+        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
+        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_RETRYCANCEL:
+        button1 = mb.addButton(QWidget::tr("Retry"), QMessageBox::AcceptRole);
+        button2 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_YESNO:
+        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
+        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
+        break;
+
+    case MB_YESNOCANCEL:
+        button1 = mb.addButton(QWidget::tr("Yes"), QMessageBox::YesRole);
+        button2 = mb.addButton(QWidget::tr("No"), QMessageBox::NoRole);
+        button3 = mb.addButton(QWidget::tr("Cancel"), QMessageBox::RejectRole);
+        break;
+
+    case MB_OK:
+    default:
+        button1 = mb.addButton(QWidget::tr("OK"), QMessageBox::AcceptRole);
+    }
+
+    mb.exec();
+
+    if (button1 == mb.clickedButton()) {
+        event->result = 1;
+    } else if (button2 == mb.clickedButton()) {
+        event->result = 2;
+    } else if (button3 == mb.clickedButton()) {
+        event->result = 3;
+    }
+
+    event->waitCondition->wakeAll();
+    return;
+}
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 {
@@ -136,13 +215,40 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                     }
                 }
             }
+            // fall through
+        case QEvent::KeyPress:
+            {
+                QKeyEvent* qke = static_cast<QKeyEvent*>(ev);
+                core::WPARAM wParam = 0;
+                core::LPARAM lParam = 0;
+                int key = qke->key();
+                if ((key >= Qt::Key_0 && key <= Qt::Key_9)
+                    || (key >= Qt::Key_A && key <= Qt::Key_Z)) {
+                        // In these cases the Qt and windows definitions match
+                    wParam = (core::WPARAM) key;
+                } else if (key >= Qt::Key_Left && key <= Qt::Key_Down) {
+                    wParam = (core::WPARAM) key - Qt::Key_Down + VK_DOWN;
+                } else if (key == Qt::Key_Return || key == Qt::Key_Enter) {
+                    wParam = VK_RETURN;
+                } else if (key == Qt::Key_Space) {
+                    wParam = VK_SPACE;
+                }
+                if (ev->type() == QEvent::KeyRelease) {
+                    core::keyUp(wParam, lParam);
+                } else {
+                    core::keyDown(wParam, lParam);
+                }
+            }
             return false;
+            break;
+        default:
+            return false;
+            break;
         }
     } else {
         return QMainWindow::eventFilter(obj, ev);
     }
 }
-#endif
 
 void MainWindow::showInfoMessage(const QString& msg)
 {
@@ -228,12 +334,10 @@ void MainWindow::emulationPauseContinue()
 void MainWindow::emulationStop()
 {
     core::stopEmulation();
-#ifdef __WIN32__
     if (m_renderWindow) {
         m_renderWindow->close();
         m_renderWindow->deleteLater();
    }
-#endif
 }
 
 void MainWindow::showCheatDialog()
@@ -244,7 +348,8 @@ void MainWindow::showCheatDialog()
 
 void MainWindow::fullScreenToggle()
 {
-    core::changeWindow();
+    if(core::g_EmulatorRunning)
+        core::changeWindow();
 }
 
 void MainWindow::saveStateSave()
@@ -314,7 +419,7 @@ void MainWindow::savestateSelectSlot(QAction* a)
 void MainWindow::configDialogShow()
 {
     SettingsDialog* d = new SettingsDialog(this);
-    d->show();
+    d->exec();
 }
 
 void MainWindow::itemCountUpdate(int count)
@@ -340,22 +445,36 @@ void MainWindow::customEvent(QEvent* event)
         case AlertEventType:
             showAlertMessage(static_cast<AlertEvent*>(event)->message);
             break;
+        case ConfirmEventType:
+            event->setAccepted(
+                confirmMessage(static_cast<ConfirmEvent*>(event)->message)
+            );
+            break;
+        case PluginGuiQueryEventType:
+            pluginGuiQueryEvent(static_cast<PluginGuiQueryEvent*>(event));
+            break;
         default:
-            qDebug("Got unknown custom event of type %d!", event->type());
+            qWarning("Got unknown custom event of type %d!", event->type());
             break;
     }
 }
 
 void MainWindow::startEmulation()
 {
-#ifdef __WIN32__
+#ifdef Q_WS_WIN
     m_renderWindow = new QWidget;
     m_renderWindow->addActions(actions());
     m_renderWindow->installEventFilter(this);
     m_renderWindow->show();
-    core::g_MainWindow = reinterpret_cast<core::HWND__*>(m_renderWindow->winId());
-    core::g_StatusBar = reinterpret_cast<core::HWND__*>(statusBar()->winId());
-#endif
+    core::g_RenderWindow = (core::HWND) m_renderWindow->winId();
+    core::g_StatusBar = (core::HWND) statusBar()->winId();
+
+    QString winId = QString("0x%1")
+                    .arg(QString::number(m_renderWindow->winId(), 16));
+    setenv("SDL_WINDOWID",
+            qPrintable(winId),
+            1);
+#endif // Q_WS_WIN
 
     core::startEmulation();
 }
@@ -422,7 +541,7 @@ void MainWindow::setupActions()
     connect(actionShowFilter, SIGNAL(toggled(bool)),
             mainWidget, SLOT(showFilter(bool)));
     actionFullScreen->setIcon(icon("view-fullscreen.png"));
-    connect(actionFullScreen, SIGNAL(toggled(bool)),
+    connect(actionFullScreen, SIGNAL(triggered()),
             this, SLOT(fullScreenToggle()));
     actionConfigureMupen64Plus->setIcon(icon("preferences-system.png"));
     connect(actionConfigureMupen64Plus, SIGNAL(triggered()),
@@ -443,4 +562,57 @@ void MainWindow::setupActions()
     actionShowStatusbar->setChecked(
         core::config_get_bool("StatusBarVisible", TRUE)
     );
+
+    m_uiActions = new QActionGroup(this);
+    m_uiActions->setExclusive(false);
+    m_uiActions->addAction(actionCloseRom);
+    m_uiActions->addAction(actionSaveState);
+    m_uiActions->addAction(actionSaveStateAs);
+    m_uiActions->addAction(actionLoadState);
+    m_uiActions->addAction(actionLoadStateFrom);
+    m_uiActions->addAction(actionFullScreen);
+    m_uiActions->addAction(actionStop);
+    m_uiActions->addAction(actionPause);
 }
+
+void MainWindow::setState(core::gui_state_t state)
+{
+    QMetaObject::invokeMethod(this, "setStateImplementation",
+                              Qt::QueuedConnection, Q_ARG(int, state));
+}
+
+void MainWindow::setStateImplementation(int state)
+{
+    bool pause, stop, play;
+    pause = stop = play = false;
+
+    switch (state) {
+        case core::GUI_STATE_RUNNING:
+            play = true;
+            break;
+        case core::GUI_STATE_PAUSED:
+            pause = true;
+            break;
+        case core::GUI_STATE_STOPPED:
+            stop = true;
+            break;
+    }
+
+    m_uiActions->setEnabled(!stop);
+
+    actionStart->setChecked(play);
+    actionPause->setChecked(pause);
+    actionStop->setChecked(stop);
+
+    if (stop && !m_renderWindow.isNull()) {
+        m_renderWindow->close();
+        m_renderWindow->deleteLater();
+    }
+
+    if (play && !m_renderWindow.isNull()) {
+        if (SDL_Surface* s = SDL_GetVideoSurface()) {
+            m_renderWindow->setFixedSize(s->w, s->h);
+        }
+    }
+}
+

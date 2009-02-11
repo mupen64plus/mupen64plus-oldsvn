@@ -113,3 +113,4 @@ void SzArchiveDatabaseFree(CArchiveDatabase *db, void (*freeFunc)(void *));
 
 
 #endif
+

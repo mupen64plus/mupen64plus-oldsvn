@@ -1,7 +1,8 @@
 #ifndef TEXTURES_H
 #define TEXTURES_H
 
-#include <GL/gl.h>
+#include <SDL_opengl.h>
+
 #include "convert.h"
 
 struct CachedTexture
@@ -87,3 +88,4 @@ void TextureCache_ActivateDummy( u32 t );
 BOOL TextureCache_Verify();
 
 #endif
+

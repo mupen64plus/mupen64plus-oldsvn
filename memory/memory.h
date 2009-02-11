@@ -50,14 +50,14 @@ extern unsigned char byte;
 extern unsigned short hword;
 extern unsigned long long dword, *rdword;
 
-extern void (*readmem[0xFFFF])();
-extern void (*readmemb[0xFFFF])();
-extern void (*readmemh[0xFFFF])();
-extern void (*readmemd[0xFFFF])();
-extern void (*writemem[0xFFFF])();
-extern void (*writememb[0xFFFF])();
-extern void (*writememh[0xFFFF])();
-extern void (*writememd[0xFFFF])();
+extern void (*readmem[0x10000])();
+extern void (*readmemb[0x10000])();
+extern void (*readmemh[0x10000])();
+extern void (*readmemd[0x10000])();
+extern void (*writemem[0x10000])();
+extern void (*writememb[0x10000])();
+extern void (*writememh[0x10000])();
+extern void (*writememd[0x10000])();
 
 typedef struct _RDRAM_register
 {
@@ -422,5 +422,8 @@ void write_pifd();
 
 void update_SP();
 void update_DPC();
+void update_MI_intr_mode_reg();
+void update_MI_init_mask_reg();
 
 #endif
+

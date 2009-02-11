@@ -501,3 +501,4 @@ void GBI_MakeCurrent( MicrocodeInfo *current )
 
     GBI.current = current;
 }
+

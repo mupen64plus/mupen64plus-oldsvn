@@ -114,3 +114,4 @@ void TexColorCombinerToExtension (GrChipID_t tmu);
 void TexAlphaCombinerToExtension (GrChipID_t tmu);
 
 #endif //COMBINE _H
+

@@ -26,59 +26,63 @@
 #include "macros.h"
 
 #include "../memory/memory.h"
+#include "../debugger/debugger.h"
 
-void NOP()
+void NOP(void)
 {
    PC++;
 }
 
-void SLL()
+void SLL(void)
 {
    rrd32 = (unsigned int)(rrt32) << rsa;
    sign_extended(rrd);
    PC++;
 }
 
-void SRL()
+void SRL(void)
 {
    rrd32 = (unsigned int)rrt32 >> rsa;
    sign_extended(rrd);
    PC++;
 }
 
-void SRA()
+void SRA(void)
 {
    rrd32 = (signed int)rrt32 >> rsa;
    sign_extended(rrd);
    PC++;
 }
 
-void SLLV()
+void SLLV(void)
 {
    rrd32 = (unsigned int)(rrt32) << (rrs32&0x1F);
    sign_extended(rrd);
    PC++;
 }
 
-void SRLV()
+void SRLV(void)
 {
    rrd32 = (unsigned int)rrt32 >> (rrs32 & 0x1F);
    sign_extended(rrd);
    PC++;
 }
 
-void SRAV()
+void SRAV(void)
 {
    rrd32 = (signed int)rrt32 >> (rrs32 & 0x1F);
    sign_extended(rrd);
    PC++;
 }
 
-void JR()
+void JR(void)
 {
    local_rs32 = irs32;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -87,12 +91,15 @@ void JR()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void JALR()
+void JALR(void)
 {
    unsigned long long *dest = (unsigned long long *) PC->f.r.rd;
    local_rs32 = rrs32;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -107,60 +114,60 @@ void JALR()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void SYSCALL()
+void SYSCALL(void)
 {
    Cause = 8 << 2;
    exception_general();
 }
 
-void SYNC()
+void SYNC(void)
 {
    PC++;
 }
 
-void MFHI()
+void MFHI(void)
 {
    rrd = hi;
    PC++;
 }
 
-void MTHI()
+void MTHI(void)
 {
    hi = rrs;
    PC++;
 }
 
-void MFLO()
+void MFLO(void)
 {
    rrd = lo;
    PC++;
 }
 
-void MTLO()
+void MTLO(void)
 {
    lo = rrs;
    PC++;
 }
 
-void DSLLV()
+void DSLLV(void)
 {
    rrd = rrt << (rrs32&0x3F);
    PC++;
 }
 
-void DSRLV()
+void DSRLV(void)
 {
    rrd = (unsigned long long)rrt >> (rrs32 & 0x3F);
    PC++;
 }
 
-void DSRAV()
+void DSRAV(void)
 {
    rrd = (long long)rrt >> (rrs32 & 0x3F);
    PC++;
 }
 
-void MULT()
+void MULT(void)
 {
    long long int temp;
    temp = rrs * rrt;
@@ -170,7 +177,7 @@ void MULT()
    PC++;
 }
 
-void MULTU()
+void MULTU(void)
 {
    unsigned long long int temp;
    temp = (unsigned int)rrs * (unsigned long long)((unsigned int)rrt);
@@ -180,7 +187,7 @@ void MULTU()
    PC++;
 }
 
-void DIV()
+void DIV(void)
 {
    if (rrt32)
      {
@@ -193,7 +200,7 @@ void DIV()
    PC++;
 }
 
-void DIVU()
+void DIVU(void)
 {
    if (rrt32)
      {
@@ -206,7 +213,7 @@ void DIVU()
    PC++;
 }
 
-void DMULT()
+void DMULT(void)
 {
    unsigned long long int op1, op2, op3, op4;
    unsigned long long int result1, result2, result3, result4;
@@ -252,7 +259,7 @@ void DMULT()
    PC++;
 }
 
-void DMULTU()
+void DMULTU(void)
 {
    unsigned long long int op1, op2, op3, op4;
    unsigned long long int result1, result2, result3, result4;
@@ -279,7 +286,7 @@ void DMULTU()
    PC++;
 }
 
-void DDIV()
+void DDIV(void)
 {
    if (rrt)
      {
@@ -290,7 +297,7 @@ void DDIV()
    PC++;
 }
 
-void DDIVU()
+void DDIVU(void)
 {
    if (rrt)
      {
@@ -301,66 +308,66 @@ void DDIVU()
    PC++;
 }
 
-void ADD()
+void ADD(void)
 {
    rrd32 = rrs32 + rrt32;
    sign_extended(rrd);
    PC++;
 }
 
-void ADDU()
+void ADDU(void)
 {
    rrd32 = rrs32 + rrt32;
    sign_extended(rrd);
    PC++;
 }
 
-void SUB()
+void SUB(void)
 {
    rrd32 = rrs32 - rrt32;
    sign_extended(rrd);
    PC++;
 }
 
-void SUBU()
+void SUBU(void)
 {
    rrd32 = rrs32 - rrt32;
    sign_extended(rrd);
    PC++;
 }
 
-void AND()
+void AND(void)
 {
    rrd = rrs & rrt;
    PC++;
 }
 
-void OR()
+void OR(void)
 {
    rrd = rrs | rrt;
    PC++;
 }
 
-void XOR()
+void XOR(void)
 {
    rrd = rrs ^ rrt;
    PC++;
 }
 
-void NOR()
+void NOR(void)
 {
    rrd = ~(rrs | rrt);
    PC++;
 }
 
-void SLT()
+void SLT(void)
 {
    if (rrs < rrt) rrd = 1;
    else rrd = 0;
    PC++;
 }
 
-void SLTU()
+void SLTU(void)
 {
    if ((unsigned long long)rrs < (unsigned long long)rrt) 
      rrd = 1;
@@ -368,31 +375,31 @@ void SLTU()
    PC++;
 }
 
-void DADD()
+void DADD(void)
 {
    rrd = rrs + rrt;
    PC++;
 }
 
-void DADDU()
+void DADDU(void)
 {
    rrd = rrs + rrt;
    PC++;
 }
 
-void DSUB()
+void DSUB(void)
 {
    rrd = rrs - rrt;
    PC++;
 }
 
-void DSUBU()
+void DSUBU(void)
 {
    rrd = rrs - rrt;
    PC++;
 }
 
-void TEQ()
+void TEQ(void)
 {
    if (rrs == rrt)
      {
@@ -402,38 +409,39 @@ void TEQ()
    PC++;
 }
 
-void DSLL()
+void DSLL(void)
 {
    rrd = rrt << rsa;
    PC++;
 }
 
-void DSRL()
+void DSRL(void)
 {
    rrd = (unsigned long long)rrt >> rsa;
    PC++;
 }
 
-void DSRA()
+void DSRA(void)
 {
    rrd = rrt >> rsa;
    PC++;
 }
 
-void DSLL32()
+void DSLL32(void)
 {
    rrd = rrt << (32+rsa);
    PC++;
 }
 
-void DSRL32()
+void DSRL32(void)
 {
    rrd = (unsigned long long int)rrt >> (32+rsa);
    PC++;
 }
 
-void DSRA32()
+void DSRA32(void)
 {
    rrd = (signed long long int)rrt >> (32+rsa);
    PC++;
 }
+

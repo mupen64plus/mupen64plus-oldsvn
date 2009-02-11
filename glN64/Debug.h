@@ -44,3 +44,4 @@ void StartDump( char *filename );
 void EndDump();
 
 #endif // DEBUG_H
+

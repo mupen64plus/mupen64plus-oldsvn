@@ -1,15 +1,15 @@
-
-# include "../main/winlnxdefs.h"
-# include <time.h>
-# include <stdlib.h>
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# define timeGetTime() time(NULL)
-
+#include <time.h>
+#include <stdlib.h>
 #include <memory.h>
+
 #define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
+#include <SDL_opengl.h>
+
+#include "../main/winlnxdefs.h"
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#define timeGetTime() time(NULL)
 
 #include "OpenGL.h"
 #include "Textures.h"
@@ -867,7 +867,7 @@ void TextureCache_Update( u32 t )
     u32 tileWidth, maskWidth, loadWidth, lineWidth, clampWidth, height;
     u32 tileHeight, maskHeight, loadHeight, lineHeight, clampHeight, width;
 
-    if (cache.enable2xSaI != OGL.enable2xSaI)
+    if (cache.enable2xSaI != (unsigned int) OGL.enable2xSaI)
     {
         TextureCache_Destroy();
         TextureCache_Init();
@@ -1141,3 +1141,4 @@ void TextureCache_ActivateNoise( u32 t )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 }
+

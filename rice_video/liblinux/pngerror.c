@@ -289,3 +289,4 @@ png_set_strip_error_numbers(png_structp png_ptr, png_uint_32 strip_mode)
    }
 }
 #endif
+

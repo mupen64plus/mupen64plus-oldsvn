@@ -59,3 +59,4 @@ class CCritSect
 };
 
 #endif // !defined(CRITSECT_H)
+

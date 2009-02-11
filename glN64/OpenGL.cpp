@@ -1,23 +1,26 @@
 
-# include "../main/winlnxdefs.h"
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <png.h>
-# include "SDL.h"
-# include <string.h>
-# include <time.h>
-# include <stdlib.h>
-
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
-# define timeGetTime() time(NULL)
-
-#include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <time.h>
+
+#include <png.h>
+
+#include <SDL.h>
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#define timeGetTime() time(NULL)
+
+#include "../main/winlnxdefs.h"
+
 #include "glN64.h"
 #include "OpenGL.h"
 #include "Types.h"
@@ -1232,3 +1235,4 @@ void OGL_ReadScreen( void **dest, int *width, int *height )
 }
 
 #endif // __LINUX__
+

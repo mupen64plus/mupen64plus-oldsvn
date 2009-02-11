@@ -30,3 +30,4 @@ extern const struct {
 #endif // __PAD_IMAGE_H__
 
 #endif // GUI_SDL
+

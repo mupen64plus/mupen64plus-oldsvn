@@ -505,3 +505,4 @@ void CColorCombiner::DisplaySimpleMuxString(void)
     m_pDecodedMux->DisplaySimpliedMuxString("Used");
 }
 #endif
+

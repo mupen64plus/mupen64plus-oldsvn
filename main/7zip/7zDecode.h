@@ -38,3 +38,4 @@ SZ_RESULT SzDecode(const CFileSize *packSizes, const CFolder *folder,
     Byte *outBuffer, size_t outSize, ISzAlloc *allocMain);
 
 #endif
+

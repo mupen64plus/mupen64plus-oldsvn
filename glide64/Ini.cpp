@@ -519,3 +519,4 @@ EXPORT void CALL SetConfigDir( char *configDir )
 {
     strncpy(configdir, configDir, PATH_MAX);
 }
+

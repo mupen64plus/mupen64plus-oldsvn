@@ -30,3 +30,4 @@
 SizeT x86_Convert(Byte *buffer, SizeT endPos, UInt32 nowPos, UInt32 *state, int encoding);
 
 #endif
+

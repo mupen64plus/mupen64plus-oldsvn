@@ -81,3 +81,4 @@ lzmadec_buffer (uint8_t *dest, size_t *dest_len,
                         return LZMADEC_DATA_ERROR;
         }
 }
+

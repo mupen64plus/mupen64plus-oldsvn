@@ -19,6 +19,7 @@
 #ifdef WITH_LIRC
 
 #include <stdio.h>
+#include <ctype.h>
 #include <sys/poll.h>
 #include <string.h>
 #include <lirc/lirc_client.h>
@@ -134,3 +135,4 @@ void lircCheckInput(void)
 }
 
 #endif //WITH_LIRC
+

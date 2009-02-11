@@ -46,3 +46,4 @@ int x86_2_Decode(
     Byte *outBuf, SizeT outSize);
 
 #endif
+

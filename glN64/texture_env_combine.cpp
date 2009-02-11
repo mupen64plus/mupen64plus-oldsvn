@@ -1,13 +1,13 @@
-
-# include "../main/winlnxdefs.h"
-# include <stdlib.h> // malloc()
+# include <stdlib.h>
 
 #define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
+#include <SDL_opengl.h>
 
 # ifndef max
 #  define max(a,b) ((a) > (b) ? (a) : (b))
 # endif
+
+# include "../main/winlnxdefs.h"
 
 #include "OpenGL.h"
 #include "Combiner.h"
@@ -624,3 +624,4 @@ void Set_texture_env_combine( TexEnvCombiner *envCombiner )
         }           
     }
 }
+

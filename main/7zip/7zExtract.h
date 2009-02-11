@@ -58,3 +58,4 @@ SZ_RESULT SzExtract(
     ISzAlloc *allocTemp);
 
 #endif
+

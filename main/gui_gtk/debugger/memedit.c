@@ -1,31 +1,32 @@
-/**
- * Mupen64Plus main/gui_gtk/debugger/memedit.c
- *
- * Copyright (C) 2008 HyperHacker (at gmail, dot com)
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - memedit.c                                               *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 HyperHacker                                        *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <math.h>
+
+#include <gdk/gdkkeysyms.h>
 
 #include "memedit.h"
-#include <math.h>
-#include <gdk/gdkkeysyms.h>
+
+#include "../../main.h"
+#include "../../translate.h"
 
 GtkTextBuffer *textbuf;
 GtkTextTag *textfont;
@@ -51,7 +52,7 @@ static void on_close();
 
 void update_memory_editor()
 {
-    int i, j, k;
+    int i, j;
     char line[linelen + 1];
     char* buf;
     uint32 addr;
@@ -185,7 +186,7 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
     GtkTextIter cursor_iter;
     int cursorpos, linepos, linenum;
     uint32 key, addr;
-    uint8 byte;
+    uint8 byte = 0;
     
     //Figure out what was typed.
     //todo: make this not suck
@@ -416,7 +417,7 @@ static void on_menu_select(GtkMenuItem *menuitem, gpointer user_data)
 {
     gchar* text;
     GtkTextIter start, end;
-    uint32 startaddr, endaddr, numbytes;
+    uint32 startaddr, endaddr = 0, numbytes;
     uint8 byte;
     int i;
     breakpoint newbp;
@@ -588,3 +589,4 @@ int GetMemEditSelectionRange(uint32* StartAddr, int AllowEmpty)
     //printf("%u bytes from %08X\n", numbytes, (*StartAddr));
     return numbytes;
 }
+

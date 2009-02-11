@@ -102,3 +102,4 @@ SizeT x86_Convert(Byte *buffer, SizeT endPos, UInt32 nowPos, UInt32 *prevMaskMix
   *prevMaskMix = ((prevPosT > 3) ? 0 : ((prevMask << ((int)prevPosT - 1)) & 0x7));
   return bufferPos;
 }
+

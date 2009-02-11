@@ -27,53 +27,99 @@
 
 #include <gtk/gtk.h>
 
+#include "../gui.h"
+
 typedef struct
 {
     GtkWidget* window;
-    GtkWidget* toplevelVBox;  //Vbox containing menubar, toolbar, filter, rombrowser, and statusbar.
+    GtkWidget* toplevelVBox;  /* Topevel vbox for main window. */
+
+    /* Pointers to GUI widgets whose state can be changed while running, 
+    such as toggling visibile / enabled, or chaning icons. */
+    GtkWidget* dialogErrorImage;
+    GtkWidget* dialogQuestionImage;
+
     GtkWidget* menuBar;
+    GtkWidget* openMenuImage;
+
+    GtkWidget* openRomMenuImage;
+    GtkWidget* closeRomMenuImage;
+    GtkWidget* quitMenuImage;
+
+    GtkWidget* playMenuImage;
+    GtkWidget* pauseMenuItem;
+    GtkWidget* pauseMenuImage;
+    GtkWidget* stopMenuItem;
+    GtkWidget* stopMenuImage;
+    GtkWidget* saveStateMenuItem;
+    GtkWidget* saveStateMenuImage;
+    GtkWidget* saveStateAsMenuItem;
+    GtkWidget* saveStateAsMenuImage;
+    GtkWidget* loadStateMenuItem;
+    GtkWidget* loadStateMenuImage;
+    GtkWidget* loadStateFromMenuItem;
+    GtkWidget* loadStateFromMenuImage;
+
+    GtkWidget* configureMenuImage;
+    GtkWidget* graphicsMenuImage;
+    GtkWidget* audioMenuImage;
+    GtkWidget* inputMenuImage;
+    GtkWidget* rspMenuImage;
+    GtkWidget* fullscreenMenuItem;
+    GtkWidget* fullscreenMenuImage;
+
+    GtkWidget* aboutMenuImage;
 
     GtkWidget* toolBar;
-    GtkWidget* openImage;
-    GtkWidget* playImage;
-    GtkWidget* pauseImage;
-    GtkWidget* stopImage;
-    GtkWidget* fullscreenImage;
-    GtkWidget* configureImage;
+    GtkWidget* openButtonImage;
+    GtkWidget* playButtonItem;
+    GtkWidget* playButtonImage;
+    GtkWidget* pauseButtonItem;
+    GtkWidget* pauseButtonImage;
+    GtkWidget* stopButtonItem;
+    GtkWidget* stopButtonImage;
+    GtkWidget* saveStateButtonItem;
+    GtkWidget* saveStateButtonImage;
+    GtkWidget* loadStateButtonItem;
+    GtkWidget* loadStateButtonImage;
+    GtkWidget* fullscreenButtonItem;
+    GtkWidget* fullscreenButtonImage;
+    GtkWidget* configureButtonImage;
 
-    GtkWidget* filterBar;
-    GtkWidget* filter;
+    GtkWidget* filterBar; /* Container object for filter, toggle visability. */
+    GtkWidget* filter; /* Entry for filter text. */
+    GtkAccelGroup* accelGroup;
+    GtkAccelGroup* accelUnsafe; /* GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets. */
+    gboolean accelUnsafeActive; /* From getting keypresses, so must be deactivated. */
+
     GtkWidget* romScrolledWindow;
-    //Make two TreeViews, a visable manually filtered one for the Display, and a
-    //Non-visable FullList from which we can filter.
+    /* Make two TreeViews, a visable manually filtered one for the Display, and a
+    Non-visable FullList from which we can filter. */
     GtkWidget* romDisplay;
     GtkWidget* romFullList;
-    GtkTreeViewColumn* column[17]; //columns in rombrowser. 
-    unsigned short columnVisible[16];
-    int romSortColumn; // sort column
-    GtkSortType romSortType; // sort type (ascending/descending)
-    GtkWidget* statusBar;
-    GtkWidget* statusBarHBox;
-    GtkAccelGroup* accelGroup;
-    GtkAccelGroup* accelUnsafe; //GtkAccelGroup for keys without Metas. Prevents GtkEntry widgets.
-    gboolean accelUnsafeActive; //From getting keypresses, so must be deactivated.
-    GtkWidget* romHeaderMenu; //Context menu for rombrowser header to control visible columns.
+    GtkTreeViewColumn* column[17]; /* Column pointers in rombrowser. */
+    char column_names[16][2][128]; /* Localized names and English config system strings. */
+    int romSortColumn;
+    GtkSortType romSortType;
+    GtkWidget* romHeaderMenu; /* Context menu for rombrowser to control visible columns. */
+    GtkWidget* playRomItem;
+    GtkWidget* romPropertiesItem;
 
-    GtkIconTheme* iconTheme;
-    gboolean fallbackIcons;
+    GtkWidget* playRombrowserImage;
+    GtkWidget* propertiesRombrowserImage;
+    GtkWidget* refreshRombrowserImage;
+
+    GtkWidget* statusBar; /* Statusbar message stack. */
+    GtkWidget* statusBarHBox; /* Container object for statusbar, toggle visability. */
 } SMainWindow;
 
 extern SMainWindow g_MainWindow;
-extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star;
+extern GdkPixbuf *australia, *europe, *france, *germany, *italy, *japan, *spain, *usa, *japanusa, *n64cart, *star, *staroff;
 
-/* public helper functions. */
-void set_icon(GtkWidget* image, const gchar* icon, int size, gboolean force);
+/* View defines */
+#define TOOLBAR 1
+#define FILTER 2
+#define STATUSBAR 3
 
-//The functons which all GUIs must implement.
-void gui_init(int *argc, char ***argv);
-void gui_display(void);
-void gui_main_loop(void);
-int gui_message(unsigned char messagetype, const char *format, ...);
-void updaterombrowser(unsigned int roms, unsigned short clear);
+#endif /* __MAIN_GTK_H__ */
 
-#endif //__MAIN_GTK_H__

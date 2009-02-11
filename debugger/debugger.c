@@ -1,27 +1,24 @@
-/*
- * Mupen64Plus - debugger/debugger.c
- *
- * Copyright (C) 2002 davFr - robind@esiee.fr
- * Copyright (C) 2008 DarkJezter
- *
- * Mupen64 homepage: http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - debugger.c                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 DarkJeztr                                          *
+ *   Copyright (C) 2002 davFr                                              *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 //#include <glib.h>
 #include "debugger.h"
@@ -29,12 +26,12 @@
 // State of the Emulation Thread:
 // 0 -> pause, 2 -> run.
 
-int  g_DebuggerEnabled = 0;    // wether the debugger is enabled or not
+int g_DebuggerEnabled = 0;    // whether the debugger is enabled or not
 int debugger_mode;
 int run;
 
-pthread_cond_t  debugger_done_cond;
-pthread_mutex_t mutex;
+SDL_cond  *debugger_done_cond;
+SDL_mutex *mutex;
 
 uint32 previousPC;
 
@@ -49,40 +46,55 @@ void init_debugger()
 
     init_host_disassembler();
 
-    pthread_mutex_init( &mutex, NULL);
-    pthread_cond_init( &debugger_done_cond, NULL);
+    mutex = SDL_CreateMutex();
+    debugger_done_cond = SDL_CreateCond();
 }
 
+void destroy_debugger()
+{
+    SDL_DestroyMutex(mutex);
+    mutex = NULL;
+    SDL_DestroyCond(debugger_done_cond);
+    debugger_done_cond = NULL;
+    debugger_mode = 0;
+}
 
 //]=-=-=-=-=-=-=-=-=-=-=-=-=[ Mise-a-Jour Debugger ]=-=-=-=-=-=-=-=-=-=-=-=-=[
 
-void update_debugger()
+void update_debugger(uint32 pc)
 // Update debugger state and display.
-// Should be called after each R4300 instruction.
+// Should be called after each R4300 instruction
+// Checks for breakpoint hits on PC
 {
     int bpt;
-    
-    if(run==2) {
-        bpt = check_breakpoints(PC->addr);
-        if( bpt==-1 ) {
-            previousPC = PC->addr;
-            return;
-        }
-        else {
+    /*if ( previousPC == pc ) {
+        printf("update_debugger: previousPC == pc (%08x)\n",pc);
+        return;
+    }*/
+    if(run!=0) {//check if we hit a breakpoint
+        bpt = check_breakpoints(pc);
+        if( bpt!=-1 ) {
             run = 0;
-            switch_button_to_run();
             
             if(BPT_CHECK_FLAG(g_Breakpoints[bpt], BPT_FLAG_LOG))
-                log_breakpoint(PC->addr, BPT_FLAG_EXEC, 0);
+                log_breakpoint(pc, BPT_FLAG_EXEC, 0);
         }
     }
-    else if ( previousPC == PC->addr )
-    {
-        return;
-    }
-    update_debugger_frontend();
 
-    previousPC = PC->addr;
-    // Emulation thread is blocked until a button is clicked.
-    pthread_cond_wait(&debugger_done_cond, &mutex);
+    if(run!=2) {
+        update_debugger_frontend( pc );
+    }
+    if(run==0) {
+        // Emulation thread is blocked until a button is clicked.
+        SDL_mutexP(mutex);
+        SDL_CondWait(debugger_done_cond, mutex);
+        SDL_mutexV(mutex);
+    }
+
+    previousPC = pc;
+}
+
+void debugger_step()
+{
+    SDL_CondSignal(debugger_done_cond);
 }

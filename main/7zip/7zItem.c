@@ -152,3 +152,4 @@ void SzArchiveDatabaseFree(CArchiveDatabase *db, void (*freeFunc)(void *))
   freeFunc(db->Files);
   SzArchiveDatabaseInit(db);
 }
+

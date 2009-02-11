@@ -23,7 +23,7 @@
 #include "ops.h"
 #include "macros.h"
 
-void CVT_S_W()
+void CVT_S_W(void)
 {  
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -31,10 +31,11 @@ void CVT_S_W()
    PC++;
 }
 
-void CVT_D_W()
+void CVT_D_W(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
    *reg_cop1_double[cffd] = *((int*)reg_cop1_simple[cffs]);
    PC++;
 }
+

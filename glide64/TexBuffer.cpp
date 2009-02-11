@@ -624,3 +624,4 @@ BOOL FindTextureBuffer(DWORD addr, WORD width)
   RDP("FindTextureBuffer, not found\n");
   return FALSE;
 }
+

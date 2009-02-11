@@ -711,3 +711,4 @@ static rdp_instr gfx_instruction[9][256] =
         rdp_setcombine,         rdp_settextureimage,    rdp_setdepthimage,      rdp_setcolorimage
     },
 };
+

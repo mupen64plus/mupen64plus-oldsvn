@@ -53,3 +53,4 @@ void lq2x_32(uint8 *srcPtr, uint32 srcPitch, uint8 *dstPtr, uint32 dstPitch, int
 
 
 #endif
+

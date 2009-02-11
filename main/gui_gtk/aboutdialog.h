@@ -22,17 +22,12 @@
 
 /* aboutdialog.h - Handles the about box */
 
+#include <gtk/gtk.h>
+
 #ifndef __ABOUTDIALOG_H__
 #define __ABOUTDIALOG_H__
 
-#include <gtk/gtk.h>
+void callback_about_mupen64plus(GtkWidget* widget, gpointer data);
 
-typedef struct
-{
-    GtkWidget *dialog;
-} SAboutDialog;
-extern SAboutDialog g_AboutDialog;
+#endif /* __ABOUTDIALOG_H__ */
 
-int create_aboutDialog( void );
-
-#endif // __ABOUTDIALOG_H__

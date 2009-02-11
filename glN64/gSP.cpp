@@ -1678,3 +1678,4 @@ void gSPObjMatrix( u32 mtx )
 void gSPObjSubMatrix( u32 mtx )
 {
 }
+

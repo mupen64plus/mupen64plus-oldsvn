@@ -572,3 +572,4 @@ static void mod_tex_scale_fac_add_col (WORD *dst, int size, DWORD color, DWORD f
         *(dst++) = (col&0xF000) | ((BYTE)r << 8) | ((BYTE)g << 4) | (BYTE)b;
     }
 }
+

@@ -21,26 +21,34 @@
 
 # detect system architecture: i386, x86_64, or PPC/PPC64
 UNAME = $(shell uname -m)
+ifeq ("$(UNAME)","amd64")
+  CPU = X86
+  ifeq ("$(BITS)", "32")
+    ARCH_DETECTED = 64BITS_32
+  else
+    ARCH_DETECTED = 64BITS
+  endif
+endif
 ifeq ("$(UNAME)","x86_64")
   CPU = X86
   ifeq ("$(BITS)", "32")
-    ARCH = 64BITS_32
+    ARCH_DETECTED = 64BITS_32
   else
-    ARCH = 64BITS
+    ARCH_DETECTED = 64BITS
   endif
 endif
 ifneq ("$(filter i%86,$(UNAME))","")
   CPU = X86
-  ARCH = 32BITS
+  ARCH_DETECTED = 32BITS
 endif
 ifeq ("$(UNAME)","ppc")
   CPU = PPC
-  ARCH = 32BITS
+  ARCH_DETECTED = 32BITS
   NO_ASM = 1
 endif
 ifeq ("$(UNAME)","ppc64")
   CPU = PPC
-  ARCH = 64BITS
+  ARCH_DETECTED = 64BITS
   NO_ASM = 1
 endif
 
@@ -54,6 +62,10 @@ ifeq ("$(UNAME)","linux")
 endif
 ifeq ("$(UNAME)","Darwin")
   OS = OSX
+  LDFLAGS += -liconv -lpng
+endif
+ifeq ("$(UNAME)","FreeBSD")
+  OS = FREEBSD
 endif
 
 ifeq ($(OS),)
@@ -65,8 +77,14 @@ endif
 ifeq ($(shell which sdl-config 2>/dev/null),)
   $(error No SDL development libraries found!)
 endif
-SDL_FLAGS	= $(shell sdl-config --cflags)
-SDL_LIBS	= $(shell sdl-config --libs)
+
+ifeq ($(OS),FREEBSD)
+    SDL_FLAGS	= `${SDL_CONFIG} --cflags`
+    SDL_LIBS	= `${SDL_CONFIG} --libs`
+else
+    SDL_FLAGS	= $(shell sdl-config --cflags)
+    SDL_LIBS	= $(shell sdl-config --libs)
+endif
 
 # test for presence of FreeType
 ifeq ($(shell which freetype-config 2>/dev/null),)
@@ -74,6 +92,10 @@ ifeq ($(shell which freetype-config 2>/dev/null),)
 endif
 FREETYPE_LIBS	= $(shell freetype-config --libs)
 FREETYPE_FLAGS	= $(shell freetype-config --cflags)
+
+# set Freetype flags
+FREETYPEINC = $(shell pkg-config --cflags freetype2)
+CFLAGS += $(FREETYPEINC)
 
 # detect GUI options
 ifeq ($(GUI),)
@@ -97,19 +119,43 @@ GTK_LIBS	= $(shell pkg-config gtk+-2.0 --libs)
 GTHREAD_LIBS 	= $(shell pkg-config gthread-2.0 --libs)
 
 # set Qt flags and libraries
+# some distros append -qt4 to the binaries so look for those first
 ifeq ($(GUI), QT4)
    ifneq ($(USES_QT4),)
-    QMAKE       = ${shell which qmake 2>/dev/null}
+    QMAKE       = ${shell which qmake-qt4 2>/dev/null}
+    ifeq ($(QMAKE),)
+      QMAKE = ${shell which qmake 2>/dev/null}
+    endif
     ifeq ($(QMAKE),)
       $(error qmake from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    MOC         = $(shell which moc 2>/dev/null)
+    MOC = $(shell which moc-qt4 2>/dev/null)
+    ifeq ($(MOC),)
+      MOC = $(shell which moc 2>/dev/null)
+    endif
     ifeq ($(MOC),)
       $(error moc from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
-    UIC         = $(shell which uic 2>/dev/null)
+    UIC         = $(shell which uic-qt4 2>/dev/null)
+    ifeq ($(UIC),)
+      UIC = $(shell which uic 2>/dev/null)
+    endif
     ifeq ($(UIC),)
       $(error uic from Qt not found! Make sure the Qt binaries are in your PATH)
+    endif
+    RCC         = $(shell which rcc-qt4 2>/dev/null)
+    ifeq ($(RCC),)
+      RCC = $(shell which rcc 2>/dev/null)
+    endif
+    ifeq ($(RCC),)
+      $(error rcc from Qt not found! Make sure the Qt binaries are in your PATH)
+    endif
+    LRELEASE    = $(shell which lrelease-qt4 2>/dev/null)
+    ifeq ($(LRELEASE),)
+      LRELEASE = $(shell which lrelease 2>/dev/null)
+    endif
+    ifeq ($(LRELEASE),)
+      $(error lrelease from Qt not found! Make sure the Qt binaries are in your PATH)
     endif
     QT_FLAGS    = $(shell pkg-config QtCore QtGui --cflags)
     QT_LIBS     = $(shell pkg-config QtCore QtGui --libs)
@@ -118,33 +164,48 @@ ifeq ($(GUI), QT4)
 endif
 
 # set base program pointers and flags
-CC      = gcc
-CXX     = g++
-LD      = g++
-ifeq ($(OS),LINUX)
-STRIP	= strip -s
+ifeq ($(OS),FREEBSD)
+  CC      ?= gcc
+  CXX     ?= g++
+  LD      ?= g++
+  RM      ?= rm
+  RM_F    ?= rm -f
+  MV      ?= mv
+  CP      ?= cp
+  MD      ?= mkdir
+  FIND    ?= find
+  PROF    ?= gprof
+  INSTALL ?= ginstall
+  STRIP	  ?= strip -s
+else
+  CC      = gcc
+  CXX     = g++
+  LD      = g++
+  RM      = rm
+  RM_F    = rm -f
+  MV      = mv
+  CP      = cp
+  MD      = mkdir
+  FIND    = find
+  PROF    = gprof
+  INSTALL = ginstall
+  ifeq ($(OS),LINUX)
+    STRIP	= strip -s
+  endif
+  ifeq ($(OS),OSX)
+    STRIP	= strip -x 
+  endif
 endif
-ifeq ($(OS),OSX)
-STRIP	= strip 
-endif
-RM      = rm
-MV      = mv
-CP      = cp
-MD      = mkdir
-FIND    = find
-PROF    = gprof
-INSTALL = ginstall
-
 # create SVN version defines
-MUPEN_RELEASE = 1.4
+MUPEN_RELEASE = 1.5
 
 ifneq ($(RELEASE),)
-  MUPEN_VERSION = $(MUPEN_RELEASE)
-  PLUGIN_VERSION = $(MUPEN_RELEASE)
+  MUPEN_VERSION = $(VER)
+  PLUGIN_VERSION = $(VER)
 else 
   ifeq ($(shell svn info ./ 2>/dev/null),)
-    MUPEN_VERSION = $(MUPEN_RELEASE)"-development"
-    PLUGIN_VERSION = $(MUPEN_RELEASE)"-development"
+    MUPEN_VERSION = $(MUPEN_RELEASE)-development
+    PLUGIN_VERSION = $(MUPEN_RELEASE)-development
   else
     SVN_REVISION = $(shell svn info ./ 2>/dev/null | sed -n '/^Revision: /s/^Revision: //p')
     SVN_BRANCH = $(shell svn info ./ 2>/dev/null | sed -n '/^URL: /s/.*mupen64plus.//1p')
@@ -154,24 +215,38 @@ else
   endif
 endif
 
-# set base CFLAGS and LDFLAGS for all systems
-CFLAGS = -pipe -O3 -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing 
-LDFLAGS =
+# set base CFLAGS and LDFLAGS
+CFLAGS += -ffast-math -funroll-loops -fexpensive-optimizations -fno-strict-aliasing
+ifneq ($(OS), FREEBSD)
+  CFLAGS += -pipe -O3
+endif
+
+ifeq ($(OS), FREEBSD)
+  CORE_LDFLAGS += -lz -lm -lpng -lfreetype
+else
+  CORE_LDFLAGS += -lz -lm -lpng -lfreetype -ldl
+endif
 
 # set special flags per-system
-ifeq ($(CPU), X86)
-  ifeq ($(ARCH), 64BITS)
-    CFLAGS += -march=athlon64
-  else
-    CFLAGS += -march=i686 -mtune=pentium-m -mmmx -msse
-    ifneq ($(PROFILE), 1)
-      CFLAGS += -fomit-frame-pointer
+ifneq ($(OS), FREEBSD)
+  ifeq ($(CPU), X86)
+    ifeq ($(ARCH_DETECTED), 64BITS)
+      CFLAGS += -march=athlon64
+    else
+      CFLAGS += -mmmx -msse -march=i686 -mtune=pentium-m
+      ifneq ($(PROFILE), 1)
+        CFLAGS += -fomit-frame-pointer
+      endif
+    endif
+    # tweak flags for 32-bit build on 64-bit system
+    ifeq ($(ARCH_DETECTED), 64BITS_32)
+      CFLAGS += -m32
+      LDFLAGS += -m32 -m elf_i386
     endif
   endif
-  # tweak flags for 32-bit build on 64-bit system
-  ifeq ($(ARCH), 64BITS_32)
-    CFLAGS += -m32
-    LDFLAGS += -m32 -m elf_i386
+else
+  ifeq ($(ARCH_DETECTED), 64BITS_32)
+    $(error Do not use the BITS=32 option with FreeBSD, use -m32 and -m elf_i386)
   endif
 endif
 ifeq ($(CPU), PPC)
@@ -179,6 +254,9 @@ ifeq ($(CPU), PPC)
 endif
 
 # set CFLAGS, LIBS, and LDFLAGS for external dependencies
+ifeq ($(OS),FREEBSD)
+  PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
+endif
 ifeq ($(OS),LINUX)
   PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
 endif
@@ -186,6 +264,9 @@ ifeq ($(OS),OSX)
   PLUGIN_LDFLAGS	= -bundle
 endif
 
+ifeq ($(OS),FREEBSD)
+  LIBGL_LIBS	= -L${LOCALBASE}/lib -lGL -lGLU
+endif
 ifeq ($(OS),LINUX)
   LIBGL_LIBS	= -L/usr/X11R6/lib -lGL -lGLU
 endif
@@ -211,3 +292,6 @@ else   # set variables for debugging symbols
     STRIP = true
   endif
 endif
+
+SO_EXTENSION = so
+

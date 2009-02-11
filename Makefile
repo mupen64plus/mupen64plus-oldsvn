@@ -19,20 +19,35 @@
 # *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+# include output from configure script
+-include ./configure.gen
+#This will eventually be necessary to build
+#ifndef CONFIGURE.GEN
+#  $(error Run ./configure before make)
+#endif
+
 # include pre-make file with a bunch of definitions
 USES_QT4 = true
 USES_GTK2 = true
-include ./pre.mk
 
-# local CFLAGS, LIBS, and LDFLAGS
-LDFLAGS += -lz -lm -lpng -lfreetype
+ifeq ($(WIN32),1)
+  include ./pre.mk.win32
+else
+  include ./pre.mk
+endif
 
+ifeq ($(OS), FREEBSD)
+  LDFLAGS += -Wl,-export-dynamic
+endif
 ifeq ($(OS), LINUX)
   LDFLAGS += -Wl,-export-dynamic
 endif
 
 # set executable stack as a linker option for X86 architecture, for dynamic recompiler
 ifeq ($(CPU), X86)
+  ifeq ($(OS), FREEBSD)
+    LDFLAGS += -z execstack
+  endif
   ifeq ($(OS), LINUX)
     LDFLAGS += -z execstack
   endif
@@ -89,19 +104,17 @@ endif
 ifeq ($(MANDIR),)
   MANDIR := $(PREFIX)/man/man1
 endif
+ifeq ($(APPLICATIONSDIR),)
+  APPLICATIONSDIR := $(PREFIX)/share/applications
+endif
 
-INSTALLOPTS := $(PREFIX) $(SHAREDIR) $(BINDIR) $(LIBDIR) $(MANDIR)
-
-# set Freetype flags
-FREETYPEINC = $(shell pkg-config --cflags freetype2)
-CFLAGS += $(FREETYPEINC)
+INSTALLOPTS := $(PREFIX) $(SHAREDIR) $(BINDIR) $(LIBDIR) $(MANDIR) $(APPLICATIONSDIR)
 
 # list of object files to generate
 OBJ_CORE = \
 	main/main.o \
 	main/romcache.o \
 	main/util.o \
-	main/translate.o \
 	main/cheat.o \
 	main/config.o \
 	main/adler32.o \
@@ -160,7 +173,7 @@ OBJ_CORE = \
 # handle dynamic recompiler objects
 ifneq ($(NO_ASM), 1)
   ifeq ($(CPU), X86)
-    ifeq ($(ARCH), 64BITS)
+    ifeq ($(ARCH_DETECTED), 64BITS)
       DYNAREC = x86_64
     else
       DYNAREC = x86
@@ -196,6 +209,7 @@ OBJ_OPENGL = \
 
 OBJ_GTK_GUI = \
 	main/gui_gtk/main_gtk.o \
+        main/gui_gtk/icontheme.o \
 	main/gui_gtk/aboutdialog.o \
 	main/gui_gtk/cheatdialog.o \
 	main/gui_gtk/configdialog.o \
@@ -205,6 +219,7 @@ OBJ_GTK_GUI = \
 OBJ_DBG = \
 	debugger/debugger.o \
 	debugger/decoder.o \
+	debugger/opprintf.o \
 	debugger/memory.o \
 	debugger/breakpoints.o
 
@@ -230,15 +245,46 @@ OBJ_GTK_DBG_GUI = \
 
 OBJ_QT4_GUI = main/gui_qt4/libgui_qt4.a
 
-PLUGINS	= plugins/blight_input.so \
-          plugins/dummyaudio.so \
-          plugins/dummyvideo.so \
-          plugins/glN64.so \
-          plugins/ricevideo.so \
-          plugins/glide64.so \
-          plugins/jttl_audio.so \
-          plugins/mupen64_hle_rsp_azimer.so \
-          plugins/mupen64_input.so
+PLUGINS	= 
+
+ifneq ($(NODUMMY), 1)
+PLUGINS += plugins/dummyaudio.$(SO_EXTENSION) \
+           plugins/dummyvideo.$(SO_EXTENSION) \
+           plugins/dummyinput.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOGLN64), 1)
+PLUGINS += plugins/glN64.$(SO_EXTENSION)
+endif
+
+ifneq ($(NORICE), 1)
+PLUGINS += plugins/ricevideo.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOGLIDE), 1)
+PLUGINS += plugins/glide64.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOHLERSP), 1)
+PLUGINS += plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOMINPUT), 1)
+PLUGINS += plugins/mupen64_input.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOJTTL), 1)
+PLUGINS +=plugins/jttl_audio.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOBLIGHT), 1)
+PLUGINS	+=plugins/blight_input.$(SO_EXTENSION)
+endif
+
+ifeq ($(Z64), 1)
+PLUGINS +=plugins/z64-rsp.$(SO_EXTENSION) \
+          plugins/z64gl.$(SO_EXTENSION)
+endif
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -256,10 +302,17 @@ ifeq ($(LIRC), 1)
   OBJECTS += $(OBJ_LIRC)
   LDFLAGS += -llirc_client
 endif
+ifneq ($(GUI), NONE)
+  ifneq ($(OS), WINDOWS)
+    MISC_DEPS = mupen64plus.desktop
+  endif
+endif
 ifeq ($(GUI), QT4)
   OBJECTS += $(OBJ_QT4_GUI)
   LIBS += $(QT_LIBS) $(GTK_LIBS)
 else
+  # we reimplement the translation functions in the Qt gui
+  OBJECTS += main/translate.o
   ifneq ($(GUI), NONE)
     OBJECTS += $(OBJ_GTK_GUI)
     LIBS += $(GTK_LIBS) $(GTHREAD_LIBS)
@@ -271,7 +324,7 @@ targets:
 	@echo "Mupen64Plus makefile. "
 	@echo "  Targets:"
 	@echo "    all           == Build Mupen64Plus and all plugins"
-	@echo "    clean         == remove object files"
+	@echo "    clean         == remove object files (also try clean-core or clean-plugins)"
 	@echo "    rebuild       == clean and re-build all"
 	@echo "    install       == Install Mupen64Plus and all plugins"
 	@echo "    uninstall     == Uninstall Mupen64Plus and all plugins"
@@ -283,6 +336,8 @@ targets:
 	@echo "    GUI=NONE      == build without GUI support"
 	@echo "    GUI=GTK2      == build with GTK2 GUI support (default)"
 	@echo "    GUI=QT4       == build with QT4 GUI support"
+	@echo "    WIN32=1       == mingw build"
+	@echo "    Z64=1         == include z64 rsp plugin"
 	@echo "  Install Options:"
 	@echo "    PREFIX=path   == install/uninstall prefix (default: /usr/local/)"
 	@echo "    SHAREDIR=path == path to install shared data (default: PREFIX/share/mupen64plus/)"
@@ -298,14 +353,17 @@ targets:
 	@echo "    DBG_COMPARE=1 == enable core-synchronized r4300 debugging"
 	@echo "    DBG_PROFILE=1 == dump profiling data for r4300 dynarec to data file"
 #	@echo "    RELEASE=1     == inhibit SVN info from version strings"
-# The RELEASE flag is hidden from view as it should only be used internally.  It only affects
-# the version strings
+#	@echo "    VER=x.y.z     == use this version number when RELEASE=1"
+# The RELEASE and VER flags are hidden from view as they should only be used internally.
+# They only affect the version strings
 
 all: version.h $(ALL)
 
-mupen64plus: $(OBJECTS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) -lpthread -ldl -o $@
+mupen64plus: $(MISC_DEPS) version.h $(OBJECTS)
+	$(CXX) $(OBJECTS) $(LDFLAGS) $(CORE_LDFLAGS) $(LIBS) -o $@
+ifneq ($(OS), WINDOWS)
 	$(STRIP) $@
+endif
 
 install:
 	./install.sh $(INSTALLOPTS)
@@ -313,30 +371,53 @@ install:
 uninstall:
 	./uninstall.sh $(INSTALLOPTS)
 
-clean:
+clean-plugins:
+ifneq ($(OS), WINDOWS)
 	$(MAKE) -C blight_input clean
 	$(MAKE) -C dummy_audio clean
 	$(MAKE) -C dummy_video clean
+	$(MAKE) -C dummy_input clean
 	$(MAKE) -C glN64 clean
 	$(MAKE) -C rice_video clean
 	$(MAKE) -C glide64 clean
 	$(MAKE) -C jttl_audio clean
 	$(MAKE) -C rsp_hle clean
 	$(MAKE) -C mupen64_input clean
-	$(RM) -f ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
-	$(RM) -f ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
-	$(RM) -f mupen64plus
-	$(RM) -f plugins/mupen64_input.so blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.so plugins/mupen64_hle_rsp_azimer.so
-	$(RM) -f plugins/dummyaudio.so plugins/dummyvideo.so plugins/jttl_audio.so plugins/glN64.so plugins/ricevideo.so plugins/glide64.so
-	$(RM) -f main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
+	$(MAKE) -C z64 clean
+	$(RM_F) plugins/mupen64_input.$(SO_EXTENSION) blight_input/arial.ttf.c blight_input/ttftoh plugins/blight_input.$(SO_EXTENSION) plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION)
+	$(RM_F) plugins/dummyaudio.$(SO_EXTENSION) plugins/dummyvideo.$(SO_EXTENSION) plugins/jttl_audio.$(SO_EXTENSION) plugins/glN64.$(SO_EXTENSION) plugins/ricevideo.$(SO_EXTENSION) plugins/glide64.$(SO_EXTENSION)
+	$(RM_F) plugins/dummyinput.$(SO_EXTENSION) plugins/z64-rsp.$(SO_EXTENSION) plugins/z64gl.$(SO_EXTENSION)
+endif
+
+clean-core:
+ifneq ($(OS), WINDOWS)
+	$(RM_F) ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
+	$(RM_F) ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
+	$(RM_F) mupen64plus mupen64plus.desktop
+	$(RM_F) main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
+	$(RM_F) translations/*.qm
+else
+	del /S *.o *.$(SO_EXTENSION) mupen64plus.exe moc_* *.a *.qm
+	cd main\gui_qt4
+	del /S ui_*.h
+endif
+
+clean: clean-core clean-plugins
 
 rebuild: clean all
 
 # build rules
-version.h: .svn/entries
+mupen64plus.desktop: FORCE
+	@sed s:SHARE_DIR:"$(SHAREDIR)": mupen64plus.desktop.in > mupen64plus.desktop
+
+version.h: FORCE
+ifneq ($(OS), WINDOWS)
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         main/version.template > version.h
 	@$(MV) version.h main/version.h
+else
+	copy version.win32.h main\version.h
+endif
 
 .cpp.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
@@ -348,43 +429,76 @@ main/gui_qt4/Makefile:
 	${QMAKE} main/gui_qt4/gui_qt4.pro -o main/gui_qt4/Makefile
 
 main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
+ifneq ($(OS), WINDOWS)
 	${MAKE} -C main/gui_qt4
+# Run lrelease only on ts files with locale suffix, makes no sense to run it on
+# the template. For some reason this fails on windows.
+	${LRELEASE} translations/*_*.ts
+else
+# I wonder whether we can avoid this somehow
+	${MAKE} -C main/gui_qt4 CXXFLAGS="${CFLAGS}"
+	copy main\gui_qt4\release\libgui_qt4.a main\gui_qt4
+endif
 
-plugins/blight_input.so: FORCE
+plugins/blight_input.$(SO_EXTENSION): FORCE
 	$(MAKE) -C blight_input all
+ifneq ($(OS), WINDOWS)
 	@$(CP) ./blight_input/blight_input.so ./plugins/blight_input.so
+else
+	copy blight_input\blight_input.dll plugins
+endif
 
-plugins/dummyaudio.so: FORCE
+plugins/dummyaudio.$(SO_EXTENSION): FORCE
 	$(MAKE) -C dummy_audio all
+ifneq ($(OS), WINDOWS)
 	@$(CP) ./dummy_audio/dummyaudio.so ./plugins/dummyaudio.so
+else
+	copy dummy_audio\dummyaudio.dll plugins
+endif
 
-plugins/dummyvideo.so: FORCE
+plugins/dummyvideo.$(SO_EXTENSION): FORCE
 	$(MAKE) -C dummy_video all
+ifneq ($(OS), WINDOWS)
 	@$(CP) ./dummy_video/dummyvideo.so ./plugins/dummyvideo.so
+else
+	copy dummy_video\dummyvideo.dll plugins
+endif
 
-plugins/glN64.so: FORCE
+plugins/dummyinput.$(SO_EXTENSION): FORCE
+	$(MAKE) -C dummy_input all
+	@$(CP) ./dummy_input/dummyinput.$(SO_EXTENSION) ./plugins/dummyinput.$(SO_EXTENSION)
+
+plugins/glN64.$(SO_EXTENSION): FORCE
 	$(MAKE) -C glN64 all
-	@$(CP) ./glN64/glN64.so ./plugins/glN64.so
+	@$(CP) ./glN64/glN64.$(SO_EXTENSION) ./plugins/glN64.$(SO_EXTENSION)
 
-plugins/ricevideo.so: FORCE
+plugins/ricevideo.$(SO_EXTENSION): FORCE
 	$(MAKE) -C rice_video all
-	@$(CP) ./rice_video/ricevideo.so ./plugins/ricevideo.so
+	@$(CP) ./rice_video/ricevideo.$(SO_EXTENSION) ./plugins/ricevideo.$(SO_EXTENSION)
 
-plugins/glide64.so: FORCE
+plugins/glide64.$(SO_EXTENSION): FORCE
 	$(MAKE) -C glide64 all
-	@$(CP) ./glide64/glide64.so ./plugins/glide64.so
+	@$(CP) ./glide64/glide64.$(SO_EXTENSION) ./plugins/glide64.$(SO_EXTENSION)
 
-plugins/jttl_audio.so: FORCE
+plugins/jttl_audio.$(SO_EXTENSION): FORCE
 	$(MAKE) -C jttl_audio all
-	@$(CP) ./jttl_audio/jttl_audio.so ./plugins/jttl_audio.so
+	@$(CP) ./jttl_audio/jttl_audio.$(SO_EXTENSION) ./plugins/jttl_audio.$(SO_EXTENSION)
 
-plugins/mupen64_hle_rsp_azimer.so: FORCE
+plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION): FORCE
 	$(MAKE) -C rsp_hle all
-	@$(CP) ./rsp_hle/mupen64_hle_rsp_azimer.so ./plugins/mupen64_hle_rsp_azimer.so
+	@$(CP) ./rsp_hle/mupen64_hle_rsp_azimer.$(SO_EXTENSION) ./plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION)
 
-plugins/mupen64_input.so: FORCE
+plugins/mupen64_input.$(SO_EXTENSION): FORCE
 	$(MAKE) -C mupen64_input all
-	@$(CP) ./mupen64_input/mupen64_input.so ./plugins/mupen64_input.so
+	@$(CP) ./mupen64_input/mupen64_input.$(SO_EXTENSION) ./plugins/mupen64_input.$(SO_EXTENSION)
+
+plugins/z64gl.$(SO_EXTENSION): FORCE
+	$(MAKE) -C z64 z64gl.$(SO_EXTENSION)
+	@$(CP) ./z64/z64gl.$(SO_EXTENSION) ./plugins/z64gl.$(SO_EXTENSION)
+
+plugins/z64-rsp.$(SO_EXTENSION): FORCE
+	$(MAKE) -C z64 z64-rsp.$(SO_EXTENSION)
+	@$(CP) ./z64/z64-rsp.$(SO_EXTENSION) ./plugins/z64-rsp.$(SO_EXTENSION)
 
 # This is used to force the plugin builds
 FORCE:

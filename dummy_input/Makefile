@@ -31,13 +31,13 @@ clean:
 	rm -f *.o *.so
 
 # build rules
-.cpp.o:
+.c.o:
 	$(CXX) -o $@ $(CFLAGS) $(SDL_FLAGS) $(GTK_FLAGS) -c $<
 
 dummyinput.so: $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(GTK_LIBS) $(GTHREAD_LIBS) $(LIBGL_LIBS) -o $@
 	$(STRIP) $@
 
-input.o: input.cpp
+input.o: input.c
 	$(CXX) $(CFLAGS) $(SDL_FLAGS) -DMAINDEF -c -o $@ $<
 

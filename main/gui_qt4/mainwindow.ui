@@ -28,7 +28,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>27</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File" >
@@ -138,11 +138,17 @@
    </property>
   </action>
   <action name="actionStart" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
    <property name="text" >
     <string>&amp;Start</string>
    </property>
   </action>
   <action name="actionPause" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
    <property name="text" >
     <string>&amp;Pause</string>
    </property>
@@ -151,6 +157,9 @@
    </property>
   </action>
   <action name="actionStop" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
    <property name="text" >
     <string>S&amp;top</string>
    </property>
@@ -190,9 +199,6 @@
    </property>
   </action>
   <action name="actionFullScreen" >
-   <property name="checkable" >
-    <bool>true</bool>
-   </property>
    <property name="text" >
     <string>&amp;Full Screen</string>
    </property>

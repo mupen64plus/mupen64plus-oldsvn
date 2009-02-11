@@ -32,6 +32,7 @@
 #include "../r4300/macros.h"
 #include "../r4300/ops.h"
 
+#include "../main/config.h"
 #include "../main/main.h"
 #include "../main/rom.h"
 
@@ -351,3 +352,4 @@ void dma_si_read()
     update_count();
     add_interupt_event(SI_INT, /*0x100*/0x900);
 }
+

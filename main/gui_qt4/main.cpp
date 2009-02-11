@@ -1,36 +1,35 @@
-/*
-* Copyright (C) 2008 Louai Al-Khanji
-*
-* This program is free software; you can redistribute it and/
-* or modify it under the terms of the GNU General Public Li-
-* cence as published by the Free Software Foundation; either
-* version 2 of the Licence, or any later version.
-*
-* This program is distributed in the hope that it will be use-
-* ful, but WITHOUT ANY WARRANTY; without even the implied war-
-* ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU General Public Licence for more details.
-*
-* You should have received a copy of the GNU General Public
-* Licence along with this program; if not, write to the Free
-* Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
-* USA.
-*
-*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - main.cpp                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Slougi                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern "C" {
-    #include "../version.h"
-    #include "../main.h"
-    #include "../config.h"
-}
+#include <QtGlobal>
 
-#ifndef __WIN32__
+#ifdef Q_WS_X11
 # include <gtk/gtk.h>
 #endif
 
 #include <QApplication>
 #include <QAbstractEventDispatcher>
 #include <QMessageBox>
+#include <QTranslator>
+#include <QLocale>
 
 #include <cstdio>
 #include <cstdarg>
@@ -39,29 +38,44 @@ extern "C" {
 #include "mainwindow.h"
 #include "globals.h"
 
+// ugly globals
 static MainWindow* mainWindow = 0;
 static QApplication* application = 0;
+static QTranslator* translator = 0;
 
-#include <QDebug>
-
+namespace core {
 extern "C" {
+
+#include "../version.h"
+#include "../main.h"
+#include "../config.h"
+#include "../gui.h"
 
 // Initializes gui subsystem. Also parses AND REMOVES any gui-specific commandline
 // arguments. This is called before mupen64plus parses any of its commandline options.
 void gui_init(int *argc, char ***argv)
 {
-    QT_REQUIRE_VERSION(*argc, *argv, "4.4")
-
     application = new QApplication(*argc, *argv);
-    application->setOrganizationName("mupen64plus");
-    application->setApplicationName("mupen64plus");
-    application->setWindowIcon(icon("mupen64plus.png"));
-    mainWindow = new MainWindow;
 
-#ifndef __WIN32__
-    if (QAbstractEventDispatcher::instance()->inherits("QEventDispatcherGlib"))
+    QString locale = QLocale::system().name();
+    QString translation = QString("mupen64plus_%1").arg(locale);
+    QString path = QString("%1translations").arg(get_installpath());
+    translator = new QTranslator;
+    if (!translator->load(translation, path)) {
+        qDebug("Could not load translation %s. Looked in %s.",
+                  qPrintable(translation), qPrintable(path));
+    }
+
+    application->installTranslator(translator);
+
+#ifdef Q_WS_X11
+    if (QAbstractEventDispatcher::instance()->inherits("QEventDispatcherGlib")) {
+        delete application;
+        application = 0;
         gtk_init(argc, argv);
-    else
+        application = new QApplication(*argc, *argv);
+        application->installTranslator(translator);
+    } else {
         QMessageBox::warning(0,
             QObject::tr("No Glib Integration"),
             QObject::tr("<html><p>Your Qt library was compiled without glib \
@@ -70,7 +84,18 @@ void gui_init(int *argc, char ***argv)
                          <p>To fix this, install a Qt version with glib \
                          main loop support. Most distributions provide this \
                          by default.</p></html>"));
+    }
 #endif
+
+    application->setOrganizationName("Mupen64Plus");
+    application->setApplicationName("Mupen64Plus");
+    application->setWindowIcon(icon("mupen64plus.png"));
+
+#if QT_VERSION >= 0x040400
+    application->setAttribute(Qt::AA_NativeWindows);
+#endif
+
+    mainWindow = new MainWindow;
 }
 
 // display GUI components to the screen
@@ -85,14 +110,16 @@ void gui_display(void)
 void gui_main_loop(void)
 {
     application->exec();
+    config_write();
     delete mainWindow;
     mainWindow = 0;
     delete application;
     application = 0;
-    config_write();
+    delete translator;
+    translator = 0;
 }
 
-int gui_message(unsigned char messagetype, const char *format, ...)
+int gui_message(gui_message_t messagetype, const char *format, ...)
 {
     if (!gui_enabled())
         return 0;
@@ -117,15 +144,28 @@ int gui_message(unsigned char messagetype, const char *format, ...)
     } else if (messagetype == 2) {
         //0 - indicates user selected no
         //1 - indicates user selected yes
-        response = mainWindow->confirmMessage(buffer);
+        ConfirmEvent e;
+        e.message = buffer;
+        application->sendEvent(mainWindow, &e);
+        response = e.isAccepted();
     }
 
     return response;
 }
 
-void updaterombrowser(unsigned int roms, unsigned short clear)
+void gui_update_rombrowser(unsigned int roms, unsigned short clear)
 {
     RomModel::self()->update(roms, clear);
 }
 
+void gui_set_state(gui_state_t state)
+{
+     if (!gui_enabled())
+        return;
+
+    mainWindow->setState(state);
+}
+
 } // extern "C"
+} // namespace core
+

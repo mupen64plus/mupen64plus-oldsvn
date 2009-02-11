@@ -21,11 +21,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Sound volume functions. */
-
+#if defined(__linux__)
 #include <sys/soundcard.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <unistd.h> /* close() */
 #include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
@@ -53,8 +55,9 @@ void volSet(int percent)
         percent = 0;
 
     vol = (percent << 8) + percent; // set both left/right channels to same vol
+#if defined(__linux__)
     ret = ioctl(mixerfd, MIXER_WRITE(SOUND_MIXER_PCM), &vol);
-
+#endif
     if(ret < 0)
         perror("Setting PCM volume: ");
 
@@ -63,6 +66,7 @@ void volSet(int percent)
 
 /* volGet
  *  Returns volume of PCM channel as a percentage (0-100).
+ *  Returns 0 on error.
  */
 int volGet(void)
 {
@@ -72,11 +76,12 @@ int volGet(void)
     if(mixerfd < 0)
     {
         perror("/dev/mixer: ");
-        return;
+        return 0;
     }
 
+#if defined(__linux__)
     ret = ioctl(mixerfd, MIXER_READ(SOUND_MIXER_PCM), &vol);
-
+#endif
     if(ret < 0)
         perror("Reading PCM volume: ");
 

@@ -63,3 +63,4 @@ DWORD CRC_CalculatePalette( DWORD crc, void *buffer, DWORD count )
 
     return crc ^ orig;
 }
+

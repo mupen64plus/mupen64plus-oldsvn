@@ -1039,3 +1039,4 @@ void output (float x, float y, BOOL scale, const char *fmt, ...)
     x+=8;
   }
 }
+

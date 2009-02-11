@@ -582,3 +582,4 @@ int LzmaDecode(CLzmaDecoderState *vs,
   *outSizeProcessed = nowPos;
   return LZMA_RESULT_OK;
 }
+

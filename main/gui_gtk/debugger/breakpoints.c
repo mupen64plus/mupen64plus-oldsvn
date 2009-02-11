@@ -1,29 +1,34 @@
-/**
- * Mupen64Plus - main/gui_gtk/debugger/breakpoints.c
- * Copyright (C) 2002 DavFr - robind@esiee.fr
- * Copyright (C) 2008 HyperHacker
- * 
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - breakpoints.c                                           *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 HyperHacker                                        *
+ *   Copyright (C) 2002 DavFr                                              *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <stdlib.h>
+#include <string.h>
+
+#include <gtk/gtk.h>
 
 #include "breakpoints.h"
+
+#include "../../translate.h"
+#include "../../main.h"
 
 static int selected[BREAKPOINTS_MAX_NUMBER];
 
@@ -157,12 +162,11 @@ void get_breakpoint_display_string(char* buf, breakpoint* bpt)
 
 void update_breakpoints( )
 {
-    int num_rows=0;
-
     char line[1][64];
     line[0][0] = 0;
 
-    printf("update_breakpoints()\n");
+    if(!breakpoints_opened) return;
+
     gtk_clist_freeze( GTK_CLIST(clBreakpoints) );
     gtk_clist_clear( GTK_CLIST(clBreakpoints) );
     int i;
@@ -172,7 +176,7 @@ void update_breakpoints( )
     for( i=0; i < g_NumBreakpoints; i++ )
     {
         get_breakpoint_display_string(line[0], &g_Breakpoints[i]);
-        printf("%s\n", line);
+        //printf("%s\n", line[0]);
         gtk_clist_set_text( GTK_CLIST(clBreakpoints), i, 0, line[0] );
         if(BPT_CHECK_FLAG(g_Breakpoints[i], BPT_FLAG_ENABLED))
             gtk_clist_set_background( GTK_CLIST(clBreakpoints), i, &color_BPEnabled);
@@ -265,7 +269,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
         
     //Read address
     //printf("Address \"%s\"\n", &line[i]);
-    i = sscanf(&line[i], "%lX %lx", &newbp.address, &newbp.endaddr);
+    i = sscanf(&line[i], "%X %x", &newbp.address, &newbp.endaddr);
     if(!i)
     {
         error_message(tr("Invalid address."));
@@ -275,12 +279,12 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     
     if(breakpoints_editing)
     {
-        printf("Updating breakpoint #%u on 0x%08X - 0x%08X flags 0x%08X\n", ced->row, newbp.address, newbp.endaddr, newbp.flags);
-        memcpy(&g_Breakpoints[ced->row], &newbp, sizeof(breakpoint));
+        //printf("Updating breakpoint #%u on 0x%08X - 0x%08X flags 0x%08X\n", ced->row, newbp.address, newbp.endaddr, newbp.flags);
+        replace_breakpoint_num(ced->row, &newbp);
     }
     else
     {
-        printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
+        //printf("Adding breakpoint on 0x%08X - 0x%08X flags 0x%08X\n", newbp.address, newbp.endaddr, newbp.flags);
         if(add_breakpoint_struct(&newbp) == -1)
         {
             error_message(tr("Cannot add any more breakpoints."));
@@ -291,7 +295,7 @@ static gint modify_address(ClistEditData *ced, const gchar *old, const gchar *ne
     gtk_clist_set_row_data( GTK_CLIST(ced->clist), ced->row, (gpointer)(long) newbp.address );
     
     update_breakpoints();
-        refresh_desasm();
+    refresh_desasm();
     return FALSE; //don't add the typed string, update_breakpoints() handles it
 }
 
@@ -426,3 +430,4 @@ static void on_close()
 {
     breakpoints_opened = 0;
 }
+

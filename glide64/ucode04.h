@@ -189,3 +189,4 @@ static void uc4_quad3d()
     rdp.tri_n ++;
   }
 }
+

@@ -595,7 +595,6 @@ void DebuggerPause()
             g_pFrameBufferManager->DisplayRenderTexture(debuggerDrawRenderTextureNo);
             debuggerDrawRenderTexture = false;
         }
-        printf("0.1 second pause\n\n\n");
         usleep(100 * 1000);
         debuggerPause = false;
     }
@@ -710,3 +709,4 @@ void DumpMatrix(const Matrix &mat, const char* prompt)
 }
 
 #endif
+

@@ -177,3 +177,4 @@ void compare_core()
      }
 #endif
 }
+

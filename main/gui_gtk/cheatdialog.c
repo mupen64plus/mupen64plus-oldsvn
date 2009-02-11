@@ -280,7 +280,6 @@ static void cb_delete(GtkButton *button, GtkTreeView *view)
     GtkTreeModel *model;
     GtkTreeIter iter, parentIter;
     GtkTreeSelection *selection;
-    GtkTreePath *path;
 
     rom_cheats_t *romcheat = NULL;
     cheat_t *cheat = NULL;
@@ -296,7 +295,9 @@ static void cb_delete(GtkButton *button, GtkTreeView *view)
             gtk_tree_model_get(model, &parentIter, 1, &romcheat, -1);
             gtk_tree_model_get(model, &iter, 1, &cheat, -1);
 
-            if(gui_message(2, tr("Are you sure you want to delete cheat \"%s\"?"), cheat->name))
+            if(gui_message(GUI_MESSAGE_CONFIRM,
+                           tr("Are you sure you want to delete cheat \"%s\"?"),
+                           cheat->name))
                 {
                 gtk_tree_store_remove(GTK_TREE_STORE(model), &iter);
                 cheat_delete_cheat(romcheat, cheat);
@@ -310,7 +311,9 @@ static void cb_delete(GtkButton *button, GtkTreeView *view)
             // selected item is a rom
             gtk_tree_model_get(model, &iter, 1, &romcheat, -1);
 
-            if(gui_message(2, tr("Are you sure you want to delete rom \"%s\" and all of its cheats?"), romcheat->rom_name))
+            if(gui_message(GUI_MESSAGE_CONFIRM,
+                           tr("Are you sure you want to delete rom \"%s\" and all of its cheats?"),
+                           romcheat->rom_name))
                 {
                 gtk_tree_store_remove(GTK_TREE_STORE(model), &iter);
                 cheat_delete_rom(romcheat);
@@ -621,6 +624,7 @@ static GtkWidget *edit_cheat_widget(cheat_t *cheat, GtkTreeSelection *selection)
     gtk_box_set_spacing(GTK_BOX(hbox), 10);
 
     viewport = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW(viewport), GTK_SHADOW_IN );
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(viewport),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_box_pack_start(GTK_BOX(hbox), viewport, TRUE, TRUE, 0);
@@ -714,11 +718,11 @@ void cb_cheatDialog(GtkWidget *widget)
 {
     // Local Variables
     GtkWidget *dialog;
-    GtkWidget *label;
     GtkWidget *frame;
     GtkWidget *hbox, *vbox;
     GtkWidget *viewport;
     GtkWidget *button;
+    GtkWidget *align;
 
     GtkTreeSelection *selection;
 
@@ -738,6 +742,7 @@ void cb_cheatDialog(GtkWidget *widget)
 
     // create scrolled window for tree view
     viewport = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW(viewport), GTK_SHADOW_IN );
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(viewport),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_widget_set_size_request(viewport, 200, 400);
@@ -745,7 +750,10 @@ void cb_cheatDialog(GtkWidget *widget)
 
     // add cheat tree view within viewport to left side of dialog box
     hbox = gtk_hbox_new(FALSE, 10);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox, TRUE, TRUE, 0);
+    align = gtk_alignment_new( 0.5f, 0.5f, 1.0f, 1.0f );
+    gtk_alignment_set_padding( GTK_ALIGNMENT(align), 0, 10, 0, 0 );
+    gtk_container_add( GTK_CONTAINER(align), hbox );
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), align, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox), viewport, FALSE, FALSE, 0);
 
     // right side of dialog
@@ -770,7 +778,7 @@ void cb_cheatDialog(GtkWidget *widget)
 
     // frame containing detail of selected item in tree view (allows user to edit)
     frame = gtk_frame_new(NULL);
-    gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 10);
+    gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
 
     // setup callback such that whenever tree view selection is changed, frame gets updated
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(g_CheatView));
@@ -781,3 +789,4 @@ void cb_cheatDialog(GtkWidget *widget)
 
     gtk_widget_show_all(dialog);
 }
+

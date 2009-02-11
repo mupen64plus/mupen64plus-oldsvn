@@ -20,7 +20,7 @@
 * Boston, MA  02110-1301, USA
 */
 
-static char * messagebox_error_xpm[] = {
+static const char * messagebox_error_xpm[] = {
 "32 32 203 2",
 "  	c None",
 ". 	c #C60000",

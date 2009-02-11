@@ -739,3 +739,4 @@ assert (state >= 0);
         }
         return LZMADEC_OK;
 }
+

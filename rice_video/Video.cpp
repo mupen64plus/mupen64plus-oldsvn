@@ -209,7 +209,18 @@ void StartVideo(void)
     g_CritialSection.Lock();
 
     memcpy(&g_curRomInfo.romheader, g_GraphicsInfo.HEADER, sizeof(ROMHeader));
-    ROM_ByteSwap_3210( &g_curRomInfo.romheader, sizeof(ROMHeader) );
+    unsigned char *puc = (unsigned char *) &g_curRomInfo.romheader;
+    unsigned int i;
+    unsigned char temp;
+    for (i = 0; i < sizeof(ROMHeader); i += 4)
+    {
+        temp     = puc[i];
+        puc[i]   = puc[i+3];
+        puc[i+3] = temp;
+        temp     = puc[i+1];
+        puc[i+1] = puc[i+2];
+        puc[i+2] = temp;
+    }
     ROM_GetRomNameFromHeader(g_curRomInfo.szGameName, &g_curRomInfo.romheader);
     Ini_GetRomOptions(&g_curRomInfo);
     char *p = (char *) g_curRomInfo.szGameName + (strlen((char *) g_curRomInfo.szGameName) -1);     // -1 to skip null
@@ -741,7 +752,7 @@ EXPORT BOOL CALL InitiateGFX(GFX_INFO Gfx_Info)
     memset(&status, 0, sizeof(status));
     windowSetting.bDisplayFullscreen = FALSE;
     memcpy(&g_GraphicsInfo, &Gfx_Info, sizeof(GFX_INFO));
-    
+
     g_pRDRAMu8          = Gfx_Info.RDRAM;
     g_pRDRAMu32         = (uint32*)Gfx_Info.RDRAM;
     g_pRDRAMs8          = (signed char *)Gfx_Info.RDRAM;
@@ -755,6 +766,7 @@ EXPORT BOOL CALL InitiateGFX(GFX_INFO Gfx_Info)
     CGraphicsContext::InitWindowInfo();
     CGraphicsContext::InitDeviceParameters();
 
+    gui_init();
     return(TRUE);
 }
 

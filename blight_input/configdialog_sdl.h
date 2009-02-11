@@ -21,3 +21,4 @@
 void configure_sdl( SController *controller );
 
 #endif /* __CONFIGDIALOG_SDL_H__ */
+

@@ -31,33 +31,34 @@
 
 typedef struct
 {
-    GtkWidget *dialog;
-    GtkWidget *filenameEntry;
-    GtkWidget *goodnameEntry;
-    GtkWidget *flag;
-    GtkWidget *countryEntry;
-    GtkWidget *status[5];
-    GtkWidget *fullpathEntry;
-    GtkWidget *crc1Entry;
-    GtkWidget *crc2Entry;
-    GtkWidget *md5Entry;
-    GtkWidget *internalnameEntry;
-    GtkWidget *sizeEntry;
-    GtkWidget *savetypeEntry;
-    GtkWidget *playersEntry;
-    GtkWidget *compressiontypeEntry;
-    GtkWidget *imagetypeEntry;
-    GtkWidget *cicchipEntry;
-    GtkWidget *rumbleEntry;
-    GtkWidget *commentsEntry;
-    GtkWidget *okButton;
+    GtkWidget* dialog;
+    GtkWidget* filenameEntry;
+    GtkWidget* goodnameEntry;
+    GtkWidget* flag;
+    GtkWidget* countryEntry;
+    GtkWidget* status[5];
+    GtkWidget* fullpathEntry;
+    GtkWidget* crc1Entry;
+    GtkWidget* crc2Entry;
+    GtkWidget* md5Entry;
+    GtkWidget* internalnameEntry;
+    GtkWidget* sizeEntry;
+    GtkWidget* savetypeEntry;
+    GtkWidget* playersEntry;
+    GtkWidget* compressiontypeEntry;
+    GtkWidget* imagetypeEntry;
+    GtkWidget* cicchipEntry;
+    GtkWidget* rumbleEntry;
+    GtkWidget* commentsEntry;
+    GtkWidget* okButton;
     GtkTreeIter iter;
-    cache_entry *entry;
+    cache_entry* entry;
 } SRomPropertiesDialog;
 
 extern SRomPropertiesDialog g_RomPropDialog;
 
-int create_romPropDialog();
-void show_romPropDialog();
+void create_rom_properties();
+void show_rom_properties();
 
-#endif // __ROMPROPERTIES_H__
+#endif /* __ROMPROPERTIES_H__ */
+

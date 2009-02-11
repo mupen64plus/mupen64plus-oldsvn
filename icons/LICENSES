@@ -20,6 +20,12 @@ preferences-system.png
 16x16/document-properties.png
 16x16/view-refresh.png
 16x16/tools-wizard.png
+16x16/video-display.png
+16x16/window-close.png
+16x16/cpu.png
+16x16/audio-card.png
+16x16/document-save-as.png
+16x16/application-exit.png
 22x22/document-open.png
 22x22/document-save.png
 22x22/media-playback-pause.png
@@ -111,9 +117,12 @@ are Copyright: The Oxygen Icon Theme
   |   The exception in section 6 of the GNU Lesser General Public License covers
   |   the use of elements of this art library in a GUI.
 
+16x16/mupen64plus.png
+16x16/mupen64cart.png
+22x22/mupen64cart.png
 32x32/mupen64plus.png
 32x32/mupen64cart.png
-16x16/mupen64plus.png
+mupen64plus-large.png
 australia.png
 europe.png
 france.png
@@ -136,7 +145,7 @@ are Copyright: The Mupen64plus Team
 mupen64logo.png
 
 are Copyright: The Mupen64plus Team
-  | Copyright (C) 2008 marshallh, Tillin9
+  | Copyright (C) 2008 Marshallh, Tillin9
   |
   | You may copy them under the Creative Common Attribution-ShareAlike 3.0
   | license, as found here:
@@ -166,7 +175,7 @@ are Copyright: The Mupen64plus Team
 mupen64logo.svg
 
 are Copyright: The Mupen64plus Team
-  | Copyright (C) 2008 marshallh, Tillin9
+  | Copyright (C) 2008 Marshallh, Tillin9
   |
   | You may copy them under the Creative Common Attribution-ShareAlike 3.0
   | license, as found here:

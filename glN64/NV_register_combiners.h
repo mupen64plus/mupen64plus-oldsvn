@@ -1,6 +1,5 @@
-
 #define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
+#include <SDL_opengl.h>
 
 /* NVidia extensions */
 extern void APIENTRY glCombinerParameterfvNV (GLenum, const GLfloat *);

@@ -1,22 +1,23 @@
-/*
-* Copyright (C) 2008 Louai Al-Khanji
-*
-* This program is free software; you can redistribute it and/
-* or modify it under the terms of the GNU General Public Li-
-* cence as published by the Free Software Foundation; either
-* version 2 of the Licence, or any later version.
-*
-* This program is distributed in the hope that it will be use-
-* ful, but WITHOUT ANY WARRANTY; without even the implied war-
-* ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU General Public Licence for more details.
-*
-* You should have received a copy of the GNU General Public
-* Licence along with this program; if not, write to the Free
-* Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
-* USA.
-*
-*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - settingsdialog.cpp                                      *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Slougi                                             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <QSize>
 #include <QListWidgetItem>
@@ -50,11 +51,10 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     items << new QListWidgetItem(QIcon(icon("preferences-system-network.png")),
                                  tr("Rom Browser"),
                                  listWidget);
-    int i = 0;
     foreach (QListWidgetItem* item, items) {
         item->setTextAlignment(Qt::AlignHCenter);
         item->setSizeHint(QSize(110, 55));
-        listWidget->insertItem(i, item);
+        listWidget->insertItem(0, item);
     }
 
     connect(listWidget, SIGNAL(currentRowChanged(int)),
@@ -70,6 +70,122 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     connect(listWidget, SIGNAL(currentRowChanged(int)),
             this, SLOT(pageChanged(int)));
 
+    connect(buttonBox, SIGNAL(clicked(QAbstractButton*)),
+            this, SLOT(buttonClicked(QAbstractButton*)));
+
+    readSettings();
+}
+
+void SettingsDialog::on_aboutAudioPluginButton_clicked()
+{
+    QString text = audioPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_about_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_configAudioPluginButton_clicked()
+{
+    QString text = audioPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_config_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_testAudioPluginButton_clicked()
+{
+    QString text = audioPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_test_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_aboutGraphicsPluginButton_clicked()
+{
+    QString text = graphicsPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_about_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_configGraphicsPluginButton_clicked()
+{
+    QString text = graphicsPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_config_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_testGraphicsPluginButton_clicked()
+{
+    QString text = graphicsPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_test_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_aboutRspPluginButton_clicked()
+{
+    QString text = rspPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_about_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_configRspPluginButton_clicked()
+{
+    QString text = rspPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_config_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_testRspPluginButton_clicked()
+{
+    QString text = rspPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_test_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_aboutInputPluginButton_clicked()
+{
+    QString text = inputPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_about_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_configInputPluginButton_clicked()
+{
+    QString text = inputPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_config_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::on_testInputPluginButton_clicked()
+{
+    QString text = inputPluginCombo->currentText();
+    core::HWND wid = (core::HWND) winId();
+    core::plugin_exec_test_with_wid(qPrintable(text), wid);
+}
+
+void SettingsDialog::accept()
+{
+    writeSettings();
+    QDialog::accept();
+}
+
+void SettingsDialog::buttonClicked(QAbstractButton* button)
+{
+    switch (buttonBox->standardButton(button)) {
+        case QDialogButtonBox::Reset:
+            readSettings();
+            break;
+        default: // we really only care about a few buttons here
+            break;
+    }
+}
+
+void SettingsDialog::pageChanged(int page)
+{
+    QListWidgetItem* i = listWidget->item(page);
+    imageLabel->setPixmap(i->icon().pixmap(32, 32));
+    textLabel->setText(QString("<b>%1</b>").arg(i->text()));
+}
+
+void SettingsDialog::readSettings()
+{
     int core = core::config_get_number("Core", CORE_DYNAREC);
     switch (core) {
         case CORE_DYNAREC:
@@ -113,7 +229,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     core::list_node_t *node;
     core::plugin *p;
     list_foreach(core::g_PluginList, node) {
-        p = static_cast<core::plugin*>(node->data);
+        p = reinterpret_cast<core::plugin*>(node->data);
         switch (p->type) {
             case PLUGIN_TYPE_GFX:
                 if(!core::g_GfxPlugin ||
@@ -144,6 +260,8 @@ SettingsDialog::SettingsDialog(QWidget* parent)
                 break;
         }
     }
+
+    int i = 0;
 
     inputPlugin = core::plugin_name_by_filename(qPrintable(inputPlugin));
     if (!inputPlugin.isEmpty() &&
@@ -180,166 +298,74 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     );
 }
 
-void SettingsDialog::on_dynamicRecompilerRadio_toggled(bool checked)
+void SettingsDialog::writeSettings()
 {
-    if (checked) {
+    const char* p = 0;
+
+    p = qPrintable(audioPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("Audio Plugin", p);
+
+    p = qPrintable(graphicsPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("Gfx Plugin", p);
+
+    p = qPrintable(rspPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("RSP Plugin", p);
+
+    p = qPrintable(inputPluginCombo->currentText());
+    p = core::plugin_filename_by_name(p);
+    core::config_put_string("Input Plugin", p);
+
+    if (dynamicRecompilerRadio->isChecked()) {
         core::config_put_number("Core", CORE_DYNAREC);
     }
-}
 
-void SettingsDialog::on_interpreterRadio_toggled(bool checked)
-{
-    if (checked) {
+    if (interpreterRadio->isChecked()) {
         core::config_put_number("Core", CORE_INTERPRETER);
     }
-}
 
-void SettingsDialog::on_pureInterpreterRadio_toggled(bool checked)
-{
-    if (checked) {
+    if (pureInterpreterRadio->isChecked()) {
         core::config_put_number("Core", CORE_PURE_INTERPRETER);
     }
-}
 
-void SettingsDialog::on_disableCompiledJumpCheck_toggled(bool checked)
-{
-    core::config_put_bool("NoCompiledJump", checked);
-}
+    core::config_put_bool(
+        "NoCompiledJump",
+        disableCompiledJumpCheck->isChecked()
+    );
 
-void SettingsDialog::on_disableMemoryExpansionCheck_toggled(bool checked)
-{
-    core::config_put_bool("NoMemoryExpansion", checked);
-}
+    core::config_put_bool(
+        "NoMemoryExpansion",
+        disableMemoryExpansionCheck->isChecked()
+    );
 
-void SettingsDialog::on_alwaysStartInFullScreenModeCheck_toggled(bool checked)
-{
-    core::config_put_bool("GuiStartFullscreen", checked);
-}
+    core::config_put_bool(
+        "GuiStartFullscreen",
+        alwaysStartInFullScreenModeCheck->isChecked()
+    );
 
-void SettingsDialog::on_askBeforeLoadingBadRomCheck_toggled(bool checked)
-{
-    core::g_Noask = checked;
-    core::config_put_bool("No Ask", checked);
-}
+    core::g_Noask = askBeforeLoadingBadRomCheck->isChecked();
+    core::config_put_bool("No Ask", askBeforeLoadingBadRomCheck->isChecked());
 
-void SettingsDialog::on_autoIncrementSaveSlotCheck_toggled(bool checked)
-{
-    core::config_put_bool("AutoIncSaveSlot", checked);
-}
+    core::g_OsdEnabled = osdEnabledCheck->isChecked();
+    core::config_put_bool("OsdEnabled", osdEnabledCheck->isChecked());
 
-void SettingsDialog::on_osdEnabledCheck_toggled(bool checked)
-{
-    core::config_put_bool("OsdEnabled", checked);
-}
+    core::config_put_bool(
+        "AutoIncSaveSlot",
+        autoIncrementSaveSlotCheck->isChecked()
+    );
 
-void SettingsDialog::on_audioPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("Audio Plugin", filename);
-}
+    core::config_put_bool(
+        "RomDirsScanRecursive",
+        scanDirectoriesRecursivelyCheck->isChecked()
+    );
 
-void SettingsDialog::on_aboutAudioPluginButton_clicked()
-{
-    QString text = audioPluginCombo->currentText();
-    core::plugin_exec_about(qPrintable(text));
-}
+    core::config_put_bool(
+        "RomBrowserShowFullPaths",
+        showFullPathsInFilenamesCheck->isChecked()
+    );
 
-void SettingsDialog::on_configAudioPluginButton_clicked()
-{
-    QString text = audioPluginCombo->currentText();
-    core::plugin_exec_config(qPrintable(text));
-}
-
-void SettingsDialog::on_testAudioPluginButton_clicked()
-{
-    QString text = audioPluginCombo->currentText();
-    core::plugin_exec_test(qPrintable(text));
-}
-
-void SettingsDialog::on_graphicsPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("Gfx Plugin", filename);
-}
-
-void SettingsDialog::on_aboutGraphicsPluginButton_clicked()
-{
-    QString text = graphicsPluginCombo->currentText();
-    core::plugin_exec_about(qPrintable(text));
-}
-
-void SettingsDialog::on_configGraphicsPluginButton_clicked()
-{
-    QString text = graphicsPluginCombo->currentText();
-    core::plugin_exec_config(qPrintable(text));
-}
-
-void SettingsDialog::on_testGraphicsPluginButton_clicked()
-{
-    QString text = graphicsPluginCombo->currentText();
-    core::plugin_exec_test(qPrintable(text));
-}
-
-void SettingsDialog::on_rspPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("RSP Plugin", filename);
-}
-
-void SettingsDialog::on_aboutRspPluginButton_clicked()
-{
-    QString text = rspPluginCombo->currentText();
-    core::plugin_exec_about(qPrintable(text));
-}
-
-void SettingsDialog::on_configRspPluginButton_clicked()
-{
-    QString text = rspPluginCombo->currentText();
-    core::plugin_exec_config(qPrintable(text));
-}
-
-void SettingsDialog::on_testRspPluginButton_clicked()
-{
-    QString text = rspPluginCombo->currentText();
-    core::plugin_exec_test(qPrintable(text));
-}
-
-void SettingsDialog::on_inputPluginCombo_currentIndexChanged(const QString& text)
-{
-    char* filename = core::plugin_filename_by_name(qPrintable(text));
-    core::config_put_string("Input Plugin", filename);
-}
-
-void SettingsDialog::on_aboutInputPluginButton_clicked()
-{
-    QString text = inputPluginCombo->currentText();
-    core::plugin_exec_about(qPrintable(text));
-}
-
-void SettingsDialog::on_configInputPluginButton_clicked()
-{
-    QString text = inputPluginCombo->currentText();
-    core::plugin_exec_config(qPrintable(text));
-}
-
-void SettingsDialog::on_testInputPluginButton_clicked()
-{
-    QString text = inputPluginCombo->currentText();
-    core::plugin_exec_test(qPrintable(text));
-}
-
-void SettingsDialog::on_scanDirectoriesRecursivelyCheck_toggled(bool checked)
-{
-    core::config_put_bool("RomDirsScanRecursive", checked);
-}
-
-void SettingsDialog::on_showFullPathsInFilenamesCheck_toggled(bool checked)
-{
-    core::config_put_bool("RomBrowserShowFullPaths", checked);
-}
-
-void SettingsDialog::accept()
-{
     QStringList romDirs = romDirectoriesListWidget->directories();
     core::config_put_number("NumRomDirs", romDirs.count());
     int i = 0;
@@ -354,12 +380,5 @@ void SettingsDialog::accept()
     }
     RomModel::self()->settingsChanged();
     core::config_write();
-    QDialog::accept();
 }
 
-void SettingsDialog::pageChanged(int page)
-{
-    QListWidgetItem* i = listWidget->item(page);
-    imageLabel->setPixmap(i->icon().pixmap(32, 32));
-    textLabel->setText(QString("<b>%1</b>").arg(i->text()));
-}

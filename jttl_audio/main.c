@@ -26,9 +26,9 @@
 #include <string.h>
 #include <limits.h>
 
-#include "SDL.h"
-#include "SDL_audio.h"
-#include "SDL_thread.h"
+#include <SDL.h>
+#include <SDL_audio.h>
+#include <SDL_thread.h>
 
 #ifdef USE_SRC
 #include <samplerate.h>
@@ -38,6 +38,8 @@
 
 #include "Audio_1.2.h"
 #include "gui.h"
+#include "volume.h"
+#include "main.h"
 
 #include "../main/version.h"
 #include "../main/translate.h"
@@ -725,7 +727,7 @@ EXPORT void CALL RomClosed( void )
         free(mixBuffer);
         mixBuffer = NULL;
     }
-    
+
     // Delete the hardware spec struct
     if(hardware_spec != NULL) free(hardware_spec);
     hardware_spec = NULL;
@@ -733,18 +735,18 @@ EXPORT void CALL RomClosed( void )
 
     // Actually close the audio device
     SDL_CloseAudio();
-    
+
     // Shutdown the respective subsystems
     if(SDL_WasInit(SDL_INIT_AUDIO) != 0) SDL_QuitSubSystem(SDL_INIT_AUDIO);
     if(SDL_WasInit(SDL_INIT_TIMER) != 0) SDL_QuitSubSystem(SDL_INIT_TIMER);
 }
 
-EXPORT void CALL SetConfigDir( char *configDir )
+EXPORT void CALL SetConfigDir(char* configDir)
 {
     strncpy(configdir, configDir, PATH_MAX);
 }
 
-EXPORT void CALL ProcessAlist( void )
+EXPORT void CALL ProcessAList()
 {
 }
 
@@ -813,7 +815,7 @@ void SaveConfig()
                          "#     master volume for PC\n");
     fprintf(config_file, "VOLUME_CONTROL_TYPE %d\n\n", VolumeControlType);
 
-    fprintf(config_file, "# Default Volume (0-100%)\n"
+    fprintf(config_file, "# Default Volume (0-100%%)\n"
                          "# Only used if you set VOLUME_CONTROL_TYPE to 1.  Otherwise the default volume\n"
                          "# is the volume that the harware mixer is set to when mupen64plus loads.\n");
     fprintf(config_file, "VOLUME_DEFAULT %d\n\n", VolPercent);
@@ -821,7 +823,7 @@ void SaveConfig()
     fprintf(config_file, "# Volume increment/decrement\n"
                          "# Set the percentage change each time the volume is increased or decreased.\n");
     fprintf(config_file, "VOLUME_ADJUST %d\n\n", VolDelta);
-    
+
     fclose(config_file);
 }
 
@@ -857,7 +859,7 @@ void ReadConfig()
             strncpy(param, line, (strlen(line) - strlen(value)));
             param[(strlen(line) - strlen(value))] = '\0';
 #ifdef DEBUG
-            printf("[JttL's SDL Audio plugin] Debug: Parameter \"%s\", value: \"%i\"\n",&param,atoi(&value[1]));
+            printf("[JttL's SDL Audio plugin] Debug: Parameter \"%s\", value: \"%i\"\n", &param, atoi(&value[1]));
 #endif
             if(strcasecmp(param, "DEFAULT_FREQUENCY") == 0) GameFreq = atoi(value);
             if(strcasecmp(param, "SWAP_CHANNELS") == 0) SwapChannels = atoi(value);

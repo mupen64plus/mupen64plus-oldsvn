@@ -1,43 +1,38 @@
-/**
- * Mupen64 - gregimm.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - gregimm.c                                               *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
+
+#include "assemble.h"
+#include "interpret.h"
+
 #include "../recomph.h"
 #include "../recomp.h"
 #include "../r4300.h"
-#include "assemble.h"
 #include "../ops.h"
-#include "../../memory/memory.h"
 #include "../macros.h"
-#include "interpret.h"
 
-void genbltz_test()
+#include "../../memory/memory.h"
+
+void genbltz_test(void)
 {
    int rs_64bit = is64((unsigned int *)dst->f.i.rs);
    
@@ -71,7 +66,7 @@ void genbltz_test()
      }
 }
 
-void genbltz()
+void genbltz(void)
 {
 #ifdef INTERPRET_BLTZ
    gencallinterp((unsigned int)BLTZ, 1);
@@ -89,7 +84,7 @@ void genbltz()
 #endif
 }
 
-void genbltz_out()
+void genbltz_out(void)
 {
 #ifdef INTERPRET_BLTZ_OUT
    gencallinterp((unsigned int)BLTZ_OUT, 1);
@@ -107,7 +102,7 @@ void genbltz_out()
 #endif
 }
 
-void genbltz_idle()
+void genbltz_idle(void)
 {
 #ifdef INTERPRET_BLTZ_IDLE
    gencallinterp((unsigned int)BLTZ_IDLE, 1);
@@ -125,7 +120,7 @@ void genbltz_idle()
 #endif
 }
 
-void genbgez_test()
+void genbgez_test(void)
 {
    int rs_64bit = is64((unsigned int *)dst->f.i.rs);
    
@@ -159,7 +154,7 @@ void genbgez_test()
      }
 }
 
-void genbgez()
+void genbgez(void)
 {
 #ifdef INTERPRET_BGEZ
    gencallinterp((unsigned int)BGEZ, 1);
@@ -177,7 +172,7 @@ void genbgez()
 #endif
 }
 
-void genbgez_out()
+void genbgez_out(void)
 {
 #ifdef INTERPRET_BGEZ_OUT
    gencallinterp((unsigned int)BGEZ_OUT, 1);
@@ -195,7 +190,7 @@ void genbgez_out()
 #endif
 }
 
-void genbgez_idle()
+void genbgez_idle(void)
 {
 #ifdef INTERPRET_BGEZ_IDLE
    gencallinterp((unsigned int)BGEZ_IDLE, 1);
@@ -213,7 +208,7 @@ void genbgez_idle()
 #endif
 }
 
-void genbltzl()
+void genbltzl(void)
 {
 #ifdef INTERPRET_BLTZL
    gencallinterp((unsigned int)BLTZL, 1);
@@ -231,7 +226,7 @@ void genbltzl()
 #endif
 }
 
-void genbltzl_out()
+void genbltzl_out(void)
 {
 #ifdef INTERPRET_BLTZL_OUT
    gencallinterp((unsigned int)BLTZL_OUT, 1);
@@ -249,7 +244,7 @@ void genbltzl_out()
 #endif
 }
 
-void genbltzl_idle()
+void genbltzl_idle(void)
 {
 #ifdef INTERPRET_BLTZL_IDLE
    gencallinterp((unsigned int)BLTZL_IDLE, 1);
@@ -267,7 +262,7 @@ void genbltzl_idle()
 #endif
 }
 
-void genbgezl()
+void genbgezl(void)
 {
 #ifdef INTERPRET_BGEZL
    gencallinterp((unsigned int)BGEZL, 1);
@@ -285,7 +280,7 @@ void genbgezl()
 #endif
 }
 
-void genbgezl_out()
+void genbgezl_out(void)
 {
 #ifdef INTERPRET_BGEZL_OUT
    gencallinterp((unsigned int)BGEZL_OUT, 1);
@@ -303,7 +298,7 @@ void genbgezl_out()
 #endif
 }
 
-void genbgezl_idle()
+void genbgezl_idle(void)
 {
 #ifdef INTERPRET_BGEZL_IDLE
    gencallinterp((unsigned int)BGEZL_IDLE, 1);
@@ -321,7 +316,7 @@ void genbgezl_idle()
 #endif
 }
 
-void genbranchlink()
+void genbranchlink(void)
 {
    int r31_64bit = is64((unsigned int*)&reg[31]);
    
@@ -352,7 +347,7 @@ void genbranchlink()
      }
 }
 
-void genbltzal()
+void genbltzal(void)
 {
 #ifdef INTERPRET_BLTZAL
    gencallinterp((unsigned int)BLTZAL, 1);
@@ -371,7 +366,7 @@ void genbltzal()
 #endif
 }
 
-void genbltzal_out()
+void genbltzal_out(void)
 {
 #ifdef INTERPRET_BLTZAL_OUT
    gencallinterp((unsigned int)BLTZAL_OUT, 1);
@@ -390,7 +385,7 @@ void genbltzal_out()
 #endif
 }
 
-void genbltzal_idle()
+void genbltzal_idle(void)
 {
 #ifdef INTERPRET_BLTZAL_IDLE
    gencallinterp((unsigned int)BLTZAL_IDLE, 1);
@@ -409,7 +404,7 @@ void genbltzal_idle()
 #endif
 }
 
-void genbgezal()
+void genbgezal(void)
 {
 #ifdef INTERPRET_BGEZAL
    gencallinterp((unsigned int)BGEZAL, 1);
@@ -428,7 +423,7 @@ void genbgezal()
 #endif
 }
 
-void genbgezal_out()
+void genbgezal_out(void)
 {
 #ifdef INTERPRET_BGEZAL_OUT
    gencallinterp((unsigned int)BGEZAL_OUT, 1);
@@ -447,7 +442,7 @@ void genbgezal_out()
 #endif
 }
 
-void genbgezal_idle()
+void genbgezal_idle(void)
 {
 #ifdef INTERPRET_BGEZAL_IDLE
    gencallinterp((unsigned int)BGEZAL_IDLE, 1);
@@ -466,7 +461,7 @@ void genbgezal_idle()
 #endif
 }
 
-void genbltzall()
+void genbltzall(void)
 {
 #ifdef INTERPRET_BLTZALL
    gencallinterp((unsigned int)BLTZALL, 1);
@@ -485,7 +480,7 @@ void genbltzall()
 #endif
 }
 
-void genbltzall_out()
+void genbltzall_out(void)
 {
 #ifdef INTERPRET_BLTZALL_OUT
    gencallinterp((unsigned int)BLTZALL_OUT, 1);
@@ -504,7 +499,7 @@ void genbltzall_out()
 #endif
 }
 
-void genbltzall_idle()
+void genbltzall_idle(void)
 {
 #ifdef INTERPRET_BLTZALL_IDLE
    gencallinterp((unsigned int)BLTZALL_IDLE, 1);
@@ -523,7 +518,7 @@ void genbltzall_idle()
 #endif
 }
 
-void genbgezall()
+void genbgezall(void)
 {
 #ifdef INTERPRET_BGEZALL
    gencallinterp((unsigned int)BGEZALL, 1);
@@ -542,7 +537,7 @@ void genbgezall()
 #endif
 }
 
-void genbgezall_out()
+void genbgezall_out(void)
 {
 #ifdef INTERPRET_BGEZALL_OUT
    gencallinterp((unsigned int)BGEZALL_OUT, 1);
@@ -561,7 +556,7 @@ void genbgezall_out()
 #endif
 }
 
-void genbgezall_idle()
+void genbgezall_idle(void)
 {
 #ifdef INTERPRET_BGEZALL_IDLE
    gencallinterp((unsigned int)BGEZALL_IDLE, 1);
@@ -579,3 +574,4 @@ void genbgezall_idle()
    genbgezall();
 #endif
 }
+

@@ -164,3 +164,4 @@ extern void _VIDEO_DisplayTemporaryMessage(const char *msg);
 extern void XBOX_Debugger_Log(const char *Message, ...);
 
 #endif
+

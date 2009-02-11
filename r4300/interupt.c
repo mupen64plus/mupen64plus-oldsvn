@@ -22,11 +22,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#ifdef __WIN32__
+  #ifdef _POSIX_C_SOURCE
+  #undef _POSIX_C_SOURCE
+  #endif
 #define _POSIX_C_SOURCE 199309
+#endif
+
 #include <time.h>
 #include <time.h>
 
 #include <SDL.h>
+
 #include "../main/winlnxdefs.h"
 
 #include "interupt.h"

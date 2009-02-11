@@ -22,6 +22,7 @@
 #include <stdlib.h>
 
 #include "recomp.h"
+#include "recomph.h" //include for function prototypes
 #include "macros.h"
 #include "r4300.h"
 #include "ops.h"
@@ -2572,3 +2573,4 @@ void prefetch_opcode(unsigned int op)
    src = op;
    recomp_ops[((src >> 26) & 0x3F)]();
 }
+

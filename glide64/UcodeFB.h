@@ -1064,3 +1064,4 @@ static rdp_instr gfx_instruction_lite[9][256] =
           0,         fb_settextureimage,    fb_setdepthimage,      fb_setcolorimage
         }
 };
+

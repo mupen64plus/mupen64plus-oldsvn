@@ -1,35 +1,28 @@
-/**
- * Mupen64 - regcache.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - regcache.c                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
 
 #include "regcache.h"
+
 #include "../recomp.h"
 #include "../r4300.h"
 #include "../recomph.h"
@@ -52,7 +45,7 @@ void init_cache(precomp_instr* start)
      r0 = (unsigned int*)reg;
 }
 
-void free_all_registers()
+void free_all_registers(void)
 {
 #if defined(PROFILE_R4300)
   int freestart = code_length;
@@ -147,7 +140,7 @@ void free_register(int reg)
      }
 }
 
-int lru_register()
+int lru_register(void)
 {
    unsigned int oldest_access = 0xFFFFFFFF;
    int i, reg = 0;
@@ -867,9 +860,10 @@ void build_wrappers(precomp_instr *instr, int start, int end, precomp_block* blo
      }
 }
 
-void simplify_access()
+void simplify_access(void)
 {
    int i;
    dst->local_addr = code_length;
    for(i=0; i<8; i++) dst->reg_cache_infos.needed_registers[i] = NULL;
 }
+

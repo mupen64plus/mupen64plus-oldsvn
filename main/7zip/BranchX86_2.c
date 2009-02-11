@@ -153,3 +153,4 @@ int x86_2_Decode(
   }
   return (outPos == outSize) ? BCJ2_RESULT_OK : BCJ2_RESULT_DATA_ERROR;
 }
+

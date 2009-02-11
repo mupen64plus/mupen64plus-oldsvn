@@ -173,3 +173,4 @@ XVECTOR4 Vec3Transform(XVECTOR4 *pOut, const XVECTOR3 *pV, const XMATRIX *pM);
 XMATRIX* MatrixTranspose(XMATRIX* pOut, CONST XMATRIX* pM);
 
 #endif
+

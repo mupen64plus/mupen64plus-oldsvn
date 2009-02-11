@@ -23,12 +23,16 @@
 #include "ops.h"
 #include "macros.h"
 #include "interupt.h"
+#include "../debugger/debugger.h"
 
-void BC1F()
+void BC1F(void)
 {
    if (check_cop1_unusable()) return;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -38,12 +42,15 @@ void BC1F()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1F_OUT()
+void BC1F_OUT(void)
 {
    if (check_cop1_unusable()) return;
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -53,7 +60,7 @@ void BC1F_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1F_IDLE()
+void BC1F_IDLE(void)
 {
    int skip;
    if ((FCR31 & 0x800000)==0)
@@ -66,11 +73,14 @@ void BC1F_IDLE()
    else BC1F();
 }
 
-void BC1T()
+void BC1T(void)
 {
    if (check_cop1_unusable()) return;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -80,12 +90,15 @@ void BC1T()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1T_OUT()
+void BC1T_OUT(void)
 {
    if (check_cop1_unusable()) return;
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -95,7 +108,7 @@ void BC1T_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1T_IDLE()
+void BC1T_IDLE(void)
 {
    int skip;
    if ((FCR31 & 0x800000)!=0)
@@ -108,13 +121,16 @@ void BC1T_IDLE()
    else BC1T();
 }
 
-void BC1FL()
+void BC1FL(void)
 {
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)==0)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -127,7 +143,7 @@ void BC1FL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1FL_OUT()
+void BC1FL_OUT(void)
 {
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)==0)
@@ -135,6 +151,9 @@ void BC1FL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -147,7 +166,7 @@ void BC1FL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1FL_IDLE()
+void BC1FL_IDLE(void)
 {
    int skip;
    if ((FCR31 & 0x800000)==0)
@@ -160,13 +179,16 @@ void BC1FL_IDLE()
    else BC1FL();
 }
 
-void BC1TL()
+void BC1TL(void)
 {
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)!=0)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -179,7 +201,7 @@ void BC1TL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1TL_OUT()
+void BC1TL_OUT(void)
 {
    if (check_cop1_unusable()) return;
    if ((FCR31 & 0x800000)!=0)
@@ -187,6 +209,9 @@ void BC1TL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -199,7 +224,7 @@ void BC1TL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BC1TL_IDLE()
+void BC1TL_IDLE(void)
 {
    int skip;
    if ((FCR31 & 0x800000)!=0)
@@ -211,3 +236,4 @@ void BC1TL_IDLE()
      }
    else BC1TL();
 }
+

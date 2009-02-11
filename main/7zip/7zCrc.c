@@ -50,3 +50,4 @@ UInt32 MY_FAST_CALL CrcCalc(const void *data, size_t size)
 {
   return CrcUpdate(CRC_INIT_VAL, data, size) ^ 0xFFFFFFFF;
 }
+

@@ -52,7 +52,7 @@
 #include "messagebox.h"
 #include <sys/time.h>
 
-#define G64_VERSION "Wonder Plus"
+#define G64_VERSION "Mupen64Plus"
 #define RELTIME "Date: " __DATE__ " Time: " __TIME__
 
 #ifdef EXT_LOGGING
@@ -325,7 +325,7 @@ void ReadSettings ()
   INI_Close ();
 }
 
-void ReadSpecialSettings (char name[21])
+void ReadSpecialSettings (const char name[21])
 {
   //  char buf [256];
   //  sprintf(buf, "ReadSpecialSettings. Name: %s\n", name);
@@ -762,7 +762,7 @@ BOOL InitGfx (BOOL evoodoo_using_window)
   
   // get the # of TMUs available
   grGet (GR_NUM_TMU, 4, (FxI32 *) &num_tmu);
-  printf("num_tmu %ld\n", num_tmu);
+  printf("num_tmu %d\n", num_tmu);
   // get maximal texture size
   grGet (GR_MAX_TEXTURE_SIZE, 4, (FxI32 *) &max_tex_size);
   //num_tmu = 1;
@@ -1053,7 +1053,7 @@ EXPORT void CALL DllAbout ( HWND hParent )
 {
    messagebox("Glide64 v"G64_VERSION, MB_OK,
           "Glide64 "G64_VERSION"\nRelease: " RELTIME "\n" 
-          "by Gonetz\nOriginal author: Dave2001\nOther developers: Gugaman\n\n"
+          "by GuentherB, Richard42, Gonetz, Dave2001, Gugaman, and others\n\n"
           "Beta testers: Raziel64, Federelli, Flash\n\n"
           "Special thanks to:\n"
           "Niki, FiRES, Icepir8, Rice, ZeZu, Azimer, Hacktarux, Cyberman, LoneRaven, Falcon4ever,\n"
@@ -1683,3 +1683,4 @@ do_it:
   return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 #endif
+

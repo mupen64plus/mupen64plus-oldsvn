@@ -26,17 +26,22 @@
  * if you want to implement an interface, you should look here
  */
  
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#define _7ZIP_UINT32_DEFINED // avoid stupid conflicts between native types and 7zip types
+#endif
+ 
 #ifndef __WIN32__
 # include <ucontext.h> // extra signal types (for portability)
 # include <libgen.h> // basename, dirname
 #endif
 
 #include <sys/time.h>
+#include <sys/stat.h> /* mkdir() */
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>  // POSIX macros and standard types.
-#include <pthread.h> // POSIX thread library
 #include <signal.h> // signals
 #include <getopt.h> // getopt_long
 #include <dirent.h>
@@ -44,6 +49,7 @@
 #include <png.h>    // for writing screenshot PNG files
 
 #include <SDL.h>
+#include <SDL_thread.h>
 
 #include "main.h"
 #include "version.h"
@@ -65,6 +71,10 @@
 #include "../opengl/osd.h"
 #include "../opengl/screenshot.h"
 
+#ifndef NO_GUI
+#include "gui.h"
+#endif
+
 #ifdef DBG
 #include <glib.h>
 #include "../debugger/debugger.h"
@@ -74,11 +84,40 @@
 #include "lirc.h"
 #endif //WITH_LIRC
 
+#ifdef __APPLE__
+// dynamic data path detection onmac
+bool macSetBundlePath(char* buffer)
+{
+    printf("checking whether we are using an app bundle... ");
+    // the following code will enable mupen to find its plugins when placed in an app bundle on mac OS X.
+    // returns true if path is set, returns false if path was not set
+    char path[1024];
+    CFBundleRef main_bundle = CFBundleGetMainBundle(); assert(main_bundle);
+    CFURLRef main_bundle_URL = CFBundleCopyBundleURL(main_bundle); assert(main_bundle_URL);
+    CFStringRef cf_string_ref = CFURLCopyFileSystemPath( main_bundle_URL, kCFURLPOSIXPathStyle); assert(cf_string_ref);
+    CFStringGetCString(cf_string_ref, path, 1024, kCFStringEncodingASCII);
+    CFRelease(main_bundle_URL);
+    CFRelease(cf_string_ref);
+    
+    if(strstr( path, ".app" ) != 0)
+    {
+        printf("yes\n");
+        // executable is inside an app bundle, use app bundle-relative paths
+        sprintf(buffer, "%s/Contents/Resources/", path);
+        return true;
+    }
+    else
+    {
+        printf("no\n");
+        return false;
+    }
+}
+#endif
+
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
-static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
-static void *emulationThread( void *_arg );
-extern void *rom_cache_system(void *_arg);
+static int emulationThread( void *_arg );
+extern int rom_cache_system( void *_arg );
 
 
 #ifdef __WIN32__
@@ -87,12 +126,14 @@ static void sighandler( int signal );
 static void sighandler( int signal, siginfo_t *info, void *context );
 #endif
 
+/** threads **/
+SDL_Thread * g_EmulationThread;         // core thread handle
+SDL_Thread * g_RomCacheThread;          // rom cache thread handle
+
 /** globals **/
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
-pthread_t   g_EmulationThread;      // core thread handle
-pthread_t   g_RomCacheThread;       // rom cache thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_Fullscreen = 0;           // fullscreen enabled?
@@ -179,7 +220,7 @@ void main_message(unsigned int console, unsigned int statusbar, unsigned int osd
         osd_new_message(osd_corner, buffer);
 #ifndef NO_GUI
     if (l_GuiEnabled && statusbar)
-        gui_message(0, buffer);
+        gui_message(GUI_MESSAGE_INFO, buffer);
 #endif
     if (console)
         printf("%s\n", buffer);
@@ -196,7 +237,7 @@ void error_message(const char *format, ...)
 
 #ifndef NO_GUI
     if (l_GuiEnabled)
-        gui_message(1, buffer);
+        gui_message(GUI_MESSAGE_ERROR, buffer);
 #endif
     printf("%s: %s\n", tr("Error"), buffer);
 }
@@ -348,7 +389,10 @@ void startEmulation(void)
         return;
     }
 
-    // make sure all plugins are specified before running
+    /* Determine which plugins to use:
+    *  -If valid plugin was specified at the commandline, use it
+    *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
+    */
     if(g_GfxPlugin)
     {
         gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
@@ -397,6 +441,12 @@ void startEmulation(void)
         return;
     }
 
+    // load the plugins. Do this outside the emulation thread for GUI
+    // related things which cannot be done outside the main thread.
+    // Examples: GTK Icon theme setup in Rice which otherwise hangs forever
+    // with the Qt4 interface.
+    plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
+
     // in nogui mode, just start the emulator in the main thread
     if(!l_GuiEnabled)
     {
@@ -405,12 +455,14 @@ void startEmulation(void)
     else if(!g_EmulatorRunning)
     {
         // spawn emulation thread
-        if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
+        g_EmulationThread = SDL_CreateThread(emulationThread, NULL);
+        if(g_EmulationThread == NULL)
         {
+            printf("Unable to create thread: %s\n", SDL_GetError());
             error_message(tr("Couldn't spawn core thread!"));
             return;
         }
-        pthread_detach(g_EmulationThread);
+
         main_message(0, 1, 0, OSD_BOTTOM_LEFT,  tr("Emulation started (PID: %d)"), g_EmulationThread);
     }
     // if emulation is already running, but it's paused, unpause it
@@ -418,32 +470,37 @@ void startEmulation(void)
     {
         main_pause();
     }
-
-#ifndef NO_GUI
-    g_romcache.rcspause = 1;
-#endif
 }
 
 void stopEmulation(void)
 {
     if(g_EmulatorRunning)
     {
-#ifndef NO_GUI
-        g_romcache.rcspause = 0;
-#endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Stopping emulation.\n"));
         rompause = 0;
         stop_it();
+#ifdef DBG
+        if(debugger_mode)
+        {
+            
+            debugger_step();
+        }
+#endif        
 
         // wait until emulation thread is done before continuing
         if(g_EmulatorRunning)
-            pthread_join(g_EmulationThread, NULL);
+            SDL_WaitThread(g_EmulationThread, NULL);
 
 #ifdef __WIN32__
         plugin_close_plugins();
 #endif
-
         g_EmulatorRunning = 0;
+        g_EmulationThread = 0;
+
+#ifndef NO_GUI
+        gui_set_state(GUI_STATE_STOPPED);
+        g_romcache.rcspause = 0;
+#endif
 
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation stopped.\n"));
     }
@@ -459,6 +516,7 @@ int pauseContinueEmulation(void)
     if (rompause)
     {
 #ifndef NO_GUI
+        gui_set_state(GUI_STATE_RUNNING);
         g_romcache.rcspause = 1;
 #endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
@@ -471,6 +529,7 @@ int pauseContinueEmulation(void)
     else
     {
 #ifndef NO_GUI
+        gui_set_state(GUI_STATE_PAUSED);
         g_romcache.rcspause = 0;
 #endif
         if(msg)
@@ -595,6 +654,7 @@ static int sdl_event_filter( const SDL_Event *event )
 {
     static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
+    static BYTE StopRumble[6] = {0x23, 0x01, 0x03, 0xc0, 0x1b, 0x00};
     char *event_str = NULL;
 
     switch( event->type )
@@ -604,114 +664,93 @@ static int sdl_event_filter( const SDL_Event *event )
             stopEmulation();
             break;
         case SDL_KEYDOWN:
-            switch( event->key.keysym.sym )
+            /* check for the only 2 hard-coded key commands: Alt-enter for fullscreen and 0-9 for save state slot */
+            if (event->key.keysym.sym == SDLK_RETURN && event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
             {
-                case SDLK_ESCAPE:
-                    stopEmulation();
-                    break;
-                case SDLK_RETURN:
-                    // Alt+Enter toggles fullscreen
-                    if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
-                        changeWindow();
-                    break;
-                case SDLK_F5:
-                    savestates_job |= SAVESTATE;
-                    break;
-                case SDLK_F7:
-                    savestates_job |= LOADSTATE;
-                    break;
-                case SDLK_F9:
-                    add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
-                    add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
-                    break;
-                case SDLK_F10:
-                    main_speeddown(5);
-                    break;
-                case SDLK_F11:
-                    main_speedup(5);
-                    break;
-                case SDLK_F12:
-                    // set flag so that screenshot will be taken at the end of frame rendering
-                    take_next_screenshot();
-                    break;
-
-                // Pause
-                case SDLK_PAUSE:
-                    main_pause();
-                    break;
-
-                default:
-                    switch (event->key.keysym.unicode)
-                    {
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            savestates_select_slot( event->key.keysym.unicode - '0' );
-                            break;
-                        // volume mute/unmute
-                        case 'm':
-                        case 'M':
-                            volumeMute();
-                            main_draw_volume_osd();
-                            break;
-                        // increase volume
-                        case ']':
-                            volumeUp();
-                            main_draw_volume_osd();
-                            break;
-                        // decrease volume
-                        case '[':
-                            volumeDown();
-                            main_draw_volume_osd();
-                            break;
-                        // fast-forward
-                        case 'f':
-                        case 'F':
-                            SavedSpeedFactor = l_SpeedFactor;
-                            l_SpeedFactor = 250;
-                            setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                            // set fast-forward indicator
-                            msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
-                            osd_message_set_static(msgFF);
-                            break;
-                        // frame advance
-                        case '/':
-                        case '?':
-                            main_advance_one();
-                            break;
-
-                        // pass all other keypresses to the input plugin
-                        default:
-                            keyDown( 0, event->key.keysym.sym );
-                    }
+                changeWindow();
             }
+            else if (event->key.keysym.unicode >= '0' && event->key.keysym.unicode <= '9')
+            {
+                savestates_select_slot( event->key.keysym.unicode - '0' );
+            }
+            /* check all of the configurable commands */
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Stop", SDLK_ESCAPE))
+                stopEmulation();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Fullscreen", 0))
+                changeWindow();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Save State", SDLK_F5))
+                savestates_job |= SAVESTATE;
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Load State", SDLK_F7))
+            {
+                savestates_job |= LOADSTATE;
+                controllerCommand(0, StopRumble);
+                controllerCommand(1, StopRumble);
+                controllerCommand(2, StopRumble);
+                controllerCommand(3, StopRumble);
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Increment Slot", 0))
+                savestates_inc_slot();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Reset", SDLK_F9))
+            {
+                add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Speed Down", SDLK_F10))
+                main_speeddown(5);
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Speed Up",SDLK_F11))
+                main_speedup(5);
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Screenshot", SDLK_F12))
+                // set flag so that screenshot will be taken at the end of frame rendering
+                take_next_screenshot();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Pause", SDLK_p))
+                main_pause();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Mute", SDLK_m))
+            {
+                volumeMute();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Increase Volume", SDLK_RIGHTBRACKET))
+            {
+                volumeUp();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Decrease Volume", SDLK_LEFTBRACKET))
+            {
+                volumeDown();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Fast Forward", SDLK_f))
+            {
+                SavedSpeedFactor = l_SpeedFactor;
+                l_SpeedFactor = 250;
+                setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                // set fast-forward indicator
+                msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
+                osd_message_set_static(msgFF);
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Frame Advance", SDLK_SLASH))
+                main_advance_one();
+            // pass all other keypresses to the input plugin
+            else keyDown( 0, event->key.keysym.sym );
+
             return 0;
-            break;
 
         case SDL_KEYUP:
-            switch( event->key.keysym.sym )
+            if(event->key.keysym.sym == config_get_number("Kbd Mapping Stop", SDLK_ESCAPE))
             {
-                case SDLK_ESCAPE:
-                    break;
-                case SDLK_f:
-                    // cancel fast-forward
-                    l_SpeedFactor = SavedSpeedFactor;
-                    setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                    // remove message
-                    osd_delete_message(msgFF);
-                    break;
-                default:
-                    keyUp( 0, event->key.keysym.sym );
+                return 0;
             }
+            else if(event->key.keysym.sym == config_get_number("Kbd Mapping Fast Forward", SDLK_f))
+            {
+                // cancel fast-forward
+                l_SpeedFactor = SavedSpeedFactor;
+                setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                // remove message
+                osd_delete_message(msgFF);
+            }
+            else keyUp( 0, event->key.keysym.sym );
+
             return 0;
-            break;
 
         // if joystick action is detected, check if it's mapped to a special function
         case SDL_JOYAXISMOTION:
@@ -750,7 +789,7 @@ static int sdl_event_filter( const SDL_Event *event )
             }
             else if(strcmp(event_str, config_get_string("Joy Mapping Increase Volume", "")) == 0)
             {
-                volumeUp;
+                volumeUp();
                 main_draw_volume_osd();
             }
 
@@ -765,9 +804,9 @@ static int sdl_event_filter( const SDL_Event *event )
 /*********************************************************************************************************
 * emulation thread - runs the core
 */
-static void * emulationThread( void *_arg )
+static int emulationThread( void *_arg )
 {
-#ifndef __WIN32__
+#if !defined(__WIN32__)
     struct sigaction sa;
 #endif
     const char *gfx_plugin = NULL,
@@ -779,7 +818,7 @@ static void * emulationThread( void *_arg )
     // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
     if (l_GuiEnabled)
     {
-#ifdef __WIN32__
+#if defined(__WIN32__)
         signal( SIGSEGV, sighandler );
         signal( SIGILL, sighandler );
         signal( SIGFPE, sighandler );
@@ -791,11 +830,10 @@ static void * emulationThread( void *_arg )
         sigaction( SIGILL, &sa, NULL );
         sigaction( SIGFPE, &sa, NULL );
         sigaction( SIGCHLD, &sa, NULL );
-#endif
+#endif 
     }
 
     g_EmulatorRunning = 1;
-
     // if emu mode wasn't specified at the commandline, set from config file
     if(!l_EmuMode)
         dynacore = config_get_number( "Core", CORE_DYNAREC );
@@ -814,30 +852,6 @@ static void * emulationThread( void *_arg )
     SDL_SetEventFilter(sdl_event_filter);
     SDL_EnableUNICODE(1);
 
-    /* Determine which plugins to use:
-     *  -If valid plugin was specified at the commandline, use it
-     *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
-     */
-    if(g_GfxPlugin)
-        gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
-    else
-        gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
-
-    if(g_AudioPlugin)
-        audio_plugin = plugin_name_by_filename(g_AudioPlugin);
-    else
-        audio_plugin = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
-
-    if(g_InputPlugin)
-        input_plugin = plugin_name_by_filename(g_InputPlugin);
-    else
-        input_plugin = plugin_name_by_filename(config_get_string("Input Plugin", ""));
-
-    if(g_RspPlugin)
-        RSP_plugin = plugin_name_by_filename(g_RspPlugin);
-    else
-        RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
-
     // initialize memory, and do byte-swapping if it's not been done yet
     if (g_MemHasBeenBSwapped == 0)
     {
@@ -849,8 +863,7 @@ static void * emulationThread( void *_arg )
         init_memory(0);
     }
 
-    // load the plugins and attach the ROM to them
-    plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
+    // Attach rom to plugins
     romOpen_gfx();
     romOpen_audio();
     romOpen_input();
@@ -876,17 +889,24 @@ static void * emulationThread( void *_arg )
     // setup rendering callback from video plugin to the core, for screenshots and On-Screen-Display
     setRenderingCallback(video_plugin_render_callback);
 
+#ifndef NO_GUI
+    gui_set_state(GUI_STATE_RUNNING);
+    g_romcache.rcspause = 1;
+#endif
+
 #ifdef WITH_LIRC
     lircStart();
 #endif // WITH_LIRC
 
 #ifdef DBG
-    if( g_DebuggerEnabled )
+    if (g_DebuggerEnabled)
         init_debugger();
 #endif
-    // load cheats for the current rom
+
+    /* load cheats for the current rom  */
     cheat_load_current_rom();
 
+    /* Startup message on the OSD */
     osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
 
     /* call r4300 CPU core and run the game */
@@ -897,6 +917,11 @@ static void * emulationThread( void *_arg )
 #ifdef WITH_LIRC
     lircStop();
 #endif // WITH_LIRC
+
+#ifdef DBG
+    if (debugger_mode)
+        destroy_debugger();
+#endif
 
     if (g_OsdEnabled)
     {
@@ -919,16 +944,7 @@ static void * emulationThread( void *_arg )
 
     SDL_Quit();
 
-    if (l_Filename != 0)
-    {
-        // the following doesn't work - it wouldn't exit immediately but when the next event is
-        // recieved (i.e. mouse movement)
-/*      gdk_threads_enter();
-        gtk_main_quit();
-        gdk_threads_leave();*/
-    }
-
-    return NULL;
+    return 0;
 }
 
 /*********************************************************************************************************
@@ -942,75 +958,72 @@ static void sighandler(int signal)
 #else
 static void sighandler(int signal, siginfo_t *info, void *context)
 {
-    if( info->si_pid == g_EmulationThread )
+    SDL_Thread *emuThread = g_EmulationThread;
+
+    switch( signal )
     {
-        switch( signal )
-        {
-            case SIGSEGV:
-                error_message(tr("The core thread recieved a SIGSEGV signal.\n"
-                                "This means it tried to access protected memory.\n"
-                                "Maybe you have set a wrong ucode for one of the plugins!"));
-                printf( "SIGSEGV in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+        case SIGSEGV:
+            error_message(tr("The core thread recieved a SIGSEGV signal.\n"
+                            "This means it tried to access protected memory.\n"
+                            "Maybe you have set a wrong ucode for one of the plugins!"));
+            printf( "SIGSEGV in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
 #ifdef SEGV_MAPERR
-                switch( info->si_code )
-                {
-                    case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
-                    case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
-                }
+            switch( info->si_code )
+            {
+                case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
+                case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
+            }
 #endif
-                break;
-            case SIGILL:
-                printf( "SIGILL in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+            break;
+        case SIGILL:
+            printf( "SIGILL in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
 #ifdef ILL_ILLOPC
-                switch( info->si_code )
-                {
-                    case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
-                    case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
-                    case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
-                    case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
-                    case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
-                    case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
-                    case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
-                    case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
-                }
+            switch( info->si_code )
+            {
+                case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
+                case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
+                case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
+                case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
+                case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
+                case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
+                case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
+                case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
+            }
 #endif
-                break;
-            case SIGFPE:
-                printf( "SIGFPE in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-                switch( info->si_code )
-                {
-                    case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
-                    case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
-                    case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
-                    case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
-                    case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
-                    case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
-                    case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
-                    case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
-                }
-                break;
-            default:
-                printf( "Signal number %d in core thread caught:\n", signal );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        }
-        pthread_cancel(g_EmulationThread);
-        g_EmulationThread = 0;
-        g_EmulatorRunning = 0;
+            break;
+        case SIGFPE:
+            printf( "SIGFPE in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+            switch( info->si_code )
+            {
+                case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
+                case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
+                case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
+                case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
+                case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
+                case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
+                case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
+                case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
+            }
+            break;
+        default:
+            printf( "Signal number %d in core thread caught:\n", signal );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
     }
-    else
-    {
-        printf( "Signal number %d caught:\n", signal );
-        printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        exit( EXIT_FAILURE );
-    }
+
+    g_EmulationThread = 0;
+    g_EmulatorRunning = 0;
+
+    if (emuThread != NULL)
+        SDL_KillThread(emuThread);
 }
 #endif /* __WIN32__ */
+
 
 static void printUsage(const char *progname)
 {
@@ -1294,6 +1307,11 @@ static void setPaths(void)
     // if install dir was not specified at the commandline, look for it in the executable's directory
     if (strlen(l_InstallDir) == 0)
     {
+#ifdef __APPLE__
+        macSetBundlePath(buf);
+        strncpy(l_InstallDir, buf, PATH_MAX);
+        strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
+#else
         buf[0] = '\0';
         int n = readlink("/proc/self/exe", buf, PATH_MAX);
         if (n > 0)
@@ -1303,6 +1321,7 @@ static void setPaths(void)
             strncpy(l_InstallDir, buf, PATH_MAX);
             strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
         }
+#endif
         // if it's not in the executable's directory, try a couple of default locations
         if (buf[0] == '\0' || !isfile(buf))
         {
@@ -1395,6 +1414,7 @@ int main(int argc, char *argv[])
 {
     char dirpath[PATH_MAX];
     int i;
+    int retval = EXIT_SUCCESS;
     printf(" __  __                         __   _  _   ____  _             \n");  
     printf("|  \\/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \\| |_   _ ___ \n");
     printf("| |\\/| | | | | '_ \\ / _ \\ '_ \\| '_ \\| || |_| |_) | | | | / __|  \n");
@@ -1450,8 +1470,9 @@ int main(int argc, char *argv[])
 
     cheat_read_config();
 
-    // try to get plugin folder path from the mupen64plus config file
+    // try to get plugin folder path from the mupen64plus config file (except on mac where app bundles may be used)
     strncpy(dirpath, config_get_string("PluginDirectory", ""), PATH_MAX-1);
+        
     dirpath[PATH_MAX-1] = '\0';
     // if it's not set in the config file, use the /plugins/ sub-folder of the installation directory
     if (strlen(dirpath) < 2)
@@ -1462,7 +1483,7 @@ int main(int argc, char *argv[])
     }
     // scan the plugin directory and set the config dir for the plugins
     plugin_scan_directory(dirpath);
-    plugin_set_configdir(l_ConfigDir);
+    plugin_set_dirs(l_ConfigDir, l_InstallDir);
 
 #ifndef NO_GUI
     if(l_GuiEnabled)
@@ -1489,73 +1510,55 @@ int main(int argc, char *argv[])
 #ifndef NO_GUI
     // only create the ROM Cache Thread if GUI is enabled
     if (l_GuiEnabled)
-    {
-        pthread_attr_t tattr;
-        int ret;
-        int newprio = 80;
-        struct sched_param param;
-        pthread_attr_init (&tattr);
-        pthread_attr_getschedparam (&tattr, &param);
-        param.sched_priority = newprio;
-        pthread_attr_setschedparam (&tattr, &param);
+    {  
         g_romcache.rcstask = RCS_INIT;
-        if(pthread_create(&g_RomCacheThread, &tattr, rom_cache_system, &tattr)!=0)
-            {
+        g_RomCacheThread = SDL_CreateThread(rom_cache_system, NULL);
+        
+        if(g_RomCacheThread == NULL)
+        {
             error_message(tr("Couldn't spawn rom cache thread!"));
-            }
-        else
-           pthread_detach(g_RomCacheThread);
+        }
     }
 
     // only display gui if user wants it
-    if(l_GuiEnabled)
+    if (l_GuiEnabled)
         gui_display();
 #endif
 
     // if rom file was specified, run it
     if (l_Filename)
     {
-        if(open_rom(l_Filename, l_RomNumber) < 0 && !l_GuiEnabled)
+        if (open_rom(l_Filename, l_RomNumber) >= 0)
         {
-            // cleanup and exit
-            cheat_delete_all();
-#ifndef NO_GUI
-            g_romcache.rcstask = RCS_SHUTDOWN;
-#endif
-            romdatabase_close();
-            plugin_delete_list();
-            tr_delete_languages();
-            config_delete();
-            exit(1);
+            startEmulation();
         }
-
-        startEmulation();
+        else if (!l_GuiEnabled)
+        {
+            retval = 1;
+        }
     }
     // Rom file must be specified in nogui mode
-    else if(!l_GuiEnabled)
+    else if (!l_GuiEnabled)
     {
         error_message("Rom file must be specified in nogui mode.");
         printUsage(argv[0]);
-
-        // cleanup and exit
-        cheat_delete_all();
-        romdatabase_close();
-        plugin_delete_list();
-        tr_delete_languages();
-        config_delete();
-        exit(1);
+        retval = 1;
     }
 
 #ifndef NO_GUI
     // give control of this thread to the gui
-    if(l_GuiEnabled)
+    if (l_GuiEnabled)
+    {
         gui_main_loop();
+        stopEmulation();
+    }
+#endif
+
     // free allocated memory
     if (l_TestShotList != NULL)
         free(l_TestShotList);
 
     // cleanup and exit
-    stopEmulation();
     config_write();
 
 /**  Disabling as it seems to be causing some problems
@@ -1565,13 +1568,15 @@ int main(int argc, char *argv[])
 **/
 //    cheat_write_config();
     cheat_delete_all();
+#ifndef NO_GUI
     g_romcache.rcstask = RCS_SHUTDOWN;
+#endif
     romdatabase_close();
     plugin_delete_list();
     tr_delete_languages();
     config_delete();
-#endif
-    return EXIT_SUCCESS;
+
+    return retval;
 }
 
 #ifdef __WIN32__
@@ -1611,3 +1616,4 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParama
     return main(i, argv);
 }
 #endif
+

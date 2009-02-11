@@ -1,32 +1,27 @@
-/*
- * Mupen64Plus main/gui_gtk/debugger/regTLB.c
- * 
- * Copyright (C) 2002 davFr - robind@esiee.fr
- *
- * Mupen64Plus homepage: http://code.google.com/p/mupen64plus/
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - regTLB.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 davFr                                              *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "regTLB.h"
-#include <pthread.h>
 
 static GtkWidget *clTLBentries;
-
 static tlb  gui_fantom_tlb_entry[32];
 
 static void on_close();
@@ -41,7 +36,6 @@ static char *mnemonicTLB[]=
     "START_odd",    "END_odd",  "PHYS_odd",
 };
 
-
 //]=-=-=-=-=-=-=-=-=-=-=[ Initialisation of TLB Display ]=-=-=-=-=-=-=-=-=-=-=[
 
 void init_TLB()
@@ -49,7 +43,7 @@ void init_TLB()
     GtkWidget *boxH1,
             *boxV1,
                 *labTLB[32];
-    
+
     int i;
     char **txt;
     txt=malloc( 19*sizeof(char*) );
@@ -181,13 +175,13 @@ void update_TLB()
             gui_fantom_tlb_entry[i].mask    = tlb_e[i].mask;
             sprintf( txt[0], "%hX", tlb_e[i].mask);
             gui_fantom_tlb_entry[i].vpn2    = tlb_e[i].vpn2;
-            sprintf( txt[1], "%lX", tlb_e[i].vpn2);
+            sprintf( txt[1], "%X", tlb_e[i].vpn2);
             gui_fantom_tlb_entry[i].g   = tlb_e[i].g;
             sprintf( txt[2], "%hhX", tlb_e[i].g);
             gui_fantom_tlb_entry[i].asid    = tlb_e[i].asid;
             sprintf( txt[3], "%hhX", tlb_e[i].asid);
             gui_fantom_tlb_entry[i].pfn_even= tlb_e[i].pfn_even;
-            sprintf( txt[4], "%lX", tlb_e[i].pfn_even);
+            sprintf( txt[4], "%X", tlb_e[i].pfn_even);
             gui_fantom_tlb_entry[i].c_even  = tlb_e[i].c_even;
             sprintf( txt[5], "%hhX", tlb_e[i].c_even);
             gui_fantom_tlb_entry[i].d_even  = tlb_e[i].d_even;
@@ -195,7 +189,7 @@ void update_TLB()
             gui_fantom_tlb_entry[i].v_even  = tlb_e[i].v_even;
             sprintf( txt[7], "%hhX", tlb_e[i].v_even);
             gui_fantom_tlb_entry[i].pfn_odd = tlb_e[i].pfn_odd;
-            sprintf( txt[8], "%lX", tlb_e[i].pfn_odd);
+            sprintf( txt[8], "%X", tlb_e[i].pfn_odd);
             gui_fantom_tlb_entry[i].c_odd   = tlb_e[i].c_odd;
             sprintf( txt[9], "%hhX", tlb_e[i].c_odd);
             gui_fantom_tlb_entry[i].d_odd   = tlb_e[i].d_odd;
@@ -205,20 +199,20 @@ void update_TLB()
             gui_fantom_tlb_entry[i].r   = tlb_e[i].r;
             sprintf( txt[12], "%hhX", tlb_e[i].r);
     //gui_fantom_tlb_entry[i].check_parity_mask = tlb_e[i].check_parity_mask; NOT USED?
-        
+
             gui_fantom_tlb_entry[i].start_even = tlb_e[i].start_even;
-            sprintf( txt[13], "%lX", tlb_e[i].start_even);
+            sprintf( txt[13], "%X", tlb_e[i].start_even);
             gui_fantom_tlb_entry[i].end_even   = tlb_e[i].end_even;
-            sprintf( txt[14], "%lX", tlb_e[i].end_even);
+            sprintf( txt[14], "%X", tlb_e[i].end_even);
             gui_fantom_tlb_entry[i].phys_even  = tlb_e[i].phys_even;
-            sprintf( txt[15], "%lX", tlb_e[i].phys_even);
+            sprintf( txt[15], "%X", tlb_e[i].phys_even);
             gui_fantom_tlb_entry[i].start_odd  = tlb_e[i].start_odd;
-            sprintf( txt[16], "%lX", tlb_e[i].start_odd);
+            sprintf( txt[16], "%X", tlb_e[i].start_odd);
             gui_fantom_tlb_entry[i].end_odd    = tlb_e[i].end_odd;
-            sprintf( txt[17], "%lX", tlb_e[i].end_odd);
+            sprintf( txt[17], "%X", tlb_e[i].end_odd);
             gui_fantom_tlb_entry[i].phys_odd   = tlb_e[i].phys_odd;
-            sprintf( txt[18], "%lX", tlb_e[i].phys_odd);
-    
+            sprintf( txt[18], "%X", tlb_e[i].phys_odd);
+
             gtk_clist_insert( GTK_CLIST(clTLBentries), i, txt);
             gtk_clist_set_background( GTK_CLIST(clTLBentries), i, &color_modif);
         }
@@ -242,3 +236,4 @@ static void on_close()
 {
     regTLB_opened = 0;
 }
+

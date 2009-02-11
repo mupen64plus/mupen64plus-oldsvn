@@ -104,3 +104,4 @@ extern u32 loopval; // Value set by A_SETLOOP : Possible conflict with SETVOLUME
 //extern u32 UCData, UDataLen;
 
 #endif
+

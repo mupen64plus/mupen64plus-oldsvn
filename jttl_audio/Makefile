@@ -23,6 +23,7 @@
 # include pre-make file with a bunch of definitions
 USES_GTK2 = true
 include ../pre.mk
+-include ../configure.gen
 
 # test for presence of libsamplerate
 ifneq ($(strip $(shell pkg-config samplerate --modversion 2> /dev/null)),)
@@ -32,15 +33,15 @@ ifneq ($(strip $(shell pkg-config samplerate --modversion 2> /dev/null)),)
     SRC_LIBS	= `pkg-config samplerate --libs`
   else
     # clear libsamplerate flags and libraries
-    SRC_FLAGS	= 
-    SRC_LIBS	= 
+    SRC_FLAGS	=
+    SRC_LIBS	=
   endif
 else
   # warn user
   $(warning No libsamplerate development libraries found.  jttl_audio will be built without Best Quality SINC resampler.)
   # clear libsamplerate flags and libraries
-  SRC_FLAGS	= 
-  SRC_LIBS	= 
+  SRC_FLAGS	=
+  SRC_LIBS	=
 endif
 
 # local CFLAGS, LIBS, and LDFLAGS
@@ -50,13 +51,23 @@ CFLAGS += -fpic -DPIC
 OBJECTS = main.o volume.o
 
 ifneq ($(findstring $(GUI), GTK2 QT4),)
-  CFLAGS += $(GTK_FLAGS) -DUSE_GTK
+  CFLAGS += $(GTK_FLAGS)
   PLUGIN_LDFLAGS += $(GTK_LIBS)
   OBJECTS += gui_gtk2.o
 endif
 
 ifeq ($(GUI),NONE)
-  OBJECTS += nogui.o
+  OBJECTS += gui_none.o
+endif
+
+ifeq ($(DBGSYM), 1)
+  STRIP=true
+  CFLAGS += -g
+  LDFLAGS += -g
+endif
+
+ifeq ($(PLUGINDBG), 1)
+  CFLAGS += -DDEBUG
 endif
 
 # build targets
@@ -66,7 +77,7 @@ clean:
 	rm -f *.o *.so
 
 # build rules
-version.h: .svn/entries
+version.h: FORCE
 	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
         ../main/version.template > version.h
 	@$(MV) version.h ../main/version.h
@@ -77,4 +88,6 @@ version.h: .svn/entries
 jttl_audio.so: $(OBJECTS)
 	$(CC) $^ $(LDFLAGS) $(PLUGIN_LDFLAGS) $(SDL_LIBS) $(SRC_LIBS) -o $@
 	$(STRIP) $@
+
+FORCE:
 

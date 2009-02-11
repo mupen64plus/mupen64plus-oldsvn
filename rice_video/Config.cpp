@@ -528,7 +528,7 @@ bool isMMXSupported()
          "pop %%ebx            \n"
          : "=d"(IsMMXSupported)
          :
-         : "memory", "cc", "eax"
+         : "memory", "cc", "eax", "ecx"
          );
 #endif
     if (IsMMXSupported != 0) 
@@ -560,7 +560,7 @@ bool isSSESupported()
          "pop %%ebx                        \n"
          : "=d"(SSESupport)
          :
-         : "memory", "cc"
+         : "memory", "cc", "eax", "ecx"
          );
 # endif
     
@@ -722,12 +722,14 @@ void ReadConfiguration(void)
     }
 
     status.isSSEEnabled = status.isSSESupported && options.bEnableSSE;
+#if !defined(NO_ASM)
     if( status.isSSEEnabled )
     {
         ProcessVertexData = ProcessVertexDataSSE;
         printf("[RiceVideo] SSE processing enabled.\n");
     }
     else
+#endif
     {
         ProcessVertexData = ProcessVertexDataNoSSE;
         printf("[RiceVideo] Disabled SSE processing.\n");
@@ -1975,74 +1977,6 @@ int FindIniEntry(uint32 dwCRC1, uint32 dwCRC2, uint8 nCountryID, char* szName)
 
 GameSetting g_curRomInfo;
 
-// Swap bytes from 80 37 12 40
-// to              40 12 37 80
-void ROM_ByteSwap_3210(void *v, uint32 dwLen)
-{
-#if defined(__INTEL_COMPILER) && !defined(NO_ASM)
-    __asm
-    {
-        mov     esi, v
-        mov     edi, v
-        mov     ecx, dwLen
-
-        add     edi, ecx
-top:
-        mov     al, byte ptr [esi + 0]
-        mov     bl, byte ptr [esi + 1]
-        mov     cl, byte ptr [esi + 2]
-        mov     dl, byte ptr [esi + 3]
-
-        mov     byte ptr [esi + 0], dl      //3
-        mov     byte ptr [esi + 1], cl      //2
-        mov     byte ptr [esi + 2], bl      //1
-        mov     byte ptr [esi + 3], al      //0
-
-        add     esi, 4
-        cmp     esi, edi
-        jne     top
-    }
-#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
-  asm volatile("0:                               "
-               " movl       (%0), %%eax;         "
-               " bswap     %%eax;                "
-               " movl      %%eax,  (%0);         "
-               " add          $4,    %0;         "
-               " decl        %k1;                "
-               " jne          0b;                "
-               : "+r"(v), "+r"(dwLen)
-               :
-               : "memory", "cc", "%eax"
-               );
-#elif !defined(NO_ASM) // GCC assumed
-   asm volatile(
-        "push           %%ebx          \n"
-        "add        %%ecx, %%edi   \n"
-
-        //top:
-        "0:                            \n"
-        "mov        0(%%esi), %%al \n"
-        "mov        1(%%esi), %%bl \n"
-        "mov        2(%%esi), %%cl \n"
-        "mov        3(%%esi), %%dl \n"
-        
-        "mov        %%dl, 0(%%esi) \n"      //3
-        "mov        %%cl, 1(%%esi) \n"      //2
-        "mov        %%bl, 2(%%esi) \n"      //1
-        "mov        %%al, 3(%%esi) \n"      //0
-        
-        "add        $4, %%esi      \n"
-        "cmp        %%edi, %%esi   \n"
-        "jne        0b             \n"
-        
-        "pop %%ebx  \n"
-        :
-        : "S"(v), "D"(v), "c"(dwLen)
-        : "memory", "cc", "eax", "edx"
-        );
-#endif
-}
-
 void ROM_GetRomNameFromHeader(TCHAR * szName, ROMHeader * pHdr)
 {
     TCHAR * p;
@@ -2278,9 +2212,12 @@ for (i=0; (size_t)i<sizeof(colorQualitySettings)/sizeof(SettingInfo); i++)
 options.colorQuality = colorQualitySettings[i].setting;
 options.bEnableSSE = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->enableSSECheckButton));
 status.isSSEEnabled = status.isSSESupported && options.bEnableSSE;
+
+#if !defined(NO_ASM)
 if (status.isSSEEnabled) 
    ProcessVertexData = ProcessVertexDataSSE;
 else
+#endif
    ProcessVertexData = ProcessVertexDataNoSSE;
 
 options.bSkipFrame = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(configDialog->skipFrameCheckButton));

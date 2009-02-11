@@ -25,12 +25,16 @@
 #include "macros.h"
 
 #include "../memory/memory.h"
+#include "../debugger/debugger.h"
 
-void BLTZ()
+void BLTZ(void)
 {
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -40,12 +44,15 @@ void BLTZ()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZ_OUT()
+void BLTZ_OUT(void)
 {
    local_rs = irs;
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -55,7 +62,7 @@ void BLTZ_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZ_IDLE()
+void BLTZ_IDLE(void)
 {
     int skip;
    if (irs < 0)
@@ -68,11 +75,14 @@ void BLTZ_IDLE()
    else BLTZ();
 }
 
-void BGEZ()
+void BGEZ(void)
 {
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -82,12 +92,15 @@ void BGEZ()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZ_OUT()
+void BGEZ_OUT(void)
 {
    local_rs = irs;
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -97,7 +110,7 @@ void BGEZ_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZ_IDLE()
+void BGEZ_IDLE(void)
 {
     int skip;
    if (irs >= 0)
@@ -110,12 +123,15 @@ void BGEZ_IDLE()
    else BGEZ();
 }
 
-void BLTZL()
+void BLTZL(void)
 {
    if (irs < 0)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -128,13 +144,16 @@ void BLTZL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZL_OUT()
+void BLTZL_OUT(void)
 {
    if (irs < 0)
      {
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -147,7 +166,7 @@ void BLTZL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZL_IDLE()
+void BLTZL_IDLE(void)
 {
    int skip;
    if (irs < 0)
@@ -160,12 +179,15 @@ void BLTZL_IDLE()
    else BLTZL();
 }
 
-void BGEZL()
+void BGEZL(void)
 {
    if (irs >= 0)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -178,13 +200,16 @@ void BGEZL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZL_OUT()
+void BGEZL_OUT(void)
 {
    if (irs >= 0)
      {
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -197,7 +222,7 @@ void BGEZL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZL_IDLE()
+void BGEZL_IDLE(void)
 {
    int skip;
    if (irs >= 0)
@@ -210,7 +235,7 @@ void BGEZL_IDLE()
    else BGEZL();
 }
 
-void BLTZAL()
+void BLTZAL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -218,6 +243,9 @@ void BLTZAL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -229,7 +257,7 @@ void BLTZAL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZAL_OUT()
+void BLTZAL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -238,6 +266,9 @@ void BLTZAL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -249,7 +280,7 @@ void BLTZAL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZAL_IDLE()
+void BLTZAL_IDLE(void)
 {
    int skip;
    if (irs < 0)
@@ -262,7 +293,7 @@ void BLTZAL_IDLE()
    else BLTZAL();
 }
 
-void BGEZAL()
+void BGEZAL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -270,6 +301,9 @@ void BGEZAL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -281,7 +315,7 @@ void BGEZAL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZAL_OUT()
+void BGEZAL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -290,6 +324,9 @@ void BGEZAL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -301,7 +338,7 @@ void BGEZAL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZAL_IDLE()
+void BGEZAL_IDLE(void)
 {
    int skip;
    if (irs >=0)
@@ -314,7 +351,7 @@ void BGEZAL_IDLE()
    else BGEZAL();
 }
 
-void BLTZALL()
+void BLTZALL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -324,6 +361,9 @@ void BLTZALL()
       {
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -338,7 +378,7 @@ void BLTZALL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZALL_OUT()
+void BLTZALL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -349,6 +389,9 @@ void BLTZALL_OUT()
          jump_target = (int)PC->f.i.immediate;
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -363,7 +406,7 @@ void BLTZALL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZALL_IDLE()
+void BLTZALL_IDLE(void)
 {
    int skip;
    if (irs < 0)
@@ -376,7 +419,7 @@ void BLTZALL_IDLE()
    else BLTZALL();
 }
 
-void BGEZALL()
+void BGEZALL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -386,6 +429,9 @@ void BGEZALL()
       {
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -400,7 +446,7 @@ void BGEZALL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZALL_OUT()
+void BGEZALL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -411,6 +457,9 @@ void BGEZALL_OUT()
          jump_target = (int)PC->f.i.immediate;
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -425,7 +474,7 @@ void BGEZALL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZALL_IDLE()
+void BGEZALL_IDLE(void)
 {
    int skip;
    if (irs >= 0)
@@ -437,3 +486,4 @@ void BGEZALL_IDLE()
      }
    else BGEZALL();
 }
+

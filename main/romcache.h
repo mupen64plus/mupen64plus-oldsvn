@@ -23,6 +23,7 @@
 #define __ROMCACHE_H__
 
 #include <limits.h> 
+#include <time.h>
 #include "md5.h"
 
 #define COMMENT_MAXLENGTH 256
@@ -45,11 +46,38 @@ typedef struct
    unsigned int crc1;
    unsigned int crc2;
    unsigned char status; /* Rom status on a scale from 0-5. */
-   unsigned char savetype; 
+   unsigned char savetype;
    unsigned char players; /* Local players 0-4, 2/3/4 way Netplay indicated by 5/6/7. */
    unsigned char rumble; /* 0 - No, 1 - Yes boolean for rumble support. */
 } romdatabase_entry;
 
+typedef struct _romdatabase_search
+{
+    romdatabase_entry entry;
+    struct _romdatabase_search* next_entry;
+    struct _romdatabase_search* next_crc;
+    struct _romdatabase_search* next_md5;
+} romdatabase_search;
+
+typedef struct
+{
+    char* comment;
+    romdatabase_search* crc_lists[256];
+    romdatabase_search* md5_lists[256];
+    romdatabase_search* list;
+} _romdatabase;
+
+extern romdatabase_entry empty_entry;
+
+void romdatabase_open(void);
+void romdatabase_close(void);
+romdatabase_entry* ini_search_by_md5(md5_byte_t* md5);
+/* Should be used by current cheat system (isn't), when cheat system is
+ * migrated to md5s, will be fully depreciated.
+ */
+romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);
+
+#ifndef NO_GUI
 /* See http://code.google.com/p/mupen64plus/wiki/RomBrowserColumns for details. */
 typedef struct _cache_entry
 {
@@ -85,38 +113,15 @@ typedef struct
     unsigned int length; 
     unsigned char rcstask;  /* Enum for what rcs thread should do. */
     unsigned char rcspause; /* Bool for pausing after last file, toggled by start/stopping emulation. */
+    unsigned char clear;    /* Bool for clearing on an update. */
     cache_entry* top;
     cache_entry* last;
 } rom_cache;
 
-typedef struct _romdatabase_search
-{
-    romdatabase_entry entry;
-    struct _romdatabase_search* next_entry;
-    struct _romdatabase_search* next_crc;
-    struct _romdatabase_search* next_md5;
-} romdatabase_search;
-
-typedef struct
-{
-    char* comment;
-    romdatabase_search* crc_lists[256];
-    romdatabase_search* md5_lists[256];
-    romdatabase_search* list;
-} _romdatabase;
-
-extern romdatabase_entry empty_entry;
 extern rom_cache g_romcache;
 
-void* rom_cache_system(void* _arg);
-romdatabase_entry* ini_search_by_md5(md5_byte_t* md5);
-void romdatabase_open();
-void romdatabase_close();
-
-/* Should be used by current cheat system (isn't), when cheat system is
- * migrated to md5s, will be fully depreciated.
- */
-romdatabase_entry* ini_search_by_crc(unsigned int crc1, unsigned int crc2);
+int rom_cache_system(void* _arg);
+#endif /* NO_GUI */
 
 #endif /* __ROMCACHE_H__ */
 

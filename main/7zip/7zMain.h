@@ -34,3 +34,4 @@ SZ_RESULT SzFileReadImp(void *object, void **buffer, size_t maxRequiredSize, siz
 SZ_RESULT SzFileReadImp(void *object, void *buffer, size_t size, size_t *processedSize);
 #endif
 SZ_RESULT SzFileSeekImp(void *object, CFileSize pos);
+

@@ -176,3 +176,4 @@ typedef struct {
         int state;
         int len;
 } lzmadec_state;
+

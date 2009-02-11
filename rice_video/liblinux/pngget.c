@@ -925,3 +925,4 @@ png_get_mmx_rowbytes_threshold (png_structp png_ptr)
 }
 #endif /* PNG_ASSEMBLER_CODE_SUPPORTED */
 #endif /* PNG_1_0_X */
+

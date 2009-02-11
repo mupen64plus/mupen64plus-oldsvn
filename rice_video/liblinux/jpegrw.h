@@ -35,3 +35,4 @@ BMGError BMG_EXPORT WriteJPEG( const char *filename,
 #endif
 
 #endif
+
