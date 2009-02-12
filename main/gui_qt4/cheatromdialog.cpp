@@ -26,10 +26,11 @@
 CheatRomDialog::CheatRomDialog(core::rom_cheats_t *rom, QWidget* parent) : QDialog(parent)
 {
     setupUi(this);
+    // Use this as our internal pointer to the cheat we are working on.
+    // To make it accessable for other than only constructor
     _rom = rom;
     if (_rom->rom_name) {
         lineEditName->setText(QString(_rom->rom_name));
-        lineEditName->setEnabled(false);
         lineEditCRC1->setText(QString("%1").arg(_rom->crc1, 8, 16, QChar('0')).toUpper());
         lineEditCRC2->setText(QString("%1").arg(_rom->crc2, 8, 16, QChar('0')).toUpper());
     }
@@ -44,7 +45,7 @@ CheatRomDialog::~CheatRomDialog()
 
 void CheatRomDialog::onaccepted()
 {
-    bool *ok;
+    bool *ok = NULL;
     int size;
 
     QByteArray arr = lineEditName->text().toLatin1();

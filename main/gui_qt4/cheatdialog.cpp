@@ -27,10 +27,8 @@
 #include "cheatromdialog.h"
 #include "cheatcheatdialog.h"
 
-CheatDialog::CheatDialog(QWidget* parent)
-: QDialog(parent)
-, m_cheats(0)
-, m_model(new QStandardItemModel(this))
+CheatDialog::CheatDialog(QWidget* parent) : QDialog(parent)
+, m_cheats(0), m_model(new QStandardItemModel(this))
 {
     setupUi(this);
     setWindowIcon(icon("tools-wizard.png"));
@@ -61,14 +59,15 @@ CheatDialog::CheatDialog(QWidget* parent)
                 
                 for (int lvl = 0;lvl < name_index;lvl++) {
                     itemMapIndex = QString(itemMapIndex + parts.at(lvl));
-                    if (itemMap.contains(itemMapIndex))
+                    if (itemMap.contains(itemMapIndex)) {
                         parent = itemMap.value(itemMapIndex);
-                    else {
+                    } else {
                         entry = new QStandardItem(parts.at(lvl));
-                        if (lvl == 0)
+                        if (lvl == 0) {
                             m_model->appendRow(entry);
-                        else
+                        } else {
                             parent->appendRow(entry);
+                        }
                         parent = entry;
                         itemMap[itemMapIndex] = parent;
                     }
@@ -99,7 +98,7 @@ CheatDialog::CheatDialog(QWidget* parent)
 
     // Adding cheats from cheats.cfg.
     // Only add if emulator is not running. If emulator is running they will be
-    // added to the 'cheat_load_current_rom'. This is only for editing.
+    // added to the 'cheat_load_current_rom'. Only for editing!
     if (!core::ROM_HEADER) {
         personal = new QStandardItem(tr("Personal Cheats"));
         m_model->appendRow(personal);
@@ -238,9 +237,6 @@ void CheatDialog::onnew()
             newrom = new QStandardItem(romcheat->rom_name);
             newrom->setData(QVariant::fromValue(romcheat), RomRole);
             personal->appendRow(newrom);
-            
-            // select new rom
-            // TODO
         }
         else {
             cheat_delete_rom(romcheat);
@@ -263,14 +259,14 @@ void CheatDialog::onedit()
         if (romcheat) {
             CheatRomDialog* d = new CheatRomDialog(romcheat,this);
             if (d->exec()) {
-                ;
-//            delete d;
+                // Reset the rom name in case it was changed
+                item->setText(tr("%1").arg(romcheat->rom_name));
             }
         } else if (cheat) {
             CheatCheatDialog* d = new CheatCheatDialog(cheat,this);
             if (d->exec()) {
-                ;
-//            delete d;
+                // Reset the cheat name in case it was changed
+                item->setText(tr("%1").arg(cheat->name));
             }
         }
     }
@@ -278,11 +274,31 @@ void CheatDialog::onedit()
 
 void CheatDialog::ondelete()
 {
+    core::rom_cheats_t* romcheat = NULL;
+    core::cheat_t* cheat = NULL;
+    QStandardItem* romitem = 0;
+    QStandardItem* cheatitem = 0;
     const QModelIndex& index = treeView->selectionModel()->currentIndex();
     const QModelIndex& parent = index.parent();
 
     if (parent.isValid()) {
-        m_model->removeRow(index.row(), parent);
+        if (index.isValid()) {
+            romitem = m_model->itemFromIndex(index);
+            romcheat = romitem->data(RomRole).value<core::rom_cheats_t*>();
+            if (romcheat) {
+                core::cheat_delete_rom(romcheat);
+                m_model->removeRow(index.row(), parent);
+            } else {
+                romitem = m_model->itemFromIndex(parent);
+                cheatitem = m_model->itemFromIndex(index);
+                romcheat = romitem->data(RomRole).value<core::rom_cheats_t*>();
+                cheat = cheatitem->data(CheatRole).value<core::cheat_t*>();
+                if (romcheat && cheat) {
+                    core::cheat_delete_cheat(romcheat, cheat);
+                    m_model->removeRow(index.row(), parent);
+                }
+            }
+        }
     }
 }
 

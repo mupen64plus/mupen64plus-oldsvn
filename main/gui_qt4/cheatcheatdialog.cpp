@@ -29,22 +29,14 @@ CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDia
     setupUi(this);
 
     // Use this as our internal pointer to the cheat we are working on.
+    // To make it accessable for other than only constructor
     _cheat = cheat;
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
     connect(pushAdd, SIGNAL(clicked()), this, SLOT(onadd()));
+    connect(pushRemove, SIGNAL(clicked()), this, SLOT(onremove()));
     
-    QString name, comment;
     core::list_t node = 0;
   
-    name = QString(_cheat->name);
-    comment = QString(_cheat->comment);
-    if (_cheat->name) {
-        lineEditName->setText(name);
-        lineEditName->setEnabled(false);
-    }
-    if (_cheat->comment)
-        textEditComment->setText(comment);
-
     tableModel = new QStandardItemModel();
     tableView->verticalHeader()->hide();
     tableView->setModel(tableModel);
@@ -55,27 +47,23 @@ CheatCheatDialog::CheatCheatDialog(core::cheat_t *cheat, QWidget* parent) : QDia
     tableModel->setHorizontalHeaderItem(0, header0);
     tableModel->setHorizontalHeaderItem(1, header1);
     
-    list_foreach(_cheat->cheat_codes, node)
-    {
-        int row = tableModel->rowCount();
-        core::cheat_code_t *code = static_cast<core::cheat_code_t*>(node->data);
-
-        QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
-        QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
-
-        row0->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
-        row1->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
-
-        tableModel->setItem(row,0,row0);
-        tableModel->setItem(row,1,row1);
-        tableView->setRowHeight(row,15);
+    if (_cheat->name) {
+        lineEditName->setText(tr("%1").arg(_cheat->name));
     }
-    
-    if (_cheat->always_enabled)
+    if (_cheat->comment) {
+        textEditComment->setText(tr("%1").arg(_cheat->comment));
+    }
+    if (_cheat->always_enabled) {
         radioAlwayEnabled->setChecked(true);
+    }
+    list_foreach(_cheat->cheat_codes, node) {
+        core::cheat_code_t *code = static_cast<core::cheat_code_t*>(node->data);
+        addCheatCodeToTable(code);
+    }
     tableView->resizeColumnsToContents();
     tableView->horizontalHeader()->setStretchLastSection(true);
 
+    // Put this here to avoid signal while initializing tableView
     connect(tableModel, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(codeItemChanged(QStandardItem *)));
 }
 
@@ -86,67 +74,81 @@ CheatCheatDialog::~CheatCheatDialog()
 
 void CheatCheatDialog::onaccepted()
 {
-    int size;
     QByteArray arr = lineEditName->text().toLatin1();
-    size = arr.size() + 1;
+    int size = arr.size() + 1;
     _cheat->name = (char*) malloc(size);
-    if (_cheat->name==NULL) return; // TODO: proper error handling
+    if (_cheat->name==NULL) { return; } // TODO: proper error handling?
     memset(_cheat->name, '\0', size);
     strcpy(_cheat->name, arr.data());
 
     arr = textEditComment->toPlainText().toLatin1();
     size = arr.size() + 1;
     _cheat->comment = (char*) malloc(size);
-    if (_cheat->comment==NULL) return; // TODO: proper error handling
+    if (_cheat->comment==NULL) { return; } // TODO: proper error handling?
     memset(_cheat->comment, '\0', size);
     strcpy(_cheat->comment, arr.data());
 
-    if (radioAlwayEnabled->isChecked())
+    if (radioAlwayEnabled->isChecked()) {
         _cheat->always_enabled = 1;
-    if (radioEnabled->isChecked())
+    }
+    if (radioEnabled->isChecked()) {
         _cheat->enabled = 1;
+    }
 }
 
 void CheatCheatDialog::onadd()
 {
     core::cheat_code_t* code = cheat_new_cheat_code(_cheat);
-    code->address = 0;
-    code->value = 0;
-    code->old_value = 0;
-    int row = tableModel->rowCount();
+    addCheatCodeToTable(code);
+}
 
-    QStandardItem *row0 = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
-    QStandardItem *row1 = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
+void CheatCheatDialog::onremove()
+{
+    const QModelIndex& index = tableView->selectionModel()->currentIndex();
+    QStandardItem* item = 0;
+    core::cheat_code_t* code;
 
-    row0->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
-    row1->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
-
-    tableModel->setItem(row,0,row0);
-    tableModel->setItem(row,1,row1);
-    tableView->resizeColumnsToContents();
-    tableView->horizontalHeader()->setStretchLastSection(true);
-    tableView->setRowHeight(row,15);
+    if (index.isValid()) {
+        item = tableModel->itemFromIndex(index);
+        code = item->data(CheatDialog::CheatCodeRole).value<core::cheat_code_t*>();
+        tableModel->removeRow(index.row());
+        core::cheat_delete_cheat_code(_cheat, code);
+    }
 }
 
 void CheatCheatDialog::codeItemChanged(QStandardItem* item)
 {
     bool ok;
-    core::cheat_code_t* code = 0;
+    core::cheat_code_t* code = NULL;
     
-    QString str = item->text();
     QModelIndex index = tableModel->indexFromItem(item);
-    code = item->data(Qt::UserRole + 4).value<core::cheat_code_t*>();
+    code = item->data(CheatDialog::CheatCodeRole).value<core::cheat_code_t*>();
 
     if (code) {
         if (index.column() == 0) { // address
-            code->address = str.toUInt(&ok, 16);;
-            item->setText(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
+            code->address = code->address, item->text().toUInt(&ok, 16);
+            item->setText(tr("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
         } else { // value
-            code->value = str.toUInt(&ok, 16);;
-            item->setText(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
+            code->value = item->text().toUInt(&ok, 16);;
+            item->setText(tr("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
         }
         tableView->resizeColumnsToContents();
         tableView->horizontalHeader()->setStretchLastSection(true);
     }
+}
+
+void CheatCheatDialog::addCheatCodeToTable(core::cheat_code_t *code) {
+    QList<QStandardItem *> row;
+    QStandardItem *address = new QStandardItem(QString("%1").arg(code->address, 8, 16, QChar('0')).toUpper());
+    QStandardItem *value = new QStandardItem(QString("%1").arg(code->value, 4, 16, QChar('0')).toUpper());
+
+    // Store the cheat in both rows. siplifies the 'codeItemChanged'
+    address->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
+    value->setData(QVariant::fromValue(code), CheatDialog::CheatCodeRole);
+    row.append(address);
+    row.append(value);
+
+    tableModel->appendRow(row);
+    tableView->setRowHeight(tableModel->rowCount() - 1,15);
 }
 
