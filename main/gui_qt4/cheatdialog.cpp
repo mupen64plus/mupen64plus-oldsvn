@@ -40,6 +40,17 @@ CheatDialog::CheatDialog(QWidget* parent) : QDialog(parent)
     connect(treeView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(treeViewClicked(const QModelIndex&)));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
 
+    // If a rom is loaded, prevent editing of cheats (causes a SIGSEGV)
+    if (core::ROM_HEADER) {
+        pushNew->setEnabled(false);
+        pushEdit->setEnabled(false);
+        pushDelete->setEnabled(false);
+    } else {
+        pushNew->setEnabled(true);
+        pushEdit->setEnabled(true);
+        pushDelete->setEnabled(true);
+    }
+    
     core::list_t node1 = 0;
     core::list_t node2 = 0;
 

@@ -54,7 +54,7 @@ void CheatRomDialog::onaccepted()
     if (_rom->rom_name==NULL) return; // TODO: proper error handling?
     memset(_rom->rom_name, '\0', size);
     strcpy(_rom->rom_name, arr.data());
-    _rom->crc1 = QString(lineEditCRC1->text()).toInt(ok,16);
-    _rom->crc2 = QString(lineEditCRC2->text()).toInt(ok,16);
+    _rom->crc1 = QString(lineEditCRC1->text()).toUInt(ok,16);
+    _rom->crc2 = QString(lineEditCRC2->text()).toUInt(ok,16);
 }
 
