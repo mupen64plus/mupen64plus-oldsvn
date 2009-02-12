@@ -229,7 +229,7 @@ extern RDP_Options gRDP;
 */
 void InitRenderBase();
 void SetFogMinMax(float fMin, float fMax, float fMul, float fOffset);
-void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL = true );
+void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL = true, bool stretch = false);
 void InitVertexTextureConstants();
 bool PrepareTriangle(uint32 dwV0, uint32 dwV1, uint32 dwV2);
 bool IsTriangleVisible(uint32 dwV0, uint32 dwV1, uint32 dwV2);

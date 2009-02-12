@@ -366,8 +366,8 @@ void WriteConfiguration()
    fprintf(f, "WidescreenExtend ");
    fprintf(f, "%d\n", (uint32)options.bWidescreenExtend);
 
-   fprintf(f, "WidescreenStretchHUD ");
-   fprintf(f, "%d\n", (uint32)options.bWidescreenStretchHUD);
+   fprintf(f, "WidescreenStretchBG ");
+   fprintf(f, "%d\n", (uint32)options.bWidescreenStretchBG);
    
    fclose(f);
 }
@@ -517,7 +517,7 @@ void ReadConfiguration(void)
         options.FPSColor = 0xFFFFFFFF;
         options.DirectXMaxAnisotropy = 16;
         options.bWidescreenExtend = FALSE;
-        options.bWidescreenStretchHUD = TRUE;
+        options.bWidescreenStretchBG = TRUE;
 
         defaultRomOptions.N64FrameBufferEmuType = FRM_BUF_NONE;
         defaultRomOptions.N64FrameBufferWriteBackControl = FRM_BUF_WRITEBACK_NORMAL;
@@ -605,7 +605,7 @@ void ReadConfiguration(void)
         options.colorQuality = ReadRegistryDwordVal("ColorQuality");
         options.OpenglRenderSetting = ReadRegistryDwordVal("OpenGLRenderSetting");
         options.bWidescreenExtend = ReadRegistryDwordVal("WidescreenExtend");
-        options.bWidescreenStretchHUD = ReadRegistryDwordVal("WidescreenStretchHUD");
+        options.bWidescreenStretchBG = ReadRegistryDwordVal("WidescreenStretchBG");
 
         defaultRomOptions.bFastTexCRC = ReadRegistryDwordVal("FastTextureLoading");
         defaultRomOptions.bAccurateTextureMapping = ReadRegistryDwordVal("AccurateTextureMapping");

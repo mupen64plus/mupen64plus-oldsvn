@@ -444,24 +444,49 @@ bool OGLRender::RenderTexRect()
     glDisable(GL_CULL_FACE);
 
     glBegin(GL_TRIANGLE_FAN);
-
+    
     float depth = -(g_texRectTVtx[3].z*2-1);
+
+    float scaleFactor = 1, offset = 0;
+    if (options.bWidescreenExtend)
+    {
+        
+        bool stretch = false;
+        if (options.bWidescreenStretchBG)
+        {
+            int min = windowSetting.uDisplayWidth / 16 , max=windowSetting.uDisplayWidth - min;
+            for (int i=0; i < 4; i++)
+            {
+                if (g_texRectTVtx[i].x <= min && g_texRectTVtx[(i+1)%4].x <= min &&
+                    g_texRectTVtx[(i+2)%4].x >= max && g_texRectTVtx[(i+3)%4].x >= max)
+                {
+                    stretch = true;
+                    break;
+                }
+            }
+        }
+        if (!stretch)
+        {
+            scaleFactor = (3.0 * windowSetting.uDisplayWidth) / (4.0 * windowSetting.uDisplayHeight);
+            offset = (windowSetting.uDisplayWidth - windowSetting.uDisplayHeight * 4 / 3) / 2;
+        }
+    }
 
     glColor4f(g_texRectTVtx[3].r, g_texRectTVtx[3].g, g_texRectTVtx[3].b, g_texRectTVtx[3].a);
     TexCoord(g_texRectTVtx[3]);
-    glVertex3f(g_texRectTVtx[3].x, g_texRectTVtx[3].y, depth);
+    glVertex3f(g_texRectTVtx[3].x / scaleFactor + offset, g_texRectTVtx[3].y, depth);
     
     glColor4f(g_texRectTVtx[2].r, g_texRectTVtx[2].g, g_texRectTVtx[2].b, g_texRectTVtx[2].a);
     TexCoord(g_texRectTVtx[2]);
-    glVertex3f(g_texRectTVtx[2].x, g_texRectTVtx[2].y, depth);
+    glVertex3f(g_texRectTVtx[2].x / scaleFactor + offset, g_texRectTVtx[2].y, depth);
 
     glColor4f(g_texRectTVtx[1].r, g_texRectTVtx[1].g, g_texRectTVtx[1].b, g_texRectTVtx[1].a);
     TexCoord(g_texRectTVtx[1]);
-    glVertex3f(g_texRectTVtx[1].x, g_texRectTVtx[1].y, depth);
+    glVertex3f(g_texRectTVtx[1].x / scaleFactor + offset, g_texRectTVtx[1].y, depth);
 
     glColor4f(g_texRectTVtx[0].r, g_texRectTVtx[0].g, g_texRectTVtx[0].b, g_texRectTVtx[0].a);
     TexCoord(g_texRectTVtx[0]);
-    glVertex3f(g_texRectTVtx[0].x, g_texRectTVtx[0].y, depth);
+    glVertex3f(g_texRectTVtx[0].x / scaleFactor + offset, g_texRectTVtx[0].y, depth);
 
     glEnd();
 
@@ -481,12 +506,32 @@ bool OGLRender::RenderFillRect(uint32 dwColor, float depth)
     GLboolean cullface = glIsEnabled(GL_CULL_FACE);
     glDisable(GL_CULL_FACE);
 
+    float scaleFactor = 1, offset = 0;
+    if (options.bWidescreenExtend)
+    {
+        bool stretch = false;
+        if (options.bWidescreenStretchBG)
+        {
+            int min = windowSetting.uDisplayWidth / 32 , max = windowSetting.uDisplayWidth - min;
+            if ((m_fillRectVtx[0].x <= min && m_fillRectVtx[1].x >= max) ||
+                (m_fillRectVtx[1].x <= min && m_fillRectVtx[0].x >= max))
+            {
+                stretch = true;
+            }
+        }
+        if (!stretch)
+        {
+            scaleFactor = (3.0 * windowSetting.uDisplayWidth) / (4.0 * windowSetting.uDisplayHeight);
+            offset = (windowSetting.uDisplayWidth - windowSetting.uDisplayHeight * 4 / 3) / 2;
+        }
+    }
+    
     glBegin(GL_TRIANGLE_FAN);
     glColor4f(r,g,b,a);
-    glVertex4f(m_fillRectVtx[0].x, m_fillRectVtx[1].y, depth, 1);
-    glVertex4f(m_fillRectVtx[1].x, m_fillRectVtx[1].y, depth, 1);
-    glVertex4f(m_fillRectVtx[1].x, m_fillRectVtx[0].y, depth, 1);
-    glVertex4f(m_fillRectVtx[0].x, m_fillRectVtx[0].y, depth, 1);
+    glVertex4f(m_fillRectVtx[0].x / scaleFactor + offset, m_fillRectVtx[1].y, depth, 1);
+    glVertex4f(m_fillRectVtx[1].x / scaleFactor + offset, m_fillRectVtx[1].y, depth, 1);
+    glVertex4f(m_fillRectVtx[1].x / scaleFactor + offset, m_fillRectVtx[0].y, depth, 1);
+    glVertex4f(m_fillRectVtx[0].x / scaleFactor + offset, m_fillRectVtx[0].y, depth, 1);
     glEnd();
 
     if( cullface ) glEnable(GL_CULL_FACE);
@@ -696,16 +741,7 @@ void OGLRender::RenderReset()
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-
-    if (options.bWidescreenExtend && !options.bWidescreenStretchHUD)
-    {
-        int offset = (windowSetting.uDisplayWidth - (windowSetting.uDisplayHeight)) / 2;
-        glOrtho(-offset, windowSetting.uDisplayWidth + offset, windowSetting.uDisplayHeight, 0, -1, 1);
-    }
-    else
-    {
-        glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
-    }
+    glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
     // position viewer 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -900,16 +936,7 @@ void OGLRender::glViewportWrapper(GLint x, GLint y, GLsizei width, GLsizei heigh
         glLoadIdentity();
         if (flag)
         {
-            if (options.bWidescreenExtend && !options.bWidescreenStretchHUD)
-            {
-                int fudgeFactor = 0;
-                int offset = (windowSetting.uDisplayWidth - (windowSetting.uDisplayHeight * 4 / 3)) / 2;
-                glOrtho(-offset - fudgeFactor, windowSetting.uDisplayWidth + offset - fudgeFactor, windowSetting.uDisplayHeight, 0, -1, 1);
-            }
-            else
-            {
-                glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
-            }
+            glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
         }
         glViewport(x,y,width,height);
     }

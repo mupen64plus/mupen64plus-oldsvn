@@ -199,7 +199,7 @@ typedef struct {
     enum HACK_FOR_GAMES enableHackForGames;
     
     BOOL    bWidescreenExtend;
-    BOOL    bWidescreenStretchHUD;
+    BOOL    bWidescreenStretchBG;
 
 } GlobalOptions;
 

@@ -837,7 +837,7 @@ void ComputeLOD(bool openGL)
 bool bHalfTxtScale=false;
 extern uint32 lastSetTile;
 
-void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL)
+void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL, bool stretch)
 {
     VTX_DUMP(TRACE2("Init vertex (%d) to vtx buf[%d]:", dwV, vtxIndex));
 
@@ -845,7 +845,7 @@ void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL)
     VTX_DUMP(TRACE4("  Trans: x=%f, y=%f, z=%f, w=%f",  g_vtxTransformed[dwV].x,g_vtxTransformed[dwV].y,g_vtxTransformed[dwV].z,g_vtxTransformed[dwV].w));
     if( openGL )
     {
-        if (options.bWidescreenExtend)
+        if (options.bWidescreenExtend && !stretch)
         {
             float s = (4.0 * windowSetting.uDisplayHeight) / (3.0 * windowSetting.uDisplayWidth);
             g_vtxProjected5[vtxIndex][0] = g_vtxTransformed[dwV].x * s;
@@ -863,6 +863,7 @@ void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL)
 
     if( !openGL || options.bOGLVertexClipper == TRUE )
     {
+
         v.x = g_vecProjected[dwV].x*gRSP.vtxXMul+gRSP.vtxXAdd;
         v.y = g_vecProjected[dwV].y*gRSP.vtxYMul+gRSP.vtxYAdd;
         v.z = (g_vecProjected[dwV].z + 1.0f) * 0.5f;    // DirectX minZ=0, maxZ=1
@@ -1534,10 +1535,23 @@ bool PrepareTriangle(uint32 dwV0, uint32 dwV1, uint32 dwV2)
 
         bool textureFlag = (CRender::g_pRender->IsTextureEnabled() || gRSP.ucode == 6 );
         bool openGL = CDeviceBuilder::m_deviceGeneralType == OGL_DEVICE;
-
-        InitVertex(dwV0, gRSP.numVertices, textureFlag, openGL);
-        InitVertex(dwV1, gRSP.numVertices+1, textureFlag, openGL);
-        InitVertex(dwV2, gRSP.numVertices+2, textureFlag, openGL);
+        bool stretch = false;
+        //detect a fullscreen background image using the following conditions:
+        //-the triangle stretches at least from -0.9 to 0.9 (out of 1)
+        //-the triangle is flat to the z plane
+        //-the triangle's z value is less than 0
+        if (options.bWidescreenStretchBG && 
+          ((((g_vtxTransformed[dwV0].x <= -0.9) && (g_vtxTransformed[dwV1].x >= 0.9 || g_vtxTransformed[dwV2].x >= 0.9)) ||
+            ((g_vtxTransformed[dwV1].x <= -0.9) && (g_vtxTransformed[dwV2].x >= 0.9 || g_vtxTransformed[dwV0].x >= 0.9)) ||
+            ((g_vtxTransformed[dwV2].x <= -0.9) && (g_vtxTransformed[dwV0].x >= 0.9 || g_vtxTransformed[dwV1].x >= 0.9))) &&
+             (g_vtxTransformed[dwV0].z == g_vtxTransformed[dwV1].z && 
+              g_vtxTransformed[dwV0].z == g_vtxTransformed[dwV2].z && g_vtxTransformed[dwV0].z <= 0)))
+        {
+            stretch = true;
+        }
+        InitVertex(dwV0, gRSP.numVertices, textureFlag, openGL, stretch);
+        InitVertex(dwV1, gRSP.numVertices+1, textureFlag, openGL, stretch);
+        InitVertex(dwV2, gRSP.numVertices+2, textureFlag, openGL, stretch);
 
         gRSP.numVertices += 3;
         status.dwNumTrisRendered++;
@@ -2369,6 +2383,7 @@ void UpdateCombinedMatrix()
         {
             gRSPworldProject = gRSPworldProject * reverseY;
         }
+
         /* Scales polygons but also screws up sprites
          * TODO: remove if this is not useful
         if (options.bWidescreenExtend)

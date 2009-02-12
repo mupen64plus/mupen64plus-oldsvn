@@ -156,6 +156,8 @@ void COGLGraphicsContext::InitState(void)
     glLoadIdentity();
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    //doesn't work yet with some games
+    //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0f);
 
     glShadeModel(GL_SMOOTH);
