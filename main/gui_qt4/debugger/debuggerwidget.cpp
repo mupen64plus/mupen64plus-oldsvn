@@ -19,52 +19,38 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <QtGui>
-#include <QDialog>
-
 #include "debuggerwidget.h"
-#include "registerwidget.h"
-#include "hexspinbox.h"
 #include "hexspinboxdialog.h"
 
-// if we include <QtGui> there is no need to include every class used: <QString>, <QFileDialog>,...
-// TODO: Figure out how to bring #ifdef DBG to the .ui file to #ifdef out debugger
 namespace debugger {
     extern "C" {
         #include "../../../debugger/debugger.h"
         #include "../../../debugger/decoder.h"
-        #include "../../../debugger/breakpoints.h"
     }
 }
 
 namespace core {
     extern "C" {
-        #include "../../config.h"
         #include "../../version.h"
     }
 }
 
 DebuggerWidget::DebuggerWidget(QWidget* parent)
 {
-    setupUi(this); // this sets up GUI
+    setupUi(this);
  
-    // signals/slots mechanism in action
-    connect( pushStep, SIGNAL( clicked() ), this, SLOT( onstep() ) ); 
-    connect( pushRun, SIGNAL( clicked() ), this, SLOT( onrun() ) ); 
-    connect( pushTrace, SIGNAL( clicked() ), this, SLOT( ontrace() ) ); 
-    connect( pushBreak, SIGNAL( clicked() ), this, SLOT( onbreak() ) ); 
-    connect( pushGoto, SIGNAL( clicked() ), this, SLOT( ongoto() ) );
+    connect( pushStep,  SIGNAL( clicked() ), this, SLOT( onstep()  ));
+    connect( pushRun,   SIGNAL( clicked() ), this, SLOT( onrun()   ));
+    connect( pushTrace, SIGNAL( clicked() ), this, SLOT( ontrace() ));
+    connect( pushBreak, SIGNAL( clicked() ), this, SLOT( onbreak() ));
+    connect( pushGoto,  SIGNAL( clicked() ), this, SLOT( ongoto()  ));
     
-    // Set window title
-    char title[64];
-    sprintf( title, "%s - %s", "Mupen64plus Debugger", PLUGIN_VERSION);
-    setWindowTitle(title);
-
+    setWindowTitle(tr("Mupen64Plus Debugger - %1").arg(PLUGIN_VERSION));
     treeDisasm->setColumnCount(3);
     treeDisasm->setEditTriggers(QAbstractItemView::AllEditTriggers);
-    QString str = "Address,Opcode,Args";
-    QStringList list = str.split(",");
-    treeDisasm->setHeaderLabels(list);    
+    QStringList headerList;
+    headerList << tr("Address") << tr("Opcode") << tr("Args");
+    treeDisasm->setHeaderLabels(headerList);
 }
 
 DebuggerWidget::~DebuggerWidget()
@@ -84,18 +70,14 @@ void DebuggerWidget::update_desasm( unsigned int pc )
     
     current_pc = pc;
     focused_pc = pc;
-    for (int i = -4; i<28; i++)
-    {
+    for (int i = -4; i<28; i++) {
         tmp_pc = current_pc + (i*4);
-        if((debugger::get_memory_flags((unsigned int)(long)current_pc) & MEM_FLAG_READABLE) != 0)
-        {
-            instr = debugger::read_memory_32((unsigned int)(long)tmp_pc);
-            debugger::r4300_decode_op( instr, opcode, args, (long)tmp_pc );
-        }
-        else
-        {
+        if((debugger::get_memory_flags(current_pc) & MEM_FLAG_READABLE) != 0) {
+            instr = debugger::read_memory_32(tmp_pc);
+            debugger::r4300_decode_op(instr, opcode, args, tmp_pc );
+        } else {
             strcpy( opcode, "X+X+X+X");
-            sprintf( args, "UNREADABLE (%d)",debugger::get_memory_type((unsigned int)(long)tmp_pc));
+            sprintf( args, "UNREADABLE (%d)",debugger::get_memory_type(tmp_pc));
         }
 
         QTreeWidgetItem* item=new QTreeWidgetItem(0);
@@ -110,8 +92,7 @@ void DebuggerWidget::update_desasm( unsigned int pc )
             item->setBackgroundColor(1, red);
             item->setBackgroundColor(2, red);
         }
-        if(debugger::check_breakpoints((unsigned int) tmp_pc) != -1)
-        {
+        if(debugger::check_breakpoints(tmp_pc) != -1) {
             QColor color;
             color.setBlue(255);
             item->setBackgroundColor(0, color);
@@ -130,24 +111,27 @@ void DebuggerWidget::update_desasm( unsigned int pc )
 
 void DebuggerWidget::onstep()
 {
-    if(debugger::run == 0)
+    if(debugger::run == 0) {
         debugger::debugger_step();
+    }
 }
 
 void DebuggerWidget::onrun()
 {
     int oldrun = debugger::run;
     debugger::run = 2;
-    if(oldrun == 0)
+    if(oldrun == 0) {
         debugger::debugger_step();
+    }
 }
 
 void DebuggerWidget::ontrace()
 {
     int oldrun = debugger::run;
     debugger::run = 1;
-    if(oldrun == 0)
+    if(oldrun == 0) {
         debugger::debugger_step();
+    }
 }
  
 void DebuggerWidget::onbreak()
@@ -157,16 +141,9 @@ void DebuggerWidget::onbreak()
 
 void DebuggerWidget::ongoto()
 {
-    unsigned int tmp_pc = 0;
-  
-    HexSpinBoxDialog* d = new HexSpinBoxDialog(focused_pc);
-    if (d->exec())
-    {
-        // TODO: Get hold of the spinbox value ...
-        // tmp_pc = (unsigned int) d->getAcceptedValue;
-        // TODO: Should probably check if it is a valid PC.
-        // Debugger API?
-        DebuggerWidget::update_desasm( tmp_pc );
+    HexSpinBoxDialog* d = new HexSpinBoxDialog(&focused_pc);
+    if (d->exec()) {
+        DebuggerWidget::update_desasm( focused_pc );
     }
 }
 

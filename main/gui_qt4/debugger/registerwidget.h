@@ -22,9 +22,7 @@
 #ifndef __REGISTERWIDGET_H__
 #define __REGISTERWIDGET_H__
 
-#include <QWidget>
-#include <QStringListModel>
-#include <QColor>
+#include <QtGui>
 
 #include "ui_registerwidget.h"
 
@@ -37,6 +35,11 @@ const extern long long int reg[32];
 const extern long int reg_cop0[32];
 const extern long long int hi;
 const extern long long int lo;
+const extern unsigned int ai_register;
+const extern unsigned int vi_register;
+const extern unsigned int pi_register;
+const extern unsigned int ri_register;
+const extern unsigned int si_register;
 
 class RegisterWidget : public QWidget, private Ui_RegisterWidget
 {
@@ -60,7 +63,8 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         void init_pi();
         void init_ri();
         void init_si();
-
+        void initTableView(QTableView*, TableListModel*);
+        
         void update_gpr();
         void update_cop0();
         void update_special(unsigned int);
@@ -75,7 +79,8 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         QString getSingle(long long int);
         QString getWord(long long int);
         QString getLong(long long int);
-
+        QString getCop1String(long long int);
+        
         long long int gui_fantom_gpr_64[32];
         long int gui_fantom_cop0_32[32];
         long long int gui_fantom_cop1_64[32];
@@ -123,6 +128,11 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         static const int DP_INT      = 0x100;
         static const int HW2_INT     = 0x200;
         static const int NMI_INT     = 0x400;
+
+        QColor color_DEFAULT;
+        QColor color_CHANGED;
+        QColor color_PC;
+        QColor color_BP;
 };
 #endif // __REGISTERWIDGET_H__
 

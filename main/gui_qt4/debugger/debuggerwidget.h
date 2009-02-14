@@ -22,7 +22,8 @@
 #ifndef __DEBUGGERWIDGET_H__
 #define __DEBUGGERWIDGET_H__
 
-#include <QDialog>
+#include <QtGui>
+
 #include "ui_debuggerwidget.h"
 
 class HexSpinBox;

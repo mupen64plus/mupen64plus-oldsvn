@@ -19,25 +19,23 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <QtGui>
-#include <QDialog>
-
 #include "hexspinboxdialog.h"
 #include "hexspinbox.h"
 
-HexSpinBoxDialog::HexSpinBoxDialog(int i, QDialog* parent)
+HexSpinBoxDialog::HexSpinBoxDialog(unsigned int* i, QDialog* parent)
 {
     setupUi(this); // this sets up GUI
+    
+    acceptedValue = i;
  
     hexSpinBox = new HexSpinBox();
-    hexSpinBox->setValue(i);
+    hexSpinBox->setValue(*acceptedValue);
     hexSpinBox->setSingleStep(4);
     hexSpinBox->setMinimum(0);
     hexSpinBox->setMaximum(0x7fffffff);
     verticalLayout->addWidget(hexSpinBox);
 
-    connect( buttonBox, SIGNAL(accepted()), this, SLOT( onaccepted()));
-
+    connect( buttonBox, SIGNAL( accepted() ), this, SLOT( onaccepted() ));
 }
 
 HexSpinBoxDialog::~HexSpinBoxDialog()
@@ -47,11 +45,6 @@ HexSpinBoxDialog::~HexSpinBoxDialog()
 
 void HexSpinBoxDialog::onaccepted()
 {
-    acceptedValue = hexSpinBox->value();
-}
-
-int HexSpinBoxDialog::getAcceptedValue()
-{
-    return acceptedValue;
+    *acceptedValue = (unsigned int) hexSpinBox->value();
 }
 

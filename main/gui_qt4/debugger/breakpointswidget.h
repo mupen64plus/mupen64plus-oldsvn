@@ -22,8 +22,7 @@
 #ifndef __BREAKPOINTSWIDGET_H__
 #define __BREAKPOINTSWIDGET_H__
 
-#include <QDialog>
-#include <QStandardItemModel>
+#include <QtGui>
 
 #include "ui_breakpointswidget.h"
 
@@ -35,11 +34,11 @@ class BreakpointsWidget : public QWidget, private Ui_BreakpointsWidget
         virtual ~BreakpointsWidget();
 
     public slots:
-        void update_breakpoint ( );
+        void update_breakpoint();
 
     private:
         QString get_breakpoint_display_string(int);
-        QStandardItemModel model;
+        QStringListModel *model;
 
     private slots:
         void onadd();

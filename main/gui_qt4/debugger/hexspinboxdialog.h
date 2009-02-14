@@ -31,16 +31,15 @@ class HexSpinBoxDialog : public QDialog, private Ui_HexSpinBoxDialog
 {
     Q_OBJECT
     public:
-        HexSpinBoxDialog(int i=0, QDialog* parent = 0);
+        HexSpinBoxDialog(unsigned int*, QDialog* parent = 0);
         virtual ~HexSpinBoxDialog();
-        int getAcceptedValue();
 
     private slots:
         void onaccepted();
 
     private:
         HexSpinBox *hexSpinBox;
-        int acceptedValue;
+        unsigned int* acceptedValue;
 };
 
 #endif // __HEXSPINBOXDIALOG_H__
