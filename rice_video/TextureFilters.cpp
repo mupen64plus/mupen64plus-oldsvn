@@ -997,11 +997,12 @@ BOOL PathFileExists(char* pszPath)
 
 void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo> &infos, bool extraCheck, bool bRecursive)
 {
-    if(PathIsDirectory(foldername) == FALSE)  return;
+    if(PathIsDirectory(foldername)==FALSE)
+        { return; }
 
     char texturefilename[_MAX_PATH];
-    IMAGE_INFO  imgInfo;
-    IMAGE_INFO  imgInfo2;
+    IMAGE_INFO imgInfo;
+    IMAGE_INFO imgInfo2;
 
     DIR *dir;
     dir = opendir(foldername);
@@ -1013,154 +1014,125 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
     char crcstr[16], crcstr2[16];
 
     do
-    {
+        {
         entry = readdir(dir);
-        if(entry == NULL) continue;
-        if( entry->d_name[0] == '.' )
-            continue;
+        if(entry==NULL)
+            { continue; }
+        if(entry->d_name[0] == '.')
+            { continue; }
 
         strcpy(texturefilename, foldername);
         strcat(texturefilename, entry->d_name);
 
-        if( PathIsDirectory(texturefilename) && bRecursive )
-        {
+        //Handle recursions.
+        if(PathIsDirectory(texturefilename)&&bRecursive)
+            {
             strcat(texturefilename, "/");
             FindAllTexturesFromFolder(texturefilename, infos, extraCheck, bRecursive);
-        }
+            }
 
-        if( strstr(entry->d_name,(const char*)g_curRomInfo.szGameName) == 0 )
+        //If file does not have the ROM name, keep going.
+        if(strstr(entry->d_name,(const char*)g_curRomInfo.szGameName)==0)
             continue;
+
+        //If image is not in the right format, keep going.
+        if(GetImageInfoFromFile(texturefilename, &imgInfo)!=0)
+           {
+           printf("Cannot get image info for file: %s\n", entry->d_name);
+           continue;
+           }
 
         TextureType type = NO_TEXTURE;
         bool bSeparatedAlpha = false;
 
-        if( strcasecmp(right(entry->d_name,7), "_ci.bmp") == 0 )
-        {
-            if( GetImageInfoFromFile(texturefilename, &imgInfo) != 0)
+        if(strcasecmp(entry->d_name+(strlen(entry->d_name)-7), "_ci.bmp")==0)
             {
-                TRACE1("Cannot get image info for file: %s", entry->d_name);
-                continue;
-            }
-
-            if( imgInfo.Format == SURFFMT_P8 )
-                type = COLOR_INDEXED_BMP;
+            if(imgInfo.Format==SURFFMT_P8)
+                { type = COLOR_INDEXED_BMP; }
             else
-                continue;
-        }
-        else if( strcasecmp(right(entry->d_name,13), "_ciByRGBA.png") == 0 )
-        {
-            if( GetImageInfoFromFile(texturefilename, &imgInfo) != 0 )
-            {
-                TRACE1("Cannot get image info for file: %s", entry->d_name);
-                continue;
+                { continue; }
             }
 
-            if( imgInfo.Format == SURFFMT_A8R8G8B8 )
-                type = RGBA_PNG_FOR_CI;
+        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-13), "_ciByRGBA.png")== 0)
+            {
+            if(imgInfo.Format==SURFFMT_A8R8G8B8)
+                { type = RGBA_PNG_FOR_CI; }
             else
-                continue;
-        }
-
-        else if( strcasecmp(right(entry->d_name,16), "_allciByRGBA.png") == 0 )
-        {
-            if( GetImageInfoFromFile(texturefilename, &imgInfo) != 0 )
-            {
-                TRACE1("Cannot get image info for file: %s", entry->d_name);
-                continue;
+                { continue; }
             }
-            if( imgInfo.Format == SURFFMT_A8R8G8B8 )
-                type = RGBA_PNG_FOR_ALL_CI;
+
+        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-16), "_allciByRGBA.png")==0)
+            {
+            if(imgInfo.Format==SURFFMT_A8R8G8B8)
+                { type = RGBA_PNG_FOR_ALL_CI; }
             else
-                continue;
-        }
-        else if( strcasecmp(right(entry->d_name,8), "_rgb.png") == 0 )
-        {
-            if( GetImageInfoFromFile(texturefilename, &imgInfo) != 0 )
-            {
-                TRACE1("Cannot get image info for file: %s", entry->d_name);
-                continue;
+                { continue; }
             }
 
-            if( imgInfo.Format != SURFFMT_X8R8G8B8 )
-                continue;
-
+        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-8), "_rgb.png")==0)
+            {
             type = RGB_PNG;
 
             char filename2[PATH_MAX];
             strcpy(filename2,texturefilename);
             strcpy(filename2+strlen(filename2)-8,"_a.png");
-            if( PathFileExists(filename2) )
-            {
-                if( GetImageInfoFromFile(filename2, &imgInfo2) != 0 )
+            if(PathFileExists(filename2))
                 {
-                    TRACE1("Cannot get image info for file: %s", filename2);
+                if(GetImageInfoFromFile(filename2, &imgInfo2)!=0)
+                    {
+                    printf("Cannot get image info for file: %s", filename2);
                     continue;
-                }
-                
-                if( extraCheck && (imgInfo2.Width != imgInfo.Width || imgInfo2.Height != imgInfo.Height) )
-                {
-                    TRACE1("RGB and alpha texture size mismatch: %s", filename2);
+                    }
+                if(extraCheck&&(imgInfo2.Width!=imgInfo.Width||imgInfo2.Height!=imgInfo.Height))
+                    {
+                    printf("RGB and alpha texture size mismatch: %s", filename2);
                     continue;
+                    }
+                bSeparatedAlpha = true;
                 }
+            }
 
-                if( imgInfo.Format == SURFFMT_X8R8G8B8 )
-                {
-                    bSeparatedAlpha = true;
-                }
-            }
-        }
-        else if( strcasecmp(right(entry->d_name,8), "_all.png") == 0 )
-        {
-            if( GetImageInfoFromFile(texturefilename, &imgInfo) != 0 )
+        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-8), "_all.png")==0)
+            { type = RGB_WITH_ALPHA_TOGETHER_PNG; }
+
+        if(type!=NO_TEXTURE)
             {
-                TRACE1("Cannot get image info for file: %s", entry->d_name);
-                continue;
-            }
-            
-            if( imgInfo.Format != SURFFMT_A8R8G8B8 )
-                continue;
-            
-            type = RGB_WITH_ALPHA_TOGETHER_PNG;
-        }
-    
-        if( type != NO_TEXTURE )
-        {
-            // Try to read image information here
+            // Try to read image information here. What do these codes mean???
             strcpy(texturefilename, entry->d_name);
 
             char *ptr = strchr(texturefilename,'#');
             *ptr++ = 0;
             if( type == RGBA_PNG_FOR_CI )
-            {
+                {
                 sscanf(ptr,"%8c#%d#%d#%8c", crcstr, &fmt, &siz,crcstr2);
                 crcstr2[8] = 0;
                 palcrc32 = strtoul(crcstr2,NULL,16);
-            }
+                }
             else
-            {
+                {
                 sscanf(ptr,"%8c#%d#%d", crcstr, &fmt, &siz);
                 palcrc32 = 0xFFFFFFFF;
-            }
+                }
             //sscanf(texturefilename,"%8c#%d#%d", crcstr, &fmt, &siz);
             crcstr[8]=0;
             crc = strtoul(crcstr,NULL,16);
 
             int foundIdx = -1;
-            for( int k=0; k<infos.size(); k++)
-            {
-                if( infos[k].crc32 == crc && infos[k].pal_crc32 == palcrc32 )
+            for(int k=0; k<infos.size(); k++)
                 {
+                if( infos[k].crc32 == crc && infos[k].pal_crc32 == palcrc32 )
+                    {
                     foundIdx = k;
                     break;
+                    }
                 }
-            }
 
-            if( foundIdx < 0 || type != infos[foundIdx].type)
-            {
+            if(foundIdx<0||type!=infos[foundIdx].type)
+                {
                 ExtTxtrInfo newinfo;
                 newinfo.width = imgInfo.Width;
                 newinfo.height = imgInfo.Height;
-            //strcpy(newinfo.name,g_curRomInfo.szGameName);
+                //strcpy(newinfo.name,g_curRomInfo.szGameName);
                 newinfo.foldername = new char[strlen(foldername)+1];
                 strcpy(newinfo.foldername,foldername);
                 newinfo.fmt = fmt;
@@ -1172,8 +1144,8 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
 
                 newinfo.RGBNameTail[0] = newinfo.AlphaNameTail[0] = 0;
 
-                switch ( type )
-                {
+                switch(type)
+                    {
                     case RGB_PNG:
                         strcpy(newinfo.RGBNameTail, "_rgb.png");
                         strcpy(newinfo.AlphaNameTail, "_a.png");
@@ -1190,16 +1162,16 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
                     default:
                         strcpy(newinfo.RGBNameTail, "_all.png");
                         break;
-                }
+                    }
 
                 uint64 crc64 = newinfo.crc32;
                 crc64 <<= 32;
                 crc64 |= (newinfo.pal_crc32&0xFFFFFF00)|(newinfo.fmt<<4)|newinfo.siz;
                 infos.add(crc64,newinfo);
+                }
             }
         }
-    //entry = readdir(dir);
-    } while(entry != NULL);
+    while(entry != NULL);
     closedir(dir);
 }
 
@@ -1943,7 +1915,7 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
         entry.pEnhancedTexture->m_bIsEnhancedTexture = true;
         entry.dwEnhancementFlag = TEXTURE_EXTERNAL;
 
-        printf("Loaded hi-res texture: %s\n", filename_rgb);
+        //printf("Loaded hi-res texture: %s\n", filename_rgb);
     }
     else
     {
