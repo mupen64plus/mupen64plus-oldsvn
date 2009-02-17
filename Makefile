@@ -123,6 +123,7 @@ OBJ_CORE = \
 	main/rom.o \
 	main/savestates.o \
 	main/zip/ioapi.o \
+	main/zip/zip.o \
 	main/zip/unzip.o \
 	main/bzip2/bzlib.o \
 	main/bzip2/crctable.o \

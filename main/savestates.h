@@ -1,6 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - savestates.h                                            *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2009 Olejl Tillin9                                      *
  *   Copyright (C) 2008 Richard42 Tillin9                                  *
  *   Copyright (C) 2002 Hacktarux                                          *
  *                                                                         *
@@ -25,11 +26,13 @@
 
 #define SAVESTATE 1
 #define LOADSTATE 2
+#define SAVEPJ64STATE 4
 
 extern int savestates_job;
 
 void savestates_save();
 void savestates_load();
+int savestates_save_pj64();
 void savestates_load_pj64();
 
 void savestates_select_slot(unsigned int s);
@@ -40,40 +43,45 @@ void savestates_inc_slot(void);
 void savestates_select_filename(const char* fn);
 char* savestates_get_filename();
 
-typedef struct _TLB_pj64 {
+typedef struct _TLB_pj64
+    {
     unsigned int _EntryDefined;
 
-    struct _BreakDownPageMask {
+    struct _BreakDownPageMask
+        {
         unsigned int zero : 13;
         unsigned int Mask : 12;
         unsigned int zero2 : 7;
-    } BreakDownPageMask;
+        } BreakDownPageMask;
 
-    struct _BreakDownEntryHi {
+    struct _BreakDownEntryHi
+        {
         unsigned int ASID : 8;
         unsigned int Zero : 4;
         unsigned int G : 1;
         unsigned int VPN2 : 19;
-    } BreakDownEntryHi;
+        } BreakDownEntryHi;
 
-    struct _BreakDownEntryLo0 {
+    struct _BreakDownEntryLo0 
+        {
         unsigned int GLOBAL: 1;
         unsigned int V : 1;
         unsigned int D : 1;
         unsigned int C : 3;
         unsigned int PFN : 20;
         unsigned int ZERO: 6;
-    } BreakDownEntryLo0;
+        } BreakDownEntryLo0;
 
-    struct _BreakDownEntryLo1 {
+    struct _BreakDownEntryLo1 
+        {
         unsigned int GLOBAL: 1;
         unsigned int V : 1;
         unsigned int D : 1;
         unsigned int C : 3;
         unsigned int PFN : 20;
         unsigned int ZERO: 6;
-    } BreakDownEntryLo1;
-} TLB_pj64;
+        } BreakDownEntryLo1;
+    } TLB_pj64;
 
 #endif /* __SAVESTAVES_H__ */
 

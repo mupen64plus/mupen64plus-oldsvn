@@ -55,6 +55,8 @@ typedef struct
     GtkWidget* saveStateMenuImage;
     GtkWidget* saveStateAsMenuItem;
     GtkWidget* saveStateAsMenuImage;
+    GtkWidget* saveStateAsPJ64MenuItem;
+    GtkWidget* saveStateAsPJ64MenuImage;
     GtkWidget* loadStateMenuItem;
     GtkWidget* loadStateMenuImage;
     GtkWidget* loadStateFromMenuItem;

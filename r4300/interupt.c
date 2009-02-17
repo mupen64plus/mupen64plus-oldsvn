@@ -215,6 +215,13 @@ unsigned int get_event(int type)
     return 0;
 }
 
+int get_next_event_type()
+{
+    interupt_queue *aux = q;
+    if (q == NULL) return 0;
+    return q->type;
+}
+
 void remove_event(int type)
 {
     interupt_queue *aux = q;
@@ -608,10 +615,20 @@ void gen_interupt()
 
     exception_general();
 
-    if (savestates_job & SAVESTATE) 
+    if(savestates_job & SAVESTATE)
     {
-        savestates_save();
-        savestates_job &= ~SAVESTATE;
+        if(savestates_job & SAVEPJ64STATE)
+        {
+            if(savestates_save_pj64() != -1)
+            {
+            savestates_job &= ~(SAVESTATE+SAVEPJ64STATE);
+            }
+        }
+        else
+        {
+            savestates_save();
+            savestates_job &= ~SAVESTATE;
+        }
     }
 }
 

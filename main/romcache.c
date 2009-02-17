@@ -394,7 +394,7 @@ static void scan_dir(const char* directoryname, int* romcounter)
     directory = opendir(directoryname);
     if(!directory)
         {
-        printf("Could not open directory '%s': %s\n", directoryname, strerror(errno));
+        printf("Could not open directory: %s\n", directoryname);
         return;
         }
 
@@ -417,7 +417,7 @@ static void scan_dir(const char* directoryname, int* romcounter)
         /* If we can't get information, move to next file. */
         if(stat(fullpath, &filestatus)==-1)
             {
-            printf("Could not open file '%s': %s\n", fullpath, strerror(errno));
+            printf("Could not open file: %s\n", fullpath);
             continue; 
             }
 
@@ -579,7 +579,7 @@ int load_initial_cache(void)
 
     if((gzfile = gzopen(cache_filename,"rb"))==NULL)
         {
-        printf("Could not open cachefile %s\n", cache_filename);
+        printf("Could not open cache file: %s\n", cache_filename);
         return 0;
         }
 
