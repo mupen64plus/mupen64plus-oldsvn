@@ -957,9 +957,6 @@ static void sighandler(int signal)
 #else
 static void sighandler(int signal, siginfo_t *info, void *context)
 {
-    struct sigaction sa;
-    SDL_Thread *emuThread = g_EmulationThread;
-
     switch( signal )
     {
         case SIGSEGV:
@@ -1016,16 +1013,7 @@ static void sighandler(int signal, siginfo_t *info, void *context)
             printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
     }
 
-    g_EmulationThread = 0;
-    g_EmulatorRunning = 0;
-
-    if (emuThread != NULL)
-        SDL_KillThread(emuThread);
-
-    /* reset to the default signal handler, so we don't loop and catch this signal over and over on non-Linux systems */
-    memset(&sa, 0, sizeof(struct sigaction));
-    sa.sa_handler = SIG_DFL;
-    sigaction(signal, &sa, NULL); 
+    abort();
 }
 #endif /* __WIN32__ */
 
