@@ -197,11 +197,17 @@ typedef struct {
     unsigned int  colorQuality;
 
     enum HACK_FOR_GAMES enableHackForGames;
-    
-    BOOL    bWidescreenExtend;
+
+    int     widescreenMode;
     BOOL    bWidescreenStretchBG;
 
 } GlobalOptions;
+
+enum WidescreenMode {
+    WIDESCREEN_STRETCH,
+    WIDESCREEN_PILLARBOX,
+    WIDESCREEN_EXTEND
+};
 
 extern GlobalOptions options;
 
@@ -298,7 +304,7 @@ extern char szIniFileName[300];
 void WriteIniFile();
 BOOL ReadIniFile();
 void OutputSectionDetails(unsigned int i, FILE* fh);
-int FindIniEntry(unsigned int dwCRC1, unsigned int dwCRC2, unsigned char nCountryID, char* szName); 
+int FindIniEntry(unsigned int dwCRC1, unsigned int dwCRC2, unsigned char nCountryID, char* szName);
 
 typedef struct
 {
@@ -319,7 +325,7 @@ typedef struct
     unsigned char nUnknown5;
 } ROMHeader;
 
-typedef struct 
+typedef struct
 {
     // Other info from the rom. This is for convenience
     unsigned char szGameName[50+1];

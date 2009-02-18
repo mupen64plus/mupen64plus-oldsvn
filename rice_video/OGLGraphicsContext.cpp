@@ -335,7 +335,7 @@ void COGLGraphicsContext::UpdateFrame(bool swaponly)
 
     glDepthMask(GL_TRUE);
     glClearDepth(1.0);
-    if( !g_curRomInfo.bForceScreenClear ) 
+    if(!g_curRomInfo.bForceScreenClear ) 
         glClear(GL_DEPTH_BUFFER_BIT);
     else
         needCleanScene = true;

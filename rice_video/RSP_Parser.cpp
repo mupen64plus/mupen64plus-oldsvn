@@ -43,7 +43,7 @@ const uint32 maxUsedUcodes = sizeof(UsedUcodes)/sizeof(UcodeInfo);
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 
-UcodeMap *ucodeMaps[] = 
+UcodeMap *ucodeMaps[] =
 {
     &ucodeMap0,             // ucode 0 - Mario
     &ucodeMap1,             // ucode 1 - GBI1
@@ -62,7 +62,7 @@ UcodeMap *ucodeMaps[] =
     NULL,                   // ucode 14 - OgreBattle Background
     NULL,                   // ucode 15 - ucode 0 with sprite2D
     NULL,                   // ucode 16 - Star War, Shadow of Empire
-    NULL,                   // ucode 17 - Star Wars - Rogue Squadron, 
+    NULL,                   // ucode 17 - Star Wars - Rogue Squadron,
     NULL,                   // ucode 18 - World Driver Championship
     NULL,                   // ucode 19 - Last Legion UX
     &ucodeMap1,             // ucode 20 - ZSortp
@@ -88,7 +88,7 @@ uint32 vertexMultVals[] =
     10, // ucode 15 - ucode 0 with sprite2D
     5,  // ucode 16 - Star War, Shadow of Empire
 
-    2,  // ucode 17 - Star Wars - Rogue Squadron, 
+    2,  // ucode 17 - Star Wars - Rogue Squadron,
     2,  // ucode 18 - World Driver Championship, check me here
     2,  // ucode 19 - Last Legion UX, check me here
     2,  // ucode 20 - ZSortp
@@ -99,125 +99,125 @@ CHAR gLastMicrocodeString[ 300 ] = "";
 //*****************************************************************************
 //
 //*****************************************************************************
-static UcodeData g_UcodeData[] = 
+static UcodeData g_UcodeData[] =
 {
     //crc_size, crc_800;
 
     {0, 0x150c3ce8, 0x150c3ce8, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Super Mario 64
     {4, 0x2b94276f, 0x2b94276f, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Wave Race 64 (v1.0)
-    {16,0xb1870454, 0xb1870454, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Star Wars - Shadows of the Empire (v1.0), 
-    {0, 0x51671ae4, 0x51671ae4, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Pilot Wings 64, 
-    {0, 0x67b5ac55, 0x67b5ac55, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Wibble, 
-    {0, 0x64dc8104, 0x64dc8104, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Dark Rift, 
-    {0, 0x309f363d, 0x309f363d, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Killer Instinct Gold, 
-    {0, 0xfcb57e57, 0xfcb57e57, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Blast Corps, 
-    {0, 0xb420f35a, 0xb420f35a, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Blast Corps, 
-    {0, 0x6e26c1df, 0x7c98e9c2, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, 
-    {2, 0xc02ac7bc, 0xc02ac7bc, (CHAR*)"RSP SW Version: 2.0G, 09-30-96",}, // GoldenEye 007, 
-    {0, 0xe5fee3bc, 0xe5fee3bc, (CHAR*)"RSP SW Version: 2.0G, 09-30-96",}, // Aero Fighters Assault, 
-    {8, 0xe4bb5ad8, 0x80129845, (CHAR*)"RSP SW Version: 2.0G, 09-30-96",}, // Puzzle Master 64, 
-    {0, 0x72109ec6, 0x72109ec6, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Duke Nukem 64, 
-    {0, 0xf24a9a04, 0xf24a9a04, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Tetrisphere, 
-    {15,0x700de42e, 0x700de42e, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Wipeout 64 (uses GBI1 too!), 
-    {15,0x1b304a74, 0x1b304a74, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Flying Dragon, 
-    {15,0xe4bb5ad8, 0xa7b2f704, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Silicon Valley, 
-    {15,0xe4bb5ad8, 0x88202781, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Glover, 
-    {0, 0xe466b5bd, 0xe466b5bd, (CHAR*)"Unknown 0xe466b5bd, 0xe466b5bd",}, // Dark Rift, 
-    {9, 0x7064a163, 0x7064a163, (CHAR*)"Unknown 0x7064a163, 0x7064a163",}, // Perfect Dark (v1.0), 
-    {0, 0x6522df69, 0x71bd078d, (CHAR*)"Unknown 0x6522df69, 0x71bd078d",}, // Tetris 
-    {0, 0x6522df69, 0x1b0c23a8, (CHAR*)"Unknown 0x6522df69, 0x1b0c23a8",}, // Pachinko Nichi 
+    {16,0xb1870454, 0xb1870454, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Star Wars - Shadows of the Empire (v1.0),
+    {0, 0x51671ae4, 0x51671ae4, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Pilot Wings 64,
+    {0, 0x67b5ac55, 0x67b5ac55, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Wibble,
+    {0, 0x64dc8104, 0x64dc8104, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Dark Rift,
+    {0, 0x309f363d, 0x309f363d, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Killer Instinct Gold,
+    {0, 0xfcb57e57, 0xfcb57e57, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Blast Corps,
+    {0, 0xb420f35a, 0xb420f35a, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",}, // Blast Corps,
+    {0, 0x6e26c1df, 0x7c98e9c2, (CHAR*)"RSP SW Version: 2.0D, 04-01-96",},
+    {2, 0xc02ac7bc, 0xc02ac7bc, (CHAR*)"RSP SW Version: 2.0G, 09-30-96",}, // GoldenEye 007,
+    {0, 0xe5fee3bc, 0xe5fee3bc, (CHAR*)"RSP SW Version: 2.0G, 09-30-96",}, // Aero Fighters Assault,
+    {8, 0xe4bb5ad8, 0x80129845, (CHAR*)"RSP SW Version: 2.0G, 09-30-96",}, // Puzzle Master 64,
+    {0, 0x72109ec6, 0x72109ec6, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Duke Nukem 64,
+    {0, 0xf24a9a04, 0xf24a9a04, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Tetrisphere,
+    {15,0x700de42e, 0x700de42e, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Wipeout 64 (uses GBI1 too!),
+    {15,0x1b304a74, 0x1b304a74, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Flying Dragon,
+    {15,0xe4bb5ad8, 0xa7b2f704, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Silicon Valley,
+    {15,0xe4bb5ad8, 0x88202781, (CHAR*)"RSP SW Version: 2.0H, 02-12-97",}, // Glover,
+    {0, 0xe466b5bd, 0xe466b5bd, (CHAR*)"Unknown 0xe466b5bd, 0xe466b5bd",}, // Dark Rift,
+    {9, 0x7064a163, 0x7064a163, (CHAR*)"Unknown 0x7064a163, 0x7064a163",}, // Perfect Dark (v1.0),
+    {0, 0x6522df69, 0x71bd078d, (CHAR*)"Unknown 0x6522df69, 0x71bd078d",}, // Tetris
+    {0, 0x6522df69, 0x1b0c23a8, (CHAR*)"Unknown 0x6522df69, 0x1b0c23a8",}, // Pachinko Nichi
 
     // GBI1
-    
-    {1, 0x45ca328e, 0x45ca328e, (CHAR*)"RSP Gfx ucode F3DLX         0.95 Yoshitaka Yasumoto Nintendo.",}, // Mario Kart 64, 
+
+    {1, 0x45ca328e, 0x45ca328e, (CHAR*)"RSP Gfx ucode F3DLX         0.95 Yoshitaka Yasumoto Nintendo.",}, // Mario Kart 64,
     {1, 0x98e3b909, 0x98e3b909, (CHAR*)"RSP Gfx ucode F3DEX         0.95 Yoshitaka Yasumoto Nintendo.",},   // Mario Kart 64
-    {1, 0x5d446090, 0x5d446090, (CHAR*)"RSP Gfx ucode F3DLP.Rej     0.96 Yoshitaka Yasumoto Nintendo.",0,1}, // Jikkyou J. League Perfect Striker, 
-    {1, 0x244f5ca3, 0x244f5ca3, (CHAR*)"RSP Gfx ucode F3DEX         1.00 Yoshitaka Yasumoto Nintendo.",}, // F-1 Pole Position 64, 
-    {1, 0x6a022585, 0x6a022585, (CHAR*)"RSP Gfx ucode F3DEX.NoN     1.00 Yoshitaka Yasumoto Nintendo.",1}, // Turok - The Dinosaur Hunter (v1.0), 
-    {1, 0x150706be, 0x150706be, (CHAR*)"RSP Gfx ucode F3DLX.NoN     1.00 Yoshitaka Yasumoto Nintendo.",1}, // Extreme-G, 
-    {1, 0x503f2c53, 0x503f2c53, (CHAR*)"RSP Gfx ucode F3DEX.NoN     1.21 Yoshitaka Yasumoto Nintendo.",1}, // Bomberman 64, 
+    {1, 0x5d446090, 0x5d446090, (CHAR*)"RSP Gfx ucode F3DLP.Rej     0.96 Yoshitaka Yasumoto Nintendo.",0,1}, // Jikkyou J. League Perfect Striker,
+    {1, 0x244f5ca3, 0x244f5ca3, (CHAR*)"RSP Gfx ucode F3DEX         1.00 Yoshitaka Yasumoto Nintendo.",}, // F-1 Pole Position 64,
+    {1, 0x6a022585, 0x6a022585, (CHAR*)"RSP Gfx ucode F3DEX.NoN     1.00 Yoshitaka Yasumoto Nintendo.",1}, // Turok - The Dinosaur Hunter (v1.0),
+    {1, 0x150706be, 0x150706be, (CHAR*)"RSP Gfx ucode F3DLX.NoN     1.00 Yoshitaka Yasumoto Nintendo.",1}, // Extreme-G,
+    {1, 0x503f2c53, 0x503f2c53, (CHAR*)"RSP Gfx ucode F3DEX.NoN     1.21 Yoshitaka Yasumoto Nintendo.",1}, // Bomberman 64,
     {1, 0xc705c37c, 0xc705c37c, (CHAR*)"RSP Gfx ucode F3DLX         1.21 Yoshitaka Yasumoto Nintendo.",}, // Fighting Force 64, Wipeout 64
-    {1, 0xa2146075, 0xa2146075, (CHAR*)"RSP Gfx ucode F3DLX.NoN     1.21 Yoshitaka Yasumoto Nintendo.",1}, // San Francisco Rush - Extreme Racing, 
-    {1, 0xb65aa2da, 0xb65aa2da, (CHAR*)"RSP Gfx ucode L3DEX         1.21 Yoshitaka Yasumoto Nintendo.",}, // Wipeout 64, 
-    {1, 0x0c8e5ec9, 0x0c8e5ec9, (CHAR*)"RSP Gfx ucode F3DEX         1.21 Yoshitaka Yasumoto Nintendo.",}, // 
+    {1, 0xa2146075, 0xa2146075, (CHAR*)"RSP Gfx ucode F3DLX.NoN     1.21 Yoshitaka Yasumoto Nintendo.",1}, // San Francisco Rush - Extreme Racing,
+    {1, 0xb65aa2da, 0xb65aa2da, (CHAR*)"RSP Gfx ucode L3DEX         1.21 Yoshitaka Yasumoto Nintendo.",}, // Wipeout 64,
+    {1, 0x0c8e5ec9, 0x0c8e5ec9, (CHAR*)"RSP Gfx ucode F3DEX         1.21 Yoshitaka Yasumoto Nintendo.",}, //
     {1, 0xe30795f2, 0xa53df3c4, (CHAR*)"RSP Gfx ucode F3DLP.Rej     1.21 Yoshitaka Yasumoto Nintendo.",0,1},
 
-    {1, 0xaebeda7d, 0xaebeda7d, (CHAR*)"RSP Gfx ucode F3DLX.Rej     1.21 Yoshitaka Yasumoto Nintendo.",0,1}, // Jikkyou World Soccer 3, 
-    {1, 0x0c8e5ec9, 0x0c8e5ec9, (CHAR*)"RSP Gfx ucode F3DEX         1.23 Yoshitaka Yasumoto Nintendo" ,},  // Wave Race 64 (Rev. 2) - Shindou Rumble Edition (JAP) 
+    {1, 0xaebeda7d, 0xaebeda7d, (CHAR*)"RSP Gfx ucode F3DLX.Rej     1.21 Yoshitaka Yasumoto Nintendo.",0,1}, // Jikkyou World Soccer 3,
+    {1, 0x0c8e5ec9, 0x0c8e5ec9, (CHAR*)"RSP Gfx ucode F3DEX         1.23 Yoshitaka Yasumoto Nintendo" ,},  // Wave Race 64 (Rev. 2) - Shindou Rumble Edition (JAP)
     {1, 0xc705c37c, 0xc705c37c, (CHAR*)"RSP Gfx ucode F3DLX         1.23 Yoshitaka Yasumoto Nintendo.",}, // GT
     {1, 0x2a61350d, 0x2a61350d, (CHAR*)"RSP Gfx ucode F3DLX         1.23 Yoshitaka Yasumoto Nintendo.",}, // Toy Story2
     {1, 0x0c8e5ec9, 0x0c8e5ec9, (CHAR*)"RSP Gfx ucode F3DEX         1.23 Yoshitaka Yasumoto Nintendo.",}, // Wave Race 64 Shindou Edition
-    {12,0xfc6529aa, 0xfc6529aa, (CHAR*)"RSP Gfx ucode F3DEX         1.23 Yoshitaka Yasumoto Nintendo.",}, // Superman - The Animated Series, 
-    {1, 0xa56cf996, 0xa56cf996, (CHAR*)"RSP Gfx ucode L3DEX         1.23 Yoshitaka Yasumoto Nintendo.",}, // Flying Dragon, 
-    {1, 0xcc83b43f, 0xcc83b43f, (CHAR*)"RSP Gfx ucode F3DEX.NoN     1.23 Yoshitaka Yasumoto Nintendo.",1}, // AeroGauge, 
-    {1, 0xca8927a0, 0xca8927a0, (CHAR*)"RSP Gfx ucode F3DLX.Rej     1.23 Yoshitaka Yasumoto Nintendo.",0,1},    // Puzzle Bobble 64, 
+    {12,0xfc6529aa, 0xfc6529aa, (CHAR*)"RSP Gfx ucode F3DEX         1.23 Yoshitaka Yasumoto Nintendo.",}, // Superman - The Animated Series,
+    {1, 0xa56cf996, 0xa56cf996, (CHAR*)"RSP Gfx ucode L3DEX         1.23 Yoshitaka Yasumoto Nintendo.",}, // Flying Dragon,
+    {1, 0xcc83b43f, 0xcc83b43f, (CHAR*)"RSP Gfx ucode F3DEX.NoN     1.23 Yoshitaka Yasumoto Nintendo.",1}, // AeroGauge,
+    {1, 0xca8927a0, 0xca8927a0, (CHAR*)"RSP Gfx ucode F3DLX.Rej     1.23 Yoshitaka Yasumoto Nintendo.",0,1},    // Puzzle Bobble 64,
     {1, 0x25689c75, 0xbe481ae8, (CHAR*)"RSP Gfx ucode F3DLP.Rej     1.23 Yoshitaka Yasumoto Nintendo.",0,1},
-    {1, 0xd2d747b7, 0xd2d747b7, (CHAR*)"RSP Gfx ucode F3DLX.NoN     1.23 Yoshitaka Yasumoto Nintendo.",1}, // Penny Racers, 
-    {1, 0xa849c858, 0x5bd32b5a, (CHAR*)"RSP Gfx ucode F3DTEX/A      1.23 Yoshitaka Yasumoto Nintendo.",}, // Tamagotchi 
+    {1, 0xd2d747b7, 0xd2d747b7, (CHAR*)"RSP Gfx ucode F3DLX.NoN     1.23 Yoshitaka Yasumoto Nintendo.",1}, // Penny Racers,
+    {1, 0xa849c858, 0x5bd32b5a, (CHAR*)"RSP Gfx ucode F3DTEX/A      1.23 Yoshitaka Yasumoto Nintendo.",}, // Tamagotchi
 
-    {7, 0xecd8b772, 0xecd8b772, (CHAR*)"RSP Gfx ucode S2DEX  1.06 Yoshitaka Yasumoto Nintendo.",}, // Yoshi's Story, 
-    {7, 0xf59132f5, 0xf59132f5, (CHAR*)"RSP Gfx ucode S2DEX  1.07 Yoshitaka Yasumoto Nintendo.",}, // Bakuretsu Muteki Bangaioh, 
+    {7, 0xecd8b772, 0xecd8b772, (CHAR*)"RSP Gfx ucode S2DEX  1.06 Yoshitaka Yasumoto Nintendo.",}, // Yoshi's Story,
+    {7, 0xf59132f5, 0xf59132f5, (CHAR*)"RSP Gfx ucode S2DEX  1.07 Yoshitaka Yasumoto Nintendo.",}, // Bakuretsu Muteki Bangaioh,
     {7, 0x961dd811, 0x961dd811, (CHAR*)"RSP Gfx ucode S2DEX  1.03 Yoshitaka Yasumoto Nintendo.",}, // GT
 
-    {5, 0x3e083afa, 0x722f97cc, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.03  Yoshitaka Yasumoto 1998 Nintendo.",1}, // F-Zero X, 
-    {5, 0xa8050bd1, 0xa8050bd1, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.03  Yoshitaka Yasumoto 1998 Nintendo.",}, // F-Zero X, 
-    {5, 0x4e8055f0, 0x4e8055f0, (CHAR*)"RSP Gfx ucode F3DLX.Rej   fifo 2.03  Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // F-Zero X, 
-    {5, 0xabf001f5, 0xabf001f5, (CHAR*)"RSP Gfx ucode F3DFLX.Rej  fifo 2.03F Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // F-Zero X, 
-    {5, 0xadb4b686, 0xadb4b686, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.04  Yoshitaka Yasumoto 1998 Nintendo.",}, // Top Gear Rally 2, 
-    {5, 0x779e2a9b, 0x779e2a9b, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.04  Yoshitaka Yasumoto 1998 Nintendo.",1}, // California Speed, 
-    {5, 0xa8cb3e09, 0xa8cb3e09, (CHAR*)"RSP Gfx ucode L3DEX       fifo 2.04  Yoshitaka Yasumoto 1998 Nintendo.",}, // In-Fisherman Bass Hunter 64, 
-    {5, 0x2a1341d6, 0x2a1341d6, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.04H Yoshitaka Yasumoto 1998 Nintendo.",}, // Kirby 64 - The Crystal Shards, 
-    {5, 0x3e083afa, 0x89a8e0ed, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo.",1}, // Carmageddon 64 (uncensored), 
-    {5, 0x4964b75d, 0x4964b75d, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo.",1}, 
-    {5, 0x39e3e95a, 0x39e3e95a, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo."}, // Knife Edge - Nose Gunner, 
-    {5, 0xd2913522, 0xd2913522, (CHAR*)"RSP Gfx ucode F3DAM       fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo."}, // Hey You, Pikachu!, 
+    {5, 0x3e083afa, 0x722f97cc, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.03  Yoshitaka Yasumoto 1998 Nintendo.",1}, // F-Zero X,
+    {5, 0xa8050bd1, 0xa8050bd1, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.03  Yoshitaka Yasumoto 1998 Nintendo.",}, // F-Zero X,
+    {5, 0x4e8055f0, 0x4e8055f0, (CHAR*)"RSP Gfx ucode F3DLX.Rej   fifo 2.03  Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // F-Zero X,
+    {5, 0xabf001f5, 0xabf001f5, (CHAR*)"RSP Gfx ucode F3DFLX.Rej  fifo 2.03F Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // F-Zero X,
+    {5, 0xadb4b686, 0xadb4b686, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.04  Yoshitaka Yasumoto 1998 Nintendo.",}, // Top Gear Rally 2,
+    {5, 0x779e2a9b, 0x779e2a9b, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.04  Yoshitaka Yasumoto 1998 Nintendo.",1}, // California Speed,
+    {5, 0xa8cb3e09, 0xa8cb3e09, (CHAR*)"RSP Gfx ucode L3DEX       fifo 2.04  Yoshitaka Yasumoto 1998 Nintendo.",}, // In-Fisherman Bass Hunter 64,
+    {5, 0x2a1341d6, 0x2a1341d6, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.04H Yoshitaka Yasumoto 1998 Nintendo.",}, // Kirby 64 - The Crystal Shards,
+    {5, 0x3e083afa, 0x89a8e0ed, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo.",1}, // Carmageddon 64 (uncensored),
+    {5, 0x4964b75d, 0x4964b75d, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo.",1},
+    {5, 0x39e3e95a, 0x39e3e95a, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo."}, // Knife Edge - Nose Gunner,
+    {5, 0xd2913522, 0xd2913522, (CHAR*)"RSP Gfx ucode F3DAM       fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo."}, // Hey You, Pikachu!,
     {5, 0x3e083afa, 0xc998443f, (CHAR*)"RSP Gfx ucode F3DEX       xbus 2.05  Yoshitaka Yasumoto 1998 Nintendo."}, //Triple play
-    {5, 0xf4184a7d, 0xf4184a7d, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.06  Yoshitaka Yasumoto 1998 Nintendo.",}, // Hey You, Pikachu!, 
-    {5, 0x595a88de, 0x595a88de, (CHAR*)"RSP Gfx ucode F3DEX.Rej   fifo 2.06  Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // Bio Hazard 2, 
-    {5, 0x0259f764, 0x0259f764, (CHAR*)"RSP Gfx ucode F3DLX.Rej   fifo 2.06  Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // Mario Party, 
-    {5, 0xe1a5477a, 0xe1a5477a, (CHAR*)"RSP Gfx ucode F3DEX.NoN   xbus 2.06  Yoshitaka Yasumoto 1998 Nintendo.",1}, // Command & Conquer, 
-    {5, 0x4cfa0a19, 0x4cfa0a19, (CHAR*)"RSP Gfx ucode F3DZEX.NoN  fifo 2.06H Yoshitaka Yasumoto 1998 Nintendo.",1}, // The Legend of Zelda - Ocarina of Time (v1.0), 
-    {5, 0x2cbd9514, 0x5f40b9f5, (CHAR*)"RSP Gfx ucode F3DZEX.NoN  fifo 2.06H Yoshitaka Yasumoto 1998 Nintendo.",1}, 
+    {5, 0xf4184a7d, 0xf4184a7d, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.06  Yoshitaka Yasumoto 1998 Nintendo.",}, // Hey You, Pikachu!,
+    {5, 0x595a88de, 0x595a88de, (CHAR*)"RSP Gfx ucode F3DEX.Rej   fifo 2.06  Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // Bio Hazard 2,
+    {5, 0x0259f764, 0x0259f764, (CHAR*)"RSP Gfx ucode F3DLX.Rej   fifo 2.06  Yoshitaka Yasumoto 1998 Nintendo.",0,1}, // Mario Party,
+    {5, 0xe1a5477a, 0xe1a5477a, (CHAR*)"RSP Gfx ucode F3DEX.NoN   xbus 2.06  Yoshitaka Yasumoto 1998 Nintendo.",1}, // Command & Conquer,
+    {5, 0x4cfa0a19, 0x4cfa0a19, (CHAR*)"RSP Gfx ucode F3DZEX.NoN  fifo 2.06H Yoshitaka Yasumoto 1998 Nintendo.",1}, // The Legend of Zelda - Ocarina of Time (v1.0),
+    {5, 0x2cbd9514, 0x5f40b9f5, (CHAR*)"RSP Gfx ucode F3DZEX.NoN  fifo 2.06H Yoshitaka Yasumoto 1998 Nintendo.",1},
 
     {5, 0x3e083afa, 0x882680f4, (CHAR*)"RSP Gfx ucode L3DEX       fifo 2.07  Yoshitaka Yasumoto 1998 Nintendo."},   // Polaris Sno
 
-    {5, 0xdeb1cac0, 0xdeb1cac0, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.07  Yoshitaka Yasumoto 1998 Nintendo.",1}, // Knockout Kings 2000, 
+    {5, 0xdeb1cac0, 0xdeb1cac0, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.07  Yoshitaka Yasumoto 1998 Nintendo.",1}, // Knockout Kings 2000,
     {5, 0xf4184a7d, 0xf4184a7d, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.07  Yoshitaka Yasumoto 1998 Nintendo.",}, // Xena Warrior Princess - Talisman of Fate, Army Men - Air Combat, Destruction Derby
-    {5, 0x4b013e60, 0x4b013e60, (CHAR*)"RSP Gfx ucode F3DEX       xbus 2.07  Yoshitaka Yasumoto 1998 Nintendo.",}, // Lode Runner 3-D, 
-    {5, 0xd1a63836, 0xd1a63836, (CHAR*)"RSP Gfx ucode L3DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Hey You, Pikachu!, 
-    {5, 0x97193667, 0x97193667, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Top Gear Hyper-Bike, 
-    {5, 0x92149ba8, 0x92149ba8, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.08  Yoshitaka Yasumoto/Kawasedo 1999.",}, // Paper Mario, 
-    {5, 0xae0fb88f, 0xae0fb88f, (CHAR*)"RSP Gfx ucode F3DEX       xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // WWF WrestleMania 2000, 
-    {5, 0xc572f368, 0xc572f368, (CHAR*)"RSP Gfx ucode F3DLX.Rej   xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // WWF No Mercy, 
-    {5, 0x3e083afa, 0x74252492, (CHAR*)"RSP Gfx ucode F3DEX.NoN   xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",1}, 
+    {5, 0x4b013e60, 0x4b013e60, (CHAR*)"RSP Gfx ucode F3DEX       xbus 2.07  Yoshitaka Yasumoto 1998 Nintendo.",}, // Lode Runner 3-D,
+    {5, 0xd1a63836, 0xd1a63836, (CHAR*)"RSP Gfx ucode L3DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Hey You, Pikachu!,
+    {5, 0x97193667, 0x97193667, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Top Gear Hyper-Bike,
+    {5, 0x92149ba8, 0x92149ba8, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.08  Yoshitaka Yasumoto/Kawasedo 1999.",}, // Paper Mario,
+    {5, 0xae0fb88f, 0xae0fb88f, (CHAR*)"RSP Gfx ucode F3DEX       xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // WWF WrestleMania 2000,
+    {5, 0xc572f368, 0xc572f368, (CHAR*)"RSP Gfx ucode F3DLX.Rej   xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // WWF No Mercy,
+    {5, 0x3e083afa, 0x74252492, (CHAR*)"RSP Gfx ucode F3DEX.NoN   xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",1},
 
-    {5, 0x9c2edb70, 0xea98e740, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",1}, // LEGO Racers, 
-    {5, 0x79e004a6, 0x79e004a6, (CHAR*)"RSP Gfx ucode F3DLX.Rej   fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",0,1}, // Mario Party 2, 
-    {5, 0xaa6ab3ca, 0xaa6ab3ca, (CHAR*)"RSP Gfx ucode F3DEX.Rej   fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",0,1}, // V-Rally Edition 99, 
+    {5, 0x9c2edb70, 0xea98e740, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",1}, // LEGO Racers,
+    {5, 0x79e004a6, 0x79e004a6, (CHAR*)"RSP Gfx ucode F3DLX.Rej   fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",0,1}, // Mario Party 2,
+    {5, 0xaa6ab3ca, 0xaa6ab3ca, (CHAR*)"RSP Gfx ucode F3DEX.Rej   fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",0,1}, // V-Rally Edition 99,
     {5, 0x2c597e0f, 0x2c597e0f, (CHAR*)"RSP Gfx ucode F3DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Cruis'n Exotica,
-    {10, 0x4e5f3e3b, 0x4e5f3e3b,(CHAR*)"RSP Gfx ucode F3DEXBG.NoN fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",1}, // Conker The Bad Fur Day 
-    {5, 0x61f31862, 0x61f31862, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.08H Yoshitaka Yasumoto 1999 Nintendo.",1}, // Pokemon Snap, 
-    {5, 0x005f5b71, 0x005f5b71, (CHAR*)"RSP Gfx ucode F3DZEX.NoN  fifo 2.08I Yoshitaka Yasumoto/Kawasedo 1999.",1}, // The Legend of Zelda 2 - Majora's Mask, 
+    {10, 0x4e5f3e3b, 0x4e5f3e3b,(CHAR*)"RSP Gfx ucode F3DEXBG.NoN fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",1}, // Conker The Bad Fur Day
+    {5, 0x61f31862, 0x61f31862, (CHAR*)"RSP Gfx ucode F3DEX.NoN   fifo 2.08H Yoshitaka Yasumoto 1999 Nintendo.",1}, // Pokemon Snap,
+    {5, 0x005f5b71, 0x005f5b71, (CHAR*)"RSP Gfx ucode F3DZEX.NoN  fifo 2.08I Yoshitaka Yasumoto/Kawasedo 1999.",1}, // The Legend of Zelda 2 - Majora's Mask,
 
-    {3, 0x41839d1e, 0x41839d1e, (CHAR*)"RSP Gfx ucode S2DEX       fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo.",}, // Chou Snobow Kids, 
+    {3, 0x41839d1e, 0x41839d1e, (CHAR*)"RSP Gfx ucode S2DEX       fifo 2.05  Yoshitaka Yasumoto 1998 Nintendo.",}, // Chou Snobow Kids,
     {3, 0x2cbd9514, 0xc639dbb9, (CHAR*)"RSP Gfx ucode S2DEX       xbus 2.06  Yoshitaka Yasumoto 1998 Nintendo.",},
-    {3, 0xec89e273, 0xec89e273, (CHAR*)"RSP Gfx ucode S2DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // V-Rally Edition 99, 
-    {3, 0x9429b7d6, 0x9429b7d6, (CHAR*)"RSP Gfx ucode S2DEX       xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Star Craft, 
-    //{14,0x5a72397b, 0xec89e273, "RSP Gfx ucode S2DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // OgreBattle Background, 
-    {3, 0x2cbd9514, 0xec89e273, (CHAR*)"RSP Gfx ucode S2DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Zelda MM, 
+    {3, 0xec89e273, 0xec89e273, (CHAR*)"RSP Gfx ucode S2DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // V-Rally Edition 99,
+    {3, 0x9429b7d6, 0x9429b7d6, (CHAR*)"RSP Gfx ucode S2DEX       xbus 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Star Craft,
+    //{14,0x5a72397b, 0xec89e273, "RSP Gfx ucode S2DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // OgreBattle Background,
+    {3, 0x2cbd9514, 0xec89e273, (CHAR*)"RSP Gfx ucode S2DEX       fifo 2.08  Yoshitaka Yasumoto 1999 Nintendo.",}, // Zelda MM,
 
-    {6, 0x6aef74f8, 0x6aef74f8, (CHAR*)"Unknown 0x6aef74f8, 0x6aef74f8",}, // Diddy Kong Racing (v1.0), 
-    {6, 0x4c4eead8, 0x4c4eead8, (CHAR*)"Unknown 0x4c4eead8, 0x4c4eead8",}, // Diddy Kong Racing (v1.1), 
+    {6, 0x6aef74f8, 0x6aef74f8, (CHAR*)"Unknown 0x6aef74f8, 0x6aef74f8",}, // Diddy Kong Racing (v1.0),
+    {6, 0x4c4eead8, 0x4c4eead8, (CHAR*)"Unknown 0x4c4eead8, 0x4c4eead8",}, // Diddy Kong Racing (v1.1),
 
-    {1, 0xed421e9a, 0xed421e9a, (CHAR*)"Unknown 0xed421e9a, 0xed421e9a",}, // Kuiki Uhabi Suigo, 
-    {5, 0x37751932, 0x55c0fd25, (CHAR*)"Unknown 0x37751932, 0x55c0fd25",}, // Bio Hazard 2, 
-    {11,0xbe0b83e7, 0xbe0b83e7,(CHAR*)"Unknown 0xbe0b83e7, 0xbe0b83e7",},  // Jet Force Gemini, 
+    {1, 0xed421e9a, 0xed421e9a, (CHAR*)"Unknown 0xed421e9a, 0xed421e9a",}, // Kuiki Uhabi Suigo,
+    {5, 0x37751932, 0x55c0fd25, (CHAR*)"Unknown 0x37751932, 0x55c0fd25",}, // Bio Hazard 2,
+    {11,0xbe0b83e7, 0xbe0b83e7,(CHAR*)"Unknown 0xbe0b83e7, 0xbe0b83e7",},  // Jet Force Gemini,
 
-    {17, 0x02e882cf, 0x2ad17281, (CHAR*)"Unknown 0x02e882cf, 0x2ad17281",}, // Indiana Jones, 
-    {17, 0x1f7d9118, 0xdab2199b, (CHAR*)"Unknown 0x1f7d9118, 0xdab2199b",}, // Battle Naboo, 
-    {17, 0x74583614, 0x74583614, (CHAR*)"Unknown 0x74583614, 0x74583614",}, // Star Wars - Rogue Squadron, 
-    {17, 0xe37e2f49, 0x1eb63fd8, (CHAR*)"Unknown 0xe37e2f49, 0x1eb63fd8",}, // Star Wars - Rogue Squadron, 
-    {17, 0x8ce1af3d, 0xb2760ea2, (CHAR*)"Unknown 0x8ce1af3d, 0xb2760ea2",}, // Star Wars - Rogue Squadron, 
+    {17, 0x02e882cf, 0x2ad17281, (CHAR*)"Unknown 0x02e882cf, 0x2ad17281",}, // Indiana Jones,
+    {17, 0x1f7d9118, 0xdab2199b, (CHAR*)"Unknown 0x1f7d9118, 0xdab2199b",}, // Battle Naboo,
+    {17, 0x74583614, 0x74583614, (CHAR*)"Unknown 0x74583614, 0x74583614",}, // Star Wars - Rogue Squadron,
+    {17, 0xe37e2f49, 0x1eb63fd8, (CHAR*)"Unknown 0xe37e2f49, 0x1eb63fd8",}, // Star Wars - Rogue Squadron,
+    {17, 0x8ce1af3d, 0xb2760ea2, (CHAR*)"Unknown 0x8ce1af3d, 0xb2760ea2",}, // Star Wars - Rogue Squadron,
 
     {18, 0x7b685972, 0x57b8095a, (CHAR*)"Unknown 0x7b685972, 0x57b8095a",}, // World Driver Championship
     {18, 0xe92dbb9b, 0x57b8095a, (CHAR*)"Unknown 0xe92dbb9b, 0x57b8095a",}, // World Driver Championship
@@ -225,10 +225,10 @@ static UcodeData g_UcodeData[] =
     {18, 0x6522df69, 0x720b88a0, (CHAR*)"Unknown 0x6522df69, 0x720b88a0",}, // World Driver Championship
     {18, 0x6522df69, 0xf1e8ba9e, (CHAR*)"Unknown 0x6522df69, 0xf1e8ba9e",}, // World Driver Championship
 
-    {19, 0xa486bed3, 0xa486bed3, (CHAR*)"Unknown 0xa486bed3, 0xa486bed3",}, // Last Legion UX, 
+    {19, 0xa486bed3, 0xa486bed3, (CHAR*)"Unknown 0xa486bed3, 0xa486bed3",}, // Last Legion UX,
     {19, 0x6b519381, 0xfebacfd8, (CHAR*)"Unknown in Toukan Road",}, // I don't know which ucode
 
-    {20, 0x6d2a01b1, 0x6d2a01b1, (CHAR*)"RSP Gfx ucode ZSortp 0.33 Yoshitaka Yasumoto Nintendo.",}, // Mia Hamm Soccer 64, 
+    {20, 0x6d2a01b1, 0x6d2a01b1, (CHAR*)"RSP Gfx ucode ZSortp 0.33 Yoshitaka Yasumoto Nintendo.",}, // Mia Hamm Soccer 64,
 };
 
 FiddledVtx * g_pVtxBase=NULL;
@@ -309,7 +309,7 @@ void DLParser_Init()
     status.bUseModifiedUcodeMap = false;
     status.ucodeHasBeenSet = false;
     status.bAllowLoadFromTMEM = true;
-    
+
     char name[200];
     strcpy(name, (char*)g_curRomInfo.szGameName);
 
@@ -604,7 +604,7 @@ static uint32 DLParser_IdentifyUcode( uint32 crc_size, uint32 crc_800, char* str
 #ifdef _DEBUG
         if ( crc_800 == g_UcodeData[i].crc_800 )
         {
-            if( strlen(str)==0 || strcmp((const char *) g_UcodeData[i].ucode_name, str) == 0 ) 
+            if( strlen(str)==0 || strcmp((const char *) g_UcodeData[i].ucode_name, str) == 0 )
             {
                 TRACE0((const char *) g_UcodeData[i].ucode_name);
             }
@@ -667,7 +667,7 @@ uint32 DLParser_CheckUcode(uint32 ucStart, uint32 ucDStart, uint32 ucSize, uint3
 #ifdef _DEBUG
             if(gRSP.ucode != (int)UsedUcodes[usedUcodeIndex].ucode && logMicrocode)
             {
-                DebuggerAppendMsg("Check, ucode = %d, crc = %08X, %s", UsedUcodes[usedUcodeIndex].ucode, 
+                DebuggerAppendMsg("Check, ucode = %d, crc = %08X, %s", UsedUcodes[usedUcodeIndex].ucode,
                     UsedUcodes[usedUcodeIndex].crc_800 , UsedUcodes[usedUcodeIndex].rspstr);
             }
 #endif
@@ -738,7 +738,7 @@ uint32 DLParser_CheckUcode(uint32 ucStart, uint32 ucDStart, uint32 ucSize, uint3
         }
 
         //DLParser_SetuCode( ucode );
-        
+
 #ifdef _DEBUG
         {
             static bool warned=false;
@@ -770,7 +770,7 @@ uint32 DLParser_CheckUcode(uint32 ucStart, uint32 ucDStart, uint32 ucSize, uint3
         strcpy( UsedUcodes[usedUcodeIndex].rspstr, (char*)str );
 
         TRACE2("New ucode has been detected:\n%s, ucode=%d", str, ucode);
-    
+
         return ucode;
     }
 }
@@ -811,7 +811,7 @@ void DLParser_Process(OSTask * pTask)
     }
 
     g_pOSTask = pTask;
-    
+
     DebuggerPauseCountN( NEXT_DLIST );
     struct timeval tv;
     gettimeofday(&tv, 0);
@@ -884,7 +884,7 @@ void DLParser_Process(OSTask * pTask)
 
             Gfx *pgfx = (Gfx*)&g_pRDRAMu32[(gDlistStack[gDlistStackPointer].pc>>2)];
 #ifdef _DEBUG
-            LOG_UCODE("0x%08x: %08x %08x %-10s", 
+            LOG_UCODE("0x%08x: %08x %08x %-10s",
                 gDlistStack[gDlistStackPointer].pc, pgfx->words.w0, pgfx->words.w1, (gRSP.ucode!=5&&gRSP.ucode!=10)?ucodeNames_GBI1[(pgfx->words.w0>>24)]:ucodeNames_GBI2[(pgfx->words.w0>>24)]);
 #endif
             gDlistStack[gDlistStackPointer].pc += 8;
@@ -917,7 +917,7 @@ void DLParser_Process(OSTask * pTask)
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 
-void RDP_NOIMPL_Real(const char* op, uint32 word0, uint32 word1) 
+void RDP_NOIMPL_Real(const char* op, uint32 word0, uint32 word1)
 {
 #ifdef _DEBUG
     if( logWarning )
@@ -981,12 +981,12 @@ void RSP_GFX_InitGeometryMode()
         bCullFront = false;
     }
     CRender::g_pRender->SetCullMode(bCullFront, bCullBack);
-    
+
     BOOL bShade         = (gRDP.geometryMode & G_SHADE) ? TRUE : FALSE;
     BOOL bShadeSmooth   = (gRDP.geometryMode & G_SHADING_SMOOTH) ? TRUE : FALSE;
     if (bShade && bShadeSmooth)     CRender::g_pRender->SetShadeMode( SHADE_SMOOTH );
     else                            CRender::g_pRender->SetShadeMode( SHADE_FLAT );
-    
+
     CRender::g_pRender->SetFogEnable( gRDP.geometryMode & G_FOG ? true : false );
     SetTextureGen((gRDP.geometryMode & G_TEXTURE_GEN) ? true : false );
     SetLighting( (gRDP.geometryMode & G_LIGHTING ) ? true : false );
@@ -1058,7 +1058,7 @@ void DLParser_SetPrimDepth(Gfx *gfx)
 
     LOG_UCODE("SetPrimDepth: 0x%08x 0x%08x - z: 0x%04x dz: 0x%04x",
         gfx->words.w0, gfx->words.w1, dwZ, dwDZ);
-    
+
     SetPrimitiveDepth(dwZ, dwDZ);
     DEBUGGER_PAUSE(NEXT_SET_PRIM_COLOR);
 }
@@ -1117,25 +1117,25 @@ void DLParser_RDPSetOtherMode(Gfx *gfx)
 
 
 
-void DLParser_RDPLoadSync(Gfx *gfx) 
-{ 
+void DLParser_RDPLoadSync(Gfx *gfx)
+{
     DP_Timing(DLParser_RDPLoadSync);
-    LOG_UCODE("LoadSync: (Ignored)"); 
+    LOG_UCODE("LoadSync: (Ignored)");
 }
 
-void DLParser_RDPPipeSync(Gfx *gfx) 
-{ 
+void DLParser_RDPPipeSync(Gfx *gfx)
+{
     DP_Timing(DLParser_RDPPipeSync);
-    LOG_UCODE("PipeSync: (Ignored)"); 
+    LOG_UCODE("PipeSync: (Ignored)");
 }
-void DLParser_RDPTileSync(Gfx *gfx) 
-{ 
+void DLParser_RDPTileSync(Gfx *gfx)
+{
     DP_Timing(DLParser_RDPTileSync);
-    LOG_UCODE("TileSync: (Ignored)"); 
+    LOG_UCODE("TileSync: (Ignored)");
 }
 
 void DLParser_RDPFullSync(Gfx *gfx)
-{ 
+{
     DP_Timing(DLParser_RDPFullSync);
     TriggerDPInterrupt();
 }
@@ -1206,7 +1206,7 @@ void DLParser_SetScissor(Gfx *gfx)
 
 
 void DLParser_FillRect(Gfx *gfx)
-{ 
+{
     DP_Timing(DLParser_FillRect);   // fix me
     status.primitiveType = PRIM_FILLRECT;
 
@@ -1435,7 +1435,7 @@ void DLParser_SetCImg(Gfx *gfx)
 
     if( dwFmt == TXT_FMT_YUV || dwFmt == TXT_FMT_IA )
     {
-        WARNING(TRACE4("Check me:  SetCImg Addr=0x%08X, Fmt:%s-%sb, Width=%d\n", 
+        WARNING(TRACE4("Check me:  SetCImg Addr=0x%08X, Fmt:%s-%sb, Width=%d\n",
             g_CI.dwAddr, pszImgFormat[dwFmt], pszImgSize[dwSiz], dwWidth));
     }
 
@@ -1447,7 +1447,7 @@ void DLParser_SetCImg(Gfx *gfx)
     {
         TXTRBUF_OR_CI_DETAIL_DUMP({
             TRACE0("Set CIMG to the same address, no change, skipped");
-            DebuggerAppendMsg("Pause after SetCImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n", 
+            DebuggerAppendMsg("Pause after SetCImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n",
                 g_CI.dwAddr, pszImgFormat[dwFmt], pszImgSize[dwSiz], dwWidth);
         });
         return;
@@ -1502,12 +1502,12 @@ void DLParser_SetCImg(Gfx *gfx)
         status.bCIBufferIsRendered = false;
         status.bN64IsDrawingTextureBuffer = false;
 
-        TXTRBUF_DUMP(TRACE4("SetCImg : Addr=0x%08X, Fmt:%s-%sb, Width=%d\n", 
+        TXTRBUF_DUMP(TRACE4("SetCImg : Addr=0x%08X, Fmt:%s-%sb, Width=%d\n",
             g_CI.dwAddr, pszImgFormat[dwFmt], pszImgSize[dwSiz], dwWidth));
 
-        DEBUGGER_PAUSE_AND_DUMP_NO_UPDATE(NEXT_SET_CIMG, 
+        DEBUGGER_PAUSE_AND_DUMP_NO_UPDATE(NEXT_SET_CIMG,
         {
-            DebuggerAppendMsg("Pause after SetCImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n", 
+            DebuggerAppendMsg("Pause after SetCImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n",
                 dwNewAddr, pszImgFormat[dwFmt], pszImgSize[dwSiz], dwWidth);
         }
         );
@@ -1557,13 +1557,13 @@ void DLParser_SetZImg(Gfx *gfx)
     }
 
     DEBUGGER_IF_DUMP((pauseAtNext) ,
-    {DebuggerAppendMsg("SetZImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n", 
+    {DebuggerAppendMsg("SetZImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n",
     g_ZI.dwAddr, pszImgFormat[dwFmt], pszImgSize[dwSiz], dwWidth);}
     );
 
-    DEBUGGER_PAUSE_AND_DUMP_NO_UPDATE(NEXT_SET_CIMG, 
+    DEBUGGER_PAUSE_AND_DUMP_NO_UPDATE(NEXT_SET_CIMG,
         {
-            DebuggerAppendMsg("Pause after SetZImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n", 
+            DebuggerAppendMsg("Pause after SetZImg: Addr=0x%08X, Fmt:%s-%sb, Width=%d\n",
                 g_ZI.dwAddr, pszImgFormat[dwFmt], pszImgSize[dwSiz], dwWidth);
         }
     );
@@ -1573,7 +1573,7 @@ bool IsUsedAsDI(uint32 addr)
 {
     if( addr == g_ZI_saves[0].CI_Info.dwAddr )
         return true;
-    else if( addr == g_ZI_saves[1].CI_Info.dwAddr && status.gDlistCount - g_ZI_saves[1].updateAtFrame < 10 
+    else if( addr == g_ZI_saves[1].CI_Info.dwAddr && status.gDlistCount - g_ZI_saves[1].updateAtFrame < 10
         && g_ZI_saves[1].CI_Info.dwAddr != 0 )
         return true;
     else
@@ -1615,7 +1615,7 @@ void DLParser_SetBlendColor(Gfx *gfx)
 void DLParser_SetPrimColor(Gfx *gfx)
 {
     DP_Timing(DLParser_SetPrimColor);
-    SetPrimitiveColor( COLOR_RGBA(gfx->setcolor.r, gfx->setcolor.g, gfx->setcolor.b, gfx->setcolor.a), 
+    SetPrimitiveColor( COLOR_RGBA(gfx->setcolor.r, gfx->setcolor.g, gfx->setcolor.b, gfx->setcolor.a),
         gfx->setcolor.prim_min_level, gfx->setcolor.prim_level);
 }
 
@@ -1647,7 +1647,7 @@ void RDP_DLParser_Process(void)
         gTextureManager.PurgeOldTextures();
         status.lastPurgeTimeTime = status.gRDPTime;
     }
-    
+
     // Lock the graphics context here.
     CRender::g_pRender->SetFillMode(RICE_FILLMODE_SOLID);
 
@@ -1715,7 +1715,7 @@ static void make_crc_table()
   poly = 0L;
   for (n = 0; (unsigned int)n < sizeof(p)/sizeof(uint8); n++)
     poly |= 1L << (31 - p[n]);
- 
+
   for (n = 0; n < 256; n++)
   {
     c = (ULONG)n;
@@ -1766,7 +1766,7 @@ void LoadMatrix(uint32 addr)
 
     for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 4; j++) 
+        for (j = 0; j < 4; j++)
         {
             int     hi = *(short *)(g_pRDRAMu8 + ((addr+(i<<3)+(j<<1)     )^0x2));
             int  lo = *(unsigned short *)(g_pRDRAMu8 + ((addr+(i<<3)+(j<<1) + 32)^0x2));

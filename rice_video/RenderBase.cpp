@@ -42,41 +42,41 @@ inline void RSP_Vtx_Clipping(int i)
         /*
         if( gRSP.bRejectVtx )
         {
-            if( g_vecProjected[i].x > 1 )   
+            if( g_vecProjected[i].x > 1 )
             {
                 g_clipFlag2[i] |= X_CLIP_MAX;
-                if( g_vecProjected[i].x > gRSP.real_clip_ratio_posx )   
+                if( g_vecProjected[i].x > gRSP.real_clip_ratio_posx )
                     g_clipFlag[i] |= X_CLIP_MAX;
             }
 
-            if( g_vecProjected[i].x < -1 )  
+            if( g_vecProjected[i].x < -1 )
             {
                 g_clipFlag2[i] |= X_CLIP_MIN;
-                if( g_vecProjected[i].x < gRSP.real_clip_ratio_negx )   
+                if( g_vecProjected[i].x < gRSP.real_clip_ratio_negx )
                     g_clipFlag[i] |= X_CLIP_MIN;
             }
 
-            if( g_vecProjected[i].y > 1 )   
+            if( g_vecProjected[i].y > 1 )
             {
                 g_clipFlag2[i] |= Y_CLIP_MAX;
-                if( g_vecProjected[i].y > gRSP.real_clip_ratio_posy )   
+                if( g_vecProjected[i].y > gRSP.real_clip_ratio_posy )
                     g_clipFlag[i] |= Y_CLIP_MAX;
             }
 
-            if( g_vecProjected[i].y < -1 )  
+            if( g_vecProjected[i].y < -1 )
             {
                 g_clipFlag2[i] |= Y_CLIP_MIN;
-                if( g_vecProjected[i].y < gRSP.real_clip_ratio_negy )   
+                if( g_vecProjected[i].y < gRSP.real_clip_ratio_negy )
                     g_clipFlag[i] |= Y_CLIP_MIN;
             }
 
-            //if( g_vecProjected[i].z > 1.0f )  
+            //if( g_vecProjected[i].z > 1.0f )
             //{
             //  g_clipFlag2[i] |= Z_CLIP_MAX;
             //  g_clipFlag[i] |= Z_CLIP_MAX;
             //}
 
-            //if( gRSP.bNearClip && g_vecProjected[i].z < -1.0f )   
+            //if( gRSP.bNearClip && g_vecProjected[i].z < -1.0f )
             //{
             //  g_clipFlag2[i] |= Z_CLIP_MIN;
             //  g_clipFlag[i] |= Z_CLIP_MIN;
@@ -86,7 +86,7 @@ inline void RSP_Vtx_Clipping(int i)
         */
         {
             float scaleFactor = 1.0f;
-            if (options.bWidescreenExtend)
+            if (options.widescreenMode == WIDESCREEN_EXTEND)
                 scaleFactor = (3.0 * windowSetting.uDisplayWidth) / (4.0 * windowSetting.uDisplayHeight);
             if( g_vecProjected[i].x > scaleFactor )   g_clipFlag2[i] |= X_CLIP_MAX;
             if( g_vecProjected[i].x < -scaleFactor )  g_clipFlag2[i] |= X_CLIP_MIN;
@@ -282,9 +282,9 @@ __declspec( naked ) void  __fastcall SSEVec3Transform(int i)
         movhlps xmm5, xmm0;         // xmm4, xmm5 are mirrored
 
         shufps  xmm4, xmm4, 0x08;   // move xmm4's 3rd uint32 to its 2nd uint32
-        shufps  xmm5, xmm5, 0x0d;   // move xmm5's 4th uint32 to its 2nd uint32, 
+        shufps  xmm5, xmm5, 0x0d;   // move xmm5's 4th uint32 to its 2nd uint32,
                                     // and move its 2nd uint32 to its 1st uint32
-        
+
         addps   xmm4, xmm5;     // results are in 1st and 2nd uint32
 
 
@@ -299,11 +299,11 @@ __declspec( naked ) void  __fastcall SSEVec3Transform(int i)
         movhlps xmm7, xmm0;         // xmm6, xmm7 are mirrored
 
         shufps  xmm6, xmm6, 0x08;   // move xmm6's 3rd uint32 to its 2nd uint32
-        shufps  xmm7, xmm7, 0x0d;   // move xmm7's 4th uint32 to its 2nd uint32, 
+        shufps  xmm7, xmm7, 0x0d;   // move xmm7's 4th uint32 to its 2nd uint32,
                                     // and move its 2nd uint32 to its 1st uint32
-        
+
         addps   xmm6, xmm7;     // results are in 1st and 2nd uint32
-        
+
         movlhps xmm4, xmm6;     // final result is in xmm4
         movaps  DWORD PTR g_vtxTransformed [ecx], xmm4;
 
@@ -350,7 +350,7 @@ __declspec( naked ) void  __fastcall SSEVec3TransformDKR(XVECTOR4 &pOut, const X
         movhlps xmm5, xmm0;         // xmm4, xmm5 are mirrored
 
         shufps  xmm4, xmm4, 0x08;   // move xmm4's 3rd uint32 to its 2nd uint32
-        shufps  xmm5, xmm5, 0x0d;   // move xmm5's 4th uint32 to its 2nd uint32, 
+        shufps  xmm5, xmm5, 0x0d;   // move xmm5's 4th uint32 to its 2nd uint32,
         // and move its 2nd uint32 to its 1st uint32
 
         addps   xmm4, xmm5;     // results are in 1st and 2nd uint32
@@ -367,7 +367,7 @@ __declspec( naked ) void  __fastcall SSEVec3TransformDKR(XVECTOR4 &pOut, const X
         movhlps xmm7, xmm0;         // xmm6, xmm7 are mirrored
 
         shufps  xmm6, xmm6, 0x08;   // move xmm6's 3rd uint32 to its 2nd uint32
-        shufps  xmm7, xmm7, 0x0d;   // move xmm7's 4th uint32 to its 2nd uint32, 
+        shufps  xmm7, xmm7, 0x0d;   // move xmm7's 4th uint32 to its 2nd uint32,
         // and move its 2nd uint32 to its 1st uint32
 
         addps   xmm6, xmm7;     // results are in 1st and 2nd uint32
@@ -507,7 +507,7 @@ __declspec( naked ) void  __fastcall SSEVec3TransformNormal()
         movhlps xmm5, xmm0;         // xmm4, xmm5 are mirrored
 
         shufps  xmm4, xmm4, 0x08;   // move xmm4's 3rd uint32 to its 2nd uint32
-        shufps  xmm5, xmm5, 0x0d;   // move xmm5's 4th uint32 to its 2nd uint32, 
+        shufps  xmm5, xmm5, 0x0d;   // move xmm5's 4th uint32 to its 2nd uint32,
 
         addps   xmm4, xmm5;     // results are in 1st and 2nd uint32
 
@@ -641,7 +641,7 @@ void InitRenderBase()
     gRSP.nVPHeightN = 640;
     gRDP.scissor.left=gRDP.scissor.top=0;
     gRDP.scissor.right=gRDP.scissor.bottom=640;
-    
+
     gRSP.bLightingEnable = gRSP.bTextureGen = false;
     gRSP.curTile=gRSPnumLights=gRSP.ambientLightColor=gRSP.ambientLightIndex= 0;
     gRSP.fAmbientLightR=gRSP.fAmbientLightG=gRSP.fAmbientLightB=0;
@@ -783,7 +783,7 @@ void InitVertexTextureConstants()
 void TexGen(float &s, float &t)
 {
     if (gRDP.geometryMode & G_TEXTURE_GEN_LINEAR)
-    {   
+    {
         s = acosf(g_normal.x) / 3.14159f;
         t = acosf(g_normal.y) / 3.14159f;
     }
@@ -845,7 +845,7 @@ void InitVertex(uint32 dwV, uint32 vtxIndex, bool bTexture, bool openGL, bool st
     VTX_DUMP(TRACE4("  Trans: x=%f, y=%f, z=%f, w=%f",  g_vtxTransformed[dwV].x,g_vtxTransformed[dwV].y,g_vtxTransformed[dwV].z,g_vtxTransformed[dwV].w));
     if( openGL )
     {
-        if (options.bWidescreenExtend && !stretch)
+        if (options.widescreenMode == WIDESCREEN_EXTEND && !stretch)
         {
             float s = (4.0 * windowSetting.uDisplayHeight) / (3.0 * windowSetting.uDisplayWidth);
             g_vtxProjected5[vtxIndex][0] = g_vtxTransformed[dwV].x * s;
@@ -1008,7 +1008,7 @@ uint32 LightVert(XVECTOR4 & norm, int vidx)
     {
         for (register unsigned int l=0; l < gRSPnumLights; l++)
         {
-            fCosT = norm.x*gRSPlights[l].x + norm.y*gRSPlights[l].y + norm.z*gRSPlights[l].z; 
+            fCosT = norm.x*gRSPlights[l].x + norm.y*gRSPlights[l].y + norm.z*gRSPlights[l].z;
 
             if (fCosT > 0 )
             {
@@ -1028,7 +1028,7 @@ uint32 LightVert(XVECTOR4 & norm, int vidx)
             if( gRSPlights[l].range == 0 )
             {
                 // Regular directional light
-                fCosT = norm.x*gRSPlights[l].x + norm.y*gRSPlights[l].y + norm.z*gRSPlights[l].z; 
+                fCosT = norm.x*gRSPlights[l].x + norm.y*gRSPlights[l].y + norm.z*gRSPlights[l].z;
 
                 if (fCosT > 0 )
                 {
@@ -1053,7 +1053,7 @@ uint32 LightVert(XVECTOR4 & norm, int vidx)
                 dir.y /= d2;
                 dir.z /= d2;
 
-                fCosT = norm.x*dir.x + norm.y*dir.y + norm.z*dir.z; 
+                fCosT = norm.x*dir.x + norm.y*dir.y + norm.z*dir.z;
 
                 if (fCosT > 0 )
                 {
@@ -1089,7 +1089,7 @@ uint32 LightVertNew(XVECTOR4 & norm)
 
     for (register unsigned int l=0; l < gRSPnumLights; l++)
     {
-        fCosT = norm.x*gRSPlights[l].tx + norm.y*gRSPlights[l].ty + norm.z*gRSPlights[l].tz; 
+        fCosT = norm.x*gRSPlights[l].tx + norm.y*gRSPlights[l].ty + norm.z*gRSPlights[l].tz;
 
         if (fCosT > 0 )
         {
@@ -1137,8 +1137,8 @@ loopback:
         jc          endloop
 
         shufps      xmm0,xmm0,0;                    // fcosT
-        mulps       xmm1,xmm0; 
-        addps       xmm3,xmm1; 
+        mulps       xmm1,xmm0;
+        addps       xmm3,xmm1;
 endloop:
         inc         ecx;
         jmp         loopback;
@@ -1168,7 +1168,7 @@ uint32 SSELightVert(void)
 {
   uint32 rval;
   float f255 = 255.0, fZero = 0.0;
-  
+
   asm volatile(" movaps            %1,  %%xmm3    \n" // xmm3 == gRSP.fAmbientLight{RGBA}
            " movaps            %2,  %%xmm4    \n"     // xmm4 == g_normal.{xyz}
            " xor            %%rcx,   %%rcx    \n"
@@ -1273,7 +1273,7 @@ inline void ReplaceAlphaWithFogFactor(int i)
         if( g_vecProjected[i].z < 0 )
             *(((uint8*)&(g_dwVtxDifColor[i]))+3) = 0;
         else
-            *(((uint8*)&(g_dwVtxDifColor[i]))+3) = (uint8)(g_vecProjected[i].z*255);    
+            *(((uint8*)&(g_dwVtxDifColor[i]))+3) = (uint8)(g_vecProjected[i].z*255);
     }
 }
 
@@ -1288,7 +1288,7 @@ inline void ReplaceAlphaWithFogFactor(int i)
 #define X_NEG  0x10
 #define X_POS  0x20
 
-// Assumes dwAddr has already been checked! 
+// Assumes dwAddr has already been checked!
 // Don't inline - it's too big with the transform macros
 
 #if !defined(NO_ASM)
@@ -1334,13 +1334,13 @@ void ProcessVertexDataSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         ReplaceAlphaWithFogFactor(i);
 
 
-        VTX_DUMP( 
+        VTX_DUMP(
         {
             uint32 *dat = (uint32*)(&vert);
-            DebuggerAppendMsg("vtx %d: %08X %08X %08X %08X", i, dat[0],dat[1],dat[2],dat[3]); 
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("vtx %d: %08X %08X %08X %08X", i, dat[0],dat[1],dat[2],dat[3]);
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vtxTransformed[i].x,g_vtxTransformed[i].y,g_vtxTransformed[i].z,g_vtxTransformed[i].w);
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vecProjected[i].x,g_vecProjected[i].y,g_vecProjected[i].z,g_vecProjected[i].w);
         });
 
@@ -1392,7 +1392,7 @@ void ProcessVertexDataSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         else
         {
             g_fVtxTxtCoords[i].x = (float)vert.tu;
-            g_fVtxTxtCoords[i].y = (float)vert.tv; 
+            g_fVtxTxtCoords[i].y = (float)vert.tv;
         }
     }
 
@@ -1454,13 +1454,13 @@ void ProcessVertexDataNoSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
                 g_fFogCoord[i] = gRSPfFogMin;
         }
 
-        VTX_DUMP( 
+        VTX_DUMP(
         {
             uint32 *dat = (uint32*)(&vert);
-            DebuggerAppendMsg("vtx %d: %08X %08X %08X %08X", i, dat[0],dat[1],dat[2],dat[3]); 
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("vtx %d: %08X %08X %08X %08X", i, dat[0],dat[1],dat[2],dat[3]);
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vtxTransformed[i].x,g_vtxTransformed[i].y,g_vtxTransformed[i].z,g_vtxTransformed[i].w);
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vecProjected[i].x,g_vecProjected[i].y,g_vecProjected[i].z,g_vecProjected[i].w);
         });
 
@@ -1511,7 +1511,7 @@ void ProcessVertexDataNoSSE(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         else
         {
             g_fVtxTxtCoords[i].x = (float)vert.tu;
-            g_fVtxTxtCoords[i].y = (float)vert.tv; 
+            g_fVtxTxtCoords[i].y = (float)vert.tv;
         }
     }
 
@@ -1540,11 +1540,11 @@ bool PrepareTriangle(uint32 dwV0, uint32 dwV1, uint32 dwV2)
         //-the triangle stretches at least from -0.9 to 0.9 (out of 1)
         //-the triangle is flat to the z plane
         //-the triangle's z value is less than 0
-        if (options.bWidescreenStretchBG && 
+        if (options.bWidescreenStretchBG &&
           ((((g_vtxTransformed[dwV0].x <= -0.9) && (g_vtxTransformed[dwV1].x >= 0.9 || g_vtxTransformed[dwV2].x >= 0.9)) ||
             ((g_vtxTransformed[dwV1].x <= -0.9) && (g_vtxTransformed[dwV2].x >= 0.9 || g_vtxTransformed[dwV0].x >= 0.9)) ||
             ((g_vtxTransformed[dwV2].x <= -0.9) && (g_vtxTransformed[dwV0].x >= 0.9 || g_vtxTransformed[dwV1].x >= 0.9))) &&
-             (g_vtxTransformed[dwV0].z == g_vtxTransformed[dwV1].z && 
+             (g_vtxTransformed[dwV0].z == g_vtxTransformed[dwV1].z &&
               g_vtxTransformed[dwV0].z == g_vtxTransformed[dwV2].z && g_vtxTransformed[dwV0].z <= 0)))
         {
             stretch = true;
@@ -1571,7 +1571,7 @@ bool IsTriangleVisible(uint32 dwV0, uint32 dwV1, uint32 dwV2)
     if( status.isVertexShaderEnabled || status.bUseHW_T_L ) return true;    // We won't have access to transformed vertex data
 
     DEBUGGER_ONLY_IF( (!debuggerEnableTestTris || !debuggerEnableCullFace), {return TRUE;});
-    
+
 #ifdef _DEBUG
     // Check vertices are valid!
     if (dwV0 >= MAX_VERTS || dwV1 >= MAX_VERTS || dwV2 >= MAX_VERTS)
@@ -1594,7 +1594,7 @@ bool IsTriangleVisible(uint32 dwV0, uint32 dwV1, uint32 dwV2)
         {
             float V1 = v2.x - v0.x;
             float V2 = v2.y - v0.y;
-            
+
             float W1 = v2.x - v1.x;
             float W2 = v2.y - v1.y;
 
@@ -1616,9 +1616,9 @@ bool IsTriangleVisible(uint32 dwV0, uint32 dwV1, uint32 dwV2)
             }
         }
     }
-    
+
 #ifdef ENABLE_CLIP_TRI
-    //if( gRSP.bRejectVtx && (g_clipFlag[dwV0]|g_clipFlag[dwV1]|g_clipFlag[dwV2]) ) 
+    //if( gRSP.bRejectVtx && (g_clipFlag[dwV0]|g_clipFlag[dwV1]|g_clipFlag[dwV2]) )
     //  return;
     if( g_clipFlag2[dwV0]&g_clipFlag2[dwV1]&g_clipFlag2[dwV2] )
     {
@@ -1653,7 +1653,7 @@ void SetPrimitiveDepth(uint32 z, uint32 dwDZ)
     gRDP.primitiveDepth = z & 0x7FFF;
     gRDP.fPrimitiveDepth = (float)(gRDP.primitiveDepth)/(float)0x8000;
 
-    //gRDP.fPrimitiveDepth = gRDP.fPrimitiveDepth*2-1;  
+    //gRDP.fPrimitiveDepth = gRDP.fPrimitiveDepth*2-1;
     /*
     z=0xFFFF    ->  1   the farest
     z=0         ->  -1  the nearest
@@ -1662,9 +1662,9 @@ void SetPrimitiveDepth(uint32 z, uint32 dwDZ)
     //how to use dwDZ?
 
 #ifdef _DEBUG
-    if( (pauseAtNext && (eventToPause == NEXT_VERTEX_CMD || eventToPause == NEXT_FLUSH_TRI )) )//&& logTriangles ) 
+    if( (pauseAtNext && (eventToPause == NEXT_VERTEX_CMD || eventToPause == NEXT_FLUSH_TRI )) )//&& logTriangles )
     {
-        DebuggerAppendMsg("Set prim Depth: %f, (%08X, %08X)", gRDP.fPrimitiveDepth, z, dwDZ); 
+        DebuggerAppendMsg("Set prim Depth: %f, (%08X, %08X)", gRDP.fPrimitiveDepth, z, dwDZ);
     }
 #endif
 }
@@ -1812,7 +1812,7 @@ void ProcessVertexDataDKR(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
 
         gRSP.DKRVtxCount++;
 
-        VTX_DUMP(TRACE5("vtx %d: %f, %f, %f, %f", i, 
+        VTX_DUMP(TRACE5("vtx %d: %f, %f, %f, %f", i,
             g_vtxTransformed[i].x,g_vtxTransformed[i].y,g_vtxTransformed[i].z,g_vtxTransformed[i].w));
 
         if( gRSP.bFogEnabled )
@@ -1961,14 +1961,14 @@ void ProcessVertexDataPD(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         else
         {
             t.x = vert.s;
-            t.y = vert.t; 
+            t.y = vert.t;
         }
 
 
-        VTX_DUMP( 
+        VTX_DUMP(
         {
-            DebuggerAppendMsg("vtx %d: %d %d %d", i, vert.x,vert.y,vert.z); 
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("vtx %d: %d %d %d", i, vert.x,vert.y,vert.z);
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vtxTransformed[i].x,g_vtxTransformed[i].y,g_vtxTransformed[i].z,g_vtxTransformed[i].w);
             DebuggerAppendMsg("      : %X, %X, %X, %X", r,g,b,a);
             DebuggerAppendMsg("      : u=%f, v=%f", t.x, t.y);
@@ -2016,13 +2016,13 @@ void ProcessVertexDataConker(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         if( g_vecProjected[i].w < 0 || g_vecProjected[i].z < 0 || g_fFogCoord[i] < gRSPfFogMin )
             g_fFogCoord[i] = gRSPfFogMin;
 
-        VTX_DUMP( 
+        VTX_DUMP(
         {
             uint32 *dat = (uint32*)(&vert);
-            DebuggerAppendMsg("vtx %d: %08X %08X %08X %08X", i, dat[0],dat[1],dat[2],dat[3]); 
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("vtx %d: %08X %08X %08X %08X", i, dat[0],dat[1],dat[2],dat[3]);
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vtxTransformed[i].x,g_vtxTransformed[i].y,g_vtxTransformed[i].z,g_vtxTransformed[i].w);
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vecProjected[i].x,g_vecProjected[i].y,g_vecProjected[i].z,g_vecProjected[i].w);
         });
 
@@ -2052,7 +2052,7 @@ void ProcessVertexDataConker(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
                 g_dwVtxDifColor[i] = 0xFF000000;
                 g_dwVtxDifColor[i] |= (r<<16);
                 g_dwVtxDifColor[i] |= (g<< 8);
-                g_dwVtxDifColor[i] |= (b    );          
+                g_dwVtxDifColor[i] |= (b    );
             }
 
             *(((uint8*)&(g_dwVtxDifColor[i]))+3) = vert.rgba.a; // still use alpha from the vertex
@@ -2093,7 +2093,7 @@ void ProcessVertexDataConker(uint32 dwAddr, uint32 dwV0, uint32 dwNum)
         else
         {
             g_fVtxTxtCoords[i].x = (float)vert.tu;
-            g_fVtxTxtCoords[i].y = (float)vert.tv; 
+            g_fVtxTxtCoords[i].y = (float)vert.tv;
         }
     }
 
@@ -2158,11 +2158,11 @@ void ProcessVertexData_Rogue_Squadron(uint32 dwXYZAddr, uint32 dwColorAddr, uint
             g_vecProjected[i].z = g_vtxTransformed[i].z * g_vecProjected[i].w;
         }
 
-        VTX_DUMP( 
+        VTX_DUMP(
         {
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vtxTransformed[i].x,g_vtxTransformed[i].y,g_vtxTransformed[i].z,g_vtxTransformed[i].w);
-            DebuggerAppendMsg("      : %f, %f, %f, %f", 
+            DebuggerAppendMsg("      : %f, %f, %f, %f",
                 g_vecProjected[i].x,g_vecProjected[i].y,g_vecProjected[i].z,g_vecProjected[i].w);
         });
 
@@ -2224,7 +2224,7 @@ void ProcessVertexData_Rogue_Squadron(uint32 dwXYZAddr, uint32 dwColorAddr, uint
         else
         {
             t.x = (float)vert.tu;
-            t.y = (float)vert.tv; 
+            t.y = (float)vert.tv;
         }
         */
     }
@@ -2312,7 +2312,7 @@ void ResetTextureCoordsLog(float maxs0, float maxt0, float maxs1, float maxt1)
     validS1 = validT1 = true;
 }
 
-void ForceMainTextureIndex(int dwTile) 
+void ForceMainTextureIndex(int dwTile)
 {
     if( dwTile == 1 && !(CRender::g_pRender->IsTexel0Enable()) && CRender::g_pRender->IsTexel1Enable() )
     {

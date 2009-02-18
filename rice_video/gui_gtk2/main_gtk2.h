@@ -35,6 +35,8 @@ GtkWidget* okButton;
 GtkWidget *windowModeCombo;
 GtkWidget *fullScreenCombo;
 GtkWidget *colorBufferDepthCombo;
+GtkWidget *widescreenModeCombo;
+GtkWidget *widescreenStretchBGCheck;
 GtkWidget* enableSSECheck;
 GtkWidget* wireframeCheck;
 GtkWidget* skipFrameCheck;

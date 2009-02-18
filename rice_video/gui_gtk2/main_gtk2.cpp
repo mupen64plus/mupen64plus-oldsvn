@@ -30,7 +30,7 @@
 
 #include "../winlnxdefs.h"
 #include "../Graphics_1.3.h"
-#include "../Config.h" 
+#include "../Config.h"
 #include "../Video.h"
 
 #include "main_gtk2.h"
@@ -60,9 +60,13 @@ const int resolutions[][2] =
 {800, 600},
 {1024, 768},
 {1152, 864},
+{1280, 720},
 {1280, 960},
+{1360, 768},
 {1400, 1050},
+{1440, 900},
 {1600, 1200},
+{1920, 1080},
 {1920, 1440},
 {2048, 1536},
 };
@@ -78,11 +82,22 @@ const char* resolutionsS[] =
 "800 x 600",
 "1024 x 768",
 "1152 x 864",
+"1280 x 720",
 "1280 x 960",
+"1360 x 768",
 "1400 x 1050",
+"1440 x 900",
 "1600 x 1200",
+"1920 x 1080",
 "1920 x 1440",
 "2048 x 1536"
+};
+
+SettingInfo widescreenModeSettings[] =
+{
+{"Stretch", WIDESCREEN_STRETCH},
+{"Pillarbox", WIDESCREEN_PILLARBOX},
+{"Extend", WIDESCREEN_EXTEND}
 };
 
 EXPORT void CALL SetInstallDir(char* installDir)
@@ -111,6 +126,26 @@ char* get_iconpath(char* iconfile)
     return path;
 }
 
+/* If a widescreen mode is selected, enable the widescreen options */
+static void callback_full_screen(GtkWidget* widget, gpointer data)
+{
+    gint setting = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.fullScreenCombo));
+    bool isWidescreen = ((resolutions[setting][0] * 3) > (resolutions[setting][1] * 4));
+    gtk_widget_set_sensitive(g_ConfigDialog.widescreenModeCombo, isWidescreen);
+    if (!isWidescreen)
+    {
+        gtk_widget_set_sensitive(g_ConfigDialog.widescreenStretchBGCheck, false);
+    }
+}
+
+/* If a widescreen mode is selected, enable the bg stretch option */
+static void callback_widescreen_mode(GtkWidget* widget, gpointer data)
+{
+    gint setting = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.widescreenModeCombo));
+    gtk_widget_set_sensitive(g_ConfigDialog.widescreenStretchBGCheck, (setting == 2));
+}
+
+
 /* Control sensitivity of enhancementControlCombo. */
 static void callback_texture_enhancement(GtkWidget* widget, gpointer data)
 {
@@ -137,6 +172,8 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     windowSetting.uWindowDisplayHeight = windowSetting.uFullScreenDisplayHeight;
     windowSetting.uDisplayWidth = windowSetting.uWindowDisplayWidth;
     windowSetting.uDisplayHeight = windowSetting.uWindowDisplayHeight;
+    options.widescreenMode = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.widescreenModeCombo));
+    options.bWidescreenStretchBG = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.widescreenStretchBGCheck));
     options.colorQuality = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.colorBufferDepthCombo));
     options.bEnableSSE = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.enableSSECheck));
     status.isSSEEnabled = status.isSSESupported && options.bEnableSSE;
@@ -240,7 +277,7 @@ static void create_dialog(void)
     gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_TOP);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(g_ConfigDialog.dialog)->vbox), notebook, TRUE, TRUE, 0);
 
-    table = gtk_table_new(2, 5, FALSE);
+    table = gtk_table_new(2, 6, FALSE);
     gtk_container_set_border_width(GTK_CONTAINER(table), 10);
     gtk_table_set_col_spacings(GTK_TABLE(table), 10);
     gtk_table_set_row_spacings(GTK_TABLE(table), 2);
@@ -273,25 +310,39 @@ static void create_dialog(void)
         gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.colorBufferDepthCombo), colorQualitySettings[i].description);
     gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.colorBufferDepthCombo, 1, 2, 1, 2);
 
+    label = gtk_label_new("Widescreen Mode:");
+    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+    gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
+
+    g_ConfigDialog.widescreenModeCombo = gtk_combo_box_new_text();
+    for (i = 0; (size_t)i < sizeof(widescreenModeSettings)/sizeof(SettingInfo); ++i)
+        gtk_combo_box_append_text(GTK_COMBO_BOX(g_ConfigDialog.widescreenModeCombo), widescreenModeSettings[i].description);
+    gtk_widget_set_tooltip_text(g_ConfigDialog.widescreenModeCombo, "This controls how to display the game if you are using a widescreen resolution.\n\n- Stretch: Stretches the 4:3 display to your resolution\n- Pillarbox: Displays in 4:3 aspect ratio, filling the remainder of the screen with black bars\n- Extend: Displays in your aspect ratio by drawing the world that exists beyond the normal 4:3 boundary.  As N64 games were not designed to support this capability, some games may not render as expected.\n");
+    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.widescreenModeCombo, 1, 2, 2, 3);
+
+    g_ConfigDialog.widescreenStretchBGCheck = gtk_check_button_new_with_label("Stretch backgrounds");
+    gtk_widget_set_tooltip_text(g_ConfigDialog.widescreenStretchBGCheck, "In widescreen extend mode, this will stretch 4:3 background images to fill the screen.  If you have a \"hall of mirrors\" effect in the sky, try turning this option on.");
+    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.widescreenStretchBGCheck, 1, 2, 3, 4);
+
     g_ConfigDialog.enableSSECheck = gtk_check_button_new_with_label("Enable SSE");
     gtk_widget_set_tooltip_text(g_ConfigDialog.enableSSECheck, "On x86 and x86_64 CPUs, SSE (Intel Streaming SMID Extension) can speed up 3D transformation, vertex, and matrix processing. If your processor cannot support SSE, the plugin should autodetect this. You generally want this enabled unless debugging.");
-    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.enableSSECheck, 0, 1, 2, 3);
+    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.enableSSECheck, 0, 1, 3, 4);
 
     g_ConfigDialog.skipFrameCheck = gtk_check_button_new_with_label("Skip frame");
     gtk_widget_set_tooltip_text(g_ConfigDialog.skipFrameCheck, "If enabled, only every other frame will be rendered to the screen. This is only useful to speedup GPU limited games and may cause flickering.");
-    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.skipFrameCheck, 1, 2, 2, 3);
+    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.skipFrameCheck, 1, 2, 4, 5);
 
     g_ConfigDialog.wireframeCheck = gtk_check_button_new_with_label("Wireframe Mode");
     gtk_widget_set_tooltip_text(g_ConfigDialog.wireframeCheck, "If enabled, graphics will be drawn in wireframe mode instead of solid and texture mode.");
-    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.wireframeCheck, 0, 1, 3, 4);
+    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.wireframeCheck, 0, 1, 4, 5);
 
     g_ConfigDialog.enableFogCheck = gtk_check_button_new_with_label("Enable Fog");
     gtk_widget_set_tooltip_text(g_ConfigDialog.enableFogCheck, "Enabling fog effects can improve graphics in some games, but may introduce minor artifacts on most platforms. Linux users with ATI cards will likely experience significant artifacts.");
-    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.enableFogCheck, 1, 2, 3, 4);
+    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.enableFogCheck, 1, 2, 5, 6);
 
     g_ConfigDialog.showFPSCheck = gtk_check_button_new_with_label("Show FPS");
     gtk_widget_set_tooltip_text(g_ConfigDialog.showFPSCheck, "If enabled, current FPS (frame per second) will be displayed in the titlebar.");
-    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.showFPSCheck, 0, 1, 4, 5);
+    gtk_table_attach_defaults(GTK_TABLE(table), g_ConfigDialog.showFPSCheck, 0, 1, 5, 6);
 
     /* OpenGL Options Tab. */
     table = gtk_table_new(2, 5, FALSE);
@@ -629,6 +680,8 @@ static void create_dialog(void)
 
     /* Signal callbacks. */
     g_signal_connect(g_ConfigDialog.dialog, "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL);
+    g_signal_connect(g_ConfigDialog.fullScreenCombo, "changed", G_CALLBACK(callback_full_screen), NULL);
+    g_signal_connect(g_ConfigDialog.widescreenModeCombo, "changed", G_CALLBACK(callback_widescreen_mode), NULL);
     g_signal_connect(g_ConfigDialog.textureEnhancementCombo, "changed", G_CALLBACK(callback_texture_enhancement), NULL);
     g_signal_connect(g_ConfigDialog.nativeResolutionCheck, "clicked", G_CALLBACK(callback_native_resolution), NULL);
 
@@ -654,14 +707,17 @@ static void show_config()
 
     for (i = 0; i < numberOfResolutions; ++i)
         {
-        if (windowSetting.uWindowDisplayWidth == resolutions[i][0])
-            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.fullScreenCombo), i); 
+        if (windowSetting.uWindowDisplayWidth == resolutions[i][0] && windowSetting.uWindowDisplayHeight == resolutions[i][1])
+            gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.fullScreenCombo), i);
         }
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.colorBufferDepthCombo), options.colorQuality);
 
     gtk_widget_set_sensitive(g_ConfigDialog.fullScreenCombo, !status.bGameIsRunning);
     gtk_widget_set_sensitive(g_ConfigDialog.colorBufferDepthCombo, !status.bGameIsRunning);
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.widescreenModeCombo), options.widescreenMode);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.widescreenStretchBGCheck), options.bWidescreenStretchBG);
 
     if(status.isSSESupported)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.enableSSECheck), options.bEnableSSE);
@@ -754,7 +810,7 @@ if(g_curRomInfo.VIHeight > 0)
    gtk_entry_set_text(GTK_ENTRY(g_ConfigDialog.n64ScreenWidthHeightEntry2), generalText);
    }
 
-    gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.useCICombo), g_curRomInfo.UseCIWidthAndRatio); 
+    gtk_combo_box_set_active(GTK_COMBO_BOX(g_ConfigDialog.useCICombo), g_curRomInfo.UseCIWidthAndRatio);
 
     gtk_widget_show_all(g_ConfigDialog.dialog);
 
@@ -769,7 +825,7 @@ EXPORT void CALL DllConfig(HWND hParent)
 {
     InitConfiguration();
 
-    if (g_ConfigDialog.dialog == NULL) 
+    if (g_ConfigDialog.dialog == NULL)
         create_dialog();
 
     show_config();

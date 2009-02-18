@@ -1245,7 +1245,7 @@ void FrameBufferManager::SetRenderTexture(void)
     }
     else if( defaultRomOptions.bDoubleSizeForSmallTxtrBuf && newRenderTextureInfo.N64Width<=128 && newRenderTextureInfo.N64Height<=128)
     {
-        printf("Using\n");
+        //printf("Using\n");
         newRenderTextureInfo.bufferWidth = newRenderTextureInfo.N64Width*2;
         newRenderTextureInfo.bufferHeight = newRenderTextureInfo.N64Height*2;
     }

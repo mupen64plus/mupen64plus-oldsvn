@@ -105,7 +105,7 @@ SettingInfo TextureEnhancementControlSettings[] =
 const char* strDXDeviceDescs[] = { "HAL", "REF" };
 
 const int numberOfRenderEngineSettings = sizeof(RenderEngineSettings)/sizeof(RenderEngineSetting);
-const int numberOfOpenGLRenderEngineSettings = sizeof(OpenGLRenderSettings)/sizeof(RenderEngineSetting); 
+const int numberOfOpenGLRenderEngineSettings = sizeof(OpenGLRenderSettings)/sizeof(RenderEngineSetting);
 
 void GenerateCurrentRomOptions();
 
@@ -244,131 +244,131 @@ void WriteConfiguration()
 
    fprintf(f, "FrameBufferSetting ");
    fprintf(f, "%d\n", defaultRomOptions.N64FrameBufferEmuType);
-   
+
    fprintf(f, "FrameBufferWriteBackControl ");
    fprintf(f, "%d\n", defaultRomOptions.N64FrameBufferWriteBackControl);
-       
+
    fprintf(f, "RenderToTexture ");
    fprintf(f, "%d\n", defaultRomOptions.N64RenderToTextureEmuType);
-   
+
    fprintf(f, "ScreenUpdateSetting ");
    fprintf(f, "%d\n", defaultRomOptions.screenUpdateSetting);
-   
+
    fprintf(f, "FPSColor ");
    fprintf(f, "%d\n", options.FPSColor);
-   
+
    fprintf(f, "OpenGLDepthBufferSetting ");
    fprintf(f, "%d\n", options.OpenglDepthBufferSetting);
-   
+
    fprintf(f, "ColorQuality ");
    fprintf(f, "%d\n", options.colorQuality);
-   
+
    fprintf(f, "OpenGLRenderSetting ");
    fprintf(f, "%d\n", options.OpenglRenderSetting);
-   
+
    fprintf(f, "NormalAlphaBlender ");
    fprintf(f, "%d\n", defaultRomOptions.bNormalBlender);
-   
+
    fprintf(f, "EnableFog ");
    fprintf(f, "%d\n", options.bEnableFog);
-   
+
    fprintf(f, "WinFrameMode ");
    fprintf(f, "%d\n", options.bWinFrameMode);
-   
+
    fprintf(f, "FullTMEMEmulation ");
    fprintf(f, "%d\n", options.bFullTMEM);
 
    fprintf(f, "ForceSoftwareTnL ");
    fprintf(f, "%d\n", options.bForceSoftwareTnL);
-   
+
    fprintf(f, "ForceSoftwareClipper ");
    fprintf(f, "%d\n", options.bForceSoftwareClipper);
-   
+
    fprintf(f, "OpenGLVertexClipper ");
    fprintf(f, "%d\n", options.bOGLVertexClipper);
-   
+
    fprintf(f, "EnableSSE ");
    fprintf(f, "%d\n", options.bEnableSSE);
-   
+
    fprintf(f, "EnableVertexShader ");
    fprintf(f, "%d\n", options.bEnableVertexShader);
-   
+
    fprintf(f, "SkipFrame ");
    fprintf(f, "%d\n", options.bSkipFrame);
-   
+
    fprintf(f, "DisplayTooltip ");
    fprintf(f, "%d\n", options.bDisplayTooltip);
-   
+
    fprintf(f, "HideAdvancedOptions ");
    fprintf(f, "%d\n", options.bHideAdvancedOptions);
-   
+
    fprintf(f, "DisplayOnscreenFPS ");
    fprintf(f, "%d\n", options.bDisplayOnscreenFPS);
-   
+
    fprintf(f, "FrameBufferType ");
    fprintf(f, "%d\n", options.RenderBufferSetting);
-   
+
    fprintf(f, "FulScreenHeight ");
    fprintf(f, "%d\n", windowSetting.uFullScreenDisplayHeight);
-   
+
    fprintf(f, "FastTextureLoading ");
    fprintf(f, "%d\n", defaultRomOptions.bFastTexCRC);
-   
+
    fprintf(f, "RenderEngine ");
    //fprintf(f, "%d\n", (uint32)CDeviceBuilder::GetDeviceType());
    fprintf(f, "%d\n", 0);
-   
+
    fprintf(f, "ForceTextureFilter ");
    fprintf(f, "%d\n", (uint32)options.forceTextureFilter);
-   
+
    fprintf(f, "TextureQuality ");
    fprintf(f, "%d\n", (uint32)options.textureQuality);
-   
+
    fprintf(f, "TexRectOnly ");
    fprintf(f, "%d\n", (uint32)options.bTexRectOnly);
-   
+
    fprintf(f, "SmallTextureOnly ");
    fprintf(f, "%d\n", (uint32)options.bSmallTextureOnly);
-   
+
    fprintf(f, "LoadHiResTextures ");
    fprintf(f, "%d\n", (uint32)options.bLoadHiResTextures);
-   
+
    fprintf(f, "DumpTexturesToFiles ");
    fprintf(f, "%d\n", (uint32)options.bDumpTexturesToFiles);
-   
+
    fprintf(f, "TextureEnhancement ");
    fprintf(f, "%d\n", (uint32)options.textureEnhancement);
-   
+
    fprintf(f, "TextureEnhancementControl ");
    fprintf(f, "%d\n", (uint32)options.textureEnhancementControl);
-   
+
    fprintf(f, "FullScreenFrequency ");
    fprintf(f, "%d\n", (uint32)windowSetting.uFullScreenRefreshRate);
-   
+
    fprintf(f, "AccurateTextureMapping ");
    fprintf(f, "%d\n", (uint32)defaultRomOptions.bAccurateTextureMapping);
-   
+
    fprintf(f, "InN64Resolution ");
    fprintf(f, "%d\n", (uint32)defaultRomOptions.bInN64Resolution);
-   
+
    fprintf(f, "SaveVRAM ");
    fprintf(f, "%d\n", (uint32)defaultRomOptions.bSaveVRAM);
-   
+
    fprintf(f, "OverlapAutoWriteBack ");
    fprintf(f, "%d\n", (uint32)defaultRomOptions.bOverlapAutoWriteBack);
-   
+
    fprintf(f, "DoubleSizeForSmallTxtrBuf ");
    fprintf(f, "%d\n", (uint32)defaultRomOptions.bDoubleSizeForSmallTxtrBuf);
-   
+
    fprintf(f, "ShowFPS ");
    fprintf(f, "%d\n", (uint32)options.bShowFPS);
 
-   fprintf(f, "WidescreenExtend ");
-   fprintf(f, "%d\n", (uint32)options.bWidescreenExtend);
+   fprintf(f, "WidescreenMode ");
+   fprintf(f, "%d\n", (uint32)options.widescreenMode);
 
    fprintf(f, "WidescreenStretchBG ");
    fprintf(f, "%d\n", (uint32)options.bWidescreenStretchBG);
-   
+
    fclose(f);
 }
 
@@ -397,39 +397,39 @@ uint32 ReadRegistryDwordVal(const char *Field)
 }
 
 
-bool isMMXSupported() 
-{ 
-    int IsMMXSupported = 0; 
-   
+bool isMMXSupported()
+{
+    int IsMMXSupported = 0;
+
 #if defined(__INTEL_COMPILER) && !defined(NO_ASM)
-    __asm 
-    { 
-        mov eax,1   // CPUID level 1 
-        cpuid       // EDX = feature flag 
-        and edx,0x800000        // test bit 23 of feature flag 
-        mov IsMMXSupported,edx  // != 0 if MMX is supported 
-    } 
+    __asm
+    {
+        mov eax,1   // CPUID level 1
+        cpuid       // EDX = feature flag
+        and edx,0x800000        // test bit 23 of feature flag
+        mov IsMMXSupported,edx  // != 0 if MMX is supported
+    }
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
   return true;
 #elif !defined(NO_ASM) // GCC assumed
    asm volatile (
          "push %%ebx           \n"
-         "mov $1, %%eax        \n"  // CPUID level 1 
-         "cpuid                \n"      // EDX = feature flag 
-         "and $0x800000, %%edx \n"      // test bit 23 of feature flag 
+         "mov $1, %%eax        \n"  // CPUID level 1
+         "cpuid                \n"      // EDX = feature flag
+         "and $0x800000, %%edx \n"      // test bit 23 of feature flag
          "pop %%ebx            \n"
          : "=d"(IsMMXSupported)
          :
          : "memory", "cc", "eax", "ecx"
          );
 #endif
-    if (IsMMXSupported != 0) 
-        return true; 
-    else 
-        return false; 
-} 
+    if (IsMMXSupported != 0)
+        return true;
+    else
+        return false;
+}
 
-bool isSSESupported() 
+bool isSSESupported()
 {
     int SSESupport = 0;
 
@@ -455,12 +455,12 @@ bool isSSESupported()
          : "memory", "cc", "eax", "ecx"
          );
 # endif
-    
-    if (SSESupport != 0) 
-        return true; 
-    else 
-        return false; 
-} 
+
+    if (SSESupport != 0)
+        return true;
+    else
+        return false;
+}
 
 void ReadConfiguration(void)
 {
@@ -516,7 +516,7 @@ void ReadConfiguration(void)
         options.DirectXMaxFSAA = 16;
         options.FPSColor = 0xFFFFFFFF;
         options.DirectXMaxAnisotropy = 16;
-        options.bWidescreenExtend = FALSE;
+        options.widescreenMode = WIDESCREEN_STRETCH;
         options.bWidescreenStretchBG = TRUE;
 
         defaultRomOptions.N64FrameBufferEmuType = FRM_BUF_NONE;
@@ -532,7 +532,7 @@ void ReadConfiguration(void)
         defaultRomOptions.bOverlapAutoWriteBack = FALSE;
         defaultRomOptions.bDoubleSizeForSmallTxtrBuf = FALSE;
         windowSetting.uFullScreenRefreshRate = 0;   // 0 is the default value, means to use Window default frequency
-       
+
         WriteConfiguration();
         return;
     }
@@ -549,7 +549,7 @@ void ReadConfiguration(void)
         {
             windowSetting.uWindowDisplayHeight = 480;
         }
-        
+
         windowSetting.uDisplayWidth = windowSetting.uWindowDisplayWidth;
         windowSetting.uDisplayHeight = windowSetting.uWindowDisplayHeight;
 
@@ -564,7 +564,7 @@ void ReadConfiguration(void)
         {
             windowSetting.uFullScreenDisplayHeight = 480;
         }
-       
+
             windowSetting.uWindowDisplayWidth = windowSetting.uFullScreenDisplayWidth;
             windowSetting.uWindowDisplayHeight = windowSetting.uFullScreenDisplayHeight;
             windowSetting.uDisplayWidth = windowSetting.uWindowDisplayWidth;
@@ -604,7 +604,7 @@ void ReadConfiguration(void)
         options.OpenglDepthBufferSetting = ReadRegistryDwordVal("OpenGLDepthBufferSetting");
         options.colorQuality = ReadRegistryDwordVal("ColorQuality");
         options.OpenglRenderSetting = ReadRegistryDwordVal("OpenGLRenderSetting");
-        options.bWidescreenExtend = ReadRegistryDwordVal("WidescreenExtend");
+        options.widescreenMode = ReadRegistryDwordVal("WidescreenMode");
         options.bWidescreenStretchBG = ReadRegistryDwordVal("WidescreenStretchBG");
 
         defaultRomOptions.bFastTexCRC = ReadRegistryDwordVal("FastTextureLoading");
@@ -643,9 +643,9 @@ BOOL InitConfiguration(void)
 
 void GenerateCurrentRomOptions()
 {
-    currentRomOptions.N64FrameBufferEmuType     =g_curRomInfo.dwFrameBufferOption;  
-    currentRomOptions.N64FrameBufferWriteBackControl        =defaultRomOptions.N64FrameBufferWriteBackControl;  
-    currentRomOptions.N64RenderToTextureEmuType =g_curRomInfo.dwRenderToTextureOption;  
+    currentRomOptions.N64FrameBufferEmuType     =g_curRomInfo.dwFrameBufferOption;
+    currentRomOptions.N64FrameBufferWriteBackControl        =defaultRomOptions.N64FrameBufferWriteBackControl;
+    currentRomOptions.N64RenderToTextureEmuType =g_curRomInfo.dwRenderToTextureOption;
     currentRomOptions.screenUpdateSetting       =g_curRomInfo.dwScreenUpdateSetting;
     currentRomOptions.bNormalCombiner           =g_curRomInfo.dwNormalCombiner;
     currentRomOptions.bNormalBlender            =g_curRomInfo.dwNormalBlender;
@@ -1115,7 +1115,7 @@ BOOL ReadIniFile()
 
             }
             else
-            {       
+            {
                 int sectionno = IniSections.size() - 1;
 
                 if (strcasecmp(left(readinfo,4), "Name")==0)
@@ -1411,7 +1411,7 @@ void OutputSectionDetails(uint32 i, FILE * fh)
     fprintf(fh, "\n");          // Spacer
 }
 
-// Find the entry corresponding to the specified rom. 
+// Find the entry corresponding to the specified rom.
 // If the rom is not found, a new entry is created
 // The resulting value is returned
 void __cdecl DebuggerAppendMsg (const char * Message, ...);

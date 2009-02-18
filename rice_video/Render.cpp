@@ -1791,9 +1791,9 @@ void CRender::UpdateClipRectangle()
         int centerx = halfx;
         int centery = halfy;
 
-        gRSP.clip_ratio_left = centerx - halfx * gRSP.clip_ratio_negx;
+        gRSP.clip_ratio_left = centerx - halfx * gRSP.clip_ratio_negx * 2;
         gRSP.clip_ratio_top = centery - halfy * gRSP.clip_ratio_negy;
-        gRSP.clip_ratio_right = centerx + halfx * gRSP.clip_ratio_posx;
+        gRSP.clip_ratio_right = centerx + halfx * gRSP.clip_ratio_posx * 2;
         gRSP.clip_ratio_bottom = centery + halfy * gRSP.clip_ratio_posy;
     }
     else
@@ -1853,6 +1853,7 @@ void CRender::UpdateScissorWithClipRatio()
     {
         w.clipping.needToClip = false;
     }
+
     w.clipping.width = (uint32)((gRSP.real_clip_scissor_right-gRSP.real_clip_scissor_left+1)*windowSetting.fMultX);
     w.clipping.height = (uint32)((gRSP.real_clip_scissor_bottom-gRSP.real_clip_scissor_top+1)*windowSetting.fMultY);
 
