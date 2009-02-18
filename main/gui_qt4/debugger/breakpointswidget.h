@@ -39,7 +39,8 @@ class BreakpointsWidget : public QWidget, private Ui_BreakpointsWidget
     private:
         QString get_breakpoint_display_string(int);
         QStringListModel *model;
-
+        void breakpoint_parse(QString, int edit = -1);
+        
     private slots:
         void onadd();
         void onremove();

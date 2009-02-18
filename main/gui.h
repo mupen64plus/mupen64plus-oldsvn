@@ -68,6 +68,13 @@ typedef enum gui_state
 void gui_set_state(gui_state_t state);
 
 /* TODO: Add debugger GUI APIs here. */
+#ifdef DBG
+void debuger_show_disassembler();
+void debuger_show_registers();
+void debuger_show_breakpoints();
+void debugger_update_desasm();
+void debuger_close();
+#endif /* DBG */
 
 #endif /* __GUI_H__ */
 

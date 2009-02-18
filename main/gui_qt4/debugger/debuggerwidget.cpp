@@ -35,7 +35,7 @@ namespace core {
     }
 }
 
-DebuggerWidget::DebuggerWidget(QWidget* parent)
+DebuggerWidget::DebuggerWidget(QWidget*)
 {
     setupUi(this);
  
@@ -44,6 +44,13 @@ DebuggerWidget::DebuggerWidget(QWidget* parent)
     connect( pushTrace, SIGNAL( clicked() ), this, SLOT( ontrace() ));
     connect( pushBreak, SIGNAL( clicked() ), this, SLOT( onbreak() ));
     connect( pushGoto,  SIGNAL( clicked() ), this, SLOT( ongoto()  ));
+
+    connect( pushReduce1000,   SIGNAL( clicked() ), this, SLOT( onreduce1000()  ));
+    connect( pushReduce100,    SIGNAL( clicked() ), this, SLOT( onreduce100()   ));
+    connect( pushReduce10,     SIGNAL( clicked() ), this, SLOT( onreduce10()    ));
+    connect( pushIncrease1000, SIGNAL( clicked() ), this, SLOT( onincrease1000()));
+    connect( pushIncrease100,  SIGNAL( clicked() ), this, SLOT( onincrease100() ));
+    connect( pushIncrease10,   SIGNAL( clicked() ), this, SLOT( onincrease10()  ));
     
     setWindowTitle(tr("Mupen64Plus Debugger - %1").arg(PLUGIN_VERSION));
     treeDisasm->setColumnCount(3);
@@ -105,8 +112,6 @@ void DebuggerWidget::update_desasm( unsigned int pc )
     treeDisasm->setItemSelected(items[4], true);
     treeDisasm->show();
     items.clear();
-
-    previous_pc = focused_pc;
 }
 
 void DebuggerWidget::onstep()
@@ -145,5 +150,35 @@ void DebuggerWidget::ongoto()
     if (d->exec()) {
         DebuggerWidget::update_desasm( focused_pc );
     }
+}
+
+void DebuggerWidget::onreduce1000()
+{
+    DebuggerWidget::update_desasm( focused_pc - 0x1000 );
+}
+
+void DebuggerWidget::onreduce100()
+{
+    DebuggerWidget::update_desasm( focused_pc - 0x100 );
+}
+
+void DebuggerWidget::onreduce10()
+{
+    DebuggerWidget::update_desasm( focused_pc - 0x10 );
+}
+
+void DebuggerWidget::onincrease1000()
+{
+    DebuggerWidget::update_desasm( focused_pc + 0x1000 );
+}
+
+void DebuggerWidget::onincrease100()
+{
+    DebuggerWidget::update_desasm( focused_pc + 0x100 );
+}
+
+void DebuggerWidget::onincrease10()
+{
+    DebuggerWidget::update_desasm( focused_pc + 0x10 );
 }
 

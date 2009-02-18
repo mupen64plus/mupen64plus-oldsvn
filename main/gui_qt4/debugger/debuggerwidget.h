@@ -45,10 +45,17 @@ class DebuggerWidget : public QWidget, private Ui_DebuggerWidget
         void onbreak();
         void ongoto();
 
+        void onreduce1000();
+        void onreduce100();
+        void onreduce10();
+        void onincrease1000();
+        void onincrease100();
+        void onincrease10();
+
     private:
         QList<QTreeWidgetItem *> items;
         HexSpinBox *hexSpinBox;
-        unsigned int current_pc, focused_pc, previous_pc;
+        unsigned int current_pc, focused_pc;
 };
 
 #endif // __DEBUGGERWIDGET_H__

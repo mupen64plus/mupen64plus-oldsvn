@@ -21,13 +21,19 @@
 
 #include "breakpointswidget.h"
 
+namespace core {
+    extern "C" {
+        #include "../../gui.h"
+    }
+}
+
 namespace debugger {
     extern "C" {
         #include "../../../debugger/debugger.h"
     }
 }
 
-BreakpointsWidget::BreakpointsWidget(QWidget* parent)
+BreakpointsWidget::BreakpointsWidget(QWidget*)
 {
     setupUi(this); // this sets up GUI
  
@@ -56,67 +62,28 @@ void BreakpointsWidget::update_breakpoint()
         list << get_breakpoint_display_string(row);
     }
     model->setStringList(list);
+    core::debugger_update_desasm();
 }
 
 void BreakpointsWidget::onadd()
 {
     bool ok;
-    debugger::breakpoint newbp;
-    //Enabled by default
-    newbp.flags = BPT_FLAG_ENABLED;
-    newbp.address = 0;
-    newbp.endaddr = 0;
 
-    QString text = QInputDialog::getText(this, tr("New Breakpoint"),
+    QString text = QInputDialog::getText(this, tr("Breakpoint"),
                                       tr("Value:"), QLineEdit::Normal, "", &ok);
-                                      
-    if (text.contains("*", Qt::CaseInsensitive)) {
-        newbp.flags &= ~BPT_FLAG_ENABLED;
-    } else if(text.contains("r", Qt::CaseInsensitive)) {
-        newbp.flags |= BPT_FLAG_READ;
-    } else if(text.contains("w", Qt::CaseInsensitive)) {
-        newbp.flags |= BPT_FLAG_WRITE;
-    } else if(text.contains("x", Qt::CaseInsensitive)) {
-        newbp.flags |= BPT_FLAG_EXEC;
-    } else if(text.contains("l", Qt::CaseInsensitive)) {
-        newbp.flags |= BPT_FLAG_LOG;
-    }
-    
-    //If none of r/w/x specified, default to exec
-    if(!(newbp.flags & (BPT_FLAG_EXEC | BPT_FLAG_READ | BPT_FLAG_WRITE))) {
-        BPT_SET_FLAG(newbp, BPT_FLAG_EXEC);
-    }
 
-    int first = text.indexOf(QRegExp("[0123456789abcdefABCDEF]"));
-    text.remove(0,first);
-    int last = text.lastIndexOf(QRegExp("[0123456789abcdefABCDEF]"));
-    text.truncate(last+1);
-
-    QStringList parts = QString(text).split(" ", QString::SkipEmptyParts);
-    if (parts.size() == 1) {
-        newbp.address = parts.at(0).toULong( &ok, 16 );
-        newbp.endaddr = newbp.address;
-    } else if (parts.size() == 2) {
-        newbp.address = parts.at(0).toULong( &ok, 16 );
-        newbp.endaddr = parts.at(1).toULong( &ok, 16 );
-    } else {
-        return;
-    }
-    
-    if(debugger::add_breakpoint_struct(&newbp) == -1) {
-        QMessageBox::warning(this, tr("Warning"),
-                tr("Cannot add any more breakpoints."),
-                QMessageBox::Ok);
-        return;
-    }
+    breakpoint_parse(text);
     BreakpointsWidget::update_breakpoint();
-    
-    //TODO: Disassebler window should be updated
 }
 
 void BreakpointsWidget::onremove()
 {
-    //TODO: Implement onremove()
+    const QModelIndex& index = listView->selectionModel()->currentIndex();
+
+    if (index.isValid()) {
+        debugger::remove_breakpoint_by_num( index.row());
+    }
+    BreakpointsWidget::update_breakpoint();
 }
 
 void BreakpointsWidget::onenable()
@@ -136,11 +103,19 @@ void BreakpointsWidget::ontoggle()
 
 void BreakpointsWidget::onedit()
 {
-    //TODO: Implement onedit()
+    const QModelIndex& index = listView->selectionModel()->currentIndex();
+    QString old;
     bool ok;
-    QString old = "old";
-    QString text = QInputDialog::getText(this, tr("Edit Breakpoint"),
-                                      tr("New Value:"), QLineEdit::Normal, old, &ok);    
+
+    if (index.isValid()) {
+        old = model->data(index,Qt::DisplayRole).toString();
+        old.remove(0,4);
+        QString text = QInputDialog::getText(this, tr("Edit Breakpoint"),
+                                          tr("New Value:"), QLineEdit::Normal, old, &ok);
+
+        breakpoint_parse(text, index.row());
+    }
+    BreakpointsWidget::update_breakpoint();
 }
 
 QString BreakpointsWidget::get_breakpoint_display_string(int row)
@@ -182,5 +157,59 @@ void BreakpointsWidget::_toggle(int flag)
         return;
     }
     update_breakpoint();
+}
+
+void BreakpointsWidget::breakpoint_parse(QString text, int edit)
+{
+    debugger::breakpoint bp;
+    //Enabled by default
+    bp.flags = BPT_FLAG_ENABLED;
+    bp.address = 0;
+    bp.endaddr = 0;
+    bool ok;
+
+    if (text.contains("*", Qt::CaseInsensitive)) {
+        bp.flags &= ~BPT_FLAG_ENABLED;
+    } else if(text.contains("r", Qt::CaseInsensitive)) {
+        bp.flags |= BPT_FLAG_READ;
+    } else if(text.contains("w", Qt::CaseInsensitive)) {
+        bp.flags |= BPT_FLAG_WRITE;
+    } else if(text.contains("x", Qt::CaseInsensitive)) {
+        bp.flags |= BPT_FLAG_EXEC;
+    } else if(text.contains("l", Qt::CaseInsensitive)) {
+        bp.flags |= BPT_FLAG_LOG;
+    }
+    
+    //If none of r/w/x specified, default to exec
+    if(!(bp.flags & (BPT_FLAG_EXEC | BPT_FLAG_READ | BPT_FLAG_WRITE))) {
+        BPT_SET_FLAG(bp, BPT_FLAG_EXEC);
+    }
+
+    int first = text.indexOf(QRegExp("[0123456789abcdefABCDEF]"));
+    text.remove(0,first);
+    int last = text.lastIndexOf(QRegExp("[0123456789abcdefABCDEF]"));
+    text.truncate(last+1);
+
+    QStringList parts = QString(text).split(" ", QString::SkipEmptyParts);
+    if (parts.size() == 1) {
+        bp.address = parts.at(0).toULong( &ok, 16 );
+        bp.endaddr = bp.address;
+    } else if (parts.size() == 2) {
+        bp.address = parts.at(0).toULong( &ok, 16 );
+        bp.endaddr = parts.at(1).toULong( &ok, 16 );
+    } else {
+        return;
+    }
+
+    if (edit < 0) {
+        if(debugger::add_breakpoint_struct(&bp) == -1) {
+            QMessageBox::warning(this, tr("Warning"),
+                    tr("Cannot add any more breakpoints."),
+                    QMessageBox::Ok);
+            return;
+        }
+    } else {
+        debugger::replace_breakpoint_num(edit, &bp);
+    }
 }
 

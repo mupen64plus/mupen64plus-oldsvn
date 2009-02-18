@@ -272,7 +272,7 @@
   </action>
   <action name="actionDisasembler" >
    <property name="enabled" >
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text" >
     <string>&amp;Disasembler</string>
@@ -280,13 +280,16 @@
   </action>
   <action name="actionRegisters" >
    <property name="enabled" >
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text" >
     <string>&amp;Registers</string>
    </property>
   </action>
   <action name="actionBreakpoints" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>&amp;Breakpoints</string>
    </property>

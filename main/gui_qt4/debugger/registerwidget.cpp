@@ -37,7 +37,7 @@ namespace core {
     }
 }
 
-RegisterWidget::RegisterWidget(QWidget* parent) // : QWidget(parent)
+RegisterWidget::RegisterWidget(QWidget*)
 {
     setupUi(this); // this sets up GUI
  
@@ -158,7 +158,7 @@ void RegisterWidget::init_cop1()
         gui_fantom_cop1_64[i] = 0x1234567890LL;
     }
 
-    modelCop1 = new TableListModel(mnemonicCop0, 16);
+    modelCop1 = new TableListModel(mnemonicCop1, 16);
     initTableView(tableCop1, modelCop1);
     tableCop1->hideColumn(2);
 }
@@ -270,7 +270,7 @@ void RegisterWidget::update_gpr()
     QString newstring;
 
     for(int i=0; i<32; i++) {
-        index = modelCop1->index(i, 1, QModelIndex());
+        index = modelGpr->index(i, 1, QModelIndex());
         if(gui_fantom_gpr_64[i]!=reg[i]) {
             gui_fantom_gpr_64[i] = reg[i];
             newstring = QString("%1").arg(gui_fantom_gpr_64[i], 16, 16, QChar('0')).toUpper();
@@ -280,7 +280,7 @@ void RegisterWidget::update_gpr()
             modelGpr->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
-    tableGpr->update();
+    tableGpr->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_cop0()
@@ -289,7 +289,7 @@ void RegisterWidget::update_cop0()
     QString newstring;
 
     for(int i=0; i<32; i++) {
-        index = modelCop1->index(i, 1, QModelIndex());
+        index = modelCop0->index(i, 1, QModelIndex());
         if(gui_fantom_cop0_32[i]!=reg_cop0[i]) {
             gui_fantom_cop0_32[i] = reg_cop0[i];
             newstring = QString("%1").arg(gui_fantom_cop0_32[i], 8, 16, QChar('0')).toUpper();
@@ -299,6 +299,7 @@ void RegisterWidget::update_cop0()
             modelCop0->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+    tableCop0->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_special(unsigned int current_pc)
@@ -338,6 +339,7 @@ void RegisterWidget::update_special(unsigned int current_pc)
     } else {
         modelHiLo->setData(index, color_DEFAULT, Qt::BackgroundRole);
     }
+    tableHiLo->resizeColumnsToContents();
 
     // TODO: Interupt queue
     int j=1;
@@ -359,6 +361,7 @@ void RegisterWidget::update_special(unsigned int current_pc)
         }
         j=j<<1;
     }
+    tableInterupt->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_cop1()
@@ -378,6 +381,7 @@ void RegisterWidget::update_cop1()
             modelCop1->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+    tableCop1->resizeColumnsToContents();
 }
 
 void RegisterWidget::radio_toggled()
@@ -409,6 +413,7 @@ void RegisterWidget::update_ai()
             modelAi->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+    tableAi->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_vi()
@@ -430,6 +435,7 @@ void RegisterWidget::update_vi()
             modelVi->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+    tableVi->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_pi()
@@ -449,6 +455,7 @@ void RegisterWidget::update_pi()
             modelPi->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+    tablePi->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_ri()
@@ -468,6 +475,7 @@ void RegisterWidget::update_ri()
             modelRi->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+    tableRi->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_si()
@@ -487,6 +495,7 @@ void RegisterWidget::update_si()
             modelSi->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
     }
+    tableSi->resizeColumnsToContents();
 }
 
 QString RegisterWidget::getSingle(long long int val)

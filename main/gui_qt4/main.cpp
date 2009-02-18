@@ -49,9 +49,13 @@ static MainWindow* mainWindow = 0;
 static QApplication* application = 0;
 static QTranslator* translator = 0;
 #ifdef DBG
+void update_debugger_frontend( unsigned int );
+
 static DebuggerWidget* debuggerWidget = 0;
 static RegisterWidget* registerWidget = 0;
 static BreakpointsWidget* breakpointsWidget = 0;
+
+unsigned int _pc = 0;
 #endif
 namespace core {
 extern "C" {
@@ -199,18 +203,17 @@ void init_debugger_frontend()
 }
 void update_debugger_frontend( unsigned int pc )
 {
-    //TODO: if (debuggerWidget->isVisible)
-    QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
-                               Qt::QueuedConnection,
-                               Q_ARG(unsigned int, pc));
-    //TODO:  if (registerWidget->isVisible)
-    QMetaObject::invokeMethod(registerWidget, "update_registers",
-                               Qt::QueuedConnection,
-                               Q_ARG(unsigned int, pc));
-
-    //TODO:  if (breakpointsWidget->isVisible)
-    // QMetaObject::invokeMethod(breakpointsWidget, "update_breakpoints",
-    //                           Qt::QueuedConnection);
+    _pc = pc;
+    if (debuggerWidget->isVisible() != 0) {
+        QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
+                                   Qt::QueuedConnection,
+                                   Q_ARG(unsigned int, pc));
+    }
+    if (debuggerWidget->isVisible() != 0) {
+        QMetaObject::invokeMethod(registerWidget, "update_registers",
+                                   Qt::QueuedConnection,
+                                   Q_ARG(unsigned int, pc));
+    }    
 }
 
 //Runs each VI for auto-updating views
@@ -221,6 +224,40 @@ void debugger_frontend_vi()
 void switch_button_to_run()
 {
     //TODO: Implement switch_button_to_run
+}
+
+void debuger_show_disassembler( )
+{
+    QMetaObject::invokeMethod(debuggerWidget, "show", Qt::QueuedConnection);
+    debuggerWidget->setFocus();
+}
+
+void debuger_show_registers( )
+{
+    QMetaObject::invokeMethod(registerWidget, "show", Qt::QueuedConnection);
+    registerWidget->setFocus();
+}
+
+void debuger_show_breakpoints( )
+{
+    QMetaObject::invokeMethod(breakpointsWidget, "show", Qt::QueuedConnection);
+    breakpointsWidget->setFocus();
+}
+
+void debugger_update_desasm()
+{
+    if ((int) debuggerWidget->isVisible() != 0) {
+        QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
+                                   Qt::QueuedConnection,
+                                   Q_ARG(unsigned int, _pc));
+    }
+}
+
+void debuger_close()
+{
+    debuggerWidget->setVisible(false);
+    registerWidget->setVisible(false);
+    breakpointsWidget->setVisible(false);
 }
 #endif
 

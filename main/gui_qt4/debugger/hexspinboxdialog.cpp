@@ -22,7 +22,7 @@
 #include "hexspinboxdialog.h"
 #include "hexspinbox.h"
 
-HexSpinBoxDialog::HexSpinBoxDialog(unsigned int* i, QDialog* parent)
+HexSpinBoxDialog::HexSpinBoxDialog(unsigned int* i, QDialog*)
 {
     setupUi(this); // this sets up GUI
     

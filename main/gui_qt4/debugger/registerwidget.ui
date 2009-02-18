@@ -9,11 +9,6 @@
     <height>552</height>
    </rect>
   </property>
-  <property name="font" >
-   <font>
-    <pointsize>8</pointsize>
-   </font>
-  </property>
   <property name="windowTitle" >
    <string>Form</string>
   </property>
@@ -49,11 +44,6 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="font" >
-              <font>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
              <property name="lineWidth" >
               <number>0</number>
              </property>
@@ -84,11 +74,6 @@
                <horstretch>5</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
-             </property>
-             <property name="font" >
-              <font>
-               <pointsize>8</pointsize>
-              </font>
              </property>
              <property name="lineWidth" >
               <number>0</number>
@@ -281,11 +266,6 @@
              <layout class="QHBoxLayout" name="horizontalLayout_10" >
               <item>
                <widget class="QTableView" name="tableCop1" >
-                <property name="font" >
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
                 <property name="lineWidth" >
                  <number>0</number>
                 </property>

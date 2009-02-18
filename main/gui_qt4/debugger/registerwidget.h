@@ -32,7 +32,7 @@ class TableListModel;
 // used to check for changes
 const extern long long int reg_cop1_fgr_64[32];
 const extern long long int reg[32];
-const extern long int reg_cop0[32];
+const extern unsigned int reg_cop0[32];
 const extern long long int hi;
 const extern long long int lo;
 const extern unsigned int ai_register;
@@ -82,7 +82,7 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         QString getCop1String(long long int);
         
         long long int gui_fantom_gpr_64[32];
-        long int gui_fantom_cop0_32[32];
+        unsigned int gui_fantom_cop0_32[32];
         long long int gui_fantom_cop1_64[32];
         long long int gui_fantom_hi;
         long long int gui_fantom_lo;

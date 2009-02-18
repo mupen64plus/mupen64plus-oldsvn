@@ -344,6 +344,9 @@ void MainWindow::emulationStop()
         m_renderWindow->close();
         m_renderWindow->deleteLater();
    }
+#ifdef DBG
+    core::debuger_close();
+#endif
 }
 
 void MainWindow::fullScreenToggle()
@@ -626,14 +629,16 @@ void MainWindow::debuggerToggle()
 {
 #ifdef DBG
     if (actionEnableDebugger->isChecked()) {
-//        actionDisasembler->setEnabled(true);
-//        actionRegisters->setEnabled(true);
+        actionDisasembler->setEnabled(true);
+        actionRegisters->setEnabled(true);
+        actionBreakpoints->setEnabled(true);
         core::g_DebuggerEnabled = 1;
     }
     else {
         core::g_DebuggerEnabled = 0;
-//        actionDisasembler->setEnabled(false);
-//        actionRegisters->setEnabled(false);
+        actionDisasembler->setEnabled(false);
+        actionRegisters->setEnabled(false);
+        actionBreakpoints->setEnabled(false);
     }
 #endif
 }
@@ -641,29 +646,21 @@ void MainWindow::debuggerToggle()
 void MainWindow::disasemblerShow()
 {
 #ifdef DBG
-    //TODO
-    QMessageBox::information(this, tr("Information"),
-            tr("Not implemented."),
-            QMessageBox::Ok);
-
+    core::debuger_show_disassembler();
 #endif
 }
 
 void MainWindow::registersShow()
 {
 #ifdef DBG
-    //TODO
-    QMessageBox::information(this, tr("Information"),
-            tr("Not implemented."),
-            QMessageBox::Ok);
+    core::debuger_show_registers();
 #endif
 }
 
 void MainWindow::breakpointsShow()
 {
 #ifdef DBG
-    BreakpointsWidget* w = new BreakpointsWidget(this);
-    w->show();
+    core::debuger_show_breakpoints();
 #endif
 }
 
