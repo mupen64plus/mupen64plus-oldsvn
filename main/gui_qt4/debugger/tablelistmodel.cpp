@@ -23,26 +23,30 @@
 
 #include "tablelistmodel.h"
 
-TableListModel::TableListModel(QStringList mnemonic, int size, QObject *parent)
+TableListModel::TableListModel(QStringList mnemonic, int width, QObject *parent)
     : QAbstractTableModel(parent)
 {
     stringMnemonic = mnemonic;
-    for (int i=0;i<mnemonic.size();i++) {
-        stringValue.append(QString("%1").arg("", size, QChar('X')));
+
+    int row_count = mnemonic.size();
+    for (int i = 0; i < row_count; i++) {
+        stringValue.append(QString("%1").arg("", width, QChar('X')));
         bgColor.append(QColor(Qt::white));
     }
 }
  
-int TableListModel::rowCount(const QModelIndex & parent) const
+int TableListModel::rowCount(const QModelIndex &parent) const
 {
-    int rows = 0;
-    if (!parent.isValid())
-        rows = stringValue.size();
-    return rows;
+    int result = 0;
+    if (!parent.isValid()) {
+        result = stringValue.size();
+    }
+    return result;
 }
 
-int TableListModel::columnCount(const QModelIndex & /* parent */) const
+int TableListModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return 3;
 }
 
@@ -74,27 +78,31 @@ QVariant TableListModel::data(const QModelIndex &index, int role) const
 
 QVariant TableListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-     if (role != Qt::DisplayRole)
-         return QVariant();
+    QVariant result;
+    
+    if (role == Qt::DisplayRole) {
 
-     if (orientation == Qt::Horizontal) {
-         switch (section) {
-             case 0:
-                 return tr("#");
-             case 1:
-                 return tr("Value");
-             case 2:
-                 return tr("Mnemonic");
-             default:
-                 return QVariant();
-         }
-     }
-     return QVariant();
+        if (orientation == Qt::Horizontal) {
+            switch (section) {
+                case 0:
+                    result = tr("#");
+                    break;
+                case 1:
+                    result = tr("Value");
+                    break;
+                case 2:
+                    result = tr("Mnemonic");
+                    break;
+            }
+        }
+    }
+    
+    return QVariant();
 }
 
 bool TableListModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    bool retval = false;
+    bool result = false;
     int row = index.row();
     int stringCount = stringValue.count();
 
@@ -102,29 +110,29 @@ bool TableListModel::setData(const QModelIndex &index, const QVariant &value, in
         if (index.column() == 1 && role == Qt::EditRole ) {
             QString val = value.toString();
             stringValue.replace(row, val);
-            retval = true;
+            result = true;
             emit(dataChanged(index, index));
             reset();
         }
         else if (Qt::BackgroundRole) {
             bgColor[row] = value.value<QColor>();
-            retval = true;
+            result = true;
             emit(dataChanged(index, index));
             reset();
         }
     }
-    return retval;
+    return result;
 }
 
 Qt::ItemFlags TableListModel::flags(const QModelIndex &index) const
 {
-    Qt::ItemFlags flags = QAbstractTableModel::flags(index);
+    Qt::ItemFlags result = QAbstractTableModel::flags(index);
 
     if (index.isValid()) {
-        flags |= Qt::ItemIsEditable;
+        result |= Qt::ItemIsEditable;
     }
 
-    return flags;
+    return result;
 }
 
 bool TableListModel::insertRows(int position, int rows, const QModelIndex &index)
@@ -132,7 +140,7 @@ bool TableListModel::insertRows(int position, int rows, const QModelIndex &index
     Q_UNUSED(index);
     beginInsertRows(QModelIndex(), position, position+rows-1);
 
-    for (int row=0; row < rows; row++) {
+    for (int row = 0; row < rows; row++) {
         QString empty = " ";
         stringValue.insert(position, empty);
         stringMnemonic.insert(position, empty);
@@ -145,9 +153,9 @@ bool TableListModel::insertRows(int position, int rows, const QModelIndex &index
 bool TableListModel::removeRows(int position, int rows, const QModelIndex &index)
 {
     Q_UNUSED(index);
-    beginRemoveRows(QModelIndex(), position, position+rows-1);
+    beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
-    for (int row=0; row < rows; ++row) {
+    for (int row = 0; row < rows; ++row) {
         stringValue.removeAt(position);
         stringMnemonic.removeAt(position);
     }

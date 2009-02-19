@@ -32,30 +32,32 @@ class DebuggerWidget : public QWidget, private Ui_DebuggerWidget
 {
     Q_OBJECT
     public:
-        DebuggerWidget(QWidget* parent = 0);
-        virtual ~DebuggerWidget();
+        DebuggerWidget(QWidget *parent = 0);
 
     public slots:
-        void update_desasm ( unsigned int );
+        void update_desasm (unsigned int pc);
 
     private slots:
-        void onstep();
-        void onrun();
-        void ontrace();
-        void onbreak();
-        void ongoto();
+        void step();
+        void run();
+        void trace();
+        void break_debugger();
+        void goto_pc();
 
-        void onreduce1000();
-        void onreduce100();
-        void onreduce10();
-        void onincrease1000();
-        void onincrease100();
-        void onincrease10();
+        void reduce1000();
+        void reduce100();
+        void reduce10();
+        void increase1000();
+        void increase100();
+        void increase10();
 
     private:
         QList<QTreeWidgetItem *> items;
         HexSpinBox *hexSpinBox;
-        unsigned int current_pc, focused_pc;
+        unsigned int focused_pc;
+
+        QColor color_PC;
+        QColor color_BP;
 };
 
 #endif // __DEBUGGERWIDGET_H__

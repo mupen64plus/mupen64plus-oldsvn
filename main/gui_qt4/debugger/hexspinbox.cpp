@@ -26,7 +26,21 @@ HexSpinBox::HexSpinBox(QWidget *parent) : QSpinBox(parent) { }
 int HexSpinBox::valueFromText(const QString &text) const
 {
     bool ok;
-    return text.toInt( &ok, 16 );
+    int tmp_number, ret = 0;
+    QString tmp = text;
+    
+    QStringList parts = QString(tmp).split("x", QString::SkipEmptyParts);
+    tmp = parts.at(parts.size()-1); // Romoving possible 0x prefix
+    tmp_number = tmp.toInt( &ok, 16 );
+    if (ok) {
+        ret = tmp_number;
+    } else {    // Else try to return old value
+        tmp_number = text.toInt( &ok, 16 );
+        if (ok) {
+            ret = tmp_number;
+        }
+    }
+    return ret;
 }
 
 QString HexSpinBox::textFromValue(int value) const

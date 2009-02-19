@@ -22,28 +22,23 @@
 #include "hexspinboxdialog.h"
 #include "hexspinbox.h"
 
-HexSpinBoxDialog::HexSpinBoxDialog(unsigned int* i, QDialog*)
+HexSpinBoxDialog::HexSpinBoxDialog(unsigned int *value, QDialog *parent) : QDialog(parent)
 {
     setupUi(this); // this sets up GUI
     
-    acceptedValue = i;
+    acceptedValue = value;
  
     hexSpinBox = new HexSpinBox();
     hexSpinBox->setValue(*acceptedValue);
     hexSpinBox->setSingleStep(4);
     hexSpinBox->setMinimum(0);
-    hexSpinBox->setMaximum(0x7fffffff);
-    verticalLayout->addWidget(hexSpinBox);
+    hexSpinBox->setMaximum(0x7fffffff); // TODO: Should be 0xffffffff. Problem is int
+    verticalLayout->addWidget(hexSpinBox);  // and not unsigned int
 
-    connect( buttonBox, SIGNAL( accepted() ), this, SLOT( onaccepted() ));
+    connect( buttonBox, SIGNAL( accepted() ), this, SLOT( accepted() ));
 }
 
-HexSpinBoxDialog::~HexSpinBoxDialog()
-{
-    //TODO: Implement destructor
-}
-
-void HexSpinBoxDialog::onaccepted()
+void HexSpinBoxDialog::accepted()
 {
     *acceptedValue = (unsigned int) hexSpinBox->value();
 }

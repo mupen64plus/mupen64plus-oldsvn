@@ -538,7 +538,7 @@ void MainWindow::setupActions()
 #ifdef DBG
     //Debugger Actions
     connect(actionEnableDebugger, SIGNAL(triggered()), this, SLOT(debuggerToggle()));
-    connect(actionDisasembler, SIGNAL(triggered()), this, SLOT(disasemblerShow()));
+    connect(actionDisassembler, SIGNAL(triggered()), this, SLOT(disassemblerShow()));
     connect(actionRegisters, SIGNAL(triggered()), this, SLOT(registersShow()));
     connect(actionBreakpoints, SIGNAL(triggered()), this, SLOT(breakpointsShow()));
     menu_Debug->menuAction()->setVisible(true);
@@ -629,21 +629,21 @@ void MainWindow::debuggerToggle()
 {
 #ifdef DBG
     if (actionEnableDebugger->isChecked()) {
-        actionDisasembler->setEnabled(true);
+        actionDisassembler->setEnabled(true);
         actionRegisters->setEnabled(true);
         actionBreakpoints->setEnabled(true);
         core::g_DebuggerEnabled = 1;
     }
     else {
         core::g_DebuggerEnabled = 0;
-        actionDisasembler->setEnabled(false);
+        actionDisassembler->setEnabled(false);
         actionRegisters->setEnabled(false);
         actionBreakpoints->setEnabled(false);
     }
 #endif
 }
 
-void MainWindow::disasemblerShow()
+void MainWindow::disassemblerShow()
 {
 #ifdef DBG
     core::debuger_show_disassembler();

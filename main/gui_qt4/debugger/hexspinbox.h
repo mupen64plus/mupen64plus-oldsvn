@@ -36,3 +36,4 @@ class HexSpinBox : public QSpinBox
 };
 
 #endif // __HEXSPINBOX_H__
+

@@ -79,7 +79,7 @@
      <string>&amp;Debug</string>
     </property>
     <addaction name="actionEnableDebugger" />
-    <addaction name="actionDisasembler" />
+    <addaction name="actionDisassembler" />
     <addaction name="actionRegisters" />
     <addaction name="actionBreakpoints" />
    </widget>
@@ -270,12 +270,12 @@
     <string>E&amp;nable</string>
    </property>
   </action>
-  <action name="actionDisasembler" >
+  <action name="actionDisassembler" >
    <property name="enabled" >
     <bool>false</bool>
    </property>
    <property name="text" >
-    <string>&amp;Disasembler</string>
+    <string>&amp;Disassembler</string>
    </property>
   </action>
   <action name="actionRegisters" >

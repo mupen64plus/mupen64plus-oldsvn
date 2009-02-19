@@ -30,7 +30,7 @@ class TableListModel : public QAbstractTableModel
 {
     Q_OBJECT
     public:
-        TableListModel(QStringList, int, QObject *parent = 0);
+        TableListModel(QStringList mnemonic, int width, QObject *parent = 0);
         
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         int columnCount(const QModelIndex &parent = QModelIndex()) const;

@@ -30,25 +30,25 @@ class BreakpointsWidget : public QWidget, private Ui_BreakpointsWidget
 {
     Q_OBJECT
     public:
-        BreakpointsWidget(QWidget* parent = 0);
-        virtual ~BreakpointsWidget();
+        BreakpointsWidget(QWidget *parent = 0);
 
     public slots:
         void update_breakpoint();
 
     private:
-        QString get_breakpoint_display_string(int);
+        QString get_breakpoint_display_string(int row);
         QStringListModel *model;
-        void breakpoint_parse(QString, int edit = -1);
+        void breakpoint_parse(QString, int row = -1); // -1 means insert new bp
+        enum { Toggle = -1, Disable = 0, Enable = 1 };
         
     private slots:
-        void onadd();
-        void onremove();
-        void onenable();
-        void ondisable();
-        void ontoggle();
-        void onedit();
-        void _toggle(int flag);
+        void add();
+        void remove();
+        void enable();
+        void disable();
+        void toggle();
+        void edit();
+        void ToggleBreakpoint(int flag);
 };
 
 #endif // __BREAKPOINTSWIDGET_H__

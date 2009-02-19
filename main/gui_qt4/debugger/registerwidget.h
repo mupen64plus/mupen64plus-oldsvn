@@ -28,25 +28,18 @@
 
 class TableListModel;
 
-// External variables from core
-// used to check for changes
-const extern long long int reg_cop1_fgr_64[32];
-const extern long long int reg[32];
-const extern unsigned int reg_cop0[32];
-const extern long long int hi;
-const extern long long int lo;
-const extern unsigned int ai_register;
-const extern unsigned int vi_register;
-const extern unsigned int pi_register;
-const extern unsigned int ri_register;
-const extern unsigned int si_register;
+namespace core {
+    extern "C" {
+        #include "../../../r4300/r4300.h"
+        #include "../../../memory/memory.h"
+    }
+}
 
 class RegisterWidget : public QWidget, private Ui_RegisterWidget
 {
     Q_OBJECT
     public:
-        RegisterWidget(QWidget* parent = 0);
-        virtual ~RegisterWidget();
+        RegisterWidget(QWidget *parent = 0);
 
     public slots:
         void update_registers(unsigned int);
@@ -63,7 +56,7 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         void init_pi();
         void init_ri();
         void init_si();
-        void initTableView(QTableView*, TableListModel*);
+        void initTableView(QTableView *tableGpr, TableListModel *modelGpr);
         
         void update_gpr();
         void update_cop0();
@@ -75,11 +68,11 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         void update_ri();
         void update_si();
         
-        QString getDouble(long long int);
-        QString getSingle(long long int);
-        QString getWord(long long int);
-        QString getLong(long long int);
-        QString getCop1String(long long int);
+        QString getDouble(long long int val);
+        QString getSingle(long long int val);
+        QString getWord(long long int val);
+        QString getLong(long long int val);
+        QString getCop1String(long long int val);
         
         long long int gui_fantom_gpr_64[32];
         unsigned int gui_fantom_cop0_32[32];
@@ -91,13 +84,13 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         unsigned int gui_fantom_reg_Pi[13];
         unsigned int gui_fantom_reg_Ri[5];
         unsigned int gui_fantom_reg_Si[4];
-        unsigned int gui_fantom_interupt[11];
+        unsigned int gui_fantom_interrupt[11];
         unsigned int previous_pc;
 
         TableListModel *modelGpr;
         TableListModel *modelCop0;
         TableListModel *modelHiLo;
-        TableListModel *modelInterupt;
+        TableListModel *modelInterrupt;
         TableListModel *modelCop1;
         TableListModel *modelAi;
         TableListModel *modelVi;
@@ -108,7 +101,7 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         QStringList mnemonicGPR;
         QStringList mnemonicCop0;
         QStringList mnemonicHiLo;
-        QStringList mnemonicInterupt;
+        QStringList mnemonicInterrupt;
         QStringList mnemonicCop1;
         QStringList mnemonicAi;
         QStringList mnemonicVi;
@@ -117,7 +110,7 @@ class RegisterWidget : public QWidget, private Ui_RegisterWidget
         QStringList mnemonicSi;
         
         static const int HEIGHT = 15;   // row height in various QTableView
-        static const int VI_INT = 0x001;
+        static const int VI_INT      = 0x001;
         static const int COMPARE_INT = 0x002;
         static const int CHECK_INT   = 0x004;
         static const int SI_INT      = 0x008;

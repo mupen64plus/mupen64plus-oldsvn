@@ -35,34 +35,31 @@ namespace core {
     }
 }
 
-DebuggerWidget::DebuggerWidget(QWidget*)
+DebuggerWidget::DebuggerWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
  
-    connect( pushStep,  SIGNAL( clicked() ), this, SLOT( onstep()  ));
-    connect( pushRun,   SIGNAL( clicked() ), this, SLOT( onrun()   ));
-    connect( pushTrace, SIGNAL( clicked() ), this, SLOT( ontrace() ));
-    connect( pushBreak, SIGNAL( clicked() ), this, SLOT( onbreak() ));
-    connect( pushGoto,  SIGNAL( clicked() ), this, SLOT( ongoto()  ));
+    connect( pushStep,  SIGNAL( clicked() ), this, SLOT( step() ));
+    connect( pushRun,   SIGNAL( clicked() ), this, SLOT( run() ));
+    connect( pushTrace, SIGNAL( clicked() ), this, SLOT( trace() ));
+    connect( pushBreak, SIGNAL( clicked() ), this, SLOT( break_debugger() ));
+    connect( pushGoto,  SIGNAL( clicked() ), this, SLOT( goto_pc() ));
 
-    connect( pushReduce1000,   SIGNAL( clicked() ), this, SLOT( onreduce1000()  ));
-    connect( pushReduce100,    SIGNAL( clicked() ), this, SLOT( onreduce100()   ));
-    connect( pushReduce10,     SIGNAL( clicked() ), this, SLOT( onreduce10()    ));
-    connect( pushIncrease1000, SIGNAL( clicked() ), this, SLOT( onincrease1000()));
-    connect( pushIncrease100,  SIGNAL( clicked() ), this, SLOT( onincrease100() ));
-    connect( pushIncrease10,   SIGNAL( clicked() ), this, SLOT( onincrease10()  ));
+    connect( pushReduce1000,   SIGNAL( clicked() ), this, SLOT( reduce1000()  ));
+    connect( pushReduce100,    SIGNAL( clicked() ), this, SLOT( reduce100()   ));
+    connect( pushReduce10,     SIGNAL( clicked() ), this, SLOT( reduce10()    ));
+    connect( pushIncrease1000, SIGNAL( clicked() ), this, SLOT( increase1000()));
+    connect( pushIncrease100,  SIGNAL( clicked() ), this, SLOT( increase100() ));
+    connect( pushIncrease10,   SIGNAL( clicked() ), this, SLOT( increase10()  ));
     
     setWindowTitle(tr("Mupen64Plus Debugger - %1").arg(PLUGIN_VERSION));
-    treeDisasm->setColumnCount(3);
     treeDisasm->setEditTriggers(QAbstractItemView::AllEditTriggers);
     QStringList headerList;
     headerList << tr("Address") << tr("Opcode") << tr("Args");
     treeDisasm->setHeaderLabels(headerList);
-}
 
-DebuggerWidget::~DebuggerWidget()
-{
-    //TODO: Implement destructor
+    color_PC = QColor(Qt::red);
+    color_BP = QColor(Qt::blue);
 }
 
 void DebuggerWidget::update_desasm( unsigned int pc )
@@ -75,11 +72,10 @@ void DebuggerWidget::update_desasm( unsigned int pc )
     treeDisasm->clear();
     items.clear();
     
-    current_pc = pc;
     focused_pc = pc;
-    for (int i = -4; i<28; i++) {
-        tmp_pc = current_pc + (i*4);
-        if((debugger::get_memory_flags(current_pc) & MEM_FLAG_READABLE) != 0) {
+    for (int i = -4; i < 28; i++) {
+        tmp_pc = pc + (i * 4);
+        if((debugger::get_memory_flags(pc) & MEM_FLAG_READABLE) != 0) {
             instr = debugger::read_memory_32(tmp_pc);
             debugger::r4300_decode_op(instr, opcode, args, tmp_pc );
         } else {
@@ -87,24 +83,20 @@ void DebuggerWidget::update_desasm( unsigned int pc )
             sprintf( args, "UNREADABLE (%d)",debugger::get_memory_type(tmp_pc));
         }
 
-        QTreeWidgetItem* item=new QTreeWidgetItem(0);
+        QTreeWidgetItem *item=new QTreeWidgetItem(0);
         item->setText(0,"0x" + QString::number(tmp_pc,16).toUpper());
         item->setText(1,opcode);
         item->setText(2,args);
         item->setFlags(Qt::ItemIsEnabled);
         if (i==0) {
-            QColor red;
-            red.setRed(255);
-            item->setBackgroundColor(0, red);
-            item->setBackgroundColor(1, red);
-            item->setBackgroundColor(2, red);
+            item->setBackgroundColor(0, color_PC);
+            item->setBackgroundColor(1, color_PC);
+            item->setBackgroundColor(2, color_PC);
         }
         if(debugger::check_breakpoints(tmp_pc) != -1) {
-            QColor color;
-            color.setBlue(255);
-            item->setBackgroundColor(0, color);
-            item->setBackgroundColor(1, color);
-            item->setBackgroundColor(2, color);
+            item->setBackgroundColor(0, color_BP);
+            item->setBackgroundColor(1, color_BP);
+            item->setBackgroundColor(2, color_BP);
         }
         items.append(item);
     }
@@ -114,14 +106,14 @@ void DebuggerWidget::update_desasm( unsigned int pc )
     items.clear();
 }
 
-void DebuggerWidget::onstep()
+void DebuggerWidget::step()
 {
     if(debugger::run == 0) {
         debugger::debugger_step();
     }
 }
 
-void DebuggerWidget::onrun()
+void DebuggerWidget::run()
 {
     int oldrun = debugger::run;
     debugger::run = 2;
@@ -130,7 +122,7 @@ void DebuggerWidget::onrun()
     }
 }
 
-void DebuggerWidget::ontrace()
+void DebuggerWidget::trace()
 {
     int oldrun = debugger::run;
     debugger::run = 1;
@@ -139,45 +131,45 @@ void DebuggerWidget::ontrace()
     }
 }
  
-void DebuggerWidget::onbreak()
+void DebuggerWidget::break_debugger()
 {
     debugger::run = 0;
 }
 
-void DebuggerWidget::ongoto()
+void DebuggerWidget::goto_pc()
 {
-    HexSpinBoxDialog* d = new HexSpinBoxDialog(&focused_pc);
+    HexSpinBoxDialog *d = new HexSpinBoxDialog(&focused_pc);
     if (d->exec()) {
         DebuggerWidget::update_desasm( focused_pc );
     }
 }
 
-void DebuggerWidget::onreduce1000()
+void DebuggerWidget::reduce1000()
 {
     DebuggerWidget::update_desasm( focused_pc - 0x1000 );
 }
 
-void DebuggerWidget::onreduce100()
+void DebuggerWidget::reduce100()
 {
     DebuggerWidget::update_desasm( focused_pc - 0x100 );
 }
 
-void DebuggerWidget::onreduce10()
+void DebuggerWidget::reduce10()
 {
     DebuggerWidget::update_desasm( focused_pc - 0x10 );
 }
 
-void DebuggerWidget::onincrease1000()
+void DebuggerWidget::increase1000()
 {
     DebuggerWidget::update_desasm( focused_pc + 0x1000 );
 }
 
-void DebuggerWidget::onincrease100()
+void DebuggerWidget::increase100()
 {
     DebuggerWidget::update_desasm( focused_pc + 0x100 );
 }
 
-void DebuggerWidget::onincrease10()
+void DebuggerWidget::increase10()
 {
     DebuggerWidget::update_desasm( focused_pc + 0x10 );
 }

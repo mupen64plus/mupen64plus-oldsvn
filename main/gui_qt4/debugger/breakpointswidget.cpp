@@ -33,75 +33,71 @@ namespace debugger {
     }
 }
 
-BreakpointsWidget::BreakpointsWidget(QWidget*)
+BreakpointsWidget::BreakpointsWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this); // this sets up GUI
  
     // signals/slots mechanism in action
-    connect( pushAdd,     SIGNAL( clicked() ), this, SLOT( onadd()     )); 
-    connect( pushRemove,  SIGNAL( clicked() ), this, SLOT( onremove()  )); 
-    connect( pushEnable,  SIGNAL( clicked() ), this, SLOT( onenable()  )); 
-    connect( pushDisable, SIGNAL( clicked() ), this, SLOT( ondisable() )); 
-    connect( pushToggle,  SIGNAL( clicked() ), this, SLOT( ontoggle()  ));
-    connect( pushEdit,    SIGNAL( clicked() ), this, SLOT( onedit()    ));
+    connect( pushAdd,     SIGNAL( clicked() ), this, SLOT( add()     )); 
+    connect( pushRemove,  SIGNAL( clicked() ), this, SLOT( remove()  )); 
+    connect( pushEnable,  SIGNAL( clicked() ), this, SLOT( enable()  )); 
+    connect( pushDisable, SIGNAL( clicked() ), this, SLOT( disable() )); 
+    connect( pushToggle,  SIGNAL( clicked() ), this, SLOT( toggle()  ));
+    connect( pushEdit,    SIGNAL( clicked() ), this, SLOT( edit()    ));
 
     model = new QStringListModel();
     listView->setModel(model);
-    BreakpointsWidget::update_breakpoint();
-}
-
-BreakpointsWidget::~BreakpointsWidget()
-{
-    //TODO: ~BreakpointsWidget()
+    update_breakpoint();
 }
 
 void BreakpointsWidget::update_breakpoint()
 {   
     QStringList list;
-    for(int row=0; row < debugger::g_NumBreakpoints; row++ ) {
+
+    for(int row = 0; row < debugger::g_NumBreakpoints; row++ ) {
         list << get_breakpoint_display_string(row);
     }
     model->setStringList(list);
     core::debugger_update_desasm();
 }
 
-void BreakpointsWidget::onadd()
+void BreakpointsWidget::add()
 {
     bool ok;
-
     QString text = QInputDialog::getText(this, tr("Breakpoint"),
                                       tr("Value:"), QLineEdit::Normal, "", &ok);
-
-    breakpoint_parse(text);
-    BreakpointsWidget::update_breakpoint();
+    if (ok) {
+        breakpoint_parse(text);
+        update_breakpoint();
+    }
 }
 
-void BreakpointsWidget::onremove()
+void BreakpointsWidget::remove()
 {
     const QModelIndex& index = listView->selectionModel()->currentIndex();
 
     if (index.isValid()) {
-        debugger::remove_breakpoint_by_num( index.row());
+        debugger::remove_breakpoint_by_num(index.row());
+        update_breakpoint();
     }
-    BreakpointsWidget::update_breakpoint();
 }
 
-void BreakpointsWidget::onenable()
+void BreakpointsWidget::enable()
 {
-    _toggle(1);
+    ToggleBreakpoint(Enable);
 }
 
-void BreakpointsWidget::ondisable()
+void BreakpointsWidget::disable()
 {
-    _toggle(0);
+    ToggleBreakpoint(Disable);
 }
  
-void BreakpointsWidget::ontoggle()
+void BreakpointsWidget::toggle()
 {
-    _toggle(-1);
+    ToggleBreakpoint(Toggle);
 }
 
-void BreakpointsWidget::onedit()
+void BreakpointsWidget::edit()
 {
     const QModelIndex& index = listView->selectionModel()->currentIndex();
     QString old;
@@ -112,10 +108,11 @@ void BreakpointsWidget::onedit()
         old.remove(0,4);
         QString text = QInputDialog::getText(this, tr("Edit Breakpoint"),
                                           tr("New Value:"), QLineEdit::Normal, old, &ok);
-
-        breakpoint_parse(text, index.row());
+        if (ok) {
+            breakpoint_parse(text, index.row());
+            update_breakpoint();
+        }
     }
-    BreakpointsWidget::update_breakpoint();
 }
 
 QString BreakpointsWidget::get_breakpoint_display_string(int row)
@@ -139,27 +136,25 @@ QString BreakpointsWidget::get_breakpoint_display_string(int row)
     return str;
 }
 
-void BreakpointsWidget::_toggle(int flag)
+void BreakpointsWidget::ToggleBreakpoint(int flag)
 {
-    //flag is 1 for enable, 0 for disable, -1 for toggle
     QModelIndex index = listView->selectionModel()->currentIndex();
     int i = index.row();
-    if (flag==1) {
+    if (flag == Enable) {
         debugger::enable_breakpoint(i);
-    } else if (flag == 0) {
+    } else if (flag == Disable) {
         debugger::disable_breakpoint(i);
     } else if (BPT_CHECK_FLAG(debugger::g_Breakpoints[i], BPT_FLAG_ENABLED)) {
         debugger::disable_breakpoint(i);
     } else {
         debugger::enable_breakpoint(i);
     }
-    if(!debugger::g_NumBreakpoints) {
-        return;
-    }
-    update_breakpoint();
+    if(debugger::g_NumBreakpoints) {
+        update_breakpoint();
+    }    
 }
 
-void BreakpointsWidget::breakpoint_parse(QString text, int edit)
+void BreakpointsWidget::breakpoint_parse(QString text, int row)
 {
     debugger::breakpoint bp;
     //Enabled by default
@@ -198,18 +193,19 @@ void BreakpointsWidget::breakpoint_parse(QString text, int edit)
         bp.address = parts.at(0).toULong( &ok, 16 );
         bp.endaddr = parts.at(1).toULong( &ok, 16 );
     } else {
-        return;
+        ok = false;
     }
 
-    if (edit < 0) {
-        if(debugger::add_breakpoint_struct(&bp) == -1) {
-            QMessageBox::warning(this, tr("Warning"),
-                    tr("Cannot add any more breakpoints."),
-                    QMessageBox::Ok);
-            return;
+    if (ok) {
+        if (row < 0) {
+            if(debugger::add_breakpoint_struct(&bp) == -1) {
+                QMessageBox::warning(this, tr("Warning"),
+                        tr("Cannot add any more breakpoints."),
+                        QMessageBox::Ok);
+            }
+        } else {
+            debugger::replace_breakpoint_num(row, &bp);
         }
-    } else {
-        debugger::replace_breakpoint_num(edit, &bp);
     }
 }
 

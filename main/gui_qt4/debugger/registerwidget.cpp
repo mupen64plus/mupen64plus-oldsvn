@@ -37,7 +37,7 @@ namespace core {
     }
 }
 
-RegisterWidget::RegisterWidget(QWidget*)
+RegisterWidget::RegisterWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this); // this sets up GUI
  
@@ -56,25 +56,20 @@ RegisterWidget::RegisterWidget(QWidget*)
     color_PC = QColor(Qt::red);
     color_BP = QColor(Qt::blue);
     
-    RegisterWidget::init_registers();
-}
-
-RegisterWidget::~RegisterWidget()
-{
-    //TODO: Implement destructor
+    init_registers();
 }
 
 void RegisterWidget::init_registers()
 {
-    RegisterWidget::init_gpr();
-    RegisterWidget::init_cop0();
-    RegisterWidget::init_special();
-    RegisterWidget::init_cop1();
-    RegisterWidget::init_ai();
-    RegisterWidget::init_vi();
-    RegisterWidget::init_pi();
-    RegisterWidget::init_ri();
-    RegisterWidget::init_si();
+    init_gpr();
+    init_cop0();
+    init_special();
+    init_cop1();
+    init_ai();
+    init_vi();
+    init_pi();
+    init_ri();
+    init_si();
 }
 
 void RegisterWidget::init_gpr()
@@ -89,7 +84,8 @@ void RegisterWidget::init_gpr()
     // Not a fail safe way to do it,
     // but the size of the QStringList is required to be the same as
     // the size of the array (by design)
-    for (int i=0;i<mnemonicGPR.size();i++) {
+    int row_count = mnemonicGPR.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_gpr_64[i] = 0x1234;
     }
 
@@ -110,7 +106,8 @@ void RegisterWidget::init_cop0()
         << "TagLo"    << "TagHi"    << "ErrorEPC" << "----"
         ;
 
-    for (int i=0;i<mnemonicCop0.size();i++) {
+    int row_count = mnemonicCop0.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_cop0_32[i] = 0x1234;
     }
     modelCop0 = new TableListModel(mnemonicCop0, 8);
@@ -130,19 +127,19 @@ void RegisterWidget::init_special()
     modelHiLo = new TableListModel(mnemonicHiLo, 16);
     initTableView(tableHiLo, modelHiLo);
 
-    // interupt
-    mnemonicInterupt 
+    // interrupt
+    mnemonicInterrupt 
         << "VI_INT" << "COMPARE_INT" << "CHECK_INT" << "SI_INT" 
         << "PI_INT" << "SPECIAL_INT" << "AI_INT" << "SP_INT" 
         << "DP_INT" << "HW2_INT" << "NMI_INT"
         ;
-
-    for (int i=0;i<mnemonicInterupt.size();i++) {
-        gui_fantom_interupt[i] = 0x1234;
+    int row_count = mnemonicInterrupt.size();
+    for (int i = 0; i < row_count; i++) {
+        gui_fantom_interrupt[i] = 0x1234;
     }
 
-    modelInterupt = new TableListModel(mnemonicInterupt, 8);
-    initTableView(tableInterupt, modelInterupt);
+    modelInterrupt = new TableListModel(mnemonicInterrupt, 8);
+    initTableView(tableInterrupt, modelInterrupt);
 }
 
 void RegisterWidget::init_cop1()
@@ -153,8 +150,8 @@ void RegisterWidget::init_cop1()
         << "Cop1_16" << "Cop1_17" << "Cop1_18" << "Cop1_19" << "Cop1_20" << "Cop1_21" << "Cop1_22" << "Cop1_23" 
         << "Cop1_24" << "Cop1_25" << "Cop1_26" << "Cop1_27" << "Cop1_28" << "Cop1_29" << "Cop1_30" << "Cop1_31"
         ;
-
-    for (int i=0;i<mnemonicCop1.size();i++) {
+    int row_count = mnemonicCop1.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_cop1_64[i] = 0x1234567890LL;
     }
 
@@ -171,7 +168,8 @@ void RegisterWidget::init_ai()
         << "AI_DACRATE_REG" << "AI_BITRATE_REG"
         ;
 
-    for (int i=0;i<mnemonicAi.size();i++) {
+    int row_count = mnemonicAi.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_reg_Ai[i] = 0x12345678;
     }
 
@@ -192,7 +190,8 @@ void RegisterWidget::init_vi()
         << "VI_DELAY" << "OsTvType"
         ;
 
-    for (int i=0;i<mnemonicVi.size();i++) {
+    int row_count = mnemonicVi.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_reg_Vi[i] = 0x12345678;
     }
 
@@ -212,7 +211,8 @@ void RegisterWidget::init_pi()
         << "PI_BSD_DOM2_PGS_REG" << "PI_BSD_DOM2_RLS_REG"
         ;
 
-    for (int i=0;i<mnemonicPi.size();i++) {
+    int row_count = mnemonicPi.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_reg_Pi[i] = 0x12345678;
     }
 
@@ -228,7 +228,8 @@ void RegisterWidget::init_ri()
         << "RI_REFRESH_REG"
         ;
 
-    for (int i=0;i<mnemonicRi.size();i++) {
+    int row_count = mnemonicRi.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_reg_Ri[i] = 0x12345678;
     }
 
@@ -243,7 +244,8 @@ void RegisterWidget::init_si()
         << "SI_PIF_ADDR_WR64B_REG" << "SI_STATUS_REG"
         ;
 
-    for (int i=0;i<mnemonicSi.size();i++) {
+    int row_count = mnemonicSi.size();
+    for (int i = 0; i < row_count; i++) {
         gui_fantom_reg_Si[i] = 0x12345678;
     }
 
@@ -253,15 +255,15 @@ void RegisterWidget::init_si()
 
 void RegisterWidget::update_registers(unsigned int current_pc)
 {
-    RegisterWidget::update_gpr();
-    RegisterWidget::update_special(current_pc);
-    RegisterWidget::update_cop0();
-    RegisterWidget::update_cop1();
-    RegisterWidget::update_ai();
-    RegisterWidget::update_vi();
-    RegisterWidget::update_pi();
-    RegisterWidget::update_ri();
-    RegisterWidget::update_si();
+    update_gpr();
+    update_special(current_pc);
+    update_cop0();
+    update_cop1();
+    update_ai();
+    update_vi();
+    update_pi();
+    update_ri();
+    update_si();
 }
 
 void RegisterWidget::update_gpr()
@@ -269,10 +271,10 @@ void RegisterWidget::update_gpr()
     QModelIndex index;
     QString newstring;
 
-    for(int i=0; i<32; i++) {
+    for(int i = 0; i < 32; i++) {
         index = modelGpr->index(i, 1, QModelIndex());
-        if(gui_fantom_gpr_64[i]!=reg[i]) {
-            gui_fantom_gpr_64[i] = reg[i];
+        if(gui_fantom_gpr_64[i] != core::reg[i]) {
+            gui_fantom_gpr_64[i] = core::reg[i];
             newstring = QString("%1").arg(gui_fantom_gpr_64[i], 16, 16, QChar('0')).toUpper();
             modelGpr->setData(index, newstring, Qt::EditRole);
             modelGpr->setData(index, color_CHANGED, Qt::BackgroundRole);
@@ -288,10 +290,10 @@ void RegisterWidget::update_cop0()
     QModelIndex index;
     QString newstring;
 
-    for(int i=0; i<32; i++) {
+    for(int i = 0; i < 32; i++) {
         index = modelCop0->index(i, 1, QModelIndex());
-        if(gui_fantom_cop0_32[i]!=reg_cop0[i]) {
-            gui_fantom_cop0_32[i] = reg_cop0[i];
+        if(gui_fantom_cop0_32[i] != core::reg_cop0[i]) {
+            gui_fantom_cop0_32[i] = core::reg_cop0[i];
             newstring = QString("%1").arg(gui_fantom_cop0_32[i], 8, 16, QChar('0')).toUpper();
             modelCop0->setData(index, newstring, Qt::EditRole);
             modelCop0->setData(index, color_CHANGED, Qt::BackgroundRole);
@@ -321,8 +323,8 @@ void RegisterWidget::update_special(unsigned int current_pc)
 
     // Hi
     index = modelHiLo->index(0, 1, QModelIndex());
-    if(gui_fantom_hi!=hi) {
-        gui_fantom_hi=hi;
+    if(gui_fantom_hi != core::hi) {
+        gui_fantom_hi = core::hi;
         newstring = QString("%1").arg(gui_fantom_hi, 16, 16, QChar('0')).toUpper();
         modelHiLo->setData(index, newstring, Qt::EditRole);
         modelHiLo->setData(index, color_CHANGED, Qt::BackgroundRole);
@@ -331,8 +333,8 @@ void RegisterWidget::update_special(unsigned int current_pc)
     }
     // Lo
     index = modelHiLo->index(1, 1, QModelIndex());
-    if(gui_fantom_lo!=lo) {
-        gui_fantom_lo=lo;
+    if(gui_fantom_lo != core::lo) {
+        gui_fantom_lo = core::lo;
         newstring = QString("%1").arg(gui_fantom_lo, 16, 16, QChar('0')).toUpper();
         modelHiLo->setData(index, newstring, Qt::EditRole);
         modelHiLo->setData(index, color_CHANGED, Qt::BackgroundRole);
@@ -341,27 +343,27 @@ void RegisterWidget::update_special(unsigned int current_pc)
     }
     tableHiLo->resizeColumnsToContents();
 
-    // TODO: Interupt queue
-    int j=1;
-    for (int i=0;i<modelInterupt->rowCount();i++) {
+    int j = 1;
+    int row_count = modelInterrupt->rowCount();
+    for (int i = 0; i < row_count; i++) {
         count = core::get_event(j);
-        index = modelInterupt->index(i, 1, QModelIndex());
-        if (gui_fantom_interupt[i] != count) {
-            gui_fantom_interupt[i] = count;
-            newstring = QString("%1").arg(gui_fantom_interupt[i], 8, 16, QChar('0')).toUpper();
-            modelInterupt->setData(index, newstring, Qt::EditRole);
-            modelInterupt->setData(index, color_CHANGED, Qt::BackgroundRole);
-            if (gui_fantom_interupt[i] == 0) {
-                tableInterupt->setRowHidden(i, true);
+        index = modelInterrupt->index(i, 1, QModelIndex());
+        if (gui_fantom_interrupt[i] != count) {
+            gui_fantom_interrupt[i] = count;
+            newstring = QString("%1").arg(gui_fantom_interrupt[i], 8, 16, QChar('0')).toUpper();
+            modelInterrupt->setData(index, newstring, Qt::EditRole);
+            modelInterrupt->setData(index, color_CHANGED, Qt::BackgroundRole);
+            if (gui_fantom_interrupt[i] == 0) {
+                tableInterrupt->setRowHidden(i, true);
             } else {
-                tableInterupt->setRowHidden(i, false);
+                tableInterrupt->setRowHidden(i, false);
             }
         } else {
-            modelInterupt->setData(index, color_DEFAULT, Qt::BackgroundRole);
+            modelInterrupt->setData(index, color_DEFAULT, Qt::BackgroundRole);
         }
-        j=j<<1;
+        j = j << 1;
     }
-    tableInterupt->resizeColumnsToContents();
+    tableInterrupt->resizeColumnsToContents();
 }
 
 void RegisterWidget::update_cop1()
@@ -369,10 +371,10 @@ void RegisterWidget::update_cop1()
     QModelIndex index;
     QString newstring;
     
-    for (int i=0;i<32;i++) {
+    for (int i = 0; i < 32; i++) {
         index = modelCop1->index(i, 1, QModelIndex());
-        if (gui_fantom_cop1_64[i] != reg_cop1_fgr_64[i]) {
-            gui_fantom_cop1_64[i] = reg_cop1_fgr_64[i];
+        if (gui_fantom_cop1_64[i] != core::reg_cop1_fgr_64[i]) {
+            gui_fantom_cop1_64[i] = core::reg_cop1_fgr_64[i];
             
             newstring = getCop1String(gui_fantom_cop1_64[i]);
             modelCop1->setData(index, newstring, Qt::EditRole);
@@ -389,7 +391,7 @@ void RegisterWidget::radio_toggled()
     QModelIndex index;
     QString newstring;
 
-    for (int i=0;i<32;i++) {
+    for (int i = 0; i < 32; i++) {
         index = modelCop1->index(i, 1, QModelIndex());
         newstring = getCop1String(gui_fantom_cop1_64[i]);
         modelCop1->setData(index, newstring, Qt::EditRole);
@@ -400,9 +402,10 @@ void RegisterWidget::update_ai()
 {
     QModelIndex index;
     QString newstring;
-    const unsigned int * regaiptr = &ai_register;
+    unsigned int *regaiptr;
+    regaiptr = (unsigned int *) &core::ai_register;
 
-    for (int i=0;i<6;i++) {
+    for (int i = 0; i < 6; i++) {
         index = modelVi->index(i, 1, QModelIndex());
         if (gui_fantom_reg_Ai[i] != (unsigned int)(*(regaiptr+i))) {
             gui_fantom_reg_Ai[i] = (unsigned int)(*(regaiptr+i));
@@ -420,11 +423,12 @@ void RegisterWidget::update_vi()
 {
     QModelIndex index;
     QString newstring;
-    const unsigned int * regviptr = &vi_register;
+    unsigned int *regviptr;
+    regviptr = (unsigned int *) &core::vi_register;
 
     // TODO: Last item #16, not implemented
     // OsTvType in GTK debugger frontend
-    for (int i=0;i<15;i++) {
+    for (int i = 0; i < 15; i++) {
         index = modelVi->index(i, 1, QModelIndex());
         if (gui_fantom_reg_Vi[i] != (unsigned int)(*(regviptr+i))) {
             gui_fantom_reg_Vi[i] = (unsigned int)(*(regviptr+i));
@@ -442,9 +446,10 @@ void RegisterWidget::update_pi()
 {
     QModelIndex index;
     QString newstring;
-    const unsigned int * regpiptr = &pi_register;
+    unsigned int *regpiptr;
+    regpiptr = (unsigned int *) &core::pi_register;
 
-    for (int i=0;i<13;i++) {
+    for (int i = 0; i < 13; i++) {
         index = modelPi->index(i, 1, QModelIndex());
         if (gui_fantom_reg_Pi[i] != (unsigned int)(*(regpiptr+i))) {
             gui_fantom_reg_Pi[i] = (unsigned int)(*(regpiptr+i));
@@ -462,9 +467,10 @@ void RegisterWidget::update_ri()
 {
     QModelIndex index;
     QString newstring;
-    const unsigned int * regriptr = &ri_register;
+    unsigned int *regriptr;
+    regriptr = (unsigned int *) &core::ri_register;
 
-    for (int i=0;i<5;i++) {
+    for (int i = 0; i < 5; i++) {
         index = modelRi->index(i, 1, QModelIndex());
         if (gui_fantom_reg_Ri[i] != (unsigned int)(*(regriptr+i))) {
             gui_fantom_reg_Ri[i] = (unsigned int)(*(regriptr+i));
@@ -482,9 +488,10 @@ void RegisterWidget::update_si()
 {
     QModelIndex index;
     QString newstring;
-    const unsigned int * regsiptr = &si_register;
+    unsigned int *regsiptr;
+    regsiptr = (unsigned int *) &core::si_register;
 
-    for (int i=0;i<4;i++) {
+    for (int i = 0; i < 4; i++) {
         index = modelSi->index(i, 1, QModelIndex());
         if (gui_fantom_reg_Si[i] != (unsigned int)(*(regsiptr+i))) {
             gui_fantom_reg_Si[i] = (unsigned int)(*(regsiptr+i));
@@ -546,30 +553,32 @@ QString RegisterWidget::getLong(long long int val)
 
 QString RegisterWidget::getCop1String(long long int value)
 {
+    QString str = "";
     if (radioRawhex->isChecked()) {
-        return QString("%1").arg(value, 16, 16, QChar('0')).toUpper();
+        str =QString("%1").arg(value, 16, 16, QChar('0')).toUpper();
     } else if (radioSingle->isChecked()) {
-        return getSingle(value);
+        str = getSingle(value);
     } else if (radioDouble->isChecked()) {
-        return getDouble(value);
+        str = getDouble(value);
     } else if (radioWord->isChecked()) {
-        return getWord(value);
+        str = getWord(value);
     } else if (radioLong->isChecked()) {
-        return getLong(value);
+        str = getLong(value);
     }
-    return "";
+    return str;
 }
 
 
-void RegisterWidget::initTableView(QTableView* table, TableListModel* model)
+void RegisterWidget::initTableView(QTableView *table, TableListModel *model)
 {
     table->setModel(model);
     table->horizontalHeader()->hide();
     table->verticalHeader()->hide();
     table->resizeColumnsToContents();
     table->horizontalHeader()->setStretchLastSection(true);
-    for (int i=0;i<model->rowCount();i++) {
-        table->setRowHeight(i,HEIGHT);
+    int row_count = model->rowCount();
+    for (int i = 0; i < row_count; i++) {
+        table->setRowHeight(i, HEIGHT);
     }
 }
 

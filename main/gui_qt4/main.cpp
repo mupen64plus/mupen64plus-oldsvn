@@ -138,9 +138,6 @@ void gui_main_loop(void)
     delete translator;
     translator = 0;
 #ifdef DBG
-    if (debuggerWidget->close()) {}
-    if (registerWidget->close()) {}
-    if (breakpointsWidget->close()) {}
     debuggerWidget = 0;
     registerWidget = 0;
     breakpointsWidget = 0;
@@ -204,12 +201,12 @@ void init_debugger_frontend()
 void update_debugger_frontend( unsigned int pc )
 {
     _pc = pc;
-    if (debuggerWidget->isVisible() != 0) {
+    if (debuggerWidget->isVisible()) {
         QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
                                    Qt::QueuedConnection,
                                    Q_ARG(unsigned int, pc));
     }
-    if (debuggerWidget->isVisible() != 0) {
+    if (debuggerWidget->isVisible()) {
         QMetaObject::invokeMethod(registerWidget, "update_registers",
                                    Qt::QueuedConnection,
                                    Q_ARG(unsigned int, pc));
@@ -246,7 +243,7 @@ void debuger_show_breakpoints( )
 
 void debugger_update_desasm()
 {
-    if ((int) debuggerWidget->isVisible() != 0) {
+    if (debuggerWidget->isVisible()) {
         QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
                                    Qt::QueuedConnection,
                                    Q_ARG(unsigned int, _pc));

@@ -139,7 +139,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         
 //TODO: #ifdef DGB
         void debuggerToggle();
-        void disasemblerShow();
+        void disassemblerShow();
         void registersShow();
         void breakpointsShow();
 //TODO: #endif        

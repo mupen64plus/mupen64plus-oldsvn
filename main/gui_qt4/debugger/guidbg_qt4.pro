@@ -27,7 +27,7 @@ INCLUDEPATH += .
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += gtk+-2.0 sdl
+    PKGCONFIG += sdl
 }
 
 # Input
