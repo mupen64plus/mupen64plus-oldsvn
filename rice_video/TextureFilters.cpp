@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /* 2X filters                                                           */
 /************************************************************************/
 // Basic 2x R8G8B8A8 filter with interpolation
-
 void Texture2x_32( DrawInfo &srcInfo, DrawInfo &destInfo)
 {
     uint32 *pDst1, *pDst2;
@@ -142,6 +141,7 @@ void Texture2x_32( DrawInfo &srcInfo, DrawInfo &destInfo)
 // Basic 2x R4G4B4A4 filter with interpolation
 void Texture2x_16( DrawInfo &srcInfo, DrawInfo &destInfo )
 {
+printf("I'm being called\n");
     uint16 *pDst1, *pDst2;
     uint16 *pSrc, *pSrc2;
     uint32 nWidth = srcInfo.dwWidth;
@@ -875,13 +875,14 @@ void MirrorTexture(uint32 dwTile, TxtrCacheEntry *pEntry)
 
 enum TextureType
 {
-    NO_TEXTURE,
- RGB_PNG,
- COLOR_INDEXED_BMP,
- RGB_WITH_ALPHA_TOGETHER_PNG,
- RGBA_PNG_FOR_CI,
- RGBA_PNG_FOR_ALL_CI,
+NO_TEXTURE,
+RGB_PNG,
+COLOR_INDEXED_BMP,
+RGB_WITH_ALPHA_TOGETHER_PNG,
+RGBA_PNG_FOR_CI,
+RGBA_PNG_FOR_ALL_CI,
 };
+
 typedef struct {
     int width;
     int height;
@@ -916,70 +917,60 @@ BOOL PathIsDirectory(char* name)
 }
 
 #define SURFFMT_P8 41
-#define SURFFMT_X8R8G8B8 SURFFMT_A8R8G8B8
 
 int GetImageInfoFromFile(char* pSrcFile, IMAGE_INFO *pSrcInfo)
 {
-    unsigned char sig[8];
-    FILE *f;
+    unsigned char header[8];
+    FILE *filepointer;
 
-    f = fopen(pSrcFile, "rb");
-    if (f == NULL)
-    {
-      printf("GetImageInfoFromFile() error: couldn't open file '%s'\n", pSrcFile);
-      return 1;
-    }
-    fread(sig, 8, 1, f);
-    fclose(f);
-
-    if(sig[0] == 'B' && sig[1] == 'M') // BMP
-    {
-        struct BMGImageStruct img;
-        memset(&img, 0, sizeof(BMGImageStruct));
-        BMG_Error code = ReadBMP(pSrcFile, &img);
-        if( code == BMG_OK )
+    filepointer = fopen(pSrcFile, "rb");
+    if (filepointer==NULL)
         {
-            pSrcInfo->Width = img.width;
-            pSrcInfo->Height = img.height;
-            pSrcInfo->Depth = img.bits_per_pixel;
-            pSrcInfo->MipLevels = 1;
-            if(img.bits_per_pixel == 32)
-                pSrcInfo->Format = SURFFMT_A8R8G8B8;
-            else if(img.bits_per_pixel == 8)
-                pSrcInfo->Format = SURFFMT_P8;
-    // Resource and File Format ignored
-            FreeBMGImage(&img);
-            return 0;
+        printf("GetImageInfoFromFile() error: couldn't open file '%s'\n", pSrcFile);
+        return 1;
         }
+    fread(header, 8, 1, filepointer);
+    fclose(filepointer);
+
+    struct BMGImageStruct image;
+    BMG_Error code = errInvalidBMGImage;
+    memset(&image, 0, sizeof(BMGImageStruct));
+
+    //Detect Bitmap header. BM
+    if((header[0]=='B')&&(header[1]=='M'))
+        { code = ReadBMP(pSrcFile, &image); }
+    //Detect PNG header. 0x89504E470D0A1A0A
+    else if((header[0]==0x89)&&
+            (header[1]=='P')&&
+            (header[2]=='N')&&
+            (header[3]=='G')&&
+            (header[4]=='\r')&&
+            (header[5]=='\n')&&
+            (header[6]==0x1A)&&
+            (header[7]=='\n'))
+        { code = ReadPNG(pSrcFile, &image); }
+
+    if(code == BMG_OK)
+        {
+        pSrcInfo->Width = image.width;
+        pSrcInfo->Height = image.height;
+        pSrcInfo->Depth = image.bits_per_pixel;
+        pSrcInfo->MipLevels = 1;
+        if(image.bits_per_pixel == 32)
+           { pSrcInfo->Format = SURFFMT_A8R8G8B8; }
+        else if(image.bits_per_pixel == 8)
+           { pSrcInfo->Format = SURFFMT_P8; }
+        //Why no 24-bit flag?
+        FreeBMGImage(&image);
+        return 0;
+        }
+    else
+        {
         printf("Error %i; couldn't read BMP file '%s'\n", code, pSrcFile);
         return 1;
-    }
-    else if(sig[0] == 137 && sig[1] == 'P' && sig[2] == 'N' && sig[3] == 'G' && sig[4] == '\r' && sig[5] == '\n' &&
-               sig[6] == 26 && sig[7] == '\n') // PNG
-    {
-        struct BMGImageStruct img;
-        memset(&img, 0, sizeof(BMGImageStruct));
-        BMG_Error code = ReadPNG(pSrcFile, &img);
-        if( code == BMG_OK )
-        {
-            pSrcInfo->Width = img.width;
-            pSrcInfo->Height = img.height;
-            pSrcInfo->Depth = img.bits_per_pixel;
-            pSrcInfo->MipLevels = 1;
-            if(img.bits_per_pixel == 32)
-                pSrcInfo->Format = SURFFMT_A8R8G8B8;
-            else if(img.bits_per_pixel == 8)
-                pSrcInfo->Format = SURFFMT_P8;
-    // Resource and File Format ignored
-            FreeBMGImage(&img);
-            return 0;
         }
-        return 1;
-    }
-    else
-    {
-        printf("GetImageInfoFromFile : unknown file format (%s)", pSrcFile);
-    }
+
+    printf("GetImageInfoFromFile : unknown file format (%s)", pSrcFile);
     return 1;
 }
 
@@ -1010,7 +1001,6 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
 
     int crc, palcrc32;
     unsigned int fmt, siz;
-    //char name[256];
     char crcstr[16], crcstr2[16];
 
     do
@@ -1044,8 +1034,9 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
 
         TextureType type = NO_TEXTURE;
         bool bSeparatedAlpha = false;
+        int length = strlen(entry->d_name);
 
-        if(strcasecmp(entry->d_name+(strlen(entry->d_name)-7), "_ci.bmp")==0)
+        if(strcasecmp(entry->d_name+(length-7), "_ci.bmp")==0)
             {
             if(imgInfo.Format==SURFFMT_P8)
                 { type = COLOR_INDEXED_BMP; }
@@ -1053,7 +1044,7 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
                 { continue; }
             }
 
-        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-13), "_ciByRGBA.png")== 0)
+        else if(strcasecmp(entry->d_name+(length-13), "_ciByRGBA.png")== 0)
             {
             if(imgInfo.Format==SURFFMT_A8R8G8B8)
                 { type = RGBA_PNG_FOR_CI; }
@@ -1061,7 +1052,7 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
                 { continue; }
             }
 
-        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-16), "_allciByRGBA.png")==0)
+        else if(strcasecmp(entry->d_name+(length-16), "_allciByRGBA.png")==0)
             {
             if(imgInfo.Format==SURFFMT_A8R8G8B8)
                 { type = RGBA_PNG_FOR_ALL_CI; }
@@ -1069,7 +1060,7 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
                 { continue; }
             }
 
-        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-8), "_rgb.png")==0)
+        else if(strcasecmp(entry->d_name+(length-8), "_rgb.png")==0)
             {
             type = RGB_PNG;
 
@@ -1092,35 +1083,47 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
                 }
             }
 
-        else if(strcasecmp(entry->d_name+(strlen(entry->d_name)-8), "_all.png")==0)
+        else if(strcasecmp(entry->d_name+(length-8), "_all.png")==0)
             { type = RGB_WITH_ALPHA_TOGETHER_PNG; }
 
         if(type!=NO_TEXTURE)
             {
-            // Try to read image information here. What do these codes mean???
+            /*
+           Try to read image information here.
+
+           (CASTLEVANIA2)(#58E2333F)(#2#0#)(D7A5C6D 9)_ciByRGBA.png
+           (------1-----)(----2----)(3)(4)(----5-----)_ciByRGBA.png
+
+           1. Internal ROM name
+           2. The DRAM CRC
+           3. The image pixel size (8b=0, 16b=1, 24b=2, 32b=3)
+           4. The texture format (RGBA=0, YUV=1, CI=2, IA=3, I=4)
+           5. The PAL CRC
+
+           <internal Rom name>#<DRAM CRC>#<24bit>#<RGBA>#<PAL CRC>_ciByRGBA.png
+           */
             strcpy(texturefilename, entry->d_name);
 
             char *ptr = strchr(texturefilename,'#');
             *ptr++ = 0;
-            if( type == RGBA_PNG_FOR_CI )
+            if(type==RGBA_PNG_FOR_CI) //Needs the extra PAL CRC.
                 {
-                sscanf(ptr,"%8c#%d#%d#%8c", crcstr, &fmt, &siz,crcstr2);
+                sscanf(ptr,"%8c#%d#%d#%8c", crcstr, &fmt, &siz, crcstr2);
                 crcstr2[8] = 0;
-                palcrc32 = strtoul(crcstr2,NULL,16);
+                palcrc32 = strtoul(crcstr2, NULL, 16);
                 }
             else
                 {
                 sscanf(ptr,"%8c#%d#%d", crcstr, &fmt, &siz);
                 palcrc32 = 0xFFFFFFFF;
                 }
-            //sscanf(texturefilename,"%8c#%d#%d", crcstr, &fmt, &siz);
             crcstr[8]=0;
-            crc = strtoul(crcstr,NULL,16);
+            crc = strtoul(crcstr, NULL, 16);
 
             int foundIdx = -1;
             for(int k=0; k<infos.size(); k++)
                 {
-                if( infos[k].crc32 == crc && infos[k].pal_crc32 == palcrc32 )
+                if(infos[k].crc32==crc&&infos[k].pal_crc32==palcrc32)
                     {
                     foundIdx = k;
                     break;
@@ -1154,7 +1157,8 @@ void FindAllTexturesFromFolder(char *foldername, CSortedList<uint64,ExtTxtrInfo>
                         strcpy(newinfo.RGBNameTail, "_ci.bmp");
                         break;
                     case RGBA_PNG_FOR_CI:
-                        strcpy(newinfo.RGBNameTail, right(ptr,22));
+                        //This format has the PAL CRC.
+                        strcpy(newinfo.RGBNameTail, entry->d_name+(length-22));
                         break;
                     case RGBA_PNG_FOR_ALL_CI:
                         strcpy(newinfo.RGBNameTail, "_allciByRGBA.png");

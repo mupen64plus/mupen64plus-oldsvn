@@ -35,7 +35,7 @@ void OGLRender::DrawSpriteR_Render()    // With Rotation
     glViewportWrapper(0, windowSetting.statusBarHeightToUse, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight);
 
     GLboolean cullface = glIsEnabled(GL_CULL_FACE);
-    glDisable(GL_CULL_FACE);
+   glDisable(GL_CULL_FACE);
 
     glBegin(GL_TRIANGLES);
     glColor4fv(gRDP.fvPrimitiveColor);
