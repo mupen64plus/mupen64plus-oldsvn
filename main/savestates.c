@@ -113,9 +113,9 @@ char* savestates_get_filename()
 char* savestates_get_pj64_filename()
 {
     size_t length;
-    length = strlen((char*)ROM_HEADER->nom)+7+1;
+    length = strlen((char*)ROM_HEADER->nom)+8+1;
     char* filename = (char*)malloc(length);
-    snprintf(filename, length, "%s.pj.zip", (char*)ROM_HEADER->nom);
+    snprintf(filename, length, "%s.pj%d.zip", (char*)ROM_HEADER->nom, slot);
     return filename;
 }
 
@@ -377,7 +377,7 @@ int savestates_save_pj64()
         }
     else
         {
-        filename = savestates_get_filename();
+        filename = savestates_get_pj64_filename();
         length = strlen(get_savespath())+strlen(filename)+1;
         file = malloc(length);
         snprintf(file, length, "%s%s", get_savespath(), filename);
@@ -502,10 +502,10 @@ void savestates_load_pj64()
         }
     else
         {
-        file = savestates_get_pj64_filename();
-        length = strlen(get_savespath()) + strlen(file) + 1;
+        filename = savestates_get_pj64_filename();
+        length = strlen(get_savespath())+strlen(filename)+1;
         file = malloc(length);
-        snprintf(file, length, "%s%s", get_savespath(), file);
+        snprintf(file, length, "%s%s", get_savespath(), filename);
         }
 
     zipstatefile = unzOpen(file); /*Open the .zip file. */

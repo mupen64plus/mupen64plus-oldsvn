@@ -354,13 +354,33 @@ void MainWindow::saveStateSave()
 void MainWindow::saveStateSaveAs()
 {
     if (core::g_EmulatorRunning) {
-        QString filename = QFileDialog::getSaveFileName(this);
+        char* file = core::savestates_get_filename();
+        QString filename = QFileDialog::getSaveFileName(
+                            this,
+                            tr("Save State as..."),
+                            tr(file),
+                            NULL);
         if (!filename.isEmpty()) {
             core::savestates_select_filename(filename.toLocal8Bit());
             core::savestates_job |= SAVESTATE;
         }
-    } else {
-        showAlertMessage(tr("Emulation not running!"));
+    }
+}
+
+void MainWindow::saveStateProject64SaveAs()
+{
+    if (core::g_EmulatorRunning) {
+        char* file = core::savestates_get_pj64_filename();
+        QString filename = QFileDialog::getSaveFileName(
+                            this,
+                            tr("Save Project64 State as..."),
+                            tr(file),
+                            tr(".zip files (*.zip); .pj files (*.pj)"));
+        if (!filename.isEmpty()) {
+            core::savestates_select_filename(filename.toLocal8Bit());
+            core::savestates_job |= SAVESTATE;
+            core::savestates_job |= SAVEPJ64STATE;
+        }
     }
 }
 
@@ -379,8 +399,6 @@ void MainWindow::saveStateLoadFrom()
             core::savestates_select_filename(filename.toLocal8Bit());
             core::savestates_job |= LOADSTATE;
         }
-    } else {
-        showAlertMessage(tr("Emulation not running!"));
     }
 }
 
@@ -492,11 +510,16 @@ void MainWindow::setupActions()
     actionSaveState->setIcon(icon("document-save.png"));
     connect(actionSaveState, SIGNAL(triggered()),
             this, SLOT(saveStateSave()));
-    actionLoadState->setIcon(icon("document-revert.png"));
-    connect(actionLoadState, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
     actionSaveStateAs->setIcon(icon("document-save-as.png"));
+    actionSaveStateAs->setData(false);
     connect(actionSaveStateAs, SIGNAL(triggered()),
             this, SLOT(saveStateSaveAs()));
+    actionSaveProject64StateAs->setIcon(icon("project64.png"));
+    actionSaveProject64StateAs->setData(TRUE);
+    connect(actionSaveProject64StateAs, SIGNAL(triggered()),
+            this, SLOT(saveStateProject64SaveAs()));
+    actionLoadState->setIcon(icon("document-revert.png"));
+    connect(actionLoadState, SIGNAL(triggered()), this, SLOT(saveStateLoad()));
     actionLoadStateFrom->setIcon(icon("document-open.png"));
     connect(actionLoadStateFrom, SIGNAL(triggered()),
             this, SLOT(saveStateLoadFrom()));
@@ -555,6 +578,7 @@ void MainWindow::setupActions()
     m_uiActions->addAction(actionCloseRom);
     m_uiActions->addAction(actionSaveState);
     m_uiActions->addAction(actionSaveStateAs);
+    m_uiActions->addAction(actionSaveProject64StateAs);
     m_uiActions->addAction(actionLoadState);
     m_uiActions->addAction(actionLoadStateFrom);
     m_uiActions->addAction(actionFullScreen);

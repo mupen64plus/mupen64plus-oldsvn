@@ -28,7 +28,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File" >
@@ -48,10 +48,11 @@
     <addaction name="actionPause" />
     <addaction name="actionStop" />
     <addaction name="separator" />
-    <addaction name="actionLoadState" />
-    <addaction name="actionLoadStateFrom" />
     <addaction name="actionSaveState" />
     <addaction name="actionSaveStateAs" />
+    <addaction name="actionSaveProject64StateAs" />
+    <addaction name="actionLoadState" />
+    <addaction name="actionLoadStateFrom" />
     <addaction name="separator" />
     <addaction name="actionCurrentSaveStateSlot" />
    </widget>
@@ -250,6 +251,11 @@
    </property>
    <property name="text" >
     <string>Show F&amp;ilter</string>
+   </property>
+  </action>
+  <action name="actionSaveProject64StateAs" >
+   <property name="text" >
+    <string>Save P&amp;roject64 State as...</string>
    </property>
   </action>
  </widget>

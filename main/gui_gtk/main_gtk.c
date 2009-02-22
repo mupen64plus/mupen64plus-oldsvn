@@ -530,13 +530,17 @@ static void callback_save_state_as(GtkWidget* widget, gpointer project64format)
     if(g_EmulatorRunning)
         {
         GtkWidget* file_chooser;
+        char* defaultfilename;
 
         file_chooser = gtk_file_chooser_dialog_new(tr("Save as..."), GTK_WINDOW(g_MainWindow.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 
         /* Set default filename. */
-        char* filename = savestates_get_filename();
-        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), filename);
-        free(filename);
+        if(GPOINTER_TO_UINT(project64format))
+            { defaultfilename = savestates_get_pj64_filename(); }
+        else
+            { defaultfilename = savestates_get_filename(); }
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), defaultfilename);
+        free(defaultfilename);
 
         if(gtk_dialog_run(GTK_DIALOG(file_chooser))==GTK_RESPONSE_ACCEPT)
             {
@@ -902,7 +906,7 @@ static void create_menubar(void)
     g_signal_connect(g_MainWindow.saveStateAsMenuItem, "activate", G_CALLBACK(callback_save_state_as), GUINT_TO_POINTER(FALSE));
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), g_MainWindow.saveStateAsMenuItem);
 
-    g_MainWindow.saveStateAsPJ64MenuItem = gtk_image_menu_item_new_with_mnemonic(tr("Save Project64 State _as..."));
+    g_MainWindow.saveStateAsPJ64MenuItem = gtk_image_menu_item_new_with_mnemonic(tr("Save P_roject64 State as..."));
     g_MainWindow.saveStateAsPJ64MenuImage = gtk_image_new();
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(g_MainWindow.saveStateAsPJ64MenuItem), g_MainWindow.saveStateAsPJ64MenuImage);
     g_signal_connect(g_MainWindow.saveStateAsPJ64MenuItem, "activate", G_CALLBACK(callback_save_state_as), GUINT_TO_POINTER(TRUE));

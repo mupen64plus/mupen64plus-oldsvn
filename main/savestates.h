@@ -34,6 +34,7 @@ void savestates_save();
 void savestates_load();
 int savestates_save_pj64();
 void savestates_load_pj64();
+char* savestates_get_pj64_filename();
 
 void savestates_select_slot(unsigned int s);
 unsigned int savestates_get_slot(void);

@@ -126,6 +126,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void emulationStop();
         void saveStateSave();
         void saveStateSaveAs();
+        void saveStateProject64SaveAs();
         void saveStateLoad();
         void saveStateLoadFrom();
         void savestateCheckSlot();
