@@ -1729,14 +1729,14 @@ bool LoadRGBBufferFromBMPFile(char *filename, unsigned char **pbuf, int &width, 
     }
 }
 
-void LoadHiresTexture( TxtrCacheEntry &entry )
+void LoadHiresTexture(TxtrCacheEntry &entry)
 {
-    if( entry.bExternalTxtrChecked )
+    if(entry.bExternalTxtrChecked)
         return;
 
-    if( entry.pEnhancedTexture )
+    if(entry.pEnhancedTexture)
     {
-        SAFE_DELETE(entry.pEnhancedTexture);
+        SAFE_DELETE(entry.pEnhancedTexture); //Huh?
     }
 
     int ciidx;
@@ -1757,6 +1757,7 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
     strcpy(filename_a,filename_rgb);
     strcat(filename_rgb,gHiresTxtrInfos[idx].RGBNameTail);
     strcat(filename_a,gHiresTxtrInfos[idx].AlphaNameTail);
+    //printf("Trying to load texture: %s\n", filename_rgb);
 
     // Load BMP image to buffer_rbg
     unsigned char *buf_rgba = NULL;
@@ -1769,7 +1770,7 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
     switch( gHiresTxtrInfos[idx].type )
     {
         case RGB_PNG:
-            if( bCI )   
+            if( bCI )
                 return;
             else
             {
@@ -1817,27 +1818,24 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
 
     // calculate the texture size magnification by comparing the N64 texture size and the hi-res texture size
     int scale = 0;
-    if (width == 1 * (int)entry.ti.WidthToCreate && height == 1 * (int)entry.ti.HeightToCreate)
-        scale = 1;
-    else if (width == 2 * (int)entry.ti.WidthToCreate && height == 2 * (int)entry.ti.HeightToCreate)
-        scale = 2;
-    else if (width == 4 * (int)entry.ti.WidthToCreate && height == 4 * (int)entry.ti.HeightToCreate)
-        scale = 4;
-    else if (width == 8 * (int)entry.ti.WidthToCreate && height == 8 * (int)entry.ti.HeightToCreate)
-        scale = 8;
-    else if (width == 16 * (int)entry.ti.WidthToCreate && height == 16 * (int)entry.ti.HeightToCreate)
-        scale =16;
-    else
-    {
-        int scalex = width / (int)entry.ti.WidthToCreate;
-        int scaley = height / (int)entry.ti.HeightToCreate;
-        scale = scalex > scaley ? scalex : scaley; // set scale to maximum(scalex,scaley)
-        printf("Warning: Non-integral hi-res texture scale.  Orig = (%i,%i)  Hi-res = (%i,%i)\nTextures may look incorrect\n", 
-               entry.ti.WidthToCreate, entry.ti.HeightToCreate, width, height);
-    }
+    int scalex = width / (int)entry.ti.WidthToCreate;
+    int scaley = height / (int)entry.ti.HeightToCreate;
+
+    scale = scalex > scaley ? scalex : scaley; // set scale to maximum(scalex,scaley)
+
+    if(scalex==0)
+        { scalex = 1; }
+    if(scaley==0)
+        { scaley = 1; }
 
     // Create new texture
-    entry.pEnhancedTexture = CDeviceBuilder::GetBuilder()->CreateTexture(entry.ti.WidthToCreate*scale, entry.ti.HeightToCreate*scale);
+    int mirrorx = 1;
+    if(entry.ti.WidthToCreate/entry.ti.WidthToLoad == 2)
+        { mirrorx = 2; }
+    int mirrory = 1;
+    if(entry.ti.HeightToCreate/entry.ti.HeightToLoad == 2)
+        { mirrory = 2; }
+    entry.pEnhancedTexture = CDeviceBuilder::GetBuilder()->CreateTexture(entry.ti.WidthToCreate*scalex*mirrorx, entry.ti.HeightToCreate*scaley*mirrory);
     DrawInfo info;
 
     if( entry.pEnhancedTexture && entry.pEnhancedTexture->StartUpdate(&info) )
@@ -1887,28 +1885,45 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
             {
                 uint32 *pdst = (uint32*)((BYTE*)info.lpSurface + i*info.lPitch);
                 for( int j=0; j<width; j++)
-                {
-                    *pdst++ = *pRGB++;      // RGBA
-                }
+                    { *pdst++ = *pRGB++;  }
             }
         }
+        //printf("texture\n");
 
-        if( entry.ti.WidthToCreate/entry.ti.WidthToLoad == 2 )
-        {
-            gTextureManager.Mirror(info.lpSurface, width, entry.ti.maskS+gHiresTxtrInfos[idx].scaleShift, width*2, width*2, height, S_FLAG, 4 );
-        }
+        //Texture was meant to be mirrored.
+        if(entry.ti.WidthToCreate/entry.ti.WidthToLoad == 2)
+            {
+            //printf("Mirroring width: %s\n", filename_rgb);
+            //printf("Mirror width\n");
+            //printf("Mirror: CreatedWidth %d, CreatedHeight %d, Widthtoload %d, Heighttoload %d\n", entry.ti.WidthToCreate, entry.ti.HeightToCreate, entry.ti.WidthToLoad, entry.ti.HeightToLoad);
+            //printf("Mirror: CreatedWidth %d, CreatedHeight %d, Widthtoload %d, Heighttoload %d\n", entry.ti.WidthToCreate*scalex*mirror, entry.ti.HeightToCreate*scale, entry.ti.WidthToLoad, entry.ti.HeightToLoad);
+            //printf("Hi-res Width: %d\n", width);
+            gTextureManager.Mirror(info.lpSurface, width, entry.ti.maskS, width*2, width*2, height, S_FLAG, 4 );
+            }
 
         if( entry.ti.HeightToCreate/entry.ti.HeightToLoad == 2 )
-        {
-            gTextureManager.Mirror(info.lpSurface, height, entry.ti.maskT+gHiresTxtrInfos[idx].scaleShift, height*2, entry.pEnhancedTexture->m_dwCreatedTextureWidth, height, T_FLAG, 4 );
-        }
+            {
+            //printf("Mirroring Hiehgt: %s\n", filename_rgb);
+            //printf("Mirror Height\n");
+            uint32 *array = (uint32*)info.lpSurface;
+            for( uint32 y = height; y<2*height; y++ )
+                 {
+                 uint32* linesrc = array+(height*mirrory)*((2*height-1)-y);
+                 uint32* linedst = array+(height*mirrory)*y;
+                  for( uint32 x=0; x<width*mirrorx; x++ )
+                     {
+                     linedst[x] = linesrc[x];
+                      }
+                   }
+            //gTextureManager.Mirror(info.lpSurface, height, entry.ti.maskT+gHiresTxtrInfos[idx].scaleShift, height*2, width, height, T_FLAG, 4 );
+            }
 
-        if( entry.ti.WidthToCreate*scale < entry.pEnhancedTexture->m_dwCreatedTextureWidth )
+        if( entry.ti.WidthToCreate*scalex*mirrorx < entry.pEnhancedTexture->m_dwCreatedTextureWidth )
         {
             // Clamp
             gTextureManager.Clamp(info.lpSurface, width, entry.pEnhancedTexture->m_dwCreatedTextureWidth, entry.pEnhancedTexture->m_dwCreatedTextureWidth, height, S_FLAG, 4 );
         }
-        if( entry.ti.HeightToCreate*scale < entry.pEnhancedTexture->m_dwCreatedTextureHeight )
+        if( entry.ti.HeightToCreate*scaley*mirrory < entry.pEnhancedTexture->m_dwCreatedTextureHeight )
         {
             // Clamp
             gTextureManager.Clamp(info.lpSurface, height, entry.pEnhancedTexture->m_dwCreatedTextureHeight, entry.pEnhancedTexture->m_dwCreatedTextureWidth, height, T_FLAG, 4 );
@@ -1924,17 +1939,15 @@ void LoadHiresTexture( TxtrCacheEntry &entry )
     else
     {
         printf("Error: New texture creation failed.\n");
+        fflush(NULL);
         TRACE0("Cannot create a new texture");
     }
 
-    if( buf_rgba )
-    {
-        delete [] buf_rgba;
-    }
+    if( buf_rgba !=NULL)
+        { delete [] buf_rgba; }
 
-    if( buf_a )
-    {
-        delete [] buf_a;
-    }
+    if(buf_a)
+        { delete [] buf_a; }
+
 }
 
