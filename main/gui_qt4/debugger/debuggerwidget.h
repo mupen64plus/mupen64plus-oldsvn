@@ -38,23 +38,17 @@ class DebuggerWidget : public QWidget, private Ui_DebuggerWidget
         void update_desasm (unsigned int pc);
 
     private slots:
-        void step();
-        void run();
-        void trace();
-        void break_debugger();
-        void goto_pc();
-
-        void reduce1000();
-        void reduce100();
-        void reduce10();
-        void increase1000();
-        void increase100();
-        void increase10();
-
+        void clicked(int value);
+        void clicked(const QString text);
+        void update (unsigned int pc);
+        
     private:
         QList<QTreeWidgetItem *> items;
         HexSpinBox *hexSpinBox;
-        unsigned int focused_pc;
+        unsigned int focused_pc, current_pc;
+        QSignalMapper *smNavigate;
+        QSignalMapper *smDebugger;
+        enum { EmulatorStop = 0, EmulatorTrace, EmulatorRun };
 
         QColor color_PC;
         QColor color_BP;

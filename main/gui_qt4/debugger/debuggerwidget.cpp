@@ -39,18 +39,33 @@ DebuggerWidget::DebuggerWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
  
-    connect( pushStep,  SIGNAL( clicked() ), this, SLOT( step() ));
-    connect( pushRun,   SIGNAL( clicked() ), this, SLOT( run() ));
-    connect( pushTrace, SIGNAL( clicked() ), this, SLOT( trace() ));
-    connect( pushBreak, SIGNAL( clicked() ), this, SLOT( break_debugger() ));
-    connect( pushGoto,  SIGNAL( clicked() ), this, SLOT( goto_pc() ));
+    smDebugger = new QSignalMapper(this);
+    connect(pushStep, SIGNAL(clicked()), smDebugger, SLOT(map()));
+    connect(pushRun, SIGNAL(clicked()), smDebugger, SLOT(map()));
+    connect(pushTrace, SIGNAL(clicked()), smDebugger, SLOT(map()));
+    connect(pushBreak, SIGNAL(clicked()), smDebugger, SLOT(map()));
+    connect(pushGoto, SIGNAL(clicked()), smDebugger, SLOT(map()));
+    smDebugger->setMapping(pushStep, "Step");
+    smDebugger->setMapping(pushRun, "Run");
+    smDebugger->setMapping(pushTrace, "Trace");
+    smDebugger->setMapping(pushBreak, "Break");
+    smDebugger->setMapping(pushGoto, "Goto");
+    connect(smDebugger, SIGNAL(mapped(const QString &)), this, SLOT(clicked(const QString &)));
 
-    connect( pushReduce1000,   SIGNAL( clicked() ), this, SLOT( reduce1000()  ));
-    connect( pushReduce100,    SIGNAL( clicked() ), this, SLOT( reduce100()   ));
-    connect( pushReduce10,     SIGNAL( clicked() ), this, SLOT( reduce10()    ));
-    connect( pushIncrease1000, SIGNAL( clicked() ), this, SLOT( increase1000()));
-    connect( pushIncrease100,  SIGNAL( clicked() ), this, SLOT( increase100() ));
-    connect( pushIncrease10,   SIGNAL( clicked() ), this, SLOT( increase10()  ));
+    smNavigate = new QSignalMapper(this);
+    connect(pushReduce1000,   SIGNAL(clicked()), smNavigate, SLOT(map()));
+    connect(pushReduce100,    SIGNAL(clicked()), smNavigate, SLOT(map()));
+    connect(pushReduce10,     SIGNAL(clicked()), smNavigate, SLOT(map()));
+    connect(pushIncrease1000, SIGNAL(clicked()), smNavigate, SLOT(map()));
+    connect(pushIncrease100,  SIGNAL(clicked()), smNavigate, SLOT(map()));
+    connect(pushIncrease10,   SIGNAL(clicked()), smNavigate, SLOT(map()));
+    smNavigate->setMapping(pushReduce1000,  -0x1000);
+    smNavigate->setMapping(pushReduce100,    -0x100);
+    smNavigate->setMapping(pushReduce10,      -0x10);
+    smNavigate->setMapping(pushIncrease1000, 0x1000);
+    smNavigate->setMapping(pushIncrease100,   0x100);
+    smNavigate->setMapping(pushIncrease10,     0x10);
+    connect(smNavigate, SIGNAL(mapped(const int)), this, SLOT(clicked(const int)));
     
     setWindowTitle(tr("Mupen64Plus Debugger - %1").arg(PLUGIN_VERSION));
     treeDisasm->setEditTriggers(QAbstractItemView::AllEditTriggers);
@@ -64,6 +79,12 @@ DebuggerWidget::DebuggerWidget(QWidget *parent) : QWidget(parent)
 
 void DebuggerWidget::update_desasm( unsigned int pc )
 {
+    current_pc = pc;
+    update(current_pc);
+}
+
+void DebuggerWidget::update( unsigned int pc )
+{
     char opcode[64];
     char args[128];
     unsigned int instr;
@@ -75,7 +96,7 @@ void DebuggerWidget::update_desasm( unsigned int pc )
     focused_pc = pc;
     for (int i = -4; i < 28; i++) {
         tmp_pc = pc + (i * 4);
-        if((debugger::get_memory_flags(pc) & MEM_FLAG_READABLE) != 0) {
+        if((debugger::get_memory_flags(tmp_pc) & MEM_FLAG_READABLE) != 0) {
             instr = debugger::read_memory_32(tmp_pc);
             debugger::r4300_decode_op(instr, opcode, args, tmp_pc );
         } else {
@@ -88,7 +109,7 @@ void DebuggerWidget::update_desasm( unsigned int pc )
         item->setText(1,opcode);
         item->setText(2,args);
         item->setFlags(Qt::ItemIsEnabled);
-        if (i==0) {
+        if (tmp_pc==current_pc) {
             item->setBackgroundColor(0, color_PC);
             item->setBackgroundColor(1, color_PC);
             item->setBackgroundColor(2, color_PC);
@@ -106,71 +127,36 @@ void DebuggerWidget::update_desasm( unsigned int pc )
     items.clear();
 }
 
-void DebuggerWidget::step()
+void DebuggerWidget::clicked(int value)
 {
-    if(debugger::run == 0) {
-        debugger::debugger_step();
+    DebuggerWidget::update( focused_pc + value );
+}
+
+void DebuggerWidget::clicked(const QString text)
+{
+    if (text == "Step") {
+        if(debugger::run == EmulatorStop) {
+            debugger::debugger_step();
+        }
+    } else if (text == "Run") {
+        int oldrun = debugger::run;
+        debugger::run = EmulatorRun;
+        if(oldrun == EmulatorStop) {
+            debugger::debugger_step();
+        }
+    } else if (text == "Break") {
+        debugger::run = EmulatorStop;
+    } else if (text == "Goto") {
+        HexSpinBoxDialog *d = new HexSpinBoxDialog(&focused_pc);
+        if (d->exec()) {
+            DebuggerWidget::update( focused_pc );
+        }
+    } else if (text == "Trace") {
+        int oldrun = debugger::run;
+        debugger::run = EmulatorTrace;
+        if(oldrun == EmulatorStop) {
+            debugger::debugger_step();
+        }
     }
-}
-
-void DebuggerWidget::run()
-{
-    int oldrun = debugger::run;
-    debugger::run = 2;
-    if(oldrun == 0) {
-        debugger::debugger_step();
-    }
-}
-
-void DebuggerWidget::trace()
-{
-    int oldrun = debugger::run;
-    debugger::run = 1;
-    if(oldrun == 0) {
-        debugger::debugger_step();
-    }
-}
- 
-void DebuggerWidget::break_debugger()
-{
-    debugger::run = 0;
-}
-
-void DebuggerWidget::goto_pc()
-{
-    HexSpinBoxDialog *d = new HexSpinBoxDialog(&focused_pc);
-    if (d->exec()) {
-        DebuggerWidget::update_desasm( focused_pc );
-    }
-}
-
-void DebuggerWidget::reduce1000()
-{
-    DebuggerWidget::update_desasm( focused_pc - 0x1000 );
-}
-
-void DebuggerWidget::reduce100()
-{
-    DebuggerWidget::update_desasm( focused_pc - 0x100 );
-}
-
-void DebuggerWidget::reduce10()
-{
-    DebuggerWidget::update_desasm( focused_pc - 0x10 );
-}
-
-void DebuggerWidget::increase1000()
-{
-    DebuggerWidget::update_desasm( focused_pc + 0x1000 );
-}
-
-void DebuggerWidget::increase100()
-{
-    DebuggerWidget::update_desasm( focused_pc + 0x100 );
-}
-
-void DebuggerWidget::increase10()
-{
-    DebuggerWidget::update_desasm( focused_pc + 0x10 );
 }
 
