@@ -172,8 +172,14 @@ static void callback_apply_changes(GtkWidget *widget, gpointer data)
     windowSetting.uWindowDisplayHeight = windowSetting.uFullScreenDisplayHeight;
     windowSetting.uDisplayWidth = windowSetting.uWindowDisplayWidth;
     windowSetting.uDisplayHeight = windowSetting.uWindowDisplayHeight;
-    options.widescreenMode = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.widescreenModeCombo));
-    options.bWidescreenStretchBG = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.widescreenStretchBGCheck));
+    if ((resolutions[i][0] * 3) > (resolutions[i][1] * 4))
+        options.widescreenMode = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.widescreenModeCombo));
+    else
+        options.widescreenMode = WIDESCREEN_STRETCH;
+    if (options.widescreenMode == 2)
+        options.bWidescreenStretchBG = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.widescreenStretchBGCheck));
+    else
+        options.bWidescreenStretchBG = false;
     options.colorQuality = gtk_combo_box_get_active(GTK_COMBO_BOX(g_ConfigDialog.colorBufferDepthCombo));
     options.bEnableSSE = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_ConfigDialog.enableSSECheck));
     status.isSSEEnabled = status.isSSESupported && options.bEnableSSE;

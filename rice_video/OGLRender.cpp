@@ -938,7 +938,30 @@ void OGLRender::glViewportWrapper(GLint x, GLint y, GLsizei width, GLsizei heigh
         {
             glOrtho(0, windowSetting.uDisplayWidth, windowSetting.uDisplayHeight, 0, -1, 1);
         }
-        glViewport(x,y,width,height);
+        
+        if (options.widescreenMode == WIDESCREEN_EXTEND)
+        {
+            if (width < windowSetting.uDisplayWidth * 0.9)
+            {
+                float scaleFactor = (4.0 * windowSetting.uDisplayHeight) / (3.0 * windowSetting.uDisplayWidth);
+                int offset = (windowSetting.uDisplayWidth - windowSetting.uDisplayHeight * 4 / 3 - width * scaleFactor / 2) / 2 ;
+                glViewport(x * scaleFactor + offset, y, width, height);
+            }
+            else
+            {
+                glViewport(x,y,width,height);
+            }
+        }
+        else if (options.widescreenMode == WIDESCREEN_PILLARBOX)
+        {
+            float scaleFactor = (4.0 * windowSetting.uDisplayHeight) / (3.0 * windowSetting.uDisplayWidth);
+            int offset = (windowSetting.uDisplayWidth - windowSetting.uDisplayHeight * 4 / 3) / 2;
+            glViewport(x * scaleFactor + offset, y, width * scaleFactor, height);
+        }
+        else
+        {
+            glViewport(x,y,width,height);
+        }
     }
 }
 
