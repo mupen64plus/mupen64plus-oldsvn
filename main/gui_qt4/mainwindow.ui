@@ -82,6 +82,7 @@
     <addaction name="actionDisassembler" />
     <addaction name="actionRegisters" />
     <addaction name="actionBreakpoints" />
+    <addaction name="actionMemory" />
    </widget>
    <addaction name="menu_File" />
    <addaction name="menu_Emulation" />
@@ -292,6 +293,14 @@
    </property>
    <property name="text" >
     <string>&amp;Breakpoints</string>
+   </property>
+  </action>
+  <action name="actionMemory" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Memory</string>
    </property>
   </action>
  </widget>

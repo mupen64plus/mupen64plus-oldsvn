@@ -142,6 +142,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void disassemblerShow();
         void registersShow();
         void breakpointsShow();
+        void memeditShow();
 //TODO: #endif        
     protected:
         void customEvent(QEvent* event);

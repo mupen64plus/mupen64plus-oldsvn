@@ -345,7 +345,7 @@ void MainWindow::emulationStop()
         m_renderWindow->deleteLater();
    }
 #ifdef DBG
-    core::debuger_close();
+    core::debugger_close();
 #endif
 }
 
@@ -541,6 +541,7 @@ void MainWindow::setupActions()
     connect(actionDisassembler, SIGNAL(triggered()), this, SLOT(disassemblerShow()));
     connect(actionRegisters, SIGNAL(triggered()), this, SLOT(registersShow()));
     connect(actionBreakpoints, SIGNAL(triggered()), this, SLOT(breakpointsShow()));
+    connect(actionMemory, SIGNAL(triggered()), this, SLOT(memeditShow()));
     menu_Debug->menuAction()->setVisible(true);
 #else
     menu_Debug->menuAction()->setVisible(false);
@@ -632,6 +633,7 @@ void MainWindow::debuggerToggle()
         actionDisassembler->setEnabled(true);
         actionRegisters->setEnabled(true);
         actionBreakpoints->setEnabled(true);
+        actionMemory->setEnabled(true);
         core::g_DebuggerEnabled = 1;
     }
     else {
@@ -639,6 +641,7 @@ void MainWindow::debuggerToggle()
         actionDisassembler->setEnabled(false);
         actionRegisters->setEnabled(false);
         actionBreakpoints->setEnabled(false);
+        actionMemory->setEnabled(false);
     }
 #endif
 }
@@ -646,21 +649,28 @@ void MainWindow::debuggerToggle()
 void MainWindow::disassemblerShow()
 {
 #ifdef DBG
-    core::debuger_show_disassembler();
+    core::debugger_show_disassembler();
 #endif
 }
 
 void MainWindow::registersShow()
 {
 #ifdef DBG
-    core::debuger_show_registers();
+    core::debugger_show_registers();
 #endif
 }
 
 void MainWindow::breakpointsShow()
 {
 #ifdef DBG
-    core::debuger_show_breakpoints();
+    core::debugger_show_breakpoints();
+#endif
+}
+
+void MainWindow::memeditShow()
+{
+#ifdef DBG
+    core::debugger_show_memedit();
 #endif
 }
 

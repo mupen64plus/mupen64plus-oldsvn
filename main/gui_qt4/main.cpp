@@ -42,6 +42,7 @@
 #include "debugger/debuggerwidget.h"
 #include "debugger/registerwidget.h"
 #include "debugger/breakpointswidget.h"
+#include "debugger/memeditwidget.h"
 #endif
 
 // ugly globals
@@ -54,6 +55,7 @@ void update_debugger_frontend( unsigned int );
 static DebuggerWidget* debuggerWidget = 0;
 static RegisterWidget* registerWidget = 0;
 static BreakpointsWidget* breakpointsWidget = 0;
+static MemEditWidget* memeditWidget = 0;
 
 unsigned int _pc = 0;
 #endif
@@ -115,6 +117,7 @@ void gui_init(int *argc, char ***argv)
     debuggerWidget = new DebuggerWidget;
     registerWidget = new RegisterWidget;
     breakpointsWidget = new BreakpointsWidget;
+    memeditWidget = new MemEditWidget;
 #endif
 }
 
@@ -141,6 +144,7 @@ void gui_main_loop(void)
     debuggerWidget = 0;
     registerWidget = 0;
     breakpointsWidget = 0;
+    memeditWidget = 0;
 #endif
 }
 
@@ -223,22 +227,30 @@ void switch_button_to_run()
     //TODO: Implement switch_button_to_run
 }
 
-void debuger_show_disassembler( )
+void debugger_show_disassembler( )
 {
     QMetaObject::invokeMethod(debuggerWidget, "show", Qt::QueuedConnection);
     debuggerWidget->setFocus();
 }
 
-void debuger_show_registers( )
+void debugger_show_registers( )
 {
     QMetaObject::invokeMethod(registerWidget, "show", Qt::QueuedConnection);
     registerWidget->setFocus();
 }
 
-void debuger_show_breakpoints( )
+void debugger_show_breakpoints( )
 {
     QMetaObject::invokeMethod(breakpointsWidget, "show", Qt::QueuedConnection);
     breakpointsWidget->setFocus();
+}
+
+void debugger_show_memedit( )
+{
+    QMetaObject::invokeMethod(memeditWidget, "show", Qt::QueuedConnection);
+    memeditWidget->setFocus();
+    QMetaObject::invokeMethod(memeditWidget, "update_memedit",
+                               Qt::QueuedConnection);
 }
 
 void debugger_update_desasm()
@@ -250,11 +262,12 @@ void debugger_update_desasm()
     }
 }
 
-void debuger_close()
+void debugger_close()
 {
     debuggerWidget->setVisible(false);
     registerWidget->setVisible(false);
     breakpointsWidget->setVisible(false);
+    memeditWidget->setVisible(false);
 }
 #endif
 
