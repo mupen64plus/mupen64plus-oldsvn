@@ -212,7 +212,7 @@ void SettingsDialog::readSettings()
     );
 
     askBeforeLoadingBadRomCheck->setChecked(
-        core::config_get_bool("No Ask", !core::g_NoaskParam)
+        !core::config_get_bool("No Ask", FALSE)
     );
 
     autoIncrementSaveSlotCheck->setChecked(
@@ -345,8 +345,8 @@ void SettingsDialog::writeSettings()
         alwaysStartInFullScreenModeCheck->isChecked()
     );
 
-    core::g_Noask = askBeforeLoadingBadRomCheck->isChecked();
-    core::config_put_bool("No Ask", askBeforeLoadingBadRomCheck->isChecked());
+    core::g_Noask = !askBeforeLoadingBadRomCheck->isChecked();
+    core::config_put_bool("No Ask", !askBeforeLoadingBadRomCheck->isChecked());
 
     core::g_OsdEnabled = osdEnabledCheck->isChecked();
     core::config_put_bool("OsdEnabled", osdEnabledCheck->isChecked());

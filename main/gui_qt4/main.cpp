@@ -133,23 +133,22 @@ int gui_message(gui_message_t messagetype, const char *format, ...)
     buffer[2048] = '\0';
     va_end(ap);
 
-    if (messagetype == 0) {
+    if (messagetype == GUI_MESSAGE_INFO) {
         InfoEvent* e = new InfoEvent;
         e->message = buffer;
         application->postEvent(mainWindow, e);
-    } else if (messagetype == 1) {
-        AlertEvent* e = new AlertEvent;
-        e->message = buffer;
-        application->postEvent(mainWindow, e);
-    } else if (messagetype == 2) {
+    } else if (messagetype == GUI_MESSAGE_CONFIRM) {
         //0 - indicates user selected no
         //1 - indicates user selected yes
         ConfirmEvent e;
         e.message = buffer;
         application->sendEvent(mainWindow, &e);
         response = e.isAccepted();
+    } else if (messagetype == GUI_MESSAGE_ERROR) {
+        AlertEvent* e = new AlertEvent;
+        e->message = buffer;
+        application->postEvent(mainWindow, e);
     }
-
     return response;
 }
 

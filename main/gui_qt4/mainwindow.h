@@ -69,7 +69,7 @@ class AlertEvent : public MessageEvent
 class ConfirmEvent : public MessageEvent
 {
     public:
-        ConfirmEvent() : MessageEvent(Type(AlertEventType)) {}
+        ConfirmEvent() : MessageEvent(Type(ConfirmEventType)) {}
 };
 
 class PluginGuiQueryEvent : public QEvent
