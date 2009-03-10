@@ -25,7 +25,7 @@
 // POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <malloc.h>
+#include <stdlib.h>
 #include "BMGUtils.h"
 
 #ifndef _WIN32
@@ -410,3 +410,4 @@ unsigned int SwapULong( unsigned int in )
 
     return *((unsigned int *)sout);
 }
+

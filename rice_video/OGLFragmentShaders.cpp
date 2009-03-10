@@ -16,9 +16,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "stdafx.h"
-
-
 
 COGLFragmentShaderCombiner::COGLFragmentShaderCombiner(CRender *pRender)
 : COGLColorCombiner(pRender)
@@ -183,9 +184,9 @@ char* MuxToOC(uint8 val)
 {
 // For color channel
 if( val&MUX_ALPHAREPLICATE )
-    { return (char*)muxToFP_Maps[val&0x1F][1]; }
+    return (char*)muxToFP_Maps[val&0x1F][1];
 else
-    { return (char*)muxToFP_Maps[val&0x1F][0]; }
+    return (char*)muxToFP_Maps[val&0x1F][0];
 }
 
 char* MuxToOA(uint8 val)
@@ -280,7 +281,7 @@ int COGL_FragmentProgramCombiner::ParseDecodedMux()
 
     if (glGetError() != 0)
     {
-        int position;
+        GLint position;
 #ifdef _DEBUG
         char *str = (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 #endif

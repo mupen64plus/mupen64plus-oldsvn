@@ -1,9 +1,31 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - glide64/wrapper/main.h                                  *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2005-2006 Hacktarux                                     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifndef MAIN_H
 #define MAIN_H
 
-#ifndef _WIN32
-//#define VPDEBUG
-#endif
+#include <SDL_opengl.h>
+
+#include "../winlnxdefs.h"
+
 #ifdef VPDEBUG
 void dump_tex(int id);
 void dump_start();
@@ -31,22 +53,6 @@ void set_bw_shader();
 extern float invtex[2];
 extern int buffer_cleared; // mark that the buffer has been cleared, used to check if we need to reload the texture buffer content
 
-#ifdef _WIN32
-#include <windows.h>
-extern "C" {
-#include "gl.h"
-#include "glext.h"
-}
-#ifdef GCC
-#include <stdio.h>
-//#define printf(...)
-#endif
-#else
-#include "gl.h" 
-#include "glext.h" 
-// #include <GL/gl.h>
-// #include <GL/glext.h>
-#endif // _WIN32
 #include "glide.h"
 
 void display_warning(const unsigned char *text, ...);
@@ -60,35 +66,8 @@ void updateCombinera(int i);
 void remove_tex(unsigned int idmin, unsigned int idmax);
 void add_tex(unsigned int id);
 
-extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-extern PFNGLBLENDFUNCSEPARATEEXTPROC glBlendFuncSeparateEXT;
-extern PFNGLFOGCOORDFPROC glFogCoordfEXT;
-
-extern PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB;
-extern PFNGLSHADERSOURCEARBPROC glShaderSourceARB;
-extern PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
-extern PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
-extern PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
-extern PFNGLLINKPROGRAMARBPROC glLinkProgramARB;
-extern PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
-extern PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
-extern PFNGLUNIFORM1IARBPROC glUniform1iARB;
-extern PFNGLUNIFORM4IARBPROC glUniform4iARB;
-extern PFNGLUNIFORM4FARBPROC glUniform4fARB;
-extern PFNGLUNIFORM1FARBPROC glUniform1fARB;
-extern PFNGLDELETEOBJECTARBPROC glDeleteObjectARB;
-extern PFNGLGETINFOLOGARBPROC glGetInfoLogARB;
-extern PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
-extern PFNGLSECONDARYCOLOR3FPROC glSecondaryColor3f;
-
-#ifdef _WIN32
-GLvoid KillGLWindow(GLvoid);
-BOOL CreateGLWindow(const char* title, int width, int height);
-#endif
-
 extern int w_buffer_mode;
-extern int nbTextureUnits;
+extern GLint nbTextureUnits;
 extern int width, height, widtho, heighto;
 extern int tex0_width, tex0_height, tex1_width, tex1_height;
 extern float texture_env_color[4];
@@ -211,6 +190,10 @@ FX_ENTRY void FX_CALL
 grConstantColorValueExt(GrChipID_t    tmu,
                         GrColor_t     value);
 
+#ifndef GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT
+#define GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT 0x8CD8
+#endif
+
 #define CHECK_FRAMEBUFFER_STATUS() \
 {\
  GLenum status; \
@@ -271,3 +254,4 @@ void LOG(char *text, ...);
 #endif // LOGGING
 
 #endif
+

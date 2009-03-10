@@ -1,13 +1,14 @@
-#ifndef __LINUX__
-# include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
-# include <stdlib.h> // malloc()
+# include <stdlib.h>
+
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
 
 # ifndef max
 #  define max(a,b) ((a) > (b) ? (a) : (b))
 # endif
-#endif
+
+# include "../main/winlnxdefs.h"
+
 #include "OpenGL.h"
 #include "Combiner.h"
 #include "texture_env_combine.h"
@@ -155,7 +156,7 @@ void Init_texture_env_combine()
     for (int i = 0; i < OGL.maxTextureUnits; i++)
     {
         TextureCache_ActivateDummy( i );
-        //glActiveTextureARB( GL_TEXTURE0_ARB + i );
+        //glActiveTexture( GL_TEXTURE0_ARB + i );
         //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
         //glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex );
         //glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
@@ -182,7 +183,7 @@ void Uninit_texture_env_combine()
 {
     for (int i = 0; i < OGL.maxTextureUnits; i++)
     {
-        glActiveTextureARB( GL_TEXTURE0_ARB + i );
+        glActiveTexture( GL_TEXTURE0_ARB + i );
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
     }
 }
@@ -195,7 +196,7 @@ void Update_texture_env_combine_Colors( TexEnvCombiner *envCombiner )
     {
         SetConstant( color, envCombiner->color[i].constant, envCombiner->alpha[i].constant );
 
-        glActiveTextureARB( GL_TEXTURE0_ARB + i );
+        glActiveTexture( GL_TEXTURE0_ARB + i );
         glTexEnvfv( GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, &color.r );
     }
 }
@@ -561,7 +562,7 @@ void BeginTextureUpdate_texture_env_combine()
 {
     for (int i = 0; i < OGL.maxTextureUnits; i++)
     {
-        glActiveTextureARB( GL_TEXTURE0_ARB + i );
+        glActiveTexture( GL_TEXTURE0_ARB + i );
         glDisable( GL_TEXTURE_2D );
     }
 }
@@ -570,7 +571,7 @@ void EndTextureUpdate_texture_env_combine()
 {
     for (int i = 0; i < ((TexEnvCombiner*)combiner.current->compiled)->usedUnits; i++)
     {
-        glActiveTextureARB( GL_TEXTURE0_ARB + i );
+        glActiveTexture( GL_TEXTURE0_ARB + i );
         glEnable( GL_TEXTURE_2D );
     }
 }
@@ -587,7 +588,7 @@ void Set_texture_env_combine( TexEnvCombiner *envCombiner )
 
     for (int i = 0; i < OGL.maxTextureUnits; i++)
     {
-        glActiveTextureARB( GL_TEXTURE0_ARB + i );
+        glActiveTexture( GL_TEXTURE0_ARB + i );
 
         if ((i < envCombiner->usedUnits ) || ((i < 2) && envCombiner->usesT1))
         {
@@ -623,3 +624,4 @@ void Set_texture_env_combine( TexEnvCombiner *envCombiner )
         }           
     }
 }
+

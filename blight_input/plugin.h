@@ -1,19 +1,24 @@
-/***************************************************************************
-                          plugin.h  -  description
-                             -------------------
-    begin                : Fri Oct 18 2002
-    copyright            : (C) 2002 by blight
-    email                : blight@fuckmicrosoft.com
- ***************************************************************************/
-
-/***************************************************************************
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - plugin.h                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Richard42 Tillin9                                  *
+ *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- ***************************************************************************/
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
@@ -29,7 +34,7 @@
 #endif
 
 #include "../main/winlnxdefs.h"
-#include "Controller_1.1.h"
+#include "Input_1.1.h"
 
 #include "SDL.h"
 
@@ -83,7 +88,8 @@ typedef struct
 {
     int button_a, button_b;         // up/down or left/right; -1 if not assigned
     SDLKey key_a, key_b;            // up/down or left/right; SDLK_UNKNOWN if not assigned
-    int axis;                       // axis index; -1 if not assigned
+    int axis_a, axis_b;             // axis index; -1 if not assigned
+    int axis_dir_a, axis_dir_b;     // direction (1 = X+, 0, -1 = X-)
     int hat, hat_pos_a, hat_pos_b;  // hat + hat position up/down and left/right; -1 if not assigned
 } SAxisMap;
 
@@ -99,7 +105,8 @@ typedef struct
     int           mouse;        // mouse enabled: 0 = no; 1 = yes
     SDL_Joystick *joystick;     // SDL joystick device
     int           event_joystick;   // the /dev/input/eventX device for force feeback
-    
+
 } SController;
 
 #endif // __PLUGIN_H__
+

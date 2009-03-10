@@ -359,7 +359,6 @@ struct ROMHeader
     s8    nCountryID;
     uint8  nUnknown5;
 };
-#pragma pack()
 
 typedef struct 
 {
@@ -418,7 +417,6 @@ extern const CountryIDInfo g_CountryCodeInfo[];
 extern GameSetting g_curRomInfo;
 
 void ROM_GetRomNameFromHeader(TCHAR * szName, ROMHeader * pHdr);
-void ROM_ByteSwap_3210(void *v, uint32 dwLen);
 
 #define TV_SYSTEM_NTSC      1
 #define TV_SYSTEM_PAL       0
@@ -442,3 +440,4 @@ void CreateOptionsDialogs(HWND hParent);
 void ShowConfigBox();
 
 #endif
+

@@ -13,9 +13,10 @@
 *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *   GNU General Public License for more details.
 *
-*   You should have received a copy of the GNU General Public License
-*   along with this program; if not, write to the Free Software
-*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public
+*   Licence along with this program; if not, write to the Free
+*   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+*   Boston, MA  02110-1301, USA
 */
 
 //****************************************************************
@@ -155,10 +156,10 @@ loop_x:
    //printf("wrap16bS\n");
     intptr_t fake_esi, fake_eax;
    asm volatile (
-         "loop_y2:                 \n"
+         "0:                 \n"
 
          "xor %%edx, %%edx         \n"
-         "loop_x2:                 \n"
+         "1:                 \n"
          
          "mov %[tex], %[S]       \n"
          "mov %%edx, %%eax         \n"
@@ -171,13 +172,13 @@ loop_x:
          
          "inc %%edx                \n"
          "cmp %[count], %%edx     \n"
-         "jne loop_x2              \n"
+         "jne 1b              \n"
          
          "add %[line], %[start]      \n"
          "add %[line_full], %[tex] \n"
          
          "dec %%ecx                \n"
-         "jnz loop_y2              \n"
+         "jnz 0b              \n"
          : [S] "=&S" (fake_esi), [a]"=&a"(fake_eax), [start]"+D"(start), "+c"(height), [tex] "+r"(tex)
          : [mask_mask] "g" (mask_mask), [count] "g" (count), [line] "g" ((intptr_t)line), [line_full] "g" ((intptr_t)line_full)
          : "memory", "cc", "edx"
@@ -294,3 +295,4 @@ void Clamp16bT (unsigned char * tex, DWORD height, DWORD real_width, DWORD clamp
         dst += line_full;
     }
 }
+

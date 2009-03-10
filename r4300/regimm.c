@@ -1,43 +1,40 @@
-/**
- * Mupen64 - regimm.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - regimm.h                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "r4300.h"
 #include "interupt.h"
-#include "../memory/memory.h"
 #include "ops.h"
 #include "macros.h"
 
-void BLTZ()
+#include "../memory/memory.h"
+#include "../debugger/debugger.h"
+
+void BLTZ(void)
 {
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -47,12 +44,15 @@ void BLTZ()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZ_OUT()
+void BLTZ_OUT(void)
 {
    local_rs = irs;
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -62,7 +62,7 @@ void BLTZ_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZ_IDLE()
+void BLTZ_IDLE(void)
 {
     int skip;
    if (irs < 0)
@@ -75,11 +75,14 @@ void BLTZ_IDLE()
    else BLTZ();
 }
 
-void BGEZ()
+void BGEZ(void)
 {
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -89,12 +92,15 @@ void BGEZ()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZ_OUT()
+void BGEZ_OUT(void)
 {
    local_rs = irs;
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -104,7 +110,7 @@ void BGEZ_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZ_IDLE()
+void BGEZ_IDLE(void)
 {
     int skip;
    if (irs >= 0)
@@ -117,12 +123,15 @@ void BGEZ_IDLE()
    else BGEZ();
 }
 
-void BLTZL()
+void BLTZL(void)
 {
    if (irs < 0)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -135,13 +144,16 @@ void BLTZL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZL_OUT()
+void BLTZL_OUT(void)
 {
    if (irs < 0)
      {
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -154,7 +166,7 @@ void BLTZL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZL_IDLE()
+void BLTZL_IDLE(void)
 {
    int skip;
    if (irs < 0)
@@ -167,12 +179,15 @@ void BLTZL_IDLE()
    else BLTZL();
 }
 
-void BGEZL()
+void BGEZL(void)
 {
    if (irs >= 0)
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -185,13 +200,16 @@ void BGEZL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZL_OUT()
+void BGEZL_OUT(void)
 {
    if (irs >= 0)
      {
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -204,7 +222,7 @@ void BGEZL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZL_IDLE()
+void BGEZL_IDLE(void)
 {
    int skip;
    if (irs >= 0)
@@ -217,7 +235,7 @@ void BGEZL_IDLE()
    else BGEZL();
 }
 
-void BLTZAL()
+void BLTZAL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -225,6 +243,9 @@ void BLTZAL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -236,7 +257,7 @@ void BLTZAL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZAL_OUT()
+void BLTZAL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -245,6 +266,9 @@ void BLTZAL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -256,7 +280,7 @@ void BLTZAL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZAL_IDLE()
+void BLTZAL_IDLE(void)
 {
    int skip;
    if (irs < 0)
@@ -269,7 +293,7 @@ void BLTZAL_IDLE()
    else BLTZAL();
 }
 
-void BGEZAL()
+void BGEZAL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -277,6 +301,9 @@ void BGEZAL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -288,7 +315,7 @@ void BGEZAL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZAL_OUT()
+void BGEZAL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -297,6 +324,9 @@ void BGEZAL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -308,7 +338,7 @@ void BGEZAL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZAL_IDLE()
+void BGEZAL_IDLE(void)
 {
    int skip;
    if (irs >=0)
@@ -321,7 +351,7 @@ void BGEZAL_IDLE()
    else BGEZAL();
 }
 
-void BLTZALL()
+void BLTZALL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -331,6 +361,9 @@ void BLTZALL()
       {
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -345,7 +378,7 @@ void BLTZALL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZALL_OUT()
+void BLTZALL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -356,6 +389,9 @@ void BLTZALL_OUT()
          jump_target = (int)PC->f.i.immediate;
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -370,7 +406,7 @@ void BLTZALL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BLTZALL_IDLE()
+void BLTZALL_IDLE(void)
 {
    int skip;
    if (irs < 0)
@@ -383,7 +419,7 @@ void BLTZALL_IDLE()
    else BLTZALL();
 }
 
-void BGEZALL()
+void BGEZALL(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -393,6 +429,9 @@ void BGEZALL()
       {
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -407,7 +446,7 @@ void BGEZALL()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZALL_OUT()
+void BGEZALL_OUT(void)
 {
    local_rs = irs;
    reg[31]=PC->addr+8;
@@ -418,6 +457,9 @@ void BGEZALL_OUT()
          jump_target = (int)PC->f.i.immediate;
          PC++;
          delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
          PC->ops();
          update_count();
          delay_slot=0;
@@ -432,7 +474,7 @@ void BGEZALL_OUT()
    if (next_interupt <= Count) gen_interupt();
 }
 
-void BGEZALL_IDLE()
+void BGEZALL_IDLE(void)
 {
    int skip;
    if (irs >= 0)
@@ -444,3 +486,4 @@ void BGEZALL_IDLE()
      }
    else BGEZALL();
 }
+

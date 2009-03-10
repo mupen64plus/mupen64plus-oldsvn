@@ -156,6 +156,7 @@ typedef struct {
 
 extern PluginStatus status;
 extern char generalText[];
+extern void (*renderCallback)();
 
 void SetVIScales();
 extern void _VIDEO_DisplayTemporaryMessage2(const char *msg, ...);
@@ -163,3 +164,4 @@ extern void _VIDEO_DisplayTemporaryMessage(const char *msg);
 extern void XBOX_Debugger_Log(const char *Message, ...);
 
 #endif
+

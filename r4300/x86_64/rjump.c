@@ -1,28 +1,24 @@
-/**
- * Mupen64 - r4300/x86_64/rjump.c
- * Copyright (C) 2007 Richard Goedeken, Hacktarux
- * Based on code written by Hacktarux, Copyright (C) 2002
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * Forum homepage: http://www.emutalk.net/forumdisplay.php?f=50
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
-
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - rjump.c                                                 *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2007 Richard Goedeken (Richard42)                       *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
 
@@ -32,15 +28,22 @@
 #include "../ops.h"
 #include "../recomph.h"
 
+extern int dynarec_stack_initialized;  /* in gr4300.c */
+
 void dyna_jump()
 {
-   if (PC->reg_cache_infos.need_map)
-     *return_address = (unsigned long) (PC->reg_cache_infos.jump_wrapper);
-   else
-     *return_address = (unsigned long) (actual->code + PC->local_addr);
+    if (stop == 1)
+    {
+        dyna_stop();
+        return;
+    }
+
+    if (PC->reg_cache_infos.need_map)
+        *return_address = (unsigned long) (PC->reg_cache_infos.jump_wrapper);
+    else
+        *return_address = (unsigned long) (actual->code + PC->local_addr);
 }
 
-static long save_rbp = 0;
 static long save_rsp = 0;
 static long save_rip = 0;
 
@@ -53,8 +56,13 @@ void dyna_start(void (*code)())
   /* It will jump to label 2, restore the base and stack pointers, and exit this function */
   printf("R4300 core: starting 64-bit dynamic recompiler at: 0x%lx.\n", (unsigned long) code);
 #if defined(__GNUC__) && defined(__x86_64__)
-   asm volatile 
-      (" mov  %%rbp, save_rbp \n"
+   asm volatile
+      (" push %%rbx           \n"  /* we must push an even # of registers to keep stack 16-byte aligned */
+       " push %%r12           \n"
+       " push %%r13           \n"
+       " push %%r14           \n"
+       " push %%r15           \n"
+       " push %%rbp           \n"
        " mov  %%rsp, save_rsp \n"
        " call 1f              \n"
        " jmp 2f               \n"
@@ -63,18 +71,25 @@ void dyna_start(void (*code)())
        " mov  %%rax, save_rip \n"
        " call *%%rbx          \n"
        "2:                    \n"
-       " mov  save_rbp, %%rbp \n"
        " mov  save_rsp, %%rsp \n"
+       " pop  %%rbp           \n"
+       " pop  %%r15           \n"
+       " pop  %%r14           \n"
+       " pop  %%r13           \n"
+       " pop  %%r12           \n"
+       " pop  %%rbx           \n"
        :
        : "b" (code)
        : "%rax", "memory"
        );
 #endif
 
-   /* clear the registers so we don't return here a second time; that would be a bug */
-   save_rbp=0;
-   save_rsp=0;
-   save_rip=0;
+    /* clear flag; stack is back to normal */
+    dynarec_stack_initialized = 0;
+
+    /* clear the registers so we don't return here a second time; that would be a bug */
+    save_rsp=0;
+    save_rip=0;
 }
 
 void dyna_stop()

@@ -1,9 +1,10 @@
-#ifndef __LINUX__
-# include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
 # include <stdlib.h>
-#endif
+
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
+# include "../main/winlnxdefs.h"
+
 #include "OpenGL.h"
 #include "Combiner.h"
 #include "texture_env.h"
@@ -182,3 +183,4 @@ void Set_texture_env( TexEnv *texEnv )
 
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnv->mode );
 }
+

@@ -1,36 +1,35 @@
-/**
- * Mupen64 - compare_core.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - compare_core.h                                          *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <sys/stat.h>
+
 #include "r4300.h"
+
 #include "../memory/memory.h"
+#ifndef __WIN32__
 #include "../main/winlnxdefs.h"
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 #include "../main/plugin.h"
 #include "../r4300/recomph.h"
 
@@ -100,7 +99,8 @@ void check_input_sync(unsigned char *value)
 }
 
 void compare_core()
-{   
+{
+#ifndef __WIN32__   
    static int comparecnt = 0;
    int iFirst = 1;
    char errHead[128];
@@ -172,7 +172,9 @@ void compare_core()
     fwrite(reg, 32, sizeof(long long int), f);
     fwrite(reg_cop0, 32, sizeof(int), f);
     fwrite(reg_cop1_fgr_64, 32, sizeof(long long int), f);
-    //fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
-    /*fwrite(&FCR31, 4, 1, f);*/
+    /*fwrite(&rdram[0x31280/4], 1, sizeof(int), f);
+    fwrite(&FCR31, 4, 1, f);*/
      }
+#endif
 }
+

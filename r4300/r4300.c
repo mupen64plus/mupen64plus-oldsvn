@@ -1,51 +1,42 @@
-/**
- * Mupen64 - r4300.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - r4300.c                                                 *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "../main/inputrecording.h"
-//#include "../main/vcr.h"
+//TODO#include "../main/vcr.h"
+#include <stdlib.h>
 #include "r4300.h"
 #include "ops.h"
-#include "../memory/memory.h"
 #include "exception.h"
 #include "interupt.h"
 #include "macros.h"
 #include "recomp.h"
 #include "recomph.h"
-#include <malloc.h>
+
+#include "../memory/memory.h"
 
 #ifdef DBG
-extern int debugger_mode;
-extern void update_debugger();
+#include "../debugger/debugger.h"
 #endif
 
-unsigned int i, dynacore = 0, interpcore = 0;
-int no_audio_delay = 0;
+unsigned int dynacore = 0, interpcore = 0;
 int no_compiled_jump = 0;
 int stop, llbit, rompause;
 long long int reg[32], hi, lo;
@@ -105,6 +96,11 @@ void FIN_BLOCK()
    if (!delay_slot)
      {
     jump_to((PC-1)->addr+4);
+/*#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
+Used by dynarec only, check should be unnecessary
+*/
     PC->ops();
     if (dynacore) dyna_jump();
      }
@@ -114,6 +110,11 @@ void FIN_BLOCK()
     precomp_instr *inst = PC;
     jump_to((PC-1)->addr+4);
     
+/*#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
+Used by dynarec only, check should be unnecessary
+*/
     if (!skip_jump)
       {
          PC->ops();
@@ -131,6 +132,9 @@ void J()
 {
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -146,6 +150,9 @@ void J_OUT()
    jump_target = (PC->addr & 0xF0000000) | (PC->f.j.inst_index<<2);
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -168,6 +175,9 @@ void JAL()
 {
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -188,6 +198,9 @@ void JAL_OUT()
    jump_target = (PC->addr & 0xF0000000) | (PC->f.j.inst_index<<2);
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -217,6 +230,9 @@ void BEQ()
    local_rt = irt;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -233,6 +249,9 @@ void BEQ_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -261,6 +280,9 @@ void BNE()
    local_rt = irt;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -277,6 +299,9 @@ void BNE_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -304,6 +329,9 @@ void BLEZ()
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -319,6 +347,9 @@ void BLEZ_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -346,6 +377,9 @@ void BGTZ()
    local_rs = irs;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -361,6 +395,9 @@ void BGTZ_OUT()
    jump_target = (int)PC->f.i.immediate;
    PC++;
    delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
    PC->ops();
    update_count();
    delay_slot=0;
@@ -443,6 +480,9 @@ void BEQL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -465,6 +505,9 @@ void BEQL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -499,6 +542,9 @@ void BNEL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -521,6 +567,9 @@ void BNEL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -555,6 +604,9 @@ void BLEZL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -577,6 +629,9 @@ void BLEZL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -611,6 +666,9 @@ void BGTZL()
      {
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -633,6 +691,9 @@ void BGTZL_OUT()
     jump_target = (int)PC->f.i.immediate;
     PC++;
     delay_slot=1;
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
     PC->ops();
     update_count();
     delay_slot=0;
@@ -1359,6 +1420,12 @@ void NOTCOMPILED()
       }
     else printf("not compiled exception\n");
      }
+/*#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
+The preceeding update_debugger SHOULD be unnecessary since it should have been
+called before NOTCOMPILED would have been executed
+*/
    PC->ops();
    if (dynacore)
      dyna_jump();
@@ -1461,9 +1528,10 @@ void update_count()
    if (delay_slot)
      compare_core();
 #endif
-#ifdef DBG
-   if (debugger_mode) update_debugger();
+/*#ifdef DBG
+   if (debugger_mode && !delay_slot) update_debugger(PC->addr);
 #endif
+*/
 }
 
 void init_blocks()
@@ -1485,85 +1553,86 @@ void init_blocks()
    actual=blocks[0xa4000000>>12];
    init_block((int *) SP_DMEM, blocks[0xa4000000>>12]);
    PC=actual->block+(0x40/4);
-#ifdef DBG
+/*#ifdef DBG //should only be needed by dynamic recompiler
    if (debugger_mode) // debugger shows initial state (before 1st instruction).
-     update_debugger();
-#endif
+     update_debugger(PC->addr);
+#endif*/
 }
 
-
-void go()
+/* this hard reset function simulates the boot-up state of the R4300 CPU */
+void r4300_reset_hard()
 {
-   long long CRC = 0;
-   unsigned int j;
-   
-   j=0;
-   debug_count = 0;
-   printf("Starting r4300 emulator\n");
-   memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFBC);
-   delay_slot=0;
-   stop = 0;
-   rompause = 0;
-   for (i=0;i<32;i++)
-     {
-    reg[i]=0;
-    reg_cop0[i]=0;
-    reg_cop1_fgr_32[i]=0;
-    reg_cop1_fgr_64[i]=0;
-    
-    reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
-    reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
-    
-    // --------------tlb------------------------
-    tlb_e[i].mask=0;
-    tlb_e[i].vpn2=0;
-    tlb_e[i].g=0;
-    tlb_e[i].asid=0;
-    tlb_e[i].pfn_even=0;
-    tlb_e[i].c_even=0;
-    tlb_e[i].d_even=0;
-    tlb_e[i].v_even=0;
-    tlb_e[i].pfn_odd=0;
-    tlb_e[i].c_odd=0;
-    tlb_e[i].d_odd=0;
-    tlb_e[i].v_odd=0;
-    tlb_e[i].r=0;
-    //tlb_e[i].check_parity_mask=0x1000;
-    
-    tlb_e[i].start_even=0;
-    tlb_e[i].end_even=0;
-    tlb_e[i].phys_even=0;
-    tlb_e[i].start_odd=0;
-    tlb_e[i].end_odd=0;
-    tlb_e[i].phys_odd=0;
-     }
-   for (i=0; i<0x100000; i++)
-     {
-    tlb_LUT_r[i] = 0;
-    tlb_LUT_w[i] = 0;
-     }
-   llbit=0;
-   hi=0;
-   lo=0;
-   FCR0=0x511;
-   FCR31=0;
-   
-   /* clear instruction counters */
-#if defined(COUNT_INSTR)
-   for (i = 0; i < 131; i++)
-     instr_count[i] = 0;
-#endif
+    unsigned int i;
 
-   //--------
-   /*reg[20]=1;
-   reg[22]=0x3F;
-   reg[29]=0xFFFFFFFFA0400000LL;
-   Random=31;
-   Status=0x70400004;
-   Config=0x66463;
-   PRevID=0xb00;*/
-   //--------
+    // clear r4300 registers and TLB entries
+    for (i = 0; i < 32; i++)
+    {
+        reg[i]=0;
+        reg_cop0[i]=0;
+        reg_cop1_fgr_32[i]=0;
+        reg_cop1_fgr_64[i]=0;
+
+        reg_cop1_double[i]=(double *)&reg_cop1_fgr_64[i];
+        reg_cop1_simple[i]=(float *)&reg_cop1_fgr_64[i];
+
+        // --------------tlb------------------------
+        tlb_e[i].mask=0;
+        tlb_e[i].vpn2=0;
+        tlb_e[i].g=0;
+        tlb_e[i].asid=0;
+        tlb_e[i].pfn_even=0;
+        tlb_e[i].c_even=0;
+        tlb_e[i].d_even=0;
+        tlb_e[i].v_even=0;
+        tlb_e[i].pfn_odd=0;
+        tlb_e[i].c_odd=0;
+        tlb_e[i].d_odd=0;
+        tlb_e[i].v_odd=0;
+        tlb_e[i].r=0;
+        //tlb_e[i].check_parity_mask=0x1000;
+
+        tlb_e[i].start_even=0;
+        tlb_e[i].end_even=0;
+        tlb_e[i].phys_even=0;
+        tlb_e[i].start_odd=0;
+        tlb_e[i].end_odd=0;
+        tlb_e[i].phys_odd=0;
+    }
+    for (i=0; i<0x100000; i++)
+    {
+        tlb_LUT_r[i] = 0;
+        tlb_LUT_w[i] = 0;
+    }
+    llbit=0;
+    hi=0;
+    lo=0;
+    FCR0=0x511;
+    FCR31=0;
+
+    // set COP0 registers
+    Random = 31;
+    Status= 0x34000000;
+    Config= 0x6e463;
+    PRevID = 0xb00;
+    Count = 0x5000;
+    Cause = 0x5C;
+    Context = 0x7FFFF0;
+    EPC = 0xFFFFFFFF;
+    BadVAddr = 0xFFFFFFFF;
+    ErrorEPC = 0xFFFFFFFF;
    
+    rounding_mode = 0x33F;
+}
+
+/* this soft reset function simulates the actions of the PIF ROM, which may vary by region */
+void r4300_reset_soft()
+{
+    long long CRC = 0;
+    unsigned int i;
+
+    // copy boot code from ROM to SP_DMEM
+    memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFC0);
+
    // the following values are extracted from the pj64 source code
    // thanks to Zilmar and Jabo
    
@@ -1574,17 +1643,7 @@ void go()
    reg[11]= 0xFFFFFFFFA4000040LL;
    reg[29]= 0xFFFFFFFFA4001FF0LL;
    
-   Random = 31;
-   Status= 0x34000000;
-   Config= 0x6e463;
-   PRevID = 0xb00;
-   Count = 0x5000;
-   Cause = 0x5C;
-   Context = 0x7FFFF0;
-   EPC = 0xFFFFFFFF;
-   BadVAddr = 0xFFFFFFFF;
-   ErrorEPC = 0xFFFFFFFF;
-   
+    // figure out which ROM type is loaded
    for (i = 0x40/4; i < (0x1000/4); i++)
      CRC += SP_DMEM[i];
    switch(CRC) {
@@ -1607,7 +1666,7 @@ void go()
     default:
       CIC_Chip = 2;
    }
-   
+
    switch(ROM_HEADER->Country_code&0xFF)
      {
       case 0x44:
@@ -1724,141 +1783,120 @@ void go()
       reg[25]= 0x00000000465E3F72LL;
       break;
    }
-   
-   rounding_mode = 0x33F;
 
-   last_addr = 0xa4000040;
-   next_interupt = 624999;
-   init_interupt();
-   interpcore = 0;
+}
 
-   if (dynacore == 0)
-     {
-     printf ("R4300 Core mode: Interpreter\n");
-     init_blocks();
-     last_addr = PC->addr;
-     while (!stop)
-      {
-         //if ((debug_count+Count) >= 0x78a8091) break; // obj 0x16aeb8a
-         //if ((debug_count+Count) >= 0x16b1360)
-         /*if ((debug_count+Count) >= 0xf203ae0)
-           {
-          printf ("PC=%x:%x\n", (unsigned int)(PC->addr), 
-              (unsigned int)(rdram[(PC->addr&0xFFFFFF)/4]));
-          for (j=0; j<16; j++)
-            printf ("reg[%2d]:%8x%8x        reg[%d]:%8x%8x\n",   
-                j,
-                (unsigned int)(reg[j] >> 32),
-                (unsigned int)reg[j],
-                j+16,
-                (unsigned int)(reg[j+16] >> 32),
-                (unsigned int)reg[j+16]);
-          printf("hi:%8x%8x        lo:%8x%8x\n",
-             (unsigned int)(hi >> 32),
-             (unsigned int)hi,
-             (unsigned int)(lo >> 32),
-             (unsigned int)lo);
-          printf("apr�s %d instructions soit %x\n",(unsigned int)(debug_count+Count)
-             ,(unsigned int)(debug_count+Count));
-          getchar();
-           }*/
-         /*if ((debug_count+Count) >= 0x80000000) 
-           printf("%x:%x, %x\n", (int)PC->addr, 
-              (int)rdram[(PC->addr & 0xFFFFFF)/4],
-              (int)(debug_count+Count));*/
-#ifdef COMPARE_CORE
-         if (PC->ops == FIN_BLOCK && 
-         (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
-         virtual_to_physical_address(PC->addr, 2);
-         compare_core();
-#endif
-         PC->ops();
-         /*if (j!= (Count & 0xFFF00000))
-           {
-          j = (Count & 0xFFF00000);
-          printf("%x\n", j);
-           }*/
-         //check_PC;
-#ifdef DBG
-         if (debugger_mode)
-           update_debugger();
-#endif
-      }
-     }
-#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
-   else if (dynacore == 1)
-     {
-     dynacore = 1;
-     printf ("R4300 Core mode: Dynamic Recompiler\n");
-     init_blocks();
-     code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
-     dyna_start(code);
-     PC++;
+void r4300_execute()
+{
+    unsigned int i;
 
-#if defined(PROFILE_R4300)
-     pfProfile = fopen("instructionaddrs.dat", "ab");
-     for (i=0; i<0x100000; i++)
-       if (invalid_code[i] == 0 && blocks[i] != NULL && blocks[i]->code != NULL && blocks[i]->block != NULL)
-         {
-         unsigned char *x86addr;
-         int mipsop;
-         // store final code length for this block
-         mipsop = -1; /* -1 == end of x86 code block */
-         x86addr = blocks[i]->code + blocks[i]->code_length;
-         fwrite(&mipsop, 1, 4, pfProfile);
-         fwrite(&x86addr, 1, sizeof(char *), pfProfile);
-         }
-     fclose(pfProfile);
-     pfProfile = NULL;
-#endif
-     }
-#endif
-   else
-     {
-     printf ("R4300 Core mode: Pure Interpreter\n");
-     dynacore = 0;
-     interpcore = 1;
-     pure_interpreter();
-     }
-   debug_count+= Count;
-   printf("R4300 core finished.\n",(unsigned int)debug_count);
-   for (i=0; i<0x100000; i++)
-   {
-     if (blocks[i])
-     {
-       if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
-       if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
-       if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }
-       if (blocks[i]->riprel_table) { free(blocks[i]->riprel_table); blocks[i]->riprel_table = NULL; }
-       free(blocks[i]);
-       blocks[i] = NULL;
-     }
-   }
-   if (!dynacore && interpcore) free(PC);
+    debug_count = 0;
+    printf("Starting r4300 emulator\n");
 
-   /* print instruction counts */
+    delay_slot=0;
+    stop = 0;
+    rompause = 0;
+
+    /* clear instruction counters */
 #if defined(COUNT_INSTR)
-   if (dynacore)
-   {
-     unsigned int iTypeCount[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-     unsigned int iTotal = 0;
-     printf("Instruction counters:\n");
-     for (i = 0; i < 131; i++)
-     {
-       printf("%8s: %08i  ", instr_name[i], instr_count[i]);
-       if (i % 5 == 4) printf("\n");
-       iTypeCount[instr_type[i]] += instr_count[i];
-       iTotal += instr_count[i];
-     }
-     printf("\nInstruction type summary (total instructions = %i)\n", iTotal);
-     for (i = 0; i < 11; i++)
-     {
-       printf("%20s: %04.1f%% (%i)\n", instr_typename[i], (float) iTypeCount[i] * 100.0 / iTotal, iTypeCount[i]);
-     }
-   }
+    for (i = 0; i < 131; i++)
+        instr_count[i] = 0;
 #endif
 
-#ifdef VCR_SUPPORT
-   VCR_coreStopped();
+    last_addr = 0xa4000040;
+    next_interupt = 624999;
+    init_interupt();
+    interpcore = 0;
+
+    if (dynacore == 0)
+    {
+        printf ("R4300 Core mode: Interpreter\n");
+        init_blocks();
+        last_addr = PC->addr;
+        while (!stop)
+        {
+#ifdef COMPARE_CORE
+            if (PC->ops == FIN_BLOCK && 
+            (PC->addr < 0x80000000 || PC->addr >= 0xc0000000))
+            virtual_to_physical_address(PC->addr, 2);
+            compare_core();
+#endif
+#ifdef DBG
+            if (debugger_mode) update_debugger(PC->addr);
+#endif
+            PC->ops();
+        }
+    }
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
+    else if (dynacore == 1)
+    {
+        dynacore = 1;
+        printf ("R4300 Core mode: Dynamic Recompiler\n");
+        init_blocks();
+        code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
+        dyna_start(code);
+        PC++;
+#if defined(PROFILE_R4300)
+        pfProfile = fopen("instructionaddrs.dat", "ab");
+        for (i=0; i<0x100000; i++)
+            if (invalid_code[i] == 0 && blocks[i] != NULL && blocks[i]->code != NULL && blocks[i]->block != NULL)
+            {
+                unsigned char *x86addr;
+                int mipsop;
+                // store final code length for this block
+                mipsop = -1; /* -1 == end of x86 code block */
+                x86addr = blocks[i]->code + blocks[i]->code_length;
+                fwrite(&mipsop, 1, 4, pfProfile);
+                fwrite(&x86addr, 1, sizeof(char *), pfProfile);
+            }
+        fclose(pfProfile);
+        pfProfile = NULL;
+#endif
+    }
+#endif
+    else
+    {
+        printf ("R4300 Core mode: Pure Interpreter\n");
+        dynacore = 0;
+        interpcore = 1;
+        pure_interpreter();
+    }
+    debug_count+= Count;
+    printf("R4300 core finished.\n");
+    for (i=0; i<0x100000; i++)
+    {
+        if (blocks[i])
+        {
+            if (blocks[i]->block) { free(blocks[i]->block); blocks[i]->block = NULL; }
+            if (blocks[i]->code) { free(blocks[i]->code); blocks[i]->code = NULL; }
+            if (blocks[i]->jumps_table) { free(blocks[i]->jumps_table); blocks[i]->jumps_table = NULL; }
+            if (blocks[i]->riprel_table) { free(blocks[i]->riprel_table); blocks[i]->riprel_table = NULL; }
+            free(blocks[i]);
+            blocks[i] = NULL;
+        }
+    }
+    if (!dynacore && interpcore) free(PC);
+
+    /* print instruction counts */
+#if defined(COUNT_INSTR)
+    if (dynacore)
+    {
+        unsigned int iTypeCount[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        unsigned int iTotal = 0;
+        printf("Instruction counters:\n");
+        for (i = 0; i < 131; i++)
+        {
+            printf("%8s: %08i  ", instr_name[i], instr_count[i]);
+            if (i % 5 == 4) printf("\n");
+            iTypeCount[instr_type[i]] += instr_count[i];
+            iTotal += instr_count[i];
+        }
+        printf("\nInstruction type summary (total instructions = %i)\n", iTotal);
+        for (i = 0; i < 11; i++)
+        {
+            printf("%20s: %04.1f%% (%i)\n", instr_typename[i], (float) iTypeCount[i] * 100.0 / iTotal, iTypeCount[i]);
+        }
+    }
 #endif
 }
+

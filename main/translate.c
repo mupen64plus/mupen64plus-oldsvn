@@ -62,6 +62,7 @@ tr_load_language( const char *filename )
     size_t outbytes;
     char *p, *p2;
     iconv_t cd;
+    int i;
 
     f = fopen( filename, "r" );
     if( !f )
@@ -115,7 +116,8 @@ tr_load_language( const char *filename )
             {
                 *p2 = '\n'; // replace '\\' by '\n'
                 p2++;
-                strcpy( p2, p2 + 1 );   // remove 'n'
+                for ( i = 0; i < strlen(p2); ++i )
+                    p2[i] = p2[i+1];
             }
 
             p = strchr( line, '=' );    // line may have changed
@@ -297,3 +299,4 @@ tr( const char *text )
 
     return ret;
 }
+

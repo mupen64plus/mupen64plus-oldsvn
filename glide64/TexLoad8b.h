@@ -13,9 +13,10 @@
 *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *   GNU General Public License for more details.
 *
-*   You should have received a copy of the GNU General Public License
-*   along with this program; if not, write to the Free Software
-*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public
+*   License along with this program; if not, write to the Free
+*   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+*   Boston, MA  02110-1301, USA
 */
 
 //****************************************************************
@@ -988,105 +989,101 @@ end_y_loop:
     }  
 #elif !defined(NO_ASM)
    //printf("Load8bIA\n");
-   long lTemp, lHeight = (long) height;
+   int lTemp, lHeight = (int) height;
    asm volatile (
          "1:                     \n"  // y_loop5
-         "mov %[c], %[temp]      \n"
-            
-         "mov %[wid_64], %%ecx    \n"
+         "mov %[wid_64], %%eax    \n"
+         "mov %%eax, %[temp]      \n"
          "2:                      \n"  // x_loop5
          "mov (%[src]), %%eax     \n"          // read all 4 pixels  
          "add $4, %[src]          \n"
          
-         "xor %%ebx, %%ebx       \n"
+         "xor %%ecx, %%ecx       \n"
          "mov %%eax, %%edx       \n"
          "shr $4, %%eax          \n"//all alpha 
          "and $0x0F0F0F0F, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          "mov %%edx, %%eax       \n"//intensity 
          "shl $4, %%eax          \n"
          "and $0xF0F0F0F0, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          
-         "mov %%ebx, (%[dst])     \n" // save dword 
+         "mov %%ecx, (%[dst])     \n" // save dword 
          "add $4, %[dst]          \n"
          
          "mov (%[src]), %%eax     \n"          // read all 4 pixels  
          "add $4, %[src]          \n"
          
-         "xor %%ebx, %%ebx       \n"
+         "xor %%ecx, %%ecx       \n"
          "mov %%eax, %%edx       \n"
          "shr $4, %%eax          \n"//all alpha 
          "and $0x0F0F0F0F, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          "mov %%edx, %%eax       \n"//intensity 
          "shl $4, %%eax          \n"
          "and $0xF0F0F0F0, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          
-         "mov %%ebx, (%[dst])     \n" // save dword 
-         "add $4, %[dst]          \n"
-         // *  
+         "mov %%ecx, (%[dst])    \n" // save dword 
+         "add $4, %[dst]         \n"
             
-         "dec %%ecx              \n"
+         "decl %[temp]           \n"
          "jnz 2b                 \n"  // x_loop5
          
-         "mov %[temp], %[c]      \n"
-         "dec %%ecx              \n"
+         "decl %[height]         \n"
          "jz 4f                  \n"  // end_y_loop5
-         "mov %[c], %[temp]      \n"
          
          "add %[line], %[src]    \n"
          "add %[ext], %[dst]     \n"
          
-         "mov %[wid_64], %%ecx    \n"
+         "mov %[wid_64], %%eax    \n"
+         "mov %%eax, %[temp]      \n"
          "3:                      \n"  // x_loop_25
          "mov 4(%[src]), %%eax    \n"          // read both pixels  
          
-         "xor %%ebx, %%ebx       \n"
+         "xor %%ecx, %%ecx       \n"
          "mov %%eax, %%edx       \n"
          "shr $4, %%eax          \n"//all alpha 
          "and $0x0F0F0F0F, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          "mov %%edx, %%eax       \n"//intensity 
          "shl $4, %%eax          \n"
          "and $0xF0F0F0F0, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          
-         "mov %%ebx, (%[dst])     \n" //save dword 
+         "mov %%ecx, (%[dst])     \n" //save dword 
          "add $4, %[dst]          \n"
          
          "mov (%[src]), %%eax     \n"          // read both pixels  
          "add $8, %[src]          \n"
          
-         "xor %%ebx, %%ebx       \n"
+         "xor %%ecx, %%ecx       \n"
          "mov %%eax, %%edx       \n"
          "shr $4, %%eax          \n"//all alpha 
          "and $0x0F0F0F0F, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          "mov %%edx, %%eax       \n"//intensity 
          "shl $4, %%eax          \n"
          "and $0xF0F0F0F0, %%eax \n"
-         "or %%eax, %%ebx        \n"
+         "or %%eax, %%ecx        \n"
          
-         "mov %%ebx, (%[dst])     \n" //save dword 
+         "mov %%ecx, (%[dst])     \n" //save dword 
          "add $4, %[dst]          \n"
          // *  
          
-         "dec %%ecx              \n"
+         "decl %[temp]           \n"
          "jnz 3b                 \n"  // x_loop_25
          
          "add %[line], %[src]    \n"
          "add %[ext], %[dst]     \n"
          
-         "mov %[temp], %[c]      \n"
-         "dec %%ecx              \n"
+         "decl %[height]         \n"
          "jnz 1b                 \n"  // y_loop5
          
          "4:                     \n"  // end_y_loop5
-           : [temp]"=m"(lTemp), [src] "+S"(src), [dst] "+D"(dst), [c] "+c"(lHeight)
+           : [temp]"=m"(lTemp), [src] "+S"(src), [dst] "+D"(dst), [height] "+g"(lHeight)
            : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
-           : "memory", "cc", "eax", "edx", "ebx"
+           : "memory", "cc", "eax", "edx", "ecx"
            );
 #endif
     return /*(0 << 16) | */GR_TEXFMT_ALPHA_INTENSITY_44;  
@@ -1168,12 +1165,11 @@ end_y_loop:
     }  
 #elif !defined(NO_ASM)
    //printf("Load8bI\n");
-   long lTemp, lHeight = (long) height;
+   int lTemp, lHeight = (int) height;
    asm volatile (
-         "1:                    \n"  // y_loop6
-         "mov %[c], %[temp]     \n"
-            
-         "mov %[wid_64], %%ecx   \n"
+         "1:                     \n"  // y_loop6
+         "mov %[wid_64], %%eax   \n"
+         "mov %%eax, %[temp]     \n"
          "2:                     \n"  // x_loop6
          "mov (%[src]), %%eax    \n"          // read all 4 pixels  
          "add $4, %[src]         \n"
@@ -1188,18 +1184,17 @@ end_y_loop:
          "add $4, %[dst]         \n"
          // *  
          
-         "dec %%ecx             \n"
+         "decl %[temp]          \n"
          "jnz 2b                \n" // x_loop6
          
-         "mov %[temp], %[c]     \n"
-         "dec %%ecx             \n"
+         "decl %[height]        \n"
          "jz 4f                 \n" // end_y_loop6
-         "mov %[c], %[temp]     \n"
             
          "add %[line], %[src]   \n"
          "add %[ext], %[dst]    \n"
          
-         "mov %[wid_64], %%ecx   \n"
+         "mov %[wid_64], %%eax   \n"
+         "mov %%eax, %[temp]     \n"
          "3:                     \n"  // x_loop_26
          "mov 4(%[src]), %%eax   \n"          // read both pixels  
          
@@ -1211,22 +1206,20 @@ end_y_loop:
          
          "mov %%eax, (%[dst])    \n" //save dword 
          "add $4, %[dst]         \n"
-         // *  
-         
-         "dec %%ecx             \n"
+
+         "decl %[temp]          \n"
          "jnz 3b                \n"  // x_loop_26
          
          "add %[line], %[src]   \n"
          "add %[ext], %[dst]    \n"
          
-         "mov %[temp], %[c]     \n"
-         "dec %%ecx             \n"
+         "decl %[height]        \n"
          "jnz 1b                \n"  // y_loop6
          
          "4:                    \n"  // end_y_loop6
-         : [temp]"=m"(lTemp), [src]"+S"(src), [dst]"+D"(dst), [c]"+c"(lHeight)
+         : [temp]"=m"(lTemp), [src]"+S"(src), [dst]"+D"(dst), [height]"+g"(lHeight)
          : [wid_64] "g" (wid_64), [line] "g" ((uintptr_t)line), [ext] "g" ((uintptr_t)ext)
-         : "memory", "cc", "eax", "edx", "ebx"
+         : "memory", "cc", "eax", "edx"
          );  
 #endif
      return /*(0 << 16) | */GR_TEXFMT_ALPHA_8;  

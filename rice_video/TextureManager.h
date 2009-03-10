@@ -243,3 +243,4 @@ extern CTextureManager gTextureManager;     // The global instance of CTextureMa
 extern void DumpCachedTexture(TxtrCacheEntry &entry);
 
 #endif
+

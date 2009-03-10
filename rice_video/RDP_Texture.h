@@ -87,11 +87,6 @@ inline uint32 ReverseDXT(uint32 val, uint32 lrs, uint32 width, uint32 size)
 // rewrite these routine by myself.
 // Rice, 02/24/2004
 
-#if !defined(__INTEL_COMPILER) && !defined(__x86_64__) && !defined(NO_ASM)
-static uint32 g_value;
-static uint16 g_value16;
-#endif
-
 inline void UnswapCopy( void *src, void *dest, uint32 numBytes )
 {
 #if defined(__INTEL_COMPILER) && !defined(NO_ASM)
@@ -547,18 +542,18 @@ inline uint32 swapdword( uint32 value )
                :
                );
   return value;
-#elif !defined(NO_ASM) // GCC assumed
-   g_value = value;
-   asm volatile("pusha \n"
-        "mov        g_value, %%eax \n"
-        "bswap  %%eax \n"
-        "mov            %%eax, g_value \n"
-        "popa \n"
-        :
-        :
-        : "memory", "cc"
-        );
-   return g_value;
+#elif defined(__GNUC__) && defined(__i386__) && !defined(NO_ASM)
+  asm volatile("bswapl %0 \n"
+               : "+r"(value)
+               :
+               :
+               );
+   return value;
+#else
+  return ((value & 0xff000000) >> 24) |
+         ((value & 0x00ff0000) >>  8) |
+         ((value & 0x0000ff00) <<  8) |
+         ((value & 0x000000ff) << 24);
 #endif
 }
 
@@ -570,25 +565,16 @@ inline uint16 swapword( uint16 value )
         mov     ax, word ptr [value]
         xchg    ah, al
     }
-#elif defined(__GNUC__) && defined(__x86_64__) && !defined(NO_ASM)
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)) && !defined(NO_ASM)
   asm volatile("xchg  %%al, %%ah    \n"
                : "+a"(value)
                :
                :
                );
   return value;
-#elif !defined(NO_ASM) // GCC assumed
-   g_value16 = value;
-   asm volatile("pusha \n"
-        "mov        g_value16, %%ax \n"
-        "xchg   %%al, %%ah \n"
-        "mov            %%ax, g_value16 \n"
-        "popa \n"
-        :
-        :
-        : "memory", "cc"
-        );
-   return g_value16;
+#else
+  return ((value & 0xff00) >> 8) |
+         ((value & 0x00ff) << 8);
 #endif
 }
 
@@ -1365,7 +1351,7 @@ tile.lastTileCmd = CMD_LOADTLUT;
 #ifdef _DEBUG
 /*
 if((((gfx->words.w0)>>12)&0x3) != 0 || (((gfx->words.w0))&0x3) != 0 || (((gfx->words.w1)>>12)&0x3) != 0 || (((gfx->words.w1))&0x3) != 0)
-    { TRACE0("Load tlut, sl,tl,sh,th are not integers"); }
+    TRACE0("Load tlut, sl,tl,sh,th are not integers");
 */
 #endif
 
@@ -1376,12 +1362,12 @@ uint32 dwPalAddress = g_TI.dwAddr + dwRDRAMOffset;
 //Copy PAL to the PAL memory
 uint16 *srcPal = (uint16*)(g_pRDRAMu8 + (dwPalAddress& (g_dwRamSize-1)) );
 for (uint32 i=0; i<dwCount && i<0x100; i++)
-    { g_wRDPTlut[(i+dwTMEMOffset)^1] = srcPal[i^1]; }
+    g_wRDPTlut[(i+dwTMEMOffset)^1] = srcPal[i^1];
 
 if( options.bUseFullTMEM )
     {
     for (uint32 i=0; i<dwCount && i+tile.dwTMem<0x200; i++)
-        { *(uint16*)(&g_Tmem.g_Tmem64bit[tile.dwTMem+i]) = srcPal[i^1]; }
+        *(uint16*)(&g_Tmem.g_Tmem64bit[tile.dwTMem+i]) = srcPal[i^1];
     }
 
 LOG_TEXTURE(
@@ -1400,7 +1386,7 @@ if( pauseAtNext && eventToPause == NEXT_LOADTLUT && dwCount == 16 )
         {
         sprintf(buf+strlen(buf), "%04X ", g_wRDPTlut[dwTMEMOffset+i]);
         if(i%4 == 3)
-            { sprintf(buf+strlen(buf), "\n"); }
+            sprintf(buf+strlen(buf), "\n");
         }
     sprintf(buf+strlen(buf), "\n");
     TRACE0(buf);
@@ -2187,7 +2173,7 @@ void TMEM_Init()
         tmenEntryBuffer[i].rdramAddr=0;
         tmenEntryBuffer[i].next = &(tmenEntryBuffer[i+1]);
     }
-    tmenEntryBuffer[i].next = NULL;
+    tmenEntryBuffer[i-1].next = NULL;
 }
 
 void TMEM_SetBlock(uint32 tmemstart, uint32 length, uint32 rdramaddr)

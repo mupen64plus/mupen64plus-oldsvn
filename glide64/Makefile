@@ -1,54 +1,27 @@
-# Makefile for Glide64, in Mupen64Plus
+#***************************************************************************
+#                             Glide64 Makefile
+#                            -------------------
+# Copyright (C) 2007-2008 Richard Goedeken (Richard42)
+#***************************************************************************
+
+#***************************************************************************
+#*                                                                         *
+#*   This program is free software; you can redistribute it and/or modify  *
+#*   it under the terms of the GNU General Public License as published by  *
+#*   the Free Software Foundation; either version 2 of the License, or     *
+#*   (at your option) any later version.                                   *
+#*                                                                         *
+#***************************************************************************
 
 # include pre-make file with a bunch of definitions
+USES_QT4 = true
+USES_GTK2 = true
 include ../pre.mk
 
-# set BITS
-ifeq ("$(ARCH)","64BITS")
-  BITS=64
-  MOPT=-m amd64
-else
-  BITS=32
-  MOPT=
-endif
-
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS = -O2 -Wall -g -DGCC -DUSE_GTK $(SDL_CFLAGS) $(GTK_FLAGS) -Iwrapper/ -ffast-math -funroll-loops
-LDFLAGS	= -shared -Wl,-Bsymbolic -lGL -lGLU -L/usr/X11R6/lib $(SDL_LIBS)
+CFLAGS += $(SDL_FLAGS) $(GTK_FLAGS) -fpic -DPIC -DGCC -DUSE_GTK -Iwrapper/
+LDFLAGS += $(PLUGIN_LDFLAGS) $(LIBGL_LIBS) $(SDL_LIBS)
 
-# set special flags per-system
-ifeq ($(CPU), X86)
-  ifeq ($(ARCH), 64BITS)
-    CFLAGS += -march=athlon64 -fPIC
-  else
-    CFLAGS += -march=i686 -mtune=pentium-m -mmmx -msse
-    ifneq ($(PROFILE), 1)
-    ifneq ($(VPDEBUG), 1)
-      CFLAGS += -fomit-frame-pointer
-    endif
-    endif
-  endif
-  # tweak flags for 32-bit build on 64-bit system
-  ifeq ($(ARCH), 64BITS_32)
-    CFLAGS += -m32
-    LDFLAGS += -m32 -m elf_i386
-  endif
-endif
-ifeq ($(CPU), PPC)
-  CFLAGS += -mcpu=powerpc
-endif
-
-# set options
-ifeq ($(PROFILE), 1)
-  CFLAGS += -pg -g
-  LDFLAGS += -pg
-  STRIP = true
-else
-  ifeq ($(DBGSYM), 1)
-    CFLAGS += -g
-    STRIP = true
-  endif
-endif
 ifeq ($(VPDEBUG), 1)
   CFLAGS  += -DVPDEBUG
   LDFLAGS += -lIL
@@ -72,15 +45,8 @@ OBJECTS = \
 	CRC.o \
 	Combine.o \
 	TexBuffer.o \
-	Config.o \
 	3dmath.o \
 	DepthBufferRender.o
-
-ifeq ($(NO_ASM), 1)
-  CFLAGS += -DNO_ASM
-else
-  OBJECTS += Tmem_nasm.o
-endif
 
 WRAPPEROBJECTS = \
 	wrapper/combiner.o \
@@ -94,14 +60,35 @@ WRAPPEROBJECTS = \
 	wrapper/hq4x.o
 
 GTKOBJECTS = \
-	support.o \
-	messagebox.o
+	support_gtk2.o \
+	messagebox_gtk2.o \
+	Config_gtk2.o
 
-OBJECTS	+= $(GTKOBJECTS) $(WRAPPEROBJECTS)
+QT_OBJECTS = \
+	messagebox_qt4.o \
+	config_qt4.o \
+	configdialog_qt4.o
+
+MOC_OBJECTS = \
+	configdialog_qt4.moc
+
+OBJECTS	+= $(WRAPPEROBJECTS)
 TARGET	= glide64.so
 
 CFLAGS += -MMD -MP -MQ $@
-DEPS := $(OBJECTS:.o=.d)
+
+ifeq ($(GUI), QT4)
+  LDFLAGS += $(QT_LIBS)
+  CFLAGS += $(QT_FLAGS) -DQT_NO_STL
+  OBJECTS += $(QT_OBJECTS)
+  QT_EXTRA := $(MOC_OBJECTS) ui_glide64config.h
+else
+  LDFLAGS += $(GTK_LIBS)
+  CFLAGS += -DUSE_GTK $(GTK_FLAGS)
+  OBJECTS += $(GTKOBJECTS)
+endif
+
+DEPS := $(OBJECTS:.o=.d) $(QT_OBJECTS:.o=.d)
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
 endif
@@ -117,15 +104,24 @@ targets:
 	@echo "    BITS=32       == build 32-bit binaries on 64-bit machine"
 	@echo "    PROFILE=1     == build gprof instrumentation into binaries for profiling"
 	@echo "    DBGSYM=1      == add debugging symbols to binaries"
+	@echo "    NO_ASM=1      == disable inline assembly language code"
 	@echo "    VPDEBUG=1     == some kind of debugging"
 	@echo "    RDP_LOG=1     == Dump out RDP instruction data"
 	@echo "    RDP_LOG_ERR=1 == Dump out RDP instruction data + errors"
+	@echo "    GUI=GTK2      == Build gtk+-2 GUI"
+	@echo "    GUI=QT4       == Build Qt4 GUI"
 
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
-	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
-	$(STRIP) --strip-all $@
+$(TARGET): $(QT_EXTRA) $(OBJECTS)
+	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
+	$(STRIP) $@
+
+ui_glide64config.h: glide64config.ui
+	$(UIC) $< -o $@
+
+configdialog_qt4.moc: configdialog_qt4.h
+	$(MOC) $< -o $@
 
 Main.o: font.h cursor.h
 font.h:	compiletex
@@ -139,20 +135,16 @@ compiletex: compiletex.c
 	$(CC) -o compiletex.o -c $<
 	$(LD) -o $@ compiletex.o
 
-Tmem_nasm.o: Tmem_nasm.asm
-	$(ASM) -f elf $(MOPT) -DBITS=$(BITS) $< -o $@
-
 rdp.o: ucode06.h
 
 clean:
 	$(RM) -rf $(OBJECTS) $(TARGET) $(DEPS) compiletex compiletex.o font.h cursor.h
-	$(RM) -rf *.ii *.i *.s
+	$(RM) -rf *.ii *.i *.s *.moc ui_*.h
 
 rebuild: clean $(TARGET)
 
 
 # build rules
-
 .SUFFIXES: .o .cpp .c
 .cpp.o:
 # in case this was invoked because a header changed and the compilation fails,

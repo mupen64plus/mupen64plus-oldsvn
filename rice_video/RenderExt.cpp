@@ -405,8 +405,9 @@ void CRender::DrawSpriteR(uObjTxSprite &sprite, bool initCombiner, uint32 tile, 
     }
 
     //RECT src = {left,top,width, height};
-    float depth;
-    (gRDP.otherMode.depth_source==1) ? depth = gRDP.fPrimitiveDepth : depth = 0;
+    float depth = 0.0;
+    if (gRDP.otherMode.depth_source==1) 
+        depth = gRDP.fPrimitiveDepth;
 
     float x0 = sprite.sprite.objX/4.0f;
     float y0 = sprite.sprite.objY/4.0f;
@@ -779,7 +780,7 @@ void CRender::DrawSprite(uObjTxSprite &sprite, bool rectR)  //Without Ratation
     }
 
     // save the current clamp type
-    int iClampS, iClampT;
+    GLint iClampS, iClampT;
     glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &iClampS);
     glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &iClampT);
     // force clamp type to CLAMP_EDGE (experiments show sometimes this is set to hex 0x2901 - invalid value)

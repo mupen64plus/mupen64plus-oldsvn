@@ -1,8 +1,5 @@
-#ifndef __LINUX__
-# include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
-#endif // __LINUX__
+
+#include "../main/winlnxdefs.h"
 
 #define CRC32_POLYNOMIAL     0x04C11DB7
 
@@ -43,6 +40,7 @@ DWORD CRC_Calculate( DWORD crc, void *buffer, DWORD count )
     DWORD orig = crc;
 
     p = (BYTE*) buffer;
+
     while (count--)
         crc = (crc >> 8) ^ CRCTable[(crc & 0xFF) ^ *p++];
 
@@ -65,3 +63,4 @@ DWORD CRC_CalculatePalette( DWORD crc, void *buffer, DWORD count )
 
     return crc ^ orig;
 }
+

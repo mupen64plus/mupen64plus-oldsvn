@@ -19,8 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _OGL_COMBINER_NV_H_
 #define _OGL_COMBINER_NV_H_
 
+#include <SDL_opengl.h>
+
 #include "OGLExtCombiner.h"
-#include "gl/gl.h"
 #include "OGLDecodedMux.h"
 
 typedef struct {
@@ -152,3 +153,4 @@ protected:
 };
 
 #endif
+

@@ -12,9 +12,10 @@
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public
+*   Licence along with this program; if not, write to the Free
+*   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+*   Boston, MA  02110-1301, USA
 */
 
 //****************************************************************
@@ -37,9 +38,6 @@
 #include "Util.h"
 #include "3dmath.h"
 #include "Debugger.h"
-#ifdef _WIN32
-#include "resource.h"
-#endif // _WIN32
 
 #include "Combine.h"
 
@@ -49,14 +47,12 @@
 #include "CRC.h"
 #include "DepthBufferRender.h"
 
-#ifndef _WIN32
 #include <string.h>
 #include <stdlib.h>
 #include "messagebox.h"
 #include <sys/time.h>
-#endif // _WIN32
 
-#define G64_VERSION "Wonder Plus"
+#define G64_VERSION "Mupen64Plus"
 #define RELTIME "Date: " __DATE__ " Time: " __TIME__
 
 #ifdef EXT_LOGGING
@@ -87,27 +83,13 @@ BOOL debugging = FALSE;
 HINSTANCE hInstance = NULL;
 BOOL exception = FALSE;
 
-// ZIGGY temporary
-#if defined(GCC) && defined(WIN32)
-int dumping;
-#endif
-
 BOOL evoodoo = 0;
 BOOL ev_fullscreen = 0;
 
-long num_tmu;
-long max_tex_size;
+int num_tmu;
+int max_tex_size;
 long sup_mirroring;
 BOOL sup_32bit_tex = FALSE;
-
-#ifdef _WIN32
-#define WINPROC_OVERRIDE
-#ifdef WINPROC_OVERRIDE
-LRESULT CALLBACK WndProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-WNDPROC oldWndProc = NULL;
-WNDPROC myWndProc = NULL;
-#endif
-#endif // _WIN32
 
 #ifdef ALTTAB_FIX
 HHOOK hhkLowLevelKybd = NULL;
@@ -187,6 +169,9 @@ DWORD   offset_texbuf1 = 0;
 
 BOOL    capture_screen = 0;
 char    capture_path[256];
+
+void (*renderCallback)() = NULL;
+
 
 void ChangeSize ()
 {
@@ -330,19 +315,17 @@ void ReadSettings ()
   settings.custom_ini = (BOOL)INI_ReadInt ("custom_ini", 0);
   settings.hotkeys = (BOOL)INI_ReadInt ("hotkeys", 0);
 
-#ifndef _WIN32
   settings.full_res = (BOOL)INI_ReadInt ("full_res", 7);
   settings.tex_filter = (BOOL)INI_ReadInt ("tex_filter", 0);
   settings.noditheredalpha = (BOOL)INI_ReadInt ("noditheredalpha", 0);
   settings.noglsl = (BOOL)INI_ReadInt ("noglsl", 0);
   settings.FBO = (BOOL)INI_ReadInt ("fbo", 0);
   settings.disable_auxbuf = (BOOL)INI_ReadInt ("disable_auxbuf", 0);
-#endif
   
   INI_Close ();
 }
 
-void ReadSpecialSettings (char name[21])
+void ReadSpecialSettings (const char name[21])
 {
   //  char buf [256];
   //  sprintf(buf, "ReadSpecialSettings. Name: %s\n", name);
@@ -383,7 +366,7 @@ void ReadSpecialSettings (char name[21])
     settings.tonic = TRUE;
   else if (strstr(name, (const char *)"All") && strstr(name, (const char *)"Star") && strstr(name, (const char *)"Baseball"))
     settings.ASB = TRUE;
-  else if (strstr(name, (const char *)"ÄÞ×´ÓÝ2 Ë¶ØÉ¼ÝÃÞÝ"))
+  else if (strstr(name, (const char *)"ï¿½ï¿½×´ï¿½ï¿½2 Ë¶ï¿½É¼ï¿½ï¿½ï¿½ï¿½"))
     settings.doraemon2 = TRUE;
   else if (strstr(name, (const char *)"SPACE INVADERS"))
     settings.invaders = TRUE;
@@ -573,21 +556,17 @@ void WriteSettings ()
   INI_WriteInt ("custom_ini", settings.custom_ini);
   INI_WriteInt ("hotkeys", settings.hotkeys);
 
-#ifndef _WIN32
   INI_WriteInt ("full_res", settings.full_res);
   INI_WriteInt ("tex_filter", settings.tex_filter);
   INI_WriteInt ("noditheredalpha", settings.noditheredalpha);
   INI_WriteInt ("noglsl", settings.noglsl);
   INI_WriteInt ("fbo", settings.FBO);
-#endif
   
   INI_Close ();
 }
 
-#ifndef _WIN32
 #include "font.h"
 #include "cursor.h"
-#endif // _WIN32
 
 GRFRAMEBUFFERCOPYEXT grFramebufferCopyExt = NULL;
 GRTEXBUFFEREXT   grTextureBufferExt = NULL;
@@ -648,18 +627,8 @@ void guLoadTextures ()
   else
     offset_font = 0;
 
-#ifdef _WIN32
-  char path[256];
-  GetModuleFileName (hInstance, path, 256);
-  HMODULE hModule = GetModuleHandle (path);
-  
-  HRSRC hrsrc = FindResource (hModule, MAKEINTRESOURCE(IDR_FONT), RT_RCDATA);
-  DWORD *data = (DWORD*)LoadResource (hModule, hrsrc);
-  DWORD cur;
-#else
    DWORD *data = (DWORD*)font;
    DWORD cur;
-#endif // _WIN32
   
   // ** Font texture **
   BYTE *tex8 = (BYTE*)malloc(256*64);
@@ -709,12 +678,7 @@ void guLoadTextures ()
   free (fontTex.data);
   
   // ** Cursor texture **
-#ifdef _WIN32
-  hrsrc = FindResource (hModule, MAKEINTRESOURCE(IDR_CURSOR), RT_RCDATA);
-  data = (DWORD*)LoadResource (hModule, hrsrc);
-#else // _WIN32
-   data = (DWORD*)cursor;
-#endif // _WIN32
+  data = (DWORD*)cursor;
   
   WORD *tex16 = (WORD*)malloc(32*32*2);
   
@@ -790,21 +754,17 @@ BOOL InitGfx (BOOL evoodoo_using_window)
 
   if (!gfx_context)
   {
-#ifdef _WIN32
-    MessageBox (gfx.hWnd, "Error setting display mode", "Error", MB_OK|MB_ICONEXCLAMATION);
-#else // _WIN32
-     messagebox("Error", MB_OK|MB_ICONEXCLAMATION, "Error setting display mode");
-#endif // _WIN32
+    messagebox("Error", MB_OK|MB_ICONEXCLAMATION, "Error setting display mode");
     grSstWinClose (gfx_context);
     grGlideShutdown ();
     return FALSE;
   }
   
   // get the # of TMUs available
-  grGet (GR_NUM_TMU, 4, &num_tmu);
-  printf("num_tmu %ld\n", num_tmu);
+  grGet (GR_NUM_TMU, 4, (FxI32 *) &num_tmu);
+  printf("num_tmu %d\n", num_tmu);
   // get maximal texture size
-  grGet (GR_MAX_TEXTURE_SIZE, 4, &max_tex_size);
+  grGet (GR_MAX_TEXTURE_SIZE, 4, (FxI32 *) &max_tex_size);
   //num_tmu = 1;
   
   // Is mirroring allowed?
@@ -841,14 +801,8 @@ BOOL InitGfx (BOOL evoodoo_using_window)
 
   grFramebufferCopyExt = (GRFRAMEBUFFERCOPYEXT) grGetProcAddress("grFramebufferCopyExt");
   printf("before\n");
-#ifdef _WIN32
-  HMODULE HGLIDE = GetModuleHandle("glide3x");
-  grStippleModeExt = (GRSTIPPLE) GetProcAddress(HGLIDE, "_grStippleMode@4");
-  grStipplePatternExt = (GRSTIPPLE) GetProcAddress(HGLIDE, "_grStipplePattern@4");
-#else // _WIN32
   grStippleModeExt = (GRSTIPPLE) grStippleMode;
   grStipplePatternExt = (GRSTIPPLE) grStipplePattern; 
-#endif // _WIN32
   printf("after\n");
   if (grStipplePatternExt)
     grStipplePatternExt(settings.stipple_pattern);
@@ -940,78 +894,6 @@ void ReleaseGfx ()
   rdp.window_changed = TRUE;
 }
 
-//
-// DllMain - called when the DLL is loaded, use this to get the DLL's instance
-//
-
-#ifdef _WIN32
-//#ifndef GCC
-BOOL CALLBACK ConfigPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK DebugPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK StatisticsPageProc (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-extern "C" {
-BOOL WINAPI DllMain (HINSTANCE hinstDLL, 
-                     DWORD fdwReason,
-                     LPVOID lpReserved);
-}
-BOOL WINAPI DllMain (HINSTANCE hinstDLL, 
-                     DWORD fdwReason,
-                     LPVOID lpReserved)
-{
-  hInstance = hinstDLL;
-  
-  sprintf (out_buf, "DllMain (%08lx - %d)\n", hinstDLL, fdwReason);
-  LOG (out_buf);
-
-  printf("DLLMain\n");
-  
-  if (fdwReason == DLL_PROCESS_ATTACH)
-  {
-    memset(m_psp, 0, sizeof(m_psp));
-    memset(&m_PropSheet, 0, sizeof(m_PropSheet));
-    
-    m_psp[0].dwSize = sizeof(PROPSHEETPAGE);
-    m_psp[0].dwFlags = PSP_USETITLE;
-    m_psp[0].hInstance = hInstance;
-    m_psp[0].pszTemplate = (LPCSTR)IDD_CONFIG;
-    m_psp[0].pszTitle = "Config";
-    m_psp[0].pfnDlgProc = (DLGPROC)ConfigPageProc;
-    
-    m_psp[1].dwSize = sizeof(PROPSHEETPAGE);
-    m_psp[1].dwFlags = PSP_USETITLE;
-    m_psp[1].hInstance = hInstance;
-    m_psp[1].pszTemplate = (LPCSTR)IDD_STATISTICS;
-    m_psp[1].pszTitle = "On screen info";
-    m_psp[1].pfnDlgProc = (DLGPROC)StatisticsPageProc;
-
-  #ifndef _FINAL_RELEASE_
-    m_psp[2].dwSize = sizeof(PROPSHEETPAGE);
-    m_psp[2].dwFlags = PSP_USETITLE;
-    m_psp[2].hInstance = hInstance;
-    m_psp[2].pszTemplate = (LPCSTR)IDD_DEBUG;
-    m_psp[2].pszTitle = "Debug";
-    m_psp[2].pfnDlgProc = (DLGPROC)DebugPageProc;
-
-    m_PropSheet.nPages = 3;
-  #else
-    m_PropSheet.nPages = 2;
-  #endif
-
-    m_PropSheet.dwSize = sizeof(PROPSHEETHEADER);
-    m_PropSheet.dwFlags = PSH_PROPSHEETPAGE | PSH_NOAPPLYNOW;
-    //  m_PropSheet.dwFlags = PSH_PROPSHEETPAGE | PSH_USECALLBACK | PSH_NOAPPLYNOW;
-    m_PropSheet.hInstance = hInstance;
-    //  m_PropSheet.hwndParent = hParent;
-    m_PropSheet.pszCaption = (LPSTR) "Glide64 settings";
-    m_PropSheet.nStartPage = 0;
-    m_PropSheet.ppsp = (LPCPROPSHEETPAGE)m_psp;
-    //  m_PropSheet.pfnCallback = (PFNPROPSHEETCALLBACK) SheetProc;
-  }
-  return TRUE;
-}
-#endif // _WIN32
-
 void CALL ReadScreen(void **dest, int *width, int *height)
 {
   *width = settings.res_x;
@@ -1088,11 +970,6 @@ EXPORT void CALL ChangeWindow (void)
     if (!ev_fullscreen)
     {
       to_fullscreen = TRUE;
-#ifdef _WIN32
-      if (gfx.hStatusBar)
-        ShowWindow( gfx.hStatusBar, SW_HIDE );
-      ShowCursor( FALSE );
-#endif // _WIN32
       GRWRAPPERFULLSCREENRESOLUTIONEXT grWrapperFullScreenResolutionExt = 
          (GRWRAPPERFULLSCREENRESOLUTIONEXT)grGetProcAddress("grWrapperFullScreenResolutionExt");
       if (grWrapperFullScreenResolutionExt != NULL)
@@ -1115,12 +992,6 @@ EXPORT void CALL ChangeWindow (void)
         settings.scr_res_y = settings.res_y = resolutions[settings.res_data][1];
       }
       InitGfx(TRUE);
-#ifdef _WN32
-      ShowCursor( TRUE );
-      if (gfx.hStatusBar)
-        ShowWindow( gfx.hStatusBar, SW_SHOW );
-      SetWindowLong (gfx.hWnd, GWL_WNDPROC, (long)oldWndProc);
-#endif // _WIN32
     }
   }
   else
@@ -1131,24 +1002,10 @@ EXPORT void CALL ChangeWindow (void)
     if (!fullscreen)
     {
       to_fullscreen = TRUE;
-#ifdef _WIN32
-      if (gfx.hStatusBar)
-        ShowWindow( gfx.hStatusBar, SW_HIDE );
-      ShowCursor( FALSE );
-#endif // _WIN32
     }
     else
     {
       ReleaseGfx ();
-#ifdef _WIN32
-      ShowCursor( TRUE );
-      if (gfx.hStatusBar)
-        ShowWindow( gfx.hStatusBar, SW_SHOW );
-    // SetWindowLong fixes the following Windows XP Banshee issues:
-    // 1964 crash error when loading another rom.
-    // All N64 emu's minimize, restore crashes.
-      SetWindowLong (gfx.hWnd, GWL_WNDPROC, (long)oldWndProc);
-#endif // _WIN32
     }
   }
 }
@@ -1184,20 +1041,7 @@ EXPORT void CALL CloseDLL (void)
   ZLUT_release();
   ClearCache ();
 }
-#ifdef _WIN32
-//taken from 1964 sources
-LRESULT APIENTRY About(HWND hDlg, unsigned message, WORD wParam, LONG lParam)
-{
-    switch(message)
-    {
-    case WM_INITDIALOG: return(TRUE);
 
-    case WM_COMMAND:    if(wParam == IDOK || wParam == IDCANCEL){ EndDialog(hDlg, TRUE); return(TRUE); }break;
-    }
-
-    return(FALSE);
-}
-#endif // _WIN32
 /******************************************************************
 Function: DllAbout
 Purpose:  This function is optional function that is provided
@@ -1207,12 +1051,9 @@ output:   none
 *******************************************************************/ 
 EXPORT void CALL DllAbout ( HWND hParent )
 {
-#ifdef _WIN32
-  DialogBox(hInstance, "ABOUT", hParent, (DLGPROC) About);
-#else // _WIN32
    messagebox("Glide64 v"G64_VERSION, MB_OK,
           "Glide64 "G64_VERSION"\nRelease: " RELTIME "\n" 
-          "by Gonetz\nOriginal author: Dave2001\nOther developers: Gugaman\n\n"
+          "by GuentherB, Richard42, Gonetz, Dave2001, Gugaman, and others\n\n"
           "Beta testers: Raziel64, Federelli, Flash\n\n"
           "Special thanks to:\n"
           "Niki, FiRES, Icepir8, Rice, ZeZu, Azimer, Hacktarux, Cyberman, LoneRaven, Falcon4ever,\n"
@@ -1222,7 +1063,6 @@ EXPORT void CALL DllAbout ( HWND hParent )
           "the Emutalk message board who helped or brought encouragement\n\n"
           "Thanks to EmuXHaven for hosting my site:\nhttp://glide64.emuxhaven.net/\n\n"
           "Official development channel: #Glide64 on EFnet\nNO ROM REQUESTS / NO BETA REQUESTS");
-#endif // _WIN32
 }
 
 /******************************************************************
@@ -1257,40 +1097,8 @@ input:    a pointer to a PLUGIN_INFO stucture that needs to be
 filled by the function. (see def above)
 output:   none
 *******************************************************************/ 
-#ifdef WIN32
-# include <fcntl.h>
-# ifndef ATTACH_PARENT_PROCESS
-#  define ATTACH_PARENT_PROCESS ((DWORD)-1)
-# endif
-
-typedef BOOL (WINAPI * AttachConsoleType)(DWORD);
-BOOL (WINAPI * AttachConsolePTR)(DWORD);
-#endif
-
 EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 {
-#ifdef WIN32x
-  // ZIGGY code to attach to console and use it
-  HANDLE libhnd;
-  if ((libhnd = LoadLibrary("KERNEL32")) && (AttachConsolePTR = (AttachConsoleType)GetProcAddress((HINSTANCE__*)libhnd, "AttachConsole")) && AttachConsolePTR(ATTACH_PARENT_PROCESS)) 
-  {
-    FILE * newstdout = freopen("CON", "w", stdout);
-    FILE * newstderr = freopen("CON", "w", stderr);
-    FILE * newstdin = freopen("CON", "r", stdin);
-  } else {
-//     AllocConsole();
-//     FILE * newstdout = freopen("CON", "w", stdout);
-//     FILE * newstderr = freopen("CON", "w", stderr);
-//     FILE * newstdin = freopen("CON", "r", stdin);
-    FILE * newstdout = freopen("stdout.txt", "w", stdout);
-    _dup2(_fileno(stdout), _fileno(stderr));
-    //FILE * newstderr = freopen("stderr.txt", "w", stderr);
-  }
-//   _dup2(0, _fileno(stdout));
-//   _dup2(1, _fileno(stdin));
-//   _dup2(2, _fileno(stderr));
-#endif
-  
   PluginInfo->Version = 0x0103;     // Set to 0x0103
   PluginInfo->Type  = PLUGIN_TYPE_GFX;  // Set to PLUGIN_TYPE_GFX
   sprintf (PluginInfo->Name, "Glide64 "G64_VERSION);  // Name of the DLL
@@ -1302,7 +1110,6 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
   // bswap on a dword (32 bits) boundry
 }
 
-#ifndef _WIN32
 BOOL WINAPI QueryPerformanceCounter(PLARGE_INTEGER counter)
 {
    struct timeval tv;
@@ -1319,7 +1126,6 @@ BOOL WINAPI QueryPerformanceFrequency(PLARGE_INTEGER frequency)
    frequency->s.HighPart= 0;
    return TRUE;
 }
-#endif
 
 /******************************************************************
 Function: InitiateGFX
@@ -1497,18 +1303,6 @@ EXPORT void CALL RomOpen (void)
   rdp_reset ();
   ClearCache ();
 
-/* JOSH FIXME: Needed in non-WIN32 case? */ 
-#ifndef GCC
-  __try
-  {
-    BYTE test = gfx.RDRAM[5000000];
-  }
-  __except (EXCEPTION_EXECUTE_HANDLER)
-  {
-    BMASK = WMASK;
-  }
-#endif // _WIN32
-  
   OPEN_RDP_LOG ();
   OPEN_RDP_E_LOG ();
   
@@ -1587,6 +1381,11 @@ void DrawFrameBuffer ()
     }
 }
 
+EXPORT void CALL SetRenderingCallback(void (*callback)())
+{
+    renderCallback = callback;
+}
+
 /******************************************************************
 Function: UpdateScreen
 Purpose:  This function is called in response to a vsync of the
@@ -1661,7 +1460,9 @@ EXPORT void CALL UpdateScreen (void)
   }
   //*/  
   if (settings.swapmode == 0)
+  {
     newSwapBuffers ();
+  }
 }
 
 DWORD curframe = 0;
@@ -1672,7 +1473,7 @@ void newSwapBuffers()
     rdp.updatescreen = 0;
     
     RDP ("swapped\n");
-    
+ 
     // Allow access to the whole screen
     if (fullscreen)
     {
@@ -1681,7 +1482,7 @@ void newSwapBuffers()
       grDepthMask (FXFALSE);
       
       grCullMode (GR_CULL_DISABLE);
-      
+
       if ((settings.show_fps & 0xF) || settings.clock)
         set_message_combiner ();
 #ifdef FPS
@@ -1740,219 +1541,8 @@ void newSwapBuffers()
         }
         output ((float)(settings.res_x - 68), y, 0, out_buf, 0);
       }
-#ifdef _WIN32
-        if (settings.hotkeys)
-        {
-            if (GetAsyncKeyState (VK_BACK) & 0x0001)
-            {
-                hotkey_info.filtering = 100;
-                if (settings.filtering < 2)
-                    settings.filtering++;
-                else
-                    settings.filtering = 0;
-            }
-            if ((abs(frame_count - curframe) > 3 ) && (GetAsyncKeyState(VK_MENU) & 0x8000))  //alt +
-            {
-                if (GetAsyncKeyState(0x42) & 0x8000)  //b
-                {
-                    hotkey_info.fb_motionblur = 100;
-                    hotkey_info.fb_always = 0;
-                    curframe = frame_count;
-                    settings.fb_motionblur = !settings.fb_motionblur;
-                }
-                else if (GetAsyncKeyState(0x56) & 0x8000)  //v
-                {
-                    hotkey_info.fb_always = 100;
-                    hotkey_info.fb_motionblur = 0;
-                    curframe = frame_count;
-                    settings.fb_read_always = !settings.fb_read_always;
-                }
-                if (GetAsyncKeyState(0x43) & 0x8000)  //c
-                {
-                    hotkey_info.corona = 100;
-                    curframe = frame_count;
-                    settings.flame_corona = !settings.flame_corona;
-                }
-            }
-            if (hotkey_info.fb_always || hotkey_info.fb_motionblur || hotkey_info.filtering || hotkey_info.corona)
-            {
-              set_message_combiner ();
-              int y = settings.res_y;
-              char buf[64];
-              char * message = 0;
-              if (hotkey_info.fb_always)
-              {
-                if (settings.fb_read_always)
-                  message = strcpy(buf, "FB READ ALWAYS: ON");
-                else
-                  message = strcpy(buf, "FB READ ALWAYS: OFF");
-                output ((float)(settings.res_x / 5), (float)y, 0, message, 0);
-                hotkey_info.fb_always--;
-              }
-              if (hotkey_info.fb_motionblur)
-              {
-                if (settings.fb_motionblur)
-                  message = strcpy(buf, "MOTION BLUR: ON");
-                else
-                  message = strcpy(buf, "MOTION BLUR: OFF");
-                output ((float)(settings.res_x / 5), (float)y, 0, message, 0);
-                hotkey_info.fb_motionblur--;
-              }
-              if (hotkey_info.corona)
-              {
-                if (settings.flame_corona)
-                  message = strcpy(buf, "CORONA FIX: ON");
-                else
-                  message = strcpy(buf, "CORONA FIX: OFF");
-                output ((float)(settings.res_x / 5 * 2), (float)y, 0, message, 0);
-                hotkey_info.corona--;
-              }
-              if (hotkey_info.filtering)
-              {
-                switch (settings.filtering) 
-                {
-                case 0:
-                  message = strcpy(buf, "FILTERING MODE: AUTOMATIC");
-                  break;
-                case 1:
-                  message = strcpy(buf, "FILTERING MODE: FORCE BILINEAR");
-                  break;
-                case 2:
-                  message = strcpy(buf, "FILTERING MODE: FORCE POINT-SAMPLED");
-                  break;
-                }
-                output ((float)(settings.res_x / 5 * 3), (float)y, 0, message, 0);
-                hotkey_info.filtering--;
-              }
-            }
     }
-#endif // _WIN32
-    }
-#ifdef _WIN32
-    if (capture_screen)
-    {
-      char path[256];
-      FILE *file = NULL;
-      
-      // Make the directory if it doesn't exist
-      _mkdir (capture_path);
-      
-      for (int i=0; ; i++)
-      {
-        if (i < 10)
-          sprintf (path, "%sss0%d.bmp", capture_path, i);
-        else
-          sprintf (path, "%sss%d.bmp", capture_path, i);
-        if ((file = fopen(path,"rb")) == NULL)
-          break;
-        fclose (file);
-      }
-      
-      file = fopen (path, "wb");
-      if (file == NULL) return;
-      
-      BITMAPFILEHEADER bmf;
-      bmf.bfType = ((WORD)'M' << 8) | 'B';
-      bmf.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) +
-        settings.res_x * settings.res_y * 3;
-      bmf.bfReserved1 = 0;
-      bmf.bfReserved2 = 0;
-      bmf.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-      fwrite (&bmf, sizeof(BITMAPFILEHEADER), 1, file);
-      
-      BITMAPINFOHEADER bmi;
-      bmi.biSize = sizeof(BITMAPINFOHEADER);
-      bmi.biWidth = settings.res_x;
-      bmi.biHeight = settings.res_y;
-      bmi.biPlanes = 1;
-      bmi.biBitCount = 24;
-      bmi.biCompression = BI_RGB;
-      bmi.biSizeImage = settings.res_x * settings.res_y * 3;
-      bmi.biXPelsPerMeter = 0;
-      bmi.biYPelsPerMeter = 0;
-      bmi.biClrUsed = 0;
-      bmi.biClrImportant = 0;
-      fwrite (&bmi, sizeof(BITMAPINFOHEADER), 1, file);
-      
-      // Lock the backbuffer (already rendered)
-      BYTE *line = new BYTE [settings.res_x * 3];
-      
-      GrLfbInfo_t info;
-      info.size = sizeof(GrLfbInfo_t);
-#if 1
-      if (grLfbLock (GR_LFB_READ_ONLY,
-                     GR_BUFFER_BACKBUFFER,
-                     GR_LFBWRITEMODE_888,
-                     GR_ORIGIN_UPPER_LEFT,
-                     FXFALSE,
-                     &info))
-      {
-        DWORD offset_src=info.strideInBytes*(settings.scr_res_y-1);
-        
-        // Copy the screen
-        DWORD col;
-        BYTE r, g, b;
-        for (DWORD y=0; y<settings.res_y; y++)
-        {
-          DWORD *ptr = (DWORD*)((BYTE*)info.lfbPtr + offset_src);
-          for (DWORD x=0; x<settings.res_x; x++)
-          {
-            col = *(ptr++);
-        r = (col >> 16);
-        g = (col >> 8) & 0xFF;
-        b = col & 0xFF;
-            line[x*3] = b;
-            line[x*3+1] = g;
-            line[x*3+2] = r;
-          }
-          fwrite (line, 1, settings.res_x*3, file);
-          offset_src -= info.strideInBytes;
-        }
-        
-        // Unlock the backbuffer
-        grLfbUnlock (GR_LFB_READ_ONLY, GR_BUFFER_BACKBUFFER);
-      }
-#else
-      if (grLfbLock (GR_LFB_READ_ONLY,
-                     GR_BUFFER_BACKBUFFER,
-                     GR_LFBWRITEMODE_565,
-                     GR_ORIGIN_UPPER_LEFT,
-                     FXFALSE,
-                     &info))
-      {
-        DWORD offset_src=info.strideInBytes*(settings.scr_res_y-1);
-        
-        // Copy the screen
-        WORD col;
-        BYTE r, g, b;
-        for (DWORD y=0; y<settings.res_y; y++)
-        {
-          WORD *ptr = (WORD*)((BYTE*)info.lfbPtr + offset_src);
-          for (DWORD x=0; x<settings.res_x; x++)
-          {
-            col = *(ptr++);
-            r = (BYTE)((float)(col >> 11) / 31.0f * 255.0f);
-            g = (BYTE)((float)((col >> 5) & 0x3F) / 63.0f * 255.0f);
-            b = (BYTE)((float)(col & 0x1F) / 31.0f * 255.0f);
-            line[x*3] = b;
-            line[x*3+1] = g;
-            line[x*3+2] = r;
-          }
-          fwrite (line, 1, settings.res_x*3, file);
-          offset_src -= info.strideInBytes;
-        }
-        
-        // Unlock the backbuffer
-        grLfbUnlock (GR_LFB_READ_ONLY, GR_BUFFER_BACKBUFFER);
-      }
-#endif
-      
-      delete [] line;
-      fclose (file);
-      
-      capture_screen = 0;
-    }
-#endif // _WIN32    
+
     // Capture the screen if debug capture is set
     if (debug.capture)
     {
@@ -1983,27 +1573,13 @@ void newSwapBuffers()
       grLfbUnlock (GR_LFB_READ_ONLY, GR_BUFFER_BACKBUFFER);
     }
 
-#ifdef _WIN32
-    if (fullscreen && debugging)
-    {
-      debug_keys ();
-      debug_cacheviewer ();
-      debug_mouse ();
-    }
-#endif // _WIN32
-
     if (fullscreen)
     {
-      LOG ("BUFFER SWAPPED\n");
-      grBufferSwap (settings.vsync);
+      LOG ("BUFFER SWAPPED\n"); 
+      grBufferSwap (settings.vsync);    
       fps_count ++;
     }
     
-#ifdef _WIN32
-    if (debug.capture)
-      debug_capture ();
-#endif // _WIN32
-
     if (fullscreen && (debugging || settings.wireframe || settings.buff_clear))
     {
       if (settings.RE2 && settings.fb_depth_render)
@@ -2014,38 +1590,6 @@ void newSwapBuffers()
     }
     
     frame_count ++;
-#ifdef _WIN32   
-    // Open/close debugger?
-    if (GetAsyncKeyState(VK_SCROLL) & 0x0001)
-    {
-      if (!debugging)
-      {
-        //if (settings.scr_res_x == 1024 && settings.scr_res_y == 768)
-        {
-          debugging = 1;
-          
-          // Recalculate screen size, don't resize screen
-          settings.res_x = (DWORD)(settings.scr_res_x * 0.625f);
-          settings.res_y = (DWORD)(settings.scr_res_y * 0.625f);
-          
-          ChangeSize ();
-        }
-      } else {
-        debugging = 0;
-        
-        settings.res_x = settings.scr_res_x;
-        settings.res_y = settings.scr_res_y;
-        
-        ChangeSize ();
-      }
-    }
-
-    // Debug capture?
-    if (/*fullscreen && */debugging && (GetAsyncKeyState(VK_INSERT) & 0x0001))
-    {
-      debug.capture = 1;
-    }
-#endif // _WIN32
   }
 }
 
@@ -2139,3 +1683,4 @@ do_it:
   return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 #endif
+

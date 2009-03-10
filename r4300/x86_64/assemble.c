@@ -1,32 +1,31 @@
-/**
- * Mupen64 - r4300/x86_64/assemble.c
- * Copyright (C) 2007 Richard Goedeken, Hacktarux
- * Based on code written by Hacktarux, Copyright (C) 2002
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * Forum homepage: http://www.emutalk.net/forumdisplay.php?f=50
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - assemble.c                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2007 Richard Goedeken (Richard42)                       *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "assemble.h"
+
 #include "../recomph.h"
-#include <malloc.h>
-#include <stdio.h>
 #include "../r4300.h"
 
 /* Placeholder for RIP-relative offsets is maxmimum 32-bit signed value.
@@ -70,7 +69,7 @@ static void add_jump(unsigned int pc_addr, unsigned int mi_addr, unsigned int ab
   jumps_number++;
 }
 
-void add_riprelative(unsigned int pc_addr, unsigned int extra_bytes, void *global_64_ptr)
+static void add_riprelative(unsigned int pc_addr, unsigned int extra_bytes, void *global_64_ptr)
 {
   if (riprel_number == max_riprel_number)
   {
@@ -190,6 +189,50 @@ void passe2(precomp_instr *dest, int start, int end, precomp_block *block)
 
 }
 
+static void put8(unsigned char octet)
+{
+  (*inst_pointer)[code_length] = octet;
+  code_length++;
+  if (code_length == max_code_length)
+  {
+    max_code_length += 8192;
+    *inst_pointer = realloc(*inst_pointer, max_code_length);
+  }
+}
+
+static void put16(unsigned short word)
+{
+  if ((code_length + 2) >= max_code_length)
+  {
+    max_code_length += 8192;
+    *inst_pointer = realloc(*inst_pointer, max_code_length);
+  }
+  *((unsigned short *) (*inst_pointer + code_length)) = word;
+  code_length += 2;
+}
+
+static void put32(unsigned int dword)
+{
+  if ((code_length + 4) >= max_code_length)
+  {
+    max_code_length += 8192;
+    *inst_pointer = realloc(*inst_pointer, max_code_length);
+  }
+  *((unsigned int *) (*inst_pointer + code_length)) = dword;
+  code_length += 4;
+}
+
+static void put64(unsigned long long qword)
+{
+  if ((code_length + 8) >= max_code_length)
+  {
+    max_code_length += 8192;
+    *inst_pointer = realloc(*inst_pointer, max_code_length);
+  }
+  *((unsigned long long *) (*inst_pointer + code_length)) = qword;
+  code_length += 8;
+}
+
 void code_align16(void)
 {
   int bytes = 0;
@@ -226,64 +269,20 @@ void code_align16(void)
 
 }
 
-inline void put8(unsigned char octet)
-{
-  (*inst_pointer)[code_length] = octet;
-  code_length++;
-  if (code_length == max_code_length)
-  {
-    max_code_length += 8192;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
-  }
-}
+static unsigned int g_jump_start8 = 0;
+static unsigned int g_jump_start32 = 0;
 
-inline void put16(unsigned short word)
-{
-  if ((code_length + 2) >= max_code_length)
-  {
-    max_code_length += 8192;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
-  }
-  *((unsigned short *) (*inst_pointer + code_length)) = word;
-  code_length += 2;
-}
-
-inline void put32(unsigned int dword)
-{
-  if ((code_length + 4) >= max_code_length)
-  {
-    max_code_length += 8192;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
-  }
-  *((unsigned int *) (*inst_pointer + code_length)) = dword;
-  code_length += 4;
-}
-
-inline void put64(unsigned long long qword)
-{
-  if ((code_length + 8) >= max_code_length)
-  {
-    max_code_length += 8192;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
-  }
-  *((unsigned long long *) (*inst_pointer + code_length)) = qword;
-  code_length += 8;
-}
-
-unsigned int g_jump_start8 = 0;
-unsigned int g_jump_start32 = 0;
-
-void jump_start_rel8()
+void jump_start_rel8(void)
 {
   g_jump_start8 = code_length;
 }
 
-void jump_start_rel32()
+void jump_start_rel32(void)
 {
   g_jump_start32 = code_length;
 }
 
-void jump_end_rel8()
+void jump_end_rel8(void)
 {
   unsigned int jump_end = code_length;
   int jump_vec = jump_end - g_jump_start8;
@@ -299,7 +298,7 @@ void jump_end_rel8()
   code_length = jump_end;
 }
 
-void jump_end_rel32()
+void jump_end_rel32(void)
 {
   unsigned int jump_end = code_length;
   int jump_vec = jump_end - g_jump_start32;
@@ -1127,23 +1126,23 @@ void jmp(unsigned int mi_addr)
    add_jump(code_length-8, mi_addr, 1);
 }
 
-void cdq()
+void cdq(void)
 {
    put8(0x99);
 }
 
-void cwde()
+void cwde(void)
 {
    put8(0x98);
 }
 
-void cbw()
+void cbw(void)
 {
    put8(0x66);
    put8(0x98);
 }
 
-void ret()
+void ret(void)
 {
    put8(0xC3);
 }
@@ -1803,7 +1802,7 @@ void xor_reg8_imm8(int reg8, unsigned char imm8)
    put8(imm8);
 }
 
-void nop()
+void nop(void)
 {
    put8(0x90);
 }
@@ -1953,7 +1952,7 @@ void fstp_preg64_dword(int reg64)
    put8(0x18 + reg64);
 }
 
-void fchs()
+void fchs(void)
 {
    put8(0xD9);
    put8(0xE0);
@@ -2069,13 +2068,13 @@ void fmul_preg64_qword(int reg64)
    put8(0x08 + reg64);
 }
 
-void fsqrt()
+void fsqrt(void)
 {
    put8(0xD9);
    put8(0xFA);
 }
 
-void fabs_()
+void fabs_(void)
 {
    put8(0xD9);
    put8(0xE1);

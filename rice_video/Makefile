@@ -1,11 +1,36 @@
+#/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# *   Mupen64plus - Makefile                                                *
+# *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+# *   Copyright (C) 2007-2008 DarkJeztr Tillin9 Richard42                   *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU General Public License as published by  *
+# *   the Free Software Foundation; either version 2 of the License, or     *
+# *   (at your option) any later version.                                   *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU General Public License for more details.                          *
+# *                                                                         *
+# *   You should have received a copy of the GNU General Public License     *
+# *   along with this program; if not, write to the                         *
+# *   Free Software Foundation, Inc.,                                       *
+# *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 # Makefile for RiceVideoLinux, in Mupen64Plus
 
 # include pre-make file with a bunch of definitions
-include ../pre.mk
+USES_GTK2 = true
+ifeq ($(WIN32),1)
+  include ../pre.mk.win32
+else
+  include ../pre.mk
+endif
 
 # local CFLAGS, LIBS, and LDFLAGS
-CFLAGS += -DUSE_GTK `sdl-config --cflags` $(GTK_FLAGS) -fpic -DPIC -Wall
-LDFLAGS	+= -L/usr/X11R6/lib `sdl-config --libs` -lGL -shared -Wl,-Bsymbolic
+CFLAGS += $(SDL_FLAGS) -fpic -DPIC -Wall
+LDFLAGS	+= $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
 # set options
 
@@ -15,7 +40,7 @@ endif
 
 # list of object files to generate
 OBJECTS = OGLGraphicsContext.o \
-    Debugger.o \
+	Debugger.o \
 	Video.o \
 	Config.o \
 	GraphicsContext.o \
@@ -26,7 +51,6 @@ OBJECTS = OGLGraphicsContext.o \
 	TextureManager.o \
 	RenderBase.o \
 	FrameBuffer.o \
-	messagebox.o \
 	Texture.o \
 	TextureFilters_2xsai.o \
 	TextureFilters_hq2x.o \
@@ -51,7 +75,6 @@ OBJECTS = OGLGraphicsContext.o \
 	ConvertImage16.o \
 	DecodedMux.o \
 	RenderTexture.o \
-	support.o \
 	liblinux/BMGUtils.o \
 	liblinux/pngread.o \
 	liblinux/png.o \
@@ -85,6 +108,13 @@ OBJECTS = OGLGraphicsContext.o \
 	liblinux/inffast.o \
 	OGLRenderExt.o
 
+GTKOBJECTS = \
+	gui_gtk2/messagebox_gtk2.o
+
+LDFLAGS += $(GTK_LIBS)
+CFLAGS += -DUSE_GTK $(GTK_FLAGS)
+OBJECTS += $(GTKOBJECTS)
+
 # build targets
 targets:
 	@echo "RiceVideoLinux N64 Video plugin makefile. "
@@ -98,7 +128,7 @@ targets:
 	@echo "    DBG=1      == turn on debugging functions"
 	@echo "    DBGSYM=1   == add debugging symbols to binaries"
 
-all: ricevideo.so
+all: version.h ricevideo.so
 
 ricevideo.so: $(OBJECTS)
 	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
@@ -110,6 +140,10 @@ clean:
 rebuild: clean all
 
 # build rules
+version.h: FORCE
+	@sed 's|@MUPEN_VERSION@|\"$(MUPEN_VERSION)\"| ; s|@PLUGIN_VERSION@|\"$(PLUGIN_VERSION)\"|' \
+        ../main/version.template > version.h
+	@$(MV) version.h ../main/version.h
 
 .cpp.o:
 	$(CXX) -o $*.o $(CFLAGS) -c $<
@@ -117,4 +151,5 @@ rebuild: clean all
 .c.o:
 	$(CC) -o $*.o $(CFLAGS) -c $<
 
+FORCE:
 

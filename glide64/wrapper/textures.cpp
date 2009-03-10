@@ -1,13 +1,32 @@
-#ifdef _WIN32
-#include <windows.h>
-//#include <gl/gl.h>
-#else // _WIN32
-#include "../winlnxdefs.h"
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - glide64/wrapper/textures.cpp                            *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2005-2006 Hacktarux                                     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <stdlib.h>
-#endif // _WIN32
+#include <stdio.h>
+
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "glide.h"
 #include "main.h"
-#include <stdio.h>
 
 /* Napalm extensions to GrTextureFormat_t */
 #define GR_TEXFMT_ARGB_CMP_FXT1           0x11
@@ -41,20 +60,18 @@ typedef struct _texlist
 static int nbTex = 0;
 static texlist *list = NULL;
 
-extern PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
-extern PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
 void remove_tex(unsigned int idmin, unsigned int idmax)
 {
-    unsigned int *t;
+    GLuint *t;
     int n = 0;
     texlist *aux = list;
   int sz = nbTex;
     if (aux == NULL) return;
-    t = (unsigned int*)malloc(sz * sizeof(int));
+    t = (GLuint*)malloc(sz * sizeof(int));
     while (aux && aux->id >= idmin && aux->id < idmax)
     {
     if (n >= sz)
-      t = (unsigned int *) realloc(t, ++sz*sizeof(int));
+      t = (GLuint*)realloc(t, ++sz*sizeof(int));
         t[n++] = aux->id;
         aux = aux->next;
         free(list);
@@ -67,7 +84,7 @@ void remove_tex(unsigned int idmin, unsigned int idmax)
         {
             texlist *aux2 = aux->next->next;
       if (n >= sz)
-        t = (unsigned int *) realloc(t, ++sz*sizeof(int));
+        t = (GLuint*)realloc(t, ++sz*sizeof(int));
             t[n++] = aux->next->id;
             free(aux->next);
             aux->next = aux2;
@@ -341,6 +358,7 @@ grTexDownloadMipMap( GrChipID_t tmu,
     int factor;
     int glformat = GL_RGBA8;
     int gltexfmt, glpixfmt, glpackfmt;
+    gltexfmt = glpixfmt = glpackfmt = 0;
     LOG("grTexDownloadMipMap(%d,%d,%d)\r\n", tmu, startAddress, evenOdd);
     if (info->largeLodLog2 != info->smallLodLog2) display_warning("grTexDownloadMipMap : loading more than one LOD");
 
@@ -791,3 +809,4 @@ grTexClampMode(
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t1);
     }
 }
+

@@ -1,4 +1,4 @@
-#include <malloc.h>
+#include <stdlib.h>
 #include "DepthBuffer.h"
 #include "Types.h"
 
@@ -164,3 +164,4 @@ DepthBuffer *DepthBuffer_FindBuffer( u32 address )
 
     return NULL;
 }
+

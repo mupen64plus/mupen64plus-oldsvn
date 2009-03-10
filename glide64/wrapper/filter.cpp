@@ -1,13 +1,31 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - glide64/wrapper/filter.cpp                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2005-2006 Hacktarux                                     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef _WIN32
 #include "../winlnxdefs.h"
-#endif // _WIN32
 
 #include "main.h"
 #include "2xsai.h"
-
 
 // this filter is crap, it's just some stuffs i tried to see what they're doing
 // it's blurring texture edges which is good for some textures, bad for some others.
@@ -347,3 +365,4 @@ unsigned char *filter(unsigned char *source, int width, int height, int *width2,
     }
     return NULL;
 }
+

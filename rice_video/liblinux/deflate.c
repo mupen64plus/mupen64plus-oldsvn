@@ -1348,3 +1348,4 @@ local block_state deflate_slow(s, flush)
     FLUSH_BLOCK(s, flush == Z_FINISH);
     return flush == Z_FINISH ? finish_done : block_done;
 }
+

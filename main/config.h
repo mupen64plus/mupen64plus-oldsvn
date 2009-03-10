@@ -37,3 +37,4 @@ void config_put_number( const char *key, int value );
 void config_put_bool( const char *key, int value );
 
 #endif // __CONFIG_H__
+

@@ -891,7 +891,7 @@ typedef struct {
     int pal_crc32;
     char *foldername;
     //char name[40];
-    char RGBNameTail[20];
+    char RGBNameTail[23];
     char AlphaNameTail[20];
     TextureType type;
     bool        bSeparatedAlpha;
@@ -1330,8 +1330,8 @@ void InitHiresTextures(void)
 {
 if( options.bLoadHiResTextures )
     {
-    printf("Texture loading option is enabled");
-    printf("Finding all hires textures");
+    printf("Texture loading option is enabled\n");
+    printf("Finding all hires textures\n");
     FindAllHiResTextures();
     }
 }
@@ -1340,8 +1340,8 @@ void InitTextureDump(void)
 {
 if( options.bDumpTexturesToFiles )
     {
-    printf("Texture dump option is enabled");
-    printf("Finding all dumpped textures");
+    printf("Texture dump option is enabled\n");
+    printf("Finding all dumpped textures\n");
     FindAllDumpedTextures();
     }
 }

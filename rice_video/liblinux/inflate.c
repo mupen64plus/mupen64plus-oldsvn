@@ -364,3 +364,4 @@ z_streamp z;
     return Z_STREAM_ERROR;
   return inflate_blocks_sync_point(z->state->blocks);
 }
+

@@ -1,31 +1,23 @@
-/**
- * Mupen64 - util.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - util.c                                                  *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
  * Provides common utilities to the rest of the code:
@@ -35,13 +27,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <SDL.h>
 
+#include "rom.h"
 #include "util.h"
+#include "translate.h"
 
 /** trim
  *    Removes leading and trailing whitespace from str. Function modifies str
@@ -49,23 +44,40 @@
  */
 char *trim(char *str)
 {
+    int i;
     char *p = str;
 
     while (isspace(*p))
         p++;
 
-    if(str != p)
-        strcpy(str, p);
+    if (str != p)
+        {
+        for (i = 0; i <= strlen(p); ++i)
+            str[i]=p[i];
+        }
 
     p = str + strlen(str) - 1;
     if (p > str)
     {
         while (isspace(*p))
             p--;
-        *(++p) = '\0';
+        p[1] = '\0';
     }
 
     return str;
+}
+
+char* strnstrip(char* string, int size)
+{
+    int counter, place;
+    for (counter = place = 0; counter < size && string[counter] != '\0'; counter++)
+        {
+        string[place] = string[counter];
+        if (string[counter] != ' ')
+            place++;
+        }
+    string[place] = '\0';
+    return string;
 }
 
 /** event_to_str
@@ -118,44 +130,44 @@ char *event_to_str(const SDL_Event *event)
  *    Returns 1 if the specified joystick event is currently active. This
  *    function expects an input string of the same form output by event_to_str.
  */
-int event_active(const char *event_str)
+int event_active(const char* event_str)
 {
     char device, joy_input_type, axis_direction;
     int dev_number, input_number, input_value;
     SDL_Joystick *joystick = NULL;
 
-    // empty string
-    if(!event_str || strlen(event_str) == 0) return 0;
+    /* Empty string. */
+    if(!event_str||strlen(event_str)==0)
+        return 0;
 
-    // joystick event
-    if(event_str[0] == 'J')
-    {
-        // parse string depending on type of joystick input
-        switch(event_str[2])
+    /* Parse string depending on type of joystick input. */
+    if(event_str[0]=='J')
         {
-            // axis
+        switch(event_str[2])
+            {
+            /* Axis. */
             case 'A':
                 sscanf(event_str, "%c%d%c%d%c", &device, &dev_number,
                        &joy_input_type, &input_number, &axis_direction);
                 break;
-            // hat
+            /* Hat. ??? */
             case 'H':
                 sscanf(event_str, "%c%d%c%dV%d", &device, &dev_number,
                        &joy_input_type, &input_number, &input_value);
                 break;
-            // button
+            /* Button. */
             case 'B':
                 sscanf(event_str, "%c%d%c%d", &device, &dev_number,
                        &joy_input_type, &input_number);
                 break;
-        }
+            }
 
         joystick = SDL_JoystickOpen(dev_number);
         SDL_JoystickUpdate();
         switch(joy_input_type)
-        {
+            {
             case 'A':
-                if(axis_direction == '-')
+                if(axis_direction=='-')
                     return SDL_JoystickGetAxis(joystick, input_number) < -15000;
                 else
                     return SDL_JoystickGetAxis(joystick, input_number) > 15000;
@@ -167,17 +179,14 @@ int event_active(const char *event_str)
             case 'H':
                 return SDL_JoystickGetHat(joystick, input_number) == input_value;
                 break;
-            default:
-                return 0;
-                break;
+            }
         }
-    }
 
-    // keyboard event
-    if(event_str[0] == 'K')
-    {
-        // TODO
-    }
+    /* TODO: Keyboard event. */
+    /* if(event_str[0]=='K') */
+
+    /* Undefined event. */
+    return 0;
 }
 
 /** key_pressed
@@ -266,6 +275,39 @@ int copyfile(char *src, char *dest)
 
 /** linked list functions **/
 
+/** list_prepend
+ *    Allocates a new list node, attaches it to the beginning of list and sets the
+ *    node data pointer to data.
+ *    Returns - the new list node.
+ */
+list_node_t *list_prepend(list_t *list, void *data)
+{
+    list_node_t *new_node,
+                *first_node;
+
+    if(list_empty(*list))
+    {
+        (*list) = malloc(sizeof(list_node_t));
+        (*list)->data = data;
+        (*list)->prev = NULL;
+        (*list)->next = NULL;
+        return *list;
+    }
+
+    // create new node and prepend it to the list
+    first_node = *list;
+    new_node = malloc(sizeof(list_node_t));
+    first_node->prev = new_node;
+    *list = new_node;
+
+    // set members in new node and return it
+    new_node->data = data;
+    new_node->prev = NULL;
+    new_node->next = first_node;
+
+    return new_node;
+}
+
 /** list_append
  *    Allocates a new list node, attaches it to the end of list and sets the
  *    node data pointer to data.
@@ -335,12 +377,12 @@ void list_delete(list_t *list)
         if(prev != NULL)
             free(prev);
 
-        // if we're on the last node, delete it
-        if(curr->next == NULL)
-            free(curr);
-        else
-            prev = curr;
+        prev = curr;
     }
+    
+    // the last node wasn't deleted, do it now
+    if (prev != NULL)
+        free(prev);
 
     *list = NULL;
 }
@@ -409,6 +451,23 @@ void *list_nth_node_data(list_t list, int n)
     return curr != NULL ? curr->data : curr;
 }
 
+/** list_first_node
+ *    Returns the first node in list.
+ */
+list_node_t *list_first_node(list_t list)
+{
+    return list;
+}
+
+/** list_first_data
+ *    Returns the data pointer of the first node in list.
+ */
+void *list_first_data(list_t list)
+{
+    if(list) return list->data;
+    return NULL;
+}
+
 /** list_last_node
  *    Returns the last node in list.
  */
@@ -421,6 +480,16 @@ list_node_t *list_last_node(list_t list)
     }
 
     return list;
+}
+
+/** list_last_data
+ *    Returns the data pointer of the last node in list.
+ */
+void *list_last_data(list_t list)
+{
+    list_node_t *node = list_last_node(list);
+    if(node) return node->data;
+    return NULL;
 }
 
 /** list_empty
@@ -461,4 +530,210 @@ list_node_t *list_find_node(list_t list, void *data)
 
     return node;
 }
+
+void countrycodestring(unsigned short countrycode, char *string)
+{
+    switch (countrycode)
+    {
+    case 0:    /* Demo */
+        strcpy(string, tr("Demo"));
+        break;
+
+    case '7':  /* Beta */
+        strcpy(string, tr("Beta"));
+        break;
+
+    case 0x41: /* Japan / USA */
+        strcpy(string, tr("USA/Japan"));
+        break;
+
+    case 0x44: /* Germany */
+        strcpy(string, tr("Germany"));
+        break;
+
+    case 0x45: /* USA */
+        strcpy(string, tr("USA"));
+        break;
+
+    case 0x46: /* France */
+        strcpy(string, tr("France"));
+        break;
+
+    case 'I':  /* Italy */
+        strcpy(string, tr("Italy"));
+        break;
+
+    case 0x4A: /* Japan */
+        strcpy(string, tr("Japan"));
+        break;
+
+    case 'S':  /* Spain */
+        strcpy(string, tr("Spain"));
+        break;
+
+    case 0x55: case 0x59:  /* Australia */
+        sprintf(string, tr("Australia (0x%2.2X)"), countrycode);
+        break;
+
+    case 0x50: case 0x58: case 0x20:
+    case 0x21: case 0x38: case 0x70:
+        sprintf(string, tr("Europe (0x%02X)"), countrycode);
+        break;
+
+    default:
+        sprintf(string, tr("Unknown (0x%02X)"), countrycode);
+        break;
+    }
+}
+
+void compressionstring(unsigned char compressiontype, char *string)
+{
+    switch (compressiontype)
+    {
+    case UNCOMPRESSED:
+        strcpy(string, tr("Uncompressed"));
+        break;
+    case ZIP_COMPRESSION:
+        strcpy(string, tr("Zip"));
+        break;
+    case GZIP_COMPRESSION:
+        strcpy(string, tr("Gzip"));
+        break;
+    case BZIP2_COMPRESSION:
+        strcpy(string, tr("Bzip2"));
+        break;
+    case LZMA_COMPRESSION:
+        strcpy(string, tr("LZMA"));
+        break;
+    case SZIP_COMPRESSION:
+        strcpy(string, tr("7zip"));
+        break;
+    default:
+        string[0] = '\0';
+    }
+}
+
+void imagestring(unsigned char imagetype, char *string)
+{
+    switch (imagetype)
+    {
+    case Z64IMAGE:
+        strcpy(string, tr(".z64 (native)"));
+        break;
+    case V64IMAGE:
+        strcpy(string, tr(".v64 (byteswapped)"));
+        break;
+    case N64IMAGE:
+        strcpy(string, tr(".n64 (wordswapped)"));
+        break;
+    default:
+        string[0] = '\0';
+    }
+}
+
+void cicstring(unsigned char cic, char *string)
+{
+    switch (cic)
+    {
+    case CIC_NUS_6101:
+        strcpy(string, tr("CIC-NUS-6101"));
+        break;
+    case CIC_NUS_6102:
+        strcpy(string, tr("CIC-NUS-6102"));
+        break;
+    case CIC_NUS_6103:
+        strcpy(string, tr("CIC-NUS-6103"));
+        break;
+    case CIC_NUS_6105:
+        strcpy(string, tr("CIC-NUS-6105"));
+        break;
+    case CIC_NUS_6106:
+        strcpy(string, tr("CIC-NUS-6106"));
+        break;
+    default:
+        string[0] = '\0';
+    }
+}
+
+void rumblestring(unsigned char rumble, char *string)
+{
+    switch (rumble)
+    {
+    case 1:
+        strcpy(string, tr("Yes"));
+        break;
+    case 0:
+        strcpy(string, tr("No"));
+        break;
+    default:
+        string[0] = '\0';
+    }
+}
+
+void savestring(unsigned char savetype, char *string)
+{
+    switch (savetype)
+    {
+    case EEPROM_4KB:
+        strcpy(string, tr("Eeprom 4KB"));
+        break;
+    case EEPROM_16KB:
+        strcpy(string, tr("Eeprom 16KB"));
+        break;
+    case SRAM:
+        strcpy(string, tr("SRAM"));
+        break;
+    case FLASH_RAM:
+        strcpy(string, tr("Flash RAM"));
+        break;
+    case CONTROLLER_PACK:
+        strcpy(string, tr("Controller Pack"));
+        break;
+    case NONE:
+        strcpy(string, tr("None"));
+        break;
+    default:
+        string[0] = '\0';
+    }
+}
+
+void playersstring(unsigned char players, char *string)
+{
+    if (players > 7)
+        {
+        string[0] = '\0';
+        return;
+        }
+
+    unsigned short netplay=0;
+    if (players > 4)
+        {
+        players-=3;
+        netplay=1;
+        }
+
+    sprintf(string, "%d %s", players, (netplay) ? "Netplay" : "");
+}
+
+char* dirfrompath(const char* string)
+{
+    int stringlength, counter;
+    char* buffer;
+
+    stringlength = strlen(string);
+
+    for(counter = stringlength; counter > 0; --counter)
+        {
+        if (string[counter-1] == '/')
+            break;
+        }
+
+    buffer = (char*)malloc((counter+1)*sizeof(char));
+    snprintf(buffer, counter+1, "%s", string);
+    buffer[counter] = '\0';
+
+    return buffer;
+}
+
+
 

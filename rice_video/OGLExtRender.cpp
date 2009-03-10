@@ -16,8 +16,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "stdafx.h"
-#include "glh_genext.h"
 
 void COGLExtRender::Initialize(void)
 {
@@ -41,7 +43,7 @@ void COGLExtRender::BindTexture(GLuint texture, int unitno)
         {
             if( m_curBoundTex[unitno] != texture )
             {
-                glActiveTextureARB(GL_TEXTURE0_ARB+unitno);
+                glActiveTexture(GL_TEXTURE0_ARB+unitno);
                 glBindTexture(GL_TEXTURE_2D,texture);
                 m_curBoundTex[unitno] = texture;
             }
@@ -57,7 +59,7 @@ void COGLExtRender::DisBindTexture(GLuint texture, int unitno)
 {
     if( m_bEnableMultiTexture )
     {
-        glActiveTextureARB(GL_TEXTURE0_ARB+unitno);
+        glActiveTexture(GL_TEXTURE0_ARB+unitno);
         glBindTexture(GL_TEXTURE_2D, 0);    //Not to bind any texture
     }
     else
@@ -72,7 +74,7 @@ void COGLExtRender::TexCoord2f(float u, float v)
         {
             if( m_textureUnitMap[i] >= 0 )
             {
-                glMultiTexCoord2fARB(GL_TEXTURE0_ARB+i, u, v);
+                glMultiTexCoord2f(GL_TEXTURE0_ARB+i, u, v);
             }
         }
     }
@@ -88,7 +90,7 @@ void COGLExtRender::TexCoord(TLITVERTEX &vtxInfo)
         {
             if( m_textureUnitMap[i] >= 0 )
             {
-                glMultiTexCoord2fvARB(GL_TEXTURE0_ARB+i, &(vtxInfo.tcord[m_textureUnitMap[i]].u));
+                glMultiTexCoord2fv(GL_TEXTURE0_ARB+i, &(vtxInfo.tcord[m_textureUnitMap[i]].u));
             }
         }
     }
@@ -152,7 +154,7 @@ void COGLExtRender::SetTextureUFlag(TextureUVFlag dwFlag, uint32 dwTile)
     {
         if( m_textureUnitMap[textureNo] == tex )
         {
-            glActiveTextureARB(GL_TEXTURE0_ARB+textureNo);
+            glActiveTexture(GL_TEXTURE0_ARB+textureNo);
             COGLTexture* pTexture = g_textures[(gRSP.curTile+tex)&7].m_pCOGLTexture;
             if( pTexture ) 
             {
@@ -212,7 +214,7 @@ void COGLExtRender::EnableTexUnit(int unitno, BOOL flag)
     if( m_texUnitEnabled[unitno] != flag )
     {
         m_texUnitEnabled[unitno] = flag;
-        glActiveTextureARB(GL_TEXTURE0_ARB+unitno);
+        glActiveTexture(GL_TEXTURE0_ARB+unitno);
         if( flag == TRUE )
             glEnable(GL_TEXTURE_2D);
         else
@@ -233,7 +235,7 @@ void COGLExtRender::ApplyTextureFilter()
             if( mtex[i] != m_curBoundTex[i] )
             {
                 mtex[i] = m_curBoundTex[i];
-                glActiveTextureARB(GL_TEXTURE0_ARB+i);
+                glActiveTexture(GL_TEXTURE0_ARB+i);
                 minflag[i] = m_dwMinFilter;
                 magflag[i] = m_dwMagFilter;
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iMinFilter);
@@ -244,13 +246,13 @@ void COGLExtRender::ApplyTextureFilter()
                 if( minflag[i] != (unsigned int)m_dwMinFilter )
                 {
                     minflag[i] = m_dwMinFilter;
-                    glActiveTextureARB(GL_TEXTURE0_ARB+i);
+                    glActiveTexture(GL_TEXTURE0_ARB+i);
                     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iMinFilter);
                 }
                 if( magflag[i] != (unsigned int)m_dwMagFilter )
                 {
                     magflag[i] = m_dwMagFilter;
-                    glActiveTextureARB(GL_TEXTURE0_ARB+i);
+                    glActiveTexture(GL_TEXTURE0_ARB+i);
                     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iMagFilter);
                 }
             }
@@ -263,3 +265,4 @@ void COGLExtRender::SetTextureToTextureUnitMap(int tex, int unit)
     if( unit < 8 && (tex >= -1 || tex <= 1))
         m_textureUnitMap[unit] = tex;
 }
+

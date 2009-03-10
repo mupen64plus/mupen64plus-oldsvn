@@ -18,8 +18,6 @@
 #ifndef __MESSAGEBOX_H__
 #define __MESSAGEBOX_H__
 
-#include <gtk/gtk.h>
-
 /** flags **/
 // The message box contains three push buttons: Abort, Retry, and Ignore.
 #define MB_ABORTRETRYIGNORE     (0x00000001)
@@ -60,3 +58,4 @@ extern "C"
 #endif
 
 #endif  // __MESSAGEBOX_H__
+

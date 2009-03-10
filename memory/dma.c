@@ -1,53 +1,48 @@
-/**
- * Mupen64 - dma.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - dma.c                                                   *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "dma.h"
 #include "memory.h"
-#include "../main/main.h"
-#include "../main/rom.h"
-#include <stdio.h>
+#include "pif.h"
+#include "flashram.h"
+
 #include "../r4300/r4300.h"
 #include "../r4300/interupt.h"
 #include "../r4300/macros.h"
-#include <malloc.h>
-#include "pif.h"
-#include "flashram.h"
-#include "../main/guifuncs.h"
 #include "../r4300/ops.h"
 #include "../main/inputrecording.h"
+
+#include "../main/config.h"
+#include "../main/main.h"
+#include "../main/rom.h"
 
 static unsigned char sram[0x8000];
 
 void dma_pi_read()
 {
     int i;
-
+   
     if (pi_register.pi_cart_addr_reg >= 0x08000000
     && pi_register.pi_cart_addr_reg < 0x08010000)
     {
@@ -55,7 +50,6 @@ void dma_pi_read()
         {
             char *filename;
             FILE *f;
-
             if (g_EmulatorPlayback == 1)
             {
             	 filename = malloc(strlen(get_savespath())+
@@ -71,21 +65,11 @@ void dma_pi_read()
                 strcat(filename, ROM_SETTINGS.goodname);
             }
             strcat(filename, ".sra");
-            if (g_UseSaveData == 1)
+            f = fopen(filename, "rb");
+            if (f)
             {
-                f = fopen(filename, "rb");
-                if (f)
-                {
-                    fread(sram, 1, 0x8000, f);
-                    fclose(f);
-                }
-                else
-                {
-                    for (i=0; i<0x8000; i++)
-                    {
-                        sram[i] = 0;
-                    }
-                }            
+                fread(sram, 1, 0x8000, f);
+                fclose(f);
             }
             else
             {
@@ -99,26 +83,16 @@ void dma_pi_read()
                 sram[((pi_register.pi_cart_addr_reg-0x08000000)+i)^S8] =
                 ((unsigned char*)rdram)[(pi_register.pi_dram_addr_reg+i)^S8];
             }
-            
-            if (g_UseSaveData == 1)
+            f = fopen(filename, "wb");
+            if (f == NULL)
             {
-                f = fopen(filename, "wb");
-                if (f == NULL)
-                {
-                    printf("Warning: couldn't open flash ram file '%s' for writing.\n", filename);
-                }
-                else
-                {
-                    fwrite(sram, 1, 0x8000, f);
-                    fclose(f);
-                }
+                 printf("Warning: couldn't open flash ram file '%s' for writing.\n", filename);
             }
             else
             {
                 fwrite(sram, 1, 0x8000, f);
                 fclose(f);
             }
-                        
             free(filename);
             use_flashram = -1;
         }
@@ -165,21 +139,12 @@ void dma_pi_write()
                     strcat(filename, ROM_SETTINGS.goodname);
                 }
                 strcat(filename, ".sra");
-                if (g_UseSaveData == 1)
-                {            
-                    f = fopen(filename, "rb");
-                    if (f)
-                    {
-                        fread(sram, 1, 0x8000, f);
-                        fclose(f);
-                    }
-                    else
-                    {
-                        for (i=0; i<0x8000; i++)
-                        {
-                            sram[i] = 0x0;
-                        }
-                    }
+                f = fopen(filename, "rb");
+                
+                if (f)
+                {
+                    fread(sram, 1, 0x8000, f);
+                    fclose(f);
                 }
                 else
                 {
@@ -187,7 +152,7 @@ void dma_pi_write()
                     {
                         sram[i] = 0x0;
                     }
-                }                
+                }
                 
                 free(filename);
                 
@@ -281,17 +246,36 @@ void dma_pi_write()
 
     if ((debug_count+Count) < 0x100000)
     {
+        
         switch(CIC_Chip)
         {
             case 1:
             case 2:
             case 3:
             case 6:
-                rdram[0x318/4] = 0x800000;
+            {
+                if ( config_get_bool( "NoMemoryExpansion", 0 ) )
+                {
+                    rdram[0x318/4] = 0x400000;
+                }
+                else
+                {
+                    rdram[0x318/4] = 0x800000;
+                }
                 break;
+            }
             case 5:
-                rdram[0x3F0/4] = 0x800000;
+            {
+                if ( config_get_bool( "NoMemoryExpansion", 0 ) )
+                {
+                    rdram[0x3F0/4] = 0x400000;
+                }
+                else
+                {
+                    rdram[0x3F0/4] = 0x800000;
+                }
                 break;
+            }
         }
     }
 
@@ -301,7 +285,7 @@ void dma_pi_write()
     
     return;
 }
-
+    
 void dma_sp_write()
 {
     int i;
@@ -386,3 +370,4 @@ void dma_si_read()
     update_count();
     add_interupt_event(SI_INT, /*0x100*/0x900);
 }
+

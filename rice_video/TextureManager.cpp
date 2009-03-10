@@ -1040,6 +1040,9 @@ void CTextureManager::ExpandTextureT(TxtrCacheEntry * pEntry)
 
 void CTextureManager::ClampS32(uint32 *array, uint32 width, uint32 towidth, uint32 arrayWidth, uint32 rows)
 {
+    if ((int) width <= 0 || (int) towidth < 0)
+        return;
+
     for( uint32 y = 0; y<rows; y++ )
     {
         uint32* line = array+y*arrayWidth;
@@ -1053,6 +1056,9 @@ void CTextureManager::ClampS32(uint32 *array, uint32 width, uint32 towidth, uint
 
 void CTextureManager::ClampS16(uint16 *array, uint32 width, uint32 towidth, uint32 arrayWidth, uint32 rows)
 {
+    if ((int) width <= 0 || (int) towidth < 0)
+        return;
+
     for( uint32 y = 0; y<rows; y++ )
     {
         uint16* line = array+y*arrayWidth;
@@ -1066,6 +1072,9 @@ void CTextureManager::ClampS16(uint16 *array, uint32 width, uint32 towidth, uint
 
 void CTextureManager::ClampT32(uint32 *array, uint32 height, uint32 toheight, uint32 arrayWidth, uint32 cols)
 {
+    if ((int) height <= 0 || (int) toheight < 0)
+        return;
+
     uint32* linesrc = array+arrayWidth*(height-1);
     for( uint32 y = height; y<toheight; y++ )
     {
@@ -1079,6 +1088,9 @@ void CTextureManager::ClampT32(uint32 *array, uint32 height, uint32 toheight, ui
 
 void CTextureManager::ClampT16(uint16 *array, uint32 height, uint32 toheight, uint32 arrayWidth, uint32 cols)
 {
+    if ((int) height <= 0 || (int) toheight < 0)
+        return;
+
     uint16* linesrc = array+arrayWidth*(height-1);
     for( uint32 y = height; y<toheight; y++ )
     {
@@ -1527,3 +1539,4 @@ void ConvertTextureRGBAtoI(TxtrCacheEntry* pEntry, bool alpha)
         }
         pEntry->pTexture->EndUpdate(&srcInfo);  }
 }
+

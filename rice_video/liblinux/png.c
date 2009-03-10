@@ -803,3 +803,4 @@ png_mmx_support(void)
 }
 #endif
 #endif /* PNG_1_0_X */
+

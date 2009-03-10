@@ -12,9 +12,10 @@
 *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *   GNU General Public License for more details.
 *
-*   You should have received a copy of the GNU General Public License
-*   along with this program; if not, write to the Free Software
-*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public
+*   Licence along with this program; if not, write to the Free
+*   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+*   Boston, MA  02110-1301, USA
 */
 
 //****************************************************************
@@ -211,8 +212,8 @@ extern unsigned long BMASK;
 #define WMASK   0x3FFFFF
 #define DMASK   0x1FFFFF
 
-extern long num_tmu;
-extern long max_tex_size;
+extern int num_tmu;
+extern int max_tex_size;
 extern long sup_mirroring;
 extern BOOL sup_32bit_tex;
 extern DWORD update_screen_count;
@@ -488,7 +489,7 @@ extern GRSTIPPLE            grStipplePatternExt;
 #endif
 
 void ReadSettings ();
-void ReadSpecialSettings (char name[21]);
+void ReadSpecialSettings (const char name[21]);
 void WriteSettings ();
 
 /******************************************************************
@@ -750,7 +751,23 @@ EXPORT void CALL FBGetFrameBufferInfo(void *pinfo);
 *******************************************************************/
 EXPORT void CALL SetConfigDir( char *configDir );
 
+/******************************************************************
+   NOTE: THIS HAS BEEN ADDED FOR MUPEN64PLUS AND IS NOT PART OF THE
+         ORIGINAL SPEC
+  Function: SetRenderingCallback
+  Purpose:  Allows emulator to register a callback function that will
+            be called by the graphics plugin just before the the
+            frame buffers are swapped.
+            This was added as a way for the emulator to draw emulator-
+            specific things to the screen, e.g. On-screen display.
+  input:    pointer to callback function. The function expects
+            to receive the current window width and height.
+  output:   none
+*******************************************************************/
+EXPORT void CALL SetRenderingCallback(void (*callback)());
+
 #if defined(__cplusplus)
 }
 #endif
 #endif //_GFX_H_INCLUDED__
+

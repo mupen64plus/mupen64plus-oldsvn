@@ -20,6 +20,7 @@
 
 #include <gtk/gtk.h>
 
-GtkWidget *create_pixmap_d (GtkWidget *widget, gchar **data);
+GtkWidget *create_pixmap_d (GtkWidget *widget, const gchar **data);
 
 #endif // __SUPPORT_H__
+

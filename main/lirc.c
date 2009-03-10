@@ -19,6 +19,7 @@
 #ifdef WITH_LIRC
 
 #include <stdio.h>
+#include <ctype.h>
 #include <sys/poll.h>
 #include <string.h>
 #include <lirc/lirc_client.h>
@@ -27,7 +28,6 @@
 #include "main.h"
 #include "savestates.h"
 #include "plugin.h"
-#include "volume.h"
 
 static struct lirc_config *g_config;
 static int g_lircfd = 0;
@@ -97,16 +97,31 @@ void lircCheckInput(void)
                     stopEmulation();
                 else if(strcmp(c, "FULLSCREEN") == 0)
                     changeWindow();
-                else if(strcmp(c, "PAUSE") == 0)
-                    pauseContinueEmulation();
                 else if(strcmp(c, "MUTE") == 0)
-                    volMute();
+                {
+                    volumeMute();
+                    main_draw_volume_osd();
+                }
                 else if(strcmp(c, "VOL+") == 0)
-                    volChange(2);
+                {
+                    volumeUp();
+                    main_draw_volume_osd();
+                }
                 else if(strcmp(c, "VOL-") == 0)
-                    volChange(-2);
+                {
+                    volumeDown();
+                    main_draw_volume_osd();
+                }
                 else if(strcmp(c, "SCREENSHOT") == 0)
-                    screenshot();
+                    take_next_screenshot();
+                else if(strcmp(c, "SPEED+") == 0)
+                    main_speedup(5);
+                else if(strcmp(c, "SPEED-") == 0)
+                    main_speeddown(5);
+                else if(strcmp(c, "ADVANCE") == 0)
+                    main_advance_one();
+                else if(strcmp(c, "PAUSE") == 0)
+                    main_pause();
                 else
                 {
                     int val = ((int)c[0])-((int) '0');
@@ -120,3 +135,4 @@ void lircCheckInput(void)
 }
 
 #endif //WITH_LIRC
+

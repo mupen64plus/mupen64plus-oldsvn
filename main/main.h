@@ -1,59 +1,69 @@
-/***************************************************************************
- main_gtk.h - Handles the main window and 'glues' it with other windows
-----------------------------------------------------------------------------
-Began                : Fri Nov 8 2002
-Copyright            : (C) 2002 by blight
-Email                : blight@Ashitaka
-****************************************************************************/
-
-/***************************************************************************
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - main.h                                                  *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- ***************************************************************************/
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#include <pthread.h>
-
-#ifndef PATH_MAX
-#  define PATH_MAX 1024
-#endif
+#include <SDL_thread.h>
 
 /* globals */
-extern int autoinc_slot;
-extern int *autoinc_save_slot;
 extern int g_Noask;
 extern int g_NoaskParam;
 extern int g_MemHasBeenBSwapped;
 extern int g_EmulatorRecording;
 extern int g_EmulatorPlayback;
-extern pthread_t g_EmulationThread;
-extern char *g_GfxPlugin;
-extern char *g_AudioPlugin;
-extern char *g_InputPlugin;
-extern char *g_RspPlugin;
+extern int g_TakeScreenshot;
+extern int g_OsdEnabled;
+extern int g_Fullscreen;
+extern int g_EmulatorRunning;
+extern SDL_Thread* g_EmulationThread;
+extern SDL_Thread* g_RomCacheThread;
+extern char* g_GfxPlugin;
+extern char* g_AudioPlugin;
+extern char* g_InputPlugin;
+extern char* g_RspPlugin;
 
-
-char *get_configpath(void);
-char *get_installpath(void);
-char *get_savespath(void);
-char *get_iconspath(void);
-char *get_iconpath(char *iconfile);
-int   gui_enabled(void);
+char* get_configpath(void);
+char* get_installpath(void);
+char* get_savespath(void);
+char* get_iconspath(void);
+char* get_iconpath(const char *iconfile);
+int gui_enabled(void);
 
 void new_frame();
 void new_vi();
 
-int open_rom(const char *filename);
-int close_rom(void);
 void startEmulation(void);
 void stopEmulation(void);
 int pauseContinueEmulation(void);
-void screenshot(void);
 
-#endif // __MAIN_H__
+void main_pause(void);
+void main_advance_one(void);
+void main_speedup(int percent);
+void main_speeddown(int percent);
+void main_draw_volume_osd(void);
+
+void take_next_screenshot(void);
+void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char* format, ...);
+void error_message(const char* format, ...);
+
+#endif /* __MAIN_H__ */
+

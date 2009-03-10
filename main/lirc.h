@@ -22,3 +22,4 @@ extern void lircStop(void);
 extern void lircCheckInput(void);
 
 #endif //__LIRC_H__
+

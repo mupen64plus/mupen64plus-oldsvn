@@ -1,53 +1,66 @@
-/***************************************************************************
-                          plugin.c  -  description
-                             -------------------
-    begin                : Fri Oct 18 2002
-    copyright            : (C) 2002 by blight
-    email                : blight@fuckmicrosoft.com
- ***************************************************************************/
-
-/***************************************************************************
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - plugin.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Richard42 Tillin9                                  *
+ *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- ***************************************************************************/
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <linux/input.h>
 
-#include "plugin.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include "SDL.h"
 
 #include "../main/winlnxdefs.h"
+#include "plugin.h"
 
 #ifdef GUI_SDL
 # include "configdialog_sdl.h"
-#elif defined( GUI_GTK )
+#elif defined(GUI_GTK)
 # include "configdialog_gtk.h"
 #endif
-
-#include "Controller_1.1.h"
 
 #ifdef GUI_GTK
 # include <gtk/gtk.h>
 #endif
-#include "SDL.h"
+
+#ifdef __linux__
+#include <linux/input.h>
+#endif /* __linux__ */
+
 #include <errno.h>
-#include <stdio.h>
-#include <string.h>
 
 /* defines for the force feedback rumble support */
+#ifdef __linux__
 #define BITS_PER_LONG (sizeof(long) * 8)
 #define OFF(x)  ((x)%BITS_PER_LONG)
 #define BIT(x)  (1UL<<OFF(x))
 #define LONG(x) ((x)/BITS_PER_LONG)
 #define test_bit(bit, array)    ((array[LONG(bit)] >> OFF(bit)) & 1)
+#endif //__linux__
+
+#include "winuser.h"
 
 static unsigned short button_bits[] = {
     0x0001,  // R_DPAD
@@ -71,6 +84,8 @@ static unsigned short button_bits[] = {
 static SController controller[4];   // 4 controllers
 static int romopen = 0;         // is a rom opened
 static char configdir[PATH_MAX] = {0};  // holds config dir path
+
+Uint8 myKeyState[SDLK_LAST];
 
 static const char *button_names[] = {
     "DPad R",       // R_DPAD
@@ -152,7 +167,8 @@ void read_configuration( void )
     FILE *f;
     int cont, plugged, plugin, mouse, i, b, dev;
     char line[200], device[200], key_a[200], key_b[200], button_a[200], button_b[200],
-             axis[200], button[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
+             axis[200], axis_a[200], axis_b[200], button[200], hat[200], hat_pos_a[200], hat_pos_b[200], mbutton[200];
+    char chAxisDir;
     const char *p;
     char path[PATH_MAX];
 
@@ -175,7 +191,10 @@ void read_configuration( void )
         {
             controller[i].axis[b].button_a = controller[i].axis[b].button_b = -1;
             controller[i].axis[b].key_a = controller[i].axis[b].key_a = SDLK_UNKNOWN;
-            controller[i].axis[b].axis = -1;
+            controller[i].axis[b].axis_a = -1;
+            controller[i].axis[b].axis_dir_a = 1;
+            controller[i].axis[b].axis_b = -1;
+            controller[i].axis[b].axis_dir_b = 1;
             controller[i].axis[b].hat = -1;
             controller[i].axis[b].hat_pos_a = -1;
             controller[i].axis[b].hat_pos_b = -1;
@@ -238,12 +257,12 @@ void read_configuration( void )
             b = get_button_num_by_name( button );
             if( (b == X_AXIS) || (b == Y_AXIS) )
             {
-                num = sscanf( p, "key( %s , %s ); button( %s , %s ); axis( %s ); hat( %s , %s , %s )",
-                    key_a, key_b, button_a, button_b, axis, hat, hat_pos_a, hat_pos_b );
+                num = sscanf( p, "key( %s , %s ); button( %s , %s ); axis( %s , %s ); hat( %s , %s , %s )",
+                    key_a, key_b, button_a, button_b, axis_a, axis_b, hat, hat_pos_a, hat_pos_b );
 
 #ifdef _DEBUG
-                printf( "%s, %d: num = %d, key_a = %s, key_b = %s, button_a = %s, button_b = %s, axis = %s, hat = %s, hat_pos_a = %s, hat_pos_b = %s\n", __FILE__, __LINE__, num,
-                        key_a, key_b, button_a, button_b, axis, hat, hat_pos_a, hat_pos_b );
+                printf( "%s, %d: num = %d, key_a = %s, key_b = %s, button_a = %s, button_b = %s, axis_a = %s, axis_b = %s, hat = %s, hat_pos_a = %s, hat_pos_b = %s\n", __FILE__, __LINE__, num,
+                        key_a, key_b, button_a, button_b, axis_a, axis_b, hat, hat_pos_a, hat_pos_b );
 #endif
                 if( sscanf( key_a, "%d", (int *)&controller[cont].axis[b - Y_AXIS].key_a ) != 1 )
                     controller[cont].axis[b - Y_AXIS].key_a = -1;
@@ -253,8 +272,37 @@ void read_configuration( void )
                     controller[cont].axis[b - Y_AXIS].button_a = -1;
                 if( sscanf( button_b, "%d", &controller[cont].axis[b - Y_AXIS].button_b ) != 1 )
                     controller[cont].axis[b - Y_AXIS].button_b = -1;
-                if( sscanf( axis, "%d", &controller[cont].axis[b - Y_AXIS].axis ) != 1 )
-                    controller[cont].axis[b - Y_AXIS].axis = -1;
+                num = sscanf( axis_a, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_a, &chAxisDir );
+                if( num != 2 )
+                {
+                    controller[cont].axis[b - Y_AXIS].axis_a = -1;
+                    controller[cont].axis[b - Y_AXIS].axis_dir_a = 0;
+                }
+                else
+                {
+                    if( chAxisDir == '+' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_a = 1;
+                    else if( chAxisDir == '-' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_a = -1;
+                    else
+                        controller[cont].axis[b - Y_AXIS].axis_dir_a = 0;
+                }
+              
+                num = sscanf( axis_b, "%d%c", &controller[cont].axis[b - Y_AXIS].axis_b, &chAxisDir);
+                if( num != 2 )
+                {
+                    controller[cont].axis[b - Y_AXIS].axis_b = -1;
+                    controller[cont].axis[b - Y_AXIS].axis_dir_b = 0;
+                }
+                else
+                {
+                    if( chAxisDir == '+' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_b = 1;
+                    else if( chAxisDir == '-' )
+                        controller[cont].axis[b - Y_AXIS].axis_dir_b = -1;
+                    else
+                        controller[cont].axis[b - Y_AXIS].axis_dir_b = 0;
+                }
                 if( sscanf( hat, "%d", &controller[cont].axis[b - Y_AXIS].hat ) != 1 )
                     controller[cont].axis[b - Y_AXIS].hat = -1;
                 controller[cont].axis[b - Y_AXIS].hat_pos_a = get_hat_pos_by_name( hat_pos_a );
@@ -272,7 +320,7 @@ void read_configuration( void )
 #ifdef _DEBUG
                 printf( "%s, %d: num = %d, key = %s, button = %s, axis = %s, hat = %s, hat_pos = %s, mbutton = %s\n", __FILE__, __LINE__, num, key_a, button_a, axis, hat, hat_pos_a, mbutton );
 #endif
-                num = sscanf( axis, "%d%c", &controller[cont].button[b].axis, (char *)&controller[cont].button[b].axis_dir );
+                num = sscanf( axis, "%d%c", &controller[cont].button[b].axis, &chAxisDir );
                 if( num != 2 )
                 {
                     controller[cont].button[b].axis = -1;
@@ -280,10 +328,12 @@ void read_configuration( void )
                 }
                 else
                 {
-                    if( controller[cont].button[b].axis_dir == '+' )
+                    if( chAxisDir == '+' )
                         controller[cont].button[b].axis_dir = 1;
-                    else if( controller[cont].button[b].axis_dir == '-' )
+                    else if( chAxisDir == '-' )
                         controller[cont].button[b].axis_dir = -1;
+                    else
+                        controller[cont].button[b].axis_dir = 0;
                 }
                 if( sscanf( key_a, "%d", (int *)&controller[cont].button[b].key ) != 1 )
                     controller[cont].button[b].key = -1;
@@ -315,7 +365,7 @@ write_configuration( void )
     FILE *f;
     int i, b;
     char cKey_a[100], cKey_b[100];
-    char cButton_a[100], cButton_b[100], cAxis[100];
+    char cButton_a[100], cButton_b[100], cAxis[100], cAxis_a[100], cAxis_b[100];
     char cHat[100];
     char cMouse[100];
     char path[PATH_MAX];
@@ -398,18 +448,23 @@ write_configuration( void )
             else
                 strcpy( cButton_b, "None" );
 
-            if( controller[i].axis[b].axis >= 0 )
-                sprintf( cAxis, "%d", controller[i].axis[b].axis );
+            if( controller[i].axis[b].axis_a >= 0 )
+                sprintf( cAxis_a, "%d%c", controller[i].axis[b].axis_a, (controller[i].axis[b].axis_dir_a <= 0) ? '-' : '+' );
             else
-                strcpy( cAxis, "None" );
-
+                strcpy( cAxis_a, "None" );
+                
+            if( controller[i].axis[b].axis_b >= 0 )
+                sprintf( cAxis_b, "%d%c", controller[i].axis[b].axis_b, (controller[i].axis[b].axis_dir_b <= 0) ? '-' : '+' );
+            else
+                strcpy( cAxis_b, "None" );
+           
             if( controller[i].axis[b].hat >= 0 )
                 sprintf( cHat, "%d", controller[i].axis[b].hat );
             else
                 strcpy( cHat, "None" );
 
-            fprintf( f, "%s=key( %s , %s ); button( %s , %s ); axis( %s ); hat( %s , %s , %s )\n", button_names[b+16],
-                        cKey_a, cKey_b, cButton_a, cButton_b, cAxis, cHat, HAT_POS_NAME(controller[i].axis[b].hat_pos_a), HAT_POS_NAME(controller[i].axis[b].hat_pos_b) );
+            fprintf( f, "%s=key( %s , %s ); button( %s , %s ); axis( %s , %s ); hat( %s , %s , %s )\n", button_names[b+16],
+                        cKey_a, cKey_b, cButton_a, cButton_b, cAxis_a, cAxis_b, cHat, HAT_POS_NAME(controller[i].axis[b].hat_pos_a), HAT_POS_NAME(controller[i].axis[b].hat_pos_b) );
         }
         fprintf( f, "\n" );
     }
@@ -420,10 +475,13 @@ write_configuration( void )
 
 BYTE lastCommand[6];
 
+#ifdef __linux__
+
 struct ff_effect ffeffect[3];
 struct ff_effect ffstrong[3];
 struct ff_effect ffweak[3];
 
+#endif //__linux__
 BYTE DataCRC( BYTE *Data, int iLenght )
 {
     register BYTE Remainder = Data[0];
@@ -459,7 +517,6 @@ void
 CloseDLL( void )
 {
     printf( "["PLUGIN_NAME"]: Closing...\n" );
-    write_configuration();
 }
 
 /******************************************************************
@@ -478,11 +535,9 @@ CloseDLL( void )
             initilize controller: 01 03 00 FF FF FF
             read controller:      01 04 01 FF FF FF FF
 *******************************************************************/
-void
-ControllerCommand(int Control, BYTE *Command)
+void ControllerCommand(int Control, BYTE *Command)
 {
     BYTE *Data = &Command[5];
-    struct input_event play;
 
     if (Control == -1)
         return;
@@ -500,12 +555,12 @@ ControllerCommand(int Control, BYTE *Command)
             if (controller[Control].control.Plugin == PLUGIN_RAW)
             {
                 DWORD dwAddress = (Command[3] << 8) + (Command[4] & 0xE0);
-    
+
                 if(( dwAddress >= 0x8000 ) && ( dwAddress < 0x9000 ) )
                     memset( Data, 0x80, 32 );
                 else
                     memset( Data, 0x00, 32 );
-    
+
                 Data[32] = DataCRC( Data, 32 );
                 break;
                 }
@@ -514,6 +569,12 @@ ControllerCommand(int Control, BYTE *Command)
             if (controller[Control].control.Plugin == PLUGIN_RAW)
             {
                 DWORD dwAddress = (Command[3] << 8) + (Command[4] & 0xE0);
+                /*Uncomment to test rumble on systems without necessary hardware.
+              if(dwAddress==PAK_IO_RUMBLE&&*Data)
+                    printf("Triggering rumble pack.\n");*/
+
+#ifdef __linux__
+                struct input_event play;
                 if( dwAddress == PAK_IO_RUMBLE && controller[Control].event_joystick != 0)
                 {
                     if( *Data )
@@ -521,9 +582,10 @@ ControllerCommand(int Control, BYTE *Command)
                         play.type = EV_FF;
                         play.code = ffeffect[Control].id;
                         play.value = 1;
-    
+
                         if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
                             perror("Error starting rumble effect");
+
                     }
                     else
                     {
@@ -535,6 +597,7 @@ ControllerCommand(int Control, BYTE *Command)
                             perror("Error stopping rumble effect");
                     }
                 }
+#endif //__linux__
                 Data[32] = DataCRC( Data, 32 );
             }
             break;
@@ -784,6 +847,7 @@ DllConfig( HWND hParent )
 #elif defined( GUI_GTK )
         configure_gtk( controller );
 #endif
+        /* write_configuration() should be called in the configure_ function above */
     }
 }
 
@@ -816,6 +880,65 @@ GetDllInfo( PLUGIN_INFO *PluginInfo )
     PluginInfo->Type = PLUGIN_TYPE_CONTROLLER;
 }
 
+/* Helper function to handle the SDL keys */
+static void
+doSdlKeys(Uint8* keystate)
+{
+    int c, b, axis_val, axis_max_val, axis_val_tmp;
+    int grabmouse = -1;
+
+    axis_max_val = 80;
+    if (keystate[SDLK_LCTRL])
+        axis_max_val -= 40;
+    if (keystate[SDLK_LSHIFT])
+        axis_max_val -= 20;
+
+    for( c = 0; c < 4; c++ )
+    {
+        for( b = 0; b < 16; b++ )
+        {
+            if( controller[c].button[b].key == SDLK_UNKNOWN || ((int) controller[c].button[b].key) < 0)
+                continue;
+            if( keystate[controller[c].button[b].key] )
+                controller[c].buttons.Value |= button_bits[b];
+        }
+        for( b = 0; b < 2; b++ )
+        {
+            // from the N64 func ref: The 3D Stick data is of type signed char and in
+            // the range between 80 and -80. (32768 / 409 = ~80.1)
+            if( b == 0 )
+                axis_val = controller[c].buttons.X_AXIS;
+            else
+                axis_val = -controller[c].buttons.Y_AXIS;
+
+            if( controller[c].axis[b].key_a != SDLK_UNKNOWN && ((int) controller[c].axis[b].key_a) > 0)
+                if( keystate[controller[c].axis[b].key_a] )
+                    axis_val = axis_max_val;
+            if( controller[c].axis[b].key_b != SDLK_UNKNOWN && ((int) controller[c].axis[b].key_b) > 0)
+                if( keystate[controller[c].axis[b].key_b] )
+                    axis_val = -axis_max_val;
+
+            if( b == 0 )
+                controller[c].buttons.X_AXIS = axis_val;
+            else
+                controller[c].buttons.Y_AXIS = -axis_val;
+        }
+        if (controller[c].mouse)
+        {
+            if (keystate[SDLK_LCTRL] && keystate[SDLK_LALT])
+            {
+                grabmouse = 0;
+            }
+            if (grabmouse >= 0)
+            {
+                // grab/ungrab mouse
+                SDL_WM_GrabInput( grabmouse ? SDL_GRAB_ON : SDL_GRAB_OFF );
+                SDL_ShowCursor( grabmouse ? 0 : 1 );
+            }
+        }
+    }
+}
+
 /******************************************************************
   Function: GetKeys
   Purpose:  To get the current state of the controllers buttons.
@@ -827,17 +950,15 @@ GetDllInfo( PLUGIN_INFO *PluginInfo )
 void
 GetKeys( int Control, BUTTONS *Keys )
 {
-    struct input_event play;
-    int b, axis_val, axis_max_val;
+    int b, axis_val, axis_max_val, axis_val_tmp;
     SDL_Event event;
-    Uint8 *keystate = SDL_GetKeyState( NULL );
+
+    // Handle keyboard input first
+    doSdlKeys( SDL_GetKeyState( NULL ) );
+    doSdlKeys( myKeyState );
 
     // read joystick state
     SDL_JoystickUpdate();
-
-    controller[Control].buttons.button = 0;
-    controller[Control].buttons.stick_x = 0;
-    controller[Control].buttons.stick_y = 0;
 
     if( controller[Control].device >= 0 )
     {
@@ -845,22 +966,22 @@ GetKeys( int Control, BUTTONS *Keys )
         {
             if( controller[Control].button[b].button >= 0 )
                 if( SDL_JoystickGetButton( controller[Control].joystick, controller[Control].button[b].button ) )
-                    controller[Control].buttons.button |= button_bits[b];
+                    controller[Control].buttons.Value |= button_bits[b];
 
             if( controller[Control].button[b].axis >= 0 )
             {
                 axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].button[b].axis );
                 if( (controller[Control].button[b].axis_dir < 0) && (axis_val <= -6000) )
-                    controller[Control].buttons.button |= button_bits[b];
+                    controller[Control].buttons.Value |= button_bits[b];
                 else if( (controller[Control].button[b].axis_dir > 0) && (axis_val >= 6000) )
-                    controller[Control].buttons.button |= button_bits[b];
+                    controller[Control].buttons.Value |= button_bits[b];
             }
 
             if( controller[Control].button[b].hat >= 0 )
             {
                 if( controller[Control].button[b].hat_pos > 0 )
                     if( SDL_JoystickGetHat( controller[Control].joystick, controller[Control].button[b].hat ) & controller[Control].button[b].hat_pos )
-                        controller[Control].buttons.button |= button_bits[b];
+                        controller[Control].buttons.Value |= button_bits[b];
             }
         }
         for( b = 0; b < 2; b++ )
@@ -868,10 +989,64 @@ GetKeys( int Control, BUTTONS *Keys )
             // from the N64 func ref: The 3D Stick data is of type signed char and in
             // the range between 80 and -80. (32768 / 409 = ~80.1)
             axis_val = 0;
-
-            if( controller[Control].axis[b].axis >= 0 )
-                axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis ) / 409;
-
+            axis_val_tmp = 0;
+            
+            
+            if( controller[Control].axis[b].axis_a >= 0 )
+            {
+                axis_val_tmp = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a );
+                // if you push a positive axis... and your directions are flipped...
+                if( (controller[Control].axis[b].axis_dir_a < 0) && (axis_val_tmp <= -6000) )
+                {
+                    if (b == 0)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / 409;
+                    }
+                }
+                else if( (controller[Control].axis[b].axis_dir_a > 0) && (axis_val_tmp >= 6000) )
+                {
+                    if (b == 1)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_a ) / 409;
+                    }
+                }
+            }
+            // up and left
+            if( controller[Control].axis[b].axis_b >= 0 )
+            {
+                axis_val_tmp = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b );
+                // if you push a positive axis... and your directions are flipped...
+                if( (controller[Control].axis[b].axis_dir_b < 0) && (axis_val_tmp <= -6000) )
+                {
+                    if (b == 1)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / 409;
+                    }
+                }
+                else if( (controller[Control].axis[b].axis_dir_b > 0) && (axis_val_tmp >= 6000) )
+                {
+                    if (b == 0)
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / -409;
+                    }
+                    else
+                    {
+                        axis_val = SDL_JoystickGetAxis( controller[Control].joystick, controller[Control].axis[b].axis_b ) / 409;
+                    }
+                }
+            }
             if( controller[Control].axis[b].hat >= 0 )
             {
                 if( controller[Control].axis[b].hat_pos_a >= 0 )
@@ -890,47 +1065,9 @@ GetKeys( int Control, BUTTONS *Keys )
                     axis_val = -80;
 
             if( b == 0 )
-                controller[Control].buttons.stick_x = -axis_val;
+                controller[Control].buttons.X_AXIS = axis_val;
             else
-                controller[Control].buttons.stick_y = axis_val;
-        }
-    }
-
-    // read keyboard state
-//  else if( controller[Control].device == DEVICE_KEYBOARD )
-    {
-        axis_max_val = 80;
-        if (keystate[SDLK_LCTRL])
-            axis_max_val -= 40;
-        if (keystate[SDLK_LSHIFT])
-            axis_max_val -= 20;
-        for( b = 0; b < 16; b++ )
-        {
-            if( controller[Control].button[b].key == SDLK_UNKNOWN || ((int) controller[Control].button[b].key) < 0)
-                continue;
-            if( keystate[controller[Control].button[b].key] )
-                controller[Control].buttons.button |= button_bits[b];
-        }
-        for( b = 0; b < 2; b++ )
-        {
-            // from the N64 func ref: The 3D Stick data is of type signed char and in
-            // the range between 80 and -80. (32768 / 409 = ~80.1)
-            if( b == 0 )
-                axis_val = controller[Control].buttons.stick_x;
-            else
-                axis_val = -controller[Control].buttons.stick_y;
-
-            if( controller[Control].axis[b].key_a != SDLK_UNKNOWN && ((int) controller[Control].axis[b].key_a) > 0)
-                if( keystate[controller[Control].axis[b].key_a] )
-                    axis_val = axis_max_val;
-            if( controller[Control].axis[b].key_b != SDLK_UNKNOWN && ((int) controller[Control].axis[b].key_b) > 0)
-                if( keystate[controller[Control].axis[b].key_b] )
-                    axis_val = -axis_max_val;
-
-            if( b == 0 )
-                controller[Control].buttons.stick_x = axis_val;
-            else
-                controller[Control].buttons.stick_y = -axis_val;
+                controller[Control].buttons.Y_AXIS = axis_val;
         }
     }
 
@@ -943,14 +1080,14 @@ GetKeys( int Control, BUTTONS *Keys )
             if( controller[Control].button[b].mouse < 1 )
                 continue;
             if( mstate & SDL_BUTTON(controller[Control].button[b].mouse) )
-                controller[Control].buttons.button |= button_bits[b];
+                controller[Control].buttons.Value |= button_bits[b];
         }
     }
 
     if (controller[Control].mouse)
     {
-        int grabmouse = -1;        
-        while (SDL_PollEvent( &event ))
+        int grabmouse = -1;
+        while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_MOUSEMOTION && SDL_WM_GrabInput( SDL_GRAB_QUERY ) == SDL_GRAB_ON)
             {
@@ -961,7 +1098,7 @@ GetKeys( int Control, BUTTONS *Keys )
                         axis_val = -80;
                     else if (axis_val > 80)
                         axis_val = 80;
-                    controller[Control].buttons.stick_y = axis_val;
+                    controller[Control].buttons.Y_AXIS = axis_val;
                 }
                 if (event.motion.yrel)
                 {
@@ -970,7 +1107,7 @@ GetKeys( int Control, BUTTONS *Keys )
                         axis_val = -80;
                     else if (axis_val > 80)
                         axis_val = 80;
-                    controller[Control].buttons.stick_x = -axis_val;
+                    controller[Control].buttons.X_AXIS = -axis_val;
                 }
             }
             else if (event.type == SDL_MOUSEBUTTONUP)
@@ -981,41 +1118,30 @@ GetKeys( int Control, BUTTONS *Keys )
                 }
             }
         }
-        if (keystate[SDLK_LCTRL] && keystate[SDLK_LALT])
-        {
-            grabmouse = 0;
-        }
-        if (grabmouse >= 0)
-        {
-            // grab/ungrab mouse
-            SDL_WM_GrabInput( grabmouse ? SDL_GRAB_ON : SDL_GRAB_OFF );
-            SDL_ShowCursor( grabmouse ? 0 : 1 );
-        }
     }
 
 #ifdef _DEBUG
     printf( "Controller #%d value: 0x%8.8X\n", Control, *(int *)&controller[Control].buttons );
 #endif
-    *(int *)Keys = *(int *)&controller[Control].buttons;
+    *Keys = controller[Control].buttons;
 
-    /* handle mempack / rumblepak switching */
-    if (controller[Control].buttons.button & button_bits[14])
+    /* handle mempack / rumblepak switching (only if rumble is active on joystick) */
+#ifdef __linux__
+    if (controller[Control].event_joystick != 0)
     {
-        controller[Control].control.Plugin = PLUGIN_MEMPAK;
-        if (controller[Control].event_joystick != 0)
+        struct input_event play;
+        if (controller[Control].buttons.Value & button_bits[14])
         {
+            controller[Control].control.Plugin = PLUGIN_MEMPAK;
             play.type = EV_FF;
             play.code = ffweak[Control].id;
             play.value = 1;
             if (write(controller[Control].event_joystick, (const void*) &play, sizeof(play)) == -1)
                 perror("Error starting rumble effect");
         }
-    }
-    if (controller[Control].buttons.button & button_bits[15])
-    {
-        controller[Control].control.Plugin = PLUGIN_RAW;
-        if (controller[Control].event_joystick != 0)
+        if (controller[Control].buttons.Value & button_bits[15])
         {
+            controller[Control].control.Plugin = PLUGIN_RAW;
             play.type = EV_FF;
             play.code = ffstrong[Control].id;
             play.value = 1;
@@ -1023,12 +1149,18 @@ GetKeys( int Control, BUTTONS *Keys )
                 perror("Error starting rumble effect");
         }
     }
+#endif /* __linux__ */
+
+    controller[Control].buttons.Value = 0;
+    //controller[Control].buttons.stick_x = 0;
+    //controller[Control].buttons.stick_y = 0;
 }
 
-int InitiateRumble(int cntrl)
+static void InitiateRumble(int cntrl)
 {
-    DIR *dp;
-    struct dirent *ep;
+#ifdef __linux__
+    DIR* dp;
+    struct dirent* ep;
     unsigned long features[4];
     char temp[128];
     char temp2[128];
@@ -1039,60 +1171,64 @@ int InitiateRumble(int cntrl)
     sprintf(temp,"/sys/class/input/js%d/device", controller[cntrl].device);
     dp = opendir(temp);
 
-    if (dp == NULL) return 0;
+    if(dp==NULL)
+        return;
 
-    while ((ep = readdir (dp)))
-    {
-        if (strncmp(ep->d_name,"event",5) == 0)
+    while ((ep=readdir(dp)))
         {
-            sprintf(temp,"/dev/input/%s",ep->d_name);
+        if (strncmp(ep->d_name, "event",5)==0)
+            {
+            sprintf(temp, "/dev/input/%s", ep->d_name);
             iFound = 1;
             break;
-        }
-        else if (strncmp(ep->d_name,"input:event",11) == 0)
-        {
-            sscanf(ep->d_name,"input:%s",temp2);
-            sprintf(temp,"/dev/input/%s",temp2);
+            }
+        else if(strncmp(ep->d_name,"input:event", 11)==0)
+            {
+            sscanf(ep->d_name, "input:%s", temp2);
+            sprintf(temp, "/dev/input/%s", temp2);
             iFound = 1;
             break;
-        }
-        else if (strncmp(ep->d_name,"input:input",11) == 0)
-        {
+            }
+        else if(strncmp(ep->d_name,"input:input", 11)==0)
+            {
             strcat(temp, "/");
             strcat(temp, ep->d_name);
             closedir (dp);
             dp = opendir(temp);
-            if (dp == NULL) return 0;
-        }
-    }
+            if(dp==NULL)
+                return;
+            }
+       }
+
     closedir(dp);
-    if (!iFound)
-    {
-        printf("["PLUGIN_NAME"]: Couldn't find input event for rumble support.\n", temp);
-        return 0;
-    }
+
+    if(!iFound)
+        {
+        printf("["PLUGIN_NAME"]: Couldn't find input event for rumble support.\n");
+        return;
+        }
 
     controller[cntrl].event_joystick = open(temp, O_RDWR);
-    if (controller[cntrl].event_joystick == -1)
-    {
+    if(controller[cntrl].event_joystick==-1)
+        {
         printf("["PLUGIN_NAME"]: Couldn't open device file '%s' for rumble support.\n", temp);
         controller[cntrl].event_joystick = 0;
-        return 0;
-    }
+        return;
+        }
 
-    if (ioctl(controller[cntrl].event_joystick, EVIOCGBIT(EV_FF, sizeof(unsigned long) * 4), features) == -1)
-    {
-        printf("["PLUGIN_NAME"]: Linux kernel communication failed for force feedback (rumble).\n", temp);
+    if(ioctl(controller[cntrl].event_joystick, EVIOCGBIT(EV_FF, sizeof(unsigned long) * 4), features)==-1)
+        {
+        printf("["PLUGIN_NAME"]: Linux kernel communication failed for force feedback (rumble).\n");
         controller[cntrl].event_joystick = 0;
-        return 0;
-    }
+        return;
+        }
 
-    if (!test_bit(FF_RUMBLE, features))
-    {
+    if(!test_bit(FF_RUMBLE, features))
+        {
         printf("["PLUGIN_NAME"]: No rumble supported on N64 joystick #%i\n", cntrl + 1);
         controller[cntrl].event_joystick = 0;
-        return 0;
-    }
+        return;
+        }
 
     ffeffect[cntrl].type = FF_RUMBLE;
     ffeffect[cntrl].id = -1;
@@ -1120,6 +1256,7 @@ int InitiateRumble(int cntrl)
     ioctl(controller[cntrl].event_joystick, EVIOCSFF, &ffweak[cntrl]);
 
     printf("["PLUGIN_NAME"]: Rumble activated on N64 joystick #%i\n", cntrl + 1);
+#endif /* __linux__ */
 }
 
 /******************************************************************
@@ -1131,21 +1268,31 @@ int InitiateRumble(int cntrl)
               the emulator to know how to handle each controller.
   output:   none
 *******************************************************************/
-void
-InitiateControllers( CONTROL_INFO ControlInfo )
+void InitiateControllers( CONTROL_INFO ControlInfo )
 {
     int i;
 
     // reset controllers
     memset( controller, 0, sizeof( SController ) * 4 );
 
+    for ( i = 0; i < SDLK_LAST; i++)
+    {
+        myKeyState[i] = 0;
+    }
+
     // read configuration
     read_configuration();
 
     for( i = 0; i < 4; i++ )
     {
-        memcpy( ControlInfo.Controls + i, &controller[i].control, sizeof( CONTROL ) );
+        // test for rumble support for this joystick
         InitiateRumble(i);
+        // if rumble not supported, switch to mempack
+        // Comment out if statement to test rumble on systems without necessary hardware.
+        if (controller[i].control.Plugin == PLUGIN_RAW && controller[i].event_joystick == 0)
+            controller[i].control.Plugin = PLUGIN_MEMPAK;
+        // copy control data struct to the core
+        memcpy( ControlInfo.Controls + i, &controller[i].control, sizeof( CONTROL ) );
     }
 
     printf( "["PLUGIN_NAME"]: version "PLUGIN_VERSION" initialized.\n" );
@@ -1246,6 +1393,33 @@ RomOpen( void )
     romopen = 1;
 }
 
+static SDLKey
+translateKey( WPARAM wParam )
+{
+    SDLKey key = 0;
+
+    // for a-z and 0-9 keys windows provides no defines
+    if (wParam >= 0x41 && wParam <= 0x5a) {
+        key = wParam - 0x41 + SDLK_a;
+    } else if (wParam >= 0x30 && wParam <= 0x39) {
+        key = wParam - 0x30 + SDLK_0;
+    } else if (wParam == VK_RETURN) {
+        key = SDLK_RETURN;
+    } else if (wParam == VK_SPACE) {
+        key = SDLK_SPACE;
+    } else if (wParam == VK_LEFT) {
+        key = SDLK_LEFT;
+    } else if (wParam == VK_RIGHT) {
+        key = SDLK_RIGHT;
+    } else if (wParam == VK_UP) {
+        key = SDLK_UP;
+    } else if (wParam == VK_DOWN) {
+        key = SDLK_DOWN;
+    }
+
+    return key;
+}
+
 /******************************************************************
   Function: WM_KeyDown
   Purpose:  To pass the WM_KeyDown message from the emulator to the
@@ -1256,6 +1430,7 @@ RomOpen( void )
 void
 WM_KeyDown( WPARAM wParam, LPARAM lParam )
 {
+    myKeyState[translateKey(wParam)] = 1;
 }
 
 /******************************************************************
@@ -1268,6 +1443,7 @@ WM_KeyDown( WPARAM wParam, LPARAM lParam )
 void
 WM_KeyUp( WPARAM wParam, LPARAM lParam )
 {
+    myKeyState[translateKey(wParam)] = 0;
 }
 
 /******************************************************************
@@ -1284,3 +1460,4 @@ SetConfigDir( char *configDir )
 {
     strncpy(configdir, configDir, PATH_MAX);
 }
+

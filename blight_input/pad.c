@@ -1,3 +1,20 @@
+/***************************************************************************
+                          pad.c  -  description
+                             -------------------
+    begin                : Mon Nov 11 2002
+    copyright            : (C) 2002 by blight
+    email                : blight@fuckmicrosoft.com
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
 /* GIMP RGBA C-Source image dump (pad.c) */
 
 #ifdef GUI_SDL
@@ -13465,3 +13482,4 @@ const struct {
 };
 
 #endif // GUI_SDL
+

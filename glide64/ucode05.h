@@ -12,9 +12,10 @@
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+* You should have received a copy of the GNU General Public
+* License along with this program; if not, write to the Free
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+* Boston, MA  02110-1301, USA
 */
 
 //****************************************************************
@@ -50,7 +51,7 @@ static void uc5_dma_offsets ()
 static void uc5_matrix ()
 {
   // Use segment offset to get the address
-  DWORD addr = dma_offset_mtx + segoffset(rdp.cmd1) & BMASK;
+  DWORD addr = dma_offset_mtx + (segoffset(rdp.cmd1) & BMASK);
 
   BYTE n = (BYTE)((rdp.cmd0 >> 16) & 0xF);
   BYTE multiply;
@@ -120,7 +121,7 @@ static void uc5_matrix ()
 
 static void uc5_vertex ()
 {
-  DWORD addr = dma_offset_vtx + segoffset(rdp.cmd1) & BMASK;
+  DWORD addr = dma_offset_vtx + (segoffset(rdp.cmd1) & BMASK);
 
   // | cccc cccc 1111 1??? 0000 0002 2222 2222 | cmd1 = address |
   // c = vtx command
@@ -385,3 +386,4 @@ static void uc5_cleargeometrymode()
 }
   }
 }
+

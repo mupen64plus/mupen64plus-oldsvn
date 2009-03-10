@@ -1,31 +1,23 @@
-/*
- * Mupen64 - memory.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - memory.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,17 +29,23 @@
 
 #include "memory.h"
 #include "dma.h"
+#include "pif.h"
+#include "flashram.h"
+
 #include "../r4300/r4300.h"
 #include "../r4300/macros.h"
 #include "../r4300/interupt.h"
 #include "../r4300/recomph.h"
 #include "../r4300/ops.h"
-#include "pif.h"
-#include "flashram.h"
+
 #include "../main/main.h"
 #include "../main/plugin.h"
 #include "../main/inputrecording.h"
 //#include "../main/vcr.h"
+
+#ifdef DBG
+#include "../debugger/breakpoints.h"
+#endif
 
 /* definitions of the rcp's structures and memory area */
 RDRAM_register rdram_register;
@@ -92,29 +90,29 @@ unsigned long long int* rdword;
 static unsigned int trash;
 
 // hash tables of read functions
-void (*readmem[0xFFFF])();
-void (*readmemb[0xFFFF])();
-void (*readmemh[0xFFFF])();
-void (*readmemd[0xFFFF])();
+void (*readmem[0x10000])();
+void (*readmemb[0x10000])();
+void (*readmemh[0x10000])();
+void (*readmemd[0x10000])();
 
 // hash tables of write functions
-void (*writemem[0xFFFF])();
-void (*writememb[0xFFFF])();
-void (*writememd[0xFFFF])();
-void (*writememh[0xFFFF])();
+void (*writemem[0x10000])();
+void (*writememb[0x10000])();
+void (*writememd[0x10000])();
+void (*writememh[0x10000])();
 
 // memory sections
-static unsigned int *readrdramreg[0xFFFF];
-static unsigned int *readrspreg[0xFFFF];
-static unsigned int *readrsp[0xFFFF];
-static unsigned int *readmi[0xFFFF];
-static unsigned int *readvi[0xFFFF];
-static unsigned int *readai[0xFFFF];
-static unsigned int *readpi[0xFFFF];
-static unsigned int *readri[0xFFFF];
-static unsigned int *readsi[0xFFFF];
-static unsigned int *readdp[0xFFFF];
-static unsigned int *readdps[0xFFFF];
+static unsigned int *readrdramreg[0x10000];
+static unsigned int *readrspreg[0x10000];
+static unsigned int *readrsp[0x10000];
+static unsigned int *readmi[0x10000];
+static unsigned int *readvi[0x10000];
+static unsigned int *readai[0x10000];
+static unsigned int *readpi[0x10000];
+static unsigned int *readri[0x10000];
+static unsigned int *readsi[0x10000];
+static unsigned int *readdp[0x10000];
+static unsigned int *readdps[0x10000];
 
 // the frameBufferInfos
 static FrameBufferInfo frameBufferInfos[6];
@@ -124,10 +122,10 @@ static int firstFrameBufferSetting;
 int init_memory(int DoByteSwap)
 {
    int i;
-
+//printf("Are we byteswapping? %d\n", DoByteSwap);
    if (DoByteSwap != 0)
    {
-     //swap rom
+    //swap rom
      unsigned int *roml;
      roml = (void *)rom;
      for (i=0; i<(taille_rom/4); i++) roml[i] = sl(roml[i]);
@@ -1012,7 +1010,7 @@ void free_memory()
 {
 }
 
-static void update_MI_init_mode_reg()
+void update_MI_init_mode_reg()
 {
    MI_register.init_length = MI_register.w_mi_init_mode_reg & 0x7F;
    if (MI_register.w_mi_init_mode_reg & 0x80) 
@@ -1039,7 +1037,7 @@ static void update_MI_init_mode_reg()
                    );
 }
 
-static void update_MI_intr_mask_reg()
+void update_MI_intr_mask_reg()
 {
    if (MI_register.w_mi_intr_mask_reg & 0x1)   MI_register.SP_intr_mask = 0;
    if (MI_register.w_mi_intr_mask_reg & 0x2)   MI_register.SP_intr_mask = 1;
@@ -1065,63 +1063,65 @@ static void update_MI_intr_mask_reg()
 
 void update_SP()
 {
-   if (sp_register.w_sp_status_reg & 0x1)
-     sp_register.halt = 0;
-   if (sp_register.w_sp_status_reg & 0x2)
-     sp_register.halt = 1;
-   if (sp_register.w_sp_status_reg & 0x4)
-     sp_register.broke = 0;
-   if (sp_register.w_sp_status_reg & 0x8)
-     {
-    MI_register.mi_intr_reg &= 0xFFFFFFFE;
-    check_interupt();
-     }
-   if (sp_register.w_sp_status_reg & 0x10)
-     {
-    MI_register.mi_intr_reg |= 1;
-    check_interupt();
-     }
-   if (sp_register.w_sp_status_reg & 0x20)
-     sp_register.single_step = 0;
-   if (sp_register.w_sp_status_reg & 0x40)
-     sp_register.single_step = 1;
-   if (sp_register.w_sp_status_reg & 0x80)
-     sp_register.intr_break = 0;
-   if (sp_register.w_sp_status_reg & 0x100)
-     sp_register.intr_break = 1;
-   if (sp_register.w_sp_status_reg & 0x200)
-     sp_register.signal0 = 0;
-   if (sp_register.w_sp_status_reg & 0x400)
-     sp_register.signal0 = 1;
-   if (sp_register.w_sp_status_reg & 0x800)
-     sp_register.signal1 = 0;
-   if (sp_register.w_sp_status_reg & 0x1000)
-     sp_register.signal1 = 1;
-   if (sp_register.w_sp_status_reg & 0x2000)
-     sp_register.signal2 = 0;
-   if (sp_register.w_sp_status_reg & 0x4000)
-     sp_register.signal2 = 1;
-   if (sp_register.w_sp_status_reg & 0x8000)
-     sp_register.signal3 = 0;
-   if (sp_register.w_sp_status_reg & 0x10000)
-     sp_register.signal3 = 1;
-   if (sp_register.w_sp_status_reg & 0x20000)
-     sp_register.signal4 = 0;
-   if (sp_register.w_sp_status_reg & 0x40000)
-     sp_register.signal4 = 1;
-   if (sp_register.w_sp_status_reg & 0x80000)
-     sp_register.signal5 = 0;
-   if (sp_register.w_sp_status_reg & 0x100000)
-     sp_register.signal5 = 1;
-   if (sp_register.w_sp_status_reg & 0x200000)
-     sp_register.signal6 = 0;
-   if (sp_register.w_sp_status_reg & 0x400000)
-     sp_register.signal6 = 1;
-   if (sp_register.w_sp_status_reg & 0x800000)
-     sp_register.signal7 = 0;
-   if (sp_register.w_sp_status_reg & 0x1000000)
-     sp_register.signal7 = 1;
-   sp_register.sp_status_reg = ((sp_register.halt) |
+    if (sp_register.w_sp_status_reg & 0x1)
+        sp_register.halt = 0;
+    if (sp_register.w_sp_status_reg & 0x2)
+        sp_register.halt = 1;
+    if (sp_register.w_sp_status_reg & 0x4)
+        sp_register.broke = 0;
+    if (sp_register.w_sp_status_reg & 0x8)
+    {
+        MI_register.mi_intr_reg &= 0xFFFFFFFE;
+        check_interupt();
+    }
+    
+    if (sp_register.w_sp_status_reg & 0x10)
+    {
+        MI_register.mi_intr_reg |= 1;
+        check_interupt();
+    }
+    
+    if (sp_register.w_sp_status_reg & 0x20)
+        sp_register.single_step = 0;
+    if (sp_register.w_sp_status_reg & 0x40)
+        sp_register.single_step = 1;
+    if (sp_register.w_sp_status_reg & 0x80)
+        sp_register.intr_break = 0;
+    if (sp_register.w_sp_status_reg & 0x100)
+        sp_register.intr_break = 1;
+    if (sp_register.w_sp_status_reg & 0x200)
+        sp_register.signal0 = 0;
+    if (sp_register.w_sp_status_reg & 0x400)
+        sp_register.signal0 = 1;
+    if (sp_register.w_sp_status_reg & 0x800)
+        sp_register.signal1 = 0;
+    if (sp_register.w_sp_status_reg & 0x1000)
+        sp_register.signal1 = 1;
+    if (sp_register.w_sp_status_reg & 0x2000)
+        sp_register.signal2 = 0;
+    if (sp_register.w_sp_status_reg & 0x4000)
+        sp_register.signal2 = 1;
+    if (sp_register.w_sp_status_reg & 0x8000)
+        sp_register.signal3 = 0;
+    if (sp_register.w_sp_status_reg & 0x10000)
+        sp_register.signal3 = 1;
+    if (sp_register.w_sp_status_reg & 0x20000)
+        sp_register.signal4 = 0;
+    if (sp_register.w_sp_status_reg & 0x40000)
+        sp_register.signal4 = 1;
+    if (sp_register.w_sp_status_reg & 0x80000)
+        sp_register.signal5 = 0;
+    if (sp_register.w_sp_status_reg & 0x100000)
+        sp_register.signal5 = 1;
+    if (sp_register.w_sp_status_reg & 0x200000)
+        sp_register.signal6 = 0;
+    if (sp_register.w_sp_status_reg & 0x400000)
+        sp_register.signal6 = 1;
+    if (sp_register.w_sp_status_reg & 0x800000)
+        sp_register.signal7 = 0;
+    if (sp_register.w_sp_status_reg & 0x1000000)
+        sp_register.signal7 = 1;
+    sp_register.sp_status_reg = ((sp_register.halt) |
                 (sp_register.broke << 1) |
                 (sp_register.dma_busy << 2) |
                 (sp_register.dma_full << 3) |
@@ -1135,157 +1135,268 @@ void update_SP()
                 (sp_register.signal4 << 11) |
                 (sp_register.signal5 << 12) |
                 (sp_register.signal6 << 13) |
-                (sp_register.signal7 << 14)
-                );
-   //if (get_event(SP_INT)) return;
-   if (!(sp_register.w_sp_status_reg & 0x1) && 
-       !(sp_register.w_sp_status_reg & 0x4)) return;
-   if (!sp_register.halt && !sp_register.broke)
-     {
-    int save_pc = rsp_register.rsp_pc & ~0xFFF;
-    if (SP_DMEM[0xFC0/4] == 1)
-      {
-         // unprotecting old frame buffers
-         if(fBGetFrameBufferInfo && fBRead && fBWrite && 
-        frameBufferInfos[0].addr)
-           {
-          int i;
-          for(i=0; i<6; i++)
+                (sp_register.signal7 << 14));
+    
+    //if (get_event(SP_INT)) return;
+    if (!(sp_register.w_sp_status_reg & 0x1) && 
+        !(sp_register.w_sp_status_reg & 0x4)) return;
+    if (!sp_register.halt && !sp_register.broke)
+    {
+        int save_pc = rsp_register.rsp_pc & ~0xFFF;
+        if (SP_DMEM[0xFC0/4] == 1)
+        {
+            // unprotecting old frame buffers
+            if(fBGetFrameBufferInfo && fBRead && fBWrite && 
+            frameBufferInfos[0].addr)
             {
-               if(frameBufferInfos[i].addr)
-             {
-                int j;
-                int start = frameBufferInfos[i].addr & 0x7FFFFF;
-                int end = start + frameBufferInfos[i].width*
-                                  frameBufferInfos[i].height*
-                                  frameBufferInfos[i].size - 1;
-                start = start >> 16;
-                end = end >> 16;
-                for(j=start; j<=end; j++)
-                  {
-                 readmem[0x8000+j] = read_rdram;
-                 readmem[0xa000+j] = read_rdram;
-                 readmemb[0x8000+j] = read_rdramb;
-                 readmemb[0xa000+j] = read_rdramb;
-                 readmemh[0x8000+j] = read_rdramh;
-                 readmemh[0xa000+j] = read_rdramh;
-                 readmemd[0x8000+j] = read_rdramd;
-                 readmemd[0xa000+j] = read_rdramd;
-                 writemem[0x8000+j] = write_rdram;
-                 writemem[0xa000+j] = write_rdram;
-                 writememb[0x8000+j] = write_rdramb;
-                 writememb[0xa000+j] = write_rdramb;
-                 writememh[0x8000+j] = write_rdramh;
-                 writememh[0xa000+j] = write_rdramh;
-                 writememd[0x8000+j] = write_rdramd;
-                 writememd[0xa000+j] = write_rdramd;
-                  }
-             }
+                int i;
+                for(i=0; i<6; i++)
+                {
+                    if(frameBufferInfos[i].addr)
+                    {
+                        int j;
+                        int start = frameBufferInfos[i].addr & 0x7FFFFF;
+                        int end = start + frameBufferInfos[i].width*
+                                    frameBufferInfos[i].height*
+                                    frameBufferInfos[i].size - 1;
+                        start = start >> 16;
+                        end = end >> 16;
+
+                        for(j=start; j<=end; j++)
+                        {
+#ifdef DBG
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0x8000+j] = read_rdram_break;
+                                readmemb[0x8000+j] = read_rdramb_break;
+                                readmemh[0x8000+j] = read_rdramh_break;
+                                readmemd[0xa000+j] = read_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0x8000+j] = read_rdram;
+                            readmemb[0x8000+j] = read_rdramb;
+                            readmemh[0x8000+j] = read_rdramh;
+                            readmemd[0xa000+j] = read_rdramd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0xa000+j] = read_rdram_break;
+                                readmemb[0xa000+j] = read_rdramb_break;
+                                readmemh[0xa000+j] = read_rdramh_break;
+                                readmemd[0x8000+j] = read_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0xa000+j] = read_rdram;
+                            readmemb[0xa000+j] = read_rdramb;
+                            readmemh[0xa000+j] = read_rdramh;
+                            readmemd[0x8000+j] = read_rdramd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0x8000+j] = write_rdram_break;
+                                writememb[0x8000+j] = write_rdramb_break;
+                                writememh[0x8000+j] = write_rdramh_break;
+                                writememd[0x8000+j] = write_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0x8000+j] = write_rdram;
+                            writememb[0x8000+j] = write_rdramb;
+                            writememh[0x8000+j] = write_rdramh;
+                            writememd[0x8000+j] = write_rdramd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0xa000+j] = write_rdram_break;
+                                writememb[0xa000+j] = write_rdramb_break;
+                                writememh[0xa000+j] = write_rdramh_break;
+                                writememd[0xa000+j] = write_rdramd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0xa000+j] = write_rdram;
+                            writememb[0xa000+j] = write_rdramb;
+                            writememh[0xa000+j] = write_rdramh;
+                            writememd[0xa000+j] = write_rdramd;
+#ifdef DBG
+                            }
+#endif
+                        }
+                    }
+                }
             }
-           }
          
-         //processDList();
-         rsp_register.rsp_pc &= 0xFFF;
-         start_section(GFX_SECTION);
-         doRspCycles(100);
-         end_section(GFX_SECTION);
-         rsp_register.rsp_pc |= save_pc;
-         new_frame();
+            //processDList();
+            rsp_register.rsp_pc &= 0xFFF;
+            start_section(GFX_SECTION);
+            doRspCycles(100);
+            end_section(GFX_SECTION);
+            rsp_register.rsp_pc |= save_pc;
+            new_frame();
          
-         MI_register.mi_intr_reg &= ~0x21;
-         sp_register.sp_status_reg &= ~0x303;
-         update_count();
-         add_interupt_event(SP_INT, 1000);
-         add_interupt_event(DP_INT, 1000);
+            MI_register.mi_intr_reg &= ~0x21;
+            sp_register.sp_status_reg &= ~0x303;
+            update_count();
+            add_interupt_event(SP_INT, 1000);
+            add_interupt_event(DP_INT, 1000);
          
-         // protecting new frame buffers
-         if(fBGetFrameBufferInfo && fBRead && fBWrite) fBGetFrameBufferInfo(frameBufferInfos);
-         if(fBGetFrameBufferInfo && fBRead && fBWrite &&
-        frameBufferInfos[0].addr)
+            // protecting new frame buffers
+            if(fBGetFrameBufferInfo && fBRead && fBWrite) 
+                fBGetFrameBufferInfo(frameBufferInfos);
+            if(fBGetFrameBufferInfo && fBRead && fBWrite 
+                && frameBufferInfos[0].addr)
            {
-          int i;
-          for(i=0; i<6; i++)
-            {
-               if(frameBufferInfos[i].addr)
-             {
-                int j;
-                int start = frameBufferInfos[i].addr & 0x7FFFFF;
-                int end = start + frameBufferInfos[i].width*
-                                  frameBufferInfos[i].height*
-                                  frameBufferInfos[i].size - 1;
-                int start1 = start;
-                int end1 = end;
-                start >>= 16;
-                end >>= 16;
-                for(j=start; j<=end; j++)
-                  {
-                 readmem[0x8000+j] = read_rdramFB;
-                 readmem[0xa000+j] = read_rdramFB;
-                 readmemb[0x8000+j] = read_rdramFBb;
-                 readmemb[0xa000+j] = read_rdramFBb;
-                 readmemh[0x8000+j] = read_rdramFBh;
-                 readmemh[0xa000+j] = read_rdramFBh;
-                 readmemd[0x8000+j] = read_rdramFBd;
-                 readmemd[0xa000+j] = read_rdramFBd;
-                 writemem[0x8000+j] = write_rdramFB;
-                 writemem[0xa000+j] = write_rdramFB;
-                 writememb[0x8000+j] = write_rdramFBb;
-                 writememb[0xa000+j] = write_rdramFBb;
-                 writememh[0x8000+j] = write_rdramFBh;
-                 writememh[0xa000+j] = write_rdramFBh;
-                 writememd[0x8000+j] = write_rdramFBd;
-                 writememd[0xa000+j] = write_rdramFBd;
-                  }
-                start <<= 4;
-                end <<= 4;
-                for(j=start; j<=end; j++)
-                  {
-                 if(j>=start1 && j<=end1) framebufferRead[j]=1;
-                 else framebufferRead[j] = 0;
-                  }
-                if(firstFrameBufferSetting)
-                  {
-                 firstFrameBufferSetting = 0;
-                 fast_memory = 0;
-                 for(j=0; j<0x100000; j++)
-                   invalid_code[j] = 1;
-                  }
-             }
+                int i;
+                for(i=0; i<6; i++)
+                {
+                    if(frameBufferInfos[i].addr)
+                    {
+                        int j;
+                        int start = frameBufferInfos[i].addr & 0x7FFFFF;
+                        int end = start + frameBufferInfos[i].width*
+                                        frameBufferInfos[i].height*
+                                        frameBufferInfos[i].size - 1;
+                        int start1 = start;
+                        int end1 = end;
+                        start >>= 16;
+                        end >>= 16;
+                        for(j=start; j<=end; j++)
+                        {
+ #ifdef DBG
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0x8000+j] = read_rdramFB_break;
+                                readmemb[0x8000+j] = read_rdramFBb_break;
+                                readmemh[0x8000+j] = read_rdramFBh_break;
+                                readmemd[0xa000+j] = read_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0x8000+j] = read_rdramFB;
+                            readmemb[0x8000+j] = read_rdramFBb;
+                            readmemh[0x8000+j] = read_rdramFBh;
+                            readmemd[0xa000+j] = read_rdramFBd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_READ ) != -1)
+                            {
+                                readmem[0xa000+j] = read_rdramFB_break;
+                                readmemb[0xa000+j] = read_rdramFBb_break;
+                                readmemh[0xa000+j] = read_rdramFBh_break;
+                                readmemd[0x8000+j] = read_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            readmem[0xa000+j] = read_rdramFB;
+                            readmemb[0xa000+j] = read_rdramFBb;
+                            readmemh[0xa000+j] = read_rdramFBh;
+                            readmemd[0x8000+j] = read_rdramFBd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0x80000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0x8000+j] = write_rdramFB_break;
+                                writememb[0x8000+j] = write_rdramFBb_break;
+                                writememh[0x8000+j] = write_rdramFBh_break;
+                                writememd[0x8000+j] = write_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0x8000+j] = write_rdramFB;
+                            writememb[0x8000+j] = write_rdramFBb;
+                            writememh[0x8000+j] = write_rdramFBh;
+                            writememd[0x8000+j] = write_rdramFBd;
+#ifdef DBG
+                            }
+                            if(lookup_breakpoint(0xa0000000 + j * 0x10000, 0xFFFF, 
+                                BPT_FLAG_ENABLED |  BPT_FLAG_WRITE ) != -1)
+                            {
+                                writemem[0xa000+j] = write_rdramFB_break;
+                                writememb[0xa000+j] = write_rdramFBb_break;
+                                writememh[0xa000+j] = write_rdramFBh_break;
+                                writememd[0xa000+j] = write_rdramFBd_break;
+                            }
+                            else
+                            {
+#endif
+                            writemem[0xa000+j] = write_rdramFB;
+                            writememb[0xa000+j] = write_rdramFBb;
+                            writememh[0xa000+j] = write_rdramFBh;
+                            writememd[0xa000+j] = write_rdramFBd;
+#ifdef DBG
+                            }
+#endif
+                        }
+                        start <<= 4;
+                        end <<= 4;
+                        for(j=start; j<=end; j++)
+                        {
+                            if(j>=start1 && j<=end1) framebufferRead[j]=1;
+                            else framebufferRead[j] = 0;
+                        }
+                        
+                        if(firstFrameBufferSetting)
+                        {
+                            firstFrameBufferSetting = 0;
+                            fast_memory = 0;
+                            for(j=0; j<0x100000; j++)
+                                invalid_code[j] = 1;
+                        }
+                    }
+                }
             }
-           }
-      }
-    else if (SP_DMEM[0xFC0/4] == 2)
-      {
-         //processAList();
-         rsp_register.rsp_pc &= 0xFFF;
-         start_section(AUDIO_SECTION);
-         doRspCycles(100);
-         end_section(AUDIO_SECTION);
-         rsp_register.rsp_pc |= save_pc;
+        }
+        else if (SP_DMEM[0xFC0/4] == 2)
+        {
+            //processAList();
+            rsp_register.rsp_pc &= 0xFFF;
+            start_section(AUDIO_SECTION);
+            doRspCycles(100);
+            end_section(AUDIO_SECTION);
+            rsp_register.rsp_pc |= save_pc;
          
-         MI_register.mi_intr_reg &= ~0x1;
-         sp_register.sp_status_reg &= ~0x303;
-         update_count();
-         //add_interupt_event(SP_INT, 500);
-         add_interupt_event(SP_INT, 4000);
-      }
-    else
-      {
-         //printf("other task\n");
-         rsp_register.rsp_pc &= 0xFFF;
-         doRspCycles(100);
-         rsp_register.rsp_pc |= save_pc;
+            MI_register.mi_intr_reg &= ~0x1;
+            sp_register.sp_status_reg &= ~0x303;
+            update_count();
+            //add_interupt_event(SP_INT, 500);
+            add_interupt_event(SP_INT, 4000);
+        }
+        else
+        {
+            //printf("other task\n");
+            rsp_register.rsp_pc &= 0xFFF;
+            doRspCycles(100);
+            rsp_register.rsp_pc |= save_pc;
          
-         MI_register.mi_intr_reg &= ~0x1;
-         sp_register.sp_status_reg &= ~0x203;
-         update_count();
-         add_interupt_event(SP_INT, 0/*100*/);
-      }
-    //printf("unknown task type\n");
-    /*if (hle) execute_dlist();
-    //if (hle) processDList();
-    else sp_register.halt = 0;*/
-     }
+            MI_register.mi_intr_reg &= ~0x1;
+            sp_register.sp_status_reg &= ~0x203;
+            update_count();
+            add_interupt_event(SP_INT, 0/*100*/);
+        }
+        //printf("unknown task type\n");
+        /*if (hle) execute_dlist();
+        //if (hle) processDList();
+        else sp_register.halt = 0;*/
+    }
 }
 
 void update_DPC()
@@ -1422,7 +1533,7 @@ void write_nomemd()
 }
 
 void read_rdram()
-{;
+{
    *rdword = *((unsigned int *)(rdramb + (address & 0xFFFFFF)));
 }
 
@@ -2615,11 +2726,7 @@ void write_ai()
      {
       case 0x4:
     ai_register.ai_len = word;
-#ifndef VCR_SUPPORT
     aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2649,7 +2756,6 @@ void write_ai()
            }
          break;
       }
-    if (no_audio_delay) delay = 0;
     if (ai_register.ai_status & 0x40000000) // busy
       {
          ai_register.next_delay = delay;
@@ -2685,21 +2791,13 @@ void write_ai()
         case 0x55:
         case 0x58:
         case 0x59:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
           break;
         case 0x37:
         case 0x41:
         case 0x45:
         case 0x4a:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
           break;
            }
       }
@@ -2723,11 +2821,7 @@ void write_aib()
     *((unsigned char*)&temp
       + ((*address_low&3)^S8) ) = byte;
     ai_register.ai_len = temp;
-#ifndef VCR_SUPPORT
     aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2794,21 +2888,13 @@ void write_aib()
         case 0x55:
         case 0x58:
         case 0x59:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
           break;
         case 0x37:
         case 0x41:
         case 0x45:
         case 0x4a:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
           break;
            }
       }
@@ -2831,11 +2917,7 @@ void write_aih()
     *((unsigned short*)((unsigned char*)&temp
                 + ((*address_low&3)^S16) )) = hword;
     ai_register.ai_len = temp;
-#ifndef VCR_SUPPORT
     aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2857,7 +2939,6 @@ void write_aih()
               vi_register.vi_delay*60)/48681812;
          break;
       }
-    if (no_audio_delay) delay = 0;
     if (ai_register.ai_status & 0x40000000) // busy
       {
          ai_register.next_delay = delay;
@@ -2898,21 +2979,13 @@ void write_aih()
         case 0x55:
         case 0x58:
         case 0x59:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
           break;
         case 0x37:
         case 0x41:
         case 0x45:
         case 0x4a:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
           break;
            }
       }
@@ -2931,11 +3004,7 @@ void write_aid()
       case 0x0:
     ai_register.ai_dram_addr = dword >> 32;
     ai_register.ai_len = dword & 0xFFFFFFFF;
-#ifndef VCR_SUPPORT
     aiLenChanged();
-#else
-    VCR_aiLenChanged();
-#endif
     switch(ROM_HEADER->Country_code&0xFF)
       {
        case 0x44:
@@ -2957,7 +3026,6 @@ void write_aid()
               vi_register.vi_delay*60)/48681812;
          break;
       }
-    if (no_audio_delay) delay = 0;
     if (ai_register.ai_status & 0x40000000) // busy
       {
          ai_register.next_delay = delay;
@@ -2994,21 +3062,13 @@ void write_aid()
         case 0x55:
         case 0x58:
         case 0x59:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_PAL);
-#else
-          VCR_aiDacrateChanged(SYSTEM_PAL);
-#endif
           break;
         case 0x37:
         case 0x41:
         case 0x45:
         case 0x4a:
-#ifndef VCR_SUPPORT
           aiDacrateChanged(SYSTEM_NTSC);
-#else
-          VCR_aiDacrateChanged(SYSTEM_NTSC);
-#endif
           break;
            }
       }
@@ -3666,3 +3726,4 @@ void write_pifd()
       update_pif_write();
      }
 }
+

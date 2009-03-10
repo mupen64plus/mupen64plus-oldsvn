@@ -1,74 +1,35 @@
-/***************************************************************************
- vcrcomp_dialog.h - Handles VCR mode GUI elements
-----------------------------------------------------------------------------
-Began                : Sat Nov 9 2002
-Copyright            : (C) 2002 by blight
-Email                : blight@Ashitaka
-****************************************************************************/
-
-/***************************************************************************
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - rombrowser.h                                            *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Tillin9                                            *
+ *   Copyright (C) 2002 Blight                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- ***************************************************************************/
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __ROMBROWSER_H__
 #define __ROMBROWSER_H__
 
 #include <gtk/gtk.h>
 
-#include "../mupenIniApi.h"
+void create_filter();
+void create_romBrowser(void);
+char* filefrompath(const char* string);
+void rombrowser_refresh(unsigned int roms, unsigned short clear);
+void countrycodeflag(unsigned short int countrycode, GdkPixbuf **flag);
 
-int create_romBrowser( void );
-void rombrowser_refresh( void );
-void apply_filter( void );
+#endif /* __ROMBROWSER_H__ */
 
-// cache
-void rombrowser_readCache( void );
-void rombrowser_writeCache( void );
-
-gboolean filter_function( GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
-
-/** global rom list */
-typedef struct
-{
-    char cFilename[PATH_MAX];
-
-    char cName[100];
-    char cSize[20];
-    char cCountry[20];
-
-    // rom info
-    struct
-    {
-        char          cName[21];                    // rom name
-        int           iSize;                            // size in bytes
-        short         sCartID;                      // cartridge id
-        int           iManufacturer;            // manufacturer
-        unsigned char cCountry;                     // country id
-        unsigned int  iCRC1;                            // crc part 1
-        unsigned int  iCRC2;                            // crc part 2
-        char          cMD5[33];                     // md5 code
-        char          cGoodName[100];           // from ini
-        char          cComments[200];           // from ini
-
-//      char     Status[60];                // from ini
-//      char     FileName[200];
-//      char     PluginNotes[250];  // from ini
-//      char     CoreNotes[250];        // from ini
-//      char     UserNotes[250];        // from ini
-//      char     Developer[30];         // from ini
-//      char     ReleaseDate[30];       // from ini
-//      char     Genre[15];                 // from ini
-    } info; // data saved in cache
-
-    // other data
-    GdkPixbuf  *flag;   // flag GdkImage
-    mupenEntry *iniEntry;   // ini entry of this rom
-} SRomEntry;
-extern GList *g_RomList;
-
-#endif // __ROMBROWSER_H__

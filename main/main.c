@@ -1,70 +1,82 @@
-/**
- * Mupen64 - main.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - main.c                                                  *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Richard42 Ebenblues Nmn Okaygo Tillin9             *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* This is MUPEN64's main entry point. It contains code that is common
  * to both the gui and non-gui versions of mupen64. See
  * gui subdirectories for the gui-specific code.
  * if you want to implement an interface, you should look here
  */
+ 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#define _7ZIP_UINT32_DEFINED // avoid stupid conflicts between native types and 7zip types
+#endif
+ 
+#ifndef __WIN32__
+# include <ucontext.h> // extra signal types (for portability)
+# include <libgen.h> // basename, dirname
+#endif
 
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/stat.h> /* mkdir() */
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <pthread.h> // POSIX Thread library
+#include <unistd.h>  // POSIX macros and standard types.
 #include <signal.h> // signals
 #include <getopt.h> // getopt_long
-#include <libgen.h> // basename, dirname
+#include <dirent.h>
+
 #include <png.h>    // for writing screenshot PNG files
+
+#include <SDL.h>
+#include <SDL_thread.h>
 
 #include "main.h"
 #include "version.h"
-#include "winlnxdefs.h"
 #include "config.h"
 #include "plugin.h"
 #include "rom.h"
-#include "mupenIniApi.h"
-#include "../r4300/r4300.h"
-#include "../r4300/recomph.h"
-#include "../memory/memory.h"
+#include "romcache.h"
 #include "savestates.h"
 #include "inputrecording.h"
-// #include "vcr_compress.h"
-#include "guifuncs.h" // gui-specific functions
+//TODO#include "vcr_compress.h"
+//TODO#include "guifuncs.h" // gui-specific functions
 #include "util.h"
 #include "translate.h"
-#include "volume.h"
 #include "cheat.h"
+
+#include "../r4300/r4300.h"
+#include "../r4300/recomph.h"
+#include "../r4300/interupt.h"
+
+#include "../memory/memory.h"
+
+#include "../opengl/osd.h"
+#include "../opengl/screenshot.h"
+
+#ifndef NO_GUI
+#include "gui.h"
+#endif
 
 #ifdef DBG
 #include <glib.h>
@@ -75,50 +87,87 @@
 #include "lirc.h"
 #endif //WITH_LIRC
 
-#include <SDL.h>
+#ifdef __APPLE__
+// dynamic data path detection onmac
+bool macSetBundlePath(char* buffer)
+{
+    printf("checking whether we are using an app bundle... ");
+    // the following code will enable mupen to find its plugins when placed in an app bundle on mac OS X.
+    // returns true if path is set, returns false if path was not set
+    char path[1024];
+    CFBundleRef main_bundle = CFBundleGetMainBundle(); assert(main_bundle);
+    CFURLRef main_bundle_URL = CFBundleCopyBundleURL(main_bundle); assert(main_bundle_URL);
+    CFStringRef cf_string_ref = CFURLCopyFileSystemPath( main_bundle_URL, kCFURLPOSIXPathStyle); assert(cf_string_ref);
+    CFStringGetCString(cf_string_ref, path, 1024, kCFStringEncodingASCII);
+    CFRelease(main_bundle_URL);
+    CFRelease(cf_string_ref);
+    
+    if(strstr( path, ".app" ) != 0)
+    {
+        printf("yes\n");
+        // executable is inside an app bundle, use app bundle-relative paths
+        sprintf(buffer, "%s/Contents/Resources/", path);
+        return true;
+    }
+    else
+    {
+        printf("no\n");
+        return false;
+    }
+}
+#endif
 
 /** function prototypes **/
 static void parseCommandLine(int argc, char **argv);
-static int  SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch);
-static void *emulationThread( void *_arg );
-static void sighandler( int signal, siginfo_t *info, void *context ); // signal handler
+static int emulationThread( void *_arg );
+extern int rom_cache_system( void *_arg );
+
+
+#ifdef __WIN32__
+static void sighandler( int signal );
+#else
+static void sighandler( int signal, siginfo_t *info, void *context );
+#endif
+
+/** threads **/
+SDL_Thread * g_EmulationThread;         // core thread handle
+SDL_Thread * g_RomCacheThread;          // rom cache thread handle
 
 /** globals **/
-// TODO: Improve the auto-incrementing savestate system.
-int         autoinc_slot = 0;
-int         *autoinc_save_slot = &autoinc_slot;
 int         g_Noask = 0;                // don't ask to force load on bad dumps
 int         g_NoaskParam = 0;           // was --noask passed at the commandline?
 int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't swap twice when re-playing game
-pthread_t   g_EmulationThread = 0;      // core thread handle
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_EmulatorRecording = 0;    // are we recording emulation    
 int         g_EmulatorPlayback = 0;     // are we in playback mode   
+int         g_OsdEnabled = 1;           // On Screen Display enabled?
+int         g_Fullscreen = 0;           // fullscreen enabled?
+int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
 char        *g_GfxPlugin = NULL;        // pointer to graphics plugin specified at commandline (if any)
 char        *g_AudioPlugin = NULL;      // pointer to audio plugin specified at commandline (if any)
 char        *g_InputPlugin = NULL;      // pointer to input plugin specified at commandline (if any)
 char        *g_RspPlugin = NULL;        // pointer to rsp plugin specified at commandline (if any)
 
+/** static (local) variables **/
 #ifdef NO_GUI
 static int  l_GuiEnabled = 0;           // GUI enabled?
 #else
 static int  l_GuiEnabled = 1;           // GUI enabled?
 #endif
 
-static char l_ConfigDir[PATH_MAX] = {0};
-static char l_InstallDir[PATH_MAX] = {0};
-#ifdef DBG
-static int  l_DebuggerEnabled = 0;       // wether the debugger is enabled or not
-#endif
-static int   l_Fullscreen = 0;           // fullscreen enabled?
+static char l_ConfigDir[PATH_MAX] = {'\0'};
+static char l_InstallDir[PATH_MAX] = {'\0'};
+
 static int   l_EmuMode = 0;              // emumode specified at commandline?
-static char  l_SshotDir[PATH_MAX] = {0}; // pointer to screenshot dir specified at commandline (if any)
 static int   l_CurrentFrame = 0;         // frame counter
 static int  *l_TestShotList = NULL;      // list of screenshots to take for regression test support
 static int   l_TestShotIdx = 0;          // index of next screenshot frame in list
 static char *l_Filename = NULL;          // filename to load & run at startup (if given at command line)
+static int   l_RomNumber = 0;            // rom number in archive (if given at command line)
 static int   l_SpeedFactor = 100;        // percentage of nominal game speed at which emulator is running
 static int   l_FrameAdvance = 0;         // variable to check if we pause on next frame
+
+static osd_message_t *l_volMsg = NULL;
 
 /*********************************************************************************************************
 * exported gui funcs
@@ -136,7 +185,7 @@ char *get_installpath()
 char *get_savespath()
 {
     static char path[PATH_MAX];
-    strcpy(path, get_configpath());
+    strncpy(path, get_configpath(), PATH_MAX-5);
     strcat(path, "save/");
     return path;
 }
@@ -144,15 +193,15 @@ char *get_savespath()
 char *get_iconspath()
 {
     static char path[PATH_MAX];
-    strcpy(path, get_installpath());
+    strncpy(path, get_installpath(), PATH_MAX-6);
     strcat(path, "icons/");
     return path;
 }
 
-char *get_iconpath(char *iconfile)
+char *get_iconpath(const char *iconfile)
 {
     static char path[PATH_MAX];
-    strcpy(path, get_iconspath());
+    strncpy(path, get_iconspath(), PATH_MAX-strlen(iconfile));
     strcat(path, iconfile);
     return path;
 }
@@ -161,6 +210,42 @@ int gui_enabled(void)
 {
     return l_GuiEnabled;
 }
+
+void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char *format, ...)
+{
+    va_list ap;
+    char buffer[2049];
+    va_start(ap, format);
+    vsnprintf(buffer, 2047, format, ap);
+    buffer[2048]='\0';
+    va_end(ap);
+
+    if (g_OsdEnabled && osd)
+        osd_new_message(osd_corner, buffer);
+#ifndef NO_GUI
+    if (l_GuiEnabled && statusbar)
+        gui_message(GUI_MESSAGE_INFO, buffer);
+#endif
+    if (console)
+        printf("%s\n", buffer);
+}
+
+void error_message(const char *format, ...)
+{
+    va_list ap;
+    char buffer[2049];
+    va_start(ap, format);
+    vsnprintf(buffer, 2047, format, ap);
+    buffer[2048]='\0';
+    va_end(ap);
+
+#ifndef NO_GUI
+    if (l_GuiEnabled)
+        gui_message(GUI_MESSAGE_ERROR, buffer);
+#endif
+    printf("%s: %s\n", tr("Error"), buffer);
+}
+
 
 /*********************************************************************************************************
 * timer functions
@@ -198,21 +283,293 @@ static int GetVILimit(void)
     }
 }
 
-static void InitTimer(void)
+static unsigned int gettimeofday_msec(void)
+{
+    unsigned int foo;
+#if defined(__WIN32__)
+    FILETIME ft;
+    unsigned __int64 tmpres = 0;
+    GetSystemTimeAsFileTime(&ft);
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+    foo = (((tmpres / 1000000UL) % 1000000) * 1000) + (tmpres % 1000000UL / 1000);
+#else
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
+#endif
+    return foo;
+}
+
+/*********************************************************************************************************
+* global functions, for adjusting the core emulator behavior
+*/
+
+void main_speeddown(int percent)
+{
+    if (l_SpeedFactor - percent > 10)  /* 10% minimum speed */
+    {
+        l_SpeedFactor -= percent;
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%", tr("Playback speed:"), l_SpeedFactor);
+        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+    }
+}
+
+void main_speedup(int percent)
+{
+	_NewVI();
+    if (l_SpeedFactor + percent < 300) /* 300% maximum speed */
+    {
+        l_SpeedFactor += percent;
+        main_message(0, 1, 1, OSD_BOTTOM_LEFT, "%s %d%%", tr("Playback speed:"), l_SpeedFactor);
+        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+    }
+}
+
+void main_pause(void)
+{
+    pauseContinueEmulation();
+    l_FrameAdvance = 0;
+}
+
+void main_advance_one(void)
+{
+    l_FrameAdvance = 1;
+    rompause = 0;
+}
+
+void main_draw_volume_osd(void)
+{
+    char msgString[32];
+    const char *volString;
+
+    // if we had a volume message, make sure that it's still in the OSD list, or set it to NULL
+    if (l_volMsg != NULL && !osd_message_valid(l_volMsg))
+        l_volMsg = NULL;
+
+    // this calls into the audio plugin
+    volString = volumeGetString();
+    if (volString == NULL)
+    {
+        strcpy(msgString, tr("Volume Not Supported."));
+    }
+    else
+    {
+        sprintf(msgString, "%s: %s", tr("Volume"), volString);
+        if (msgString[strlen(msgString) - 1] == '%')
+            strcat(msgString, "%");
+    }
+
+    // create a new message or update an existing one
+    if (l_volMsg != NULL)
+        osd_update_message(l_volMsg, msgString);
+    else
+        l_volMsg = osd_new_message(OSD_MIDDLE_CENTER, msgString);
+}
+
+/* this function could be called as a result of a keypress, joystick/button movement,
+   LIRC command, or 'testshots' command-line option timer */
+void take_next_screenshot(void)
+{
+    g_TakeScreenshot = l_CurrentFrame + 1;
+}
+
+void startEmulation(void)
 {
     VILimit = GetVILimit();
     VILimitMilliseconds = (double) 1000.0/VILimit; 
     printf("init timer!\n");
+
+    const char *gfx_plugin = NULL,
+               *audio_plugin = NULL,
+               *input_plugin = NULL,
+               *RSP_plugin = NULL;
+
+    // make sure rom is loaded before running
+    if(!rom)
+    {
+        error_message(tr("There is no Rom loaded."));
+        return;
+    }
+
+    /* Determine which plugins to use:
+    *  -If valid plugin was specified at the commandline, use it
+    *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
+    */
+    if(g_GfxPlugin)
+    {
+        gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
+    }
+    else
+    {
+        gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
+    }
+
+    if(!gfx_plugin)
+    {
+        error_message(tr("No graphics plugin specified."));
+        return;
+    }
+
+    if(g_AudioPlugin)
+        audio_plugin = plugin_name_by_filename(g_AudioPlugin);
+    else
+        audio_plugin = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
+
+    if(!audio_plugin)
+    {
+        error_message(tr("No audio plugin specified."));
+        return;
+    }
+
+    if(g_InputPlugin)
+        input_plugin = plugin_name_by_filename(g_InputPlugin);
+    else
+        input_plugin = plugin_name_by_filename(config_get_string("Input Plugin", ""));
+
+    if(!input_plugin)
+    {
+        error_message(tr("No input plugin specified."));
+        return;
+    }
+
+    if(g_RspPlugin)
+        RSP_plugin = plugin_name_by_filename(g_RspPlugin);
+    else
+        RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
+
+    if(!RSP_plugin)
+    {
+        error_message(tr("No RSP plugin specified."));
+        return;
+    }
+    
+    // cleanup variables for re-recording.
+    _StartROM();
+    
+    // load the plugins. Do this outside the emulation thread for GUI
+    // related things which cannot be done outside the main thread.
+    // Examples: GTK Icon theme setup in Rice which otherwise hangs forever
+    // with the Qt4 interface.
+    plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
+
+    // in nogui mode, just start the emulator in the main thread
+    if(!l_GuiEnabled)
+    {
+        emulationThread(NULL);
+    }
+    else if(!g_EmulatorRunning)
+    {
+        // spawn emulation thread
+        g_EmulationThread = SDL_CreateThread(emulationThread, NULL);
+        if(g_EmulationThread == NULL)
+        {
+            printf("Unable to create thread: %s\n", SDL_GetError());
+            error_message(tr("Couldn't spawn core thread!"));
+            return;
+        }
+
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT,  tr("Emulation started (PID: %d)"), g_EmulationThread);
+    }
+    // if emulation is already running, but it's paused, unpause it
+    else if(rompause)
+    {
+        main_pause();
+    }
 }
 
-static unsigned int gettimeofday_msec(void)
+void stopEmulation(void)
 {
-    struct timeval tv;
-    unsigned int foo;
-    
-    gettimeofday(&tv, NULL);
-    foo = ((tv.tv_sec % 1000000) * 1000) + (tv.tv_usec / 1000);
-    return foo;
+    if(g_EmulatorRunning)
+    {    
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Stopping emulation.\n"));
+        rompause = 0;
+        stop_it();
+#ifdef DBG
+        if(debugger_mode)
+        {
+            
+            debugger_step();
+        }
+#endif        
+
+        // wait until emulation thread is done before continuing
+        if(g_EmulatorRunning)
+            SDL_WaitThread(g_EmulationThread, NULL);
+
+#ifdef __WIN32__
+        plugin_close_plugins();
+#endif
+        g_EmulatorRunning = 0;
+        g_EmulationThread = 0;
+
+#ifndef NO_GUI
+        gui_set_state(GUI_STATE_STOPPED);
+        g_romcache.rcspause = 0;
+#endif
+
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation stopped.\n"));
+    }
+}
+
+int pauseContinueEmulation(void)
+{
+    static osd_message_t *msg = NULL;
+
+    if (!g_EmulatorRunning)
+        return 1;
+
+    if (rompause)
+    {
+#ifndef NO_GUI
+        gui_set_state(GUI_STATE_RUNNING);
+        g_romcache.rcspause = 1;
+#endif
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
+        if(msg)
+        {
+            osd_delete_message(msg);
+            msg = NULL;
+        }
+    }
+    else
+    {
+#ifndef NO_GUI
+        gui_set_state(GUI_STATE_PAUSED);
+        g_romcache.rcspause = 0;
+#endif
+        if(msg)
+            osd_delete_message(msg);
+
+        main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Paused\n"));
+        msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused\n"));
+        osd_message_set_static(msg);
+    }
+
+    rompause = !rompause;
+    return rompause;
+}
+
+/*********************************************************************************************************
+* global functions, callbacks from the r4300 core or from other plugins
+*/
+
+void video_plugin_render_callback(void)
+{
+    // if the flag is set to take a screenshot, then grab it now
+    if (g_TakeScreenshot != 0)
+    {
+        TakeScreenshot(g_TakeScreenshot - 1);  // current frame number +1 is in g_TakeScreenshot
+        g_TakeScreenshot = 0; // reset flag
+    }
+
+    // if the OSD is enabled, then draw it now
+    if (g_OsdEnabled)
+    {
+        osd_render();
+    }
 }
 
 void new_frame(void)
@@ -221,23 +578,27 @@ void new_frame(void)
     if (l_TestShotList != NULL)
     {
         int nextshot = l_TestShotList[l_TestShotIdx];
-        if (l_CurrentFrame == nextshot)
+        if (nextshot == l_CurrentFrame)
         {
-            screenshot();
+            // set global variable so screenshot will be taken just before OSD is drawn at the end of frame rendering
+            take_next_screenshot();
             // advance list index to next screenshot frame number.  If it's 0, then quit
             l_TestShotIdx++;
-            if (l_TestShotList[l_TestShotIdx] == 0) stopEmulation();
+        }
+        else if (nextshot == 0)
+        {
+            stopEmulation();
+            free(l_TestShotList);
+            l_TestShotList = NULL;
         }
     }
 
     // advance the current frame
     l_CurrentFrame++;
-
 }
 
 void new_vi(void)
 {
-	_NewVI();
     int Dif;
     unsigned int CurrentFPSTime;
     static unsigned int LastFPSTime = 0;
@@ -250,6 +611,10 @@ void new_vi(void)
 
     start_section(IDLE_SECTION);
     VI_Counter++;
+    
+#ifdef DBG
+    if(debugger_mode) debugger_frontend_vi();
+#endif
 
     if(LastFPSTime == 0)
     {
@@ -267,7 +632,11 @@ void new_vi(void)
         time = (int)(CalculatedTime - CurrentFPSTime);
         if (time > 0)
         {
+#ifdef __WIN32__
+            Sleep(time);
+#else
             usleep(time * 1000);
+#endif
         }
         CurrentFPSTime = CurrentFPSTime + time;
     }
@@ -286,267 +655,14 @@ void new_vi(void)
     }
 }
 
-int open_rom( const char *filename )
-{
-    int rc;
-
-    if(g_EmulationThread)
-    {
-        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load the selected rom?")))
-        {
-            return -1;
-        }
-        stopEmulation();
-    }
-
-    if(ROM_HEADER)
-    {
-        free(ROM_HEADER);
-        ROM_HEADER = NULL;
-    }
-
-    if(rom)
-    {
-        free(rom);
-        rom = NULL;
-    }
-
-    // clear Byte-swapped flag, since ROM is now deleted
-    g_MemHasBeenBSwapped = 0;
-
-    if(!fill_header(filename))
-    {
-        alert_message(tr("Couldn't load Rom!"));
-        return -2;
-    }
-
-    if((rc = rom_read(filename)) != 0)
-    {
-        // rc of -3 means rom file was a hack or bad dump and the user did not want to load it.
-        if(rc == -3)
-            info_message(tr("Rom closed."));
-        else
-            alert_message(tr("Couldn't load Rom!"));
-
-        return -3;
-    }
-    InitTimer();
-
-    return 0;
-}
-
-int close_rom(void)
-{
-    if(g_EmulationThread)
-    {
-        if(!confirm_message(tr("Emulation is running. Do you want to\nstop it and load a rom?")))
-        {
-            return -1;
-        }
-        stopEmulation();
-    }
-
-    if(ROM_HEADER)
-    {
-        free(ROM_HEADER);
-        ROM_HEADER = NULL;
-    }
-
-    if(rom)
-    {
-        free(rom);
-        rom = NULL;
-    }
-    
-    // clear Byte-swapped flag, since ROM is now deleted
-    g_MemHasBeenBSwapped = 0;
-    info_message(tr("Rom closed."));
-
-    return 0;
-}
-
-/** emulation **/
-/* startEmulation
- *  Begins emulation thread
- */
-void startEmulation(void)
-{
-    const char *gfx_plugin = NULL,
-               *audio_plugin = NULL,
-               *input_plugin = NULL,
-               *RSP_plugin = NULL;
-
-    // make sure rom is loaded before running
-    if(!rom)
-    {
-        alert_message(tr("There is no Rom loaded."));
-        return;
-    }
-
-    // make sure all plugins are specified before running
-    if(g_GfxPlugin)
-        gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
-    else
-        gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
-
-    if(!gfx_plugin)
-    {
-        alert_message(tr("No graphics plugin specified."));
-        return;
-    }
-
-    if(g_AudioPlugin)
-        audio_plugin = plugin_name_by_filename(g_AudioPlugin);
-    else
-        audio_plugin = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
-
-    if(!audio_plugin)
-    {
-        alert_message(tr("No audio plugin specified."));
-        return;
-    }
-
-    if(g_InputPlugin)
-        input_plugin = plugin_name_by_filename(g_InputPlugin);
-    else
-        input_plugin = plugin_name_by_filename(config_get_string("Input Plugin", ""));
-
-    if(!input_plugin)
-    {
-        alert_message(tr("No input plugin specified."));
-        return;
-    }
-
-    if(g_RspPlugin)
-        RSP_plugin = plugin_name_by_filename(g_RspPlugin);
-    else
-        RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
-
-    if(!RSP_plugin)
-    {
-        alert_message(tr("No RSP plugin specified."));
-        return;
-    }
-    
-    // cleanup variables for re-recording.
-    _StartROM();
-    
-    // in nogui mode, just start the emulator in the main thread
-    if(!l_GuiEnabled)
-    {
-        emulationThread(NULL);
-    }
-    else if(!g_EmulationThread)
-    {
-        // spawn emulation thread
-        if(pthread_create(&g_EmulationThread, NULL, emulationThread, NULL) != 0)
-        {
-            g_EmulationThread = 0;
-            alert_message(tr("Couldn't spawn core thread!"));
-            return;
-        }
-        pthread_detach(g_EmulationThread);
-        info_message(tr("Emulation started (PID: %d)"), g_EmulationThread);
-    }
-    // if emulation is already running, but it's paused, unpause it
-    else if(rompause)
-    {
-        pauseContinueEmulation();
-    }
-
-}
-
-void stopEmulation(void)
-{
-    if(g_EmulationThread || g_EmulatorRunning)
-    {    
-        info_message(tr("Stopping emulation."));
-        rompause = 0;
-        stop_it();
-
-        // wait until emulation thread is done before continuing
-        if(g_EmulationThread)
-            pthread_join(g_EmulationThread, NULL);
-
-        g_EmulatorRunning = 0;
-
-        info_message(tr("Emulation stopped."));
-    }
-}
-
-int pauseContinueEmulation(void)
-{
-    if (!g_EmulatorRunning)
-        return 1;
-
-    if (rompause)
-        info_message(tr("Emulation continued."));
-    else
-        info_message(tr("Emulation paused."));
-    
-    rompause = !rompause;
-    return rompause;
-}
-
-void screenshot(void)
-{
-    unsigned char *pchImage = NULL;
-    int width, height;
-
-    if(g_EmulationThread || g_EmulatorRunning)
-    {
-        // start by getting the base file path
-        char filepath[PATH_MAX], filename[PATH_MAX];
-        char *pch, ch;
-        filepath[0] = 0;
-        filename[0] = 0;
-        strcpy(filepath, l_SshotDir);
-        if (strlen(filepath) > 0 && filepath[strlen(filepath)-1] != '/')
-            strcat(filepath, "/");
-        
-        // add the game's name to the end, convert to lowercase, convert spaces to underscores
-        pch = filepath + strlen(filepath);
-        strncpy(pch, ROM_HEADER->nom, sizeof(ROM_HEADER->nom));
-        pch[20] = 0;
-        do
-        {
-            ch = *pch;
-            if (ch == ' ')
-                *pch++ = '_';
-            else
-                *pch++ = tolower(ch);
-        } while (ch != 0);
-        
-        // look for a file
-        int i;
-        for (i = 0; i < 100; i++)
-        {
-            sprintf(filename, "%s-%03i.png", filepath, i);
-            FILE *pFile = fopen(filename, "r");
-            if (pFile == NULL)
-                break;
-            fclose(pFile);
-        }
-        if (i == 100) return;
-        // get the screen buffer from the video plugin
-        if (readScreen == NULL) return;
-        readScreen((void **) &pchImage, &width, &height);
-        if (pchImage == NULL) return;
-        // write the image to a PNG
-        SaveRGBBufferToFile(filename, pchImage, width, height, width * 3);
-        // free the memory
-        free(pchImage);
-        // print message -- this allows developers to capture frames and use them in the regression test
-        printf("Captured screenshot for frame %i\n", l_CurrentFrame);
-    }
-}
-
 /*********************************************************************************************************
 * sdl event filter
 */
 static int sdl_event_filter( const SDL_Event *event )
 {
+    static osd_message_t *msgFF = NULL;
     static int SavedSpeedFactor = 100;
+    static BYTE StopRumble[6] = {0x23, 0x01, 0x03, 0xc0, 0x1b, 0x00};
     char *event_str = NULL;
 
     switch( event->type )
@@ -556,122 +672,93 @@ static int sdl_event_filter( const SDL_Event *event )
             stopEmulation();
             break;
         case SDL_KEYDOWN:
-            switch( event->key.keysym.sym )
+            /* check for the only 2 hard-coded key commands: Alt-enter for fullscreen and 0-9 for save state slot */
+            if (event->key.keysym.sym == SDLK_RETURN && event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
             {
-                case SDLK_F5:
-                    savestates_job |= SAVESTATE;
-                    break;
-
-                case SDLK_F7:
-                    savestates_job |= LOADSTATE;
-                    break;
-
-                case SDLK_ESCAPE:
-                    stopEmulation();
-                    break;
-
-                case SDLK_RETURN:
-                    // Alt+Enter toggles fullscreen
-                    if(event->key.keysym.mod & (KMOD_LALT | KMOD_RALT))
-                        changeWindow();
-                    break;
-                case SDLK_F10:
-                    if (l_SpeedFactor > 10)
-                    {
-                        l_SpeedFactor -= 5;
-                        info_message(tr("Emulator playback speed: %i%%"), l_SpeedFactor);
-                        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                    }
-                    break;
-                case SDLK_F11:
-                    if (l_SpeedFactor < 300)
-                    {
-                        l_SpeedFactor += 5;
-                        info_message(tr("Emulator playback speed: %i%%"), l_SpeedFactor);
-                        setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                    }
-                    break;
-                case SDLK_F12:
-                    screenshot();
-                    break;
-
-                // Pause
-                case SDLK_PAUSE:
-                    pauseContinueEmulation();
-                    l_FrameAdvance = 0;
-                    break;
-
-                default:
-                    switch (event->key.keysym.unicode)
-                    {
-                        case '0':
-                        //  gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotDefaultItem), TRUE );
-                            savestates_select_slot( 0 );
-                            break;
-
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            //gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(slotItem[event->key.keysym.unicode - '1']), TRUE );
-                            savestates_select_slot( event->key.keysym.unicode - '0' );
-                            break;
-                        // volume mute/unmute
-                        case 'm':
-                        case 'M':
-                            volMute();
-                            break;
-                        // increase volume
-                        case ']':
-                            volChange(2);
-                            break;
-                        // decrease volume
-                        case '[':
-                            volChange(-2);
-                            break;
-                        // fast-forward
-                        case 'f':
-                        case 'F':
-                            SavedSpeedFactor = l_SpeedFactor;
-                            l_SpeedFactor = 250;
-                            setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                            break;
-                        // frame advance
-                        case '/':
-                        case '?':
-                            l_FrameAdvance = 1;
-                            rompause = 0;
-                            break;
-                        
-                        // pass all other keypresses to the input plugin
-                        
-                        default:
-                            keyDown( 0, event->key.keysym.sym );
-                    }
+                changeWindow();
             }
+            else if (event->key.keysym.unicode >= '0' && event->key.keysym.unicode <= '9')
+            {
+                savestates_select_slot( event->key.keysym.unicode - '0' );
+            }
+            /* check all of the configurable commands */
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Stop", SDLK_ESCAPE))
+                stopEmulation();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Fullscreen", 0))
+                changeWindow();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Save State", SDLK_F5))
+                savestates_job |= SAVESTATE;
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Load State", SDLK_F7))
+            {
+                savestates_job |= LOADSTATE;
+                controllerCommand(0, StopRumble);
+                controllerCommand(1, StopRumble);
+                controllerCommand(2, StopRumble);
+                controllerCommand(3, StopRumble);
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Increment Slot", 0))
+                savestates_inc_slot();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Reset", SDLK_F9))
+            {
+                add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Speed Down", SDLK_F10))
+                main_speeddown(5);
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Speed Up",SDLK_F11))
+                main_speedup(5);
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Screenshot", SDLK_F12))
+                // set flag so that screenshot will be taken at the end of frame rendering
+                take_next_screenshot();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Pause", SDLK_p))
+                main_pause();
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Mute", SDLK_m))
+            {
+                volumeMute();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Increase Volume", SDLK_RIGHTBRACKET))
+            {
+                volumeUp();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Decrease Volume", SDLK_LEFTBRACKET))
+            {
+                volumeDown();
+                main_draw_volume_osd();
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Fast Forward", SDLK_f))
+            {
+                SavedSpeedFactor = l_SpeedFactor;
+                l_SpeedFactor = 250;
+                setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                // set fast-forward indicator
+                msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
+                osd_message_set_static(msgFF);
+            }
+            else if (event->key.keysym.sym == config_get_number("Kbd Mapping Frame Advance", SDLK_SLASH))
+                main_advance_one();
+            // pass all other keypresses to the input plugin
+            else keyDown( 0, event->key.keysym.sym );
+
             return 0;
-            break;
 
         case SDL_KEYUP:
-            switch( event->key.keysym.sym )
+            if(event->key.keysym.sym == config_get_number("Kbd Mapping Stop", SDLK_ESCAPE))
             {
-                case SDLK_ESCAPE:
-                    break;
-                case SDLK_f:
-                    // cancel fast-forward
-                    l_SpeedFactor = SavedSpeedFactor;
-                    setSpeedFactor(l_SpeedFactor);  // call to audio plugin
-                    break;
-                default:
-                    keyUp( 0, event->key.keysym.sym );
+                return 0;
             }
+            else if(event->key.keysym.sym == config_get_number("Kbd Mapping Fast Forward", SDLK_f))
+            {
+                // cancel fast-forward
+                l_SpeedFactor = SavedSpeedFactor;
+                setSpeedFactor(l_SpeedFactor);  // call to audio plugin
+                // remove message
+                osd_delete_message(msgFF);
+            }
+            else keyUp( 0, event->key.keysym.sym );
+
             return 0;
-            break;
 
         // if joystick action is detected, check if it's mapped to a special function
         case SDL_JOYAXISMOTION:
@@ -689,21 +776,30 @@ static int sdl_event_filter( const SDL_Event *event )
             else if(strcmp(event_str, config_get_string("Joy Mapping Stop", "")) == 0)
                 stopEmulation();
             else if(strcmp(event_str, config_get_string("Joy Mapping Pause", "")) == 0)
-                pauseContinueEmulation();
+                main_pause();
             else if(strcmp(event_str, config_get_string("Joy Mapping Save State", "")) == 0)
                 savestates_job |= SAVESTATE;
             else if(strcmp(event_str, config_get_string("Joy Mapping Load State", "")) == 0)
                 savestates_job |= LOADSTATE;
             else if(strcmp(event_str, config_get_string("Joy Mapping Increment Slot", "")) == 0)
-                ;// TODO: Will add after reviewing statesave slot function (Issue 35)
+                savestates_inc_slot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Screenshot", "")) == 0)
-                screenshot();
+                take_next_screenshot();
             else if(strcmp(event_str, config_get_string("Joy Mapping Mute", "")) == 0)
-                volMute();
+            {
+                volumeMute();
+                main_draw_volume_osd();
+            }
             else if(strcmp(event_str, config_get_string("Joy Mapping Decrease Volume", "")) == 0)
-                volChange(-2);
+            {
+                volumeDown();
+                main_draw_volume_osd();
+            }
             else if(strcmp(event_str, config_get_string("Joy Mapping Increase Volume", "")) == 0)
-                volChange(2);
+            {
+                volumeUp();
+                main_draw_volume_osd();
+            }
 
             free(event_str);
             return 0;
@@ -716,30 +812,44 @@ static int sdl_event_filter( const SDL_Event *event )
 /*********************************************************************************************************
 * emulation thread - runs the core
 */
-static void * emulationThread( void *_arg )
+static int emulationThread( void *_arg )
 {
+#if !defined(__WIN32__)
+    struct sigaction sa;
+#endif
     const char *gfx_plugin = NULL,
                *audio_plugin = NULL,
            *input_plugin = NULL,
            *RSP_plugin = NULL;
-    struct sigaction sa;
 
-    // install signal handler
-    memset( &sa, 0, sizeof( struct sigaction ) );
-    sa.sa_sigaction = sighandler;
-    sa.sa_flags = SA_SIGINFO;
-    sigaction( SIGSEGV, &sa, NULL );
-    sigaction( SIGILL, &sa, NULL );
-    sigaction( SIGFPE, &sa, NULL );
-    sigaction( SIGCHLD, &sa, NULL );
+    // install signal handler, but only if we're running in GUI mode
+    // in non-GUI mode, we don't need to catch exceptions (there's no GUI to take down)
+    if (l_GuiEnabled)
+    {
+#if defined(__WIN32__)
+        signal( SIGSEGV, sighandler );
+        signal( SIGILL, sighandler );
+        signal( SIGFPE, sighandler );
+#else
+        memset( &sa, 0, sizeof( struct sigaction ) );
+        sa.sa_sigaction = sighandler;
+        sa.sa_flags = SA_SIGINFO;
+        sigaction( SIGSEGV, &sa, NULL );
+        sigaction( SIGILL, &sa, NULL );
+        sigaction( SIGFPE, &sa, NULL );
+        sigaction( SIGCHLD, &sa, NULL );
+#endif 
+    }
 
     g_EmulatorRunning = 1;
-
     // if emu mode wasn't specified at the commandline, set from config file
     if(!l_EmuMode)
         dynacore = config_get_number( "Core", CORE_DYNAREC );
+#ifdef NO_ASM
+    if(dynacore==CORE_DYNAREC)
+        dynacore = CORE_INTERPRETER;
+#endif
 
-    no_audio_delay = config_get_bool("NoAudioDelay", FALSE);
     no_compiled_jump = config_get_bool("NoCompiledJump", FALSE);
 
     // init sdl
@@ -749,30 +859,6 @@ static void * emulationThread( void *_arg )
 
     SDL_SetEventFilter(sdl_event_filter);
     SDL_EnableUNICODE(1);
-
-    /* Determine which plugins to use:
-     *  -If valid plugin was specified at the commandline, use it
-     *  -Else, get plugin from config. NOTE: gui code must change config if user switches plugin in the gui)
-     */
-    if(g_GfxPlugin)
-        gfx_plugin = plugin_name_by_filename(g_GfxPlugin);
-    else
-        gfx_plugin = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
-
-    if(g_AudioPlugin)
-        audio_plugin = plugin_name_by_filename(g_AudioPlugin);
-    else
-        audio_plugin = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
-
-    if(g_InputPlugin)
-        input_plugin = plugin_name_by_filename(g_InputPlugin);
-    else
-        input_plugin = plugin_name_by_filename(config_get_string("Input Plugin", ""));
-
-    if(g_RspPlugin)
-        RSP_plugin = plugin_name_by_filename(g_RspPlugin);
-    else
-        RSP_plugin = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
 
     // initialize memory, and do byte-swapping if it's not been done yet
     if (g_MemHasBeenBSwapped == 0)
@@ -785,31 +871,70 @@ static void * emulationThread( void *_arg )
         init_memory(0);
     }
 
-    // load the plugins and attach the ROM to them
-    plugin_load_plugins(gfx_plugin, audio_plugin, input_plugin, RSP_plugin);
+    // Attach rom to plugins
     romOpen_gfx();
     romOpen_audio();
     romOpen_input();
 
-    if (l_Fullscreen)
+    // switch to fullscreen if enabled
+    if (g_Fullscreen)
         changeWindow();
+
+    if (g_OsdEnabled)
+    {
+        // init on-screen display
+        void *pvPixels = NULL;
+        int width = 640, height = 480;
+        readScreen(&pvPixels, &width, &height); // read screen to get width and height
+        if (pvPixels != NULL)
+        {
+            free(pvPixels);
+            pvPixels = NULL;
+        }
+        osd_init(width, height);
+    }
+
+    // setup rendering callback from video plugin to the core, for screenshots and On-Screen-Display
+    setRenderingCallback(video_plugin_render_callback);
+
+#ifndef NO_GUI
+    gui_set_state(GUI_STATE_RUNNING);
+    g_romcache.rcspause = 1;
+#endif
 
 #ifdef WITH_LIRC
     lircStart();
 #endif // WITH_LIRC
 
 #ifdef DBG
-    if( l_DebuggerEnabled )
+    if (g_DebuggerEnabled)
         init_debugger();
 #endif
-    // load cheats for the current rom
+
+    /* load cheats for the current rom  */
     cheat_load_current_rom();
 
-    go();   /* core func */
+    /* Startup message on the OSD */
+    osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
+
+    /* call r4300 CPU core and run the game */
+    r4300_reset_hard();
+    r4300_reset_soft();
+    r4300_execute();
 
 #ifdef WITH_LIRC
     lircStop();
 #endif // WITH_LIRC
+
+#ifdef DBG
+    if (debugger_mode)
+        destroy_debugger();
+#endif
+
+    if (g_OsdEnabled)
+    {
+        osd_exit();
+    }
 
     romClosed_RSP();
     romClosed_input();
@@ -822,119 +947,112 @@ static void * emulationThread( void *_arg )
     free_memory();
 
     // clean up
-    g_EmulationThread = 0;
+    g_EmulatorRunning = 0;
 
     SDL_Quit();
 
-    if (l_Filename != 0)
-    {
-        // the following doesn't work - it wouldn't exit immediately but when the next event is
-        // recieved (i.e. mouse movement)
-/*      gdk_threads_enter();
-        gtk_main_quit();
-        gdk_threads_leave();*/
-    }
-
-    return NULL;
+    return 0;
 }
 
 /*********************************************************************************************************
 * signal handler
 */
+#ifdef __WIN32__
+static void sighandler(int signal)
+{
+    printf( "Signal number %d caught\n", signal );
+}
+#else
 static void sighandler(int signal, siginfo_t *info, void *context)
 {
-    if( info->si_pid == g_EmulationThread )
+    switch( signal )
     {
-        switch( signal )
-        {
-            case SIGSEGV:
-                alert_message(tr("The core thread recieved a SIGSEGV signal.\n"
-                                "This means it tried to access protected memory.\n"
-                                "Maybe you have set a wrong ucode for one of the plugins!"));
-                printf( "SIGSEGV in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+        case SIGSEGV:
+            error_message(tr("The core thread recieved a SIGSEGV signal.\n"
+                            "This means it tried to access protected memory.\n"
+                            "Maybe you have set a wrong ucode for one of the plugins!"));
+            printf( "SIGSEGV in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
 #ifdef SEGV_MAPERR
-                switch( info->si_code )
-                {
-                    case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
-                    case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
-                }
+            switch( info->si_code )
+            {
+                case SEGV_MAPERR: printf( "                address not mapped to object\n" ); break;
+                case SEGV_ACCERR: printf( "                invalid permissions for mapped object\n" ); break;
+            }
 #endif
-                break;
-            case SIGILL:
-                printf( "SIGILL in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+            break;
+        case SIGILL:
+            printf( "SIGILL in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
 #ifdef ILL_ILLOPC
-                switch( info->si_code )
-                {
-                    case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
-                    case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
-                    case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
-                    case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
-                    case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
-                    case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
-                    case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
-                    case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
-                }
+            switch( info->si_code )
+            {
+                case ILL_ILLOPC: printf( "\tillegal opcode\n" ); break;
+                case ILL_ILLOPN: printf( "\tillegal operand\n" ); break;
+                case ILL_ILLADR: printf( "\tillegal addressing mode\n" ); break;
+                case ILL_ILLTRP: printf( "\tillegal trap\n" ); break;
+                case ILL_PRVOPC: printf( "\tprivileged opcode\n" ); break;
+                case ILL_PRVREG: printf( "\tprivileged register\n" ); break;
+                case ILL_COPROC: printf( "\tcoprocessor error\n" ); break;
+                case ILL_BADSTK: printf( "\tinternal stack error\n" ); break;
+            }
 #endif
-                break;
-            case SIGFPE:
-                printf( "SIGFPE in core thread caught:\n" );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-                printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
-                switch( info->si_code )
-                {
-                    case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
-                    case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
-                    case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
-                    case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
-                    case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
-                    case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
-                    case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
-                    case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
-                }
-                break;
-            default:
-                printf( "Signal number %d in core thread caught:\n", signal );
-                printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        }
-        pthread_cancel(g_EmulationThread);
-        g_EmulationThread = 0;
-        g_EmulatorRunning = 0;
+            break;
+        case SIGFPE:
+            printf( "SIGFPE in core thread caught:\n" );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
+            printf( "\taddress = 0x%08lX\n", (unsigned long) info->si_addr );
+            switch( info->si_code )
+            {
+                case FPE_INTDIV: printf( "\tinteger divide by zero\n" ); break;
+                case FPE_INTOVF: printf( "\tinteger overflow\n" ); break;
+                case FPE_FLTDIV: printf( "\tfloating point divide by zero\n" ); break;
+                case FPE_FLTOVF: printf( "\tfloating point overflow\n" ); break;
+                case FPE_FLTUND: printf( "\tfloating point underflow\n" ); break;
+                case FPE_FLTRES: printf( "\tfloating point inexact result\n" ); break;
+                case FPE_FLTINV: printf( "\tfloating point invalid operation\n" ); break;
+                case FPE_FLTSUB: printf( "\tsubscript out of range\n" ); break;
+            }
+            break;
+        default:
+            printf( "Signal number %d in core thread caught:\n", signal );
+            printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
     }
-    else
-    {
-        printf( "Signal number %d caught:\n", signal );
-        printf( "\terrno = %d (%s)\n", info->si_errno, strerror( info->si_errno ) );
-        exit( EXIT_FAILURE );
-    }
+
+    abort();
 }
+#endif /* __WIN32__ */
+
 
 static void printUsage(const char *progname)
 {
     char *str = strdup(progname);
 
-    printf("Usage: %s [parameter(s)] rom\n"
+    printf("Usage: %s [parameter(s)] [romfile]\n"
            "\n"
            "Parameters:\n"
-           "    --nogui             : do not display GUI\n"
-           "    --fullscreen        : turn fullscreen mode on\n"
-           "    --gfx (path)        : use gfx plugin given by (path)\n"
-           "    --audio (path)      : use audio plugin given by (path)\n"
-           "    --input (path)      : use input plugin given by (path)\n"
-           "    --rsp (path)        : use rsp plugin given by (path)\n"
-           "    --emumode (number)  : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter\n"
-           "    --sshotdir (dir)    : set screenshot directory to (dir)\n"
-           "    --configdir (dir)   : force config dir (must contain mupen64plus.conf)\n"
-           "    --installdir (dir)  : force install dir (place to look for plugins, icons, lang, etc)\n"
-           "    --noask             : don't ask to force load on bad dumps\n"
-           "    --testshots (list)  : take screenshots at frames given in comma-separated list, then quit\n"
-           "    --playback (path)   : playback .m64 file given by (path)\n"
-           "    -h, --help          : see this help message\n"
-           "\n", basename(str));
-
+           "    --nogui               : do not display GUI.\n"
+           "    --noask               : do not prompt user if rom file is hacked or a bad dump.\n"
+           "    --noosd               : disable onscreen display.\n"
+           "    --fullscreen          : turn fullscreen mode on.\n"
+           "    --romnumber (number)  : specify which rom in romfile, if multirom archive.\n"
+           "    --gfx (plugin-file)   : use gfx plugin given by (path)\n"
+           "    --audio (plugin-file) : use audio plugin given by (path)\n"
+           "    --input (plugin-file) : use input plugin given by (path)\n"
+           "    --rsp (plugin-file)   : use rsp plugin given by (path)\n"
+           "    --emumode (mode)      : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter\n"
+           "    --sshotdir (dir)      : set screenshot directory to (dir)\n"
+           "    --configdir (dir)     : force config dir (must contain mupen64plus.conf)\n"
+           "    --installdir (dir)    : force install dir (place to look for plugins, icons, lang, etc)\n"
+           "    --testshots (list)    : take screenshots at frames given in comma-separated (list), then quit\n"
+           "    --playback (path)     : playback .m64 file given by (path)\n"
+#ifdef DBG
+           "    --debugger            : start with debugger enabled\n"
+#endif 
+           "    -h, --help            : see this help message\n"
+           "\n", str);
     free(str);
 
     return;
@@ -960,14 +1078,20 @@ void parseCommandLine(int argc, char **argv)
         OPT_SSHOTDIR,
         OPT_CONFIGDIR,
         OPT_INSTALLDIR,
+#ifdef DBG
+    OPT_DEBUGGER,
+#endif
         OPT_NOASK,
+        OPT_PLAYBACK,
         OPT_TESTSHOTS,
-        OPT_PLAYBACK
+        OPT_ROMNUMBER
     };
     struct option long_options[] =
     {
         {"nogui", no_argument, &l_GuiEnabled, FALSE},
-        {"fullscreen", no_argument, &l_Fullscreen, TRUE},
+        {"noosd", no_argument, &g_OsdEnabled, FALSE},
+        {"fullscreen", no_argument, &g_Fullscreen, TRUE},
+        {"romnumber", required_argument, NULL, OPT_ROMNUMBER},
         {"gfx", required_argument, NULL, OPT_GFX},
         {"audio", required_argument, NULL, OPT_AUDIO},
         {"input", required_argument, NULL, OPT_INPUT},
@@ -976,6 +1100,9 @@ void parseCommandLine(int argc, char **argv)
         {"sshotdir", required_argument, NULL, OPT_SSHOTDIR},
         {"configdir", required_argument, NULL, OPT_CONFIGDIR},
         {"installdir", required_argument, NULL, OPT_INSTALLDIR},
+#ifdef DBG
+        {"debugger", no_argument, NULL, OPT_DEBUGGER},
+#endif
         {"noask", no_argument, NULL, OPT_NOASK},
         {"testshots", required_argument, NULL, OPT_TESTSHOTS},
         {"playback", required_argument, NULL, OPT_PLAYBACK},
@@ -1047,7 +1174,7 @@ void parseCommandLine(int argc, char **argv)
                 break;
             case OPT_SSHOTDIR:
                 if(isdir(optarg))
-                    strncpy(l_SshotDir, optarg, PATH_MAX);
+                    SetScreenshotDir(optarg);
                 else
                     printf("***Warning: Screen shot directory '%s' is not accessible or not a directory.\n", optarg);
                 break;
@@ -1092,6 +1219,14 @@ void parseCommandLine(int argc, char **argv)
                     l_TestShotList[idx] = 0;
                 }
                 break;
+#ifdef DBG
+            case OPT_DEBUGGER:
+                g_DebuggerEnabled = TRUE;
+                break;
+#endif
+            case OPT_ROMNUMBER:
+                l_RomNumber = atoi(optarg);
+                break;
             // print help
             case 'h':
             case '?':
@@ -1112,7 +1247,6 @@ void parseCommandLine(int argc, char **argv)
     // This allows creation of a mupen64plus_nogui symlink to mupen64plus instead of passing --nogui
     // for backwards compatability with old mupen64_nogui program name.
     str = strdup(argv[0]);
-    basename(str);
     if(strstr(str, "_nogui") != NULL)
     {
         l_GuiEnabled = FALSE;
@@ -1128,6 +1262,11 @@ void parseCommandLine(int argc, char **argv)
  */
 static void setPaths(void)
 {
+#ifdef __WIN32__
+    strncpy(l_ConfigDir, "./", PATH_MAX);
+    strncpy(l_InstallDir, "./", PATH_MAX);
+    return;
+#else
     char buf[PATH_MAX], buf2[PATH_MAX];
 
     // if the config dir was not specified at the commandline, look for ~/.mupen64plus dir
@@ -1171,34 +1310,41 @@ static void setPaths(void)
     if(l_ConfigDir[strlen(l_ConfigDir)-1] != '/')
         strncat(l_ConfigDir, "/", PATH_MAX - strlen(l_ConfigDir));
 
-    // if install dir was not specified at the commandline, look for it in the default location
-    if(strlen(l_InstallDir) == 0)
+    // if install dir was not specified at the commandline, look for it in the executable's directory
+    if (strlen(l_InstallDir) == 0)
     {
-        strncpy(l_InstallDir, PREFIX, PATH_MAX);
-        strncat(l_InstallDir, "/share/mupen64plus/", PATH_MAX - strlen(l_InstallDir));
-        
-        // if install dir is not in the default location, try the same dir as the binary
-        if(!isdir(l_InstallDir))
+#ifdef __APPLE__
+        macSetBundlePath(buf);
+        strncpy(l_InstallDir, buf, PATH_MAX);
+        strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
+#else
+        buf[0] = '\0';
+        int n = readlink("/proc/self/exe", buf, PATH_MAX);
+        if (n > 0)
         {
-            int n = readlink("/proc/self/exe", buf, PATH_MAX);
-
-            if(n > 0)
+            buf[n] = '\0';
+            dirname(buf);
+            strncpy(l_InstallDir, buf, PATH_MAX);
+            strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
+        }
+#endif
+        // if it's not in the executable's directory, try a couple of default locations
+        if (buf[0] == '\0' || !isfile(buf))
+        {
+            strcpy(l_InstallDir, "/usr/local/share/mupen64plus");
+            strcpy(buf, l_InstallDir);
+            strcat(buf, "/config/mupen64plus.conf");
+            if (!isfile(buf))
             {
-                buf[n] = '\0';
-                dirname(buf);
-                strncpy(l_InstallDir, buf, PATH_MAX);
-
-                strncat(buf, "/config/mupen64plus.conf", PATH_MAX - strlen(buf));
-                if(!isfile(buf))
+                strcpy(l_InstallDir, "/usr/share/mupen64plus");
+                strcpy(buf, l_InstallDir);
+                strcat(buf, "/config/mupen64plus.conf");
+                // if install dir is not in the default locations, try the same dir as the binary
+                if (!isfile(buf))
                 {
                     // try cwd as last resort
                     getcwd(l_InstallDir, PATH_MAX);
                 }
-            }
-            else
-            {
-                // try cwd as last resort
-                getcwd(l_InstallDir, PATH_MAX);
             }
         }
     }
@@ -1247,7 +1393,7 @@ static void setPaths(void)
             {
                 strncpy(buf2, l_ConfigDir, PATH_MAX);
                 strncat(buf2, entry->d_name, PATH_MAX - strlen(buf2));
-                                
+
                 printf("Copying %s to %s\n", buf, l_ConfigDir);
                 if(copyfile(buf, buf2) != 0)
                     printf("Error copying file\n");
@@ -1258,88 +1404,13 @@ static void setPaths(void)
     }
 
     // set screenshot dir if it wasn't specified by the user
-    if(strlen(l_SshotDir) == 0)
+    if (!ValidScreenshotDir())
     {
-        snprintf(l_SshotDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
-        if(!isdir(l_SshotDir))
-        {
-            printf("Warning: Could not find screenshot dir: %s\n", l_SshotDir);
-            l_SshotDir[0] = '\0';
-        }
+        char chDefaultDir[PATH_MAX + 1];
+        snprintf(chDefaultDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
+        SetScreenshotDir(chDefaultDir);
     }
-
-    // make sure screenshots dir has a '/' on the end.
-    if(l_SshotDir[strlen(l_SshotDir)-1] != '/')
-        strncat(l_SshotDir, "/", PATH_MAX - strlen(l_SshotDir));
-}
-
-/*********************************************************************************************************
-* PNG support functions for writing screenshot files
-*/
-
-static void mupen_png_error(png_structp png_write, const char *message)
-{
-    printf("PNG Error: %s\n", message);
-}
-
-static void mupen_png_warn(png_structp png_write, const char *message)
-{
-    printf("PNG Warning: %s\n", message);
-}
-
-static int SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int height, int pitch)
-{
-    int i;
-
-    // allocate PNG structures
-    png_structp png_write = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, mupen_png_error, mupen_png_warn);
-    if (!png_write)
-    {
-        printf("Error creating PNG write struct.\n");
-        return 1;
-    }
-    png_infop png_info = png_create_info_struct(png_write);
-    if (!png_info)
-    {
-        png_destroy_write_struct(&png_write, (png_infopp)NULL);
-        printf("Error creating PNG info struct.\n");
-        return 2;
-    }
-    // Set the jumpback
-    if (setjmp(png_jmpbuf(png_write)))
-    {
-        png_destroy_write_struct(&png_write, &png_info);
-        printf("Error calling setjmp()\n");
-        return 3;
-    }
-    // open the file to write
-    FILE *savefile = fopen(filename, "wb");
-    if (savefile == NULL)
-    {
-        printf("Error opening '%s' to save screenshot.\n", filename);
-        return 4;
-    }
-    // give the file handle to the PNG compressor
-    png_init_io(png_write, savefile);
-    // set the info
-    png_set_IHDR(png_write, png_info, width, height, 8, PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-    // allocate row pointers and scale each row to 24-bit color
-    png_byte **row_pointers;
-    row_pointers = (png_byte **) malloc(height * sizeof(png_bytep));
-    for (i = 0; i < height; i++)
-    {
-        row_pointers[i] = (png_byte *) (buf + (height - 1 - i) * pitch);
-    }
-    // set the row pointers
-    png_set_rows(png_write, png_info, row_pointers);
-    // write the picture to disk
-    png_write_png(png_write, png_info, 0, NULL);
-    // free memory
-    free(row_pointers);
-    png_destroy_write_struct(&png_write, &png_info);
-    // all done
-    return 0;
+#endif /* __WIN32__ */
 }
 
 /*********************************************************************************************************
@@ -1347,130 +1418,204 @@ static int SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, in
 */
 int main(int argc, char *argv[])
 {
-#ifdef VCR_SUPPORT
+    char dirpath[PATH_MAX];
     int i;
-    const char *p;
-#endif
+    int retval = EXIT_SUCCESS;
     printf(" __  __                         __   _  _   ____  _             \n");  
     printf("|  \\/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \\| |_   _ ___ \n");
     printf("| |\\/| | | | | '_ \\ / _ \\ '_ \\| '_ \\| || |_| |_) | | | | / __|  \n");
     printf("| |  | | |_| | |_) |  __/ | | | (_) |__   _|  __/| | |_| \\__ \\  \n");
     printf("|_|  |_|\\__,_| .__/ \\___|_| |_|\\___/   |_| |_|   |_|\\__,_|___/  \n");
-    printf("             |_|         http://code.google.com/p/mupen64plus/  \n\n");                                              
-
-    // allow gui subsystem to init and parse gui-specific commandline args first
-    if(l_GuiEnabled)
-        gui_init(&argc, &argv);
+    printf("             |_|         http://code.google.com/p/mupen64plus/  \n");
+    printf("Version %s\n\n",MUPEN_VERSION);
 
     parseCommandLine(argc, argv);
     setPaths();
     config_read();
 
-#ifdef VCR_SUPPORT
-    VCRComp_init();
-    p = config_get_string( "VCR Video Codec", "XviD" );
-    for (i = 0; i < VCRComp_numVideoCodecs(); i++)
+    if (l_GuiEnabled)
     {
-        if (!strcasecmp( VCRComp_videoCodecName( i ), p ))
+        i = config_get_bool("OsdEnabled", 2);
+        if (i == 2)
         {
-            VCRComp_selectVideoCodec( i );
-            break;
+            config_put_bool("OsdEnabled", 1);
         }
-    }
-    p = config_get_string( "VCR Audio Codec", VCRComp_audioCodecName( 0 ) );
-    for (i = 0; i < VCRComp_numAudioCodecs(); i++)
-    {
-        if (!strcasecmp( VCRComp_audioCodecName( i ), p ))
+        else if (g_OsdEnabled == 1)
         {
-            VCRComp_selectAudioCodec( i );
-            break;
+            g_OsdEnabled = i;
         }
+        // check "GUI always start fullscreen" setting in config file
+        i = config_get_bool("GuiStartFullscreen", 2);
+        if (i == 2)
+        {
+            config_put_bool("GuiStartFullscreen", 0);
+        }
+        else if (g_Fullscreen == 0)
+        {
+            g_Fullscreen = i;
+        }
+
     }
-#endif
 
     // init multi-language support
     tr_init();
 
-    // look for plugins in the install dir and set plugin config dir
-    plugin_scan_installdir();
-    plugin_set_configdir(l_ConfigDir);
-
-    /* TODO: autoinc_save_slot acts differently in the gui version than it does in the nogui version. Here, it's a bool, in nogui version, it's a pointer to the current autoinc_slot. Need to research this */
-    *autoinc_save_slot = config_get_bool("AutoIncSaveSlot", FALSE);
-
-    // if --noask was not specified at the commandline, try config file
+    // if --noask was not specified at the commandline, default to true in nogui mode, 
+    // otherwise check the config file.
     if(!g_NoaskParam)
-        g_Noask = config_get_bool("No Ask", FALSE);
-
-    /* TODO: nogui version does not use ini file */
-    ini_openFile();
+        {
+        if(!l_GuiEnabled)
+            {
+            g_Noask = TRUE;
+            }
+        else
+            {
+            g_Noask = config_get_bool("No Ask", FALSE);
+            }
+        }
 
     cheat_read_config();
 
-    // build gui, but do not display
-    if(l_GuiEnabled)
-        gui_build();
+    // try to get plugin folder path from the mupen64plus config file (except on mac where app bundles may be used)
+    strncpy(dirpath, config_get_string("PluginDirectory", ""), PATH_MAX-1);
+        
+    dirpath[PATH_MAX-1] = '\0';
+    // if it's not set in the config file, use the /plugins/ sub-folder of the installation directory
+    if (strlen(dirpath) < 2)
+    {
+        strncpy(dirpath, l_InstallDir, PATH_MAX);
+        strncat(dirpath, "plugins/", PATH_MAX - strlen(dirpath));
+        dirpath[PATH_MAX-1] = '\0';
+    }
+    // scan the plugin directory and set the config dir for the plugins
+    plugin_scan_directory(dirpath);
+    plugin_set_dirs(l_ConfigDir, l_InstallDir);
 
+#ifndef NO_GUI
+    if(l_GuiEnabled)
+        gui_init(&argc, &argv);
+#endif
     // must be called after building gui
-    info_message(tr("Config Dir: \"%s\", Install Dir: \"%s\""), l_ConfigDir, l_InstallDir);
+    // look for plugins in the install dir and set plugin config dir
+    savestates_set_autoinc_slot(config_get_bool("AutoIncSaveSlot", FALSE));
     
     // removes any old entries from recording
     CleanUpSaveFiles();
+    if((i=config_get_number("CurrentSaveSlot",10))!=10)
+    {
+        savestates_select_slot((unsigned int)i);
+    }
+    else
+    {
+        config_put_number("CurrentSaveSlot",0);
+    }
+
+    main_message(1, 0, 0, 0, tr("Config Dir:  %s\nInstall Dir: %s\nPlugin Dir:  %s\n"), l_ConfigDir, l_InstallDir, dirpath);
+    main_message(0, 1, 0, 0, tr("Config Dir: \"%s\", Install Dir: \"%s\", Plugin Dir:  \"%s\""), l_ConfigDir, l_InstallDir, dirpath);
+
+    //The database needs to be opened regardless of GUI mode.
+    romdatabase_open();
+#ifndef NO_GUI
+    // only create the ROM Cache Thread if GUI is enabled
+    if (l_GuiEnabled)
+    {  
+        g_romcache.rcstask = RCS_INIT;
+        g_RomCacheThread = SDL_CreateThread(rom_cache_system, NULL);
+        
+        if(g_RomCacheThread == NULL)
+        {
+            error_message(tr("Couldn't spawn rom cache thread!"));
+        }
+    }
+
     // only display gui if user wants it
-    if(l_GuiEnabled)
+    if (l_GuiEnabled)
         gui_display();
+#endif
 
     // if rom file was specified, run it
     if (l_Filename)
     {
-        if(open_rom(l_Filename) < 0 &&
-           !l_GuiEnabled)
+        if (open_rom(l_Filename, l_RomNumber) >= 0)
         {
-            // cleanup and exit
-            cheat_delete_all();
-            ini_closeFile();
-            plugin_delete_list();
-            tr_delete_languages();
-            config_delete();
-            exit(1);
+            startEmulation();
         }
-
-        startEmulation();
+        else if (!l_GuiEnabled)
+        {
+            retval = 1;
+        }
     }
     // Rom file must be specified in nogui mode
-    else if(!l_GuiEnabled)
+    else if (!l_GuiEnabled)
     {
-        alert_message("Rom file must be specified in nogui mode.");
+        error_message("Rom file must be specified in nogui mode.");
         printUsage(argv[0]);
-
-        // cleanup and exit
-        cheat_delete_all();
-        ini_closeFile();
-        plugin_delete_list();
-        tr_delete_languages();
-        config_delete();
-        exit(1);
+        retval = 1;
     }
 
+#ifndef NO_GUI
     // give control of this thread to the gui
-    if(l_GuiEnabled)
+    if (l_GuiEnabled)
+    {
         gui_main_loop();
+        stopEmulation();
+    }
+#endif
 
     // free allocated memory
     if (l_TestShotList != NULL)
         free(l_TestShotList);
 
     // cleanup and exit
-    stopEmulation();
     config_write();
-    ini_updateFile(1);
     cheat_write_config();
     cheat_delete_all();
-    ini_closeFile();
+#ifndef NO_GUI
+    g_romcache.rcstask = RCS_SHUTDOWN;
+#endif
+    romdatabase_close();
     plugin_delete_list();
     tr_delete_languages();
     config_delete();
 
-    return EXIT_SUCCESS;
+    return retval;
 }
+
+#ifdef __WIN32__
+
+static const char* programName = "mupen64plus.exe";
+
+int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdParamarg, int cmdShow)
+{
+    list_t arguments = NULL;
+    list_node_t*  node = NULL;
+    int i = 0;
+    char* arg = NULL;
+    char* wrk = NULL;
+    char** argv = NULL;
+
+    g_ProgramInstance = instance;
+    
+    wrk = malloc(strlen(programName) + 1);
+    strcpy(wrk, programName);
+    list_append(&arguments, wrk);
+    
+    for (arg = strtok(cmdParamarg, " ");
+         arg != NULL;
+         arg = strtok(NULL, " "))
+    {
+        wrk = malloc(strlen(arg) + 1);
+        strcpy(wrk, arg);
+        list_append(&arguments, arg);
+    }
+    
+    argv = malloc(list_length(arguments) + 1 * sizeof(char*));
+    list_foreach(arguments, node)
+    {
+        argv[i++] = node->data;
+    }
+    
+    return main(i, argv);
+}
+#endif
 

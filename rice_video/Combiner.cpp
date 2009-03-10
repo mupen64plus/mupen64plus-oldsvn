@@ -91,9 +91,9 @@ const char *cycleTypeStrs[] = {
 const char* constStr(uint32 op)
 {
 if(op<=MUX_UNK)
-    { return constStrs[op]; }
+    return constStrs[op];
 else
-   { return "Invalid-Const"; }
+   return "Invalid-Const";
 }
 #endif
 
@@ -505,3 +505,4 @@ void CColorCombiner::DisplaySimpleMuxString(void)
     m_pDecodedMux->DisplaySimpliedMuxString("Used");
 }
 #endif
+

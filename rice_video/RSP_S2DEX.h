@@ -201,3 +201,4 @@ typedef struct  {   // Intel Format
 } uObjScaleBg;
 
 #endif
+

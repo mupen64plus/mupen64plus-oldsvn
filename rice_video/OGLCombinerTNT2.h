@@ -19,8 +19,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _OGL_COMBINER_TNT2_H_
 #define _OGL_COMBINER_TNT2_H_
 
+#include <SDL_opengl.h>
+
+#define GL_SOURCE3_RGB_EXT                0x8583
+#define GL_SOURCE3_ALPHA_EXT              0x858B
+#define GL_OPERAND3_RGB_EXT               0x8593
+#define GL_OPERAND3_ALPHA_EXT             0x859B
+
 #include "OGLExtCombiner.h"
-#include "gl/gl.h"
 #include "OGLDecodedMux.h"
 #include "CNvTNTCombiner.h"
 
@@ -60,3 +66,4 @@ private:
 
 
 #endif
+

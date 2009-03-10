@@ -13,9 +13,10 @@
 *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *   GNU General Public License for more details.
 *
-*   You should have received a copy of the GNU General Public License
-*   along with this program; if not, write to the Free Software
-*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public
+*   Licence along with this program; if not, write to the Free
+*   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+*   Boston, MA  02110-1301, USA
 */
 
 //****************************************************************
@@ -325,7 +326,23 @@ void math_init()
   BOOL IsSSE = FALSE;
 #if defined(__GNUC__) && !defined(NO_ASM)
     int edx, eax;
-    asm volatile("cpuid":"=a"(eax),"=d"(edx):"0"(1):"ecx","ebx");
+  #if defined(__x86_64__)
+    asm volatile(" cpuid;        "
+                 : "=a"(eax), "=d"(edx)
+                 : "0"(1)
+                 : "rbx", "rcx"
+                 );
+  #else
+    asm volatile(" push %%ebx;   "
+                 " push %%ecx;   "
+                 " cpuid;        "
+                 " pop %%ecx;    "
+                 " pop %%ebx;    "
+                 : "=a"(eax), "=d"(edx)
+                 : "0"(1)
+                 :
+                 );
+  #endif
     // Check for SSE
     if (edx & (1 << 25))
     IsSSE = TRUE;
@@ -367,3 +384,4 @@ void math_init()
     LOG("SSE detected.\n");
   }
 }
+

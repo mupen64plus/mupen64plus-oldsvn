@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "stdafx.h"
-#include "_BldNum.h"
+#include "../main/version.h"
 
 #ifndef _DEBUG
 void __cdecl DebuggerAppendMsg(const char * Message, ...) {}
@@ -586,7 +586,7 @@ void __cdecl DebuggerAppendMsg(const char * Message, ...)
 void DebuggerPause()
 {
     char temp[300];
-    sprintf(temp,"%s Debug %s:Paused ",project_name, FILE_VERSION) ;
+    sprintf(temp,"%s Debug %s:Paused ",project_name, MUPEN_VERSION) ;
 
     while( debuggerPause )
     {
@@ -595,11 +595,10 @@ void DebuggerPause()
             g_pFrameBufferManager->DisplayRenderTexture(debuggerDrawRenderTextureNo);
             debuggerDrawRenderTexture = false;
         }
-        printf("0.1 second pause\n\n\n");
         usleep(100 * 1000);
         debuggerPause = false;
     }
-    sprintf(temp,"%s Debug %s",project_name, FILE_VERSION) ;
+    sprintf(temp,"%s Debug %s",project_name, MUPEN_VERSION) ;
 }
 
 void __cdecl LOG_UCODE(const char* szFormat, ...)
@@ -664,7 +663,7 @@ void DEBUGGER_PAUSE_COUNT_N(uint32 val)
 if (eventToPause == (int)val)
     {   
     if(debuggerPauseCount>0) 
-        { debuggerPauseCount--; }
+        debuggerPauseCount--;
     if(debuggerPauseCount==0)
         {
         CGraphicsContext::Get()->UpdateFrame();
@@ -678,7 +677,7 @@ void DEBUGGER_PAUSE_COUNT_N_WITHOUT_UPDATE(uint32 val)
 if(eventToPause == (int)val)
     {
     if(debuggerPauseCount>0) 
-        { debuggerPauseCount--; }
+        debuggerPauseCount--;
     if(debuggerPauseCount==0)
         {
         debuggerPauseCount = countToPause;
@@ -710,3 +709,4 @@ void DumpMatrix(const Matrix &mat, const char* prompt)
 }
 
 #endif
+

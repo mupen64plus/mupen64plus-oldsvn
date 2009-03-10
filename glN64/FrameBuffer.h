@@ -33,3 +33,4 @@ FrameBuffer *FrameBuffer_FindBuffer( u32 address );
 void FrameBuffer_ActivateBufferTexture( s16 t, FrameBuffer *buffer );
 
 #endif
+

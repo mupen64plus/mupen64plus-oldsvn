@@ -16,8 +16,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "stdafx.h"
-#include "glh_genext.h"
 
 //========================================================================
 COGLColorCombinerTNT2::COGLColorCombinerTNT2(CRender *pRender)
@@ -204,7 +206,7 @@ void COGLColorCombinerTNT2::GenerateCombinerSetting(int index)
     if( pTexture1 ) m_pOGLRender->BindTexture(pTexture1->m_dwTextureName, 1);
 
     // Texture unit 0
-    glActiveTextureARB(GL_TEXTURE0_ARB);
+    glActiveTexture(GL_TEXTURE0_ARB);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE4_NV);
     m_pOGLRender->EnableTexUnit(0,TRUE);
     glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, res.unit1.rgbOp);
@@ -250,7 +252,7 @@ void COGLColorCombinerTNT2::GenerateCombinerSetting(int index)
     glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE3_ALPHA_EXT, MapRGBArgs(res.unit1.rgbArg3));
     glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND3_ALPHA_EXT, MapAlphaArgFlags(res.unit1.rgbArg3));
 
-    glActiveTextureARB(GL_TEXTURE1_ARB);
+    glActiveTexture(GL_TEXTURE1_ARB);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE4_NV);
 
     if( m_maxTexUnits > 1 && res.numOfUnits > 1 )

@@ -1,3 +1,24 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - main.c                                                  *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifdef __WIN32__
 #include <windows.h>
 #include "./winproject/resource.h"
@@ -11,10 +32,9 @@
 #endif
 #include <stdio.h>
 
+#include "Audio_1.1.h"
 #include "Rsp_1.1.h"
 #include "hle.h"
-
-#include "Audio_1.1.h"
 
 RSP_INFO rsp;
 
@@ -25,8 +45,6 @@ extern void (*processAList)();
 static BOOL firstTime = TRUE;
 void loadPlugin();
 #endif
-
-void disasm(FILE *f, unsigned int t[0x1000/4]);
 
 __declspec(dllexport) void CloseDLL (void)
 {
@@ -286,12 +304,6 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
          f = fopen("dmem.dat", "wb");
          fwrite(rsp.RDRAM + task->ucode_data, task->ucode_data_size, 1, f);
          fclose(f);
-
-         f = fopen("disasm.txt", "wb");
-         memcpy(rsp.DMEM, rsp.RDRAM+task->ucode_data, task->ucode_data_size);
-         memcpy(rsp.IMEM+0x80, rsp.RDRAM+task->ucode, 0xF7F);
-         disasm(f, (unsigned int*)(rsp.IMEM));
-         fclose(f);
       }
     else
       {
@@ -301,10 +313,6 @@ __declspec(dllexport) DWORD DoRspCycles ( DWORD Cycles )
 
          f = fopen("dmem.dat", "wb");
          fwrite(rsp.DMEM, 0x1000, 1, f);
-         fclose(f);
-
-         f = fopen("disasm.txt", "wb");
-         disasm(f, (unsigned int*)(rsp.IMEM));
          fclose(f);
       }
      }
@@ -339,3 +347,4 @@ __declspec(dllexport) void RomClosed (void)
    firstTime = TRUE;
 #endif
 }
+

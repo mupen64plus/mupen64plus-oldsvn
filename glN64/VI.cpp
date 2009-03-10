@@ -77,3 +77,4 @@ void VI_UpdateScreen()
     }
     glFinish();
 }
+

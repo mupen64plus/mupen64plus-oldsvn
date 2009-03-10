@@ -276,16 +276,12 @@ static int MicrocodeDialog()
 
     return selectedMicrocode;
 }
-#elif defined(USE_KDE4)
-# warning "The KDE4 microcode dialog needs to be implemented!!"
+#else 
 static int MicrocodeDialog()
 {
     // FIXME
     return 0;
 }
-
-#else
-# error "No microcode dialog implementation!"
 #endif
 
 MicrocodeInfo *GBI_AddMicrocode()
@@ -505,3 +501,4 @@ void GBI_MakeCurrent( MicrocodeInfo *current )
 
     GBI.current = current;
 }
+

@@ -51,6 +51,7 @@ int l_ForceManual = 0; // use manual settings - ie: do not let emulator configur
 
 
 FILE *PlaybackFile;
+FILE *RecordingFile;
 m64_header Header;
 
 int BeginPlayback(char *sz_filename)
@@ -73,7 +74,7 @@ int BeginPlayback(char *sz_filename)
 
 int BeginRecording(char *sz_filename)
 {
-    RecrodingFile = fopen(sz_filename,"wb");
+    RecordingFile = fopen(sz_filename,"wb");
     if (!RecordingFile)
     {
         EndPlaybackAndRecording();

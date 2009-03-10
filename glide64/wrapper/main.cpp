@@ -1,25 +1,38 @@
-#define SAVE_CBUFFER
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - glide64/wrapper/main.cpp                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2005-2006 Hacktarux                                     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _WIN32
-#include "../winlnxdefs.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
+
 #include <SDL/SDL.h>
-#endif
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "glide.h"
-#include <stdlib.h>
-#include <stdio.h>
-#ifdef _WIN32
-#include <windows.h>
-#include <commctrl.h>
-// #include <gl/gl.h>
-// #include <gl/glu.h>
-#endif // _WIN32
 #include "main.h"
-#ifdef _WIN32
-#include "wglext.h"
-#endif // _WIN32
+
+#define SAVE_CBUFFER
 
 #ifdef VPDEBUG
 #include <IL/il.h>
@@ -63,55 +76,19 @@ static inline void opt_glCopyTexImage2D( GLenum target,
 }
 #define glCopyTexImage2D opt_glCopyTexImage2D
 
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-PFNGLBLENDFUNCSEPARATEEXTPROC glBlendFuncSeparateEXT;
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-PFNGLFOGCOORDFPROC glFogCoordfEXT;
-#ifdef _WIN32
-PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
-#endif // _WIN32
-
-PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebufferEXT;
-PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2DEXT;
-PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffersEXT;
-PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbufferEXT = NULL;
-PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT = NULL;
-PFNGLGENRENDERBUFFERSEXTPROC glGenRenderbuffersEXT = NULL;
-PFNGLRENDERBUFFERSTORAGEEXTPROC glRenderbufferStorageEXT = NULL;
-PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbufferEXT = NULL;
-PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatusEXT;
-PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
-
-PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB;
-PFNGLSHADERSOURCEARBPROC glShaderSourceARB;
-PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
-PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
-PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
-PFNGLLINKPROGRAMARBPROC glLinkProgramARB;
-PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
-PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
-PFNGLUNIFORM1IARBPROC glUniform1iARB;
-PFNGLUNIFORM4IARBPROC glUniform4iARB;
-PFNGLUNIFORM4FARBPROC glUniform4fARB;
-PFNGLUNIFORM1FARBPROC glUniform1fARB;
-PFNGLDELETEOBJECTARBPROC glDeleteObjectARB;
-PFNGLGETINFOLOGARBPROC glGetInfoLogARB;
-PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB;
-PFNGLSECONDARYCOLOR3FPROC glSecondaryColor3f;
-
 typedef struct
 {
     unsigned int address;
     int width;
     int height;
-  unsigned int fbid;
-  unsigned int zbid;
-  unsigned int texid;
+  GLuint fbid;
+  GLuint zbid;
+  GLuint texid;
   int buff_clear;
 } fb;
 
-int nbTextureUnits;
-int nbAuxBuffers, current_buffer;
+GLint nbTextureUnits;
+GLint nbAuxBuffers, current_buffer;
 int width, widtho, heighto, height;
 int saved_width, saved_height;
 int blend_func_separate_support;
@@ -133,18 +110,7 @@ int save_w, save_h;
 int lfb_color_fmt;
 float invtex[2];
 
-#ifdef _WIN32
-static HDC hDC = NULL;
-static HGLRC hGLRC = NULL;
-static HWND hToolBar = NULL;
-static HWND hwnd_win = NULL;
-static unsigned long windowedExStyle, windowedStyle;
-#endif // _WIN32
 static unsigned long fullscreen;
-#ifdef _WIN32
-static RECT windowedRect;
-static HMENU windowedMenu;
-#endif // _WIN32
 
 static int savedWidtho, savedHeighto;
 static int savedWidth, savedHeight;
@@ -165,9 +131,7 @@ struct texbuf_t {
 static texbuf_t texbufs[NB_TEXBUFS];
 static int texbuf_i;
 
-#ifndef _WIN32
 static SDL_Surface *m_pScreen;
-#endif // _WIN32
 
 // unsigned short * frameBuffer = NULL;
 // unsigned short * depthBuffer = NULL;
@@ -189,42 +153,10 @@ void display_warning(const char *text, ...)
         vsprintf((char*)buf, (char*)text, ap);
         va_end(ap);
 
-// #ifdef _WIN32
-//      MessageBox(NULL, (LPCTSTR)buf, "Glide3x warning : ", MB_OK);
-// #else // _WIN32
        printf("Glide3x warning : %s\n", buf);
-// #endif // _WIN32
         first_message--;
     }
 }
-
-#ifdef _WIN32
-void display_error()
-{
-    LPVOID lpMsgBuf;
-    if (!FormatMessage( 
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-        FORMAT_MESSAGE_FROM_SYSTEM | 
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        GetLastError(),
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-        (LPTSTR) &lpMsgBuf,
-        0,
-        NULL ))
-    {
-    // Handle the error.
-    return;
-    }
-    // Process any inserts in lpMsgBuf.
-    // ...
-    // Display the string.
-    MessageBox( NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION );
-
-    // Free the buffer.
-    LocalFree( lpMsgBuf );
-}
-#endif // _WIN32
 
 #ifdef LOGGING
 FILE *log_file = NULL;
@@ -344,48 +276,6 @@ BOOL isExtensionSupported(const char *extension)
     return FALSE;
 }
 
-#ifdef _WIN32
-BOOL isWglExtensionSupported(const char *extension)
-{
-    const GLubyte *extensions = NULL;
-    const GLubyte *start;
-    GLubyte *where, *terminator;
-
-    where = (GLubyte *)strchr(extension, ' ');
-    if (where || *extension == '\0')
-        return 0;
-
-    extensions = (GLubyte*)wglGetExtensionsStringARB(wglGetCurrentDC());
-
-    start = extensions;
-    for (;;)
-    {
-        where = (GLubyte *) strstr((const char *) start, extension);
-        if (!where)
-            break;
-
-        terminator = where + strlen(extension);
-        if (where == start || *(where - 1) == ' ')
-            if (*terminator == ' ' || *terminator == '\0')
-                return TRUE;
-
-        start = terminator;
-    }
-
-    return FALSE;
-}
-
-BOOL CALLBACK FindToolBarProc(HWND hWnd, LPARAM lParam)
-{
-    if (GetWindowLong(hWnd, GWL_STYLE) & RBS_VARHEIGHT)
-    {
-        hToolBar = hWnd;
-        return FALSE;
-    }
-    return TRUE;
-}
-#endif // _WIN32
-
 #define GrPixelFormat_t int
 
 FX_ENTRY GrContext_t FX_CALL 
@@ -403,13 +293,6 @@ grSstWinOpenExt(
     return grSstWinOpen(hWnd, screen_resolution, refresh_rate, color_format, 
                         origin_location, nColBuffers, nAuxBuffers);
 }
-
-#ifdef WIN32
-# include <fcntl.h>
-# ifndef ATTACH_PARENT_PROCESS
-#  define ATTACH_PARENT_PROCESS ((DWORD)-1)
-# endif
-#endif
 
 FX_ENTRY GrContext_t FX_CALL 
 grSstWinOpen(
@@ -440,38 +323,8 @@ grSstWinOpen(
   color_texture = free_texture++;
   depth_texture = free_texture++;
   
-#ifdef _WIN32
-    PIXELFORMATDESCRIPTOR pfd = {
-        sizeof(PIXELFORMATDESCRIPTOR),  // size of this pfd
-        1,                       // version number
-        PFD_DRAW_TO_WINDOW |     // support window
-        PFD_SUPPORT_OPENGL |     // support OpenGL
-        PFD_GENERIC_ACCELERATED | //PFD_SWAP_COPY | PFD_SWAP_EXCHANGE |
-        PFD_DOUBLEBUFFER,        // double buffered
-        PFD_TYPE_RGBA,           // RGBA type
-        32,
-        0, 0, 0, 0, 0, 0,        // color bits ignored
-        0,                       // no alpha buffer
-        0,                       // shift bit ignored
-        0,                       // no accumulation buffer
-        0, 0, 0, 0,              // accum bits ignored
-        24,        // z-buffer      
-        0,                       // no stencil buffer
-        1,                       // no auxiliary buffer ZIGGY: added 1 auxiliary buffer
-        PFD_MAIN_PLANE,          // main layer
-        0,                       // reserved
-        0, 0, 0};                // layer masks ignored
-    int pfm;
-    RECT windowRect, toolRect;
-    int pc_width, pc_height;
-#endif // _WIN32
-
     LOG("grSstWinOpen(%d, %d, %d, %d, %d, %d %d)\r\n", hWnd, screen_resolution, refresh_rate, color_format, origin_location, nColBuffers, nAuxBuffers);
 
-#ifdef _WIN32
-    if ((HWND)hWnd == NULL) hWnd = (FxU32)GetActiveWindow();
-    hwnd_win = (HWND)hWnd;
-#endif // _WIN32
     switch ((screen_resolution & ~0x80)&0xFF)
     {
     case GR_RESOLUTION_320x200:
@@ -542,113 +395,6 @@ grSstWinOpen(
         display_warning("unknown SstWinOpen resolution : %x", screen_resolution);
     }
 
-#ifdef _WIN32
-    if (screen_resolution & 0x80)
-    {
-        viewport_offset = max(25, screen_resolution >> 8);
-        ChangeDisplaySettings(NULL, 0);
-        GetClientRect(hwnd_win, &windowRect);
-        EnumChildWindows(hwnd_win, FindToolBarProc, 0);
-
-        if (hToolBar)
-            GetWindowRect(hToolBar, &toolRect);
-        else
-            toolRect.bottom = toolRect.top = 0;
-
-        windowRect.right = windowRect.left + width - 1;
-        windowRect.bottom = windowRect.top + height - 1 + 40;
-        AdjustWindowRect(&windowRect, GetWindowLong(hwnd_win, GWL_STYLE), GetMenu(hwnd_win) != NULL);
-
-        SetWindowPos(hwnd_win, NULL, 0, 0, windowRect.right - windowRect.left + 1,
-                    windowRect.bottom - windowRect.top + 1 /*+ toolRect.bottom - toolRect.top + 1*/, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOMOVE);
-    fullscreen = 0;
-    }
-    else
-    {
-        DEVMODE fullscreenMode;
-        DEVMODE currentMode;
-        
-        viewport_offset = 0;
-        pc_width = getFullScreenWidth();
-        pc_height = getFullScreenHeight();
-        if (pc_width == 0 || pc_height == 0)
-        {
-            pc_width = width;
-            pc_height = height;
-        }
-
-        memset(&fullscreenMode, 0, sizeof(DEVMODE));
-        fullscreenMode.dmSize = sizeof(DEVMODE);
-        fullscreenMode.dmPelsWidth= pc_width;
-        fullscreenMode.dmPelsHeight= pc_height;
-        fullscreenMode.dmBitsPerPel= 32;
-        fullscreenMode.dmDisplayFrequency= 60;
-        fullscreenMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
-
-        EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &currentMode);
-        fullscreenMode.dmDisplayFrequency = currentMode.dmDisplayFrequency;
-
-        if (ChangeDisplaySettings( &fullscreenMode, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL)
-        {
-            display_warning("can't change to fullscreen mode");
-        }
-        ShowCursor(FALSE);
-
-        windowedExStyle = GetWindowLong(hwnd_win, GWL_EXSTYLE);
-        windowedStyle = GetWindowLong(hwnd_win, GWL_STYLE);
-
-        SetWindowLong(hwnd_win, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
-        SetWindowLong(hwnd_win, GWL_STYLE, WS_POPUP);
-
-        GetWindowRect(hwnd_win, &windowedRect);
-        windowedMenu = GetMenu(hwnd_win);
-        if (windowedMenu) SetMenu(hwnd_win, NULL);
-
-        fullscreen = 1;
-
-        SetWindowPos(hwnd_win, NULL, 0, 0, pc_width, pc_height, SWP_NOACTIVATE | SWP_NOZORDER | SWP_SHOWWINDOW);
-    }
-    
-    if ((hDC = GetDC(hwnd_win)) == NULL)
-    {
-        display_warning("GetDC on main window failed");
-        return FXFALSE;
-    }
-    SetViewportExtEx(hDC, width, height, NULL);
-    SetWindowExtEx(hDC, width, height, NULL);
-
-    if ((pfm = ChoosePixelFormat(hDC, &pfd)) == 0) {
-    printf("disabling auxiliary buffers\n");
-    pfd.cAuxBuffers = 0;
-    pfm = ChoosePixelFormat(hDC, &pfd);
-  }
-    if (pfm == 0)
-    {
-        display_warning("ChoosePixelFormat failed");
-        return FXFALSE;
-    }
-    if (SetPixelFormat(hDC, pfm, &pfd) == FALSE)
-    {
-        display_warning("SetPixelFormat failed");
-        return FXFALSE;
-    }
-
-    DescribePixelFormat(hDC, pfm, sizeof(pfd), &pfd);
-    
-    if ((hGLRC = wglCreateContext(hDC)) == 0)
-    {
-        display_warning("wglCreateContext failed!");
-        grSstWinClose(0);
-        return FXFALSE;
-    }
-
-    if (!wglMakeCurrent(hDC, hGLRC))
-    {
-        display_warning("wglMakeCurrent failed!");
-        grSstWinClose(0);
-        return FXFALSE;
-    }
-#else // _WIN32
    // init sdl & gl
    const SDL_VideoInfo *videoInfo;
    Uint32 videoFlags = 0;
@@ -720,7 +466,6 @@ grSstWinOpen(
 # endif // _DEBUG
    SDL_WM_SetCaption(caption, caption);
    glViewport(0, viewport_offset, width, height);
-#endif // _WIN32
     
     //if (color_format !=   GR_COLORFORMAT_ARGB) display_warning("color format is not ARGB");
     lfb_color_fmt = color_format;
@@ -738,14 +483,6 @@ grSstWinOpen(
         display_warning("Your video card doesn't support GL_ARB_texture_mirrored_repeat extension");
   show_warning = 0;
 
-#ifdef _WIN32
-        glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)wglGetProcAddress("glMultiTexCoord2fARB");
-#else // _WIN32
-        glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glActiveTextureARB");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)SDL_GL_GetProcAddress("glMultiTexCoord2fARB");
-#endif // _WIN32
-  
   nbTextureUnits = 0;
     glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &nbTextureUnits);
     if (nbTextureUnits == 1) display_warning("You need a video card that has at least 2 texture units");
@@ -780,55 +517,13 @@ grSstWinOpen(
         npot_support = 1;
     }
 
-#ifdef _WIN32
-    glBlendFuncSeparateEXT = (PFNGLBLENDFUNCSEPARATEEXTPROC)wglGetProcAddress("glBlendFuncSeparateEXT");
-#else // _WIN32
-    glBlendFuncSeparateEXT = (PFNGLBLENDFUNCSEPARATEEXTPROC)SDL_GL_GetProcAddress("glBlendFuncSeparateEXT");
-#endif // _WIN32
-
     if (isExtensionSupported("GL_EXT_fog_coord") == FALSE)
         fog_coord_support = 0;
     else
         fog_coord_support = 1;
 
-#ifdef _WIN32
-    glFogCoordfEXT = (PFNGLFOGCOORDFPROC)wglGetProcAddress("glFogCoordfEXT");
-#else // _WIN32
-    glFogCoordfEXT = (PFNGLFOGCOORDFPROC)SDL_GL_GetProcAddress("glFogCoordfEXT");
-#endif // _WIN32
-
-#ifdef _WIN32
-    wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
-#endif // _WIN32
-
-#ifdef _WIN32
-    glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)wglGetProcAddress("glBindFramebufferEXT");
-    glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)wglGetProcAddress("glFramebufferTexture2DEXT");
-    glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)wglGetProcAddress("glGenFramebuffersEXT");
-    glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)wglGetProcAddress("glCheckFramebufferStatusEXT");
-    glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)wglGetProcAddress("glDeleteFramebuffersEXT");
-
-  glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)wglGetProcAddress("glBindRenderbufferEXT");
-    glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)wglGetProcAddress("glDeleteRenderbuffersEXT");
-    glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)wglGetProcAddress("glGenRenderbuffersEXT");
-    glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)wglGetProcAddress("glRenderbufferStorageEXT");
-  glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)wglGetProcAddress("glFramebufferRenderbufferEXT");
-#else // _WIN32
-    glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindFramebufferEXT");
-    glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
-    glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenFramebuffersEXT");
-    glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
-    glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
-
-  glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindRenderbufferEXT");
-    glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteRenderbuffersEXT");
-    glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenRenderbuffersEXT");
-    glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)SDL_GL_GetProcAddress("glRenderbufferStorageEXT");
-  glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glFramebufferRenderbufferEXT");
-#endif // _WIN32
-
   int getEnableFBO();
-  use_fbo = getEnableFBO() && glFramebufferRenderbufferEXT;
+  use_fbo = getEnableFBO();
 
   printf("use_fbo %d\n", use_fbo);
 
@@ -838,67 +533,13 @@ grSstWinOpen(
         isExtensionSupported("GL_ARB_vertex_shader") && !getDisableGLSL())
     {
         glsl_support = 1;
-
-#ifdef _WIN32
-        glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)wglGetProcAddress("glCreateShaderObjectARB");
-        glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)wglGetProcAddress("glShaderSourceARB");
-        glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)wglGetProcAddress("glCompileShaderARB");
-        glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)wglGetProcAddress("glCreateProgramObjectARB");
-        glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)wglGetProcAddress("glAttachObjectARB");
-        glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)wglGetProcAddress("glLinkProgramARB");
-        glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)wglGetProcAddress("glUseProgramObjectARB");
-        glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)wglGetProcAddress("glGetUniformLocationARB");
-        glUniform1iARB = (PFNGLUNIFORM1IARBPROC)wglGetProcAddress("glUniform1iARB");
-        glUniform4iARB = (PFNGLUNIFORM4IARBPROC)wglGetProcAddress("glUniform4iARB");
-        glUniform4fARB = (PFNGLUNIFORM4FARBPROC)wglGetProcAddress("glUniform4fARB");
-        glUniform1fARB = (PFNGLUNIFORM1FARBPROC)wglGetProcAddress("glUniform1fARB");
-        glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)wglGetProcAddress("glDeleteObjectARB");
-        glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)wglGetProcAddress("glGetInfoLogARB");
-        glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)wglGetProcAddress("glGetObjectParameterivARB");
-
-        glSecondaryColor3f = (PFNGLSECONDARYCOLOR3FPROC)wglGetProcAddress("glSecondaryColor3f");
-#else // _WIN32
-        glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)SDL_GL_GetProcAddress("glCreateShaderObjectARB");
-        glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)SDL_GL_GetProcAddress("glShaderSourceARB");
-        glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)SDL_GL_GetProcAddress("glCompileShaderARB");
-        glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)SDL_GL_GetProcAddress("glCreateProgramObjectARB");
-        glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)SDL_GL_GetProcAddress("glAttachObjectARB");
-        glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)SDL_GL_GetProcAddress("glLinkProgramARB");
-        glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)SDL_GL_GetProcAddress("glUseProgramObjectARB");
-        glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)SDL_GL_GetProcAddress("glGetUniformLocationARB");
-        glUniform1iARB = (PFNGLUNIFORM1IARBPROC)SDL_GL_GetProcAddress("glUniform1iARB");
-        glUniform4iARB = (PFNGLUNIFORM4IARBPROC)SDL_GL_GetProcAddress("glUniform4iARB");
-        glUniform4fARB = (PFNGLUNIFORM4FARBPROC)SDL_GL_GetProcAddress("glUniform4fARB");
-        glUniform1fARB = (PFNGLUNIFORM1FARBPROC)SDL_GL_GetProcAddress("glUniform1fARB");
-        glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)SDL_GL_GetProcAddress("glDeleteObjectARB");
-        glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)SDL_GL_GetProcAddress("glGetInfoLogARB");
-        glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)SDL_GL_GetProcAddress("glGetObjectParameterivARB");
-
-        glSecondaryColor3f = (PFNGLSECONDARYCOLOR3FPROC)SDL_GL_GetProcAddress("glSecondaryColor3f");
-#endif // _WIN32
     }
     else
         glsl_support = 0;
 
-#ifdef _WIN32
-    if (screen_resolution & 0x80)
-    {
-        glViewport(0, viewport_offset, width, height);
-        viewport_width = width;
-        viewport_height = height;
-    }
-    else
-    {
-        glViewport(0, 0, pc_width, pc_height);
-        viewport_width = pc_width;
-        viewport_height = pc_height;
-    viewport_offset = 0;
-    }
-#else
     glViewport(0, viewport_offset, width, height);
     viewport_width = width;
     viewport_height = height;
-#endif // _WIN32
 
 //   void do_benchmarks();
 //   do_benchmarks();
@@ -1000,21 +641,8 @@ grSstWinClose( GrContext_t context )
 //   frameBuffer = depthBuffer = NULL;
   
     free_combiners();
-#ifndef WIN32
-#ifndef GCC
-  __try // I don't know why, but opengl can be killed before this function call when emulator is closed (Gonetz).
-    // ZIGGY : I found the problem : it is a function pointer, when the extension isn't supported , it is then zero, so just need to check the pointer prior to do the call.
-#endif
-  {
-    if (use_fbo && glBindFramebufferEXT)
+    if (use_fbo)
       glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
-  }
-#ifndef GCC
-  __except(EXCEPTION_EXECUTE_HANDLER)
-  {
-    clear_texbuff = 0;
-  }
-#endif
 
   if (clear_texbuff)
   {
@@ -1025,45 +653,14 @@ grSstWinClose( GrContext_t context )
       glDeleteRenderbuffersEXT( 1, &(fbs[i].zbid) );
     }
   }
-#endif
   nb_fb = 0;
   
-    //free_textures();
-#ifndef WIN32
   // ZIGGY for some reasons, Pj64 doesn't like remove_tex on exit
   remove_tex(0, 0xfffffff);
-#endif
 
-  //*/
-#ifdef _WIN32
-    if (hGLRC)
-    {
-        wglMakeCurrent(NULL,NULL);
-        wglDeleteContext(hGLRC);
-        hGLRC = NULL;
-    }
-  /*
-  if (hDC != NULL) 
-  {
-      ReleaseDC(hwnd_win,hDC);
-    hDC = NULL;
-  }
-    //*/
-    if (fullscreen)
-    {
-        ShowCursor(TRUE);
-        ChangeDisplaySettings(NULL, 0);
-        SetWindowLong(hwnd_win, GWL_STYLE, windowedStyle);
-        SetWindowLong(hwnd_win, GWL_EXSTYLE, windowedExStyle);
-        SetWindowPos(hwnd_win, NULL, windowedRect.left, windowedRect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-        if (windowedMenu) SetMenu(hwnd_win, windowedMenu);
-        fullscreen = 0;
-    }
-#else
    //SDL_QuitSubSystem(SDL_INIT_VIDEO);
    //sleep(2);
    m_pScreen = NULL;
-#endif
     return FXTRUE;
 }
 
@@ -1594,33 +1191,7 @@ grGetString( FxU32 pname )
 /* JOSH FIXME: hack to avoid implementing CreateGLWindow and KillGLWindow
  * Rather than calling glGetString to check for the appropriate extensions,
  * just let getDisableGLSL() decide. */
-#ifdef _WIN32
-                int openglinit = (hGLRC == NULL);
-        //if (glGetString(GL_EXTENSIONS) == NULL) openglinit = 1;
-                if(openglinit)
-                {
-          printf("Creating gl window\n");
-                    CreateGLWindow("Opengl window", 640, 480);
-                }
-                if (isExtensionSupported("GL_ARB_shading_language_100") &&
-                    isExtensionSupported("GL_ARB_shader_objects") &&
-                    isExtensionSupported("GL_ARB_fragment_shader") &&
-                    isExtensionSupported("GL_ARB_vertex_shader") && !getDisableGLSL())
-                {
-                    glsl_combiner = 1;
-                }
-                else
-                {
-                    glsl_combiner = 0;
-                }
-        printf("glsl_combiner %d\n", glsl_combiner);
-                if(openglinit)
-                {
-                    KillGLWindow();
-                }
-#else // _WIN32
         glsl_combiner = 1; /* Just use the disable flag */
-#endif // _WIN32
             }
             if(glsl_combiner == 1 && !getDisableGLSL())
                 return extension1;
@@ -1825,10 +1396,6 @@ FX_ENTRY void FX_CALL grFramebufferCopyExt(int x, int y, int w, int h,
 FX_ENTRY void FX_CALL
 grRenderBuffer( GrBuffer_t buffer )
 {
-#ifdef _WIN32
-    static HANDLE region = NULL;
-    int realWidth = pBufferWidth, realHeight = pBufferHeight;
-#endif // _WIN32
     LOG("grRenderBuffer(%d)\r\n", buffer);
     //printf("grRenderBuffer(%d)\n", buffer);
 
@@ -2012,10 +1579,15 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU32 depth )
 
 }
 
+
+extern void (*renderCallback)();
+
 // #include <unistd.h>
 FX_ENTRY void FX_CALL
 grBufferSwap( FxU32 swap_interval )
 {
+  if(renderCallback)
+    (*renderCallback)();
   int i;
     LOG("grBufferSwap(%d)\r\n", swap_interval);
   //printf("swap\n");
@@ -2024,11 +1596,7 @@ grBufferSwap( FxU32 swap_interval )
     return;
   }
 
-#ifdef _WIN32
-    SwapBuffers(wglGetCurrentDC());
-#else // _WIN32
   SDL_GL_SwapBuffers();
-#endif // _WIN32
   for (i = 0; i < nb_fb; i++)
     fbs[i].buff_clear = 1;
 
@@ -2747,3 +2315,4 @@ void dump_tex(int id)
 }
 
 #endif
+

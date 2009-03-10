@@ -1,32 +1,29 @@
-/**
- * Mupen64 - r4300/x86_64/regcache.c
- * Copyright (C) 2007 Richard Goedeken, Hacktarux
- * Based on code written by Hacktarux, Copyright (C) 2002
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * Forum homepage: http://www.emutalk.net/forumdisplay.php?f=50
- * 
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
-
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - regcache.c                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2007 Richard Goedeken (Richard42)                       *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
 
 #include "regcache.h"
+
 #include "../recomp.h"
 #include "../r4300.h"
 #include "../recomph.h"
@@ -52,7 +49,7 @@ void init_cache(precomp_instr* start)
   r0 = (unsigned long long *) reg;
 }
 
-void free_all_registers()
+void free_all_registers(void)
 {
 #if defined(PROFILE_R4300)
   int freestart = code_length;
@@ -93,7 +90,7 @@ void free_all_registers()
 #endif
 }
 
-void free_registers_move_start()
+void free_registers_move_start(void)
 {
   /* flush all dirty registers and clear needed_registers table */
   free_all_registers();
@@ -144,7 +141,7 @@ void free_register(int reg)
   free_since[reg] = dst+1;
 }
 
-void flush_registers()
+void flush_registers(void)
 {
   precomp_instr *last;
   int i;
@@ -174,7 +171,7 @@ void flush_registers()
   }
 }
 
-void reload_registers()
+void reload_registers(void)
 {
   int i;
 
@@ -192,7 +189,7 @@ void reload_registers()
   }
 }
 
-void stack_save_registers()
+void stack_save_registers(void)
 {
   int i;
 
@@ -205,7 +202,7 @@ void stack_save_registers()
   }
 }
 
-void stack_load_registers()
+void stack_load_registers(void)
 {
   int i;
 
@@ -218,9 +215,9 @@ void stack_load_registers()
   }
 }
 
-int lru_register()
+int lru_register(void)
 {
-   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFL;
+   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFULL;
    int i, reg = 0;
    for (i=0; i<8; i++)
      {
@@ -233,9 +230,9 @@ int lru_register()
    return reg;
 }
 
-int lru_base_register() /* EBP cannot be used as a base register for SIB addressing byte */
+int lru_base_register(void) /* EBP cannot be used as a base register for SIB addressing byte */
 {
-   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFL;
+   unsigned long oldest_access = 0xFFFFFFFFFFFFFFFFULL;
    int i, reg = 0;
    for (i=0; i<8; i++)
      {
@@ -262,7 +259,7 @@ void set_register_state(int reg, unsigned int *addr, int _dirty, int _is64bits)
 int lock_register(int reg)
 {
    free_register(reg);
-   last_access[reg] = (precomp_instr *) 0xFFFFFFFFFFFFFFFFLL;
+   last_access[reg] = (precomp_instr *) 0xFFFFFFFFFFFFFFFFULL;
    reg_content[reg] = NULL;
    return reg;
 }
@@ -720,7 +717,7 @@ void build_wrappers(precomp_instr *instr, int start, int end, precomp_block* blo
      }
 }
 
-void simplify_access()
+void simplify_access(void)
 {
    int i;
    dst->local_addr = code_length;

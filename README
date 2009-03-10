@@ -8,14 +8,49 @@ http://code.google.com/p/mupen64plus/wiki/README
 Mupen64Plus is based off of mupen64, originally created by Hacktarux. The Mupen64Plus package contains the mupen64 emulator program (renamed mupen64plus) plus graphics, sound, input, and RSP plugins.
 
 README Sections
-  1. Building From Source
-  2. Installation
-  3. Multi-user Support
-  4. Key Commands In Emulator
-  5. Known Issues
+  1. Requirements for building or running Mupen64Plus
+  2. Building From Source
+  3. Installation
+  4. Multi-user Support
+  5. Key Commands In Emulator
+  6. Known Issues
 
+1. Requirements and Pre-requisites
+----------------------------------
 
-1. Building From Source
+*Binary Package Requirements*
+
+  - GTK2 libraries (unless built from source with GUI=NONE - see note)
+  - SDL 1.2
+  - SDL_ttf
+  - libpng
+  - freetype 2
+  - zlib 
+
+*Source Build Requirements*
+
+In addition to the binary libraries, the following packages are required if you build Mupen64Plus from source:
+
+  - GNU C and C++ compiler, libraries, and headers
+  - GNU make
+  - Development packages for all the libraries above
+  - libsamplerate (aka Secret Rabbit Code)
+
+Most of these pre-requisites are installed by default, but some are more uncommon. Here is an example for adding the 'SDL_ttf' development packages on Fedora systems:
+
+  # yum install SDL_ttf SDL_ttf-devel
+
+And on Debian systems: 
+
+  # apt-get install libsdl-ttf2.0-0 libsdl-ttf2.0-dev
+
+There are also a number of packages required for specific options: 
+
+  - libsamplerate (aka Secret Rabbit Code for higher quality audio) 
+  - binutils-dev (dis-asm.h for debugger) 
+  - Qt4 libraries and headers (for Qt4 GUI)
+
+2. Building From Source
 -----------------------
 
 If you downloaded the binary distribution of Mupen64Plus, skip to the Installation section. To build the source distribution, unzip and cd into the source directory, then build using make:
@@ -36,12 +71,18 @@ Type 'make' by itself to view all available build options:
      uninstall     == Uninstall Mupen64Plus and all plugins
    Options:
      BITS=32       == build 32-bit binaries on 64-bit machine
-     VCR=1         == enable video recording
      LIRC=1        == enable LIRC support
+     NO_RESAMP=1   == disable libsamplerate support in jttl_audio
+     NO_ASM=1      == build without assembly (no dynamic recompiler or MMX/SSE code)
      GUI=NONE      == build without GUI support
      GUI=GTK2      == build GTK2 GUI support (default)
-     GUI=KDE4      == build KDE4 GUI support
-     PREFIX=path   == specify install/uninstall prefix (default: /usr/local)
+     GUI=QT4       == build QT4 GUI support
+   Install Options:
+     PREFIX=path   == install/uninstall prefix (default: /usr/local/)
+     SHAREDIR=path == path to install shared data (default: PREFIX/share/mupen64plus/)
+     BINDIR=path   == path to install mupen64plus binary (default: PREFIX/bin/)
+     LIBDIR=path   == path to install plugin libs (default: SHAREDIR/plugins/)
+     MANDIR=path   == path to install manual files (default: PREFIX/man/man1/)
    Debugging Options:
      PROFILE=1     == build gprof instrumentation into binaries for profiling
      DBGSYM=1      == add debugging symbols to binaries
@@ -57,7 +98,9 @@ NOTE: If you want to build a nogui-only version of mupen64plus, i.e. without gtk
 
  $ make GUI=NONE all
 
-2. Installation
+Also note, that this only disables gtk+ dependencies where avaliable. Currently (August, 2008) some plugins such as rice video and glide64 must be built with gtk. This is a known issue and being addressed.
+
+3. Installation
 ---------------
 
 *Binary Distribution*
@@ -83,7 +126,7 @@ After building mupen64plus and all plugins, su to root and type 'make install' t
  # exit
  $
 
-3. Multi-user Support
+4. Multi-user Support
 ---------------------
 
 As of version 1.3, Mupen64Plus now has support for multi-user environments.
@@ -95,24 +138,26 @@ By default, the mupen64plus program will look for plugins, icons, and language t
 Run 'mupen64plus --help' for a complete list of commandline options:
 
  $ mupen64plus --help
- Usage: mupen64plus [parameter(s)] rom
+Usage: mupen64plus [parameter(s)] [romfile]
 
- Parameters:
-         --nogui                 : do not display GUI
-         --fullscreen            : turn fullscreen mode on
-         --gfx (path)            : use gfx plugin given by (path)
-         --audio (path)          : use audio plugin given by (path)
-         --input (path)          : use input plugin given by (path)
-         --rsp (path)            : use rsp plugin given by (path)
-         --emumode (number)      : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter
-         --sshotdir (dir)        : set screenshot directory to (dir)
-         --configdir (dir)       : force config dir (must contain mupen64plus.conf)
-         --installdir (dir)      : force install dir (place to look for plugins, icons, lang, etc)
-         --noask                 : don't ask to force load on bad dumps
-         -h, --help              : see this help message
+Parameters:
+    --nogui               : do not display GUI.
+    --noask               : do not prompt user if rom file is hacked or a bad dump.
+    --noosd               : disable onscreen display.
+    --fullscreen          : turn fullscreen mode on.
+    --romnumber (number)  : specify which rom in romfile, if multirom archive.
+    --gfx (plugin-file)   : use gfx plugin given by (path)
+    --audio (plugin-file) : use audio plugin given by (path)
+    --input (plugin-file) : use input plugin given by (path)
+    --rsp (plugin-file)   : use rsp plugin given by (path)
+    --emumode (mode)      : set emu mode to: 0=Interpreter 1=DynaRec 2=Pure Interpreter
+    --sshotdir (dir)      : set screenshot directory to (dir)
+    --configdir (dir)     : force config dir (must contain mupen64plus.conf)
+    --installdir (dir)    : force install dir (place to look for plugins, icons, lang, etc)
+    --testshots (list)    : take screenshots at frames given in comma-separated (list), then quit
+    -h, --help            : see this help message
 
-
-4. Key Commands In Emulator
+5. Key Commands In Emulator
 ---------------------------
 The keys or joystick/mouse inputs which will be mapped to the N64 controller for playing the games are determined by the input plugin.  The emulator core also supports several key commands during emulation, which are fixed and cannot be changed.  They are:
 
@@ -120,14 +165,20 @@ The keys or joystick/mouse inputs which will be mapped to the N64 controller for
       0-9 == Select virtual 'slot' for save/load state (F5 and F7) commands
        F5 == Save emulator state
        F7 == Load emulator state
+       F9 == Reset emulator
+      F10 == slow down emulator by 5%
+      F11 == speed up emulator by 5%
+      F12 == take screenshot
 Alt-Enter == Toggle between windowed and fullscreen (may not be supported by all video plugins)
-   p or P == Pause on/off
+    Pause == Pause on/off
    m or M == Mute/unmute sound
+   / or ? == single frame advance while paused
+        F == Fast Forward (playback at 250% normal speed while F key is pressed)
         [ == Decrease volume
         ] == Increase volume
 
 
-5. Known Issues
+6. Known Issues
 -----------------------
 As of March 2008, the RiceVideoLinux plugin may be unstable with users of the open source drivers for an ATI Radeon graphics adapter when fog is enabled.  If you have are using the open source Radeon driver, you should set the "EnableFog" value in RiceVideo.cfg to 0.
 

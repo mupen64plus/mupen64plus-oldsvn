@@ -13,9 +13,10 @@
 *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *   GNU General Public License for more details.
 *
-*   You should have received a copy of the GNU General Public License
-*   along with this program; if not, write to the Free Software
-*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*   You should have received a copy of the GNU General Public
+*   Licence along with this program; if not, write to the Free
+*   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+*   Boston, MA  02110-1301, USA
 */
 
 //****************************************************************
@@ -323,6 +324,7 @@ void GetTexInfo (int id, int tile)
             }
 #elif !defined(NO_ASM)
         int i;
+        int tempheight = height;
        asm volatile (
              "xor %[crc], %[crc]      \n"                           // eax is final result
              "crc_loop_y:           \n"
@@ -340,15 +342,15 @@ void GetTexInfo (int id, int tile)
              "dec %[i]             \n"
              "jnz crc_loop_x        \n"
              
-             "mov %[height], %%edx      \n"
+             "mov %[tempheight], %%edx      \n"
              "mul %%edx             \n"
              "add %%edx, %[crc]      \n"
              
              "add %[line], %[addr]      \n"
              
-             "dec %[height]             \n"
+             "dec %[tempheight]             \n"
              "jnz crc_loop_y        \n"
-             : [crc] "=&a"(crc), [i] "=&r" (i), [height] "+r"(height), [addr]"+r"(addr)
+             : [crc] "=&a"(crc), [i] "=&r" (i), [tempheight] "+r"(tempheight), [addr]"+r"(addr)
              : [line] "g" ((intptr_t)line), [wid_64] "g" (wid_64)
              : "memory", "cc", "edx"
              );
@@ -1466,3 +1468,4 @@ void LoadTex (int id, int tmu)
 
     RDP (" | | +- LoadTex end\n");
 }
+

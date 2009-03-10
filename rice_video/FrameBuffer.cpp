@@ -2054,3 +2054,4 @@ void FrameBufferManager::SaveBackBuffer(int ciInfoIdx, RECT* pSrcRect, bool forc
 
     g_uRecentCIInfoPtrs[ciInfoIdx]->bCopied = true;
 }
+

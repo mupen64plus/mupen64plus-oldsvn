@@ -1,9 +1,10 @@
-#ifndef __LINUX__
-# include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
-# include <stdlib.h>
-#endif // __LINUX__
+#include <stdlib.h>
+
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
+#include "../main/winlnxdefs.h"
+
 #include "OpenGL.h"
 #include "Combiner.h"
 #include "NV_register_combiners.h"
@@ -309,7 +310,7 @@ void Combiner_Destroy()
 
     for (int i = 0; i < OGL.maxTextureUnits; i++)
     {
-        glActiveTextureARB( GL_TEXTURE0_ARB + i );
+        glActiveTexture( GL_TEXTURE0_ARB + i );
         glDisable( GL_TEXTURE_2D );
     }
 }
@@ -410,3 +411,4 @@ void Combiner_SetCombine( u64 mux )
     Combiner_SelectCombine( mux );
     Combiner_SetCombineStates();
 }
+

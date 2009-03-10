@@ -1,21 +1,34 @@
 /*
-** Copyright (c) 1995, 3Dfx Interactive, Inc.
-** All Rights Reserved.
+** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
+** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
+** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
+** 
+** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
+** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
+** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
+** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
+** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
+** THE UNITED STATES.  
+** 
+** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** This is UNPUBLISHED PROPRIETARY SOURCE CODE of 3Dfx Interactive, Inc.;
-** the contents of this file may not be disclosed to third parties, copied or
-** duplicated in any form, in whole or in part, without the prior written
-** permission of 3Dfx Interactive, Inc.
-**
-** RESTRICTED RIGHTS LEGEND:
-** Use, duplication or disclosure by the Government is subject to restrictions
-n** as set forth in subdivision (c)(1)(ii) of the Rights in Technical Data
-** and Computer Software clause at DFARS 252.227-7013, and/or in similar or
-** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished -
-** rights reserved under the Copyright Laws of the United States.
-**
-** $Header: /devel/cvg/glide3/src/glidesys.h 3     7/24/98 1:41p Hohn $
-** $Log: /devel/cvg/glide3/src/glidesys.h $
+** $Header: /cvsroot/glide/glide3x/h5/glide3/src/glidesys.h,v 1.3.4.3 2003/07/24 03:51:08 anholt Exp $
+** $Log: 
+**  3    3dfx      1.0.1.0.1.0 10/11/00 Brent           Forced check in to enforce
+**       branching.
+**  2    3dfx      1.0.1.0     06/20/00 Joseph Kain     Changes to support the
+**       Napalm Glide open source release.  Changes include cleaned up offensive
+**       comments and new legal headers.
+**  1    3dfx      1.0         09/11/99 StarTeam VTS Administrator 
+** $
+** 
+** 4     11/05/98 11:18a Russp
+** Fix GLIDE_NUM_TMU error check (change "&&" to "||")
 ** 
 ** 3     7/24/98 1:41p Hohn
 ** 
@@ -96,7 +109,9 @@ n** -----------------------------------------------------------------------
 #endif
 
 /* Check for OS */
-#if defined(__IRIX__) || defined(__sparc__) || defined(__linux__) || defined(__FreeBSD__)
+#if defined(__IRIX__) || defined(__sparc__) || defined(__linux__) || \
+    defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
+    defined(__APPLE__)
 #  define GLIDE_OS        GLIDE_OS_UNIX
 #elif defined(__DOS__)
 #  define GLIDE_OS        GLIDE_OS_DOS32
@@ -139,8 +154,9 @@ n** -----------------------------------------------------------------------
 #endif
 
 
-#if ((GLIDE_NUM_TMU < 0) && (GLIDE_NUM_TMU > 3))
+#if ((GLIDE_NUM_TMU < 0) || (GLIDE_NUM_TMU > 3))
 #  error "GLIDE_NUM_TMU set to an invalid value"
 #endif
 
 #endif /* __GLIDESYS_H__ */
+

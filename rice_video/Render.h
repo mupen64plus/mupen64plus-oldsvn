@@ -260,3 +260,4 @@ bool SaveRGBBufferToFile(char *filename, unsigned char *buf, int width, int heig
 bool SaveRGBABufferToPNGFile(char *filename, unsigned char *buf, int width, int height, int pitch = -1);
 
 #endif  //_RICE_RENDER_H
+

@@ -1448,3 +1448,4 @@ png_write_png(png_structp png_ptr, png_infop info_ptr,
 }
 #endif
 #endif /* PNG_WRITE_SUPPORTED */
+

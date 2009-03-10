@@ -1,16 +1,35 @@
-#ifdef _WIN32
-#include <windows.h>
-// #include <gl/gl.h>
-// #include "glext.h"
-#else // _WIN32
-#include "../winlnxdefs.h"
-#include <string.h>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - glide64/wrapper/combiner.cpp                            *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2005-2006 Hacktarux                                     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+#include <stdio.h>
 #include <stdlib.h>
-#endif // _WIN32
 #include <math.h>
+#include <string.h>
+
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "glide.h"
 #include "main.h"
-#include <stdio.h>
 
 static int fct[4], source0[4], operand0[4], source1[4], operand1[4], source2[4], operand2[4];
 static int fcta[4],sourcea0[4],operanda0[4],sourcea1[4],operanda1[4],sourcea2[4],operanda2[4];
@@ -24,10 +43,6 @@ int fog_enabled;
 static int chroma_enabled;
 static int chroma_other_color;
 static int chroma_other_alpha;
-#ifdef _WIN32
-static float farF;
-static float nearF;
-#endif // _WIN32
 static int dither_enabled;
 int blackandwhite0;
 int blackandwhite1;
@@ -283,7 +298,7 @@ void init_combiner()
         int texture0_location;
         int texture1_location;
         char *fragment_shader;
-        int log_length;
+        GLint log_length;
 
         /*glActiveTextureARB(GL_TEXTURE2_ARB);
         glBindTexture(GL_TEXTURE_2D, default_texture);
@@ -508,7 +523,7 @@ void compile_shader()
     char *fragment_shader;
     int i;
     int chroma_color_location;
-    int log_length;
+    GLint log_length;
 
     need_to_compile = 0;
 
@@ -2648,7 +2663,7 @@ static void setPattern()
     GLubyte stip[32*4];
     for(i=0; i<32; i++)
     {
-        unsigned int val = rand() << 17 | (rand() & 1) << 16 | rand() << 1 | rand() & 1;
+        unsigned int val = (rand() << 17) | ((rand() & 1) << 16) | (rand() << 1) | (rand() & 1);
         stip[i*4+0] = (val >> 24) & 0xFF;
         stip[i*4+1] = (val >> 16) & 0xFF;
         stip[i*4+2] = (val >> 8) & 0xFF;
@@ -3778,3 +3793,4 @@ grConstantColorValueExt(GrChipID_t    tmu,
         glUniform4fARB(ccolor1_location, ccolor1[0], ccolor1[1], ccolor1[2], ccolor1[3]);
     }
 }
+

@@ -1,3 +1,24 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - ucode1.cpp                                              *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifdef __WIN32__
 # include <windows.h>
 #else
@@ -363,82 +384,6 @@ static void ENVMIXER () {
     *(s32 *)(hleMixerWorkArea + 14) = RAdderEnd; // 14-15
     *(s32 *)(hleMixerWorkArea + 16) = LAdderStart; // 12-13
     *(s32 *)(hleMixerWorkArea + 18) = RAdderStart; // 14-15
-    memcpy(rsp.RDRAM+addy, (u8 *)hleMixerWorkArea,80);
-}
-
-static void ENVMIXERo () { // Borrowed from RCP...
-    u8  flags = (u8)((inst1 >> 16) & 0xff);
-    u32 addy = (inst2 & 0xffffff);// + SEGMENTS[(inst2>>24)&0xf];
-
-    short *inp=(short *)(BufferSpace+AudioInBuffer);
-    short *out=(short *)(BufferSpace+AudioOutBuffer);
-    short *aux1=(short *)(BufferSpace+AudioAuxA);
-    short *aux2=(short *)(BufferSpace+AudioAuxC);
-    short *aux3=(short *)(BufferSpace+AudioAuxE);
-
-    int i1,o1,a1,a2,a3;
-    int MainR;
-    int MainL;
-    int AuxR;
-    int AuxL;
-
-    WORD AuxIncRate=1;
-    short zero[8];
-    memset(zero,0,16);
-    if(flags & A_INIT) {
-        MainR = (Env_Dry * VolTrg_Right + 0x10000) >> 15;
-        MainL = (Env_Dry * VolTrg_Left  + 0x10000) >> 15;
-        AuxR  = (Env_Wet * VolTrg_Right + 0x8000)  >> 16;
-        AuxL  = (Env_Wet * VolTrg_Left  + 0x8000)  >> 16;
-    } else {
-        memcpy((u8 *)hleMixerWorkArea, (rsp.RDRAM+addy), 80);
-        MainR=hleMixerWorkArea[0];
-        MainL=hleMixerWorkArea[2];
-        AuxR=hleMixerWorkArea[4];
-        AuxL=hleMixerWorkArea[6];
-    }
-    if(!(flags&A_AUX))
-    {
-        AuxIncRate=0;
-        aux2=aux3=zero;
-    }
-    for(int i=0;i<AudioCount/2;i++)
-    {
-        i1=(int)*(inp++);
-        o1=(int)*out;
-        a1=(int)*aux1;
-        a2=(int)*aux2;
-        a3=(int)*aux3;
-
-        o1=((o1*0x7fff)+(i1*MainR)+0x10000)>>15;
-        a2=((a2*0x7fff)+(i1*AuxR)+0x8000)>>16;
-
-        a1=((a1*0x7fff)+(i1*MainL)+0x10000)>>15;
-        a3=((a3*0x7fff)+(i1*AuxL)+0x8000)>>16;
-
-        if(o1>32767) o1=32767;
-        else if(o1<-32768) o1=-32768;
-
-        if(a1>32767) a1=32767;
-        else if(a1<-32768) a1=-32768;
-
-        if(a2>32767) a2=32767;
-        else if(a2<-32768) a2=-32768;
-
-        if(a3>32767) a3=32767;
-        else if(a3<-32768) a3=-32768;
-
-        *(out++)=o1;
-        *(aux1++)=a1;
-        *aux2=a2;
-        *aux3=a3;
-        aux2+=AuxIncRate;
-        aux3+=AuxIncRate;
-    }
-    hleMixerWorkArea[0]=MainR;
-    hleMixerWorkArea[2]=MainL;
-    hleMixerWorkArea[4]=AuxR;
-    hleMixerWorkArea[6]=AuxL;
     memcpy(rsp.RDRAM+addy, (u8 *)hleMixerWorkArea,80);
 }
 
@@ -831,13 +776,6 @@ static void SAVEBUFF () { // memcpy causes static... endianess issue :(
         return;
     v0 = (inst2 & 0xfffffc);// + SEGMENTS[(inst2>>24)&0xf];
     memcpy (rsp.RDRAM+v0, BufferSpace+(AudioOutBuffer&0xFFFC), (AudioCount+3)&0xFFFC);
-}
-
-static void SEGMENT () { // Should work
-    SEGMENTS[(inst2>>24)&0xf] = (inst2 & 0xffffff);
-/*  if (SEGMENTS[(inst2>>24)&0xf] > (8*1024*1024))
-        MessageBox (NULL, "Invalid Segment Size", "Just a test", MB_OK);
-*/
 }
 
 static void SETBUFF () { // Should work ;-)

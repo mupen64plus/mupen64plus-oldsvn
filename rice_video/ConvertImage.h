@@ -296,3 +296,4 @@ void Convert8b_16(CTexture *pTexture, const TxtrInfo &tinfo);
 void Convert16b_16(CTexture *pTexture, const TxtrInfo &tinfo);
 
 #endif
+

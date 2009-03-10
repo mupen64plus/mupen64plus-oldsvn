@@ -1,31 +1,23 @@
-/**
- * Mupen64 - cop1_d.c
- * Copyright (C) 2002 Hacktarux
- *
- * Mupen64 homepage: http://mupen64.emulation64.com
- * email address: hacktarux@yahoo.fr
- * 
- * If you want to contribute to the project please contact
- * me first (maybe someone is already making what you are
- * planning to do).
- *
- *
- * This program is free software; you can redistribute it and/
- * or modify it under the terms of the GNU General Public Li-
- * cence as published by the Free Software Foundation; either
- * version 2 of the Licence, or any later version.
- *
- * This program is distributed in the hope that it will be use-
- * ful, but WITHOUT ANY WARRANTY; without even the implied war-
- * ranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public Licence for more details.
- *
- * You should have received a copy of the GNU General Public
- * Licence along with this program; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
- * USA.
- *
-**/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - cop1_d.c                                                *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2002 Hacktarux                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <math.h>
 
@@ -33,7 +25,7 @@
 #include "ops.h"
 #include "macros.h"
 
-void ADD_D()
+void ADD_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -42,7 +34,7 @@ void ADD_D()
    PC++;
 }
 
-void SUB_D()
+void SUB_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -51,7 +43,7 @@ void SUB_D()
    PC++;
 }
 
-void MUL_D()
+void MUL_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -60,7 +52,7 @@ void MUL_D()
    PC++;
 }
 
-void DIV_D()
+void DIV_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -69,7 +61,7 @@ void DIV_D()
    PC++;
 }
 
-void SQRT_D()
+void SQRT_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -77,7 +69,7 @@ void SQRT_D()
    PC++;
 }
 
-void ABS_D()
+void ABS_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -85,7 +77,7 @@ void ABS_D()
    PC++;
 }
 
-void MOV_D()
+void MOV_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -93,7 +85,7 @@ void MOV_D()
    PC++;
 }
 
-void NEG_D()
+void NEG_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -101,7 +93,7 @@ void NEG_D()
    PC++;
 }
 
-void ROUND_L_D()
+void ROUND_L_D(void)
 {
    if (check_cop1_unusable()) return;
    set_round();
@@ -109,7 +101,7 @@ void ROUND_L_D()
    PC++;
 }
 
-void TRUNC_L_D()
+void TRUNC_L_D(void)
 {
    if (check_cop1_unusable()) return;
    set_trunc();
@@ -117,7 +109,7 @@ void TRUNC_L_D()
    PC++;
 }
 
-void CEIL_L_D()
+void CEIL_L_D(void)
 {
    if (check_cop1_unusable()) return;
    set_ceil();
@@ -125,7 +117,7 @@ void CEIL_L_D()
    PC++;
 }
 
-void FLOOR_L_D()
+void FLOOR_L_D(void)
 {
    if (check_cop1_unusable()) return;
    set_floor();
@@ -133,7 +125,7 @@ void FLOOR_L_D()
    PC++;
 }
 
-void ROUND_W_D()
+void ROUND_W_D(void)
 {
    if (check_cop1_unusable()) return;
    set_round();
@@ -141,7 +133,7 @@ void ROUND_W_D()
    PC++;
 }
 
-void TRUNC_W_D()
+void TRUNC_W_D(void)
 {
    if (check_cop1_unusable()) return;
    set_trunc();
@@ -149,7 +141,7 @@ void TRUNC_W_D()
    PC++;
 }
 
-void CEIL_W_D()
+void CEIL_W_D(void)
 {
    if (check_cop1_unusable()) return;
    set_ceil();
@@ -157,7 +149,7 @@ void CEIL_W_D()
    PC++;
 }
 
-void FLOOR_W_D()
+void FLOOR_W_D(void)
 {
    if (check_cop1_unusable()) return;
    set_floor();
@@ -165,7 +157,7 @@ void FLOOR_W_D()
    PC++;
 }
 
-void CVT_S_D()
+void CVT_S_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -173,7 +165,7 @@ void CVT_S_D()
    PC++;
 }
 
-void CVT_W_D()
+void CVT_W_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -181,7 +173,7 @@ void CVT_W_D()
    PC++;
 }
 
-void CVT_L_D()
+void CVT_L_D(void)
 {
    if (check_cop1_unusable()) return;
    set_rounding();
@@ -189,14 +181,14 @@ void CVT_L_D()
    PC++;
 }
 
-void C_F_D()
+void C_F_D(void)
 {
    if (check_cop1_unusable()) return;
    FCR31 &= ~0x800000;
    PC++;
 }
 
-void C_UN_D()
+void C_UN_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
@@ -205,7 +197,7 @@ void C_UN_D()
    PC++;
 }
 
-void C_EQ_D()
+void C_EQ_D(void)
 {
    if (check_cop1_unusable()) return;
    if (!isnan(*reg_cop1_double[cffs]) && !isnan(*reg_cop1_double[cfft]) &&
@@ -215,7 +207,7 @@ void C_EQ_D()
    PC++;
 }
 
-void C_UEQ_D()
+void C_UEQ_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]) ||
@@ -225,7 +217,7 @@ void C_UEQ_D()
    PC++;
 }
 
-void C_OLT_D()
+void C_OLT_D(void)
 {
    if (check_cop1_unusable()) return;
    if (!isnan(*reg_cop1_double[cffs]) && !isnan(*reg_cop1_double[cfft]) &&
@@ -235,7 +227,7 @@ void C_OLT_D()
    PC++;
 }
 
-void C_ULT_D()
+void C_ULT_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]) ||
@@ -245,7 +237,7 @@ void C_ULT_D()
    PC++;
 }
 
-void C_OLE_D()
+void C_OLE_D(void)
 {
    if (check_cop1_unusable()) return;
    if (!isnan(*reg_cop1_double[cffs]) && !isnan(*reg_cop1_double[cfft]) &&
@@ -255,7 +247,7 @@ void C_OLE_D()
    PC++;
 }
 
-void C_ULE_D()
+void C_ULE_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]) ||
@@ -265,7 +257,7 @@ void C_ULE_D()
    PC++;
 }
 
-void C_SF_D()
+void C_SF_D(void)
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
@@ -276,7 +268,7 @@ void C_SF_D()
    PC++;
 }
 
-void C_NGLE_D()
+void C_NGLE_D(void)
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
@@ -287,7 +279,7 @@ void C_NGLE_D()
    PC++;
 }
 
-void C_SEQ_D()
+void C_SEQ_D(void)
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
@@ -300,7 +292,7 @@ void C_SEQ_D()
    PC++;
 }
 
-void C_NGL_D()
+void C_NGL_D(void)
 {
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
      {
@@ -313,7 +305,7 @@ void C_NGL_D()
    PC++;
 }
 
-void C_LT_D()
+void C_LT_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
@@ -327,7 +319,7 @@ void C_LT_D()
    PC++;
 }
 
-void C_NGE_D()
+void C_NGE_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
@@ -341,7 +333,7 @@ void C_NGE_D()
    PC++;
 }
 
-void C_LE_D()
+void C_LE_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
@@ -355,7 +347,7 @@ void C_LE_D()
    PC++;
 }
 
-void C_NGT_D()
+void C_NGT_D(void)
 {
    if (check_cop1_unusable()) return;
    if (isnan(*reg_cop1_double[cffs]) || isnan(*reg_cop1_double[cfft]))
@@ -368,3 +360,4 @@ void C_NGT_D()
    else FCR31 &= ~0x800000;
    PC++;
 }
+

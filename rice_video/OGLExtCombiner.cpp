@@ -16,8 +16,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
 #include "stdafx.h"
-#include "glh_genext.h"
 
 #define         GL_MODULATE_ADD_ATI                   0x8744
 #define         GL_MODULATE_SUBTRACT_ATI              0x8746
@@ -118,13 +120,13 @@ void COGLColorCombiner4::InitCombinerCycleFill(void)
 {
     for( int i=0; i<m_supportedStages; i++ )
     {
-        glActiveTextureARB(GL_TEXTURE0_ARB+i);
+        glActiveTexture(GL_TEXTURE0_ARB+i);
         m_pOGLRender->EnableTexUnit(i,FALSE);
     }
 
-    //glActiveTextureARB(GL_TEXTURE0_ARB);
+    //glActiveTexture(GL_TEXTURE0_ARB);
     //m_pOGLRender->EnableTexUnit(0,FALSE);
-    //glActiveTextureARB(GL_TEXTURE1_ARB);
+    //glActiveTexture(GL_TEXTURE1_ARB);
     //m_pOGLRender->EnableTexUnit(1,FALSE);
 }
 
@@ -911,7 +913,7 @@ void COGLColorCombiner4::GenerateCombinerSetting(int index)
 
     for( int i=0; i<res.numOfUnits; i++ )
     {
-        glActiveTextureARB(GL_TEXTURE0_ARB+i);
+        glActiveTexture(GL_TEXTURE0_ARB+i);
         m_pOGLRender->EnableTexUnit(i,TRUE);
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
         ApplyFor1Unit(res.units[i]);
@@ -921,7 +923,7 @@ void COGLColorCombiner4::GenerateCombinerSetting(int index)
     {
         for( int i=res.numOfUnits; i<m_maxTexUnits; i++ )
         {
-            glActiveTextureARB(GL_TEXTURE0_ARB+i);
+            glActiveTexture(GL_TEXTURE0_ARB+i);
             m_pOGLRender->DisBindTexture(0, i);
             m_pOGLRender->EnableTexUnit(i,FALSE);
         }
@@ -961,7 +963,7 @@ void COGLColorCombiner4::GenerateCombinerSettingConstants(int index)
     {
         for( int i=0; i<res.numOfUnits; i++ )
         {
-            glActiveTextureARB(GL_TEXTURE0_ARB+i);
+            glActiveTexture(GL_TEXTURE0_ARB+i);
             glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR,fv);
         }
     }
@@ -981,7 +983,7 @@ void COGLColorCombiner4v2::GenerateCombinerSettingConstants(int index)
         float *fv = GetPrimitiveColorfv();  // CONSTANT COLOR
         for( int i=0; i<res.numOfUnits; i++ )
         {
-            glActiveTextureARB(GL_TEXTURE0_ARB+i);
+            glActiveTexture(GL_TEXTURE0_ARB+i);
             glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR,fv);
         }
     }
@@ -989,7 +991,7 @@ void COGLColorCombiner4v2::GenerateCombinerSettingConstants(int index)
     if( res.envIsUsed )
     {
         // Set Texture unit 2 to ENV
-        glActiveTextureARB(GL_TEXTURE2_ARB);
+        glActiveTexture(GL_TEXTURE2_ARB);
         prender->EnableTexUnit(2,TRUE);
         TxtrCacheEntry *pEntry = gTextureManager.GetConstantColorTexture(MUX_ENV);
         prender->SetCurrentTexture( (gRSP.curTile+2)%7, pEntry->pTexture, 4, 4, pEntry);
@@ -1003,7 +1005,7 @@ void COGLColorCombiner4v2::GenerateCombinerSettingConstants(int index)
             unit = 2;
 
         // Set Texture unit 3 to LODFRAC
-        glActiveTextureARB(GL_TEXTURE0_ARB+unit);
+        glActiveTexture(GL_TEXTURE0_ARB+unit);
         prender->EnableTexUnit(unit,TRUE);
         TxtrCacheEntry *pEntry = gTextureManager.GetConstantColorTexture(MUX_LODFRAC);
         prender->SetCurrentTexture( (gRSP.curTile+unit)%7, pEntry->pTexture, 4, 4, pEntry);
@@ -1016,7 +1018,7 @@ void COGLColorCombiner4v2::GenerateCombinerSettingConstants(int index)
             unit = 2;
 
         // Disable texture unit 3
-        glActiveTextureARB(GL_TEXTURE0_ARB+unit);
+        glActiveTexture(GL_TEXTURE0_ARB+unit);
         prender->EnableTexUnit(unit,FALSE);
         prender->SetTextureToTextureUnitMap(-1,unit);
     }

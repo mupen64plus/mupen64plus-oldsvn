@@ -1,13 +1,18 @@
-#ifndef __LINUX__
-# include <windows.h>
-# include <commctrl.h>
-# include <process.h>
+#ifndef __LINUX__ //Change me...
+#include <windows.h>
+#include <commctrl.h>
+#include <process.h>
 #else
-# include "../main/winlnxdefs.h"
-# include <string.h>
+#include <string.h>
+#include "../main/winlnxdefs.h"
 #endif
-#include <GL/gl.h>
-#include <GL/glu.h>
+
+#ifdef QT4_GUI
+# include <QMessageBox>
+#endif
+
+#include <SDL_opengl.h>
+
 #include "glN64.h"
 #include "Debug.h"
 #include "Zilmar GFX 1.3.h"
@@ -30,9 +35,10 @@ HINSTANCE   hInstance;
 
 char        pluginName[] = "glN64 v0.4.1";
 char        *screenDirectory;
-u32 last_good_ucode = -1;
+u32 last_good_ucode = (u32) -1;
 void (*CheckInterrupts)( void );
 char        configdir[PATH_MAX] = {0};
+void (*renderCallback)() = NULL;
 
 #ifndef __LINUX__
 LONG        windowedStyle;
@@ -166,17 +172,28 @@ EXPORT void CALL DllAbout ( HWND hParent )
 #ifndef __LINUX__
     MessageBox( hParent, "glN64 v0.4 by Orkin\n\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn", pluginName, MB_OK | MB_ICONINFORMATION );
 #else
+# ifdef QT4_GUI
+    QMessageBox::about(QWidget::find(hParent),
+                        "About glN64",
+                        "glN64 v0.4 by Orkin\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn\nported by blight\nQt4 interface by slougi");
+# else
     puts( "glN64 v0.4 by Orkin\nWebsite: http://gln64.emulation64.com/\n\nThanks to Clements, Rice, Gonetz, Malcolm, Dave2001, cryhlove, icepir8, zilmar, Azimer, and StrmnNrmn\nported by blight" );
+# endif // QT4_GUI
 #endif
 }
 
 EXPORT void CALL DllConfig ( HWND hParent )
 {
-    Config_DoConfig();
+    Config_DoConfig(hParent);
 }
 
 EXPORT void CALL DllTest ( HWND hParent )
 {
+#ifdef QT4_GUI
+    QMessageBox::information(QWidget::find(hParent),
+                              "glN64 Test",
+                              "This plugin has nothing to test.");
+#endif
 }
 
 EXPORT void CALL DrawScreen (void)
@@ -223,30 +240,30 @@ EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info)
     IMEM = Gfx_Info.IMEM;
     RDRAM = Gfx_Info.RDRAM;
 
-    REG.MI_INTR = Gfx_Info.MI_INTR_REG;
-    REG.DPC_START = Gfx_Info.DPC_START_REG;
-    REG.DPC_END = Gfx_Info.DPC_END_REG;
-    REG.DPC_CURRENT = Gfx_Info.DPC_CURRENT_REG;
-    REG.DPC_STATUS = Gfx_Info.DPC_STATUS_REG;
-    REG.DPC_CLOCK = Gfx_Info.DPC_CLOCK_REG;
-    REG.DPC_BUFBUSY = Gfx_Info.DPC_BUFBUSY_REG;
-    REG.DPC_PIPEBUSY = Gfx_Info.DPC_PIPEBUSY_REG;
-    REG.DPC_TMEM = Gfx_Info.DPC_TMEM_REG;
+    REG.MI_INTR = (u32*) Gfx_Info.MI_INTR_REG;
+    REG.DPC_START = (u32*) Gfx_Info.DPC_START_REG;
+    REG.DPC_END = (u32*) Gfx_Info.DPC_END_REG;
+    REG.DPC_CURRENT = (u32*) Gfx_Info.DPC_CURRENT_REG;
+    REG.DPC_STATUS = (u32*) Gfx_Info.DPC_STATUS_REG;
+    REG.DPC_CLOCK = (u32*) Gfx_Info.DPC_CLOCK_REG;
+    REG.DPC_BUFBUSY = (u32*) Gfx_Info.DPC_BUFBUSY_REG;
+    REG.DPC_PIPEBUSY = (u32*) Gfx_Info.DPC_PIPEBUSY_REG;
+    REG.DPC_TMEM = (u32*) Gfx_Info.DPC_TMEM_REG;
 
-    REG.VI_STATUS = Gfx_Info.VI_STATUS_REG;
-    REG.VI_ORIGIN = Gfx_Info.VI_ORIGIN_REG;
-    REG.VI_WIDTH = Gfx_Info.VI_WIDTH_REG;
-    REG.VI_INTR = Gfx_Info.VI_INTR_REG;
-    REG.VI_V_CURRENT_LINE = Gfx_Info.VI_V_CURRENT_LINE_REG;
-    REG.VI_TIMING = Gfx_Info.VI_TIMING_REG;
-    REG.VI_V_SYNC = Gfx_Info.VI_V_SYNC_REG;
-    REG.VI_H_SYNC = Gfx_Info.VI_H_SYNC_REG;
-    REG.VI_LEAP = Gfx_Info.VI_LEAP_REG;
-    REG.VI_H_START = Gfx_Info.VI_H_START_REG;
-    REG.VI_V_START = Gfx_Info.VI_V_START_REG;
-    REG.VI_V_BURST = Gfx_Info.VI_V_BURST_REG;
-    REG.VI_X_SCALE = Gfx_Info.VI_X_SCALE_REG;
-    REG.VI_Y_SCALE = Gfx_Info.VI_Y_SCALE_REG;
+    REG.VI_STATUS = (u32*) Gfx_Info.VI_STATUS_REG;
+    REG.VI_ORIGIN = (u32*) Gfx_Info.VI_ORIGIN_REG;
+    REG.VI_WIDTH = (u32*) Gfx_Info.VI_WIDTH_REG;
+    REG.VI_INTR = (u32*) Gfx_Info.VI_INTR_REG;
+    REG.VI_V_CURRENT_LINE = (u32*) Gfx_Info.VI_V_CURRENT_LINE_REG;
+    REG.VI_TIMING = (u32*) Gfx_Info.VI_TIMING_REG;
+    REG.VI_V_SYNC = (u32*) Gfx_Info.VI_V_SYNC_REG;
+    REG.VI_H_SYNC = (u32*) Gfx_Info.VI_H_SYNC_REG;
+    REG.VI_LEAP = (u32*) Gfx_Info.VI_LEAP_REG;
+    REG.VI_H_START = (u32*) Gfx_Info.VI_H_START_REG;
+    REG.VI_V_START = (u32*) Gfx_Info.VI_V_START_REG;
+    REG.VI_V_BURST = (u32*) Gfx_Info.VI_V_BURST_REG;
+    REG.VI_X_SCALE = (u32*) Gfx_Info.VI_X_SCALE_REG;
+    REG.VI_Y_SCALE = (u32*) Gfx_Info.VI_Y_SCALE_REG;
 
     CheckInterrupts = Gfx_Info.CheckInterrupts;
 
@@ -407,5 +424,10 @@ EXPORT void CALL ReadScreen (void **dest, int *width, int *height)
 EXPORT void CALL SetConfigDir (char *configDir)
 {
     strncpy(configdir, configDir, PATH_MAX);
+}
+
+EXPORT void CALL SetRenderingCallback(void (*callback)())
+{
+    renderCallback = callback;
 }
 

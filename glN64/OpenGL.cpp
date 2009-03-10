@@ -1,33 +1,26 @@
-#ifndef __LINUX__
-# include <windows.h>
-# include <GL/gl.h>
-# include "glext.h"
-#else // !__LINUX__
-# include "../main/winlnxdefs.h"
-#define GL_GLEXT_PROTOTYPES
-#define __WIN32__
-#include "gl.h" 
-#include "glext.h"
-#undef __WIN32__
-#include <png.h>
-//# include <GL/gl.h>
-//# include <GL/glext.h>
-# include "SDL.h"
-# include <string.h>
-# include <time.h>
-# include <stdlib.h>
 
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
-# define timeGetTime() time(NULL)
-
-#endif // __LINUX__
-#include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <time.h>
+
+#include <png.h>
+
+#include <SDL.h>
+#define GL_GLEXT_PROTOTYPES
+#include <SDL_opengl.h>
+
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#define timeGetTime() time(NULL)
+
+#include "../main/winlnxdefs.h"
+
 #include "glN64.h"
 #include "OpenGL.h"
 #include "Types.h"
@@ -1215,6 +1208,11 @@ OGL_SwapBuffers()
         lastTicks = ticks;
     }
 
+    // if emulator defined a render callback function, call it before buffer swap
+
+    if(renderCallback)
+        (*renderCallback)();
+
     SDL_GL_SwapBuffers();
 }
 
@@ -1237,3 +1235,4 @@ void OGL_ReadScreen( void **dest, int *width, int *height )
 }
 
 #endif // __LINUX__
+

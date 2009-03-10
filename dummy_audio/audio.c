@@ -1,9 +1,31 @@
-#include "../main/winlnxdefs.h"
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Mupen64plus - audio.h                                                 *
+ *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
+ *   Copyright (C) 2008 Richard42                                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <stdio.h>
 
-#include "audio.h"
+#include "../main/winlnxdefs.h"
 
-AUDIO_INFO AudioInfo;
+#include "Audio_1.1.h"
+
+static AUDIO_INFO AudioInfo;
 
 
 EXPORT void CALL
@@ -65,7 +87,7 @@ InitiateAudio( AUDIO_INFO Audio_Info )
     return TRUE;
 }
 
-EXPORT void CALL RomOpen()
+EXPORT void CALL RomOpen(void)
 {
 }
 
@@ -75,6 +97,7 @@ RomClosed( void )
 }
 
 EXPORT void CALL
-ProcessAlist( void )
+ProcessAList( void )
 {
 }
+
