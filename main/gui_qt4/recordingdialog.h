@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - recordingwidget.cpp                                     *
+ *   Mupen64plus - recordingdialog.h                                       *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
  *   Copyright (C) 2009 olejl                                              *
  *                                                                         *
@@ -19,41 +19,23 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "recordingwidget.h"
-namespace core {
-    extern "C" {
-        #include "../main.h"
-        #include "../rom.h"
-        #include "../../memory/memory.h"
-    }
-}
+#ifndef __RECORDINGDIALOG_H__
+#define __RECORDINGDIALOG_H__
 
-recordingWidget::recordingWidget(QWidget *parent) : QWidget(parent)
+#include <QDialog>
+
+#include "ui_recordingdialog.h"
+
+class RecordingDialog : public QDialog, private Ui_RecordingDialog
 {
-    char tempbuf[255];
+    Q_OBJECT
+    public:
+        RecordingDialog(QWidget *parent = 0);
+    private:
+        QString gfx_name, input_name, sound_name, rsp_name;
+    private slots:
+        void onaccepted();
+};
 
-    setupUi(this);
-
-    if (core::ROM_HEADER) {
-        snprintf(tempbuf, 20, "%s", core::ROM_HEADER->nom);
-        labelName->setText(tempbuf);
-		strcat(tempbuf, ".m64");
-        lineMovieFile->setText(tempbuf);
-        lineAuthor->setText("");
-        lineDescription->setText("");
-        snprintf(tempbuf, 5, "C:%X", (core::ROM_HEADER->Country_code)&0xff);
-        labelCountry->setText(tempbuf);
-        snprintf(tempbuf, 18, "%X-%X", core::ROM_HEADER->CRC1, core::ROM_HEADER->CRC2);
-        labelCRC->setText(tempbuf);
-        labelVideo->setText("<Video Plugin Name>");
-        labelSound->setText("<Sound Plugin Name>");
-        labelInput->setText("<Input Plugin Name>");
-        labelRsp->setText("<RSP Plugin Name>");
-        labelController1->setText("<undef>");
-        labelController2->setText("<undef>");
-        labelController3->setText("<undef>");
-        labelController4->setText("<undef>");
-        radioFromStart->setChecked(true);
-    }
-}
+#endif // __RECORDINGDIALOG_H__
 

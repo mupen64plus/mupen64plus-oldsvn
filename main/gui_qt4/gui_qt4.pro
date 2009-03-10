@@ -20,7 +20,7 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 TEMPLATE = lib
-CONFIG += staticlib release
+CONFIG += staticlib debug
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .
@@ -40,7 +40,7 @@ HEADERS += globals.h \
            rommodel.h \
            settingsdialog.h \
            starlabel.h \
-           recordingwidget.h \
+           recordingdialog.h \
            ../config.h \
            ../main.h \
            ../version.h \
@@ -64,7 +64,7 @@ FORMS += mainwidget.ui \
          romdirectorieslistwidget.ui \
          rominfodialog.ui \
          settingsdialog.ui \
-         recordingwidget.ui
+         recordingdialog.ui
 SOURCES += globals.cpp \
            main.cpp \
            mainwidget.cpp \
@@ -75,5 +75,5 @@ SOURCES += globals.cpp \
            rommodel.cpp \
            settingsdialog.cpp \
            starlabel.cpp \
-           recordingwidget.cpp \
+           recordingdialog.cpp \
            translate.cpp

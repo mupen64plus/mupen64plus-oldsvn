@@ -35,7 +35,7 @@ extern int g_UseSaveData;
 void _StartROM();
 int BeginPlayback( char *sz_filename );
 
-int WriteEmulationState();
+int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8);
 int SetupEmulationState();
 
 void _GetKeys( int Control, BUTTONS *Keys );

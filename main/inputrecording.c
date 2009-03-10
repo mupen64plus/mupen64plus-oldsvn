@@ -72,7 +72,7 @@ int BeginPlayback(char *sz_filename)
     return 1;
 }
 
-int BeginRecording(char *sz_filename)
+int BeginRecording(char *sz_filename, int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8 )
 {
     RecordingFile = fopen(sz_filename,"wb");
     if (!RecordingFile)
@@ -83,19 +83,39 @@ int BeginRecording(char *sz_filename)
     
     g_EmulatorRecording = 1;
     printf("Writing header file to m64 file.\n");
-    WriteEmulationState();
+    WriteEmulationState(fromSnapshot, *authorUTF8, *descriptionUTF8);
 }
 
-int WriteEmulationState()
+int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8)
 {
     Header.signature[0] = 0x4D;
     Header.signature[1] = 0x36;
     Header.signature[2] = 0x34;
     Header.signature[3] = 0x1A;
-    
     Header.version_number = 3;
-    
-    
+    Header.movie_uid = 0;   //TODO: recording time in Unix epoch format
+    Header.total_vi = 0;
+    Header.rerecord_count = 0;
+    Header.fps = 0; //TODO
+    Header.controllers = 0; //TODO
+    Header.core_type = 0; // TODOwas: reserved1
+    Header.input_samples = 0; //TODO
+/*
+    Header.start_type = fromSnapshot ? MOVIE_START_FROM_SNAPSHOT : MOVIE_START_FROM_NOTHING;
+    Header.reserved2;
+    Header.controller_flags;
+    Header.reserved3[160];
+    Header.rom_name[32];
+    Header.rom_crc;
+    Header.rom_cc;
+    Header.reserved4[56];
+    Header.video_plugin[64];
+    Header.sound_plugin[64];
+    Header.input_plugin[64];
+    Header.rsp_plugin[64];
+    Header.utf_authorname[222];
+    Header.utf_moviedesc[256];
+*/
 }
 
 int SetupEmulationState()

@@ -25,7 +25,7 @@
 #include "globals.h"
 #include "rommodel.h"
 #include "settingsdialog.h"
-#include "recordingwidget.h"
+#include "recordingdialog.h"
 
 #include <SDL_video.h>
 
@@ -641,8 +641,14 @@ void MainWindow::setStateImplementation(int state)
 
 void MainWindow::startRecording()
 {
-    recordingWidget *d = new recordingWidget();
-    d->show();
+    RecordingDialog *d = new RecordingDialog(this);
+    if (d->exec()) {
+        ;
+    } else {
+        ;
+    }
+    delete d;
+
 }
 
 void MainWindow::stopRecording()
