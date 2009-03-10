@@ -30,20 +30,20 @@ namespace core {
 
 recordingWidget::recordingWidget(QWidget *parent) : QWidget(parent)
 {
-    char tempbuf [MAX_PATH];
+    char tempbuf[255];
 
     setupUi(this);
 
     if (core::ROM_HEADER) {
-        snprintf(tempbuf, "%s", core::ROM_HEADER->nom);
+        snprintf(tempbuf, 20, "%s", core::ROM_HEADER->nom);
         labelName->setText(tempbuf);
 		strcat(tempbuf, ".m64");
         lineMovieFile->setText(tempbuf);
         lineAuthor->setText("");
         lineDescription->setText("");
-        snprintf(tempbuf, "C:%X", (core::ROM_HEADER->Country_code)&0xff);
+        snprintf(tempbuf, 5, "C:%X", (core::ROM_HEADER->Country_code)&0xff);
         labelCountry->setText(tempbuf);
-        snprintf(tempbuf, "%X-%X", core::ROM_HEADER->CRC1, core::ROM_HEADER->CRC2);
+        snprintf(tempbuf, 18, "%X-%X", core::ROM_HEADER->CRC1, core::ROM_HEADER->CRC2);
         labelCRC->setText(tempbuf);
         labelVideo->setText("<Video Plugin Name>");
         labelSound->setText("<Sound Plugin Name>");
