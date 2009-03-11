@@ -55,7 +55,7 @@ RecordingDialog::RecordingDialog(QWidget *parent) : QDialog(parent)
         
         sprintf(tempbuf, "%X", (core::ROM_HEADER->Country_code)&0xff);
         labelCountry->setText(tempbuf);
-        snprintf(tempbuf, 18, "%X-%X", core::ROM_HEADER->CRC1, core::ROM_HEADER->CRC2);
+        sprintf(tempbuf, "%X", core::ROM_HEADER->CRC1);
         labelCRC->setText(tempbuf);
         
         gfx_name = core::config_get_string("Gfx Plugin", "");

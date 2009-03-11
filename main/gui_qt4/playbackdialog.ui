@@ -1,0 +1,554 @@
+<ui version="4.0" >
+ <class>PlaybackDialog</class>
+ <widget class="QDialog" name="PlaybackDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>659</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Dialog</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2" >
+   <item row="0" column="0" >
+    <layout class="QGridLayout" name="gridLayout" >
+     <item row="0" column="1" >
+      <widget class="QLineEdit" name="lineMovieFile" />
+     </item>
+     <item row="1" column="1" colspan="2" >
+      <widget class="QLineEdit" name="lineAuthor" />
+     </item>
+     <item row="2" column="1" colspan="2" >
+      <widget class="QLineEdit" name="lineDescription" />
+     </item>
+     <item row="3" column="0" colspan="3" >
+      <widget class="QGroupBox" name="groupSettings" >
+       <property name="title" >
+        <string>Settings</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3" >
+        <item row="2" column="0" >
+         <widget class="QGroupBox" name="groupRom" >
+          <property name="title" >
+           <string>ROM</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4" >
+           <item row="1" column="1" >
+            <widget class="QLabel" name="labelCountry" >
+             <property name="text" >
+              <string>&lt;Country></string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" >
+            <widget class="QLabel" name="labelName" >
+             <property name="text" >
+              <string>&lt;Name></string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLabel" name="label" >
+             <property name="text" >
+              <string>Country:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" >
+            <widget class="QLabel" name="label_2" >
+             <property name="text" >
+              <string>CRC:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" >
+            <widget class="QLabel" name="labelCRC" >
+             <property name="text" >
+              <string>&lt;CRC1 - CRC2></string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" >
+            <widget class="QLabel" name="label_3" >
+             <property name="text" >
+              <string>Name:</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="3" column="0" >
+         <widget class="QGroupBox" name="groupPlugins" >
+          <property name="title" >
+           <string>Plugins</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_5" >
+           <item row="2" column="0" >
+            <widget class="QLabel" name="label_4" >
+             <property name="text" >
+              <string>Video:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" >
+            <widget class="QLabel" name="labelVideo" >
+             <property name="text" >
+              <string>&lt;Video></string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" >
+            <widget class="QLabel" name="label_5" >
+             <property name="text" >
+              <string>Sound:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1" >
+            <widget class="QLabel" name="labelSound" >
+             <property name="text" >
+              <string>&lt;Sound></string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" >
+            <widget class="QLabel" name="label_8" >
+             <property name="text" >
+              <string>Input:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1" >
+            <widget class="QLabel" name="labelInput" >
+             <property name="text" >
+              <string>&lt;Input></string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" >
+            <widget class="QLabel" name="label_10" >
+             <property name="text" >
+              <string>RSP:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1" >
+            <widget class="QLabel" name="labelRsp" >
+             <property name="text" >
+              <string>&lt;RSP></string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2" >
+         <widget class="QGroupBox" name="groupInformation" >
+          <property name="title" >
+           <string>Information</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_10" >
+           <item row="0" column="0" >
+            <widget class="QLabel" name="label_23" >
+             <property name="text" >
+              <string>Length:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" >
+            <widget class="QLabel" name="labelLength" >
+             <property name="text" >
+              <string>&lt;length></string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" >
+            <widget class="QLabel" name="label_27" >
+             <property name="text" >
+              <string>Re-Records:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3" >
+            <widget class="QLabel" name="labelReRecords" >
+             <property name="text" >
+              <string>&lt;re-records></string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLabel" name="label_24" >
+             <property name="text" >
+              <string>Frames (input):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" >
+            <widget class="QLabel" name="labelFrames" >
+             <property name="text" >
+              <string>&lt;frames></string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2" >
+            <widget class="QLabel" name="label_28" >
+             <property name="text" >
+              <string>Starts From:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3" >
+            <widget class="QLabel" name="labelFrom" >
+             <property name="text" >
+              <string>&lt;from></string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="4" column="0" >
+         <widget class="QGroupBox" name="groupControllers" >
+          <property name="title" >
+           <string>Controllers</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6" >
+           <item row="0" column="0" >
+            <widget class="QLabel" name="label_6" >
+             <property name="text" >
+              <string>1:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" >
+            <widget class="QLabel" name="labelController1" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLabel" name="label_9" >
+             <property name="text" >
+              <string>2:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" >
+            <widget class="QLabel" name="labelController2" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" >
+            <widget class="QLabel" name="label_12" >
+             <property name="text" >
+              <string>3:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" >
+            <widget class="QLabel" name="labelController3" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" >
+            <widget class="QLabel" name="label_14" >
+             <property name="text" >
+              <string>4:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1" >
+            <widget class="QLabel" name="labelController4" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="2" column="1" >
+         <widget class="QGroupBox" name="groupRom_2" >
+          <property name="title" >
+           <string>ROM</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_7" >
+           <item row="1" column="1" >
+            <widget class="QLabel" name="labelCountry_2" >
+             <property name="text" >
+              <string>&lt;Country></string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" >
+            <widget class="QLabel" name="label_7" >
+             <property name="text" >
+              <string>Name:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" >
+            <widget class="QLabel" name="labelName_2" >
+             <property name="text" >
+              <string>&lt;Name></string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLabel" name="label_11" >
+             <property name="text" >
+              <string>Country:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" >
+            <widget class="QLabel" name="label_13" >
+             <property name="text" >
+              <string>CRC:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" >
+            <widget class="QLabel" name="labelCRC_2" >
+             <property name="text" >
+              <string>&lt;CRC1 - CRC2></string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="3" column="1" >
+         <widget class="QGroupBox" name="groupPlugins_2" >
+          <property name="title" >
+           <string>Plugins</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_8" >
+           <item row="2" column="0" >
+            <widget class="QLabel" name="label_15" >
+             <property name="text" >
+              <string>Video:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" >
+            <widget class="QLabel" name="labelVideo_2" >
+             <property name="text" >
+              <string>&lt;Video></string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" >
+            <widget class="QLabel" name="label_16" >
+             <property name="text" >
+              <string>Sound:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1" >
+            <widget class="QLabel" name="labelSound_2" >
+             <property name="text" >
+              <string>&lt;Sound></string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" >
+            <widget class="QLabel" name="label_17" >
+             <property name="text" >
+              <string>Input:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1" >
+            <widget class="QLabel" name="labelInput_2" >
+             <property name="text" >
+              <string>&lt;Input></string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" >
+            <widget class="QLabel" name="label_18" >
+             <property name="text" >
+              <string>RSP:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1" >
+            <widget class="QLabel" name="labelRsp_2" >
+             <property name="text" >
+              <string>&lt;RSP></string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="4" column="1" >
+         <widget class="QGroupBox" name="groupControllers_2" >
+          <property name="title" >
+           <string>Controllers</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_9" >
+           <item row="0" column="0" >
+            <widget class="QLabel" name="label_19" >
+             <property name="text" >
+              <string>1:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" >
+            <widget class="QLabel" name="labelController1_2" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLabel" name="label_20" >
+             <property name="text" >
+              <string>2:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" >
+            <widget class="QLabel" name="labelController2_2" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" >
+            <widget class="QLabel" name="label_21" >
+             <property name="text" >
+              <string>3:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" >
+            <widget class="QLabel" name="labelController3_2" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" >
+            <widget class="QLabel" name="label_22" >
+             <property name="text" >
+              <string>4:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1" >
+            <widget class="QLabel" name="labelController4_2" >
+             <property name="text" >
+              <string>&lt;Status></string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_25" >
+          <property name="text" >
+           <string>Own Settings:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QLabel" name="label_26" >
+          <property name="text" >
+           <string>Movie Settings:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="0" column="0" >
+      <widget class="QLabel" name="labelMovieFile" >
+       <property name="text" >
+        <string>Movie File:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="labelAuthor" >
+       <property name="text" >
+        <string>Author:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" >
+      <widget class="QLabel" name="labelDescription" >
+       <property name="text" >
+        <string>Description:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2" >
+      <widget class="QPushButton" name="pushBrowse" >
+       <property name="text" >
+        <string>&amp;Browse</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0" >
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>PlaybackDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>PlaybackDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

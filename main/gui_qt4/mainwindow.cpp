@@ -26,6 +26,7 @@
 #include "rommodel.h"
 #include "settingsdialog.h"
 #include "recordingdialog.h"
+#include "playbackdialog.h"
 
 #include <SDL_video.h>
 
@@ -650,11 +651,13 @@ void MainWindow::setStateImplementation(int state)
 
 void MainWindow::startRecording()
 {
-    RecordingDialog *d = new RecordingDialog(this);
-    if (d->exec()) {
-        ;
-    } else {
-        ;
+    if (core::g_EmulatorRunning) {
+        RecordingDialog *d = new RecordingDialog(this);
+        if (d->exec()) {
+            ;
+        } else {
+            ;
+        }
     }
 }
 
@@ -666,6 +669,13 @@ void MainWindow::stopRecording()
 void MainWindow::startPlayback()
 {
     if (core::g_EmulatorRunning) {
+        PlaybackDialog *d = new PlaybackDialog(this);
+        if (d->exec()) {
+            ;
+        } else {
+            ;
+        }
+/*
         char* file = core::get_m64_filename();
         QString filename = QFileDialog::getOpenFileName(
                             this,
@@ -676,6 +686,7 @@ void MainWindow::startPlayback()
         if (!filename.isEmpty()) {
             core::BeginPlayback((char *) filename.toLatin1().data());
         }
+*/
     }
 }
 

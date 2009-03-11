@@ -30,6 +30,9 @@
 
 #include "plugin.h"
 
+#define MOVIE_START_FROM_SNAPSHOT   (1)
+#define MOVIE_START_FROM_RESET  	(2)
+
 extern int g_UseSaveData;
 extern unsigned int dynacore;
 

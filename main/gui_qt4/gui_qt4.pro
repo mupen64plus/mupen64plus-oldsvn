@@ -41,6 +41,7 @@ HEADERS += globals.h \
            settingsdialog.h \
            starlabel.h \
            recordingdialog.h \
+           playbackdialog.h \
            ../config.h \
            ../main.h \
            ../version.h \
@@ -64,7 +65,8 @@ FORMS += mainwidget.ui \
          romdirectorieslistwidget.ui \
          rominfodialog.ui \
          settingsdialog.ui \
-         recordingdialog.ui
+         recordingdialog.ui \
+         playbackdialog.ui
 SOURCES += globals.cpp \
            main.cpp \
            mainwidget.cpp \
@@ -76,4 +78,5 @@ SOURCES += globals.cpp \
            settingsdialog.cpp \
            starlabel.cpp \
            recordingdialog.cpp \
+           playbackdialog.cpp \
            translate.cpp

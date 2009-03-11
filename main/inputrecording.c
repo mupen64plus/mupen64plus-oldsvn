@@ -46,10 +46,8 @@
 #define MUP_MAGIC (0x1a34364d) // M64\0x1a
 #define MUP_VERSION (3)
 #define MUP_HEADER_SIZE (sizeof(m64_header))
-#define MOVIE_START_FROM_SNAPSHOT   (1)
-#define MOVIE_START_FROM_RESET  	(2)
-#define CONTROLLER_PRESENT          (0)
-#define CONTROLLER_MEMPACK          (0x10)
+#define CONTROLLER_PRESENT          (0x001)
+#define CONTROLLER_MEMPACK          (0x010)
 #define CONTROLLER_RUMBLEPACK       (0x100)
 
 int l_CurrentSample = 0;
@@ -272,12 +270,15 @@ void _StartROM()
 
 void EndPlaybackAndRecording()
 {
-	l_TotalSamples = 0;
-	l_CurrentSample = 0;
-	l_CurrentVI = 0;
 	g_UseSaveData = 1;
 	if (g_EmulatorRecording) {
-    	update_header();
+        Header.total_vi = (unsigned int) l_CurrentVI;
+        Header.rerecord_count ++;   // TODO
+        Header.fps = 30;     // TODO
+        Header.input_samples = (unsigned int) l_TotalSamples;
+	    fseek(RecordingFile, 0L, SEEK_SET);
+	    fwrite(&Header, 1, MUP_HEADER_SIZE, RecordingFile);
+	    fseek(RecordingFile, 0L, SEEK_END);
 	    fclose(RecordingFile);
     	g_EmulatorRecording = 0;
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording Ended."));
@@ -287,6 +288,9 @@ void EndPlaybackAndRecording()
     	g_EmulatorPlayback = 0;
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback Ended."));
 	}
+	l_TotalSamples = 0;
+	l_CurrentSample = 0;
+	l_CurrentVI = 0;
 }
 
 void _NewVI()
@@ -334,6 +338,7 @@ void _GetKeys( int Control, BUTTONS *Keys )
         memcpy(&l_LastInput,&Keys->Value,sizeof(int));
         InputToString();
         if ((Keys->Value != 0) && (g_EmulatorPlayback || g_EmulatorRecording)) {
+            l_TotalSamples ++;
             main_message(1, 1, 1, OSD_TOP_LEFT, "%s", l_InputDisplay);
         }
     }
@@ -357,17 +362,5 @@ void CleanUpSaveFiles ()
   
     free(filename);
   
-}
-
-int update_header()
-{
-    Header.total_vi = l_CurrentVI;
-    Header.rerecord_count ++;   // TODO
-    Header.fps = 0;             // TODO
-    Header.input_samples = 0;   // TODO
-	fseek(RecordingFile, 0L, SEEK_SET);
-	fwrite(&Header, 1, MUP_HEADER_SIZE, RecordingFile);
-	fseek(RecordingFile, 0L, SEEK_END);
-	return 1;
 }
 
