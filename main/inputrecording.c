@@ -31,6 +31,10 @@
 #include "main.h"
 #include "inputrecording.h"
 #include "../memory/memory.h"
+#include "config.h"
+#include "../r4300/interupt.h"
+#include "translate.h"
+#include "../opengl/osd.h"
 
 #include <errno.h>
 #include <limits.h>
@@ -38,6 +42,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <zlib.h>
+
+#define MUP_MAGIC (0x1a34364d) // M64\0x1a
+#define MUP_VERSION (3)
+#define MUP_HEADER_SIZE (sizeof(m64_header))
+#define MOVIE_START_FROM_SNAPSHOT   (1)
+#define MOVIE_START_FROM_RESET  	(2)
+#define CONTROLLER_PRESENT          (0)
+#define CONTROLLER_MEMPACK          (0x10)
+#define CONTROLLER_RUMBLEPACK       (0x100)
 
 int l_CurrentSample = 0;
 int l_CurrentVI = 0;
@@ -54,82 +67,115 @@ FILE *PlaybackFile;
 FILE *RecordingFile;
 m64_header Header;
 
+char* get_m64_filename()
+{
+    size_t length = strlen((char*)ROM_HEADER->nom);
+    length = strlen(get_savespath()) + length + 4 + 1;
+    char *file = malloc(length);
+    snprintf(file, length, "%s%s.m64", get_savespath(), (char*)ROM_HEADER->nom);
+    return file;
+}
+
 int BeginPlayback(char *sz_filename)
 {
-    PlaybackFile = fopen(sz_filename,"rb");
-    if (!PlaybackFile)
-    {
-    	EndPlaybackAndRecording();
-    	printf("Could not open file %s for playback.",sz_filename);
-    	return 0;
+    int result = 0;
+    if (g_EmulatorRunning) {
+        PlaybackFile = fopen(sz_filename,"rb");
+        if (!PlaybackFile) {
+        	EndPlaybackAndRecording();
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for playback."), sz_filename);
+        	return 0;
+        }
+        g_EmulatorPlayback = 1;
+	    fread(&Header,sizeof(Header),1,PlaybackFile);
+	    if (SetupEmulationState()) {
+            if (Header.start_type == MOVIE_START_FROM_RESET) {
+                add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback started from reset: %s"), sz_filename);
+            } else {
+                savestates_select_slot((unsigned int) Header.movie_uid);
+                savestates_job |= LOADSTATE;
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback from savestate started"));
+            }
+	    }
+        result = 1;
     }
-    g_EmulatorPlayback = 1;
-	printf("Reading header file of the m64 file.\n");
-	fread(&Header,sizeof(Header),1,PlaybackFile);
-	SetupEmulationState();
-	
-
-    return 1;
+    return result;
 }
 
 int BeginRecording(char *sz_filename, int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8 )
 {
     RecordingFile = fopen(sz_filename,"wb");
-    if (!RecordingFile)
-    {
+    if (!RecordingFile) {
         EndPlaybackAndRecording();
-        printf("Could not create file %s for plaback.",sz_filename);
+        main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not create file %s for plaback."), sz_filename);
     }
     
     g_EmulatorRecording = 1;
-    printf("Writing header file to m64 file.\n");
-    WriteEmulationState(fromSnapshot, *authorUTF8, *descriptionUTF8);
+    WriteEmulationState(fromSnapshot, authorUTF8, descriptionUTF8);
+	fwrite(&Header,sizeof(Header),1,RecordingFile);
+    if (SetupEmulationState()) {
+        if (Header.start_type == MOVIE_START_FROM_RESET) {
+            add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+            add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording to file started: %s"), sz_filename);
+        } else {
+            if (g_EmulatorRunning) {
+                savestates_job |= SAVESTATE;
+            }
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording from savestate started"));
+        }
+    }
 }
 
 int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8)
 {
-    Header.signature[0] = 0x4D;
-    Header.signature[1] = 0x36;
-    Header.signature[2] = 0x34;
-    Header.signature[3] = 0x1A;
-    Header.version_number = 3;
-    Header.movie_uid = 0;   //TODO: recording time in Unix epoch format
-    Header.total_vi = 0;
+    int i;
+	memset(&Header, 0, MUP_HEADER_SIZE);
+    Header.signature = MUP_MAGIC;
+    Header.version_number = MUP_VERSION;
+    Header.movie_uid = (int) savestates_get_slot();
     Header.rerecord_count = 0;
-    Header.fps = 0; //TODO
-    Header.controllers = 0; //TODO
-    Header.core_type = 0; // TODOwas: reserved1
-    Header.input_samples = 0; //TODO
-/*
-    Header.start_type = fromSnapshot ? MOVIE_START_FROM_SNAPSHOT : MOVIE_START_FROM_NOTHING;
-    Header.reserved2;
-    Header.controller_flags;
-    Header.reserved3[160];
-    Header.rom_name[32];
-    Header.rom_crc;
-    Header.rom_cc;
-    Header.reserved4[56];
-    Header.video_plugin[64];
-    Header.sound_plugin[64];
-    Header.input_plugin[64];
-    Header.rsp_plugin[64];
-    Header.utf_authorname[222];
-    Header.utf_moviedesc[256];
-*/
+    for (i = 0; i < 4; i++) {
+        if (Controls[i].Present) {
+            Header.controllers ++;
+            Header.controller_flags |= CONTROLLER_PRESENT << i;
+            if (Controls[i].Plugin == PLUGIN_MEMPAK) {
+                Header.controller_flags |= CONTROLLER_MEMPACK << i;
+            }
+            if (Controls[i].Plugin == PLUGIN_RUMBLE_PAK) {
+                Header.controller_flags |= CONTROLLER_RUMBLEPACK << i;
+            }
+        }
+    }
+    Header.core_type = (short) dynacore; // TODOwas: reserved1
+    if (fromSnapshot == 0) {
+        Header.start_type = MOVIE_START_FROM_RESET;
+    } else {
+        Header.start_type = MOVIE_START_FROM_SNAPSHOT;
+    }
+    sprintf(Header.utf_authorname, "%s", authorUTF8);
+    sprintf(Header.utf_moviedesc, "%s", descriptionUTF8);
+    sprintf(Header.rom_name, "%s", ROM_HEADER->nom);
+    Header.rom_crc = ROM_HEADER->CRC1;
+    Header.rom_cc = (short) ROM_HEADER->Country_code;
+
+    sprintf(Header.video_plugin, "%s", config_get_string("Gfx Plugin", ""));
+    sprintf(Header.input_plugin, "%s", config_get_string("Input Plugin", ""));
+    sprintf(Header.sound_plugin, "%s", config_get_string("Audio Plugin", ""));
+    sprintf(Header.rsp_plugin, "%s", config_get_string("RSP Plugin", ""));
 }
 
 int SetupEmulationState()
 {
-    if (Header.signature[0] != 0x4D && Header.signature[1] != 0x36
-    && Header.signature[2] != 0x34 && Header.signature[3] != 0x1A)
-    {
-    	printf("Invalid signature in header file.\n");
+    if (Header.signature != MUP_MAGIC) {
+        main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Invalid signature in header file."));
     	return 0;
     }
     
-    if (Header.version_number != 3) 
-    {
-    	printf("Invalid version number: %i\n",Header.version_number);
+    if (Header.version_number != 3) {
+        main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Invalid version number: %i"), Header.version_number);
     }
     
     printf("Movie UID: %i\n",Header.movie_uid);
@@ -140,18 +186,17 @@ int SetupEmulationState()
     // todo: enable this many controllers, check force_manual
     printf("Input Samples: %i\n",Header.input_samples);
     l_TotalSamples = Header.input_samples;
-    printf("Start Type: %s\n", (Header.start_type == 1 ? "Snapshot" : "Start"));
-    if (Header.start_type == 1)
-    {
-        // todo: look for .st of the same file name
+    printf("Start Type: %s\n", (Header.start_type == 1 ? "Savestate" : "Start"));
+    if (Header.start_type == 1) {
+        // TODO: look for .st of the same file name
     }
-    //todo: check  020 4-byte unsigned int: controller flags
+    //TODO: check  020 4-byte unsigned int: controller flags
     
     printf("ROM Name: %s\n",Header.rom_name);
     printf("ROM CRC: %i\n",Header.rom_crc);
     printf("ROM CC: %i\n",Header.rom_cc);
     
-    //todo: plugin checking
+    //TODO: plugin checking
     
     return 1;
 }
@@ -159,7 +204,6 @@ int SetupEmulationState()
 // taken from mupen64rerecording v8
 void InputToString ()
 {
-
 	// input display
 	l_InputDisplay[0] = '\0';
 	{
@@ -182,18 +226,18 @@ void InputToString ()
 		x = ((l_LastInput & (0x00FF0000)) >> 16);
 		y = ((l_LastInput & (0xFF000000)) >> 24);
 
-		if(!x && !y)
+		if(!x && !y) {
 			strcpy(l_InputDisplay, "");
-		else
-		{
+		} else {
 			int xamt = (x<0?-x:x) * 99/127; if(!xamt && x) xamt = 1;
 			int yamt = (y<0?-y:y) * 99/127; if(!yamt && y) yamt = 1;
-			if(x && y)
+			if(x && y) {
 				sprintf(l_InputDisplay, "%c%d %c%d ", x<0?'<':'>', xamt, y<0?'v':'^', yamt);
-			else if(x)
+			} else if(x) {
 				sprintf(l_InputDisplay, "%c%d ", x<0?'<':'>', xamt);
-			else //if(y)
+			} else { //if(y)
 				sprintf(l_InputDisplay, "%c%d ", y<0?'v':'^', yamt);
+			}
 		}
 
 		if(s) strcat(l_InputDisplay, "S");
@@ -202,16 +246,14 @@ void InputToString ()
 		if(b) strcat(l_InputDisplay, "B");
 		if(l) strcat(l_InputDisplay, "L");
 		if(r) strcat(l_InputDisplay, "R");
-		if(cu||cd||cl||cr)
-		{
+		if(cu||cd||cl||cr) {
 			strcat(l_InputDisplay, " C");
 			if(cu) strcat(l_InputDisplay, "^");
 			if(cd) strcat(l_InputDisplay, "v");
 			if(cl) strcat(l_InputDisplay, "<");
 			if(cr) strcat(l_InputDisplay, ">");
 		}
-		if(du||dd||dl||dr)
-		{
+		if(du||dd||dl||dr) {
 			strcat(l_InputDisplay, " D");
 			if(du) strcat(l_InputDisplay, "^");
 			if(dd) strcat(l_InputDisplay, "v");
@@ -219,8 +261,6 @@ void InputToString ()
 			if(dr) strcat(l_InputDisplay, ">");
 		}
 	}
-	
-    printf("Input: %s\n",l_InputDisplay);
 }
 
 void _StartROM()
@@ -236,19 +276,22 @@ void EndPlaybackAndRecording()
 	l_CurrentSample = 0;
 	l_CurrentVI = 0;
 	g_UseSaveData = 1;
-	g_EmulatorRecording = 0;
-	g_EmulatorPlayback = 0;
+	if (g_EmulatorRecording) {
+    	update_header();
+	    fclose(RecordingFile);
+    	g_EmulatorRecording = 0;
+        main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording Ended."));
+	}
+	if (g_EmulatorPlayback) {
+	    fclose(PlaybackFile);
+    	g_EmulatorPlayback = 0;
+        main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback Ended."));
+	}
 }
 
 void _NewVI()
 {
 	l_CurrentVI++;
-	if (g_EmulatorRecording)
-	{
-	    printf("Current frame: %i\n",l_CurrentVI);
-	}
-	
-	// What other functions do we need to hook?
 }
 
 void _GetKeys( int Control, BUTTONS *Keys )
@@ -256,41 +299,43 @@ void _GetKeys( int Control, BUTTONS *Keys )
 	// Since we handle input here now, we always want to start with getKeys.
     getKeys(Control, Keys);
     
-    if (g_EmulatorPlayback)
-    {
-        if (Control == 0) // hack: assume only 1 controller
-        {
-            fread(Keys,sizeof(BUTTONS),1,PlaybackFile);
-        }
-        else
-        {
+    if (g_EmulatorPlayback) {
+        // hack: assume only 1 controller
+        if (Control == 0) {
+            int length = fread(Keys,sizeof(BUTTONS),1,PlaybackFile);
+            if (length == 0) {
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback complete."));
+        		EndPlaybackAndRecording();
+            }
+        } else {
             memset(Keys,0,sizeof(BUTTONS));
         }
         
         // it doesn't matter if there isn't 4 controllers plugged in, 
         // our sample stops at this point.
-        if (Control == 3)
-        {
+        // TODO: Not working properly.
+        // Handled by the 'if (length == 0)' above ...
+        if (Control == 3) {
         	l_CurrentSample++;
-        	if (l_CurrentSample > l_TotalSamples)
-        	{
-        		printf("Playback complete.\n");
+        	if (l_CurrentSample > l_TotalSamples) {
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback complete."));
         		EndPlaybackAndRecording();
         	}
         }
         // read keys from file.
     }
     
-    if (g_EmulatorRecording)
-    {
-        // record keys
+    if (g_EmulatorRecording) {
+       fwrite(Keys,sizeof(BUTTONS),1,RecordingFile);
     }
     
     // print out the data of the controller input
-    if (Control == 0)
-    {
+    if (Control == 0) {
         memcpy(&l_LastInput,&Keys->Value,sizeof(int));
         InputToString();
+        if ((Keys->Value != 0) && (g_EmulatorPlayback || g_EmulatorRecording)) {
+            main_message(1, 1, 1, OSD_TOP_LEFT, "%s", l_InputDisplay);
+        }
     }
 }
 
@@ -313,3 +358,16 @@ void CleanUpSaveFiles ()
     free(filename);
   
 }
+
+int update_header()
+{
+    Header.total_vi = l_CurrentVI;
+    Header.rerecord_count ++;   // TODO
+    Header.fps = 0;             // TODO
+    Header.input_samples = 0;   // TODO
+	fseek(RecordingFile, 0L, SEEK_SET);
+	fwrite(&Header, 1, MUP_HEADER_SIZE, RecordingFile);
+	fseek(RecordingFile, 0L, SEEK_END);
+	return 1;
+}
+

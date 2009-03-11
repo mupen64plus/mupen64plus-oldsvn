@@ -37,6 +37,7 @@ namespace core {
         #include "../savestates.h"
         #include "../rom.h"
         #include "../config.h"
+        #include "../inputrecording.h"
     }
 }
 
@@ -330,6 +331,11 @@ void MainWindow::emulationPauseContinue()
     core::pauseContinueEmulation();
 }
 
+void MainWindow::emulationFrameAdvance()
+{
+    core::main_advance_one();
+}
+
 void MainWindow::emulationStop()
 {
     core::stopEmulation();
@@ -503,6 +509,8 @@ void MainWindow::setupActions()
     //Emulation Actions
     actionStart->setIcon(icon("media-playback-start.png"));
     connect(actionStart, SIGNAL(triggered()), this, SLOT(emulationStart()));
+    connect(actionFrameAdvance, SIGNAL(triggered()),
+            this, SLOT(emulationFrameAdvance()));
     actionPause->setIcon(icon("media-playback-pause.png"));
     connect(actionPause, SIGNAL(triggered()),
             this, SLOT(emulationPauseContinue()));
@@ -592,6 +600,7 @@ void MainWindow::setupActions()
     m_uiActions->addAction(actionFullScreen);
     m_uiActions->addAction(actionStop);
     m_uiActions->addAction(actionPause);
+    m_uiActions->addAction(actionFrameAdvance);
     m_uiActions->addAction(actionStartRecording);
     m_uiActions->addAction(actionStopRecording);
     m_uiActions->addAction(actionStartPlayback);
@@ -647,19 +656,31 @@ void MainWindow::startRecording()
     } else {
         ;
     }
-    delete d;
-
 }
 
 void MainWindow::stopRecording()
 {
+    core::EndPlaybackAndRecording();
 }
 
 void MainWindow::startPlayback()
 {
+    if (core::g_EmulatorRunning) {
+        char* file = core::get_m64_filename();
+        QString filename = QFileDialog::getOpenFileName(
+                            this,
+                            tr("Open .m64 file for playback..."),
+                            QString(file),
+                            tr(".m64 files (*.m64)"));
+
+        if (!filename.isEmpty()) {
+            core::BeginPlayback((char *) filename.toLatin1().data());
+        }
+    }
 }
 
 void MainWindow::stopPlayback()
 {
+    core::EndPlaybackAndRecording();
 }
 

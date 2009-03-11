@@ -123,6 +123,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
 
         void emulationStart();
         void emulationPauseContinue();
+        void emulationFrameAdvance();
         void emulationStop();
         void saveStateSave();
         void saveStateSaveAs();

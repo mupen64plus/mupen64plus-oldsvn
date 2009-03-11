@@ -319,7 +319,6 @@ void main_speeddown(int percent)
 
 void main_speedup(int percent)
 {
-	_NewVI();
     if (l_SpeedFactor + percent < 300) /* 300% maximum speed */
     {
         l_SpeedFactor += percent;
@@ -647,8 +646,9 @@ void new_vi(void)
         VI_Counter = 0 ;
     }
     
-    LastFPSTime = CurrentFPSTime ;
+    LastFPSTime = CurrentFPSTime;
     end_section(IDLE_SECTION);
+    _NewVI();
     if (l_FrameAdvance) {
         rompause = 1;
         l_FrameAdvance = 0;

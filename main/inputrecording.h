@@ -31,18 +31,21 @@
 #include "plugin.h"
 
 extern int g_UseSaveData;
+extern unsigned int dynacore;
 
+char* get_m64_filename();
 void _StartROM();
 int BeginPlayback( char *sz_filename );
 
 int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8);
 int SetupEmulationState();
+int BeginRecording(char *sz_filename, int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8 );
 
 void _GetKeys( int Control, BUTTONS *Keys );
 void EndPlaybackAndRecording();
 void CleanUpSaveFiles();
 /*
- *     000 4-byte signature: 4D 36 34 1A "M64\x1A"
+ *  000 4-byte signature: 4D 36 34 1A "M64\x1A"
     004 4-byte little-endian unsigned int: version number, should be 3
     008 4-byte little-endian integer: movie "uid" - identifies the movie-savestate relationship,
                also used as the recording time in Unix epoch format
@@ -77,7 +80,7 @@ void CleanUpSaveFiles();
  * 
  */
 typedef struct {
-	char signature[4];
+	int signature;
     unsigned int version_number;
     int movie_uid;
     unsigned int total_vi;

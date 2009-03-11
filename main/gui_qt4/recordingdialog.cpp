@@ -29,6 +29,7 @@ namespace core {
         #include "../rom.h"
         #include "../config.h"
         #include "../plugin.h"
+        #include "../inputrecording.h"
         #include "../../memory/memory.h"
     }
 }
@@ -47,6 +48,7 @@ RecordingDialog::RecordingDialog(QWidget *parent) : QDialog(parent)
         sprintf(tempbuf, "%s", core::ROM_HEADER->nom);
         labelName->setText(tempbuf);
         strcat(tempbuf, ".m64");
+        sprintf(tempbuf, "%s", core::get_m64_filename());
         lineMovieFile->setText(tempbuf);
         lineAuthor->setText("");
         lineDescription->setText("");
@@ -106,4 +108,23 @@ RecordingDialog::RecordingDialog(QWidget *parent) : QDialog(parent)
 
 void RecordingDialog::onaccepted()
 {
+    int fromSnapshot = 0;
+    char *filename = NULL;
+    QString aut, desc;
+    
+    if (radioFromSavestate->isChecked()) {
+        fromSnapshot = 1;
+    }
+    if (lineAuthor->text() == "") {
+        lineAuthor->setText(tr("(too lazy to write a name)"));
+    }
+    if (lineDescription->text() == "") {
+        lineDescription->setText(tr("(no description entered)"));
+    }
+        
+    const char *author = lineAuthor->text().toLatin1().data();
+    const char *description = lineDescription->text().toLatin1().data();
+    filename = lineMovieFile->text().toLatin1().data();
+    core::BeginRecording(filename, fromSnapshot, author, description);
 }
+

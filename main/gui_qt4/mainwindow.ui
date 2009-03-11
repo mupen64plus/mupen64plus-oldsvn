@@ -45,6 +45,7 @@
      <string>&amp;Emulation</string>
     </property>
     <addaction name="actionStart" />
+    <addaction name="actionFrameAdvance" />
     <addaction name="actionPause" />
     <addaction name="actionStop" />
     <addaction name="separator" />
@@ -298,6 +299,11 @@
   <action name="actionStopPlayback" >
    <property name="text" >
     <string>Stop Playback</string>
+   </property>
+  </action>
+  <action name="actionFrameAdvance" >
+   <property name="text" >
+    <string>&amp;Frame Advance</string>
    </property>
   </action>
  </widget>
