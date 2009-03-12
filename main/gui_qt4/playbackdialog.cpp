@@ -36,7 +36,7 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
     connect(pushBrowse , SIGNAL(clicked()), this, SLOT(browse()));
-    connect(checkReadOnly , SIGNAL(stateChanged(int state)), this, SLOT(state_changed(int state)));
+    connect(checkReadOnly , SIGNAL(stateChanged(int)), this, SLOT(state_changed(int)));
 
     if (core::g_EmulatorRunning) {
         connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));

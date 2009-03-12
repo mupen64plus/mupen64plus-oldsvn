@@ -79,11 +79,11 @@ char* get_m64_filename()
 int BeginPlayback(const char *sz_filename)
 {
     int result = 0;
-    strcpy(playback_file, sz_filename);
-    strcpy(progress_file, sz_filename);
-    strcat(progress_file, ".progress");
     if (g_EmulatorRunning) {
-    	if (g_ReadOnlyPlayback == 1) {
+        strcpy(playback_file, sz_filename);
+        strcpy(progress_file, sz_filename);
+        strcat(progress_file, ".progress");
+	    if (g_ReadOnlyPlayback == 1) {
             PlaybackFile = fopen(sz_filename,"rb");
             if (!PlaybackFile) {
             	EndPlaybackAndRecording();
@@ -91,8 +91,8 @@ int BeginPlayback(const char *sz_filename)
             	return 0;
             }
             g_EmulatorPlayback = 1;
-	        fread(&Header,sizeof(Header),1,PlaybackFile);
-	        if (SetupEmulationState()) {
+            fread(&Header,sizeof(Header),1,PlaybackFile);
+            if (SetupEmulationState()) {
                 if (Header.start_type == MOVIE_START_FROM_RESET) {
                     add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
                     add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
@@ -102,42 +102,59 @@ int BeginPlayback(const char *sz_filename)
                     savestates_job |= LOADSTATE;
                     main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback from savestate started"));
                 }
-	        }
-	    } else {
-	        // TODO
-	        // 1. Load .progress filestate.
-	        // 2. Open the .m64 file and start appending ...
-	    }
-        result = 1;
+            }
+            result = 1;
+        } else {
+            RecordingFile = fopen(sz_filename,"ab+");
+            if (!RecordingFile) {
+                EndPlaybackAndRecording();
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for recording."), sz_filename);
+                result = 0;
+            } else {            
+                g_EmulatorRecording = 1;
+        	    savestates_select_filename(progress_file);
+                savestates_job |= LOADSTATE;
+	            fseek(RecordingFile, 0L, SEEK_SET);
+	            fread(&Header,sizeof(Header),1,RecordingFile);
+	            fseek(RecordingFile, 0L, SEEK_END);
+                // TODO
+                // 1. Load .progress filestate.
+                // 2. Open the .m64 file and start appending ...
+            }
+        }
     }
     return result;
 }
 
 int BeginRecording(char *sz_filename, int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8 )
 {
-    strcpy(progress_file, sz_filename);
-    strcat(progress_file, ".progress");
-    RecordingFile = fopen(sz_filename,"wb");
-    if (!RecordingFile) {
-        EndPlaybackAndRecording();
-        main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not create file %s for plaback."), sz_filename);
-    }
-    
-    g_EmulatorRecording = 1;
-    WriteEmulationState(fromSnapshot, authorUTF8, descriptionUTF8);
-	fwrite(&Header,sizeof(Header),1,RecordingFile);
-    if (SetupEmulationState()) {
-        if (Header.start_type == MOVIE_START_FROM_RESET) {
-            add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
-            add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
-            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording to file started: %s"), sz_filename);
-        } else {
-            if (g_EmulatorRunning) {
-                savestates_job |= SAVESTATE;
-            }
-            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording from savestate started"));
+    int result = 0;
+    if (g_EmulatorRunning) {
+        strcpy(progress_file, sz_filename);
+        strcat(progress_file, ".progress");
+
+        RecordingFile = fopen(sz_filename,"wb");
+        if (!RecordingFile) {
+            EndPlaybackAndRecording();
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not create file %s for recording."), sz_filename);
+            return 0;
         }
+        g_EmulatorRecording = 1;
+        WriteEmulationState(fromSnapshot, authorUTF8, descriptionUTF8);
+        fwrite(&Header,sizeof(Header),1,RecordingFile);
+        if (SetupEmulationState()) {
+            if (Header.start_type == MOVIE_START_FROM_RESET) {
+                add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording to file started: %s"), sz_filename);
+            } else {
+                savestates_job |= SAVESTATE;
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording from savestate started"));
+            }
+        }
+        result = 1;
     }
+    return result;
 }
 
 int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8)

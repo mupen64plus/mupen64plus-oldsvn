@@ -523,7 +523,7 @@
      <item row="3" column="1" >
       <widget class="QCheckBox" name="checkReadOnly" >
        <property name="enabled" >
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text" >
         <string>Read Only</string>
