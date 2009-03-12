@@ -19,10 +19,18 @@
       <widget class="QLineEdit" name="lineMovieFile" />
      </item>
      <item row="1" column="1" colspan="2" >
-      <widget class="QLineEdit" name="lineAuthor" />
+      <widget class="QLineEdit" name="lineAuthor" >
+       <property name="maxLength" >
+        <number>221</number>
+       </property>
+      </widget>
      </item>
      <item row="2" column="1" colspan="2" >
-      <widget class="QLineEdit" name="lineDescription" />
+      <widget class="QLineEdit" name="lineDescription" >
+       <property name="maxLength" >
+        <number>255</number>
+       </property>
+      </widget>
      </item>
      <item row="3" column="0" colspan="3" >
       <widget class="QGroupBox" name="groupSettings" >

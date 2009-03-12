@@ -140,6 +140,7 @@ int         g_MemHasBeenBSwapped = 0;   // store byte-swapped flag so we don't s
 int         g_EmulatorRunning = 0;      // need separate boolean to tell if emulator is running, since --nogui doesn't use a thread
 int         g_EmulatorRecording = 0;    // are we recording emulation    
 int         g_EmulatorPlayback = 0;     // are we in playback mode   
+int         g_ReadOnlyPlayback = 1;     // 1 means play a movie from start. 0 means resume recording from end of current file.
 int         g_OsdEnabled = 1;           // On Screen Display enabled?
 int         g_Fullscreen = 0;           // fullscreen enabled?
 int         g_TakeScreenshot = 0;       // Tell OSD Rendering callback to take a screenshot just before drawing the OSD
@@ -493,7 +494,10 @@ void stopEmulation(void)
             debugger_step();
         }
 #endif        
-
+        if (g_EmulatorRecording || g_EmulatorPlayback) {
+            EndPlaybackAndRecording();
+        }
+        
         // wait until emulation thread is done before continuing
         if(g_EmulatorRunning)
             SDL_WaitThread(g_EmulationThread, NULL);

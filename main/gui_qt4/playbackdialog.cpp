@@ -28,160 +28,134 @@ namespace core {
         #include "../main.h"
         #include "../rom.h"
         #include "../config.h"
-        #include "../plugin.h"
         #include "../inputrecording.h"
-        #include "../../memory/memory.h"
     }
 }
 
 PlaybackDialog::PlaybackDialog(QWidget *parent) : QDialog(parent)
 {
-    char tempbuf[255];
-
     setupUi(this);
+    connect(pushBrowse , SIGNAL(clicked()), this, SLOT(browse()));
+    connect(checkReadOnly , SIGNAL(stateChanged(int state)), this, SLOT(state_changed(int state)));
 
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
-
-    // Settings from current setup
-    sprintf(tempbuf, "%s", core::ROM_HEADER->nom);
-    labelName->setText(tempbuf);
-    
-    char* file = core::get_m64_filename();
-    filename = QString(file);
+    if (core::g_EmulatorRunning) {
+        connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
+        filename = QString(core::get_m64_filename());
   
-    lineMovieFile->setText(filename);
-    lineAuthor->setText("");
-    lineDescription->setText("");
-    
-    sprintf(tempbuf, "%X", (core::ROM_HEADER->Country_code)&0xff);
-    labelCountry->setText(tempbuf);
-    sprintf(tempbuf, "%X", core::ROM_HEADER->CRC1);
-    labelCRC->setText(tempbuf);
-    
-    gfx_name = core::config_get_string("Gfx Plugin", "");
-    input_name = core::config_get_string("Input Plugin", "");
-    sound_name = core::config_get_string("Audio Plugin", "");
-    rsp_name = core::config_get_string("RSP Plugin", "");
-    labelVideo->setText(gfx_name);
-    labelSound->setText(input_name);
-    labelInput->setText(sound_name);
-    labelRsp->setText(rsp_name);
+        labelName->setText(QString((const char *) core::ROM_HEADER->nom));
+        lineMovieFile->setText(filename);
+        lineAuthor->setText("");
+        lineDescription->setText("");
+        labelCountry->setText(QString("%1").arg(core::ROM_HEADER->Country_code & 0xff));
+        labelCRC->setText(QString("%1").arg(core::ROM_HEADER->CRC1, 8, 16, QChar('0')).toUpper());
 
+        labelVideo->setText(QString(QLatin1String(core::getGfxName())));
+        labelSound->setText(QString(QLatin1String(core::getAudioName())));
+        labelInput->setText(QString(QLatin1String(core::getInputName())));
+        labelRsp->setText(QString(QLatin1String(core::getRspName())));
 
-    strcpy(tempbuf, core::Controls[0].Present ? "Present" : "Disconnected");
-    if(core::Controls[0].Present && core::Controls[0].Plugin == PLUGIN_MEMPAK) {
-        strcat(tempbuf, " with mempak");
+        labelController1->setText(core::getCtrlStrInternal(0));
+        labelController2->setText(core::getCtrlStrInternal(1));
+        labelController3->setText(core::getCtrlStrInternal(2));
+        labelController4->setText(core::getCtrlStrInternal(3));
     }
-    if(core::Controls[0].Present && core::Controls[0].Plugin == PLUGIN_RUMBLE_PAK) {
-        strcat(tempbuf, " with rumble");
-    }
-    labelController1->setText(tempbuf);
+    update_movieinfo();
+}
 
-    strcpy(tempbuf, core::Controls[1].Present ? "Present" : "Disconnected");
-    if(core::Controls[1].Present && core::Controls[1].Plugin == PLUGIN_MEMPAK) {
-        strcat(tempbuf, " with mempak");
+void PlaybackDialog::onaccepted()
+{
+    if (!lineMovieFile->text().isEmpty()) {
+        if (checkReadOnly->checkState()) {
+            core::g_ReadOnlyPlayback = 1;
+        } else {
+            core::g_ReadOnlyPlayback = 0;
+        }
+        core::BeginPlayback(lineMovieFile->text().toLocal8Bit());
     }
-    if(core::Controls[1].Present && core::Controls[1].Plugin == PLUGIN_RUMBLE_PAK) {
-        strcat(tempbuf, " with rumble pak");
-    }
-    labelController2->setText(tempbuf);
-    
-    
-    if(core::Controls[2].Present && core::Controls[2].Plugin == PLUGIN_MEMPAK) {
-        strcat(tempbuf, " with mempak");
-    }
-    if(core::Controls[2].Present && core::Controls[2].Plugin == PLUGIN_RUMBLE_PAK) {
-        strcat(tempbuf, " with rumble pak");
-    }
-    labelController3->setText(tempbuf);
+}
 
-    if(core::Controls[3].Present && core::Controls[3].Plugin == PLUGIN_MEMPAK) {
-        strcat(tempbuf, " with mempak");
-    }
-    if(core::Controls[3].Present && core::Controls[3].Plugin == PLUGIN_RUMBLE_PAK) {
-        strcat(tempbuf, " with rumble pak");
-    }
-    labelController4->setText(tempbuf);
-    
+void PlaybackDialog::update_movieinfo()
+{
     // Update information for selected movie file
+    char* file;
+    file = lineMovieFile->text().toLatin1().data();
     PlaybackFile = fopen(file,"rb");
     core::m64_header header;
-    if (PlaybackFile) {
-    	memset(&header, 0, sizeof(header));
-        fread(&header,sizeof(header),1,PlaybackFile);
+  	memset(&header, 0, sizeof(header));
+
+    if (PlaybackFile && (fread(&header,sizeof(header),1,PlaybackFile) == 1)) {
         fclose(PlaybackFile);
 
-        int min = 0;
-        int sec = 0;
-        int fps = (unsigned int) header.fps;
-        if ((header.total_vi > 0) && (fps > 0)) {
-            min = (header.total_vi / fps) / 60;
-            sec = (header.total_vi / fps) % 60;
-            qDebug() << "header.total_vi: " << header.total_vi << " - header.fps: " << fps;
-            qDebug() << min << ":" << sec;
+        int min = 0, sec = 0;
+        if ((header.total_vi > 0) && ((unsigned int) header.fps > 0)) {
+            min = (header.total_vi / (unsigned int) header.fps) / 60;
+            sec = (header.total_vi / (unsigned int) header.fps) % 60;
         }
-        sprintf(tempbuf, "%.2u:%.2u", min, sec);
-        labelLength->setText(tempbuf);
-        sprintf(tempbuf, "%u (%u)", header.total_vi, header.input_samples);
-        labelFrames->setText(tempbuf);
-        sprintf(tempbuf, "%u", header.rerecord_count);
-        labelReRecords->setText(tempbuf);
+        labelLength->setText(QString("%1:%2").arg(min, 2, 10, QChar('0')).arg(sec, 2, 10, QChar('0')));
+        labelFrames->setText(QString("%1 (%2)").arg(header.total_vi).arg(header.input_samples));
+        labelReRecords->setText(QString("%1").arg(header.rerecord_count));
+        lineAuthor->setText(QString(QLatin1String(header.utf_authorname)));
+        lineDescription->setText(QString(QLatin1String(header.utf_moviedesc)));
+        labelName_2->setText(QString(QLatin1String(header.rom_name)));
+        labelCountry_2->setText(QString("%1").arg(header.rom_cc));
+        labelCRC_2->setText(QString("%1").arg(header.rom_crc, 8, 16, QChar('0')).toUpper());
+        labelVideo_2->setText(QString(QLatin1String(header.video_plugin)));
+        labelSound_2->setText(QString(QLatin1String(header.sound_plugin)));
+        labelInput_2->setText(QString(QLatin1String(header.input_plugin)));
+        labelRsp_2->setText(QString(QLatin1String(header.rsp_plugin)));
+
         if (header.start_type == MOVIE_START_FROM_SNAPSHOT) {
             labelFrom->setText("Savestate");
         } else {
             labelFrom->setText("Reset");
         }
-       
-        lineAuthor->setText(QString(QLatin1String(header.utf_authorname)));
-        lineDescription->setText(QString(QLatin1String(header.utf_moviedesc)));
-        labelName_2->setText(QString(QLatin1String(header.rom_name)));
-        sprintf(tempbuf, "%X", header.rom_cc);
-        labelCountry_2->setText(tempbuf);
-        snprintf(tempbuf, 9, "%X", header.rom_crc);
-        labelCRC_2->setText(tempbuf);
+        
+        labelController1_2->setText(core::getCtrlStrHeader(0, header.controller_flags));
+        labelController2_2->setText(core::getCtrlStrHeader(1, header.controller_flags));
+        labelController3_2->setText(core::getCtrlStrHeader(2, header.controller_flags));
+        labelController4_2->setText(core::getCtrlStrHeader(3, header.controller_flags));
+        
+        update_states();
+    }
 
-        labelVideo_2->setText(QString(QLatin1String(header.video_plugin)));
-        labelSound_2->setText(QString(QLatin1String(header.sound_plugin)));
-        labelInput_2->setText(QString(QLatin1String(header.input_plugin)));
-        labelRsp_2->setText(QString(QLatin1String(header.rsp_plugin)));
-        
-        int ctrl_flags = header.controller_flags;
-        QString ctrl1 = "Disconnected";
-        QString ctrl2 = "Disconnected";
-        QString ctrl3 = "Disconnected";
-        QString ctrl4 = "Disconnected";
-        if (ctrl_flags & 0x001) { 
-            ctrl1 = "Present";
-            if (ctrl_flags & 0x010) { ctrl1 += " with mempak"; }
-            if (ctrl_flags & 0x100) { ctrl1 += " with rumble pak"; }
-        }
-        if (ctrl_flags & 0x002) {
-            ctrl2 = "Present";
-            if (ctrl_flags & 0x020) { ctrl2 += " with mempak"; }
-            if (ctrl_flags & 0x200) { ctrl2 += " with rumble pak"; }
-        }
-        if (ctrl_flags & 0x004) {
-            ctrl3 = "Present";
-            if (ctrl_flags & 0x040) { ctrl3 += " with mempak"; }
-            if (ctrl_flags & 0x400) { ctrl3 += " with rumble pak"; }
-        }
-        if (ctrl_flags & 0x008) {
-            ctrl4 = "Present";
-            if (ctrl_flags & 0x080) { ctrl4 += " with mempak"; }
-            if (ctrl_flags & 0x800) { ctrl4 += " with rumble pak"; }
-        }
-        
-        labelController1_2->setText(ctrl1);
-        labelController2_2->setText(ctrl2);
-        labelController3_2->setText(ctrl3);
-        labelController4_2->setText(ctrl4);
+}
+
+void PlaybackDialog::browse()
+{
+    QString filename = QFileDialog::getOpenFileName(
+                        this,
+                        tr("Open .m64 file for playback..."),
+                        lineMovieFile->text(),
+                        tr(".m64 files (*.m64)"));
+
+    if (!filename.isEmpty()) {
+        lineMovieFile->setText(filename);
+        update_movieinfo();
+    }
+
+}
+
+void PlaybackDialog::update_states()
+{
+    if (core::g_ReadOnlyPlayback) {
+        checkReadOnly->setCheckState(Qt::Checked);
+        lineAuthor->setEnabled(false);
+        lineDescription->setEnabled(false);
+    } else {
+        checkReadOnly->setCheckState(Qt::Unchecked);
+        lineAuthor->setEnabled(true);
+        lineDescription->setEnabled(true);
     }
 }
 
-void PlaybackDialog::onaccepted()
+void PlaybackDialog::state_changed(int state)
 {
-    if (!filename.isEmpty()) {
-        core::BeginPlayback((char *) filename.toLatin1().data());
+    if (state) {
+        core::g_ReadOnlyPlayback = 1;
+        update_movieinfo();
+    } else {
+        core::g_ReadOnlyPlayback = 0;
     }
+    update_states();
 }
 

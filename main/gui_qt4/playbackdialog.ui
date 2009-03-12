@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>659</height>
+    <height>687</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -16,15 +16,33 @@
    <item row="0" column="0" >
     <layout class="QGridLayout" name="gridLayout" >
      <item row="0" column="1" >
-      <widget class="QLineEdit" name="lineMovieFile" />
+      <widget class="QLineEdit" name="lineMovieFile" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item row="1" column="1" colspan="2" >
-      <widget class="QLineEdit" name="lineAuthor" />
+      <widget class="QLineEdit" name="lineAuthor" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="maxLength" >
+        <number>221</number>
+       </property>
+      </widget>
      </item>
      <item row="2" column="1" colspan="2" >
-      <widget class="QLineEdit" name="lineDescription" />
+      <widget class="QLineEdit" name="lineDescription" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="maxLength" >
+        <number>255</number>
+       </property>
+      </widget>
      </item>
-     <item row="3" column="0" colspan="3" >
+     <item row="5" column="0" colspan="3" >
       <widget class="QGroupBox" name="groupSettings" >
        <property name="title" >
         <string>Settings</string>
@@ -499,6 +517,19 @@
       <widget class="QPushButton" name="pushBrowse" >
        <property name="text" >
         <string>&amp;Browse</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" >
+      <widget class="QCheckBox" name="checkReadOnly" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string>Read Only</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
        </property>
       </widget>
      </item>

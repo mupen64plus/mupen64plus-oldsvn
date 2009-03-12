@@ -31,9 +31,8 @@ class RecordingDialog : public QDialog, private Ui_RecordingDialog
     Q_OBJECT
     public:
         RecordingDialog(QWidget *parent = 0);
-    private:
-        QString gfx_name, input_name, sound_name, rsp_name;
     private slots:
+        void browse();
         void onaccepted();
 };
 

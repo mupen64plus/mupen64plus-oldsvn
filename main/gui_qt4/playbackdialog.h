@@ -32,11 +32,14 @@ class PlaybackDialog : public QDialog, private Ui_PlaybackDialog
     public:
         PlaybackDialog(QWidget *parent = 0);
     private:
-        QString gfx_name, input_name, sound_name, rsp_name;
         QString filename;
         FILE *PlaybackFile;
+        void update_movieinfo();
+        void update_states();
     private slots:
         void onaccepted();
+        void browse();
+        void state_changed(int state);
 };
 
 #endif // __PLAYBACKDIALOG_H__

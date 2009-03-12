@@ -675,18 +675,6 @@ void MainWindow::startPlayback()
         } else {
             ;
         }
-/*
-        char* file = core::get_m64_filename();
-        QString filename = QFileDialog::getOpenFileName(
-                            this,
-                            tr("Open .m64 file for playback..."),
-                            QString(file),
-                            tr(".m64 files (*.m64)"));
-
-        if (!filename.isEmpty()) {
-            core::BeginPlayback((char *) filename.toLatin1().data());
-        }
-*/
     }
 }
 

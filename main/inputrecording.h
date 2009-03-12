@@ -38,7 +38,7 @@ extern unsigned int dynacore;
 
 char* get_m64_filename();
 void _StartROM();
-int BeginPlayback( char *sz_filename );
+int BeginPlayback(const char *sz_filename );
 
 int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8);
 int SetupEmulationState();
@@ -107,3 +107,12 @@ typedef struct {
     char utf_authorname[222];
     char utf_moviedesc[256];  
 } m64_header;
+
+char* getCtrlStrInternal(int controller);
+char* getCtrlStrHeader(int controller, unsigned int controller_flags);
+char* getGfxName();
+char* getInputName();
+char* getAudioName();
+char* getRspName();
+int fpsByCountrycode();
+

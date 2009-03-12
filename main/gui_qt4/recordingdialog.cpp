@@ -28,9 +28,7 @@ namespace core {
         #include "../main.h"
         #include "../rom.h"
         #include "../config.h"
-        #include "../plugin.h"
         #include "../inputrecording.h"
-        #include "../../memory/memory.h"
     }
 }
 
@@ -38,93 +36,65 @@ extern core::CONTROL Controls[4];
 
 RecordingDialog::RecordingDialog(QWidget *parent) : QDialog(parent)
 {
-    char tempbuf[255];
-
     setupUi(this);
-
+    connect(pushBrowse , SIGNAL(clicked()), this, SLOT(browse()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
 
-    if (core::ROM_HEADER) {
-        sprintf(tempbuf, "%s", core::ROM_HEADER->nom);
-        labelName->setText(tempbuf);
-        strcat(tempbuf, ".m64");
-        sprintf(tempbuf, "%s", core::get_m64_filename());
-        lineMovieFile->setText(tempbuf);
+    if (core::g_EmulatorRunning) {
+        labelName->setText(QString((const char *) core::ROM_HEADER->nom));
+        lineMovieFile->setText(QString((const char *) core::get_m64_filename()));
         lineAuthor->setText("");
         lineDescription->setText("");
-        
-        sprintf(tempbuf, "%X", (core::ROM_HEADER->Country_code)&0xff);
-        labelCountry->setText(tempbuf);
-        sprintf(tempbuf, "%X", core::ROM_HEADER->CRC1);
-        labelCRC->setText(tempbuf);
-        
-        gfx_name = core::config_get_string("Gfx Plugin", "");
-        input_name = core::config_get_string("Input Plugin", "");
-        sound_name = core::config_get_string("Audio Plugin", "");
-        rsp_name = core::config_get_string("RSP Plugin", "");
-        labelVideo->setText(gfx_name);
-        labelSound->setText(input_name);
-        labelInput->setText(sound_name);
-        labelRsp->setText(rsp_name);
+        labelCountry->setText(QString("%1").arg(core::ROM_HEADER->Country_code & 0xff));
+        labelCRC->setText(QString("%1").arg(core::ROM_HEADER->CRC1, 8, 16, QChar('0')).toUpper());
+        labelVideo->setText(QString(QLatin1String(core::getGfxName())));
+        labelSound->setText(QString(QLatin1String(core::getAudioName())));
+        labelInput->setText(QString(QLatin1String(core::getInputName())));
+        labelRsp->setText(QString(QLatin1String(core::getRspName())));
 
-
-        strcpy(tempbuf, Controls[0].Present ? "Present" : "Disconnected");
-        if(Controls[0].Present && Controls[0].Plugin == PLUGIN_MEMPAK) {
-            strcat(tempbuf, " with mempak");
-        }
-        if(Controls[0].Present && Controls[0].Plugin == PLUGIN_RUMBLE_PAK) {
-            strcat(tempbuf, " with rumble");
-        }
-        labelController1->setText(tempbuf);
-
-        strcpy(tempbuf, Controls[1].Present ? "Present" : "Disconnected");
-        if(Controls[1].Present && Controls[1].Plugin == PLUGIN_MEMPAK) {
-            strcat(tempbuf, " with mempak");
-        }
-        if(Controls[1].Present && Controls[1].Plugin == PLUGIN_RUMBLE_PAK) {
-            strcat(tempbuf, " with rumble pak");
-        }
-        labelController2->setText(tempbuf);
-        
-        
-        if(Controls[2].Present && Controls[1].Plugin == PLUGIN_MEMPAK) {
-            strcat(tempbuf, " with mempak");
-        }
-        if(Controls[2].Present && Controls[1].Plugin == PLUGIN_RUMBLE_PAK) {
-            strcat(tempbuf, " with rumble pak");
-        }
-        labelController3->setText(tempbuf);
-
-        if(Controls[3].Present && Controls[1].Plugin == PLUGIN_MEMPAK) {
-            strcat(tempbuf, " with mempak");
-        }
-        if(Controls[3].Present && Controls[1].Plugin == PLUGIN_RUMBLE_PAK) {
-            strcat(tempbuf, " with rumble pak");
-        }
-        labelController4->setText(tempbuf);
+        labelController1->setText(core::getCtrlStrInternal(0));
+        labelController2->setText(core::getCtrlStrInternal(1));
+        labelController3->setText(core::getCtrlStrInternal(2));
+        labelController4->setText(core::getCtrlStrInternal(3));
         radioFromStart->setChecked(true);
     }
 }
 
 void RecordingDialog::onaccepted()
 {
-    int fromSnapshot = 0;
-    char *filename = NULL;
-    QString aut, desc;
-    
-    if (radioFromSavestate->isChecked()) {
-        fromSnapshot = 1;
-    }
-    if (lineAuthor->text() == "") {
-        lineAuthor->setText(tr("(too lazy to write a name)"));
-    }
-    if (lineDescription->text() == "") {
-        lineDescription->setText(tr("(no description entered)"));
-    }
+    if (core::g_EmulatorRunning) {
+        int fromSnapshot = 0;
+        char *filename = NULL;
+        QString aut, desc;
         
-    const char *author = lineAuthor->text().toLatin1().data();
-    const char *description = lineDescription->text().toLatin1().data();
-    filename = lineMovieFile->text().toLatin1().data();
-    core::BeginRecording(filename, fromSnapshot, author, description);
+        if (radioFromSavestate->isChecked()) {
+            fromSnapshot = 1;
+        }
+        if (lineAuthor->text() == "") {
+            lineAuthor->setText(tr("(too lazy to write a name)"));
+        }
+        if (lineDescription->text() == "") {
+            lineDescription->setText(tr("(no description entered)"));
+        }
+            
+        const char *author = lineAuthor->text().toLatin1().data();
+        const char *description = lineDescription->text().toLatin1().data();
+        filename = lineMovieFile->text().toLatin1().data();
+        core::BeginRecording(filename, fromSnapshot, author, description);
+    }
+}
+
+void RecordingDialog::browse()
+{
+    QString filename = QFileDialog::getSaveFileName(
+                        this,
+                        tr("Select .m64 file for recording..."),
+                        lineMovieFile->text(),
+                        tr(".m64 files (*.m64)"));
+
+    if (!filename.isEmpty()) {
+        lineMovieFile->setText(filename);
+    }
+
 }
 

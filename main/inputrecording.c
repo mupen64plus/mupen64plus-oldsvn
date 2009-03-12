@@ -60,6 +60,8 @@ int l_TotalSamples = 0;
 int g_UseSaveData = 1; // TAS will always use its own version of savedata. This is a global variable
 int l_ForceManual = 0; // use manual settings - ie: do not let emulator configure for you.
 
+char progress_file[255];
+char playback_file[255];
 
 FILE *PlaybackFile;
 FILE *RecordingFile;
@@ -67,35 +69,44 @@ m64_header Header;
 
 char* get_m64_filename()
 {
-    size_t length = strlen((char*)ROM_HEADER->nom);
-    length = strlen(get_savespath()) + length + 4 + 1;
-    char *file = malloc(length);
-    snprintf(file, length, "%s%s.m64", get_savespath(), (char*)ROM_HEADER->nom);
+    size_t length = strlen(get_savespath()) + strlen((char*)ROM_HEADER->nom) + 4 + 1;
+    char *file = (char *) malloc(length);
+    snprintf(file, length, "%s%s.m64", get_savespath(), ROM_HEADER->nom);
+    file[length] = '\0';
     return file;
 }
 
-int BeginPlayback(char *sz_filename)
+int BeginPlayback(const char *sz_filename)
 {
     int result = 0;
+    strcpy(playback_file, sz_filename);
+    strcpy(progress_file, sz_filename);
+    strcat(progress_file, ".progress");
     if (g_EmulatorRunning) {
-        PlaybackFile = fopen(sz_filename,"rb");
-        if (!PlaybackFile) {
-        	EndPlaybackAndRecording();
-            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for playback."), sz_filename);
-        	return 0;
-        }
-        g_EmulatorPlayback = 1;
-	    fread(&Header,sizeof(Header),1,PlaybackFile);
-	    if (SetupEmulationState()) {
-            if (Header.start_type == MOVIE_START_FROM_RESET) {
-                add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
-                add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback started from reset: %s"), sz_filename);
-            } else {
-                savestates_select_slot((unsigned int) Header.movie_uid);
-                savestates_job |= LOADSTATE;
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback from savestate started"));
+    	if (g_ReadOnlyPlayback == 1) {
+            PlaybackFile = fopen(sz_filename,"rb");
+            if (!PlaybackFile) {
+            	EndPlaybackAndRecording();
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for playback."), sz_filename);
+            	return 0;
             }
+            g_EmulatorPlayback = 1;
+	        fread(&Header,sizeof(Header),1,PlaybackFile);
+	        if (SetupEmulationState()) {
+                if (Header.start_type == MOVIE_START_FROM_RESET) {
+                    add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                    add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+                    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback started from reset: %s"), sz_filename);
+                } else {
+                    savestates_select_slot((unsigned int) Header.movie_uid);
+                    savestates_job |= LOADSTATE;
+                    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback from savestate started"));
+                }
+	        }
+	    } else {
+	        // TODO
+	        // 1. Load .progress filestate.
+	        // 2. Open the .m64 file and start appending ...
 	    }
         result = 1;
     }
@@ -104,6 +115,8 @@ int BeginPlayback(char *sz_filename)
 
 int BeginRecording(char *sz_filename, int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8 )
 {
+    strcpy(progress_file, sz_filename);
+    strcat(progress_file, ".progress");
     RecordingFile = fopen(sz_filename,"wb");
     if (!RecordingFile) {
         EndPlaybackAndRecording();
@@ -147,7 +160,7 @@ int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *de
             }
         }
     }
-    Header.core_type = (short) dynacore; // TODOwas: reserved1
+    Header.core_type = (short) dynacore; // was: reserved1
     if (fromSnapshot == 0) {
         Header.start_type = MOVIE_START_FROM_RESET;
     } else {
@@ -159,10 +172,10 @@ int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *de
     Header.rom_crc = ROM_HEADER->CRC1;
     Header.rom_cc = (short) ROM_HEADER->Country_code;
 
-    sprintf(Header.video_plugin, "%s", config_get_string("Gfx Plugin", ""));
-    sprintf(Header.input_plugin, "%s", config_get_string("Input Plugin", ""));
-    sprintf(Header.sound_plugin, "%s", config_get_string("Audio Plugin", ""));
-    sprintf(Header.rsp_plugin, "%s", config_get_string("RSP Plugin", ""));
+    snprintf(Header.video_plugin, 64, "%s", getGfxName());
+    snprintf(Header.input_plugin, 64, "%s", getInputName());
+    snprintf(Header.sound_plugin, 64, "%s", getAudioName());
+    snprintf(Header.rsp_plugin, 64, "%s", getRspName());
 }
 
 int SetupEmulationState()
@@ -272,9 +285,11 @@ void EndPlaybackAndRecording()
 {
 	g_UseSaveData = 1;
 	if (g_EmulatorRecording) {
+	    savestates_select_filename(progress_file);
+        savestates_job |= SAVESTATE; // Save a in progress savestate for easy resume.
         Header.total_vi = (unsigned int) l_CurrentVI;
-        Header.rerecord_count ++;   // TODO
-        Header.fps = 30;     // TODO
+        Header.rerecord_count ++;   // TODO: Needs some work ...
+        Header.fps = fpsByCountrycode();
         Header.input_samples = (unsigned int) l_TotalSamples;
 	    fseek(RecordingFile, 0L, SEEK_SET);
 	    fwrite(&Header, 1, MUP_HEADER_SIZE, RecordingFile);
@@ -282,15 +297,25 @@ void EndPlaybackAndRecording()
 	    fclose(RecordingFile);
     	g_EmulatorRecording = 0;
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording Ended."));
+	    l_TotalSamples = 0;
+	    l_CurrentSample = 0;
+	    l_CurrentVI = 0;
 	}
 	if (g_EmulatorPlayback) {
 	    fclose(PlaybackFile);
     	g_EmulatorPlayback = 0;
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback Ended."));
+    	if (g_ReadOnlyPlayback == 0) {
+    	    BeginRecording(playback_file, Header.start_type, Header.utf_authorname, Header.utf_moviedesc);
+	        l_TotalSamples = Header.input_samples;
+	        l_CurrentSample = 0; // TODO
+	        l_CurrentVI = Header.total_vi;
+    	} else {
+	        l_TotalSamples = 0;
+	        l_CurrentSample = 0;
+	        l_CurrentVI = 0;
+    	}
 	}
-	l_TotalSamples = 0;
-	l_CurrentSample = 0;
-	l_CurrentVI = 0;
 }
 
 void _NewVI()
@@ -308,7 +333,6 @@ void _GetKeys( int Control, BUTTONS *Keys )
         if (Control == 0) {
             int length = fread(Keys,sizeof(BUTTONS),1,PlaybackFile);
             if (length == 0) {
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback complete."));
         		EndPlaybackAndRecording();
             }
         } else {
@@ -322,7 +346,6 @@ void _GetKeys( int Control, BUTTONS *Keys )
         if (Control == 3) {
         	l_CurrentSample++;
         	if (l_CurrentSample > l_TotalSamples) {
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback complete."));
         		EndPlaybackAndRecording();
         	}
         }
@@ -362,5 +385,100 @@ void CleanUpSaveFiles ()
   
     free(filename);
   
+}
+
+char* getCtrlStrInternal(int controller)
+{
+    char *result;
+  	result = malloc(32);
+    
+    if (Controls[controller].Present) {
+        sprintf(result,"Present");
+        if(Controls[controller].Plugin == PLUGIN_MEMPAK) {
+            strcat(result, " with mempak");
+        }
+        if(Controls[controller].Plugin == PLUGIN_RUMBLE_PAK) {
+            strcat(result, " with rumble");
+        }
+    } else {
+        sprintf(result,"Disconnected");
+    }
+
+    return result;
+}
+
+char* getCtrlStrHeader(int controller, unsigned int controller_flags)
+{
+    char *result;
+  	result = malloc(32);
+  	
+    if (controller_flags & (CONTROLLER_PRESENT << controller)) { 
+        sprintf(result,"Present");
+        if (controller_flags & (CONTROLLER_MEMPACK << controller)) {
+            strcat(result," with mempak");
+        }
+        if (controller_flags & (CONTROLLER_RUMBLEPACK << controller)) {
+            strcat(result," with rumble pak");
+        }
+    } else {
+        sprintf(result,"Disconnected");
+    }
+
+    return result;
+}
+
+char* getGfxName()
+{
+    char *result;
+    result = plugin_name_by_filename(config_get_string("Gfx Plugin", ""));
+    return result;
+}
+
+char* getInputName()
+{
+    char *result;
+    result = plugin_name_by_filename(config_get_string("Input Plugin", ""));
+    return result;
+}
+
+char* getAudioName()
+{
+    char *result;
+    result = plugin_name_by_filename(config_get_string("Audio Plugin", ""));
+    return result;
+}
+
+char* getRspName()
+{
+    char *result;
+    result = plugin_name_by_filename(config_get_string("RSP Plugin", ""));
+    return result;
+}
+
+int fpsByCountrycode()
+{
+    switch(ROM_HEADER->Country_code&0xFF)
+    {
+    case 0x44:
+    case 0x46:
+    case 0x49:
+    case 0x50:
+    case 0x53:
+    case 0x55:
+    case 0x58:
+    case 0x59:
+        return 25;
+        break;
+
+    case 0x37:
+    case 0x41:
+    case 0x45:
+    case 0x4a:
+        return 30;
+        break;
+    }
+
+    printf( "[VCR]: Warning - unknown country code, using 30 FPS for video.\n" );
+    return 30;
 }
 
