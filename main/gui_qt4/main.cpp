@@ -55,6 +55,12 @@ extern "C" {
 // arguments. This is called before mupen64plus parses any of its commandline options.
 void gui_init(int *argc, char ***argv)
 {
+#ifdef Q_WS_X11
+    // We always want the glib-based event loop - make sure it is not disabled by
+    // the user.
+    unsetenv("QT_NO_GLIB");
+#endif
+
     application = new QApplication(*argc, *argv);
 
     QString locale = QLocale::system().name();
