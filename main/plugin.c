@@ -363,8 +363,8 @@ void plugin_exec_config_with_wid(const char *name, HWND wid)
 
     if(p && p->handle)
     {
-         /* Commenting out since this interferes with Rice's initialization on Linux.
-        Added originally for better win32 compatibility? Not sure why.
+#ifdef __WIN32__
+        /* Some plugins on windows need to be initialized before they work */
         switch (p->type)
         {
             case PLUGIN_TYPE_CONTROLLER:
@@ -380,7 +380,7 @@ void plugin_exec_config_with_wid(const char *name, HWND wid)
                 plugin_load_audio_plugin(name);
                 break;
         }
-       */
+#endif /* __WIN32__ */
 
         dllConfig = dlsym(p->handle, "DllConfig");
         if(dllConfig)
@@ -399,6 +399,25 @@ void plugin_exec_test_with_wid(const char *name, HWND wid)
 
     if(p && p->handle)
     {
+#ifdef __WIN32__
+        /* Some plugins on windows need to be initialized before they work */
+        switch (p->type)
+        {
+            case PLUGIN_TYPE_CONTROLLER:
+                plugin_load_input_plugin(name);
+                break;
+            case PLUGIN_TYPE_RSP:
+                plugin_load_rsp_plugin(name);
+                break;
+            case PLUGIN_TYPE_GFX:
+                plugin_load_gfx_plugin(name);
+                break;
+            case PLUGIN_TYPE_AUDIO:
+                plugin_load_audio_plugin(name);
+                break;
+        }
+#endif /* __WIN32__ */
+
         dllTest = dlsym(p->handle, "DllTest");
         if(dllTest)
             dllTest(wid);
@@ -416,6 +435,25 @@ void plugin_exec_about_with_wid(const char *name, HWND wid)
 
     if(p && p->handle)
     {
+#ifdef __WIN32__
+        /* Some plugins on windows need to be initialized before they work */
+        switch (p->type)
+        {
+            case PLUGIN_TYPE_CONTROLLER:
+                plugin_load_input_plugin(name);
+                break;
+            case PLUGIN_TYPE_RSP:
+                plugin_load_rsp_plugin(name);
+                break;
+            case PLUGIN_TYPE_GFX:
+                plugin_load_gfx_plugin(name);
+                break;
+            case PLUGIN_TYPE_AUDIO:
+                plugin_load_audio_plugin(name);
+                break;
+        }
+#endif /* __WIN32__ */
+
         dllAbout = dlsym(p->handle, "DllAbout");
         if(dllAbout)
             dllAbout(wid);
