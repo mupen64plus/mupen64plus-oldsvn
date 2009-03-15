@@ -88,6 +88,7 @@ void (*viWidthChanged)() = dummy_void;
 void (*readScreen)(void **dest, int *width, int *height) = 0;
 void (*captureScreen)(char *dirpath) = 0;
 void (*setRenderingCallback)(void (*callback)()) = dummy_void;
+void (*moveScreen)(int x, int y) = 0;
 
 void (*aiDacrateChanged)(int SystemType) = dummy_aiDacrateChanged;
 void (*aiLenChanged)() = dummy_void;
@@ -659,6 +660,7 @@ void plugin_load_gfx_plugin(const char* gfx_name)
     readScreen = dlsym(handle_gfx, "ReadScreen");
     captureScreen = dlsym(handle_gfx, "CaptureScreen");
     setRenderingCallback = dlsym(handle_gfx, "SetRenderingCallback");
+    moveScreen = dlsym(handle_gfx, "MoveScreen");
     
     fBRead = dlsym(handle_gfx, "FBRead");
     fBWrite = dlsym(handle_gfx, "FBWrite");

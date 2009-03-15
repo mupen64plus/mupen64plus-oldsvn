@@ -239,6 +239,16 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             }
             return false;
             break;
+        case QEvent::Move:
+            {
+                if (core::moveScreen) {
+                    QMoveEvent* qme = static_cast<QMoveEvent*>(ev);
+                    QPoint p = qme->pos();
+                    core::moveScreen(p.x(), p.y());
+                }
+            }
+            return false;
+            break;
         default:
             return false;
             break;
@@ -340,8 +350,15 @@ void MainWindow::emulationStop()
 
 void MainWindow::fullScreenToggle()
 {
-    if(core::g_EmulatorRunning)
+    if (core::g_EmulatorRunning) {
         core::changeWindow();
+#ifdef Q_WS_WIN
+        if (core::moveScreen && m_renderWindow) {
+            QPoint p = m_renderWindow->pos();
+            core::moveScreen(p.x(), p.y());
+        }
+#endif
+    }
 }
 
 void MainWindow::saveStateSave()

@@ -266,6 +266,7 @@ extern void (*viWidthChanged)();
 extern void (*readScreen)(void **dest, int *width, int *height);
 extern void (*captureScreen)(char *dirpath);
 extern void (*setRenderingCallback)(void (*callback)());
+extern void (*moveScreen)(int x, int y);
 
 extern void (*aiDacrateChanged)(int SystemType);
 extern void (*aiLenChanged)();
