@@ -478,12 +478,6 @@ void MainWindow::startEmulation()
     m_renderWindow->show();
     core::g_RenderWindow = (core::HWND) m_renderWindow->winId();
     core::g_StatusBar = (core::HWND) statusBar()->winId();
-
-    QString winId = QString("0x%1")
-                    .arg(QString::number(m_renderWindow->winId(), 16));
-    setenv("SDL_WINDOWID",
-            qPrintable(winId),
-            1);
 #endif // Q_WS_WIN
 
     core::startEmulation();
