@@ -45,6 +45,7 @@
 #include <signal.h> // signals
 #include <getopt.h> // getopt_long
 #include <dirent.h>
+#include <stdlib.h>
 
 #include <png.h>    // for writing screenshot PNG files
 
