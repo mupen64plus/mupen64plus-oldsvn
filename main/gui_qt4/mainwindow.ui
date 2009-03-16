@@ -82,13 +82,15 @@
     </property>
     <widget class="QMenu" name="menuTAS" >
      <property name="title" >
-      <string>TAS</string>
+      <string>&amp;TAS</string>
      </property>
      <addaction name="actionStartRecording" />
      <addaction name="actionStopRecording" />
      <addaction name="separator" />
      <addaction name="actionStartPlayback" />
      <addaction name="actionStopPlayback" />
+     <addaction name="separator" />
+     <addaction name="actionReadOnly" />
     </widget>
     <addaction name="menuTAS" />
    </widget>
@@ -283,27 +285,53 @@
   </action>
   <action name="actionStartRecording" >
    <property name="text" >
-    <string>Start Recording</string>
+    <string>&amp;Start Recording</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionStopRecording" >
    <property name="text" >
-    <string>Stop Recording</string>
+    <string>S&amp;top Recording</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+Shift+R</string>
    </property>
   </action>
   <action name="actionStartPlayback" >
    <property name="text" >
-    <string>Start Playback</string>
+    <string>St&amp;art Playback</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionStopPlayback" >
    <property name="text" >
-    <string>Stop Playback</string>
+    <string>Sto&amp;p Playback</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+Shift+P</string>
    </property>
   </action>
   <action name="actionFrameAdvance" >
    <property name="text" >
     <string>&amp;Frame Advance</string>
+   </property>
+   <property name="shortcut" >
+    <string>/</string>
+   </property>
+  </action>
+  <action name="actionReadOnly" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>R&amp;ead Only</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>

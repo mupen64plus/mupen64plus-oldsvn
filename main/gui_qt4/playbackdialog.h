@@ -39,7 +39,8 @@ class PlaybackDialog : public QDialog, private Ui_PlaybackDialog
     private slots:
         void onaccepted();
         void browse();
-        void state_changed(int state);
+        void checkReadOnly_changed(int state);
+        void checkResumeRecording_changed(int state);
 };
 
 #endif // __PLAYBACKDIALOG_H__

@@ -143,7 +143,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void stopRecording();
         void startPlayback();
         void stopPlayback();
-
+        void readOnlyToggle();
     protected:
         void customEvent(QEvent* event);
         void closeEvent(QCloseEvent* event);

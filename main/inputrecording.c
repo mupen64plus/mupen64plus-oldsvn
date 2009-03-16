@@ -69,6 +69,7 @@ m64_header Header;
 
 char* get_m64_filename()
 {
+    // create the .m64 file in the .mupen64plus/save directory
     size_t length = strlen(get_savespath()) + strlen((char*)ROM_HEADER->nom) + 4 + 1;
     char *file = (char *) malloc(length);
     snprintf(file, length, "%s%s.m64", get_savespath(), ROM_HEADER->nom);
@@ -82,44 +83,67 @@ int BeginPlayback(const char *sz_filename)
     if (g_EmulatorRunning) {
         strcpy(playback_file, sz_filename);
         strcpy(progress_file, sz_filename);
-        strcat(progress_file, ".progress");
-	    if (g_ReadOnlyPlayback == 1) {
-            PlaybackFile = fopen(sz_filename,"rb");
-            if (!PlaybackFile) {
-            	EndPlaybackAndRecording();
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for playback."), sz_filename);
-            	return 0;
-            }
+        strcat(progress_file, ".progress"); // savestate at end of recording
+        PlaybackFile = fopen(sz_filename,"rb");
+        if (!PlaybackFile) {
+        	EndPlaybackAndRecording();
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for playback."), sz_filename);
+        	return 0;
+        }
+        if (!fread(&Header,sizeof(Header),1,PlaybackFile) == 1) {
+        	EndPlaybackAndRecording();
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Failed to read file header: %s."), sz_filename);
+        	return 0;
+        }
+        if (SetupEmulationState()) {
             g_EmulatorPlayback = 1;
-            fread(&Header,sizeof(Header),1,PlaybackFile);
-            if (SetupEmulationState()) {
-                if (Header.start_type == MOVIE_START_FROM_RESET) {
-                    add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
-                    add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
-                    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback started from reset: %s"), sz_filename);
-                } else {
-                    savestates_select_slot((unsigned int) Header.movie_uid);
-                    savestates_job |= LOADSTATE;
-                    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback from savestate started"));
-                }
-            }
-            result = 1;
-        } else {
-            RecordingFile = fopen(sz_filename,"ab+");
-            if (!RecordingFile) {
-                EndPlaybackAndRecording();
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for recording."), sz_filename);
-                result = 0;
-            } else {            
-                g_EmulatorRecording = 1;
-        	    savestates_select_filename(progress_file);
+            if (Header.start_type == MOVIE_START_FROM_RESET) {
+                add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+                add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback started from reset: %s"), sz_filename);
+            } else {
+                savestates_select_slot((unsigned int) Header.movie_uid);
                 savestates_job |= LOADSTATE;
-	            fseek(RecordingFile, 0L, SEEK_SET);
-	            fread(&Header,sizeof(Header),1,RecordingFile);
-	            fseek(RecordingFile, 0L, SEEK_END);
-                // TODO
-                // 1. Load .progress filestate.
-                // 2. Open the .m64 file and start appending ...
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback from savestate started"));
+            }
+        } else {
+        	EndPlaybackAndRecording();
+        	return 0;
+        }
+        result = 1;
+    }
+    return result;
+}
+
+int ResumeRecording(const char *sz_filename)
+{
+    int result = 0;
+    if (g_EmulatorRunning) {
+        strcpy(playback_file, sz_filename);
+        strcpy(progress_file, sz_filename);
+        strcat(progress_file, ".progress");
+        RecordingFile = fopen(sz_filename,"ab+");
+        if (!RecordingFile) {
+            EndPlaybackAndRecording();
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for recording."), sz_filename);
+            result = 0;
+        } else {
+            // Resume the .progress file
+            // Saved on "End Recording"
+    	    savestates_select_filename(progress_file);
+            savestates_job |= LOADSTATE;
+
+            // Only resume the recording if not the read only bit is set
+            if (g_ReadOnlyPlayback == 0) {
+                g_EmulatorRecording = 1;
+                fseek(RecordingFile, 0L, SEEK_SET);
+                if (!fread(&Header,sizeof(Header),1,RecordingFile) == 1) {
+                	EndPlaybackAndRecording();
+                    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Failed to read file header: %s."), sz_filename);
+                	return 0;
+                }
+                fseek(RecordingFile, 0L, SEEK_END);
+                SetupEmulationState();
             }
         }
     }
@@ -130,28 +154,33 @@ int BeginRecording(char *sz_filename, int fromSnapshot, const char *authorUTF8, 
 {
     int result = 0;
     if (g_EmulatorRunning) {
+        strcpy(playback_file, sz_filename);
         strcpy(progress_file, sz_filename);
         strcat(progress_file, ".progress");
-
         RecordingFile = fopen(sz_filename,"wb");
         if (!RecordingFile) {
             EndPlaybackAndRecording();
             main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not create file %s for recording."), sz_filename);
             return 0;
         }
-        g_EmulatorRecording = 1;
         WriteEmulationState(fromSnapshot, authorUTF8, descriptionUTF8);
-        fwrite(&Header,sizeof(Header),1,RecordingFile);
+        if (!fwrite(&Header,sizeof(Header),1,RecordingFile) == 1) {
+            EndPlaybackAndRecording();
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Failed to write to file: %s"), sz_filename);
+            return 0;
+        }
         if (SetupEmulationState()) {
+            g_EmulatorRecording = 1;
             if (Header.start_type == MOVIE_START_FROM_RESET) {
                 add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
                 add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording to file started: %s"), sz_filename);
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Starting from reset"));
             } else {
                 savestates_job |= SAVESTATE;
-                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording from savestate started"));
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Starting from savestate"));
             }
         }
+        main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording started"));
         result = 1;
     }
     return result;
@@ -204,6 +233,7 @@ int SetupEmulationState()
     
     if (Header.version_number != 3) {
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Invalid version number: %i"), Header.version_number);
+    	return 0;
     }
     
     printf("Movie UID: %i\n",Header.movie_uid);
@@ -300,37 +330,39 @@ void _StartROM()
 
 void EndPlaybackAndRecording()
 {
-	g_UseSaveData = 1;
-	if (g_EmulatorRecording) {
-	    savestates_select_filename(progress_file);
+    g_UseSaveData = 1;
+    if (g_EmulatorRecording) {
+        savestates_select_filename(progress_file);
         savestates_job |= SAVESTATE; // Save a in progress savestate for easy resume.
         Header.total_vi = (unsigned int) l_CurrentVI;
-        Header.rerecord_count ++;   // TODO: Needs some work ...
+        Header.rerecord_count ++;
         Header.fps = fpsByCountrycode();
         Header.input_samples = (unsigned int) l_TotalSamples;
-	    fseek(RecordingFile, 0L, SEEK_SET);
-	    fwrite(&Header, 1, MUP_HEADER_SIZE, RecordingFile);
-	    fseek(RecordingFile, 0L, SEEK_END);
-	    fclose(RecordingFile);
-    	g_EmulatorRecording = 0;
+        fseek(RecordingFile, 0L, SEEK_SET);
+        if (!fwrite(&Header, MUP_HEADER_SIZE, 1, RecordingFile) == 1) {
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Failed to update header in .m64 file."));
+        }
+        fseek(RecordingFile, 0L, SEEK_END);
+        fclose(RecordingFile);
+        g_EmulatorRecording = 0;
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Recording Ended."));
-	    l_TotalSamples = 0;
-	    l_CurrentSample = 0;
-	    l_CurrentVI = 0;
-	}
-	if (g_EmulatorPlayback) {
+        l_TotalSamples = 0;
+        l_CurrentSample = 0;
+        l_CurrentVI = 0;
+    }
+    if (g_EmulatorPlayback) {
 	    fclose(PlaybackFile);
     	g_EmulatorPlayback = 0;
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback Ended."));
     	if (g_ReadOnlyPlayback == 0) {
-    	    BeginRecording(playback_file, Header.start_type, Header.utf_authorname, Header.utf_moviedesc);
-	        l_TotalSamples = Header.input_samples;
-	        l_CurrentSample = 0; // TODO
-	        l_CurrentVI = Header.total_vi;
+            BeginRecording(playback_file, Header.start_type, Header.utf_authorname, Header.utf_moviedesc);
+            l_TotalSamples = Header.input_samples;
+            l_CurrentSample = 0; // TODO
+            l_CurrentVI = Header.total_vi;
     	} else {
-	        l_TotalSamples = 0;
-	        l_CurrentSample = 0;
-	        l_CurrentVI = 0;
+            l_TotalSamples = 0;
+            l_CurrentSample = 0;
+            l_CurrentVI = 0;
     	}
 	}
 }
@@ -348,8 +380,7 @@ void _GetKeys( int Control, BUTTONS *Keys )
     if (g_EmulatorPlayback) {
         // hack: assume only 1 controller
         if (Control == 0) {
-            int length = fread(Keys,sizeof(BUTTONS),1,PlaybackFile);
-            if (length == 0) {
+            if (!fread(Keys,sizeof(BUTTONS),1,PlaybackFile) == 1) {
         		EndPlaybackAndRecording();
             }
         } else {
@@ -370,7 +401,9 @@ void _GetKeys( int Control, BUTTONS *Keys )
     }
     
     if (g_EmulatorRecording) {
-       fwrite(Keys,sizeof(BUTTONS),1,RecordingFile);
+       if (!fwrite(Keys,sizeof(BUTTONS),1,RecordingFile) == 1) {
+            main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Failed to write keypress"));
+       }
     }
     
     // print out the data of the controller input

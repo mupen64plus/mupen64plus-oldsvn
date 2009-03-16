@@ -39,6 +39,7 @@ extern unsigned int dynacore;
 char* get_m64_filename();
 void _StartROM();
 int BeginPlayback(const char *sz_filename );
+int ResumeRecording(const char *sz_filename );
 
 int WriteEmulationState(int fromSnapshot, const char *authorUTF8, const char *descriptionUTF8);
 int SetupEmulationState();

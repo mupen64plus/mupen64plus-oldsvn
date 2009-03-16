@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>687</height>
+    <height>715</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -42,7 +42,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0" colspan="3" >
+     <item row="6" column="0" colspan="3" >
       <widget class="QGroupBox" name="groupSettings" >
        <property name="title" >
         <string>Settings</string>
@@ -530,6 +530,13 @@
        </property>
        <property name="checked" >
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1" >
+      <widget class="QCheckBox" name="checkResumeRecording" >
+       <property name="text" >
+        <string>Resume end of file</string>
        </property>
       </widget>
      </item>

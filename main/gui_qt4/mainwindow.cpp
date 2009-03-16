@@ -99,6 +99,8 @@ MainWindow::MainWindow()
         position.setY(desktop.height() - size.height());
     }
 
+    actionReadOnly->setChecked((bool) core::g_ReadOnlyPlayback);
+
     resize(size);
     move(position);
 }
@@ -572,6 +574,7 @@ void MainWindow::setupActions()
     connect(actionStopRecording, SIGNAL(triggered()), this, SLOT(stopRecording()));
     connect(actionStartPlayback, SIGNAL(triggered()), this, SLOT(startPlayback()));
     connect(actionStopPlayback, SIGNAL(triggered()), this, SLOT(stopPlayback()));
+    connect(actionReadOnly, SIGNAL(triggered()), this, SLOT(readOnlyToggle()));
     
     
     // Help menu actions
@@ -606,6 +609,7 @@ void MainWindow::setupActions()
     m_uiActions->addAction(actionStopRecording);
     m_uiActions->addAction(actionStartPlayback);
     m_uiActions->addAction(actionStopPlayback);
+    m_uiActions->addAction(actionReadOnly);
 }
 
 void MainWindow::setState(core::gui_state_t state)
@@ -683,3 +687,12 @@ void MainWindow::stopPlayback()
     core::EndPlaybackAndRecording();
 }
 
+void MainWindow::readOnlyToggle()
+{
+    if (actionReadOnly->isChecked()) {
+        core::g_ReadOnlyPlayback = 1;
+    }
+    else {
+        core::g_ReadOnlyPlayback = 0;
+    }
+}

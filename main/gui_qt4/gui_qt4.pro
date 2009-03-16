@@ -20,7 +20,7 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 TEMPLATE = lib
-CONFIG += staticlib debug
+CONFIG += staticlib release
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .

@@ -36,7 +36,8 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
     connect(pushBrowse , SIGNAL(clicked()), this, SLOT(browse()));
-    connect(checkReadOnly , SIGNAL(stateChanged(int)), this, SLOT(state_changed(int)));
+    connect(checkReadOnly , SIGNAL(stateChanged(int)), this, SLOT(checkReadOnly_changed(int)));
+    connect(checkResumeRecording , SIGNAL(stateChanged(int)), this, SLOT(checkResumeRecording_changed(int)));
 
     if (core::g_EmulatorRunning) {
         connect(buttonBox, SIGNAL(accepted()), this, SLOT(onaccepted()));
@@ -65,12 +66,11 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) : QDialog(parent)
 void PlaybackDialog::onaccepted()
 {
     if (!lineMovieFile->text().isEmpty()) {
-        if (checkReadOnly->checkState()) {
-            core::g_ReadOnlyPlayback = 1;
+        if (checkResumeRecording->checkState()) {
+            core::ResumeRecording(lineMovieFile->text().toLocal8Bit());
         } else {
-            core::g_ReadOnlyPlayback = 0;
+            core::BeginPlayback(lineMovieFile->text().toLocal8Bit());
         }
-        core::BeginPlayback(lineMovieFile->text().toLocal8Bit());
     }
 }
 
@@ -146,16 +146,29 @@ void PlaybackDialog::update_states()
         lineAuthor->setEnabled(true);
         lineDescription->setEnabled(true);
     }
+    if (core::g_ResumeRecording) {
+        checkResumeRecording->setCheckState(Qt::Checked);
+    } else {
+        checkResumeRecording->setCheckState(Qt::Unchecked);
+    }
 }
 
-void PlaybackDialog::state_changed(int state)
+void PlaybackDialog::checkReadOnly_changed(int state)
 {
     if (state) {
         core::g_ReadOnlyPlayback = 1;
-        update_movieinfo();
     } else {
         core::g_ReadOnlyPlayback = 0;
     }
     update_states();
+}
+
+void PlaybackDialog::checkResumeRecording_changed(int state)
+{
+    if (state) {
+        core::g_ResumeRecording = 1;
+    } else {
+        core::g_ResumeRecording = 0;
+    }
 }
 
