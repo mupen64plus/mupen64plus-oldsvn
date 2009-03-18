@@ -35,7 +35,7 @@ extern int g_OsdEnabled;
 extern int g_Fullscreen;
 extern int g_EmulatorRunning;
 extern int g_ReadOnlyPlayback;
-extern int g_ResumeRecording;
+extern int g_ResumeEof;
 extern SDL_Thread* g_EmulationThread;
 extern SDL_Thread* g_RomCacheThread;
 extern char* g_GfxPlugin;

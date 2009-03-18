@@ -115,36 +115,35 @@ int BeginPlayback(const char *sz_filename)
     return result;
 }
 
-int ResumeRecording(const char *sz_filename)
+int ResumeEof(const char *sz_filename)
 {
     int result = 0;
     if (g_EmulatorRunning) {
         strcpy(playback_file, sz_filename);
         strcpy(progress_file, sz_filename);
         strcat(progress_file, ".progress");
-        RecordingFile = fopen(sz_filename,"ab+");
+        RecordingFile = fopen(sz_filename,"rb+");
+        fseek(RecordingFile, 0L, SEEK_END);
         if (!RecordingFile) {
             EndPlaybackAndRecording();
             main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Could not open file %s for recording."), sz_filename);
-            result = 0;
-        } else {
-            // Resume the .progress file
-            // Saved on "End Recording"
-    	    savestates_select_filename(progress_file);
-            savestates_job |= LOADSTATE;
+        	return 0;
+        }
 
-            // Only resume the recording if not the read only bit is set
-            if (g_ReadOnlyPlayback == 0) {
-                g_EmulatorRecording = 1;
-                fseek(RecordingFile, 0L, SEEK_SET);
-                if (!fread(&Header,sizeof(Header),1,RecordingFile) == 1) {
-                	EndPlaybackAndRecording();
-                    main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Failed to read file header: %s."), sz_filename);
-                	return 0;
-                }
-                fseek(RecordingFile, 0L, SEEK_END);
-                SetupEmulationState();
+        // Resume the .progress file
+        // Saved on "End Recording"
+        savestates_select_filename(progress_file);
+        savestates_job |= LOADSTATE;
+        if (g_ReadOnlyPlayback == 0) {
+            g_EmulatorRecording = 1;
+            fseek(RecordingFile, 0L, SEEK_SET);
+            if (!fread(&Header,sizeof(Header),1,RecordingFile) == 1) {
+            	EndPlaybackAndRecording();
+                main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Failed to read file header: %s."), sz_filename);
+            	return 0;
             }
+            fseek(RecordingFile, 0L, SEEK_END);
+            SetupEmulationState();
         }
     }
     return result;
@@ -355,7 +354,7 @@ void EndPlaybackAndRecording()
     	g_EmulatorPlayback = 0;
         main_message(1, 1, 1, OSD_BOTTOM_LEFT, tr("Playback Ended."));
     	if (g_ReadOnlyPlayback == 0) {
-            BeginRecording(playback_file, Header.start_type, Header.utf_authorname, Header.utf_moviedesc);
+            ResumeEof(playback_file);
             l_TotalSamples = Header.input_samples;
             l_CurrentSample = 0; // TODO
             l_CurrentVI = Header.total_vi;
