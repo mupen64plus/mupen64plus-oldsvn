@@ -62,6 +62,7 @@ int check_breakpoints( uint32 address );
 int check_breakpoints_on_mem_access( uint32 pc, uint32 address, uint32 size, uint32 flags );
 int lookup_breakpoint( uint32 address, uint32 size, uint32 flags );
 int log_breakpoint(uint32 PC, uint32 Flag, uint32 Access);
+void replace_breakpoint_num( int, breakpoint* );
 
 #endif  /* __BREAKPOINTS_H__ */
 

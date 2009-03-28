@@ -28,6 +28,12 @@
 #include "settingsdialog.h"
 #include "cheatdialog.h"
 
+#ifdef DBG
+#include "debugger/debuggerwidget.h"
+#include "debugger/registerwidget.h"
+#include "debugger/breakpointswidget.h"
+#endif
+
 namespace core {
     extern "C" {
         #include "../gui.h"
@@ -36,6 +42,9 @@ namespace core {
         #include "../savestates.h"
         #include "../rom.h"
         #include "../config.h"
+#ifdef DBG
+        #include "../../debugger/debugger.h"
+#endif
     }
 }
 
@@ -346,6 +355,9 @@ void MainWindow::emulationStop()
         m_renderWindow->close();
         m_renderWindow->deleteLater();
    }
+#ifdef DBG
+    core::debugger_close();
+#endif
 }
 
 void MainWindow::showCheatDialog()
@@ -569,6 +581,18 @@ void MainWindow::setupActions()
         }
     }
 
+#ifdef DBG
+    //Debugger Actions
+    connect(actionEnableDebugger, SIGNAL(triggered()), this, SLOT(debuggerToggle()));
+    connect(actionDisassembler, SIGNAL(triggered()), this, SLOT(disassemblerShow()));
+    connect(actionRegisters, SIGNAL(triggered()), this, SLOT(registersShow()));
+    connect(actionBreakpoints, SIGNAL(triggered()), this, SLOT(breakpointsShow()));
+    connect(actionMemory, SIGNAL(triggered()), this, SLOT(memeditShow()));
+    menu_Debug->menuAction()->setVisible(true);
+#else
+    menu_Debug->menuAction()->setVisible(false);
+#endif
+
     //Settings Actions
     connect(actionShowFilter, SIGNAL(toggled(bool)),
             mainWidget, SLOT(showFilter(bool)));
@@ -647,5 +671,53 @@ void MainWindow::setStateImplementation(int state)
             m_renderWindow->setFixedSize(s->w, s->h);
         }
     }
+}
+
+void MainWindow::debuggerToggle()
+{
+#ifdef DBG
+    if (actionEnableDebugger->isChecked()) {
+        actionDisassembler->setEnabled(true);
+        actionRegisters->setEnabled(true);
+        actionBreakpoints->setEnabled(true);
+        actionMemory->setEnabled(true);
+        core::g_DebuggerEnabled = 1;
+    }
+    else {
+        core::g_DebuggerEnabled = 0;
+        actionDisassembler->setEnabled(false);
+        actionRegisters->setEnabled(false);
+        actionBreakpoints->setEnabled(false);
+        actionMemory->setEnabled(false);
+    }
+#endif
+}
+
+void MainWindow::disassemblerShow()
+{
+#ifdef DBG
+    core::debugger_show_disassembler();
+#endif
+}
+
+void MainWindow::registersShow()
+{
+#ifdef DBG
+    core::debugger_show_registers();
+#endif
+}
+
+void MainWindow::breakpointsShow()
+{
+#ifdef DBG
+    core::debugger_show_breakpoints();
+#endif
+}
+
+void MainWindow::memeditShow()
+{
+#ifdef DBG
+    core::debugger_show_memedit();
+#endif
 }
 

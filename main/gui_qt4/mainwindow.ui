@@ -77,8 +77,19 @@
     <addaction name="actionAbout" />
     <addaction name="actionAboutQt" />
    </widget>
+   <widget class="QMenu" name="menu_Debug" >
+    <property name="title" >
+     <string>&amp;Debug</string>
+    </property>
+    <addaction name="actionEnableDebugger" />
+    <addaction name="actionDisassembler" />
+    <addaction name="actionRegisters" />
+    <addaction name="actionBreakpoints" />
+    <addaction name="actionMemory" />
+   </widget>
    <addaction name="menu_File" />
    <addaction name="menu_Emulation" />
+   <addaction name="menu_Debug" />
    <addaction name="menu_Settings" />
    <addaction name="menu_Help" />
   </widget>
@@ -263,6 +274,46 @@
   <action name="actionCheats" >
    <property name="text" >
     <string>Ch&amp;eats</string>
+   </property>
+  </action>
+  <action name="actionEnableDebugger" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>E&amp;nable</string>
+   </property>
+  </action>
+  <action name="actionDisassembler" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Disassembler</string>
+   </property>
+  </action>
+  <action name="actionRegisters" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Registers</string>
+   </property>
+  </action>
+  <action name="actionBreakpoints" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Breakpoints</string>
+   </property>
+  </action>
+  <action name="actionMemory" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Memory</string>
    </property>
   </action>
  </widget>

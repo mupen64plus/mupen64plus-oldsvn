@@ -138,7 +138,14 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void itemCountUpdate(int count);
         void aboutDialogShow();
         void setStateImplementation(int state);
-
+        
+//TODO: #ifdef DGB
+        void debuggerToggle();
+        void disassemblerShow();
+        void registersShow();
+        void breakpointsShow();
+        void memeditShow();
+//TODO: #endif        
     protected:
         void customEvent(QEvent* event);
         void closeEvent(QCloseEvent* event);

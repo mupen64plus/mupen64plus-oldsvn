@@ -38,11 +38,27 @@
 #include "mainwindow.h"
 #include "globals.h"
 
+#ifdef DBG
+#include "debugger/debuggerwidget.h"
+#include "debugger/registerwidget.h"
+#include "debugger/breakpointswidget.h"
+#include "debugger/memeditwidget.h"
+#endif
+
 // ugly globals
 static MainWindow* mainWindow = 0;
 static QApplication* application = 0;
 static QTranslator* translator = 0;
+#ifdef DBG
+void update_debugger_frontend( unsigned int );
 
+static DebuggerWidget* debuggerWidget = 0;
+static RegisterWidget* registerWidget = 0;
+static BreakpointsWidget* breakpointsWidget = 0;
+static MemEditWidget* memeditWidget = 0;
+
+unsigned int _pc = 0;
+#endif
 namespace core {
 extern "C" {
 
@@ -102,6 +118,13 @@ void gui_init(int *argc, char ***argv)
 #endif
 
     mainWindow = new MainWindow;
+
+#ifdef DBG
+    debuggerWidget = new DebuggerWidget;
+    registerWidget = new RegisterWidget;
+    breakpointsWidget = new BreakpointsWidget;
+    memeditWidget = new MemEditWidget;
+#endif
 }
 
 // display GUI components to the screen
@@ -123,6 +146,12 @@ void gui_main_loop(void)
     application = 0;
     delete translator;
     translator = 0;
+#ifdef DBG
+    debuggerWidget = 0;
+    registerWidget = 0;
+    breakpointsWidget = 0;
+    memeditWidget = 0;
+#endif
 }
 
 int gui_message(gui_message_t messagetype, const char *format, ...)
@@ -170,6 +199,82 @@ void gui_set_state(gui_state_t state)
 
     mainWindow->setState(state);
 }
+
+#ifdef DBG
+void init_debugger_frontend()
+{
+    QMetaObject::invokeMethod(registerWidget, "show", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(debuggerWidget, "show", Qt::QueuedConnection);
+    debuggerWidget->setFocus();
+}
+void update_debugger_frontend( unsigned int pc )
+{
+    _pc = pc;
+    if (debuggerWidget->isVisible()) {
+        QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
+                                   Qt::QueuedConnection,
+                                   Q_ARG(unsigned int, pc));
+    }
+    if (debuggerWidget->isVisible()) {
+        QMetaObject::invokeMethod(registerWidget, "update_registers",
+                                   Qt::QueuedConnection,
+                                   Q_ARG(unsigned int, pc));
+    }    
+}
+
+//Runs each VI for auto-updating views
+void debugger_frontend_vi()
+{
+    //TODO: Implement debugger_frontend_vi
+}
+void switch_button_to_run()
+{
+    //TODO: Implement switch_button_to_run
+}
+
+void debugger_show_disassembler( )
+{
+    QMetaObject::invokeMethod(debuggerWidget, "show", Qt::QueuedConnection);
+    debuggerWidget->setFocus();
+}
+
+void debugger_show_registers( )
+{
+    QMetaObject::invokeMethod(registerWidget, "show", Qt::QueuedConnection);
+    registerWidget->setFocus();
+}
+
+void debugger_show_breakpoints( )
+{
+    QMetaObject::invokeMethod(breakpointsWidget, "show", Qt::QueuedConnection);
+    breakpointsWidget->setFocus();
+}
+
+void debugger_show_memedit( )
+{
+    QMetaObject::invokeMethod(memeditWidget, "show", Qt::QueuedConnection);
+    memeditWidget->setFocus();
+    QMetaObject::invokeMethod(memeditWidget, "update_memedit",
+                               Qt::QueuedConnection);
+}
+
+void debugger_update_desasm()
+{
+    if (debuggerWidget->isVisible()) {
+        QMetaObject::invokeMethod(debuggerWidget, "update_desasm",
+                                   Qt::QueuedConnection,
+                                   Q_ARG(unsigned int, _pc));
+    }
+}
+
+void debugger_close()
+{
+    debuggerWidget->setVisible(false);
+    registerWidget->setVisible(false);
+    breakpointsWidget->setVisible(false);
+    memeditWidget->setVisible(false);
+}
+#endif
 
 } // extern "C"
 } // namespace core
