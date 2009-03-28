@@ -124,6 +124,7 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
         void emulationStart();
         void emulationPauseContinue();
         void emulationStop();
+        void showCheatDialog();
         void saveStateSave();
         void saveStateSaveAs();
         void saveStateProject64SaveAs();

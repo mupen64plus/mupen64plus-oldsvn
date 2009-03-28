@@ -929,6 +929,7 @@ static int emulationThread( void *_arg )
         osd_exit();
     }
 
+    cheat_unload_current_rom();
     romClosed_RSP();
     romClosed_input();
     romClosed_audio();
@@ -1554,7 +1555,13 @@ int main(int argc, char *argv[])
 
     // cleanup and exit
     config_write();
-    cheat_write_config();
+
+/**  Disabling as it seems to be causing some problems
+ * Maybe some of the "objects are already deleted?
+ * Is it required? Cheats should be saved when clicking OK in
+ * The cheats dialog.
+**/
+//    cheat_write_config();
     cheat_delete_all();
 #ifndef NO_GUI
     g_romcache.rcstask = RCS_SHUTDOWN;

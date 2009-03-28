@@ -69,6 +69,7 @@ $INSTALL -d -v "${SHAREDIR}"
 $INSTALL -d -v "${SHAREDIR}/config"
 $INSTALL -m 0644 config/* "${SHAREDIR}/config"
 $INSTALL -m 0644 mupen64plus.ini "${SHAREDIR}/"
+$INSTALL -m 0644 mupen64plus.cht "${SHAREDIR}/"
 $INSTALL -d -v "${SHAREDIR}/doc"
 $INSTALL -m 0644 doc/* "${SHAREDIR}/doc"
 $INSTALL -d -v "${SHAREDIR}/fonts"
@@ -103,4 +104,3 @@ then
 fi
 
 printf "Done.\n"
-

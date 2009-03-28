@@ -28,10 +28,6 @@
 extern "C" {
 #endif
 
-/** string utilities **/
-char *trim(char *str);
-char *strnstrip(char* string, int size);
-char *event_to_str(const SDL_Event *event);
 int event_active(const char *event_str);
 int key_pressed(SDLKey k);
 
@@ -78,6 +74,12 @@ void playersstring(unsigned char players, char *string);
 // cycles through each listnode in list setting curr_node to current node.
 #define list_foreach(list, curr_node) \
     for((curr_node) = (list); (curr_node) != NULL; (curr_node) = (curr_node)->next)
+
+/** string utilities **/
+char *trim(char *str);
+char *strnstrip(char* string, int size);
+char *event_to_str(const SDL_Event *event);
+list_t tokenize_string(const char *string, const char* delim);
 
 #ifdef __cplusplus
 }

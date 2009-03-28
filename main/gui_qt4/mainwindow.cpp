@@ -25,6 +25,7 @@
 #include "globals.h"
 #include "rommodel.h"
 #include "settingsdialog.h"
+#include "cheatdialog.h"
 
 #include <SDL_video.h>
 
@@ -348,6 +349,12 @@ void MainWindow::emulationStop()
    }
 }
 
+void MainWindow::showCheatDialog()
+{
+    CheatDialog* d = new CheatDialog(this);
+    d->show();
+}
+
 void MainWindow::fullScreenToggle()
 {
     if (core::g_EmulatorRunning) {
@@ -518,6 +525,11 @@ void MainWindow::setupActions()
             this, SLOT(emulationPauseContinue()));
     actionStop->setIcon(icon("media-playback-stop.png"));
     connect(actionStop, SIGNAL(triggered()), this, SLOT(emulationStop()));
+
+    actionCheats->setIcon(icon("tools-wizard.png"));
+    connect(actionCheats, SIGNAL(triggered()),
+             this, SLOT(showCheatDialog()));
+
     actionSaveState->setIcon(icon("document-save.png"));
     connect(actionSaveState, SIGNAL(triggered()),
             this, SLOT(saveStateSave()));

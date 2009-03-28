@@ -121,6 +121,7 @@ OBJ_CORE = \
 	main/md5.o \
 	main/plugin.o \
 	main/rom.o \
+	main/ini_reader.o \
 	main/savestates.o \
 	main/zip/ioapi.o \
 	main/zip/zip.o \

@@ -735,5 +735,27 @@ char* dirfrompath(const char* string)
     return buffer;
 }
 
+list_t tokenize_string(const char *string, const char* delim)
+{
+    list_t list = NULL;
+    char *token = NULL, *wrk = NULL;
+    char buf[4096]; // some of those strings are really long
+    strncpy(buf, string, 4096);
 
+    token = strtok(buf, delim);
+    if (token)
+    {
+        wrk = malloc(strlen(token) + 1);
+        strcpy(wrk, token);
+        list_append(&list, wrk);
+    }
+
+    while ((token = strtok(NULL, delim)))
+    {
+        wrk = malloc(strlen(token) + 1);
+        strcpy(wrk, token);
+        list_append(&list, wrk);
+    }
+    return list;
+}
 

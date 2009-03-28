@@ -54,6 +54,8 @@
     <addaction name="actionLoadState" />
     <addaction name="actionLoadStateFrom" />
     <addaction name="separator" />
+    <addaction name="actionCheats" />
+    <addaction name="separator" />
     <addaction name="actionCurrentSaveStateSlot" />
    </widget>
    <widget class="QMenu" name="menu_Settings" >
@@ -256,6 +258,11 @@
   <action name="actionSaveProject64StateAs" >
    <property name="text" >
     <string>Save P&amp;roject64 State as...</string>
+   </property>
+  </action>
+  <action name="actionCheats" >
+   <property name="text" >
+    <string>Ch&amp;eats</string>
    </property>
   </action>
  </widget>
