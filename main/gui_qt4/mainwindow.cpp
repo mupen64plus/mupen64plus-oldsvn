@@ -19,6 +19,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <SDL.h>
 #include <QtGui>
 
 #include "mainwidget.h"
@@ -26,8 +27,6 @@
 #include "rommodel.h"
 #include "settingsdialog.h"
 #include "cheatdialog.h"
-
-#include <SDL_video.h>
 
 namespace core {
     extern "C" {
