@@ -23,6 +23,7 @@
 import sys
 import subprocess
 import os
+import commands
 from optparse import OptionParser, OptionGroup, OptionValueError, SUPPRESS_HELP
 
 defaultFile = 'configure.gen'
@@ -117,7 +118,8 @@ def checkDeps(config, options):
     ftglTest = ShellTest(['pkg-config','ftgl'],'Ftgl not installed')
     ftglTest.addDep(pkgTest)
     
-    sdlttfTest = CompileTest('SDL/SDL_ttf.h','-lSDL_ttf','SDL-TTF development libraries not installed')
+    sdl_flags = commands.getoutput("sdl-config --cflags --libs").split()
+    sdlttfTest = CompileTest('SDL/SDL_ttf.h',sdl_flags+['-lSDL_ttf'],'SDL-TTF development libraries not installed')
     
     resampTest = ShellTest(['pkg-config','samplerate'],'libsamplerate not installed')
     resampTest.addDep(pkgTest)
@@ -429,11 +431,18 @@ class CompileTest(ShellTest):
             try:
                 try:
                     srcfile = open('./tmp.c','w')
-                    srcfile.write(''.join(['#include<',self.__header,'>\nint main(void){}\n']))
+                    main_func = "int main(int argc, char*argv[])"
+                    srcfile.write(''.join(['#include<',self.__header,'>\n',main_func,'{}\n']))
                 finally:
                     srcfile.close()
                 try:
-                    self.value=(subprocess.call(['gcc','tmp.c',self.__library,'-otmp.out'],
+                    # allow __library to be either a string or a list
+                    if isinstance(self.__library, list):
+                        call = ['gcc','tmp.c']+self.__library+['-o','tmp.out']
+                    else:
+                        call = ['gcc','tmp.c', self.__library, '-o','tmp.out']
+                        
+                    self.value=(subprocess.call(call,
                                         stdout=subprocess.PIPE,stderr=subprocess.PIPE) == 0)
                 except OSError:
                     assert("Could not execute gcc"==0)
