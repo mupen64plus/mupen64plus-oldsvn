@@ -27,6 +27,7 @@
 #include "rommodel.h"
 #include "settingsdialog.h"
 #include "cheatdialog.h"
+#include "aboutdialog.h"
 
 #ifdef DBG
 #include "debugger/debuggerwidget.h"
@@ -474,11 +475,8 @@ void MainWindow::itemCountUpdate(int count)
 
 void MainWindow::aboutDialogShow()
 {
-    QMessageBox::about(this,
-        tr("About Mupen64Plus"),
-        tr("<html><b>Mupen64Plus N64 Emulator</b><br/>\
-            <a href=\"http://code.google.com/p/mupen64plus/\">Home...</a>\
-            </html>"));
+    AboutDialog d(this);
+    d.exec();
 }
 
 void MainWindow::customEvent(QEvent* event)

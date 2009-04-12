@@ -43,6 +43,7 @@ HEADERS += globals.h \
            cheatdialog.h \
            cheatromdialog.h \
            cheatcheatdialog.h \
+           aboutdialog.h \
            ../config.h \
            ../main.h \
            ../version.h \
@@ -68,7 +69,8 @@ FORMS += mainwidget.ui \
          settingsdialog.ui \
          cheatdialog.ui \
          cheatcheatdialog.ui \
-         cheatromdialog.ui
+         cheatromdialog.ui \
+         aboutdialog.ui
 SOURCES += globals.cpp \
            main.cpp \
            mainwidget.cpp \
@@ -82,5 +84,6 @@ SOURCES += globals.cpp \
            cheatdialog.cpp \
            cheatcheatdialog.cpp \
            cheatromdialog.cpp \
-           translate.cpp
+           translate.cpp \
+           aboutdialog.cpp
 

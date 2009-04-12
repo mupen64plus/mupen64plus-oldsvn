@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,310 +10,309 @@
     <height>600</height>
    </rect>
   </property>
-  <property name="contextMenuPolicy" >
+  <property name="contextMenuPolicy">
    <enum>Qt::NoContextMenu</enum>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Mupen64Plus</string>
   </property>
-  <widget class="QWidget" name="centralwidget" >
-   <layout class="QVBoxLayout" name="verticalLayout" >
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="MainWidget" native="1" name="mainWidget" />
+     <widget class="MainWidget" name="mainWidget" native="true"/>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar" >
-   <property name="geometry" >
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_File" >
-    <property name="title" >
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionOpenRom" />
-    <addaction name="actionCloseRom" />
-    <addaction name="separator" />
-    <addaction name="actionQuit" />
+    <addaction name="actionOpenRom"/>
+    <addaction name="actionCloseRom"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menu_Emulation" >
-    <property name="title" >
+   <widget class="QMenu" name="menu_Emulation">
+    <property name="title">
      <string>&amp;Emulation</string>
     </property>
-    <addaction name="actionStart" />
-    <addaction name="actionPause" />
-    <addaction name="actionStop" />
-    <addaction name="separator" />
-    <addaction name="actionSaveState" />
-    <addaction name="actionSaveStateAs" />
-    <addaction name="actionSaveProject64StateAs" />
-    <addaction name="actionLoadState" />
-    <addaction name="actionLoadStateFrom" />
-    <addaction name="separator" />
-    <addaction name="actionCheats" />
-    <addaction name="separator" />
-    <addaction name="actionCurrentSaveStateSlot" />
+    <addaction name="actionStart"/>
+    <addaction name="actionPause"/>
+    <addaction name="actionStop"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveState"/>
+    <addaction name="actionSaveStateAs"/>
+    <addaction name="actionSaveProject64StateAs"/>
+    <addaction name="actionLoadState"/>
+    <addaction name="actionLoadStateFrom"/>
+    <addaction name="separator"/>
+    <addaction name="actionCheats"/>
+    <addaction name="separator"/>
+    <addaction name="actionCurrentSaveStateSlot"/>
    </widget>
-   <widget class="QMenu" name="menu_Settings" >
-    <property name="title" >
+   <widget class="QMenu" name="menu_Settings">
+    <property name="title">
      <string>&amp;Settings</string>
     </property>
-    <addaction name="actionShowToolbar" />
-    <addaction name="actionShowStatusbar" />
-    <addaction name="actionShowFilter" />
-    <addaction name="separator" />
-    <addaction name="actionFullScreen" />
-    <addaction name="separator" />
-    <addaction name="actionConfigureMupen64Plus" />
+    <addaction name="actionShowToolbar"/>
+    <addaction name="actionShowStatusbar"/>
+    <addaction name="actionShowFilter"/>
+    <addaction name="separator"/>
+    <addaction name="actionFullScreen"/>
+    <addaction name="separator"/>
+    <addaction name="actionConfigureMupen64Plus"/>
    </widget>
-   <widget class="QMenu" name="menu_Help" >
-    <property name="title" >
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionAbout" />
-    <addaction name="actionAboutQt" />
+    <addaction name="actionAbout"/>
    </widget>
-   <widget class="QMenu" name="menu_Debug" >
-    <property name="title" >
+   <widget class="QMenu" name="menu_Debug">
+    <property name="title">
      <string>&amp;Debug</string>
     </property>
-    <addaction name="actionEnableDebugger" />
-    <addaction name="actionDisassembler" />
-    <addaction name="actionRegisters" />
-    <addaction name="actionBreakpoints" />
-    <addaction name="actionMemory" />
+    <addaction name="actionEnableDebugger"/>
+    <addaction name="actionDisassembler"/>
+    <addaction name="actionRegisters"/>
+    <addaction name="actionBreakpoints"/>
+    <addaction name="actionMemory"/>
    </widget>
-   <addaction name="menu_File" />
-   <addaction name="menu_Emulation" />
-   <addaction name="menu_Debug" />
-   <addaction name="menu_Settings" />
-   <addaction name="menu_Help" />
+   <addaction name="menu_File"/>
+   <addaction name="menu_Emulation"/>
+   <addaction name="menu_Debug"/>
+   <addaction name="menu_Settings"/>
+   <addaction name="menu_Help"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
-  <widget class="QToolBar" name="toolBar" >
-   <property name="windowTitle" >
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
     <string>Toolbar</string>
    </property>
-   <property name="iconSize" >
+   <property name="iconSize">
     <size>
      <width>22</width>
      <height>22</height>
     </size>
    </property>
-   <property name="toolButtonStyle" >
+   <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
-   <attribute name="toolBarArea" >
+   <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
-   <attribute name="toolBarBreak" >
+   <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpenRom" />
-   <addaction name="separator" />
-   <addaction name="actionStart" />
-   <addaction name="actionPause" />
-   <addaction name="actionStop" />
-   <addaction name="separator" />
-   <addaction name="actionLoadState" />
-   <addaction name="actionSaveState" />
-   <addaction name="actionCurrentSaveStateSlot" />
-   <addaction name="separator" />
-   <addaction name="actionFullScreen" />
+   <addaction name="actionOpenRom"/>
+   <addaction name="separator"/>
+   <addaction name="actionStart"/>
+   <addaction name="actionPause"/>
+   <addaction name="actionStop"/>
+   <addaction name="separator"/>
+   <addaction name="actionLoadState"/>
+   <addaction name="actionSaveState"/>
+   <addaction name="actionCurrentSaveStateSlot"/>
+   <addaction name="separator"/>
+   <addaction name="actionFullScreen"/>
   </widget>
-  <action name="actionOpenRom" >
-   <property name="text" >
+  <action name="actionOpenRom">
+   <property name="text">
     <string>&amp;Open Rom</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionCloseRom" >
-   <property name="text" >
+  <action name="actionCloseRom">
+   <property name="text">
     <string>&amp;Close Rom</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+W</string>
    </property>
   </action>
-  <action name="actionQuit" >
-   <property name="text" >
+  <action name="actionQuit">
+   <property name="text">
     <string>&amp;Quit</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionStart" >
-   <property name="checkable" >
+  <action name="actionStart">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Start</string>
    </property>
   </action>
-  <action name="actionPause" >
-   <property name="checkable" >
+  <action name="actionPause">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Pause</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Space</string>
    </property>
   </action>
-  <action name="actionStop" >
-   <property name="checkable" >
+  <action name="actionStop">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>S&amp;top</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Esc</string>
    </property>
   </action>
-  <action name="actionSaveState" >
-   <property name="text" >
+  <action name="actionSaveState">
+   <property name="text">
     <string>Sa&amp;ve State</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+F7</string>
    </property>
   </action>
-  <action name="actionSaveStateAs" >
-   <property name="text" >
+  <action name="actionSaveStateAs">
+   <property name="text">
     <string>Save State &amp;as...</string>
    </property>
   </action>
-  <action name="actionLoadState" >
-   <property name="text" >
+  <action name="actionLoadState">
+   <property name="text">
     <string>&amp;Load State</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+F5</string>
    </property>
   </action>
-  <action name="actionLoadStateFrom" >
-   <property name="text" >
+  <action name="actionLoadStateFrom">
+   <property name="text">
     <string>L&amp;oad State from...</string>
    </property>
   </action>
-  <action name="actionCurrentSaveStateSlot" >
-   <property name="text" >
+  <action name="actionCurrentSaveStateSlot">
+   <property name="text">
     <string>&amp;Current Save State Slot...</string>
    </property>
   </action>
-  <action name="actionFullScreen" >
-   <property name="text" >
+  <action name="actionFullScreen">
+   <property name="text">
     <string>&amp;Full Screen</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Alt+Return</string>
    </property>
   </action>
-  <action name="actionConfigureMupen64Plus" >
-   <property name="text" >
+  <action name="actionConfigureMupen64Plus">
+   <property name="text">
     <string>&amp;Configure Mupen64Plus</string>
    </property>
   </action>
-  <action name="actionAbout" >
-   <property name="text" >
+  <action name="actionAbout">
+   <property name="text">
     <string>&amp;About</string>
    </property>
   </action>
-  <action name="actionAboutQt" >
-   <property name="text" >
+  <action name="actionAboutQt">
+   <property name="text">
     <string>About &amp;Qt</string>
    </property>
   </action>
-  <action name="actionShowToolbar" >
-   <property name="checkable" >
+  <action name="actionShowToolbar">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked" >
+   <property name="checked">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Show &amp;Toolbar</string>
    </property>
   </action>
-  <action name="actionShowStatusbar" >
-   <property name="checkable" >
+  <action name="actionShowStatusbar">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked" >
+   <property name="checked">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Show &amp;Statusbar</string>
    </property>
   </action>
-  <action name="actionShowFilter" >
-   <property name="checkable" >
+  <action name="actionShowFilter">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked" >
+   <property name="checked">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Show F&amp;ilter</string>
    </property>
   </action>
-  <action name="actionSaveProject64StateAs" >
-   <property name="text" >
+  <action name="actionSaveProject64StateAs">
+   <property name="text">
     <string>Save P&amp;roject64 State as...</string>
    </property>
   </action>
-  <action name="actionCheats" >
-   <property name="text" >
+  <action name="actionCheats">
+   <property name="text">
     <string>Ch&amp;eats</string>
    </property>
   </action>
-  <action name="actionEnableDebugger" >
-   <property name="checkable" >
+  <action name="actionEnableDebugger">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>E&amp;nable</string>
    </property>
   </action>
-  <action name="actionDisassembler" >
-   <property name="enabled" >
+  <action name="actionDisassembler">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Disassembler</string>
    </property>
   </action>
-  <action name="actionRegisters" >
-   <property name="enabled" >
+  <action name="actionRegisters">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Registers</string>
    </property>
   </action>
-  <action name="actionBreakpoints" >
-   <property name="enabled" >
+  <action name="actionBreakpoints">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Breakpoints</string>
    </property>
   </action>
-  <action name="actionMemory" >
-   <property name="enabled" >
+  <action name="actionMemory">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Memory</string>
    </property>
   </action>
@@ -333,11 +333,11 @@
    <receiver>toolBar</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>399</x>
      <y>41</y>
     </hint>
@@ -349,11 +349,11 @@
    <receiver>statusbar</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>399</x>
      <y>587</y>
     </hint>
