@@ -1095,8 +1095,12 @@ Plugin Dir:  %s
     </message>
     <message>
         <location filename="../main/gui_qt4/main.cpp" line="103"/>
+        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glibmainloop integration. Plugins that use Gtk+&lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glibmain loop support. Most distributions provide thisby default.&lt;/p&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib                          mainloop integration. Plugins that use Gtk+                          &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;                         &lt;p&gt;To fix this, install a Qt version with glib                          main loop support. Most distributions provide this                          by default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;p&gt;Ihre Qt-Bibliothek wurde ohne Glib mainloop-Unterstützung kompiliert. Plugins, die Gtk+ benutzen,&lt;b&gt;werden&lt;/b&gt;den Emulator zum Absturz bringen!&lt;/p&gt;&lt;p&gt;Um dies zu beheben, installieren Sie eine Qt-Version mit Glib Mainloop-Unterstützung. Die meisten Distributionen unterstützen dies standardmäßig.&lt;/p&gt;&lt;/html&gt;</translation>
+        <translation type="obsolete">&lt;html&gt;&lt;p&gt;Ihre Qt-Bibliothek wurde ohne Glib mainloop-Unterstützung kompiliert. Plugins, die Gtk+ benutzen,&lt;b&gt;werden&lt;/b&gt;den Emulator zum Absturz bringen!&lt;/p&gt;&lt;p&gt;Um dies zu beheben, installieren Sie eine Qt-Version mit Glib Mainloop-Unterstützung. Die meisten Distributionen unterstützen dies standardmäßig.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
