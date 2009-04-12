@@ -2,7 +2,7 @@ Mupen64Plus LICENSES
 --------------------
 
 Mupen64Plus is licensed under the GNU General Public License version 2.  Please see the
-included doc/gpl-license file for the terms and conditions of the GNU General Public License. 
+included doc/gpl-license file for the terms and conditions of the GNU General Public License.
 The authors of Mupen64Plus are:
   * Richard Goedeken (Richard42)
   * John Chadwick (NMN)
@@ -39,6 +39,12 @@ The Rice Video plugin is GPL-licensed and was originally written by:
 
 Mupen64Plus includes a GPL-license demo rom written by:
   *  Marshallh
+
+The Wiinput64 wiimote input plugin is GPL-licensed and was originally written by:
+  * Funto
+
+The libwiimote library used for Wiinput64 is GPL-licensed and was originally written
+by Joel Andersson (http://libwiimote.sourceforge.net)
 
 The OGLFT library used for the On-Screen Display is based on GPL/LGPL-licensed code Copyright 2002 lignum Computing. Please see the included doc/lgpl-license file for the terms and conditions of the GNU Lesser General Public License. More information about this library is available at the following websites:
   - http://oglft.sourceforge.net/index.html

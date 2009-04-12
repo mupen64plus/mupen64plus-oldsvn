@@ -1,0 +1,4 @@
+# robot/Outils/libwiimote/SConstruct
+
+SConscript('src/SConstruct')
+SConscript('test/SConstruct')
