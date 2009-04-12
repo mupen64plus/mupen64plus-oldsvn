@@ -26,16 +26,16 @@
 
 // We need the pointers to remain valid after the tr call returns, so cache the
 // translations
-static QMap<QString, QString> translations;
+static QMap<QString, QByteArray> translations;
 
 extern "C" {
     void tr_init(void) {}
     void tr_delete_languages(void) {}
     list_t tr_language_list(void) { return 0; }
     int tr_set_language(const char *name) { Q_UNUSED(name); return 0; }
-    const char *tr(const char *text) {
+    const char *tr(const char *str) {
         // update the translation every time, it might have changed
-        translations[text] = QCoreApplication::translate("", text);
-        return qPrintable(translations[text]);
+        translations[str] = QCoreApplication::translate("", str).toLocal8Bit();
+        return translations[str].constData();
     }
 }
