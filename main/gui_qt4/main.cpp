@@ -100,12 +100,12 @@ void gui_init(int *argc, char ***argv)
     } else {
         QMessageBox::warning(0,
             QObject::tr("No Glib Integration"),
-            QObject::tr("<html><p>Your Qt library was compiled without glib \
-                         mainloop integration. Plugins that use Gtk+ \
-                         <b>will</b> crash the emulator!</p>\
-                         <p>To fix this, install a Qt version with glib \
-                         main loop support. Most distributions provide this \
-                         by default.</p></html>"));
+            QObject::tr("<html><p>Your Qt library was compiled without glib"
+                        "mainloop integration. Plugins that use Gtk+"
+                        "<b>will</b> crash the emulator!</p>"
+                        "<p>To fix this, install a Qt version with glib"
+                        "main loop support. Most distributions provide this"
+                        "by default.</p></html>"));
     }
 #endif
 
