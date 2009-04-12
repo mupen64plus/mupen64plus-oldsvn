@@ -17,36 +17,33 @@
 include ../pre.mk
 
 # local CFLAGS and PLUGIN_LDFLAGS
-#CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -D_ENABLE_TILT -D_ENABLE_FORCE -Ilibcwiimote/src
-#PLUGIN_LDFLAGS += -Llibcwiimote -lcwiimote -lbluetooth -lm -lpthread
+CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -D_ENABLE_TILT -D_ENABLE_FORCE -Ilibcwiimote/src -Wall
+PLUGIN_LDFLAGS += -Llibcwiimote -lcwiimote -lbluetooth -lm -lpthread
 
-# GTK version (TODO : use the normal system...)
-CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -D_ENABLE_TILT -D_ENABLE_FORCE -Ilibcwiimote/src `pkg-config gtk+-2.0 --cflags`
-PLUGIN_LDFLAGS += -Llibcwiimote -lcwiimote -lbluetooth -lm -lpthread `pkg-config gtk+-2.0 --libs`
-
+# GTK version (TODO : use the variables given by ../pre.mk and make the "if" work ^^)
 # if asked on the command line, append the GTK flags
 #ifeq ($GUI,GTK2)
-#	CFLAGS += $GTK_FLAGS -DUSE_GTK
-#	PLUGIN_LDFLAGS += $GTK_LIBS
+CFLAGS += `pkg-config gtk+-2.0 --cflags` -DUSE_GTK
+PLUGIN_LDFLAGS += `pkg-config gtk+-2.0 --libs`
 #endif
 
 # list of object files to generate
-OBJECTS = wiinput64.o
+OBJECTS = wiinput64.o gui_gtk2.o gui_none.o
 
 # build targets
-all: wiinput64.so
+all: ../plugins/wiinput64.so
 
 clean:
 	rm -f *.o *.so
 	@(cd libcwiimote && $(MAKE) clean)
 
 # build rules
-wiinput64.so: $(OBJECTS) libcwiimote/libcwiimote.a
+../plugins/wiinput64.so: $(OBJECTS) libcwiimote/libcwiimote.a
 	$(CXX) $(OBJECTS) $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) -o $@
 	$(STRIP) $@
 
-wiinput64.o: wiinput64.c
-	$(CXX) $(CFLAGS) -DMAINDEF -c -o $@ $<
+%.o: %.c
+	$(CXX) $(CFLAGS) -c -o $@ $<
 
 libcwiimote/libcwiimote.a:
 	@(cd libcwiimote && $(MAKE))

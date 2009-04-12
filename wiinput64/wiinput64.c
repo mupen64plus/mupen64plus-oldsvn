@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - input.c                                                 *
+ *   Mupen64plus - Wiinput64 plugin : wiinput64.c                          *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
- *   Copyright (C) 2008 Scott Gorman (okaygo)                              *
+ *   Copyright (C) 2009 Lionel Fuentes (Funto)                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,26 +20,24 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
 #include <string.h>
 #include "wiinput64.h"
 #include "Input_1.1.h"
+#include "gui.h"
 #include <wiimote_api.h>
 #include <pthread.h>
-
-#ifdef USE_GTK
-#include <gtk/gtk.h>
-#endif
 
 #define MAX_NUNCHUK_JOY_Y 223.0
 #define MIN_NUNCHUK_JOY_Y 32.0
 #define MAX_NUNCHUK_JOY_X 235.0
 #define MIN_NUNCHUK_JOY_X 26.0
 
-char pluginName[] = "Wiinput64 plugin by Funto";
-char configdir[PATH_MAX] = {0};
-static wiimote_t wiimote;
+char* config_dir = NULL;	// Configuration files directory
+bluetooth_addr wiimote_addresses[4];	// Bluetooth addresses of the wiimotes
+static wiimote_t wiimotes[4];	// The wiimotes
 
 // Variables for the wiimote_update() thread
 static pthread_t thread_update;
@@ -64,8 +62,9 @@ static void* Wiinput64UpdateThread(void* data)
 		if(should_stop_update)
 			break;
 
-		wiimote_update(&wiimote);
+		wiimote_update(&wiimotes[0]);
 	}
+	return NULL;
 }
 
 #ifndef __LINUX__
@@ -92,7 +91,11 @@ void _init( void )
 *******************************************************************/
 EXPORT void CALL CloseDLL (void)
 {
-	//printf("DEBUG : CloseDLL\n");
+	if(config_dir != NULL)
+	{
+		free(config_dir);
+		config_dir = NULL;
+	}
 }
 
 /******************************************************************
@@ -125,31 +128,7 @@ EXPORT void CALL ControllerCommand ( int Control, BYTE * Command)
 *******************************************************************/
 EXPORT void CALL DllAbout ( HWND hParent )
 {
-	//printf("DEBUG : DllAbout\n");
-
-	char s[] = "Wiinput64 plugin for Mupen64 emulator\nMade by Funto\n";
-#ifdef USE_GTK
-	GtkWidget *dialog, *label, *okay_button;
-
-	// Create the widgets
-	dialog = gtk_dialog_new();
-	label = gtk_label_new (s);
-	okay_button = gtk_button_new_with_label("OK");
-
-	// Ensure that the dialog box is destroyed when the user clicks ok.
-	gtk_signal_connect_object	(GTK_OBJECT (okay_button), "clicked",
-								GTK_SIGNAL_FUNC (gtk_widget_destroy),
-								GTK_OBJECT (dialog));
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area), okay_button);
-
-	// Add the label, and show everything we've added to the dialog.
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
-			  label);
-	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
-	gtk_widget_show_all (dialog);
-#else
-	puts(s);
-#endif
+	AboutDialog();
 }
 
 /******************************************************************
@@ -161,7 +140,7 @@ EXPORT void CALL DllAbout ( HWND hParent )
 *******************************************************************/
 EXPORT void CALL DllConfig ( HWND hParent )
 {
-	//printf("DEBUG : DllConfig\n");
+	ConfigDialog();
 }
 
 /******************************************************************
@@ -188,7 +167,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo )
 {
 	PluginInfo->Version = 0x0101;
 	PluginInfo->Type = PLUGIN_TYPE_CONTROLLER;
-	strcpy( PluginInfo->Name, pluginName );
+	strcpy( PluginInfo->Name, PLUGIN_NAME );	// Name to be displayed in the Configure dialog
 	PluginInfo->Reserved1 = FALSE;
 	PluginInfo->Reserved2 = FALSE;
 
@@ -214,21 +193,21 @@ EXPORT void CALL GetKeys(int Control, BUTTONS * Keys )
 		Keys->L_DPAD = 0;
 		Keys->D_DPAD = 0;
 		Keys->U_DPAD = 0;
-		Keys->START_BUTTON = wiimote.keys.home;
-		Keys->Z_TRIG = wiimote.ext.nunchuk.keys.z;
-		Keys->B_BUTTON = wiimote.keys.b;
-		Keys->A_BUTTON = wiimote.keys.a;
+		Keys->START_BUTTON = wiimotes[0].keys.home;
+		Keys->Z_TRIG = wiimotes[0].ext.nunchuk.keys.z;
+		Keys->B_BUTTON = wiimotes[0].keys.b;
+		Keys->A_BUTTON = wiimotes[0].keys.a;
 
-		Keys->R_CBUTTON = wiimote.keys.right;
-		Keys->L_CBUTTON = wiimote.keys.left;
-		Keys->D_CBUTTON = wiimote.keys.down;
-		Keys->U_CBUTTON = wiimote.keys.up;
-		Keys->R_TRIG = wiimote.keys.plus;
-		Keys->L_TRIG = wiimote.keys.minus;
+		Keys->R_CBUTTON = wiimotes[0].keys.right;
+		Keys->L_CBUTTON = wiimotes[0].keys.left;
+		Keys->D_CBUTTON = wiimotes[0].keys.down;
+		Keys->U_CBUTTON = wiimotes[0].keys.up;
+		Keys->R_TRIG = wiimotes[0].keys.plus;
+		Keys->L_TRIG = wiimotes[0].keys.minus;
 		Keys->Reserved1 = 0;
 		Keys->Reserved2 = 0;
 
-		NunchukToN64(wiimote.ext.nunchuk.joyx, wiimote.ext.nunchuk.joyy, &x, &y);
+		NunchukToN64(wiimotes[0].ext.nunchuk.joyx, wiimotes[0].ext.nunchuk.joyy, &x, &y);
 		Keys->Y_AXIS = x;
 		Keys->X_AXIS = y;
 	}
@@ -281,7 +260,7 @@ EXPORT void CALL RomClosed (void)
 	pthread_join(thread_update, NULL);
 
 	// We disconnect the wiimote
-	wiimote_disconnect(&wiimote);
+	wiimote_disconnect(&wiimotes[0]);
 }
 
 /******************************************************************
@@ -295,14 +274,13 @@ EXPORT void CALL RomOpen (void)
 {
 	// TODO : NOT hard-code my wiimote address ^^
 	static const char* wiimote_address = "00:1E:A9:3D:AF:9E";
-	//static const char* wiimote_address = "00:1D:BC:2A:F1:DE";
 
 	printf("Press 1+2 on the wiimote for connection...\n");
 	do
-		wiimote_connect(&wiimote, wiimote_address);
-	while(!wiimote_is_open(&wiimote));
+		wiimote_connect(&wiimotes[0], wiimote_address);
+	while(!wiimote_is_open(&wiimotes[0]));
 
-	wiimote.mode.acc = 0;	// No need for accelerometers
+	wiimotes[0].mode.acc = 0;	// No need for accelerometers
 
 	// Launch the update thread
 	should_stop_update = false;
@@ -344,5 +322,44 @@ EXPORT void CALL WM_KeyUp( WPARAM wParam, LPARAM lParam )
 *******************************************************************/
 EXPORT void CALL SetConfigDir( char *configDir )
 {
-	//printf("DEBUG : SetConfigDir\n");
+	FILE* f = NULL;
+	char* buffer = NULL;
+	size_t len = strlen(configDir);
+	int i=0;
+
+	// Memorize the configuration files directory
+	config_dir = (char*)malloc(len + 1);
+	strcpy(config_dir, configDir);
+
+	// Remove the ending '/' if there is one :
+	if(len >= 2 && config_dir[len-2] == '/')
+		config_dir[len-2] = '\0';
+
+	// Load the config file, if there is one
+	buffer = (char*)malloc(len + 50);
+	sprintf(buffer, "%s/%s", config_dir, CONFIG_FILE_NAME);
+	if((f=fopen(buffer, "r")) != NULL)
+	{
+		// Look for wiimote number i's address
+		for(i=0 ; i<4 ; i++)
+		{
+			char str_format[40] = "";
+			char str_line[40] = "";
+			sprintf(str_format, "addr%d=%%s\n", i);
+
+			fseek(f, 0, SEEK_SET);
+
+			while(!feof(f))
+			{
+				if(fgets(str_line, sizeof(str_line), f) != NULL)
+				{
+					if(sscanf(str_line, str_format, wiimote_addresses[i]) == 1)
+						break;
+				}
+			}
+		}
+		fclose(f);
+	}
+
+	free(buffer);
 }

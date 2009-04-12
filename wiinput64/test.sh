@@ -1,1 +1,1 @@
-make && ../mupen64plus --input=./wiinput64.so
+make && ../mupen64plus --configdir ../config --installdir ../

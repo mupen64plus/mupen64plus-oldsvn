@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *   Mupen64plus - input.h                                                 *
+ *   Mupen64plus - Wiinput64 plugin : gui_none.c                           *
  *   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/           *
- *   Copyright (C) 2008 Scott Gorman (okaygo)                              *
+ *   Copyright (C) 2009 Lionel Fuentes (Funto)                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,23 +19,39 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef USE_GTK
 
-#ifndef __LINUX__
-#include <windows.h>
-#else
-# include "../main/winlnxdefs.h"
-#endif
+#include "wiinput64.h"
+#include "gui.h"
 
-#define STR_VERSION "0.1"
-#define PLUGIN_NAME "Wiinput64 wiimote plugin"
-#define PLUGIN_FULL_NAME "Wiinput64 " STR_VERSION " plugin by Funto"
-#define CONFIG_FILE_NAME "wiinput64.conf"
+void ConfigDialog()
+{
+	int nb_wiimotes=0;
+	int i=0;
+	char buffer[20] = "";
 
-typedef char bluetooth_addr[18];	// address of the form : xx:xx:xx:xx:xx:xx (ending with a null character)
+	do
+	{
+		puts("[Wiinput64] : number of wiimotes (max : 4) : ");
+		scanf("%d", &nb_wiimotes);
+	}
+	while(nb_wiimotes < 0 || nb_wiimotes > 4);
 
-extern char* config_dir;	// Configuration files directory, WITHOUT the ending '/' if there is one
-extern bluetooth_addr wiimote_addresses[4];	// Bluetooth addresses of the wiimotes
+	for(i=0 ; i<nb_wiimotes ; i++)
+	{
+		printf("[Wiinput64] wiimote %d address (get it with \"lswm\" ; currently : %s) : ", i, wiimote_addresses[i]);
+		fgets(buffer, sizeof(buffer));
 
-#endif
+		// NB : fgets() may append an '\n', we get rid of it
+		strncpy(wiimote_addresses[i], buffer, sizeof(bluetooth_addr));
+	}
+}
+
+void AboutDialog()
+{
+	puts("[Wiinput64] : about : ");
+	puts(PLUGIN_FULL_NAME);
+	putchar('\n');
+}
+
+#endif // !defined USE_GTK
