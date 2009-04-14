@@ -14,31 +14,31 @@
 #***************************************************************************
 
 # include pre-make file with a bunch of definitions
+USES_GTK2 = true
 include ../pre.mk
 
 # local CFLAGS and PLUGIN_LDFLAGS
 CFLAGS += -fpic -DPIC -D__LINUX__ -DX86_ASM -D_ENABLE_TILT -D_ENABLE_FORCE -Ilibcwiimote/src -Wall
 PLUGIN_LDFLAGS += -Llibcwiimote -lcwiimote -lbluetooth -lm -lpthread
 
-# GTK version (TODO : use the variables given by ../pre.mk and make the "if" work ^^)
 # if asked on the command line, append the GTK flags
-#ifeq ($GUI,GTK2)
-CFLAGS += `pkg-config gtk+-2.0 --cflags` -DUSE_GTK
-PLUGIN_LDFLAGS += `pkg-config gtk+-2.0 --libs`
-#endif
+ifeq ($(GUI),GTK2)
+  CFLAGS += $(GTK_FLAGS) -DUSE_GTK
+  PLUGIN_LDFLAGS += $(GTK_LIBS)
+endif
 
 # list of object files to generate
 OBJECTS = wiinput64.o gui_gtk2.o gui_none.o
 
 # build targets
-all: ../plugins/wiinput64.so
+all: wiinput64.so
 
 clean:
 	rm -f *.o *.so
 	@(cd libcwiimote && $(MAKE) clean)
 
 # build rules
-../plugins/wiinput64.so: $(OBJECTS) libcwiimote/libcwiimote.a
+wiinput64.so: $(OBJECTS) libcwiimote/libcwiimote.a
 	$(CXX) $(OBJECTS) $(LDFLAGS) $(ASM_LDFLAGS) $(PLUGIN_LDFLAGS) -o $@
 	$(STRIP) $@
 

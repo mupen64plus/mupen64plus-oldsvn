@@ -250,7 +250,7 @@ OBJ_QT4_DBG_GUI = main/gui_qt4/debugger/libguidbg_qt4.a
 QT4_GUI_DEPENDENCIES = main/gui_qt4/Makefile
 QMAKE_CONFIG = CONFIG+=release
 
-PLUGINS	= 
+PLUGINS	=
 
 ifneq ($(NODUMMY), 1)
 PLUGINS += plugins/dummyaudio.$(SO_EXTENSION) \
@@ -284,6 +284,12 @@ endif
 
 ifneq ($(NOBLIGHT), 1)
 PLUGINS	+=plugins/blight_input.$(SO_EXTENSION)
+endif
+
+ifneq ($(NOWIINPUT64), 1)
+  ifeq ($(OS), LINUX)
+    PLUGINS	+=plugins/wiinput64.$(SO_EXTENSION)
+  endif
 endif
 
 ifeq ($(Z64), 1)
@@ -387,6 +393,7 @@ uninstall:
 clean-plugins:
 ifneq ($(OS), WINDOWS)
 	$(MAKE) -C blight_input clean
+	$(MAKE) -C wiinput64 clean
 	$(MAKE) -C dummy_audio clean
 	$(MAKE) -C dummy_video clean
 	$(MAKE) -C dummy_input clean
@@ -475,6 +482,12 @@ ifneq ($(OS), WINDOWS)
 	@$(CP) ./blight_input/blight_input.so ./plugins/blight_input.so
 else
 	copy blight_input\blight_input.dll plugins
+endif
+
+plugins/wiinput64.$(SO_EXTENSION): FORCE
+	$(MAKE) -C wiinput64 all
+ifneq ($(OS), WINDOWS)
+	@$(CP) ./wiinput64/wiinput64.so ./plugins/wiinput64.so
 endif
 
 plugins/dummyaudio.$(SO_EXTENSION): FORCE
