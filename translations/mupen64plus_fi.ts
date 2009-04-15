@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="de_DE">
-<defaultcodec></defaultcodec>
+<TS version="2.0" language="fi_FI">
 <context>
     <name></name>
     <message>
@@ -17,12 +16,12 @@
     <message>
         <location filename="../main/util.c" line="547"/>
         <source>USA/Japan</source>
-        <translation></translation>
+        <translation>USA/Japani</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="551"/>
         <source>Germany</source>
-        <translation>Deutschland</translation>
+        <translation>Saksa</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="555"/>
@@ -32,42 +31,42 @@
     <message>
         <location filename="../main/util.c" line="559"/>
         <source>France</source>
-        <translation>Frankreich</translation>
+        <translation>Ranska</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="563"/>
         <source>Italy</source>
-        <translation>Italien</translation>
+        <translation>Itali</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="567"/>
         <source>Japan</source>
-        <translation></translation>
+        <translation>Japani</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="571"/>
         <source>Spain</source>
-        <translation>Spanien</translation>
+        <translation>Espanja</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="575"/>
         <source>Australia (0x%2.2X)</source>
-        <translation>Australien (0x%2.2X)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="580"/>
         <source>Europe (0x%02X)</source>
-        <translation>Europa (0x%02X)</translation>
+        <translation>Eurooppa (0x%02X)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="584"/>
         <source>Unknown (0x%02X)</source>
-        <translation>Unbekannt (0x%02X)</translation>
+        <translation>Tuntematon (0x%02X)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="594"/>
         <source>Uncompressed</source>
-        <translation>Unkomprimiert</translation>
+        <translation>Pakkaamaton</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="597"/>
@@ -137,12 +136,12 @@
     <message>
         <location filename="../main/util.c" line="663"/>
         <source>Yes</source>
-        <translation>Ja</translation>
+        <translation>Kyllä</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="666"/>
         <source>No</source>
-        <translation>Nein</translation>
+        <translation>Ei</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="678"/>
@@ -172,167 +171,143 @@
     <message>
         <location filename="../main/util.c" line="693"/>
         <source>None</source>
-        <translation>Keine</translation>
+        <translatorcomment>Huono käännös...</translatorcomment>
+        <translation>Ei mikään</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="66"/>
         <source>Selected state file: %s</source>
-        <translation>Ausgewählte Spielstanddatei: %s</translation>
+        <translation>Valittu tilatiedosto: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="70"/>
         <source>Selected state slot: %d</source>
-        <translation>Ausgewähler Spielstandslot: %d</translation>
+        <translation>Valittu tila: %d</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="210"/>
         <location filename="../main/savestates.c" line="480"/>
         <source>Saved state to: %s</source>
-        <translation>Spielstand in %s gespeichert</translation>
+        <translation>Tila tallennettu tiedostoon: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="244"/>
         <source>Could not open state file: %s</source>
-        <translation>Konnte Spielstanddatei nicht laden: %s</translation>
+        <translation>Tilatiedostoa %s ei voitu avata</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="253"/>
         <source>State file: %s is not a valid Mupen64plus savestate. Checking if in Project64 format...</source>
-        <translation>Spielstanddatei %s ist keine valide Mupen64Plus datei. Checke ob es im Project64 Format ist...</translation>
+        <translation>%s ei ole käypä Mupen64Plus tilatiedosto. Tarkistetaan onko Project64 muodossa...</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="269"/>
         <source>State version (%08x) doesn&apos;t match current version (%08x).</source>
-        <translation>Spielstanddateiversion (%08x) stimmt nicht mit der gegenwärtigen (%08x) überein.</translation>
+        <translation>Tilatiedoston versio (%08x) on eri kuin nykyinen versio (%08x).</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="278"/>
         <source>State ROM MD5 does not match current ROM.</source>
-        <translation>ROM MD5 in der Spielstanddatei stimmt nicht mit dem derzeitigen ROM überein.</translation>
+        <translation>Tilatiedoston ROM MD5-arvo ei vastaa nykyistä ROM tiedostoa.</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="391"/>
         <source>Could not create PJ64 state file: %s</source>
-        <translation>Konnte Project64 Spielstanddatei nicht erstellen: %s</translation>
+        <translation>Project64 tilatiedostoa %s ei voitu avata</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="400"/>
         <source>Zip error. Could not create state file: %s</source>
-        <translation>Zip Fehler. Konnte Spielstanddatei nicht erstellen: %s</translation>
+        <translation>Zip-virhe. Tilatiedostoa %s ei voitu avata</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="531"/>
         <source>Zip error. Could not open state file: %s</source>
-        <translation>Zip Fehler. Konnte Spielstanddatei nicht öffnen: %s</translation>
+        <translation>Zip-virhe. Ei voitu avata tilatiedostoa %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="541"/>
         <source>State file: %s is not a valid Project64 savestate. Unrecognized file format.</source>
-        <translation>Spielstanddatei %s ist kein gültiger Project64 Spielstand. Unerkanntes Dateiformat.</translation>
+        <translation>%s ei ole käypä Project64 tilatiedosto. Tuntematon tiedostomuoto.</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="551"/>
         <source>State ROM header does not match current ROM.</source>
-        <translation>Spielstanddatei ROM Header stimmt nicht mit dem derzeitigen ROM überein.</translation>
-    </message>
-    <message>
-        <source>Error: state file &apos;%s&apos; doesn&apos;t exist</source>
-        <translation type="obsolete">Fehler: Spielstanddatei &apos;%s&apos; existiert nicht</translation>
-    </message>
-    <message>
-        <source>Error: Unrecognized savestate format.</source>
-        <translation type="obsolete">Fehler: Unbekanntes Spielstandformat.</translation>
-    </message>
-    <message>
-        <source>Error: Savestate version (%08x) doesn&apos;t match current version (%08x).</source>
-        <translation type="obsolete">Fehler: Spielstandversion (%08x) ist nicht mit aktueller Version (%08x) identisch.</translation>
-    </message>
-    <message>
-        <source>Load state error: Saved state ROM doesn&apos;t match current ROM.</source>
-        <translation type="obsolete">Fehler beim Laden des Spielstands: ROM des Spielstands ist nicht identisch mit aktuellem ROM.</translation>
+        <translation>Tilatiedoston ROM-otsikko ei vastaa nykyistä ROM tiedostoa.</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="347"/>
         <location filename="../main/savestates.c" line="761"/>
         <source>State loaded from: %s</source>
-        <translation>Spielstand von %s geladen</translation>
+        <translation>Tila ladattu tiedostosta %s</translation>
     </message>
     <message>
         <location filename="../main/romcache.c" line="271"/>
         <location filename="../main/romcache.c" line="289"/>
         <source>Rescanning rom cache.</source>
-        <translation>Zwischenspeicher wird neu aufgebaut.</translation>
+        <translation>Uudistetaan ROM puskuri.</translation>
     </message>
     <message>
         <location filename="../main/romcache.c" line="275"/>
         <location filename="../main/romcache.c" line="292"/>
         <source>Rom cache up to date. %d ROM%s.</source>
-        <translation>ROM-Zwischenspeicher aktuell. %d ROM%s.</translation>
+        <translation>Rom puskuri ajantasainen. %d ROM tiedostoa.</translation>
     </message>
     <message>
         <location filename="../main/romcache.c" line="536"/>
         <source>Added ROMs %d-%d.</source>
-        <translation>ROMs %d-%d hinzugefügt.</translation>
+        <translation>Lisätty ROM-tiedostot %d-%d.</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="449"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
-        <translation>Das ROM, das Sie versuchen zu laden, ist wahrscheinlich ein Bad Dump!
-Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
-Möchten Sie es trotzdem laden?</translation>
+        <translation>ROM-tiedosto jota yrität ladata on luultavasti viallinen. Tämä voi johtaa ennalta arvaamattomiin tuloksiin. Haluatko silti jatkaa?</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="454"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 </source>
-        <translation>Das ROM, das Sie versuchen zu laden, ist wahrscheinlich ein Bad Dump!
-Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
-</translation>
+        <translation>ROM-tiedosto jota yrität ladata on luultavasti viallinen. Tämä voi johtaa ennalta arvaamattomiin tuloksiin.</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="464"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
-        <translation>Das ROM, das Sie versuchen zu laden, ist wahrscheinlich ein Hack!
-Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
-Möchten Sie es trotzdem laden?</translation>
+        <translation>ROM-tiedostoa jota yrität ladata on luultavasti muokattu. Tämä voi johtaa ennalta arvaamattomiin tuloksiin. Haluatko silti jatkaa?</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="469"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 </source>
-        <translation>Das ROM, das Sie versuchen zu laden, ist wahrscheinlich ein Hack!
-Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
-</translation>
+        <translation>ROM-tiedostoa jota yrität ladata on luultavasti muokattu. Tämä voi johtaa ennalta arvaamattomiin lopputuloksiin.</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="483"/>
         <source>Emulation is running. Do you want to
 stop it and load the selected rom?</source>
-        <translation>Die Emulation läuft gerade. Möchten Sie
-sie abbrechen und das ausgewählte ROM laden?</translation>
+        <translation>Emulaatio on käynnissä. Haluatko pysäyttää sen ja ladata valittu ROM-tiedosto?</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="523"/>
         <source>Couldn&apos;t load Rom!</source>
-        <translation>Das ROM konnte nicht geladen werden!</translation>
+        <translation>ROM-tiedostoa ei voitu ladata!</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="624"/>
         <location filename="../main/rom.c" line="658"/>
         <source>Rom closed.</source>
-        <translation>ROM geschlossen.</translation>
+        <translation>ROM-tiedosto suljettu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="242"/>
         <location filename="../main/main.c" line="243"/>
         <source>Error</source>
-        <translation>Fehler</translation>
+        <translation>Virhe</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="311"/>
@@ -340,85 +315,82 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
         <location filename="../main/main.c" line="312"/>
         <location filename="../main/main.c" line="322"/>
         <source>Playback speed:</source>
-        <translation>Wiedergabegeschwindigkeit:</translation>
+        <translation>Toistonopeus:</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="351"/>
         <location filename="../main/main.c" line="352"/>
         <source>Volume Not Supported.</source>
-        <translation>Lautstärke nicht unterstützt.</translation>
+        <translation>Äänentaso ei ole tuettu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="355"/>
         <location filename="../main/main.c" line="356"/>
         <source>Volume</source>
-        <translation>Lautstärke</translation>
+        <translation>Äänentaso</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="388"/>
         <location filename="../main/main.c" line="389"/>
         <source>There is no Rom loaded.</source>
-        <translation>Es ist kein ROM geladen.</translation>
+        <translation>ROM-tiedostoa ei ole ladattu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="407"/>
         <location filename="../main/main.c" line="408"/>
         <source>No graphics plugin specified.</source>
-        <translation>Kein Grafik-Plugin ausgewählt.</translation>
+        <translation>Näyttöliitännäistä ei ole valittu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="418"/>
         <location filename="../main/main.c" line="419"/>
         <source>No audio plugin specified.</source>
-        <translation>Kein Audio-Plugin ausgewählt.</translation>
+        <translation>Ääniliitännäistä ei ole valittu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="429"/>
         <location filename="../main/main.c" line="430"/>
         <source>No input plugin specified.</source>
-        <translation>Kein Eingabe-Plugin ausgewählt.</translation>
+        <translation>Ohjainliitännäistä ei ole valittu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="440"/>
         <location filename="../main/main.c" line="441"/>
         <source>No RSP plugin specified.</source>
-        <translation>Kein RSP-Plugin ausgewählt.</translation>
+        <translation>RSP-liitännäistä ei ole valittu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="462"/>
         <location filename="../main/main.c" line="463"/>
         <source>Couldn&apos;t spawn core thread!</source>
-        <translation>Konnte Core Thread nicht erzeugen!</translation>
+        <translation>Ydinsäiettä ei voitu luoda!</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="466"/>
         <location filename="../main/main.c" line="467"/>
         <source>Emulation started (PID: %d)</source>
-        <translation>Emulation gestartet (PID: %d)</translation>
+        <translation>Emulaatio käynnissä (PID: %d)</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="479"/>
         <location filename="../main/main.c" line="480"/>
         <source>Stopping emulation.
 </source>
-        <translation>Halte Emulation an.
-</translation>
+        <translation>Pysäytetään emulaatio.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="505"/>
         <location filename="../main/main.c" line="506"/>
         <source>Emulation stopped.
 </source>
-        <translation>Emulation angehalten.
-</translation>
+        <translation>Emulaatio pysäytetty.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="522"/>
         <location filename="../main/main.c" line="523"/>
         <source>Emulation continued.
 </source>
-        <translation>Emulation fortgesetzt.
-</translation>
+        <translation>Emulaatio jatkettu.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="538"/>
@@ -427,14 +399,13 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
         <location filename="../main/main.c" line="540"/>
         <source>Paused
 </source>
-        <translation>Pausiert
-</translation>
+        <translation>Pysäytetty</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="728"/>
         <location filename="../main/main.c" line="729"/>
         <source>Fast Forward</source>
-        <translation>Vorspulen</translation>
+        <translation>Pikakelaus eteenpäin</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="963"/>
@@ -442,9 +413,7 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
         <source>The core thread recieved a SIGSEGV signal.
 This means it tried to access protected memory.
 Maybe you have set a wrong ucode for one of the plugins!</source>
-        <translation>Dieses Core Thread hat ein SIGSEGV-Signal erhalten.
-Das bedeutet, es hat versucht auf geschützten Speicher zuzugreifen.
-Vielleicht haben Sie den falschen UCode für eins der Plugins festgelegt.</translation>
+        <translation>Ydinsäie vastaanotti SIGSEGV signaalin. Tämä tarkoittaa sitä, että säie yritti käyttää suojattua muistia. Ehkä jossakin liitännäisessä on määritelty väärä ucode.</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="1498"/>
@@ -453,19 +422,21 @@ Vielleicht haben Sie den falschen UCode für eins der Plugins festgelegt.</trans
 Install Dir: %s
 Plugin Dir:  %s
 </source>
-        <translation></translation>
+        <translation>Konfiguraatiokansio: %s
+Asennuskansio: %s
+Liitännäiskansio: %s</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="1499"/>
         <location filename="../main/main.c" line="1501"/>
         <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
-        <translation></translation>
+        <translation>Konfiguraatiokansio: &quot;%s&quot; Asennuskansio: &quot;%s&quot; Liitännäiskansio: &quot;%s&quot;</translation>
     </message>
     <message>
         <location filename="../main/main.c~" line="1512"/>
         <location filename="../main/main.c" line="1514"/>
         <source>Couldn&apos;t spawn rom cache thread!</source>
-        <translation>Konnte ROM Cache Thread nicht erzeugen!</translation>
+        <translation>ROM-puskurisäiettä ei voitu luoda!</translation>
     </message>
 </context>
 <context>
@@ -473,12 +444,12 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/aboutdialog.cpp" line="37"/>
         <source>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Home Page&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum on EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Licensing: GNU GPL version 2 or later&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Startseite&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;EmuTalk.net Forum&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 Das Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Lizenz: GNU GPL Version 2 oder höher&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Kotisivu&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Keskustelupalsta EmuTalk.net-sivustolla&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 Mupen64Plus Kehittäjäryhmä&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Lisenssi: GNU GPL versio 2 tai uudempi&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/aboutdialog.ui" line="14"/>
         <source>About Mupen64Plus</source>
-        <translation>Über Mupen64Plus</translation>
+        <translation>Tietoja Mupen64Plussasta</translation>
     </message>
 </context>
 <context>
@@ -486,67 +457,67 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="67"/>
         <source>Breakpoint</source>
-        <translation>Haltepunkt</translation>
+        <translation>Pysäytyskohta</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="68"/>
         <source>Value:</source>
-        <translation>Wert:</translation>
+        <translation>Arvo:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="109"/>
         <source>Edit Breakpoint</source>
-        <translation>Haltepunkt bearbeiten</translation>
+        <translation>Muokkaa pysäytyskohtaa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="110"/>
         <source>New Value:</source>
-        <translation>Neuer Wert:</translation>
+        <translation>Uusi arvo:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="202"/>
         <source>Warning</source>
-        <translation>Warnung</translation>
+        <translation>Varoitus</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="203"/>
         <source>Cannot add any more breakpoints.</source>
-        <translation>Kann keine weiteren Haltepunkte hinzufügen.</translation>
+        <translation>Pysäytyskohtia ei voi enää lisätä.</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="13"/>
         <source>Breakpoints</source>
-        <translation>Haltepunkte</translation>
+        <translation>Pysäytyskohdat</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="63"/>
         <source>&amp;Add</source>
-        <translation>&amp;Hinzufügen</translation>
+        <translation>&amp;Lisää</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="70"/>
         <source>&amp;Remove</source>
-        <translation>&amp;Entfernen</translation>
+        <translation>&amp;Poista</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="77"/>
         <source>&amp;Enable</source>
-        <translation>&amp;Aktiviere</translation>
+        <translation>Kytke p&amp;äälle</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="84"/>
         <source>&amp;Disable</source>
-        <translation>&amp;Deaktivieren</translation>
+        <translation>&amp;Kytke pois</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="91"/>
         <source>&amp;Toggle</source>
-        <translation>&amp;Schalten</translation>
+        <translation>K&amp;ytke</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="98"/>
         <source>Ed&amp;it</source>
-        <translation>&amp;Bearbeiten</translation>
+        <translation>&amp;Muokkaa</translation>
     </message>
 </context>
 <context>
@@ -562,42 +533,42 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="13"/>
         <source>Cheat</source>
-        <translation></translation>
+        <translation>Huijauskoodi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="21"/>
         <source>Name:</source>
-        <translation></translation>
+        <translation>Nimi:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="44"/>
         <source>Disabled</source>
-        <translation>Deaktiviert</translation>
+        <translation>Pois päältä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="60"/>
         <source>Enabled (Session)</source>
-        <translation>Aktiviert (in dieser Sitzung)</translation>
+        <translation>Päällä (tässä istunnossa)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="79"/>
         <source>Enabled (Always)</source>
-        <translation>Aktiviert (immer)</translation>
+        <translation>Päällä (aina)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="109"/>
         <source>Comment:</source>
-        <translation>Bemerkung:</translation>
+        <translation>Selitys:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="123"/>
         <source>&amp;Add</source>
-        <translation>&amp;Hinzufügen</translation>
+        <translation>&amp;Lisää</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="130"/>
         <source>&amp;Remove</source>
-        <translation>&amp;Entfernen</translation>
+        <translation>&amp;Poista</translation>
     </message>
 </context>
 <context>
@@ -605,17 +576,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="61"/>
         <source>%1 - Cheats</source>
-        <translation></translation>
+        <translation>%1 - Huijauskoodit</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="100"/>
         <source>%1 (Option)</source>
-        <translation></translation>
+        <translation>%1 (Valinta)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="114"/>
         <source>Personal Cheats</source>
-        <translation>Persönliche Cheats</translation>
+        <translation>Henkilökohtaiset Huijauskoodit</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="274"/>
@@ -626,22 +597,22 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="13"/>
         <source>Cheats</source>
-        <translation></translation>
+        <translation>Huijauskoodit</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="24"/>
         <source>&amp;Delete</source>
-        <translation>&amp;Lösche</translation>
+        <translation>&amp;Poista</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="70"/>
         <source>&amp;New</source>
-        <translation>&amp;Neu</translation>
+        <translation>&amp;Uusi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="77"/>
         <source>&amp;Edit</source>
-        <translation>%Bearbeite</translation>
+        <translation>&amp;Muokkaa</translation>
     </message>
 </context>
 <context>
@@ -649,17 +620,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="13"/>
         <source>New Rom</source>
-        <translation>Neue ROM</translation>
+        <translation>Uusi ROM-tiedosto</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="40"/>
         <source>Rom CRC:</source>
-        <translation>Neue CRC:</translation>
+        <translation>ROM CRC:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="47"/>
         <source>Rom Name:</source>
-        <translation>ROM Name:</translation>
+        <translation>ROM Nimi:</translation>
     </message>
 </context>
 <context>
@@ -667,32 +638,32 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="70"/>
         <source>Mupen64Plus Debugger - %1</source>
-        <translation></translation>
+        <translation>Mupen64Plus Debuggeri - %1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Address</source>
-        <translation>Addresse</translation>
+        <translation>Osoite</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Opcode</source>
-        <translation></translation>
+        <translation>Opkoodi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Args</source>
-        <translation>Argumente</translation>
+        <translation>Argumentit</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="19"/>
         <source>Mupen64plus debugger</source>
-        <translation></translation>
+        <translation>Mupen64Plus debuggeri</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="25"/>
         <source>Disassembler</source>
-        <translation></translation>
+        <translation>Purkaja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="35"/>
@@ -707,27 +678,27 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="73"/>
         <source>&amp;Run</source>
-        <translation>&amp;Ausführen</translation>
+        <translation>&amp;Aja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="80"/>
         <source>&amp;Trace</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Jäljitä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="87"/>
         <source>&amp;Step</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Yksi askel</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="94"/>
         <source>&amp;Break</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Pysäytä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="101"/>
         <source>&amp;Go To...</source>
-        <translation>&amp;Gehe zu...</translation>
+        <translation>&amp;Mene...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="121"/>
@@ -765,7 +736,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/hexspinboxdialog.ui" line="13"/>
         <source>Goto address</source>
-        <translation>Gehe zu Addresse</translation>
+        <translation>Mene osoitteeseen</translation>
     </message>
 </context>
 <context>
@@ -773,27 +744,27 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwidget.cpp" line="201"/>
         <source>Load</source>
-        <translation>Laden</translation>
+        <translation>Lataa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.cpp" line="203"/>
         <source>Properties...</source>
-        <translation>Eigenschaften...</translation>
+        <translation>Ominaisuudet...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.cpp" line="206"/>
         <source>Refresh Rom List</source>
-        <translation>ROM-Liste neu laden</translation>
+        <translation>Päivitä ROM-lista</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.ui" line="13"/>
         <source>Form</source>
-        <translation>Maske</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.ui" line="24"/>
         <source>&amp;Filter:</source>
-        <translation>&amp;Filter:</translation>
+        <translation>&amp;Etsi:</translation>
     </message>
 </context>
 <context>
@@ -801,38 +772,30 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="285"/>
         <source>Confirm</source>
-        <translation>Bestätigen</translation>
+        <translation>Vahvista</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="302"/>
         <source>Select Rom</source>
-        <translation>ROM auswählen</translation>
+        <translation>Valitse ROM-tiedosto</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="334"/>
         <source>There is no Rom loaded. Do you want to load one?</source>
-        <translation>Es ist kein ROM geladen? Möchten Sie eins laden?</translation>
-    </message>
-    <message>
-        <source>Emulation not running!</source>
-        <translation type="obsolete">Die Emulation läuft nicht!</translation>
+        <translation>ROM-tiedostoa ei ole ladattu. Haluatko ladata?</translation>
     </message>
     <message numerus="yes">
         <location filename="../main/gui_qt4/mainwindow.cpp" line="473"/>
         <source>%n rom(s)</source>
         <translation>
-            <numerusform>%n ROM</numerusform>
-            <numerusform>%n ROMs</numerusform>
+            <numerusform>%n ROM-tiedosto</numerusform>
+            <numerusform>%n ROM-tiedostoa</numerusform>
         </translation>
-    </message>
-    <message>
-        <source>About Mupen64Plus</source>
-        <translation type="obsolete">Über Mupen64Plus</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="564"/>
         <source>Slot &amp;%1</source>
-        <translation>Slot &amp;%1</translation>
+        <translation>Tila &amp;%1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="17"/>
@@ -842,212 +805,212 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="37"/>
         <source>&amp;File</source>
-        <translation>&amp;Datei</translation>
+        <translation>&amp;Tiedosto</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="46"/>
         <source>&amp;Emulation</source>
-        <translation>&amp;Emulation</translation>
+        <translation>&amp;Emulaatio</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="64"/>
         <source>&amp;Settings</source>
-        <translation>Einstellun&amp;gen</translation>
+        <translation>&amp;Asetukset</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="76"/>
         <source>&amp;Help</source>
-        <translation>&amp;Hilfe</translation>
+        <translation>&amp;Ohje</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="82"/>
         <source>&amp;Debug</source>
-        <translation>D&amp;ebug</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="99"/>
         <source>Toolbar</source>
-        <translation>Werkzeugleiste</translation>
+        <translation>&amp;Työkalupalkki</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="130"/>
         <source>&amp;Open Rom</source>
-        <translation>ROM öff&amp;nen</translation>
+        <translation>&amp;Avaa ROM-tiedosto</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="133"/>
         <source>Ctrl+O</source>
-        <translation>Strg+O</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="138"/>
         <source>&amp;Close Rom</source>
-        <translation>ROM &amp;schließen</translation>
+        <translation>&amp;Sulje ROM-tiedosto</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="141"/>
         <source>Ctrl+W</source>
-        <translation>Strg+W</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="146"/>
         <source>&amp;Quit</source>
-        <translation>&amp;Beenden</translation>
+        <translation>&amp;Lopeta</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="149"/>
         <source>Ctrl+Q</source>
-        <translation>Strg+Q</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="157"/>
         <source>&amp;Start</source>
-        <translation>&amp;Start</translation>
+        <translation>A&amp;loita</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="165"/>
         <source>&amp;Pause</source>
-        <translation>&amp;Pause</translation>
+        <translation>&amp;Pysäytä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="168"/>
         <source>Space</source>
-        <translation></translation>
+        <translation>Välilyönti</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="176"/>
         <source>S&amp;top</source>
-        <translation>S&amp;top</translation>
+        <translation>&amp;Lopeta</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="179"/>
         <source>Esc</source>
-        <translation>Esc</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="184"/>
         <source>Sa&amp;ve State</source>
-        <translation>Spielstand spe&amp;ichern</translation>
+        <translation>&amp;Tallenna Tila</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="187"/>
         <source>Ctrl+F7</source>
-        <translation>Strg+F7</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="192"/>
         <source>Save State &amp;as...</source>
-        <translation>Spielstand speichern &amp;als....</translation>
+        <translation>&amp;Tallenna tila nimellä...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="197"/>
         <source>&amp;Load State</source>
-        <translation>Spielstand &amp;laden</translation>
+        <translation>&amp;Lataa Tila</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="200"/>
         <source>Ctrl+F5</source>
-        <translation>Strg+F5</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="205"/>
         <source>L&amp;oad State from...</source>
-        <translation>Spielstand laden a&amp;us...</translation>
+        <translation>Lataa tila t&amp;iedostosta...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="210"/>
         <source>&amp;Current Save State Slot...</source>
-        <translation>A&amp;ktueller Spielstand-Slot...</translation>
+        <translation>&amp;Nykyinen tila...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="215"/>
         <source>&amp;Full Screen</source>
-        <translation>&amp;Vollbild</translation>
+        <translation>&amp;Koko Näyttö</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="218"/>
         <source>Alt+Return</source>
-        <translation>Alt+Eingabe</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="223"/>
         <source>&amp;Configure Mupen64Plus</source>
-        <translation>Mupen64Plus konfi&amp;gurieren</translation>
+        <translation>&amp;Muuta asetuksia</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="228"/>
         <source>&amp;About</source>
-        <translation>&amp;Über</translation>
+        <translation>&amp;Tietoja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="233"/>
         <source>About &amp;Qt</source>
-        <translation>Über &amp;Qt</translation>
+        <translation>Tietoja &amp;Qt:sta</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="244"/>
         <source>Show &amp;Toolbar</source>
-        <translation>&amp;Werkzeugleiste anzeigen</translation>
+        <translation>Näytä t&amp;yökalupalkki</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="255"/>
         <source>Show &amp;Statusbar</source>
-        <translation>Statusleiste an&amp;zeigen</translation>
+        <translation>Näytä t&amp;ilapalkki</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="266"/>
         <source>Show F&amp;ilter</source>
-        <translation>&amp;Filter anzeigen</translation>
+        <translation>Näytä &amp;suodatin</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="271"/>
         <source>Save P&amp;roject64 State as...</source>
-        <translation>Speichere P&amp;roject64 Spielstand als...</translation>
+        <translation>Tallenna P&amp;roject64 tilatiedosto nimellä...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="276"/>
         <source>Ch&amp;eats</source>
-        <translation>Chea&amp;ts</translation>
+        <translation>&amp;Huijauskoodit</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="284"/>
         <source>E&amp;nable</source>
-        <translation>A&amp;ktivieren</translation>
+        <translation>Kytke p&amp;äälle</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="292"/>
         <source>&amp;Disassembler</source>
-        <translation>D&amp;isassembler</translation>
+        <translation>P&amp;urkaja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="300"/>
         <source>&amp;Registers</source>
-        <translation>&amp;Register</translation>
+        <translation>R&amp;ekisterit</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="308"/>
         <source>&amp;Breakpoints</source>
-        <translation>&amp;Haltepunkt</translation>
+        <translation>&amp;Pysäytyskohdat</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="316"/>
         <source>&amp;Memory</source>
-        <translation>&amp;Speicher</translation>
+        <translation>M&amp;uisti</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="396"/>
         <source>Save State as...</source>
-        <translation>Speichere Spielstandort als...</translation>
+        <translation>Talenna tilatiedosto nimellä...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="412"/>
         <source>Save Project64 State as...</source>
-        <translation>Speichere Projec64 Spielstandort als...</translation>
+        <translation>Tallenna Project64 tilatiedosto nimellä...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="414"/>
         <source>.zip files (*.zip); .pj files (*.pj)</source>
-        <translation>.zip Dateien (*.zip); .pj Dateien (*.pj)</translation>
+        <translation>.zip tiedostot (*.zip); .pj tiedostot (*.pj)</translation>
     </message>
 </context>
 <context>
@@ -1055,7 +1018,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="66"/>
         <source>Address</source>
-        <translation>Addresse</translation>
+        <translation>Osoite</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="84"/>
@@ -1073,17 +1036,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="13"/>
         <source>Memory</source>
-        <translation>Speicher</translation>
+        <translation>Muisti</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="29"/>
         <source>Address:</source>
-        <translation>Addresse:</translation>
+        <translation>Osoite:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="36"/>
         <source>&amp;Auto Refresh</source>
-        <translation>&amp;Auto-Refresh</translation>
+        <translation>&amp;Automaattinen päivitys</translation>
     </message>
 </context>
 <context>
@@ -1091,16 +1054,12 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/main.cpp" line="102"/>
         <source>No Glib Integration</source>
-        <translation>Keine Glib-Integration</translation>
+        <translation>Puuttuva Glib Integraatio</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/main.cpp" line="103"/>
         <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glibmainloop integration. Plugins that use Gtk+&lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glibmain loop support. Most distributions provide thisby default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;p&gt;Ihre Qt-Bibliothek wurde ohne Glib mainloop-Unterstützung kompiliert. Plugins, die Gtk+ benutzen,&lt;b&gt;werden&lt;/b&gt;den Emulator zum Absturz bringen!&lt;/p&gt;&lt;p&gt;Um dies zu beheben, installieren Sie eine Qt-Version mit Glib Mainloop-Unterstützung. Die meisten Distributionen unterstützen dies standardmäßig.&lt;/p&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib                          mainloop integration. Plugins that use Gtk+                          &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;                         &lt;p&gt;To fix this, install a Qt version with glib                          main loop support. Most distributions provide this                          by default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="obsolete">&lt;html&gt;&lt;p&gt;Ihre Qt-Bibliothek wurde ohne Glib mainloop-Unterstützung kompiliert. Plugins, die Gtk+ benutzen,&lt;b&gt;werden&lt;/b&gt;den Emulator zum Absturz bringen!&lt;/p&gt;&lt;p&gt;Um dies zu beheben, installieren Sie eine Qt-Version mit Glib Mainloop-Unterstützung. Die meisten Distributionen unterstützen dies standardmäßig.&lt;/p&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;p&gt;Qt kirjastosi on käännetty ilman tukea glib-pääsilmukalle. Liitännäiset jotka käyttävät Gtk+-kirjastoa kaatavat emulaattorin varmasti.&lt;/p&gt;&lt;p&gt;Korjataksesi tämä, asenna versio Qt kirjastoista jossa on tämä tuki. Useimmat jakelupaketit sisältävät tämän.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -1108,19 +1067,19 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="151"/>
         <source>Abort</source>
-        <translation>Beenden</translation>
+        <translation>Keskeytä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="152"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="158"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="168"/>
         <source>Retry</source>
-        <translation>Wiederholen</translation>
+        <translation>Yritä uudelleen</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="153"/>
         <source>Ignore</source>
-        <translation>Ignorieren</translation>
+        <translation>Sivuuta</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="157"/>
@@ -1128,12 +1087,12 @@ Plugin Dir:  %s
         <location filename="../main/gui_qt4/mainwindow.cpp" line="169"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="180"/>
         <source>Cancel</source>
-        <translation>Abbrechen</translation>
+        <translation>Peruuta</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="159"/>
         <source>Continue</source>
-        <translation>Weiter</translation>
+        <translation>Jatka</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="163"/>
@@ -1145,13 +1104,13 @@ Plugin Dir:  %s
         <location filename="../main/gui_qt4/mainwindow.cpp" line="173"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="178"/>
         <source>Yes</source>
-        <translation>Ja</translation>
+        <translation>Kyllä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="174"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="179"/>
         <source>No</source>
-        <translation>Nein</translation>
+        <translation>Ei</translation>
     </message>
 </context>
 <context>
@@ -1159,7 +1118,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="52"/>
         <source>Mupen64Plus Register Viewer</source>
-        <translation></translation>
+        <translation>Mupen64Plus Rekisterikatselija</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="120"/>
@@ -1174,7 +1133,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="13"/>
         <source>Form</source>
-        <translation>Maske</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="34"/>
@@ -1184,7 +1143,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="104"/>
         <source>&amp;Special</source>
-        <translation>&amp;Spezial</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="128"/>
@@ -1194,7 +1153,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="165"/>
         <source>Previous PC</source>
-        <translation>Vorheriger PC</translation>
+        <translation>Aiempi PC</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="196"/>
@@ -1204,7 +1163,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="224"/>
         <source>Interrupt Queue</source>
-        <translation>Interrupt-Warteschlange</translation>
+        <translation>Keskeytysjono</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="247"/>
@@ -1219,12 +1178,12 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="315"/>
         <source>Show as</source>
-        <translation>Zeige als</translation>
+        <translation>Tulostusmuoto</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="329"/>
         <source>&amp;Raw Hex</source>
-        <translation>&amp;Roher Hex Wert</translation>
+        <translation>&amp;Hex</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="339"/>
@@ -1287,22 +1246,22 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="13"/>
         <source>Form</source>
-        <translation>Maske</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="24"/>
         <source>Add</source>
-        <translation>Hinzufügen</translation>
+        <translation>Lisää</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="31"/>
         <source>Remove</source>
-        <translation>Entfernen</translation>
+        <translation>Poista</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="38"/>
         <source>Remove All</source>
-        <translation>Alle entfernen</translation>
+        <translation>Poista kaikki</translation>
     </message>
 </context>
 <context>
@@ -1311,92 +1270,92 @@ Plugin Dir:  %s
         <location filename="../main/gui_qt4/rominfodialog.ui" line="13"/>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="19"/>
         <source>Rom Info</source>
-        <translation>ROM-Informationen</translation>
+        <translation>ROM Tietoja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="31"/>
         <source>Good Name:</source>
-        <translation>Good Name:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="54"/>
         <source>File Name:</source>
-        <translation>Dateiname:</translation>
+        <translation>Tiedostonimi:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="77"/>
         <source>Country:</source>
-        <translation>Land:</translation>
+        <translation>Maa:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="129"/>
         <source>Status:</source>
-        <translation>Status:</translation>
+        <translation>Tila:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="152"/>
         <source>Players:</source>
-        <translation>Spieler:</translation>
+        <translation>Pelaajien määrä:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="175"/>
         <source>Rumble:</source>
-        <translation>Rumble:</translation>
+        <translation>Värinä:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="198"/>
         <source>Save Type:</source>
-        <translation>Speichertyp:</translation>
+        <translation>Tallennustyyppi:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="221"/>
         <source>Internal Name:</source>
-        <translation>Interner Name:</translation>
+        <translation>Sisäinen Nimi:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="249"/>
         <source>Size:</source>
-        <translation>Größe:</translation>
+        <translation>Koko:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="277"/>
         <source>CRC1:</source>
-        <translation>CRC1:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="305"/>
         <source>CRC2:</source>
-        <translation>CRC2:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="333"/>
         <source>MD5 Hash:</source>
-        <translation>MD5 Hash:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="361"/>
         <source>Full Path:</source>
-        <translation>Voller Pfad:</translation>
+        <translation>Koko polku:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="384"/>
         <source>Compression:</source>
-        <translation>Kompression:</translation>
+        <translation>Pakkaus:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="407"/>
         <source>Image Type:</source>
-        <translation>Abbild-Typ:</translation>
+        <translation>Tyyppi:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="430"/>
         <source>CIC Chip:</source>
-        <translation>CIC-Chip:</translation>
+        <translation>CIC Piiri:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="450"/>
         <source>User Comments</source>
-        <translation>Benutzerkommentare:</translation>
+        <translation>Käyttäjäseloste:</translation>
     </message>
 </context>
 <context>
@@ -1414,7 +1373,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="65"/>
         <source>Japan/USA</source>
-        <translation></translation>
+        <translation>Japani/USA</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="66"/>
@@ -1424,57 +1383,57 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="67"/>
         <source>Germany</source>
-        <translation>Deutschland</translation>
+        <translation>Saksa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="68"/>
         <source>France</source>
-        <translation>Frankreich</translation>
+        <translation>Ranska</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="69"/>
         <source>Italy</source>
-        <translation>Italien</translation>
+        <translation>Italia</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="70"/>
         <source>Japan</source>
-        <translation></translation>
+        <translation>Japani</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="71"/>
         <source>Spain</source>
-        <translation>Spanien</translation>
+        <translation>Espanja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="72"/>
         <source>Australia</source>
-        <translation>Australien</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="73"/>
         <source>Europe</source>
-        <translation>Europa</translation>
+        <translation>Eurooppa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="74"/>
         <source>Unknown</source>
-        <translation>Unbekannt</translation>
+        <translation>Tuntematon</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="224"/>
         <source>%0 Mbit</source>
-        <translation>%0 Mbit</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="251"/>
         <source>Internal error</source>
-        <translation>Interner Fehler</translation>
+        <translation>Sisäinen virhe</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="320"/>
         <source>Country</source>
-        <translation>Land</translation>
+        <translation>Maa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="321"/>
@@ -1484,17 +1443,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="322"/>
         <source>Status</source>
-        <translation></translation>
+        <translation>Tila</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="323"/>
         <source>User Comments</source>
-        <translation>Benutzerkommentare</translation>
+        <translation>Käyttäseloste</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="324"/>
         <source>File Name</source>
-        <translation>Dateiname</translation>
+        <translation>Tiedostonimi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="325"/>
@@ -1504,7 +1463,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="326"/>
         <source>Internal Name</source>
-        <translation>Interner Name</translation>
+        <translation>Sisäinen Nimi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="327"/>
@@ -1519,37 +1478,37 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="329"/>
         <source>Save Type</source>
-        <translation>Speichertyp</translation>
+        <translation>Tallennustyyppi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="330"/>
         <source>Players</source>
-        <translation>Spieler</translation>
+        <translation>Pelaajat</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="331"/>
         <source>Size</source>
-        <translation>Größe</translation>
+        <translation>Koko</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="332"/>
         <source>Compression Type</source>
-        <translation>Kompressionstyp</translation>
+        <translation>Pakkaustyyppi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="333"/>
         <source>Image Type</source>
-        <translation>Abbild-Typ</translation>
+        <translation>Tyyppi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="334"/>
         <source>CIC Chip</source>
-        <translation></translation>
+        <translation>CIC Piiri</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="335"/>
         <source>Rumble</source>
-        <translation></translation>
+        <translation>Värinä</translation>
     </message>
 </context>
 <context>
@@ -1557,87 +1516,87 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/settingsdialog.cpp" line="46"/>
         <source>Main Settings</source>
-        <translation>Generelle Einstellungen</translation>
+        <translation>Yleiset Asetukset</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.cpp" line="49"/>
         <source>Plugins</source>
-        <translation></translation>
+        <translation>Liitännäiset</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.cpp" line="52"/>
         <source>Rom Browser</source>
-        <translation>ROM-Browser</translation>
+        <translation>ROM Selain</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="13"/>
         <source>Mupen64Plus Settings</source>
-        <translation>Mupen64Plus-Einstellungen</translation>
+        <translation>Mupen64Plus Asetukset</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="117"/>
         <source>CPU Core</source>
-        <translation></translation>
+        <translation>Suoritinemulaatiotyyppi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="123"/>
         <source>&amp;Interpreter</source>
-        <translation>&amp;Interpreter</translation>
+        <translation>&amp;Tulkki</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="130"/>
         <source>Dynamic &amp;Recompiler</source>
-        <translation>Dynamischer &amp;Recompiler</translation>
+        <translation>Dynaaminen &amp;uudelleenkääntäjä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="137"/>
         <source>&amp;Pure Interpreter</source>
-        <translation>&amp;Purer Interpreter</translation>
+        <translation>&amp;Puhdas tulkki</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="147"/>
         <source>Compatibility</source>
-        <translation>Kompatibilität</translation>
+        <translation>Yhteensopivuus</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="153"/>
         <source>Disable compiled &amp;jump</source>
-        <translation>Compiled &amp;jump deaktivieren</translation>
+        <translation>Kytke lasketut &amp;hypyt pois päältä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="160"/>
         <source>&amp;Disable Memory Expansion</source>
-        <translation>Memory Expansion &amp;deaktivieren</translation>
+        <translation>Kytke &amp;muistijatke pois päältä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="170"/>
         <source>Miscellaneous</source>
-        <translation>Sonstiges</translation>
+        <translation>Muut asetukset</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="176"/>
         <source>A&amp;uto-increment save slot</source>
-        <translation>Speicherslots a&amp;utomatisch hochzählen</translation>
+        <translation>&amp;Siirry seuraavaan tilaan automaattisesti</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="183"/>
         <source>Ask &amp;before loading bad dump/hacked rom</source>
-        <translation>Fragen, &amp;bevor Bad Dumps/Hacked-ROMs geladen werden</translation>
+        <translation>&amp;Kysy ennen kuin ladataan viallisisia tai muokattuja ROM-tiedostoja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="190"/>
         <source>On &amp;screen display enabled</source>
-        <translation>On &amp;Screen Display aktiviert</translation>
+        <translation>&amp;OSD päällä</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="197"/>
         <source>Always start in &amp;full screen mode</source>
-        <translation>Immer im &amp;Vollbildmodus starten</translation>
+        <translation>Käynnistä aina &amp;kokoruututilassa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="227"/>
         <source>Graphics Plugin</source>
-        <translation>Grafik-Plugin</translation>
+        <translation>Näyttöliitännäinen</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="256"/>
@@ -1645,7 +1604,7 @@ Plugin Dir:  %s
         <location filename="../main/gui_qt4/settingsdialog.ui" line="366"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="421"/>
         <source>Config</source>
-        <translation>Konfiguration</translation>
+        <translation>Muuta asetuksia</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="263"/>
@@ -1653,7 +1612,7 @@ Plugin Dir:  %s
         <location filename="../main/gui_qt4/settingsdialog.ui" line="373"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="428"/>
         <source>Test</source>
-        <translation></translation>
+        <translation>Testaa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="270"/>
@@ -1661,37 +1620,37 @@ Plugin Dir:  %s
         <location filename="../main/gui_qt4/settingsdialog.ui" line="380"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="435"/>
         <source>About</source>
-        <translation>Über</translation>
+        <translation>Tietoja</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="282"/>
         <source>Audio Plugin</source>
-        <translation>Audio-Plugin</translation>
+        <translation>Ääniliitännäinen</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="337"/>
         <source>Input Plugin</source>
-        <translation>Eingabe-Plugin</translation>
+        <translation>Ohjainliitännäinen</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="392"/>
         <source>RSP Plugin</source>
-        <translation>RSP-Plugin</translation>
+        <translation>RSP-liitännäinen</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="454"/>
         <source>Directories</source>
-        <translation>Verzeichnisse</translation>
+        <translation>Kansiot</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="466"/>
         <source>&amp;Scan directories recursively</source>
-        <translation>Verzeichnisse rekursiv durch&amp;suchen</translation>
+        <translation>&amp;Käy kansiot läpi rekursiivisesti</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="473"/>
         <source>Show &amp;full paths in filenames</source>
-        <translation>Vo&amp;lle Pfade in Dateinamen anzeigen</translation>
+        <translation>&amp;Näytä koko polku tiedostonimissä</translation>
     </message>
 </context>
 <context>
@@ -1704,7 +1663,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="91"/>
         <source>Value</source>
-        <translation>Wert</translation>
+        <translation>Arvo</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="94"/>
