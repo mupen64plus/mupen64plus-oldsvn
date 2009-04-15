@@ -7,17 +7,17 @@
     <message>
         <location filename="../main/util.c" line="539"/>
         <source>Demo</source>
-        <translation>Demo</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="543"/>
         <source>Beta</source>
-        <translation>Beta</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="547"/>
         <source>USA/Japan</source>
-        <translation>USA/Japan</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="551"/>
@@ -27,7 +27,7 @@
     <message>
         <location filename="../main/util.c" line="555"/>
         <source>USA</source>
-        <translation>USA</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="559"/>
@@ -42,7 +42,7 @@
     <message>
         <location filename="../main/util.c" line="567"/>
         <source>Japan</source>
-        <translation>Japan</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="571"/>
@@ -52,7 +52,7 @@
     <message>
         <location filename="../main/util.c" line="575"/>
         <source>Australia (0x%2.2X)</source>
-        <translation>Australia (0x%2.2X)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="580"/>
@@ -72,57 +72,57 @@
     <message>
         <location filename="../main/util.c" line="597"/>
         <source>Zip</source>
-        <translation>Zip</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="600"/>
         <source>Gzip</source>
-        <translation>Gzip</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="603"/>
         <source>Bzip2</source>
-        <translation>Bzip2</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="606"/>
         <source>LZMA</source>
-        <translation>LZMA</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="609"/>
         <source>7zip</source>
-        <translation>7zip</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="621"/>
         <source>.z64 (native)</source>
-        <translation type="unfinished">.z64 (opprinnelig)</translation>
+        <translation>.z64 (opprinnelig)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="624"/>
         <source>.v64 (byteswapped)</source>
-        <translation type="unfinished">.v64 (byteswapped)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="627"/>
         <source>.n64 (wordswapped)</source>
-        <translation type="unfinished">.n64 (wordswapped)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="639"/>
         <source>CIC-NUS-6101</source>
-        <translation>CIC-NUS-6101</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="642"/>
         <source>CIC-NUS-6102</source>
-        <translation>CIC-NUS-6102</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="645"/>
         <source>CIC-NUS-6103</source>
-        <translation>CIC-NUS-6103</translation>
+        <translation></translation>
     </message>
     <message>
         <source>CIC-NUS-6104</source>
@@ -131,12 +131,12 @@
     <message>
         <location filename="../main/util.c" line="648"/>
         <source>CIC-NUS-6105</source>
-        <translation>CIC-NUS-6105</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="651"/>
         <source>CIC-NUS-6106</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="663"/>
@@ -151,12 +151,12 @@
     <message>
         <location filename="../main/util.c" line="678"/>
         <source>Eeprom 4KB</source>
-        <translation>Eeprom 4KB</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="681"/>
         <source>Eeprom 16KB</source>
-        <translation>Eeprom 16KB</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="684"/>
@@ -166,7 +166,7 @@
     <message>
         <location filename="../main/util.c" line="687"/>
         <source>Flash RAM</source>
-        <translation>Flash RAM</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/util.c" line="690"/>
@@ -181,12 +181,12 @@
     <message>
         <location filename="../main/savestates.c" line="66"/>
         <source>Selected state file: %s</source>
-        <translation>Valgt tilstadnds fil: %s</translation>
+        <translation>Valgt tilstadndsfil: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="70"/>
         <source>Selected state slot: %d</source>
-        <translation>Valgt tilstands posisjon: %d</translation>
+        <translation>Gjeledende tilstandsposisjon: %d</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="210"/>
@@ -197,47 +197,47 @@
     <message>
         <location filename="../main/savestates.c" line="244"/>
         <source>Could not open state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Kunne ikke åpne tilstandsfil: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="253"/>
         <source>State file: %s is not a valid Mupen64plus savestate. Checking if in Project64 format...</source>
-        <translation type="unfinished"></translation>
+        <translation>Tilstandsfile: %s er ikke en gyldig Mupen64plus tilstand. Sjekker om den er Project64 format...</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="269"/>
         <source>State version (%08x) doesn&apos;t match current version (%08x).</source>
-        <translation type="unfinished"></translation>
+        <translation>Tilstandsversjon (%08x) stemmer ikke med gjeldende versjon (%08x).</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="278"/>
         <source>State ROM MD5 does not match current ROM.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tilstandens ROM MD5 stemmer ikke med gjeldende ROM.</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="391"/>
         <source>Could not create PJ64 state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Kunne ikke opprette PJ64 tilstandsfil: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="400"/>
         <source>Zip error. Could not create state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Zip feil. Klarte ikke å opprette tilstandsfil: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="531"/>
         <source>Zip error. Could not open state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Zip feil. Klarte ikke å åpne tilstandsfil: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="541"/>
         <source>State file: %s is not a valid Project64 savestate. Unrecognized file format.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tilstandsfil: %s er ikke en gyldig Project64 tilstand. Ukjent fil format.</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="551"/>
         <source>State ROM header does not match current ROM.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tilstand ROM header stemmer ikke med gjeldende ROM.</translation>
     </message>
     <message>
         <source>Error: state file &apos;%s&apos; doesn&apos;t exist</source>
@@ -265,13 +265,13 @@
         <location filename="../main/romcache.c" line="271"/>
         <location filename="../main/romcache.c" line="289"/>
         <source>Rescanning rom cache.</source>
-        <translation>Oppdaterer rom minne.</translation>
+        <translation>Oppdaterer rom buffer.</translation>
     </message>
     <message>
         <location filename="../main/romcache.c" line="275"/>
         <location filename="../main/romcache.c" line="292"/>
         <source>Rom cache up to date. %d ROM%s.</source>
-        <translation>Rom minne er oppdatert. %d ROM%s.</translation>
+        <translation>Rom buffer er oppdatert. %d ROM%s.</translation>
     </message>
     <message>
         <location filename="../main/romcache.c" line="536"/>
@@ -283,16 +283,16 @@
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
-        <translation>Rom&apos;en du prøvde å laste er sansynligvis et dårlig dump.
+        <translation>ROM&apos;en du prøvde å laste er sansynligvis et dårlig dump.
 Du er advart, dette vil sansyligvis gi uventede resultater.
-Vil du fortsatt kjøre det?</translation>
+Vil du fortsatt kjøre den?</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="454"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 </source>
-        <translation>Rom&apos;en du prøver å laste er sansynligvis en dårlig dump!
+        <translation>ROM&apos;en du prøver å laste er sansynligvis en dårlig dump!
 Du er advart, dette vil sansyligvis gi uventede resultater.</translation>
     </message>
     <message>
@@ -300,16 +300,16 @@ Du er advart, dette vil sansyligvis gi uventede resultater.</translation>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
-        <translation>Rom&apos;en du laster er sansynligvis et hack!
+        <translation>ROM&apos;en du laster er sansynligvis et hack!
 Du er advart, dette vil sansyligvis gi uventede resultater.
-Vil du fortsatt kjøre det?</translation>
+Vil du fortsatt kjøre den?</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="469"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 </source>
-        <translation>Rom&apos;en du laster er sansynligvis et hack!
+        <translation>ROM&apos;en du laster er sansynligvis et hack!
 Du er advart, dette vil sansyligvis gi uventede resultater.</translation>
     </message>
     <message>
@@ -322,7 +322,7 @@ stoppe den og laste valgt rom?</translation>
     <message>
         <location filename="../main/rom.c" line="523"/>
         <source>Couldn&apos;t load Rom!</source>
-        <translation>Kunne ikke laste Rom!</translation>
+        <translation>Kunne ikke laste ROM!</translation>
     </message>
     <message>
         <location filename="../main/rom.c" line="624"/>
@@ -444,7 +444,7 @@ stoppe den og laste valgt rom?</translation>
         <source>The core thread recieved a SIGSEGV signal.
 This means it tried to access protected memory.
 Maybe you have set a wrong ucode for one of the plugins!</source>
-        <translation>Kjernen har motatt et SIGSEGV signal.
+        <translation>Kjerne tråden har motatt et SIGSEGV signal.
 Dette betyr at den prøvde å aksesere beskyttet minne.
 Kanskje du har satt feil ukode for en av plugin&apos;ene!</translation>
     </message>
@@ -470,7 +470,7 @@ Pluginmappe:  %s
         <location filename="../main/main.c~" line="1512"/>
         <location filename="../main/main.c" line="1514"/>
         <source>Couldn&apos;t spawn rom cache thread!</source>
-        <translation>Kunne ikke opprette rom minne tråden!</translation>
+        <translation>Kunne ikke opprette rom buffer tråden!</translation>
     </message>
 </context>
 <context>
@@ -478,12 +478,12 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/aboutdialog.cpp" line="37"/>
         <source>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Home Page&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum on EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Licensing: GNU GPL version 2 or later&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Versjon %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Hjemmeside&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum hos EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Lisens: GNU GPL versjon 2 eller senere&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/aboutdialog.ui" line="14"/>
         <source>About Mupen64Plus</source>
-        <translation type="unfinished">Om Mupen64Plus</translation>
+        <translation>Om Mupen64Plus</translation>
     </message>
 </context>
 <context>
@@ -491,67 +491,67 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="67"/>
         <source>Breakpoint</source>
-        <translation type="unfinished"></translation>
+        <translation>Pausepunkt</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="68"/>
         <source>Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Verdi:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="109"/>
         <source>Edit Breakpoint</source>
-        <translation type="unfinished"></translation>
+        <translation>Endre Pausepunkt</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="110"/>
         <source>New Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ny verdi:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="202"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Advarsel</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="203"/>
         <source>Cannot add any more breakpoints.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kan ikke legge til flere pausepunkt.</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="13"/>
         <source>Breakpoints</source>
-        <translation type="unfinished"></translation>
+        <translation>Pausepunkter</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="63"/>
         <source>&amp;Add</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Legg til</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="70"/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fjern</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="77"/>
         <source>&amp;Enable</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Aktiver</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="84"/>
         <source>&amp;Disable</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Deaktiver</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="91"/>
         <source>&amp;Toggle</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="98"/>
         <source>Ed&amp;it</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Endre</translation>
     </message>
 </context>
 <context>
@@ -562,47 +562,47 @@ Pluginmappe:  %s
         <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="130"/>
         <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="133"/>
         <source>%1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="13"/>
         <source>Cheat</source>
-        <translation type="unfinished"></translation>
+        <translation>Juksekode</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="21"/>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Navn:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="44"/>
         <source>Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Deaktivert</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="60"/>
         <source>Enabled (Session)</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktivert (Sesjon)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="79"/>
         <source>Enabled (Always)</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktivert (Alltid)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="109"/>
         <source>Comment:</source>
-        <translation type="unfinished"></translation>
+        <translation>Kommentar:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="123"/>
         <source>&amp;Add</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Legg til</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="130"/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fjern</translation>
     </message>
 </context>
 <context>
@@ -610,43 +610,43 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="61"/>
         <source>%1 - Cheats</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 - Juksekoder</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="100"/>
         <source>%1 (Option)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 (Alternativ)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="114"/>
         <source>Personal Cheats</source>
-        <translation type="unfinished"></translation>
+        <translation>Personlige Juksekoder</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="274"/>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="280"/>
         <source>%1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="13"/>
         <source>Cheats</source>
-        <translation type="unfinished"></translation>
+        <translation>Juksekoder</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="24"/>
         <source>&amp;Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Slett</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="70"/>
         <source>&amp;New</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ny</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="77"/>
         <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Endre</translation>
     </message>
 </context>
 <context>
@@ -654,17 +654,17 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="13"/>
         <source>New Rom</source>
-        <translation type="unfinished"></translation>
+        <translation>Ny Rom</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="40"/>
         <source>Rom CRC:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="47"/>
         <source>Rom Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Rom Navn:</translation>
     </message>
 </context>
 <context>
@@ -672,97 +672,97 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="70"/>
         <source>Mupen64Plus Debugger - %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Mupen64Plus Feilsøker - %1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Adresse</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Opcode</source>
-        <translation type="unfinished"></translation>
+        <translation>Opkode</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Args</source>
-        <translation type="unfinished"></translation>
+        <translation>Arg</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="19"/>
         <source>Mupen64plus debugger</source>
-        <translation type="unfinished"></translation>
+        <translation>Mupen64Plus Feilsøker</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="25"/>
         <source>Disassembler</source>
-        <translation type="unfinished"></translation>
+        <translation>Dekoder</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="35"/>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="64"/>
         <source>Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Feilsøk</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="73"/>
         <source>&amp;Run</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Kjør</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="80"/>
         <source>&amp;Trace</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Spor</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="87"/>
         <source>&amp;Step</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Steg</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="94"/>
         <source>&amp;Break</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Pause</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="101"/>
         <source>&amp;Go To...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Gå Til...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="121"/>
         <source>- 1000</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="128"/>
         <source>- 100</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="135"/>
         <source> - 10</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="142"/>
         <source>+ 10</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="149"/>
         <source>+100</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="156"/>
         <source>+ 1000</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -770,7 +770,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/hexspinboxdialog.ui" line="13"/>
         <source>Goto address</source>
-        <translation type="unfinished"></translation>
+        <translation>Gå til adresse</translation>
     </message>
 </context>
 <context>
@@ -788,7 +788,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwidget.cpp" line="206"/>
         <source>Refresh Rom List</source>
-        <translation>Last inn Rom liste på nytt</translation>
+        <translation>Relast Rom Liste</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.ui" line="13"/>
@@ -798,7 +798,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwidget.ui" line="24"/>
         <source>&amp;Filter:</source>
-        <translation>&amp;Filter:</translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -846,7 +846,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="17"/>
         <source>Mupen64Plus</source>
-        <translation>Mupen64Plus</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="37"/>
@@ -871,7 +871,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="82"/>
         <source>&amp;Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Feilsøk</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="99"/>
@@ -886,17 +886,17 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="133"/>
         <source>Ctrl+O</source>
-        <translation>Ctrl+O</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="138"/>
         <source>&amp;Close Rom</source>
-        <translation>&amp;Lukke Rom</translation>
+        <translation>&amp;Lukk Rom</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="141"/>
         <source>Ctrl+W</source>
-        <translation>Ctrl+W</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="146"/>
@@ -906,7 +906,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="149"/>
         <source>Ctrl+Q</source>
-        <translation>Ctrl+Q</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="157"/>
@@ -931,7 +931,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="179"/>
         <source>Esc</source>
-        <translation>Esc</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="184"/>
@@ -941,7 +941,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="187"/>
         <source>Ctrl+F7</source>
-        <translation>Ctrl+F7</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="192"/>
@@ -956,7 +956,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="200"/>
         <source>Ctrl+F5</source>
-        <translation>Ctrl+F5</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="205"/>
@@ -966,7 +966,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="210"/>
         <source>&amp;Current Save State Slot...</source>
-        <translation>&amp;Gjeldende Posisjon for lagring av tilstand...</translation>
+        <translation>&amp;Gjeldende Posisjon for tilstand...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="215"/>
@@ -976,7 +976,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="218"/>
         <source>Alt+Return</source>
-        <translation>Alt+Return</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="223"/>
@@ -1011,52 +1011,52 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="271"/>
         <source>Save P&amp;roject64 State as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagre P&amp;roject64 Tilstand som...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="276"/>
         <source>Ch&amp;eats</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Juksekoder</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="284"/>
         <source>E&amp;nable</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Aktiver</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="292"/>
         <source>&amp;Disassembler</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Dekoder</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="300"/>
         <source>&amp;Registers</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Registre</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="308"/>
         <source>&amp;Breakpoints</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Pausepunkter</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="316"/>
         <source>&amp;Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Minne</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="396"/>
         <source>Save State as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagre Tilstand som...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="412"/>
         <source>Save Project64 State as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagre Project64 Tilstand som...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="414"/>
         <source>.zip files (*.zip); .pj files (*.pj)</source>
-        <translation type="unfinished"></translation>
+        <translation>.zip filer (*.zip); .pj filer (*.pj)</translation>
     </message>
 </context>
 <context>
@@ -1064,17 +1064,17 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="66"/>
         <source>Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Adresse</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="84"/>
         <source>#</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="87"/>
         <source>Ascii</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1082,17 +1082,17 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="13"/>
         <source>Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>Minne</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="29"/>
         <source>Address:</source>
-        <translation type="unfinished"></translation>
+        <translation>Adresse:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="36"/>
         <source>&amp;Auto Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Auto Oppdater</translation>
     </message>
 </context>
 <context>
@@ -1105,7 +1105,8 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/main.cpp" line="103"/>
         <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glibmainloop integration. Plugins that use Gtk+&lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glibmain loop support. Most distributions provide thisby default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Usikker på hvordan oversette &apos;Plugins&apos;</translatorcomment>
+        <translation>&lt;html&gt;&lt;p&gt;Ditt Qt biblotek ble kompilert uten glibmainloop integrasjon. Plugins som bruker Gtk+&lt;b&gt;vil&lt;/b&gt; krasje emulatoren!&lt;/p&gt;&lt;p&gt;For å fikse dette, installer en Qt versjon med glibmain loop støtte. De fleste distribusjoner har dette som standart.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib                          mainloop integration. Plugins that use Gtk+                          &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;                         &lt;p&gt;To fix this, install a Qt version with glib                          main loop support. Most distributions provide this                          by default.&lt;/p&gt;&lt;/html&gt;</source>
@@ -1168,127 +1169,127 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="52"/>
         <source>Mupen64Plus Register Viewer</source>
-        <translation type="unfinished"></translation>
+        <translation>Mupen64Plus Register Seer</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="120"/>
         <source>XXXXXXXXXXXXXXXX: 0xXXXXXXXX</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="121"/>
         <source>XXXXXXXXXXXXXXXX</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="13"/>
         <source>Form</source>
-        <translation type="unfinished">Skjema</translation>
+        <translation>Skjema</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="34"/>
         <source>&amp;GPR</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="104"/>
         <source>&amp;Special</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="128"/>
         <source>PC</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="165"/>
         <source>Previous PC</source>
-        <translation type="unfinished"></translation>
+        <translation>Forrige PC</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="196"/>
         <source>Hi / Lo</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="224"/>
         <source>Interrupt Queue</source>
-        <translation type="unfinished"></translation>
+        <translation>Avbruddskø</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="247"/>
         <source>&amp;Cop1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="259"/>
         <source>Cop1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="315"/>
         <source>Show as</source>
-        <translation type="unfinished"></translation>
+        <translation>Vis som</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="329"/>
         <source>&amp;Raw Hex</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ren Hex</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="339"/>
         <source>&amp;Single</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="346"/>
         <source>&amp;Double</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="356"/>
         <source>&amp;Word</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="366"/>
         <source>&amp;Long</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="392"/>
         <source>&amp;AI / VI</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="404"/>
         <source>AI</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="436"/>
         <source>VI</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="463"/>
         <source>&amp;PI / RI / SI</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="475"/>
         <source>PI</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="507"/>
         <source>RI</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="539"/>
         <source>SI</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1320,7 +1321,7 @@ Pluginmappe:  %s
         <location filename="../main/gui_qt4/rominfodialog.ui" line="13"/>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="19"/>
         <source>Rom Info</source>
-        <translation>Rom Informasjon</translation>
+        <translation>Rom Info</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="31"/>
@@ -1330,7 +1331,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="54"/>
         <source>File Name:</source>
-        <translation>Fil Navn:</translation>
+        <translation>Filnavn:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="77"/>
@@ -1355,7 +1356,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="198"/>
         <source>Save Type:</source>
-        <translation>Lagrings Type:</translation>
+        <translation>Lagringstype:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="221"/>
@@ -1370,17 +1371,17 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="277"/>
         <source>CRC1:</source>
-        <translation>CRC1:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="305"/>
         <source>CRC2:</source>
-        <translation>CRC2:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="333"/>
         <source>MD5 Hash:</source>
-        <translation>MD5 Hash:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="361"/>
@@ -1395,12 +1396,12 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="407"/>
         <source>Image Type:</source>
-        <translation>Rom Bilde Type:</translation>
+        <translation>Rom Type:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="430"/>
         <source>CIC Chip:</source>
-        <translation>CIC Chip:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="450"/>
@@ -1413,22 +1414,22 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="63"/>
         <source>Demo</source>
-        <translation>Demo</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="64"/>
         <source>Beta</source>
-        <translation>Beta</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="65"/>
         <source>Japan/USA</source>
-        <translation>Japan/USA</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="66"/>
         <source>USA</source>
-        <translation>USA</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="67"/>
@@ -1448,7 +1449,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="70"/>
         <source>Japan</source>
-        <translation>Japan</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="71"/>
@@ -1458,7 +1459,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="72"/>
         <source>Australia</source>
-        <translation>Australia</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="73"/>
@@ -1503,12 +1504,12 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="324"/>
         <source>File Name</source>
-        <translation>Fil Navn</translation>
+        <translation>Filnavn</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="325"/>
         <source>MD5 Hash</source>
-        <translation>MD5 Hash</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="326"/>
@@ -1518,12 +1519,12 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="327"/>
         <source>CRC1</source>
-        <translation>CRC1</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="328"/>
         <source>CRC2</source>
-        <translation>CRC2</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="329"/>
@@ -1548,12 +1549,12 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="333"/>
         <source>Image Type</source>
-        <translation>Rombildetype</translation>
+        <translation>Romtype</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="334"/>
         <source>CIC Chip</source>
-        <translation>CIC Chip</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="335"/>
@@ -1690,7 +1691,7 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="454"/>
         <source>Directories</source>
-        <translation>Kataloger</translation>
+        <translation>Mapper</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="466"/>
@@ -1708,17 +1709,17 @@ Pluginmappe:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="88"/>
         <source>#</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="91"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Verdi</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="94"/>
         <source>Mnemonic</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 </TS>
