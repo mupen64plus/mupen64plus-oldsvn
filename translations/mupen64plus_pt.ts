@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="pt_BR">
+<!DOCTYPE TS><TS version="1.1" language="pt_BR">
+<defaultcodec></defaultcodec>
 <context>
     <name></name>
     <message>
@@ -371,52 +371,52 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/util.c" line="651"/>
         <source>CIC-NUS-6106</source>
-        <translation type="unfinished">CIC-NUS-6106</translation>
+        <translation>CIC-NUS-6106</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="244"/>
         <source>Could not open state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi Possível abrir o arquivo de estado: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="253"/>
         <source>State file: %s is not a valid Mupen64plus savestate. Checking if in Project64 format...</source>
-        <translation type="unfinished"></translation>
+        <translation>O arquivo de estado: %s não um estado valido do Mupen64plus. Checando se é valido para Project64...</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="269"/>
         <source>State version (%08x) doesn&apos;t match current version (%08x).</source>
-        <translation type="unfinished"></translation>
+        <translation>A versão do estado (%08x) não fecha com a versão corrente (%08x).</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="278"/>
         <source>State ROM MD5 does not match current ROM.</source>
-        <translation type="unfinished"></translation>
+        <translation>O MD5 da rom do estado, não fecha com o da rom carregada.</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="391"/>
         <source>Could not create PJ64 state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossível criar um um arquivo de estado PJ64: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="400"/>
         <source>Zip error. Could not create state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro no zip, Impossível criar o arquivo de estado: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="531"/>
         <source>Zip error. Could not open state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro no zip, Impossível abrir o arquivo de estado: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="541"/>
         <source>State file: %s is not a valid Project64 savestate. Unrecognized file format.</source>
-        <translation type="unfinished"></translation>
+        <translation>Estado salvo: %s não é um estado salvo válido do Project64. Formato de arquivo desconhecido.</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="551"/>
         <source>State ROM header does not match current ROM.</source>
-        <translation type="unfinished"></translation>
+        <translation>O cabeçalho da rom do estado não fecha com o da rom carregada.</translation>
     </message>
 </context>
 <context>
@@ -424,12 +424,12 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/aboutdialog.cpp" line="58"/>
         <source>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Home Page&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum on EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Licensing: GNU GPL version 2 or later&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Versão %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Página&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum em EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Licenciado: GNU GPL Versão 2 ou posterior&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/aboutdialog.ui" line="14"/>
         <source>About Mupen64Plus</source>
-        <translation type="unfinished">Sobre Mupen64Plus</translation>
+        <translation>Sobre Mupen64Plus</translation>
     </message>
 </context>
 <context>
@@ -437,67 +437,67 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="67"/>
         <source>Breakpoint</source>
-        <translation type="unfinished"></translation>
+        <translation>Ponto de Quebra</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="68"/>
         <source>Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="109"/>
         <source>Edit Breakpoint</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar ponto de Quebra</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="110"/>
         <source>New Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Novo Valor:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="202"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Aviso</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.cpp" line="203"/>
         <source>Cannot add any more breakpoints.</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossível Adicionar novos pontos de quebra.</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="13"/>
         <source>Breakpoints</source>
-        <translation type="unfinished"></translation>
+        <translation>Pontos de Quebra</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="63"/>
         <source>&amp;Add</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Adicionar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="70"/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Remover</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="77"/>
         <source>&amp;Enable</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Habilitar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="84"/>
         <source>&amp;Disable</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Desabilitar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="91"/>
         <source>&amp;Toggle</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Pinar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/breakpointswidget.ui" line="98"/>
         <source>Ed&amp;it</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Editar</translation>
     </message>
 </context>
 <context>
@@ -505,47 +505,47 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="133"/>
         <source>%1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="13"/>
         <source>Cheat</source>
-        <translation type="unfinished"></translation>
+        <translation>Trapaça</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="21"/>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="44"/>
         <source>Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitado</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="60"/>
         <source>Enabled (Session)</source>
-        <translation type="unfinished"></translation>
+        <translation>Habilitado (Sessão)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="79"/>
         <source>Enabled (Always)</source>
-        <translation type="unfinished"></translation>
+        <translation>Habilitado (Sempre)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="109"/>
         <source>Comment:</source>
-        <translation type="unfinished"></translation>
+        <translation>Comentário:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="123"/>
         <source>&amp;Add</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Adicionar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatcheatdialog.ui" line="130"/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Remover</translation>
     </message>
 </context>
 <context>
@@ -553,42 +553,42 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="61"/>
         <source>%1 - Cheats</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 - Trapaças</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="100"/>
         <source>%1 (Option)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 (Opção)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="114"/>
         <source>Personal Cheats</source>
-        <translation type="unfinished"></translation>
+        <translation>Trapaças Pessoais</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="280"/>
         <source>%1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="13"/>
         <source>Cheats</source>
-        <translation type="unfinished"></translation>
+        <translation>Trapaças</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="24"/>
         <source>&amp;Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Deletar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="70"/>
         <source>&amp;New</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Nova</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatdialog.ui" line="77"/>
         <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Editar</translation>
     </message>
 </context>
 <context>
@@ -596,17 +596,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="13"/>
         <source>New Rom</source>
-        <translation type="unfinished"></translation>
+        <translation>Nova Rom</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="40"/>
         <source>Rom CRC:</source>
-        <translation type="unfinished"></translation>
+        <translation>CRC da Rom:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/cheatromdialog.ui" line="47"/>
         <source>Rom Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome da Rom:</translation>
     </message>
 </context>
 <context>
@@ -614,97 +614,97 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="70"/>
         <source>Mupen64Plus Debugger - %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Mupen64Plus Debugador - %1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Endereço</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Opcode</source>
-        <translation type="unfinished"></translation>
+        <translation>Opcode</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.cpp" line="73"/>
         <source>Args</source>
-        <translation type="unfinished"></translation>
+        <translation>Argumentos</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="19"/>
         <source>Mupen64plus debugger</source>
-        <translation type="unfinished"></translation>
+        <translation>Mupen64Plus Debugador</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="25"/>
         <source>Disassembler</source>
-        <translation type="unfinished"></translation>
+        <translation>Desassembleador</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="35"/>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="64"/>
         <source>Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Debugar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="73"/>
         <source>&amp;Run</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Correr</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="80"/>
         <source>&amp;Trace</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Traçar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="87"/>
         <source>&amp;Step</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Passo</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="94"/>
         <source>&amp;Break</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Quebrar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="101"/>
         <source>&amp;Go To...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ir para...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="121"/>
         <source>- 1000</source>
-        <translation type="unfinished"></translation>
+        <translation>- 1000</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="128"/>
         <source>- 100</source>
-        <translation type="unfinished"></translation>
+        <translation>- 100</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="135"/>
         <source> - 10</source>
-        <translation type="unfinished"></translation>
+        <translation> - 10</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="142"/>
         <source>+ 10</source>
-        <translation type="unfinished"></translation>
+        <translation>+ 10</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="149"/>
         <source>+100</source>
-        <translation type="unfinished"></translation>
+        <translation>+100</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/debuggerwidget.ui" line="156"/>
         <source>+ 1000</source>
-        <translation type="unfinished"></translation>
+        <translation>+ 1000</translation>
     </message>
 </context>
 <context>
@@ -712,7 +712,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/hexspinboxdialog.ui" line="13"/>
         <source>Goto address</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -936,57 +936,57 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="396"/>
         <source>Save State as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar estado como...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="412"/>
         <source>Save Project64 State as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar estado do Project64 como...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="414"/>
         <source>.zip files (*.zip); .pj files (*.pj)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivos .zip (*.zip); .pj files (*.pj)</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="82"/>
         <source>&amp;Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Debugar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="271"/>
         <source>Save P&amp;roject64 State as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar estado do &amp;Project64 como...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="276"/>
         <source>Ch&amp;eats</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Trapaças</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="284"/>
         <source>E&amp;nable</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Habilitar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="292"/>
         <source>&amp;Disassembler</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Desassembleador</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="300"/>
         <source>&amp;Registers</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Registros</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="308"/>
         <source>&amp;Breakpoints</source>
-        <translation type="unfinished"></translation>
+        <translation>Pontos de &amp;Quebra</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="316"/>
         <source>&amp;Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Memória</translation>
     </message>
 </context>
 <context>
@@ -994,17 +994,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="66"/>
         <source>Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Endereço</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="84"/>
         <source>#</source>
-        <translation type="unfinished"></translation>
+        <translation>#</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditmodel.cpp" line="87"/>
         <source>Ascii</source>
-        <translation type="unfinished"></translation>
+        <translation>Ascii</translation>
     </message>
 </context>
 <context>
@@ -1012,17 +1012,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="13"/>
         <source>Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>Memória</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="29"/>
         <source>Address:</source>
-        <translation type="unfinished"></translation>
+        <translation>Endereço:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/memeditwidget.ui" line="36"/>
         <source>&amp;Auto Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Auto Atualizar</translation>
     </message>
 </context>
 <context>
@@ -1086,127 +1086,127 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="52"/>
         <source>Mupen64Plus Register Viewer</source>
-        <translation type="unfinished"></translation>
+        <translation>Visualizador de Registro do Mupen64Plus</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="120"/>
         <source>XXXXXXXXXXXXXXXX: 0xXXXXXXXX</source>
-        <translation type="unfinished"></translation>
+        <translation>XXXXXXXXXXXXXXXX: 0xXXXXXXXX</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.cpp" line="121"/>
         <source>XXXXXXXXXXXXXXXX</source>
-        <translation type="unfinished"></translation>
+        <translation>XXXXXXXXXXXXXXXX</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="13"/>
         <source>Form</source>
-        <translation type="unfinished">Forma</translation>
+        <translation>Forma</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="34"/>
         <source>&amp;GPR</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;GPR</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="104"/>
         <source>&amp;Special</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Especial</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="128"/>
         <source>PC</source>
-        <translation type="unfinished"></translation>
+        <translation>PC</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="165"/>
         <source>Previous PC</source>
-        <translation type="unfinished"></translation>
+        <translation>PC anterior</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="196"/>
         <source>Hi / Lo</source>
-        <translation type="unfinished"></translation>
+        <translation>Hi / Lo</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="224"/>
         <source>Interrupt Queue</source>
-        <translation type="unfinished"></translation>
+        <translation>Fila de Interrupção</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="247"/>
         <source>&amp;Cop1</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Cop1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="259"/>
         <source>Cop1</source>
-        <translation type="unfinished"></translation>
+        <translation>Cop1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="315"/>
         <source>Show as</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar como</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="329"/>
         <source>&amp;Raw Hex</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Crú Hex</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="339"/>
         <source>&amp;Single</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Simples</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="346"/>
         <source>&amp;Double</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Dupla</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="356"/>
         <source>&amp;Word</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Palavra</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="366"/>
         <source>&amp;Long</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;longo</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="392"/>
         <source>&amp;AI / VI</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;AI / VI</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="404"/>
         <source>AI</source>
-        <translation type="unfinished"></translation>
+        <translation>AI</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="436"/>
         <source>VI</source>
-        <translation type="unfinished"></translation>
+        <translation>VI</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="463"/>
         <source>&amp;PI / RI / SI</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;PI / RI / SI</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="475"/>
         <source>PI</source>
-        <translation type="unfinished"></translation>
+        <translation>PI</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="507"/>
         <source>RI</source>
-        <translation type="unfinished"></translation>
+        <translation>RI</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="539"/>
         <source>SI</source>
-        <translation type="unfinished"></translation>
+        <translation>SI</translation>
     </message>
 </context>
 <context>
@@ -1616,17 +1616,17 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="88"/>
         <source>#</source>
-        <translation type="unfinished"></translation>
+        <translation>#</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="91"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/tablelistmodel.cpp" line="94"/>
         <source>Mnemonic</source>
-        <translation type="unfinished"></translation>
+        <translation>Mnemônico</translation>
     </message>
 </context>
 </TS>
