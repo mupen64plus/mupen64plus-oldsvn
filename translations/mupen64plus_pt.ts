@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="1.1" language="pt_BR">
+<!DOCTYPE TS>
+<TS version="2.0" language="pt_BR">
 <context>
     <name></name>
     <message>
@@ -763,8 +764,8 @@ Plugin Dir:  %s
         <location filename="../main/gui_qt4/mainwindow.cpp" line="473"/>
         <source>%n rom(s)</source>
         <translation>
-            <numerusform>%n rom(s)</numerusform>
-            <numerusform></numerusform>
+            <numerusform>%n rom</numerusform>
+            <numerusform>%n roms</numerusform>
         </translation>
     </message>
     <message>
