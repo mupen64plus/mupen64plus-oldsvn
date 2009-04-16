@@ -9,5 +9,5 @@ do
     TARGETS="${DIR}/${t} ${TARGETS}"
 done
 
-lupdate ${TARGETS} -ts mupen64plus*.ts
+lupdate ${TARGETS} ${LUPDATE_OPTS} -ts mupen64plus*.ts
 

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="de_DE">
-<defaultcodec></defaultcodec>
+<!DOCTYPE TS><TS version="1.1" language="de_DE">
 <context>
     <name></name>
     <message>
@@ -185,7 +183,6 @@
         <translation>Ausgewähler Spielstandslot: %d</translation>
     </message>
     <message>
-        <location filename="../main/savestates.c" line="210"/>
         <location filename="../main/savestates.c" line="480"/>
         <source>Saved state to: %s</source>
         <translation>Spielstand in %s gespeichert</translation>
@@ -236,35 +233,16 @@
         <translation>Spielstanddatei ROM Header stimmt nicht mit dem derzeitigen ROM überein.</translation>
     </message>
     <message>
-        <source>Error: state file &apos;%s&apos; doesn&apos;t exist</source>
-        <translation type="obsolete">Fehler: Spielstanddatei &apos;%s&apos; existiert nicht</translation>
-    </message>
-    <message>
-        <source>Error: Unrecognized savestate format.</source>
-        <translation type="obsolete">Fehler: Unbekanntes Spielstandformat.</translation>
-    </message>
-    <message>
-        <source>Error: Savestate version (%08x) doesn&apos;t match current version (%08x).</source>
-        <translation type="obsolete">Fehler: Spielstandversion (%08x) ist nicht mit aktueller Version (%08x) identisch.</translation>
-    </message>
-    <message>
-        <source>Load state error: Saved state ROM doesn&apos;t match current ROM.</source>
-        <translation type="obsolete">Fehler beim Laden des Spielstands: ROM des Spielstands ist nicht identisch mit aktuellem ROM.</translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="347"/>
         <location filename="../main/savestates.c" line="761"/>
         <source>State loaded from: %s</source>
         <translation>Spielstand von %s geladen</translation>
     </message>
     <message>
-        <location filename="../main/romcache.c" line="271"/>
         <location filename="../main/romcache.c" line="289"/>
         <source>Rescanning rom cache.</source>
         <translation>Zwischenspeicher wird neu aufgebaut.</translation>
     </message>
     <message>
-        <location filename="../main/romcache.c" line="275"/>
         <location filename="../main/romcache.c" line="292"/>
         <source>Rom cache up to date. %d ROM%s.</source>
         <translation>ROM-Zwischenspeicher aktuell. %d ROM%s.</translation>
@@ -275,7 +253,7 @@
         <translation>ROMs %d-%d hinzugefügt.</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="449"/>
+        <location filename="../main/rom.c" line="451"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
@@ -284,7 +262,7 @@ Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
 Möchten Sie es trotzdem laden?</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="454"/>
+        <location filename="../main/rom.c" line="455"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 </source>
@@ -293,7 +271,7 @@ Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
 </translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="464"/>
+        <location filename="../main/rom.c" line="466"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
@@ -302,7 +280,7 @@ Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
 Möchten Sie es trotzdem laden?</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="469"/>
+        <location filename="../main/rom.c" line="470"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 </source>
@@ -311,7 +289,7 @@ Vorsicht, dies wird wahrscheinlich zu unerwarteten Resultaten führen.
 </translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="483"/>
+        <location filename="../main/rom.c" line="484"/>
         <source>Emulation is running. Do you want to
 stop it and load the selected rom?</source>
         <translation>Die Emulation läuft gerade. Möchten Sie
@@ -323,81 +301,66 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
         <translation>Das ROM konnte nicht geladen werden!</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="624"/>
         <location filename="../main/rom.c" line="658"/>
         <source>Rom closed.</source>
         <translation>ROM geschlossen.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="242"/>
         <location filename="../main/main.c" line="243"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="311"/>
-        <location filename="../main/main.c~" line="321"/>
-        <location filename="../main/main.c" line="312"/>
         <location filename="../main/main.c" line="322"/>
         <source>Playback speed:</source>
         <translation>Wiedergabegeschwindigkeit:</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="351"/>
         <location filename="../main/main.c" line="352"/>
         <source>Volume Not Supported.</source>
         <translation>Lautstärke nicht unterstützt.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="355"/>
         <location filename="../main/main.c" line="356"/>
         <source>Volume</source>
         <translation>Lautstärke</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="388"/>
         <location filename="../main/main.c" line="389"/>
         <source>There is no Rom loaded.</source>
         <translation>Es ist kein ROM geladen.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="407"/>
         <location filename="../main/main.c" line="408"/>
         <source>No graphics plugin specified.</source>
         <translation>Kein Grafik-Plugin ausgewählt.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="418"/>
         <location filename="../main/main.c" line="419"/>
         <source>No audio plugin specified.</source>
         <translation>Kein Audio-Plugin ausgewählt.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="429"/>
         <location filename="../main/main.c" line="430"/>
         <source>No input plugin specified.</source>
         <translation>Kein Eingabe-Plugin ausgewählt.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="440"/>
         <location filename="../main/main.c" line="441"/>
         <source>No RSP plugin specified.</source>
         <translation>Kein RSP-Plugin ausgewählt.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="462"/>
         <location filename="../main/main.c" line="463"/>
         <source>Couldn&apos;t spawn core thread!</source>
         <translation>Konnte Core Thread nicht erzeugen!</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="466"/>
         <location filename="../main/main.c" line="467"/>
         <source>Emulation started (PID: %d)</source>
         <translation>Emulation gestartet (PID: %d)</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="479"/>
         <location filename="../main/main.c" line="480"/>
         <source>Stopping emulation.
 </source>
@@ -405,7 +368,6 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="505"/>
         <location filename="../main/main.c" line="506"/>
         <source>Emulation stopped.
 </source>
@@ -413,7 +375,6 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="522"/>
         <location filename="../main/main.c" line="523"/>
         <source>Emulation continued.
 </source>
@@ -421,9 +382,6 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="538"/>
-        <location filename="../main/main.c~" line="539"/>
-        <location filename="../main/main.c" line="539"/>
         <location filename="../main/main.c" line="540"/>
         <source>Paused
 </source>
@@ -431,14 +389,12 @@ sie abbrechen und das ausgewählte ROM laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="728"/>
         <location filename="../main/main.c" line="729"/>
         <source>Fast Forward</source>
         <translation>Vorspulen</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="963"/>
-        <location filename="../main/main.c" line="965"/>
+        <location filename="../main/main.c" line="967"/>
         <source>The core thread recieved a SIGSEGV signal.
 This means it tried to access protected memory.
 Maybe you have set a wrong ucode for one of the plugins!</source>
@@ -447,7 +403,6 @@ Das bedeutet, es hat versucht auf geschützten Speicher zuzugreifen.
 Vielleicht haben Sie den falschen UCode für eins der Plugins festgelegt.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1498"/>
         <location filename="../main/main.c" line="1500"/>
         <source>Config Dir:  %s
 Install Dir: %s
@@ -456,13 +411,11 @@ Plugin Dir:  %s
         <translation></translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1499"/>
         <location filename="../main/main.c" line="1501"/>
         <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1512"/>
         <location filename="../main/main.c" line="1514"/>
         <source>Couldn&apos;t spawn rom cache thread!</source>
         <translation>Konnte ROM Cache Thread nicht erzeugen!</translation>
@@ -471,7 +424,7 @@ Plugin Dir:  %s
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../main/gui_qt4/aboutdialog.cpp" line="37"/>
+        <location filename="../main/gui_qt4/aboutdialog.cpp" line="58"/>
         <source>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Home Page&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum on EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Licensing: GNU GPL version 2 or later&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Startseite&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;EmuTalk.net Forum&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 Das Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Lizenz: GNU GPL Version 2 oder höher&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
@@ -552,9 +505,6 @@ Plugin Dir:  %s
 <context>
     <name>CheatCheatDialog</name>
     <message>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="51"/>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="54"/>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="130"/>
         <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="133"/>
         <source>%1</source>
         <translation></translation>
@@ -618,7 +568,6 @@ Plugin Dir:  %s
         <translation>Persönliche Cheats</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/cheatdialog.cpp" line="274"/>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="280"/>
         <source>%1</source>
         <translation></translation>
@@ -809,13 +758,9 @@ Plugin Dir:  %s
         <translation>ROM auswählen</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="334"/>
+        <location filename="../main/gui_qt4/mainwindow.cpp" line="335"/>
         <source>There is no Rom loaded. Do you want to load one?</source>
         <translation>Es ist kein ROM geladen? Möchten Sie eins laden?</translation>
-    </message>
-    <message>
-        <source>Emulation not running!</source>
-        <translation type="obsolete">Die Emulation läuft nicht!</translation>
     </message>
     <message numerus="yes">
         <location filename="../main/gui_qt4/mainwindow.cpp" line="473"/>
@@ -824,10 +769,6 @@ Plugin Dir:  %s
             <numerusform>%n ROM</numerusform>
             <numerusform>%n ROMs</numerusform>
         </translation>
-    </message>
-    <message>
-        <source>About Mupen64Plus</source>
-        <translation type="obsolete">Über Mupen64Plus</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="564"/>
@@ -1094,13 +1035,9 @@ Plugin Dir:  %s
         <translation>Keine Glib-Integration</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/main.cpp" line="103"/>
-        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glibmainloop integration. Plugins that use Gtk+&lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glibmain loop support. Most distributions provide thisby default.&lt;/p&gt;&lt;/html&gt;</source>
+        <location filename="../main/gui_qt4/main.cpp" line="108"/>
+        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib mainloop integration. Plugins that use Gtk+ &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glib main loop support. Most distributions provide this by default.&lt;/p&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;p&gt;Ihre Qt-Bibliothek wurde ohne Glib mainloop-Unterstützung kompiliert. Plugins, die Gtk+ benutzen,&lt;b&gt;werden&lt;/b&gt;den Emulator zum Absturz bringen!&lt;/p&gt;&lt;p&gt;Um dies zu beheben, installieren Sie eine Qt-Version mit Glib Mainloop-Unterstützung. Die meisten Distributionen unterstützen dies standardmäßig.&lt;/p&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib                          mainloop integration. Plugins that use Gtk+                          &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;                         &lt;p&gt;To fix this, install a Qt version with glib                          main loop support. Most distributions provide this                          by default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="obsolete">&lt;html&gt;&lt;p&gt;Ihre Qt-Bibliothek wurde ohne Glib mainloop-Unterstützung kompiliert. Plugins, die Gtk+ benutzen,&lt;b&gt;werden&lt;/b&gt;den Emulator zum Absturz bringen!&lt;/p&gt;&lt;p&gt;Um dies zu beheben, installieren Sie eine Qt-Version mit Glib Mainloop-Unterstützung. Die meisten Distributionen unterstützen dies standardmäßig.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -1111,8 +1048,6 @@ Plugin Dir:  %s
         <translation>Beenden</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="152"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="158"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="168"/>
         <source>Retry</source>
         <translation>Wiederholen</translation>
@@ -1123,9 +1058,6 @@ Plugin Dir:  %s
         <translation>Ignorieren</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="157"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="164"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="169"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="180"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
@@ -1136,19 +1068,16 @@ Plugin Dir:  %s
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="163"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="185"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="173"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="178"/>
         <source>Yes</source>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="174"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="179"/>
         <source>No</source>
         <translation>Nein</translation>
@@ -1308,7 +1237,6 @@ Plugin Dir:  %s
 <context>
     <name>RomInfoDialog</name>
     <message>
-        <location filename="../main/gui_qt4/rominfodialog.ui" line="13"/>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="19"/>
         <source>Rom Info</source>
         <translation>ROM-Informationen</translation>
@@ -1640,25 +1568,16 @@ Plugin Dir:  %s
         <translation>Grafik-Plugin</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="256"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="311"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="366"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="421"/>
         <source>Config</source>
         <translation>Konfiguration</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="263"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="318"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="373"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="428"/>
         <source>Test</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="270"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="325"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="380"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="435"/>
         <source>About</source>
         <translation>Über</translation>

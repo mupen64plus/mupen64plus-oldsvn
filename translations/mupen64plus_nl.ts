@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="en_US">
-<defaultcodec></defaultcodec>
+<!DOCTYPE TS><TS version="1.1" language="en_US">
 <context>
     <name></name>
     <message>
@@ -185,7 +183,6 @@
         <translation>Geselecteerd status slot: %d</translation>
     </message>
     <message>
-        <location filename="../main/savestates.c" line="210"/>
         <location filename="../main/savestates.c" line="480"/>
         <source>Saved state to: %s</source>
         <translation>Status opgeslagen in: %s</translation>
@@ -236,35 +233,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error: state file &apos;%s&apos; doesn&apos;t exist</source>
-        <translation type="obsolete">Fout: Status bestand &apos;%s&apos; bestaat niet</translation>
-    </message>
-    <message>
-        <source>Error: Unrecognized savestate format.</source>
-        <translation type="obsolete">Fout: Onherkenbaar savestate formaat.</translation>
-    </message>
-    <message>
-        <source>Error: Savestate version (%08x) doesn&apos;t match current version (%08x).</source>
-        <translation type="obsolete">Fout: Savestate versie (%08x) komt niet overeen met de huidige versie (%08x).</translation>
-    </message>
-    <message>
-        <source>Load state error: Saved state ROM doesn&apos;t match current ROM.</source>
-        <translation type="obsolete">Laad satus fout: Opgeslagen status ROM komt niet overeen met de huidige ROM.</translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="347"/>
         <location filename="../main/savestates.c" line="761"/>
         <source>State loaded from: %s</source>
         <translation>Status geladen van: %s</translation>
     </message>
     <message>
-        <location filename="../main/romcache.c" line="271"/>
         <location filename="../main/romcache.c" line="289"/>
         <source>Rescanning rom cache.</source>
         <translation>Opnieuw doorzoeken rom cache.</translation>
     </message>
     <message>
-        <location filename="../main/romcache.c" line="275"/>
         <location filename="../main/romcache.c" line="292"/>
         <source>Rom cache up to date. %d ROM%s.</source>
         <translation>Rom cache actueel.  %d ROM%s.</translation>
@@ -275,7 +253,7 @@
         <translation>Toegevoegde ROMs %d-%d.</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="449"/>
+        <location filename="../main/rom.c" line="451"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
@@ -284,7 +262,7 @@ Wees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten geeft.
 Wil je het nog steeds laden?</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="454"/>
+        <location filename="../main/rom.c" line="455"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 </source>
@@ -293,7 +271,7 @@ Wees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten geeft.
 </translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="464"/>
+        <location filename="../main/rom.c" line="466"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
@@ -302,7 +280,7 @@ Wees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten geeft.
 Wil je het nog steeds laden?</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="469"/>
+        <location filename="../main/rom.c" line="470"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 </source>
@@ -311,7 +289,7 @@ Wees gewaarschuwd dat dit waarschijnlijk onverwachte resultaten geeft.
 </translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="483"/>
+        <location filename="../main/rom.c" line="484"/>
         <source>Emulation is running. Do you want to
 stop it and load the selected rom?</source>
         <translation>Emulatie is bezig. Wil je het stoppen
@@ -323,81 +301,66 @@ en de geselecteerde rom laden?</translation>
         <translation>Kon de Rom niet laden!</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="624"/>
         <location filename="../main/rom.c" line="658"/>
         <source>Rom closed.</source>
         <translation>Rom gesloten.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="242"/>
         <location filename="../main/main.c" line="243"/>
         <source>Error</source>
         <translation>Fout</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="311"/>
-        <location filename="../main/main.c~" line="321"/>
-        <location filename="../main/main.c" line="312"/>
         <location filename="../main/main.c" line="322"/>
         <source>Playback speed:</source>
         <translation>Afspeelsnelheid:</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="351"/>
         <location filename="../main/main.c" line="352"/>
         <source>Volume Not Supported.</source>
         <translation>Volume niet ondersteund.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="355"/>
         <location filename="../main/main.c" line="356"/>
         <source>Volume</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="388"/>
         <location filename="../main/main.c" line="389"/>
         <source>There is no Rom loaded.</source>
         <translation>Er is geen Rom geladen.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="407"/>
         <location filename="../main/main.c" line="408"/>
         <source>No graphics plugin specified.</source>
         <translation>Geen grafische plugin geselecteerd.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="418"/>
         <location filename="../main/main.c" line="419"/>
         <source>No audio plugin specified.</source>
         <translation>Geen geluids plugin geselecteerd.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="429"/>
         <location filename="../main/main.c" line="430"/>
         <source>No input plugin specified.</source>
         <translation>Geen invoer plugin geselecteerd.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="440"/>
         <location filename="../main/main.c" line="441"/>
         <source>No RSP plugin specified.</source>
         <translation>Geen RSP plugin geselecteerd.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="462"/>
         <location filename="../main/main.c" line="463"/>
         <source>Couldn&apos;t spawn core thread!</source>
         <translation>Kon geen core thread starten!</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="466"/>
         <location filename="../main/main.c" line="467"/>
         <source>Emulation started (PID: %d)</source>
         <translation>Emulatie gestart (PID: %d)</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="479"/>
         <location filename="../main/main.c" line="480"/>
         <source>Stopping emulation.
 </source>
@@ -405,7 +368,6 @@ en de geselecteerde rom laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="505"/>
         <location filename="../main/main.c" line="506"/>
         <source>Emulation stopped.
 </source>
@@ -413,7 +375,6 @@ en de geselecteerde rom laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="522"/>
         <location filename="../main/main.c" line="523"/>
         <source>Emulation continued.
 </source>
@@ -421,9 +382,6 @@ en de geselecteerde rom laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="538"/>
-        <location filename="../main/main.c~" line="539"/>
-        <location filename="../main/main.c" line="539"/>
         <location filename="../main/main.c" line="540"/>
         <source>Paused
 </source>
@@ -431,14 +389,12 @@ en de geselecteerde rom laden?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="728"/>
         <location filename="../main/main.c" line="729"/>
         <source>Fast Forward</source>
         <translation>Vooruit Spoelen</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="963"/>
-        <location filename="../main/main.c" line="965"/>
+        <location filename="../main/main.c" line="967"/>
         <source>The core thread recieved a SIGSEGV signal.
 This means it tried to access protected memory.
 Maybe you have set a wrong ucode for one of the plugins!</source>
@@ -447,7 +403,6 @@ Dit betekent dat het probeerde om toegang tot beschermd geheugen te krijgen.
 Misschien heb je een verkeerde ucode voor één van de plugins ingesteld!</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1498"/>
         <location filename="../main/main.c" line="1500"/>
         <source>Config Dir:  %s
 Install Dir: %s
@@ -459,13 +414,11 @@ Plugin Map:  %s
 </translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1499"/>
         <location filename="../main/main.c" line="1501"/>
         <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
         <translation>Configuratie Map: &quot;%s&quot;, Installatie Map: &quot;%s&quot;, Plugin Map:  &quot;%s&quot;</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1512"/>
         <location filename="../main/main.c" line="1514"/>
         <source>Couldn&apos;t spawn rom cache thread!</source>
         <translation>Kon geen rom cache thread starten!</translation>
@@ -474,7 +427,7 @@ Plugin Map:  %s
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../main/gui_qt4/aboutdialog.cpp" line="37"/>
+        <location filename="../main/gui_qt4/aboutdialog.cpp" line="58"/>
         <source>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Home Page&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum on EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Licensing: GNU GPL version 2 or later&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -555,9 +508,6 @@ Plugin Map:  %s
 <context>
     <name>CheatCheatDialog</name>
     <message>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="51"/>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="54"/>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="130"/>
         <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="133"/>
         <source>%1</source>
         <translation type="unfinished"></translation>
@@ -621,7 +571,6 @@ Plugin Map:  %s
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/cheatdialog.cpp" line="274"/>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="280"/>
         <source>%1</source>
         <translation type="unfinished"></translation>
@@ -812,13 +761,9 @@ Plugin Map:  %s
         <translation>Selecteer Rom</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="334"/>
+        <location filename="../main/gui_qt4/mainwindow.cpp" line="335"/>
         <source>There is no Rom loaded. Do you want to load one?</source>
         <translation>Er is geen Rom geladen. Wil je een Rom laden?</translation>
-    </message>
-    <message>
-        <source>Emulation not running!</source>
-        <translation type="obsolete">Emulatie is niet gestart!</translation>
     </message>
     <message numerus="yes">
         <location filename="../main/gui_qt4/mainwindow.cpp" line="473"/>
@@ -827,10 +772,6 @@ Plugin Map:  %s
             <numerusform>%n rom</numerusform>
             <numerusform>%n roms</numerusform>
         </translation>
-    </message>
-    <message>
-        <source>About Mupen64Plus</source>
-        <translation type="obsolete">Over Mupen64Plus</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="564"/>
@@ -1097,13 +1038,9 @@ Plugin Map:  %s
         <translation>Geen Glib integratie</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/main.cpp" line="103"/>
-        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glibmainloop integration. Plugins that use Gtk+&lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glibmain loop support. Most distributions provide thisby default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib                          mainloop integration. Plugins that use Gtk+                          &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;                         &lt;p&gt;To fix this, install a Qt version with glib                          main loop support. Most distributions provide this                          by default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="obsolete">&lt;html&gt;&lt;p&gt;Je Qt bibliotheek was gecompileert zonder glib mainloop integratie. Plugins die Gtk+ gebruiken &lt;b&gt;zullen&lt;/b&gt; de emulator crashen!&lt;/p&gt;&lt;p&gt;Dit kan worden opgelost door een Qt versie met glib main loop ondersteuning te installeren. De meeste distributies ondersteunen dit standaard.&lt;/p&gt;&lt;/html&gt;</translation>
+        <location filename="../main/gui_qt4/main.cpp" line="108"/>
+        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib mainloop integration. Plugins that use Gtk+ &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glib main loop support. Most distributions provide this by default.&lt;/p&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;p&gt;Je Qt bibliotheek was gecompileert zonder glib mainloop integratie. Plugins die Gtk+ gebruiken &lt;b&gt;zullen&lt;/b&gt; de emulator crashen!&lt;/p&gt;&lt;p&gt;Dit kan worden opgelost door een Qt versie met glib main loop ondersteuning te installeren. De meeste distributies ondersteunen dit standaard.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -1114,8 +1051,6 @@ Plugin Map:  %s
         <translation>Beëindigen</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="152"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="158"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="168"/>
         <source>Retry</source>
         <translation>Nogmaals</translation>
@@ -1126,9 +1061,6 @@ Plugin Map:  %s
         <translation>Negeren</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="157"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="164"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="169"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="180"/>
         <source>Cancel</source>
         <translation>Annuleren</translation>
@@ -1139,19 +1071,16 @@ Plugin Map:  %s
         <translation>Doorgaan</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="163"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="185"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="173"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="178"/>
         <source>Yes</source>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="174"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="179"/>
         <source>No</source>
         <translation>Nee</translation>
@@ -1311,7 +1240,6 @@ Plugin Map:  %s
 <context>
     <name>RomInfoDialog</name>
     <message>
-        <location filename="../main/gui_qt4/rominfodialog.ui" line="13"/>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="19"/>
         <source>Rom Info</source>
         <translation></translation>
@@ -1643,25 +1571,16 @@ Plugin Map:  %s
         <translation>Grafische Plugin</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="256"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="311"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="366"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="421"/>
         <source>Config</source>
         <translation>Configuratie</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="263"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="318"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="373"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="428"/>
         <source>Test</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="270"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="325"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="380"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="435"/>
         <source>About</source>
         <translation>Over</translation>

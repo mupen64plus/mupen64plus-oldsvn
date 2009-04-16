@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="fi_FI">
+<!DOCTYPE TS><TS version="1.1" language="fi_FI">
 <context>
     <name></name>
     <message>
@@ -171,7 +170,6 @@
     <message>
         <location filename="../main/util.c" line="693"/>
         <source>None</source>
-        <translatorcomment>Huono käännös...</translatorcomment>
         <translation>Ei mikään</translation>
     </message>
     <message>
@@ -185,7 +183,6 @@
         <translation>Valittu tila: %d</translation>
     </message>
     <message>
-        <location filename="../main/savestates.c" line="210"/>
         <location filename="../main/savestates.c" line="480"/>
         <source>Saved state to: %s</source>
         <translation>Tila tallennettu tiedostoon: %s</translation>
@@ -236,19 +233,16 @@
         <translation>Tilatiedoston ROM-otsikko ei vastaa nykyistä ROM tiedostoa.</translation>
     </message>
     <message>
-        <location filename="../main/savestates.c" line="347"/>
         <location filename="../main/savestates.c" line="761"/>
         <source>State loaded from: %s</source>
         <translation>Tila ladattu tiedostosta %s</translation>
     </message>
     <message>
-        <location filename="../main/romcache.c" line="271"/>
         <location filename="../main/romcache.c" line="289"/>
         <source>Rescanning rom cache.</source>
         <translation>Uudistetaan ROM puskuri.</translation>
     </message>
     <message>
-        <location filename="../main/romcache.c" line="275"/>
         <location filename="../main/romcache.c" line="292"/>
         <source>Rom cache up to date. %d ROM%s.</source>
         <translation>Rom puskuri ajantasainen. %d ROM tiedostoa.</translation>
@@ -259,35 +253,35 @@
         <translation>Lisätty ROM-tiedostot %d-%d.</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="449"/>
+        <location filename="../main/rom.c" line="451"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
         <translation>ROM-tiedosto jota yrität ladata on luultavasti viallinen. Tämä voi johtaa ennalta arvaamattomiin tuloksiin. Haluatko silti jatkaa?</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="454"/>
+        <location filename="../main/rom.c" line="455"/>
         <source>The rom you are trying to load is probably a bad dump!
 Be warned that this will probably give unexpected results.
 </source>
         <translation>ROM-tiedosto jota yrität ladata on luultavasti viallinen. Tämä voi johtaa ennalta arvaamattomiin tuloksiin.</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="464"/>
+        <location filename="../main/rom.c" line="466"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 Do you still want to run it?</source>
         <translation>ROM-tiedostoa jota yrität ladata on luultavasti muokattu. Tämä voi johtaa ennalta arvaamattomiin tuloksiin. Haluatko silti jatkaa?</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="469"/>
+        <location filename="../main/rom.c" line="470"/>
         <source>The rom you are trying to load is probably a hack!
 Be warned that this will probably give unexpected results.
 </source>
         <translation>ROM-tiedostoa jota yrität ladata on luultavasti muokattu. Tämä voi johtaa ennalta arvaamattomiin lopputuloksiin.</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="483"/>
+        <location filename="../main/rom.c" line="484"/>
         <source>Emulation is running. Do you want to
 stop it and load the selected rom?</source>
         <translation>Emulaatio on käynnissä. Haluatko pysäyttää sen ja ladata valittu ROM-tiedosto?</translation>
@@ -298,125 +292,102 @@ stop it and load the selected rom?</source>
         <translation>ROM-tiedostoa ei voitu ladata!</translation>
     </message>
     <message>
-        <location filename="../main/rom.c" line="624"/>
         <location filename="../main/rom.c" line="658"/>
         <source>Rom closed.</source>
         <translation>ROM-tiedosto suljettu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="242"/>
         <location filename="../main/main.c" line="243"/>
         <source>Error</source>
         <translation>Virhe</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="311"/>
-        <location filename="../main/main.c~" line="321"/>
-        <location filename="../main/main.c" line="312"/>
         <location filename="../main/main.c" line="322"/>
         <source>Playback speed:</source>
         <translation>Toistonopeus:</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="351"/>
         <location filename="../main/main.c" line="352"/>
         <source>Volume Not Supported.</source>
         <translation>Äänentaso ei ole tuettu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="355"/>
         <location filename="../main/main.c" line="356"/>
         <source>Volume</source>
         <translation>Äänentaso</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="388"/>
         <location filename="../main/main.c" line="389"/>
         <source>There is no Rom loaded.</source>
         <translation>ROM-tiedostoa ei ole ladattu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="407"/>
         <location filename="../main/main.c" line="408"/>
         <source>No graphics plugin specified.</source>
         <translation>Näyttöliitännäistä ei ole valittu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="418"/>
         <location filename="../main/main.c" line="419"/>
         <source>No audio plugin specified.</source>
         <translation>Ääniliitännäistä ei ole valittu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="429"/>
         <location filename="../main/main.c" line="430"/>
         <source>No input plugin specified.</source>
         <translation>Ohjainliitännäistä ei ole valittu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="440"/>
         <location filename="../main/main.c" line="441"/>
         <source>No RSP plugin specified.</source>
         <translation>RSP-liitännäistä ei ole valittu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="462"/>
         <location filename="../main/main.c" line="463"/>
         <source>Couldn&apos;t spawn core thread!</source>
         <translation>Ydinsäiettä ei voitu luoda!</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="466"/>
         <location filename="../main/main.c" line="467"/>
         <source>Emulation started (PID: %d)</source>
         <translation>Emulaatio käynnissä (PID: %d)</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="479"/>
         <location filename="../main/main.c" line="480"/>
         <source>Stopping emulation.
 </source>
         <translation>Pysäytetään emulaatio.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="505"/>
         <location filename="../main/main.c" line="506"/>
         <source>Emulation stopped.
 </source>
         <translation>Emulaatio pysäytetty.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="522"/>
         <location filename="../main/main.c" line="523"/>
         <source>Emulation continued.
 </source>
         <translation>Emulaatio jatkettu.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="538"/>
-        <location filename="../main/main.c~" line="539"/>
-        <location filename="../main/main.c" line="539"/>
         <location filename="../main/main.c" line="540"/>
         <source>Paused
 </source>
         <translation>Pysäytetty</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="728"/>
         <location filename="../main/main.c" line="729"/>
         <source>Fast Forward</source>
         <translation>Pikakelaus eteenpäin</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="963"/>
-        <location filename="../main/main.c" line="965"/>
+        <location filename="../main/main.c" line="967"/>
         <source>The core thread recieved a SIGSEGV signal.
 This means it tried to access protected memory.
 Maybe you have set a wrong ucode for one of the plugins!</source>
         <translation>Ydinsäie vastaanotti SIGSEGV signaalin. Tämä tarkoittaa sitä, että säie yritti käyttää suojattua muistia. Ehkä jossakin liitännäisessä on määritelty väärä ucode.</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1498"/>
         <location filename="../main/main.c" line="1500"/>
         <source>Config Dir:  %s
 Install Dir: %s
@@ -427,13 +398,11 @@ Asennuskansio: %s
 Liitännäiskansio: %s</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1499"/>
         <location filename="../main/main.c" line="1501"/>
         <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
         <translation>Konfiguraatiokansio: &quot;%s&quot; Asennuskansio: &quot;%s&quot; Liitännäiskansio: &quot;%s&quot;</translation>
     </message>
     <message>
-        <location filename="../main/main.c~" line="1512"/>
         <location filename="../main/main.c" line="1514"/>
         <source>Couldn&apos;t spawn rom cache thread!</source>
         <translation>ROM-puskurisäiettä ei voitu luoda!</translation>
@@ -442,7 +411,7 @@ Liitännäiskansio: %s</translation>
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../main/gui_qt4/aboutdialog.cpp" line="37"/>
+        <location filename="../main/gui_qt4/aboutdialog.cpp" line="58"/>
         <source>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Home Page&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Forum on EmuTalk.net&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 The Mupen64Plus Team&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Licensing: GNU GPL version 2 or later&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;p&gt;&lt;center&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;&lt;img src=&quot;%1mupen64logo.png&quot;&gt;&lt;/a&gt;&lt;br/&gt;Version %2&lt;br/&gt;&lt;a href=&quot;http://code.google.com/p/mupen64plus/&quot;&gt;Kotisivu&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.emutalk.net/forumdisplay.php?f=113&quot;&gt;Keskustelupalsta EmuTalk.net-sivustolla&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;p&gt;&lt;center&gt;Copyright &amp;copy; 2007-2009 Mupen64Plus Kehittäjäryhmä&lt;br/&gt;&lt;a href=&quot;http://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;Lisenssi: GNU GPL versio 2 tai uudempi&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
@@ -523,9 +492,6 @@ Liitännäiskansio: %s</translation>
 <context>
     <name>CheatCheatDialog</name>
     <message>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="51"/>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="54"/>
-        <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="130"/>
         <location filename="../main/gui_qt4/cheatcheatdialog.cpp" line="133"/>
         <source>%1</source>
         <translation></translation>
@@ -589,7 +555,6 @@ Liitännäiskansio: %s</translation>
         <translation>Henkilökohtaiset Huijauskoodit</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/cheatdialog.cpp" line="274"/>
         <location filename="../main/gui_qt4/cheatdialog.cpp" line="280"/>
         <source>%1</source>
         <translation></translation>
@@ -780,7 +745,7 @@ Liitännäiskansio: %s</translation>
         <translation>Valitse ROM-tiedosto</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="334"/>
+        <location filename="../main/gui_qt4/mainwindow.cpp" line="335"/>
         <source>There is no Rom loaded. Do you want to load one?</source>
         <translation>ROM-tiedostoa ei ole ladattu. Haluatko ladata?</translation>
     </message>
@@ -1057,8 +1022,8 @@ Liitännäiskansio: %s</translation>
         <translation>Puuttuva Glib Integraatio</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/main.cpp" line="103"/>
-        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glibmainloop integration. Plugins that use Gtk+&lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glibmain loop support. Most distributions provide thisby default.&lt;/p&gt;&lt;/html&gt;</source>
+        <location filename="../main/gui_qt4/main.cpp" line="108"/>
+        <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib mainloop integration. Plugins that use Gtk+ &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glib main loop support. Most distributions provide this by default.&lt;/p&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;p&gt;Qt kirjastosi on käännetty ilman tukea glib-pääsilmukalle. Liitännäiset jotka käyttävät Gtk+-kirjastoa kaatavat emulaattorin varmasti.&lt;/p&gt;&lt;p&gt;Korjataksesi tämä, asenna versio Qt kirjastoista jossa on tämä tuki. Useimmat jakelupaketit sisältävät tämän.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
 </context>
@@ -1070,8 +1035,6 @@ Liitännäiskansio: %s</translation>
         <translation>Keskeytä</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="152"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="158"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="168"/>
         <source>Retry</source>
         <translation>Yritä uudelleen</translation>
@@ -1082,9 +1045,6 @@ Liitännäiskansio: %s</translation>
         <translation>Sivuuta</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="157"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="164"/>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="169"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="180"/>
         <source>Cancel</source>
         <translation>Peruuta</translation>
@@ -1095,19 +1055,16 @@ Liitännäiskansio: %s</translation>
         <translation>Jatka</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="163"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="185"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="173"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="178"/>
         <source>Yes</source>
         <translation>Kyllä</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="174"/>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="179"/>
         <source>No</source>
         <translation>Ei</translation>
@@ -1267,7 +1224,6 @@ Liitännäiskansio: %s</translation>
 <context>
     <name>RomInfoDialog</name>
     <message>
-        <location filename="../main/gui_qt4/rominfodialog.ui" line="13"/>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="19"/>
         <source>Rom Info</source>
         <translation>ROM Tietoja</translation>
@@ -1599,25 +1555,16 @@ Liitännäiskansio: %s</translation>
         <translation>Näyttöliitännäinen</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="256"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="311"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="366"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="421"/>
         <source>Config</source>
         <translation>Muuta asetuksia</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="263"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="318"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="373"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="428"/>
         <source>Test</source>
         <translation>Testaa</translation>
     </message>
     <message>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="270"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="325"/>
-        <location filename="../main/gui_qt4/settingsdialog.ui" line="380"/>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="435"/>
         <source>About</source>
         <translation>Tietoja</translation>

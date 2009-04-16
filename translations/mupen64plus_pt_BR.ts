@@ -1,191 +1,376 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="1.1" language="en">
+<!DOCTYPE TS><TS version="1.1" language="pt_BR">
 <context>
     <name></name>
     <message>
         <location filename="../main/util.c" line="539"/>
         <source>Demo</source>
-        <translation type="unfinished"></translation>
+        <translation>Demonstração</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="543"/>
         <source>Beta</source>
-        <translation type="unfinished"></translation>
+        <translation>Beta</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="547"/>
         <source>USA/Japan</source>
-        <translation type="unfinished"></translation>
+        <translation>EUA/Japão</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="551"/>
         <source>Germany</source>
-        <translation type="unfinished"></translation>
+        <translation>Alemanha</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="555"/>
         <source>USA</source>
-        <translation type="unfinished"></translation>
+        <translation>EUA</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="559"/>
         <source>France</source>
-        <translation type="unfinished"></translation>
+        <translation>França</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="563"/>
         <source>Italy</source>
-        <translation type="unfinished"></translation>
+        <translation>Itália</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="567"/>
         <source>Japan</source>
-        <translation type="unfinished"></translation>
+        <translation>Japão</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="571"/>
         <source>Spain</source>
-        <translation type="unfinished"></translation>
+        <translation>Espanha</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="575"/>
         <source>Australia (0x%2.2X)</source>
-        <translation type="unfinished"></translation>
+        <translation>Austrália (0x%2.2X)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="580"/>
         <source>Europe (0x%02X)</source>
-        <translation type="unfinished"></translation>
+        <translation>Europa (0x%02X)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="584"/>
         <source>Unknown (0x%02X)</source>
-        <translation type="unfinished"></translation>
+        <translation>Desconhecido (0x%02X)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="594"/>
         <source>Uncompressed</source>
-        <translation type="unfinished"></translation>
+        <translation>Descomprimido</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="597"/>
         <source>Zip</source>
-        <translation type="unfinished"></translation>
+        <translation>Zip</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="600"/>
         <source>Gzip</source>
-        <translation type="unfinished"></translation>
+        <translation>Gzip</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="603"/>
         <source>Bzip2</source>
-        <translation type="unfinished"></translation>
+        <translation>Bzip2</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="606"/>
         <source>LZMA</source>
-        <translation type="unfinished"></translation>
+        <translation>LZMA</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="609"/>
         <source>7zip</source>
-        <translation type="unfinished"></translation>
+        <translation>7zip</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="621"/>
         <source>.z64 (native)</source>
-        <translation type="unfinished"></translation>
+        <translation>.z64 (nativo)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="624"/>
         <source>.v64 (byteswapped)</source>
-        <translation type="unfinished"></translation>
+        <translation>.v64 (byte trocado)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="627"/>
         <source>.n64 (wordswapped)</source>
-        <translation type="unfinished"></translation>
+        <translation>.n64 (Palavra trocada)</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="639"/>
         <source>CIC-NUS-6101</source>
-        <translation type="unfinished"></translation>
+        <translation>CIC-NUS-6101</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="642"/>
         <source>CIC-NUS-6102</source>
-        <translation type="unfinished"></translation>
+        <translation>CIC-NUS-6102</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="645"/>
         <source>CIC-NUS-6103</source>
-        <translation type="unfinished"></translation>
+        <translation>CIC-NUS-6103</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="648"/>
         <source>CIC-NUS-6105</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/util.c" line="651"/>
-        <source>CIC-NUS-6106</source>
-        <translation type="unfinished"></translation>
+        <translation>CIC-NUS-6105</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="663"/>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Sim</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="666"/>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Não</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="678"/>
         <source>Eeprom 4KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Eeprom 4KB</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="681"/>
         <source>Eeprom 16KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Eeprom 16KB</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="684"/>
         <source>SRAM</source>
-        <translation type="unfinished"></translation>
+        <translation>SRAM</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="687"/>
         <source>Flash RAM</source>
-        <translation type="unfinished"></translation>
+        <translation>Flash RAM</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="690"/>
         <source>Controller Pack</source>
-        <translation type="unfinished"></translation>
+        <translation>Pack Do Controle</translation>
     </message>
     <message>
         <location filename="../main/util.c" line="693"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>nenhum</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="66"/>
         <source>Selected state file: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo selecionado de estado: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="70"/>
         <source>Selected state slot: %d</source>
-        <translation type="unfinished"></translation>
+        <translation>Espaço de estado selecionado: %s</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="480"/>
         <source>Saved state to: %s</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar estado para: %s</translation>
+    </message>
+    <message>
+        <location filename="../main/savestates.c" line="761"/>
+        <source>State loaded from: %s</source>
+        <translation>Estado carregado de: %s</translation>
+    </message>
+    <message>
+        <location filename="../main/romcache.c" line="289"/>
+        <source>Rescanning rom cache.</source>
+        <translation>Re-escaneando o cache de roms.</translation>
+    </message>
+    <message>
+        <location filename="../main/romcache.c" line="292"/>
+        <source>Rom cache up to date. %d ROM%s.</source>
+        <translation>O cache de rom está atualizado. %d ROMS%s.</translation>
+    </message>
+    <message>
+        <location filename="../main/romcache.c" line="536"/>
+        <source>Added ROMs %d-%d.</source>
+        <translation>%d-%d roms adicionadas.</translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="451"/>
+        <source>The rom you are trying to load is probably a bad dump!
+Be warned that this will probably give unexpected results.
+Do you still want to run it?</source>
+        <translation>A rom que estás tentando carregar é provavelmente um dump ruim!
+Esteja avisado que isso provavelmente retornará um resultado inexperado.
+Ainda sim queres carrega-la?</translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="455"/>
+        <source>The rom you are trying to load is probably a bad dump!
+Be warned that this will probably give unexpected results.
+</source>
+        <translation>A rom que estás tentando carregar é provavelmente um dump ruim!
+Esteja avisado que isso provavelmente retornará um resultado inexperado.</translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="466"/>
+        <source>The rom you are trying to load is probably a hack!
+Be warned that this will probably give unexpected results.
+Do you still want to run it?</source>
+        <translation>A rom que estás tentando carregar é provavelmente um hack!
+Esteja avisado que isso provavelmente retornará um resultado inexperado.
+Ainda sim queres carrega-la?</translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="470"/>
+        <source>The rom you are trying to load is probably a hack!
+Be warned that this will probably give unexpected results.
+</source>
+        <translation>A rom que estás tentando carregar é provavelmente um hack!￼
+Esteja avisado que isso provavelmente retornará um resultado inexperado.</translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="484"/>
+        <source>Emulation is running. Do you want to
+stop it and load the selected rom?</source>
+        <translation>A emulação está correndo. Queres para-la
+e carregar a rom selecionada?</translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="523"/>
+        <source>Couldn&apos;t load Rom!</source>
+        <translation>Impossível carregar esta Rom!</translation>
+    </message>
+    <message>
+        <location filename="../main/rom.c" line="658"/>
+        <source>Rom closed.</source>
+        <translation>Rom Fechada.</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="243"/>
+        <source>Error</source>
+        <translation>Erro</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="322"/>
+        <source>Playback speed:</source>
+        <translation>Velocidade de Playback:</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="352"/>
+        <source>Volume Not Supported.</source>
+        <translation>Volume Não suportado.</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="356"/>
+        <source>Volume</source>
+        <translation>Volume</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="389"/>
+        <source>There is no Rom loaded.</source>
+        <translation>Não há Rom Carregada.</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="408"/>
+        <source>No graphics plugin specified.</source>
+        <translation>Plugin de gráficos não especificado.</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="419"/>
+        <source>No audio plugin specified.</source>
+        <translation>Plugin de audio não especificado.</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="430"/>
+        <source>No input plugin specified.</source>
+        <translation>Plugin de entrada não especificado.</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="441"/>
+        <source>No RSP plugin specified.</source>
+        <translation>Plugin de RSP não especificado.</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="463"/>
+        <source>Couldn&apos;t spawn core thread!</source>
+        <translation>Impossível aflorar a core thread!</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="467"/>
+        <source>Emulation started (PID: %d)</source>
+        <translation>Emulação Iniciada (PID: %d)</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="480"/>
+        <source>Stopping emulation.
+</source>
+        <translation>Parando Emulação.
+</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="506"/>
+        <source>Emulation stopped.
+</source>
+        <translation>Emulação parada.
+</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="523"/>
+        <source>Emulation continued.
+</source>
+        <translation>Emulação continuada.
+</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="540"/>
+        <source>Paused
+</source>
+        <translation>Pausado</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="729"/>
+        <source>Fast Forward</source>
+        <translation>Avanço Rápido</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="967"/>
+        <source>The core thread recieved a SIGSEGV signal.
+This means it tried to access protected memory.
+Maybe you have set a wrong ucode for one of the plugins!</source>
+        <translation>A core thread recebeu um sinal SIGSEGV.
+Isso significa que tentou acessar a memória protegida.
+Talvez tenhas definido um unicode errôneo para um dos plugins!</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="1500"/>
+        <source>Config Dir:  %s
+Install Dir: %s
+Plugin Dir:  %s
+</source>
+        <translation>Config Dir:  %sInstall Dir: %sPlugin Dir:  %s</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="1501"/>
+        <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
+        <translation>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</translation>
+    </message>
+    <message>
+        <location filename="../main/main.c" line="1514"/>
+        <source>Couldn&apos;t spawn rom cache thread!</source>
+        <translation>Impossível aflorar a thread do cache de roms!</translation>
+    </message>
+    <message>
+        <location filename="../main/util.c" line="651"/>
+        <source>CIC-NUS-6106</source>
+        <translation type="unfinished">CIC-NUS-6106</translation>
     </message>
     <message>
         <location filename="../main/savestates.c" line="244"/>
@@ -205,11 +390,6 @@
     <message>
         <location filename="../main/savestates.c" line="278"/>
         <source>State ROM MD5 does not match current ROM.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/savestates.c" line="761"/>
-        <source>State loaded from: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -237,174 +417,6 @@
         <source>State ROM header does not match current ROM.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location filename="../main/romcache.c" line="289"/>
-        <source>Rescanning rom cache.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/romcache.c" line="292"/>
-        <source>Rom cache up to date. %d ROM%s.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/romcache.c" line="536"/>
-        <source>Added ROMs %d-%d.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="451"/>
-        <source>The rom you are trying to load is probably a bad dump!
-Be warned that this will probably give unexpected results.
-Do you still want to run it?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="455"/>
-        <source>The rom you are trying to load is probably a bad dump!
-Be warned that this will probably give unexpected results.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="466"/>
-        <source>The rom you are trying to load is probably a hack!
-Be warned that this will probably give unexpected results.
-Do you still want to run it?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="470"/>
-        <source>The rom you are trying to load is probably a hack!
-Be warned that this will probably give unexpected results.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="484"/>
-        <source>Emulation is running. Do you want to
-stop it and load the selected rom?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="523"/>
-        <source>Couldn&apos;t load Rom!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/rom.c" line="658"/>
-        <source>Rom closed.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="243"/>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="322"/>
-        <source>Playback speed:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="352"/>
-        <source>Volume Not Supported.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="356"/>
-        <source>Volume</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="389"/>
-        <source>There is no Rom loaded.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="408"/>
-        <source>No graphics plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="419"/>
-        <source>No audio plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="430"/>
-        <source>No input plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="441"/>
-        <source>No RSP plugin specified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="463"/>
-        <source>Couldn&apos;t spawn core thread!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="467"/>
-        <source>Emulation started (PID: %d)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="480"/>
-        <source>Stopping emulation.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="506"/>
-        <source>Emulation stopped.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="523"/>
-        <source>Emulation continued.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="540"/>
-        <source>Paused
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="729"/>
-        <source>Fast Forward</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="967"/>
-        <source>The core thread recieved a SIGSEGV signal.
-This means it tried to access protected memory.
-Maybe you have set a wrong ucode for one of the plugins!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="1500"/>
-        <source>Config Dir:  %s
-Install Dir: %s
-Plugin Dir:  %s
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="1501"/>
-        <source>Config Dir: &quot;%s&quot;, Install Dir: &quot;%s&quot;, Plugin Dir:  &quot;%s&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/main.c" line="1514"/>
-        <source>Couldn&apos;t spawn rom cache thread!</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>AboutDialog</name>
@@ -416,7 +428,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/aboutdialog.ui" line="14"/>
         <source>About Mupen64Plus</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sobre Mupen64Plus</translation>
     </message>
 </context>
 <context>
@@ -707,27 +719,27 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwidget.cpp" line="201"/>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.cpp" line="203"/>
         <source>Properties...</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriedades...</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.cpp" line="206"/>
         <source>Refresh Rom List</source>
-        <translation type="unfinished"></translation>
+        <translation>Recarregar a Lista de Roms</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.ui" line="13"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Forma</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwidget.ui" line="24"/>
         <source>&amp;Filter:</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Filtro:</translation>
     </message>
 </context>
 <context>
@@ -735,17 +747,190 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="285"/>
         <source>Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation>Confirmar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="302"/>
         <source>Select Rom</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar Rom</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="335"/>
         <source>There is no Rom loaded. Do you want to load one?</source>
-        <translation type="unfinished"></translation>
+        <translation>Não há rom selecionada. Queres carregar uma?</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../main/gui_qt4/mainwindow.cpp" line="473"/>
+        <source>%n rom(s)</source>
+        <translation>
+            <numerusform>%n rom(s)</numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.cpp" line="564"/>
+        <source>Slot &amp;%1</source>
+        <translation>Espaço &amp;%1</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="17"/>
+        <source>Mupen64Plus</source>
+        <translation>Mupen64Plus</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="37"/>
+        <source>&amp;File</source>
+        <translation>&amp;Arquivo</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="46"/>
+        <source>&amp;Emulation</source>
+        <translation>&amp;Emulação</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="64"/>
+        <source>&amp;Settings</source>
+        <translation>&amp;Configurações</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="76"/>
+        <source>&amp;Help</source>
+        <translation>A&amp;juda</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="99"/>
+        <source>Toolbar</source>
+        <translation>Barra de Ferramentas</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="130"/>
+        <source>&amp;Open Rom</source>
+        <translation>A&amp;brir Rom</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="133"/>
+        <source>Ctrl+O</source>
+        <translation>Ctrl+O</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="138"/>
+        <source>&amp;Close Rom</source>
+        <translation>&amp;Fechar Rom</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="141"/>
+        <source>Ctrl+W</source>
+        <translation>Ctrl+W</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="146"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Sair</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="149"/>
+        <source>Ctrl+Q</source>
+        <translation>Ctrl+Q</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="157"/>
+        <source>&amp;Start</source>
+        <translation>&amp;iniciar</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="165"/>
+        <source>&amp;Pause</source>
+        <translation>Pa&amp;usar</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="168"/>
+        <source>Space</source>
+        <translation>Espaço</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="176"/>
+        <source>S&amp;top</source>
+        <translation>&amp;Parar</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="179"/>
+        <source>Esc</source>
+        <translation>Esc</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="184"/>
+        <source>Sa&amp;ve State</source>
+        <translation>&amp;Estado Salvo</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="187"/>
+        <source>Ctrl+F7</source>
+        <translation>Ctrl+F7</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="192"/>
+        <source>Save State &amp;as...</source>
+        <translation>Salvar estado c&amp;omo...</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="197"/>
+        <source>&amp;Load State</source>
+        <translation>Carre&amp;gar Estado</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="200"/>
+        <source>Ctrl+F5</source>
+        <translation>Ctrl+F5</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="205"/>
+        <source>L&amp;oad State from...</source>
+        <translation>Carregar estado do arqui&amp;vo...</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="210"/>
+        <source>&amp;Current Save State Slot...</source>
+        <translation>Espa&amp;ço de salva corrente...</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="215"/>
+        <source>&amp;Full Screen</source>
+        <translation>Te&amp;la Cheia</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="218"/>
+        <source>Alt+Return</source>
+        <translation>Alt+Return</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="223"/>
+        <source>&amp;Configure Mupen64Plus</source>
+        <translation>&amp;Configurar Mupen64Plus</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="228"/>
+        <source>&amp;About</source>
+        <translation>&amp;Sobre</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="233"/>
+        <source>About &amp;Qt</source>
+        <translation>Sobre o &amp;Qt</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="244"/>
+        <source>Show &amp;Toolbar</source>
+        <translation>Mostrar a Barra de &amp;Ferramentas</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="255"/>
+        <source>Show &amp;Statusbar</source>
+        <translation>Mostrar A Barra de &amp;Estado</translation>
+    </message>
+    <message>
+        <location filename="../main/gui_qt4/mainwindow.ui" line="266"/>
+        <source>Show F&amp;ilter</source>
+        <translation>Mostrar &amp;Filtro</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="396"/>
@@ -762,182 +947,9 @@ Plugin Dir:  %s
         <source>.zip files (*.zip); .pj files (*.pj)</source>
         <translation type="unfinished"></translation>
     </message>
-    <message numerus="yes">
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="473"/>
-        <source>%n rom(s)</source>
-        <translation>
-            <numerusform>%n rom</numerusform>
-            <numerusform>%n roms</numerusform>
-        </translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.cpp" line="564"/>
-        <source>Slot &amp;%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="17"/>
-        <source>Mupen64Plus</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="37"/>
-        <source>&amp;File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="46"/>
-        <source>&amp;Emulation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="64"/>
-        <source>&amp;Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="76"/>
-        <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.ui" line="82"/>
         <source>&amp;Debug</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="99"/>
-        <source>Toolbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="130"/>
-        <source>&amp;Open Rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="133"/>
-        <source>Ctrl+O</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="138"/>
-        <source>&amp;Close Rom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="141"/>
-        <source>Ctrl+W</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="146"/>
-        <source>&amp;Quit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="149"/>
-        <source>Ctrl+Q</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="157"/>
-        <source>&amp;Start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="165"/>
-        <source>&amp;Pause</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="168"/>
-        <source>Space</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="176"/>
-        <source>S&amp;top</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="179"/>
-        <source>Esc</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="184"/>
-        <source>Sa&amp;ve State</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="187"/>
-        <source>Ctrl+F7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="192"/>
-        <source>Save State &amp;as...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="197"/>
-        <source>&amp;Load State</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="200"/>
-        <source>Ctrl+F5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="205"/>
-        <source>L&amp;oad State from...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="210"/>
-        <source>&amp;Current Save State Slot...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="215"/>
-        <source>&amp;Full Screen</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="218"/>
-        <source>Alt+Return</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="223"/>
-        <source>&amp;Configure Mupen64Plus</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="228"/>
-        <source>&amp;About</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="233"/>
-        <source>About &amp;Qt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="244"/>
-        <source>Show &amp;Toolbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="255"/>
-        <source>Show &amp;Statusbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/gui_qt4/mainwindow.ui" line="266"/>
-        <source>Show F&amp;ilter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1017,12 +1029,12 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/main.cpp" line="102"/>
         <source>No Glib Integration</source>
-        <translation type="unfinished"></translation>
+        <translation>Sem integração com a Glib</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/main.cpp" line="108"/>
         <source>&lt;html&gt;&lt;p&gt;Your Qt library was compiled without glib mainloop integration. Plugins that use Gtk+ &lt;b&gt;will&lt;/b&gt; crash the emulator!&lt;/p&gt;&lt;p&gt;To fix this, install a Qt version with glib main loop support. Most distributions provide this by default.&lt;/p&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;p&gt;Sua Qt foi compilada sem a integração com o glib mainloop. Plugins que usam Gtk+ &lt;b&gt;Vão&lt;/b&gt;causar falha ao emulador!&lt;/p&gt;&lt;p&gt;Para resolver isso, instale uma glib com suporte ao  main loop. A maioria das distribuições distribuem isso por padrão.&lt;/p&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -1030,42 +1042,42 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="151"/>
         <source>Abort</source>
-        <translation type="unfinished"></translation>
+        <translation>Abortar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="168"/>
         <source>Retry</source>
-        <translation type="unfinished"></translation>
+        <translation>Tentar novamente</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="153"/>
         <source>Ignore</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="180"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="159"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation>Continuar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="185"/>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="178"/>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Sim</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/mainwindow.cpp" line="179"/>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Não</translation>
     </message>
 </context>
 <context>
@@ -1088,7 +1100,7 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="13"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Forma</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/debugger/registerwidget.ui" line="34"/>
@@ -1201,22 +1213,22 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="13"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Forma</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="24"/>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="31"/>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>Remover</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/romdirectorieslistwidget.ui" line="38"/>
         <source>Remove All</source>
-        <translation type="unfinished"></translation>
+        <translation>Remover tudo</translation>
     </message>
 </context>
 <context>
@@ -1224,92 +1236,92 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="19"/>
         <source>Rom Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Info da Rom</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="31"/>
         <source>Good Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome Good:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="54"/>
         <source>File Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome do Arquivo:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="77"/>
         <source>Country:</source>
-        <translation type="unfinished"></translation>
+        <translation>País:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="129"/>
         <source>Status:</source>
-        <translation type="unfinished"></translation>
+        <translation>Estado:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="152"/>
         <source>Players:</source>
-        <translation type="unfinished"></translation>
+        <translation>Jogadores:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="175"/>
         <source>Rumble:</source>
-        <translation type="unfinished"></translation>
+        <translation>Rumble:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="198"/>
         <source>Save Type:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tipo de Salva:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="221"/>
         <source>Internal Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome Interno:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="249"/>
         <source>Size:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="277"/>
         <source>CRC1:</source>
-        <translation type="unfinished"></translation>
+        <translation>CRC1:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="305"/>
         <source>CRC2:</source>
-        <translation type="unfinished"></translation>
+        <translation>CRC2:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="333"/>
         <source>MD5 Hash:</source>
-        <translation type="unfinished"></translation>
+        <translation>MD5 Hash:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="361"/>
         <source>Full Path:</source>
-        <translation type="unfinished"></translation>
+        <translation>Caminho completo:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="384"/>
         <source>Compression:</source>
-        <translation type="unfinished"></translation>
+        <translation>Compressão:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="407"/>
         <source>Image Type:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tipo de imagem:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="430"/>
         <source>CIC Chip:</source>
-        <translation type="unfinished"></translation>
+        <translation>CIC Chip:</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rominfodialog.ui" line="450"/>
         <source>User Comments</source>
-        <translation type="unfinished"></translation>
+        <translation>Comentários do Usuário</translation>
     </message>
 </context>
 <context>
@@ -1317,152 +1329,152 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="63"/>
         <source>Demo</source>
-        <translation type="unfinished"></translation>
+        <translation>Demo</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="64"/>
         <source>Beta</source>
-        <translation type="unfinished"></translation>
+        <translation>Beta</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="65"/>
         <source>Japan/USA</source>
-        <translation type="unfinished"></translation>
+        <translation>Japão/EUA</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="66"/>
         <source>USA</source>
-        <translation type="unfinished"></translation>
+        <translation>EUA</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="67"/>
         <source>Germany</source>
-        <translation type="unfinished"></translation>
+        <translation>Alemanha</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="68"/>
         <source>France</source>
-        <translation type="unfinished"></translation>
+        <translation>França</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="69"/>
         <source>Italy</source>
-        <translation type="unfinished"></translation>
+        <translation>Itália</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="70"/>
         <source>Japan</source>
-        <translation type="unfinished"></translation>
+        <translation>Japão</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="71"/>
         <source>Spain</source>
-        <translation type="unfinished"></translation>
+        <translation>Espanha</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="72"/>
         <source>Australia</source>
-        <translation type="unfinished"></translation>
+        <translation>Austrália</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="73"/>
         <source>Europe</source>
-        <translation type="unfinished"></translation>
+        <translation>Europa</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="74"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>Desconhecido</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="224"/>
         <source>%0 Mbit</source>
-        <translation type="unfinished"></translation>
+        <translation>%0 Mbit</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="251"/>
         <source>Internal error</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro interno</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="320"/>
         <source>Country</source>
-        <translation type="unfinished"></translation>
+        <translation>País</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="321"/>
         <source>Good Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome no Good</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="322"/>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Estado</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="323"/>
         <source>User Comments</source>
-        <translation type="unfinished"></translation>
+        <translation>Comentários do Usuário</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="324"/>
         <source>File Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome do Arquivo</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="325"/>
         <source>MD5 Hash</source>
-        <translation type="unfinished"></translation>
+        <translation>MD5 Hash</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="326"/>
         <source>Internal Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Mone Interno</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="327"/>
         <source>CRC1</source>
-        <translation type="unfinished"></translation>
+        <translation>CRC1</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="328"/>
         <source>CRC2</source>
-        <translation type="unfinished"></translation>
+        <translation>CRC2</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="329"/>
         <source>Save Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Tipo de salvo</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="330"/>
         <source>Players</source>
-        <translation type="unfinished"></translation>
+        <translation>Jogadores</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="331"/>
         <source>Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="332"/>
         <source>Compression Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Tipo de compressão</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="333"/>
         <source>Image Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Tipo de imagem</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="334"/>
         <source>CIC Chip</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/rommodel.cpp" line="335"/>
         <source>Rumble</source>
-        <translation type="unfinished"></translation>
+        <translation>Rumble</translation>
     </message>
 </context>
 <context>
@@ -1470,132 +1482,132 @@ Plugin Dir:  %s
     <message>
         <location filename="../main/gui_qt4/settingsdialog.cpp" line="46"/>
         <source>Main Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações Principais</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.cpp" line="49"/>
         <source>Plugins</source>
-        <translation type="unfinished"></translation>
+        <translation>Plugins</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.cpp" line="52"/>
         <source>Rom Browser</source>
-        <translation type="unfinished"></translation>
+        <translation>Navegador de Roms</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="13"/>
         <source>Mupen64Plus Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações do Mupen64Plus </translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="117"/>
         <source>CPU Core</source>
-        <translation type="unfinished"></translation>
+        <translation>CPU Core</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="123"/>
         <source>&amp;Interpreter</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Interpretador</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="130"/>
         <source>Dynamic &amp;Recompiler</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Recompilador Dinâmico</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="137"/>
         <source>&amp;Pure Interpreter</source>
-        <translation type="unfinished"></translation>
+        <translation>Interpretador &amp;Puro</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="147"/>
         <source>Compatibility</source>
-        <translation type="unfinished"></translation>
+        <translation>Compatibilidade</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="153"/>
         <source>Disable compiled &amp;jump</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitar &amp;pulo compilado</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="160"/>
         <source>&amp;Disable Memory Expansion</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Disabilitar Expanção de Memória</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="170"/>
         <source>Miscellaneous</source>
-        <translation type="unfinished"></translation>
+        <translation>Miscelânea</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="176"/>
         <source>A&amp;uto-increment save slot</source>
-        <translation type="unfinished"></translation>
+        <translation>Incrementar A&amp;utomaticamente o espaço de salva</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="183"/>
         <source>Ask &amp;before loading bad dump/hacked rom</source>
-        <translation type="unfinished"></translation>
+        <translation>Perguntar antes de carregar roms &amp;bad dump/hackeadas</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="190"/>
         <source>On &amp;screen display enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>O&amp;sd Habilitado </translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="197"/>
         <source>Always start in &amp;full screen mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Sempre iniciar em modo &amp;tela cheia</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="227"/>
         <source>Graphics Plugin</source>
-        <translation type="unfinished"></translation>
+        <translation>Plugin Gráfico</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="421"/>
         <source>Config</source>
-        <translation type="unfinished"></translation>
+        <translation>Configuração</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="428"/>
         <source>Test</source>
-        <translation type="unfinished"></translation>
+        <translation>Teste</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="435"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="282"/>
         <source>Audio Plugin</source>
-        <translation type="unfinished"></translation>
+        <translation>Plugin de áudio</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="337"/>
         <source>Input Plugin</source>
-        <translation type="unfinished"></translation>
+        <translation>Plugin de entrada</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="392"/>
         <source>RSP Plugin</source>
-        <translation type="unfinished"></translation>
+        <translation>Plugin de RSP</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="454"/>
         <source>Directories</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretórios</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="466"/>
         <source>&amp;Scan directories recursively</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Varrer diretórios recursivamente</translation>
     </message>
     <message>
         <location filename="../main/gui_qt4/settingsdialog.ui" line="473"/>
         <source>Show &amp;full paths in filenames</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar caminho &amp;completo nos arquivos</translation>
     </message>
 </context>
 <context>
