@@ -37,7 +37,7 @@
 
 char* config_dir = NULL;	// Configuration files directory
 bluetooth_addr wiimote_addresses[4];	// Bluetooth addresses of the wiimotes
-static wiimote_t wiimotes[4];	// The wiimotes
+static wiimote_t wiimotes[4] = {WIIMOTE_INIT, WIIMOTE_INIT, WIIMOTE_INIT, WIIMOTE_INIT};	// The wiimotes
 
 // Variables for the wiimote_update() thread
 static pthread_t thread_update;
@@ -272,12 +272,9 @@ EXPORT void CALL RomClosed (void)
 *******************************************************************/
 EXPORT void CALL RomOpen (void)
 {
-	// TODO : NOT hard-code my wiimote address ^^
-	static const char* wiimote_address = "00:1E:A9:3D:AF:9E";
-
-	printf("Press 1+2 on the wiimote for connection...\n");
+	printf("Press 1+2 on the wiimote for connection (bluetooth address : %s)...\n", wiimote_addresses[0]);
 	do
-		wiimote_connect(&wiimotes[0], wiimote_address);
+		wiimote_connect(&wiimotes[0], wiimote_addresses[0]);
 	while(!wiimote_is_open(&wiimotes[0]));
 
 	wiimotes[0].mode.acc = 0;	// No need for accelerometers
