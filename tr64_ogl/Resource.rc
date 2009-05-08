@@ -1,0 +1,149 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CONFIG DIALOG DISCARDABLE  0, 0, 332, 186
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Glide64 Config"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,275,5,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,275,25,50,14
+    LTEXT           "Resolution:",IDC_STATIC,15,46,45,15,SS_CENTERIMAGE
+    COMBOBOX        IDC_RESOLUTION,70,46,75,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Note: Voodoo 2 can only use resolutions up to 800x600.  I recommend for all cards values of 640x480 or 1024x768.",
+                    IDC_STATIC,10,66,145,25
+    CONTROL         "Wireframe",IDC_WIREFRAME,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,100,50,10
+    LTEXT           "Force Microcode:",IDC_STATIC,5,15,55,15,SS_CENTERIMAGE
+    COMBOBOX        IDC_UCODE,70,15,195,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    GROUPBOX        "Rendering",IDC_STATIC,5,35,160,145
+    CONTROL         "FPS counter",IDC_FPS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,175,80,85,10
+    GROUPBOX        "Debug/Misc",IDC_STATIC,170,35,95,110
+    CONTROL         "Log to rdp.txt (SLOW)",IDC_LOGGING,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,175,45,85,10
+    CONTROL         "Autodetect Microcode",IDC_AUTODETECT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,5,85,10
+    GROUPBOX        "Glide Card # (multiple cards)",IDC_STATIC,170,150,95,30
+    COMBOBOX        IDC_FILTER,70,115,90,60,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Filtering mode:",IDC_STATIC,10,115,55,15,SS_CENTERIMAGE
+    CONTROL         "Bilinear filter tex cache",IDC_CACHEFILTER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,175,95,85,10
+    CONTROL         "#1",IDC_GID1,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,
+                    180,160,15,15
+    CONTROL         "#2",IDC_GID2,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,
+                    200,160,15,15
+    CONTROL         "#3",IDC_GID3,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,
+                    220,160,15,15
+    CONTROL         "#4",IDC_GID4,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,
+                    240,160,15,15
+    CONTROL         "Log clear every frame",IDC_LOGCLEAR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,175,55,85,10
+    CONTROL         "Run (+log) in window",IDC_RUNINWINDOW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,175,65,85,10
+    CONTROL         "? combiners as red",IDC_UNKRED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,175,110,85,8
+    CONTROL         "combiner logging",IDC_LOGUNK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,175,120,85,8
+    CONTROL         "Fog enabled",IDC_FOG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,135,60,10
+    CONTROL         "cmb. clear every frame",IDC_UNKCLEAR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,175,130,85,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 325
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 179
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RCDATA
+//
+
+IDR_FONT                RCDATA  DISCARDABLE     "font.tex"
+IDR_CURSOR              RCDATA  DISCARDABLE     "cursor.tex"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,27 @@
+
+* Texrects in mario
+
+* Trail problem in zelda
+
+* White stuff
+
+* Spherical mapping
+
+- Ogy
+
+
+
+- release
+
+* Castlevania flames - caused by loading two textures with one loadblock, loads entire
+  tmem, 512 qwords, which fills both textures, at 0x000 and 0x100.
+
+* Add >256 texrect support - for mario kart and others, chopper attack not included (uses
+  triangles)
+
+* Add >256 tri support - shrink textures that are > 256, don't bother to split it unless
+  it's a texrect
+
+* Add odd-ratioed wrapping - objects CAN wrap at non-power-of-two places, see zappy jellyfish
+  in Jabu-Jabu's belly (lightning texture), stretch these textures to a power of two so that
+  wrapping can be successfully performed.
