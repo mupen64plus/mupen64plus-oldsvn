@@ -11873,7 +11873,7 @@ void InitCombine ()
   LOG ("InitCombine() ");
   memset(&cmb, 0, sizeof(cmb));
   const char *extensions = grGetString (GR_EXTENSION);
-  if (char * extstr = strstr(extensions, "COMBINE")) {
+  if (const char * extstr = strstr(extensions, "COMBINE")) {
     if (!strncmp(extstr, "COMBINE", 7)) {
       LOG ("extensions ");
       cmb.grColorCombineExt = (GRCOLORCOMBINEEXT) grGetProcAddress("grColorCombineExt");

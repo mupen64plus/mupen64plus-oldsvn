@@ -784,7 +784,7 @@ BOOL InitGfx (BOOL evoodoo_using_window)
   printf("bebefore2\n");
   if (settings.fb_hires)
   {
-    if (char * extstr = strstr(extensions, "TEXTUREBUFFER")) 
+    if (const char * extstr = strstr(extensions, "TEXTUREBUFFER")) 
     {
       if (!strncmp(extstr, "TEXTUREBUFFER", 13)) 
       {
