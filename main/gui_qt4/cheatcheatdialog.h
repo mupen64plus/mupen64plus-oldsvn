@@ -22,6 +22,7 @@
 #ifndef CHEATCHEATDIALOG_H
 #define CHEATCHEATDIALOG_H
 
+#include <stdio.h>
 #include <QDialog>
 #include <QStandardItemModel>
 #include "ui_cheatcheatdialog.h"

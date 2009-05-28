@@ -23,6 +23,7 @@
 #ifndef CHEATDIALOG_H
 #define CHEATDIALOG_H
 
+#include <stdio.h>
 #include <QDialog>
 #include "ui_cheatdialog.h"
 
