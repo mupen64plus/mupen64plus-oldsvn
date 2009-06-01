@@ -17,28 +17,15 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <windows.h>
+#include "tr_windows.h"
 #include <math.h>
 #include <stdio.h>
 #include "rdp_registers.h"
 #include "3dmath.h"
 
-typedef float MATRIX3[9];
-typedef float MATRIX4[16];
-typedef float VFLOAT;
-typedef float VECTOR[4];
-
-static void PrintMatrix4(MATRIX4 Matrix);
-static void m4_submat( MATRIX4 mr, MATRIX3 mb, int i, int j );
-static VFLOAT m4_det( MATRIX4 mr );
-static int m4_inverse( MATRIX4 mr, MATRIX4 ma );
-static VFLOAT m3_det( MATRIX3 mat );
-
-//extern HWND hGraphics;
-
 extern BOOL refresh_matrix;
 
-static void PrintMatrix4(MATRIX4 Matrix)
+void PrintMatrix4(MATRIX4 Matrix)
 {
     char text[1024];
     sprintf(text,"%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n",
@@ -49,7 +36,7 @@ static void PrintMatrix4(MATRIX4 Matrix)
 //  MessageBox(hGraphics, text, "Matrix", MB_OK);
 }
 
-static void PrintVector(VECTOR vec)
+void PrintVector(VECTOR vec)
 {
     char text[1024];
     sprintf(text,"%f %f %f \n",
@@ -57,7 +44,7 @@ static void PrintVector(VECTOR vec)
 //  MessageBox(hGraphics, text, "Vector", MB_OK);
 }
 
-static void PrintFloat(float f)
+void PrintFloat(float f)
 {
     char text[1024];
     sprintf(text,"%f\n",f);
@@ -65,7 +52,7 @@ static void PrintFloat(float f)
 }
 
 
-static void m4_submat( MATRIX4 mr, MATRIX3 mb, int i, int j )
+void m4_submat( MATRIX4 mr, MATRIX3 mb, int i, int j )
 {
     int ti, tj, idst, jdst;
     for ( ti = 0; ti < 4; ti++ )
@@ -95,7 +82,7 @@ static void m4_submat( MATRIX4 mr, MATRIX3 mb, int i, int j )
 
     --------------------------
 */
-static VFLOAT m4_det( MATRIX4 mr )
+VFLOAT m4_det( MATRIX4 mr )
 {
     VFLOAT  det, result = 0, i = 1;
     MATRIX3 msub3;
@@ -118,7 +105,7 @@ static VFLOAT m4_det( MATRIX4 mr )
 
     --------------------------
 */
-static int m4_inverse( MATRIX4 mr, MATRIX4 ma )
+int m4_inverse( MATRIX4 mr, MATRIX4 ma )
 {
     int     i, j, sign;
     VFLOAT  mdet = m4_det( ma );
@@ -139,7 +126,7 @@ static int m4_inverse( MATRIX4 mr, MATRIX4 ma )
     return( 1 );
 }
 
-int m3_inverse( MATRIX4 mr, MATRIX4 ma )
+m3_inverse( MATRIX4 mr, MATRIX4 ma )
 {
 //  int     i, j, sign;
 //  VFLOAT  mdet = m4_det( ma );
@@ -197,7 +184,7 @@ int m3_inverse( MATRIX4 mr, MATRIX4 ma )
     return( 1 );
 }
 
-static VFLOAT m3_det( MATRIX3 mat )
+VFLOAT m3_det( MATRIX3 mat )
 {
     VFLOAT det;
 

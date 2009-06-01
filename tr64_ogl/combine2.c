@@ -18,7 +18,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 //#define DEBUGCC
-#include <windows.h>
+#include "tr_windows.h"
 #include <GL/gl.h>
 //#include <glext.h>
 #include <GL/glu.h>
@@ -28,11 +28,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Combine.h"
+#include "combine.h"
 #include "rdp_registers.h"
 #include "texture.h"
 #include "rdp.h"
-#include "debug.h"
+//#include "debug.h"
 
 //* externals
 extern void MDrawVisualTriangle(int vn[3], int t1, int s1, int ss1);

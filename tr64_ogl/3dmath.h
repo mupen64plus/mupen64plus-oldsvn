@@ -21,7 +21,7 @@
 
 #define __3DMATH
 
-#include <windows.h>
+#include "tr_windows.h"
 #include <math.h>
 
 typedef float MATRIX3[9];

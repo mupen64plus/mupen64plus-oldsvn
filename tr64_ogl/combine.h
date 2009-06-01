@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
+#include "tr_windows.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 

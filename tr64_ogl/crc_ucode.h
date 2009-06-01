@@ -20,11 +20,7 @@
 #ifndef _CRC_UCODE_
 #define _CRC_UCODE_
 
-#define _u64   unsigned __int64   /* 64 bit */
-#define _u32   unsigned __int32   /* 32 bit */
-#define _u16   unsigned __int16   /* 16 bit */
-#define _u8    unsigned __int8    /*  8 bit */
-
+#include "type_sizes.h"
 
 typedef struct MicrocodeCRCEntry {
     _u32        crc;

@@ -18,7 +18,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include <windows.h>
+#include "tr_windows.h"
 #include <stdlib.h>
 #include <malloc.h>
 
@@ -26,15 +26,23 @@
 //#include <glext.h>
 #include <GL/glu.h>
 
-#include "display.h"
+//#include "display.h"
 #include "rdp_registers.h"
 
 _u32 flags; 
 HWND HWNDMss;
+
+#ifdef WIN32
 void msg_box(char *textl)
 {
     MessageBox(HWNDMss, textl, "Display", MB_OK);
 }
+#else
+void msg_box(char *text)
+{
+    puts(text);
+}
+#endif
 
 int RePaint;                // are used by DEBUG.cpp and MAIN.cpp
 extern int iRenderWindowX;

@@ -17,20 +17,26 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <windows.h>
-#include <process.h>  // _beginthread, _endthread 
+#include "tr_windows.h"
+#ifdef WIN32
+# include <process.h>  // _beginthread, _endthread
+# define HANDLE TR64_THREAD
+#else
+# include <SDL_thread.h>
+# define SDL_Thread TR64_THREAD
+#endif
 #include <stdio.h>
 #include <GL/gl.h>
 //#include <glext.h>
 #include <GL/glu.h>
 
 #include "gfx.h"
-#include "wingl.h"
+// #include "wingl.h"
 #include "crc_ucode.h"
 #include "rdp_registers.h"
 
 //** externals
-void RealExecuteDList(unsigned __int32 dwAddr);
+void RealExecuteDList(_u32 dwAddr);
 void RefreshVisual(void);
 void CreateConfigDlg();
 void ResizeVisualClipRectangle();
@@ -53,7 +59,7 @@ char versfx[] = ".0c";
 #endif
 
 //** globals
-BOOLEAN  bFullScreen = FALSE; // FullScreen Mode
+BOOL bFullScreen = FALSE; // FullScreen Mode
 //static BOOLEAN bFullScreen = 0;
 
 int             *pInterruptMask;
@@ -74,11 +80,14 @@ _u32            *pVIHGT;
 BOOL            Draw2d = TRUE;
 BOOL            NoBlending = FALSE;         
 BOOL            m_bFullScreen = FALSE;
+
+#ifdef WIN32
 RECT            m_WindowRect;
 WINDOWPLACEMENT m_WindowPlacement;
 HMENU           m_hOldMenu;
 DWORD           m_iOldWindowStyle;
 BOOL interlaced = FALSE;
+#endif
 
 int             ucode_version;
 int skipCount;
@@ -104,7 +113,7 @@ float imgWidth  = 320.0f;
 #define V_CLOSEROM 2
 #define V_STARTROM 3
 
-HANDLE  hVideoThread;
+TR64_THREAD hVideoThread;
 BOOL VideoDone = FALSE;
 int VideoDoNow = V_DONOTHING;
 BOOL VideoBusy = FALSE;
@@ -252,9 +261,6 @@ void   __cdecl DllClose (void)
 int 
 SetWindowedMode(int _width, int _height, int _bpp)
 {
-
-
-
     //SetWindowLong(WinData.hWnd, GWL_STYLE, m_iWindowStyle);
     SetWindowLong(WinData.hWnd, GWL_STYLE, 0);
     ShowWindow(WinData.hWnd, SW_SHOWNORMAL);
