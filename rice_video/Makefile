@@ -131,7 +131,7 @@ targets:
 all: version.h ricevideo.so
 
 ricevideo.so: $(OBJECTS)
-	$(LD) $(OBJECTS) $(GTK_LIBS) $(LDFLAGS) -o $@
+	$(LD) $(OBJECTS) $(LDFLAGS) $(GTK_LIBS) -o $@
 	$(STRIP) $@
 
 clean:

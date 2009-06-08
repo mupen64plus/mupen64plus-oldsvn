@@ -31,7 +31,7 @@ endif
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += -DPIC -D__LINUX__ -Wall
-LDFLAGS += $(GTHREAD_LIBS)
+LDFLAGS += $(GTHREAD_LIBS) -lpng
 
 ifneq ($(OS), WINDOWS)
   CFLAGS += -fpic
