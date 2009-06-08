@@ -25,10 +25,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#include <bzlib.h>
 #include <zlib.h>
 
 #include "zip/unzip.h"
-#include "bzip2/bzlib.h"
 #include "lzma/lzmadec.h"
 #include "7zip/7zExtract.h"
 #include "7zip/7zCrc.h"

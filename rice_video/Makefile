@@ -30,7 +30,7 @@ endif
 
 # local CFLAGS, LIBS, and LDFLAGS
 CFLAGS += $(SDL_FLAGS) -fpic -DPIC -Wall
-LDFLAGS	+= $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
+LDFLAGS	+= -lpng $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
 # set options
 
@@ -76,36 +76,11 @@ OBJECTS = OGLGraphicsContext.o \
 	DecodedMux.o \
 	RenderTexture.o \
 	liblinux/BMGUtils.o \
-	liblinux/pngread.o \
-	liblinux/png.o \
-	liblinux/pngget.o \
-	liblinux/pngrtran.o \
-	liblinux/pngtrans.o \
-	liblinux/pngwrite.o \
-	liblinux/pngset.o \
-	liblinux/pngmem.o \
 	OGLDecodedMux.o \
 	CNvTNTCombiner.o \
 	GeneralCombiner.o \
 	DirectXDecodedMux.o \
-	liblinux/pngerror.o \
-	liblinux/inflate.o \
-	liblinux/pngrio.o \
-	liblinux/pngrutil.o \
-	liblinux/crc32.o \
-	liblinux/pngwutil.o \
-	liblinux/pngwio.o \
-	liblinux/pngwtran.o \
-	liblinux/deflate.o \
 	CombinerTable.o \
-	liblinux/infblock.o \
-	liblinux/zutil.o \
-	liblinux/adler32.o \
-	liblinux/trees.o \
-	liblinux/infcodes.o \
-	liblinux/infutil.o \
-	liblinux/inftrees.o \
-	liblinux/inffast.o \
 	OGLRenderExt.o
 
 GTKOBJECTS = \

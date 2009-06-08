@@ -29,13 +29,12 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <setjmp.h>
 #ifdef _BMG_LIBPNG_STANDALONE
 #include "BMGLibPNG.h"
 #else
 #include "pngrw.h"
 #endif
-#include "png.h"
+#include <png.h>
 
 #ifndef png_jmpbuf
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)

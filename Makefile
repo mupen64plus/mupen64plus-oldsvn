@@ -118,7 +118,6 @@ OBJ_CORE = \
 	main/util.o \
 	main/cheat.o \
 	main/config.o \
-	main/adler32.o \
 	main/md5.o \
 	main/plugin.o \
 	main/rom.o \
@@ -127,13 +126,6 @@ OBJ_CORE = \
 	main/zip/ioapi.o \
 	main/zip/zip.o \
 	main/zip/unzip.o \
-	main/bzip2/bzlib.o \
-	main/bzip2/crctable.o \
-	main/bzip2/decompress.o \
-	main/bzip2/compress.o \
-	main/bzip2/randtable.o \
-	main/bzip2/huffman.o \
-	main/bzip2/blocksort.o \
 	main/lzma/buffer.o \
 	main/lzma/io.o \
 	main/lzma/main.o \
@@ -296,7 +288,7 @@ SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 # set primary objects and libraries for all outputs
 ALL = mupen64plus $(PLUGINS)
 OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
-LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
+LIBS = $(SDL_LIBS) $(LIBGL_LIBS) -lbz2
 
 # add extra objects and libraries for selected options
 ifneq ($(GUI), NONE)
@@ -405,7 +397,7 @@ endif
 clean-core:
 ifneq ($(OS), WINDOWS)
 	$(RM_F) ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
-	$(RM_F) ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
+	$(RM_F) ./main/*.o ./main/version.h ./main/zip/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
 	$(RM_F) mupen64plus mupen64plus.desktop
 	$(RM_F) main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile
 	$(RM_F) main/gui_qt4/debugger/moc_* main/gui_qt4/debugger/ui_*.h main/gui_qt4/debugger/*.o main/gui_qt4/debugger/*.a main/gui_qt4/debugger/Makefile
