@@ -18,9 +18,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 //#define DEBUG_R
-#include <windows.h>
+#include "tr_windows.h"
 #include <math.h>
-#include <gl/gl.h>
+#include <GL/gl.h>
 //#include <glext.h>
 
 #include "WinGL.h"
