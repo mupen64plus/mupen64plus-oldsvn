@@ -382,7 +382,7 @@ stop it and load the selected rom?</source>
     </message>
     <message>
         <location filename="../main/main.c" line="967"/>
-        <source>The core thread recieved a SIGSEGV signal.
+        <source>The core thread received a SIGSEGV signal.
 This means it tried to access protected memory.
 Maybe you have set a wrong ucode for one of the plugins!</source>
         <translation type="unfinished"></translation>

@@ -962,7 +962,7 @@ static void sighandler(int signal, siginfo_t *info, void *context)
     switch( signal )
     {
         case SIGSEGV:
-            error_message(tr("The core thread recieved a SIGSEGV signal.\n"
+            error_message(tr("The core thread received a SIGSEGV signal.\n"
                             "This means it tried to access protected memory.\n"
                             "Maybe you have set a wrong ucode for one of the plugins!"));
             printf( "SIGSEGV in core thread caught:\n" );

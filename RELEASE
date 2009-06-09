@@ -328,7 +328,7 @@ what's new in 0.3:
     + Pause emulation when idle fixes
     + Global plugin settings (should be unchecked if you want to use plugins
       per game option from rom properties)
-    + Switch on/off ToolBar (ALT+T) and Status Bar (ALT+S), usefull when
+    + Switch on/off ToolBar (ALT+T) and Status Bar (ALT+S), useful when
       plugin sets wrong resolution in windowed mode, and for those who hate
       toolbars :)
     + Selection of columns to show in rom browser

@@ -492,7 +492,7 @@ grSstWinOpen(
   if (!getDisableAuxbuf())
     glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &nbAuxBuffers);
   if (nbAuxBuffers > 0)
-    printf("Congratulations, you have %d auxilliary buffers, we'll use them wisely !\n", nbAuxBuffers);
+    printf("Congratulations, you have %d auxiliary buffers, we'll use them wisely !\n", nbAuxBuffers);
 
 #ifdef VOODOO1
     nbTextureUnits = 2;
