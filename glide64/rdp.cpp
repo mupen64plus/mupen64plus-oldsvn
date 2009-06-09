@@ -60,8 +60,14 @@ DWORD frame_count;  // frame counter
 BOOL ucode_error_report = TRUE;
 int wrong_tile = -1;
 
-#define BYTESWAP1(s1) asm volatile (" bswap %0; " : "+r" (s1) : :);
-#define BYTESWAP2(s1,s2) asm volatile (" bswap %0; bswap %1; " : "+r" (s1), "+r" (s2) : :);
+#if defined(NO_ASM)
+  #define BYTESWAP1(s1) s1 = ((s1 & 0xff) << 24) | ((s1 & 0xff00) << 8) | ((s1 & 0xff0000) >> 8) | ((s1 & 0xff000000) >> 24);
+  #define BYTESWAP2(s1,s2) s1 = ((s1 & 0xff) << 24) | ((s1 & 0xff00) << 8) | ((s1 & 0xff0000) >> 8) | ((s1 & 0xff000000) >> 24); \
+  s2 = ((s2 & 0xff) << 24) | ((s2 & 0xff00) << 8) | ((s2 & 0xff0000) >> 8) | ((s2 & 0xff000000) >> 24);
+#else
+  #define BYTESWAP1(s1) asm volatile (" bswap %0; " : "+r" (s1) : :);
+  #define BYTESWAP2(s1,s2) asm volatile (" bswap %0; bswap %1; " : "+r" (s1), "+r" (s2) : :);
+#endif
 
 // global strings
 const char *ACmp[4] = { "NONE", "THRESHOLD", "UNKNOWN", "DITHER" };
