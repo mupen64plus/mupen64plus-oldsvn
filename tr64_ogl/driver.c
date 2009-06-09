@@ -20,10 +20,8 @@
 #include "tr_windows.h"
 #ifdef WIN32
 # include <process.h>  // _beginthread, _endthread
-# define HANDLE TR64_THREAD
 #else
 # include <SDL_thread.h>
-# define SDL_Thread TR64_THREAD
 #endif
 #include <stdio.h>
 #include <GL/gl.h>
@@ -86,19 +84,19 @@ RECT            m_WindowRect;
 WINDOWPLACEMENT m_WindowPlacement;
 HMENU           m_hOldMenu;
 DWORD           m_iOldWindowStyle;
-BOOL interlaced = FALSE;
-#endif
-
-int             ucode_version;
-int skipCount;
-
+extern WINDATA_T WinData;
 HINSTANCE g_hInstance;
 HWND g_hWnd;
-
+HANDLE hVideoThread;
 DEVMODEA m_DMsaved,devMode;
+#endif
+
+BOOL interlaced = FALSE;
 
 extern int DList_C;
-extern WINDATA_T WinData;
+
+int ucode_version;
+int skipCount;
 
 extern int ucode;
 extern BOOL HandsetUcode;
@@ -113,7 +111,6 @@ float imgWidth  = 320.0f;
 #define V_CLOSEROM 2
 #define V_STARTROM 3
 
-TR64_THREAD hVideoThread;
 BOOL VideoDone = FALSE;
 int VideoDoNow = V_DONOTHING;
 BOOL VideoBusy = FALSE;
@@ -155,10 +152,12 @@ void SetWindowScale()
     vi_scl_height = (float)vi_height / imgHeight;
     vi_scl_width = (float)vi_width / imgWidth;
 
+#ifdef WIN32
     GetClientRect(WinData.hWnd,lpRect);
     if ((WinData.hStatusBar) && !bFullScreen)
         GetClientRect(WinData.hStatusBar,lpRectSB);
     else
+#endif
     {
         clRectSB.bottom = 0;
         clRectSB.top = 0;
@@ -166,6 +165,7 @@ void SetWindowScale()
         clRectSB.left = 0;
     }
 
+#ifdef WIN32
     WinData.Width = clRect.right-clRect.left;
     WinData.HeightSB = (clRectSB.bottom-clRectSB.top);
     WinData.Height = (clRect.bottom-clRect.top);
@@ -178,10 +178,12 @@ void SetWindowScale()
 
 //  fScaley *= vi_scl_height;
 //  fScalex *= vi_scl_width;
+#endif
 }
 
 void VideoThread()
 {
+#ifdef WIN32
     WGL_Init();
     SetThreadPriority(hVideoThread, THREAD_PRIORITY_HIGHEST);
 
@@ -222,6 +224,7 @@ void VideoThread()
     }
 
     _endthreadex(1);
+#endif
 }
 
 /*
@@ -233,6 +236,7 @@ void VideoThread()
 */
 void SaveUCode(int _ucode);
 
+#ifdef WIN32
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 {
     ucode = -1;
@@ -254,6 +258,18 @@ void   __cdecl DllClose (void)
     TerminateThread(hVideoThread, 0);
 #endif USE_THREADS
 }
+#else /* !WIN32 */
+void __attribute__ ((constructor)) init(void)
+{
+    ucode = -1;
+    HandsetUcode = FALSE;
+}
+
+void __attribute__ ((destructor)) fini(void)
+{
+    VideoDone = TRUE;
+}
+#endif
 
 // __________________________________________________________________________________________________
 // SetWindowMode
@@ -261,6 +277,7 @@ void   __cdecl DllClose (void)
 int 
 SetWindowedMode(int _width, int _height, int _bpp)
 {
+#ifdef WIN32
     //SetWindowLong(WinData.hWnd, GWL_STYLE, m_iWindowStyle);
     SetWindowLong(WinData.hWnd, GWL_STYLE, 0);
     ShowWindow(WinData.hWnd, SW_SHOWNORMAL);
@@ -294,6 +311,7 @@ SetWindowedMode(int _width, int _height, int _bpp)
     GetWindowRect(WinData.hWnd, &m_WindowRect);
 
 //  _trace_("COpenGL: Window-Mode\n");
+#endif
     return(FALSE);
 }
 
@@ -305,7 +323,7 @@ int SetFullscreenMode(int _width, int _height, int _bpp);
 
 int SetFullscreenMode(int _width, int _height, int _bpp)
 {
-
+#ifdef WIN32
     ZeroMemory(&devMode, sizeof(DEVMODE));
     
     devMode.dmSize       = sizeof(DEVMODE);
@@ -354,6 +372,9 @@ int SetFullscreenMode(int _width, int _height, int _bpp)
 
 //  _trace3_("COpenGL: Fullscreen set to width: %i height: %i bpp: %i\n", _width, _height, _bpp);
     return TRUE;
+#else
+    return FALSE;
+#endif
 }
 
 void ChangeWinSize()
@@ -371,7 +392,7 @@ void   __cdecl CloseDLL (void)
 
 void   __cdecl ChangeWindow (void)
 {
-
+#ifdef WIN32
     if (bFullScreen == 0) 
     {
         EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &m_DMsaved);
@@ -385,6 +406,7 @@ void   __cdecl ChangeWindow (void)
 //        ChangeWinSize(WinData.hWnd, 640, 480, NULL);
         bFullScreen = SetWindowedMode(640, 480, 16);
     }
+#endif
 }
 
 //void   (__cdecl* DllAbout)(HWND) = NULL;
@@ -396,8 +418,12 @@ void   __cdecl DllAbout ( HWND hParent )
 
     sprintf(tTilte,"%s v%i.%i%s - About Box",plgname,vermjr,vermnr,versfx);
     sprintf(tMsg,"%s v%i.%i%s\nby Icepir8\ntexture cache modified by Hacktarux",plgname,vermjr,vermnr,versfx);
-
+#ifdef WIN32
     MessageBox(NULL, tMsg, tTilte, MB_OK|MB_ICONINFORMATION);
+#else
+    puts(tTilte);
+    puts(tMsg);
+#endif
 }
 
 //void   (__cdecl* DllConfig)(HWND) = NULL;
@@ -411,7 +437,9 @@ void   __cdecl DllConfig ( HWND hParent )
 
 void   __cdecl DllTest ( HWND hParent )
 {
+#ifdef WIN32
     MessageBox(NULL, "No Test Box yet", "message", MB_OK);
+#endif
 }
 
 //void   (__cdecl* DrawScreen)(void) = NULL;
@@ -463,6 +491,7 @@ BOOL   __cdecl InitiateGFX (GFX_INFO Gfx_Info)
     CheckInterrupts = Gfx_Info.CheckInterrupts;
 
 
+#ifdef WIN32
 //  WinData.Width = 640;
 //  WinData.Height = 480;
     WinData.hWnd = Gfx_Info.hWnd;
@@ -472,20 +501,21 @@ BOOL   __cdecl InitiateGFX (GFX_INFO Gfx_Info)
     if ((WinData.hStatusBar) && !bFullScreen)
         GetClientRect(WinData.hStatusBar,lpRectSB);
     else
+#endif
     {
         clRectSB.bottom = 0;
         clRectSB.top = 0;
         clRectSB.right = 0;
         clRectSB.left = 0;
     }
-
+#ifdef WIN32
     WinData.Width = clRect.right-clRect.left;
     WinData.HeightSB = -(clRectSB.bottom-clRectSB.top);
     WinData.Height = (clRect.bottom-clRect.top) - (clRectSB.bottom-clRectSB.top);
 
     fScalex = WinData.Width / imgWidth;
     fScaley = WinData.Height / imgHeight;
-
+#endif
 //  if (interlaced) fScaley /= 2.0f;
 
 //  if(!WGL_Init()) return FALSE;
@@ -507,7 +537,7 @@ void   __cdecl MoveScreen (int xpos, int ypos)
 //void   (__cdecl* ProcessDList)(void) = NULL;
 void   __cdecl ProcessDList(void)
 {
-    unsigned __int32 DlistAddr = ((unsigned __int32 *)pDMEM)[0xff0>>2];
+    _u32 DlistAddr = ((_u32 *)pDMEM)[0xff0>>2];
 
 #ifdef USE_THREADS    
     VideoBusy = TRUE;
@@ -521,7 +551,7 @@ void   __cdecl ProcessDList(void)
     }
 #else // USE_THREADS
     {
-        unsigned __int32 addr = ((unsigned __int32 *)pDMEM)[0xff0>>2];
+        _u32 addr = ((_u32 *)pDMEM)[0xff0>>2];
 /*
         RECT clRect;
         LPRECT lpRect = &clRect;

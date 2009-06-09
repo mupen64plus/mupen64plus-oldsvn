@@ -45,8 +45,17 @@ typedef int WPARAM;
 typedef int LPARAM;
 typedef void* LPVOID;
 
+typedef struct {
+    int bottom;
+    int top;
+    int right;
+    int left;
+} RECT;
+typedef RECT *LPRECT;
+
 #define __declspec(dllexport) __attribute__((visibility("default")))
 #define _cdecl
+#define __cdecl
 #define __stdcall
 #define WINAPI
 

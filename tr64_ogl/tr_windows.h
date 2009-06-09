@@ -21,5 +21,7 @@
 # include <windows.h>
 #else
 # include "../main/winlnxdefs.h"
+#define __try
+#define __except(...)
 #endif
 
