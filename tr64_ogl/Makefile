@@ -42,7 +42,7 @@ endif
 
 # list of object files to generate
 OBJECTS += 3dmath.o \
-    combine1.o \
+    combine.o \
     display.o \
     driver.o \
     render.o \
