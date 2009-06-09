@@ -115,7 +115,7 @@ BMGError ReadPNG( const char *filename,
     int                 NumTrans = 0;
     int                 i, j, k;
     png_color_16p       TransColors = NULL;
-    unsigned int        Width, Height;
+    png_uint_32         Width, Height;
 
     unsigned char      *bits, *p, *q;
     unsigned char**     rows = NULL;
@@ -189,8 +189,8 @@ BMGError ReadPNG( const char *filename,
     png_get_IHDR( png_ptr, info_ptr, &Width, &Height, &BitDepth, &ColorType,
         &InterlaceType, NULL, NULL );
 
-    img->width = Width;
-    img->height = Height;
+    img->width = (unsigned int) Width;
+    img->height = (unsigned int) Height;
     ImageChannels = png_get_channels( png_ptr, info_ptr );
     FixedBitDepth = BitDepth;
 
@@ -262,18 +262,18 @@ BMGError ReadPNG( const char *filename,
     if ( ColorType & PNG_COLOR_MASK_ALPHA && BitsPerPixel == 8 )
     {
         img->bits_per_pixel = 32U;
-        DIBLineWidth = 4U * Width;
+        DIBLineWidth = 4U * (unsigned int) Width;
     }
 /* paletted images with more than 1 transparency index or a non-zero alpha
     component are converted to 32-bit ABGR images */
     else if ( ColorType & PNG_COLOR_MASK_PALETTE && PaletteTo32 == 1 )
     {
         img->bits_per_pixel = 32U;
-        DIBLineWidth = 4U * Width;
+        DIBLineWidth = 4U * (unsigned int) Width;
     }
     else
     {
-        DIBLineWidth = img->scan_width = ( BitsPerPixel * Width + 7 ) / 8;
+        DIBLineWidth = img->scan_width = ( BitsPerPixel * (unsigned int) Width + 7 ) / 8;
         if ( img->opt_for_bmp > 0 && img->scan_width % 4 )
             img->scan_width += 4 - img->scan_width % 4;
     }
