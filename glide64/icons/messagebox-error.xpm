@@ -1,5 +1,5 @@
 /* XPM */
-static char * messagebox_quest_xpm[] = {
+static const char * messagebox_error_xpm[] = {
 "32 32 224 2",
 "  	c None",
 ". 	c #AA0000",

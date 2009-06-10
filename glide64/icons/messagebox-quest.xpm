@@ -1,5 +1,5 @@
 /* XPM */
-static char * messagebox_quest_xpm[] = {
+static const char * messagebox_quest_xpm[] = {
 "32 32 216 2",
 "  	c None",
 ". 	c #3B6BA8",
