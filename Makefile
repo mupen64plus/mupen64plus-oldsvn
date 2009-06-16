@@ -432,7 +432,7 @@ endif
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 main/gui_qt4/debugger/Makefile: FORCE
-	${QMAKE} main/gui_qt4/debugger/guidbg_qt4.pro ${QT4_CONFIG} ${QMAKE_CXXFLAGS} -o main/gui_qt4/debugger/Makefile
+	${QMAKE} main/gui_qt4/debugger/guidbg_qt4.pro ${QMAKE_FLAGS} ${QT4_CONFIG} ${QMAKE_CXXFLAGS} -o main/gui_qt4/debugger/Makefile
 
 main/gui_qt4/debugger/libguidbg_qt4.a: main/gui_qt4/debugger/Makefile FORCE
 ifneq ($(OS), WINDOWS)
@@ -447,7 +447,7 @@ else
 endif
 
 main/gui_qt4/Makefile: FORCE
-	${QMAKE} main/gui_qt4/gui_qt4.pro  ${QT4_CONFIG} ${QMAKE_CXXFLAGS} -o main/gui_qt4/Makefile
+	${QMAKE} main/gui_qt4/gui_qt4.pro ${QMAKE_FLAGS} ${QT4_CONFIG} ${QMAKE_CXXFLAGS} -o main/gui_qt4/Makefile
 
 main/gui_qt4/libgui_qt4.a: ${QT4_GUI_DEPENDENCIES} FORCE
 ifneq ($(OS), WINDOWS)
