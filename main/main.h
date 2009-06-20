@@ -63,5 +63,22 @@ void take_next_screenshot(void);
 void main_message(unsigned int console, unsigned int statusbar, unsigned int osd, unsigned int osd_corner, const char* format, ...);
 void error_message(const char* format, ...);
 
+#define kbdFullscreen "Kbd Mapping Fullscreen"
+#define kbdStop "Kbd Mapping Stop"
+#define kbdPause "Kbd Mapping Pause"
+#define kbdSave "Kbd Mapping Save State"
+#define kbdLoad "Kbd Mapping Load State"
+#define kbdIncrement "Kbd Mapping Increment Slot"
+#define kbdReset "Kbd Mapping Reset"
+#define kbdSpeeddown "Kbd Mapping Speed Down"
+#define kbdSpeedup "Kbd Mapping Speed Up"
+#define kbdScreenshot "Kbd Mapping Screenshot"
+#define kbdMute "Kbd Mapping Mute"
+#define kbdIncrease "Kbd Mapping Increase Volume"
+#define kbdDecrease "Kbd Mapping Decrease Volume"
+#define kbdForward "Kbd Mapping Fast Forward"
+#define kbdAdvance "Kbd Mapping Frame Advance"
+#define kbdGameshark "Kbd Mapping Gameshark"
+
 #endif /* __MAIN_H__ */
 

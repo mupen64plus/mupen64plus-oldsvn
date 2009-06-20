@@ -44,6 +44,7 @@ HEADERS += globals.h \
            cheatromdialog.h \
            cheatcheatdialog.h \
            aboutdialog.h \
+           getinput.h \
            ../config.h \
            ../main.h \
            ../version.h \
@@ -85,5 +86,6 @@ SOURCES += globals.cpp \
            cheatcheatdialog.cpp \
            cheatromdialog.cpp \
            translate.cpp \
-           aboutdialog.cpp
+           aboutdialog.cpp \
+           getinput.cpp
 

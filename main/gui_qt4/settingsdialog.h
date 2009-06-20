@@ -23,6 +23,7 @@
 #define __SETTINGSDIALOG_H__
 
 #include <QDialog>
+#include <QSignalMapper>
 #include "ui_settingsdialog.h"
 
 class QAbstractButton;
@@ -52,10 +53,15 @@ class SettingsDialog : public QDialog, public Ui_SettingsDialog
 
         void buttonClicked(QAbstractButton* button);
         void pageChanged(int);
+        void hotkeyClicked(const QString text);
 
     private:
         void readSettings();
         void writeSettings();
+        QSignalMapper *smInput;
+        QString getSdlKeyString(const char *name, int key);
+        QMap<unsigned int, QString> sdlKeyMap;
+        void initializeSdlKeyMap();
 };
 
 #endif // __SETTINGSDIALOG_H__
