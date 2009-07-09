@@ -675,13 +675,13 @@ static int sdl_event_filter( const SDL_Event *event )
                 savestates_select_slot( event->key.keysym.unicode - '0' );
             }
             /* check all of the configurable commands */
-            else if (event->key.keysym.unicode == config_get_number(kbdStop, SDLK_ESCAPE))
+            else if (event->key.keysym.sym == config_get_number(kbdStop, SDLK_ESCAPE))
                 stopEmulation();
-            else if (event->key.keysym.unicode == config_get_number(kbdFullscreen, SDLK_LAST))
+            else if (event->key.keysym.sym == config_get_number(kbdFullscreen, SDLK_LAST))
                 changeWindow();
-            else if (event->key.keysym.unicode == config_get_number(kbdSave, SDLK_F5))
+            else if (event->key.keysym.sym == config_get_number(kbdSave, SDLK_F5))
                 savestates_job |= SAVESTATE;
-            else if (event->key.keysym.unicode == config_get_number(kbdLoad, SDLK_F7))
+            else if (event->key.keysym.sym == config_get_number(kbdLoad, SDLK_F7))
             {
                 savestates_job |= LOADSTATE;
                 controllerCommand(0, StopRumble);
@@ -689,38 +689,38 @@ static int sdl_event_filter( const SDL_Event *event )
                 controllerCommand(2, StopRumble);
                 controllerCommand(3, StopRumble);
             }
-            else if (event->key.keysym.unicode == config_get_number(kbdIncrement, 0))
+            else if (event->key.keysym.sym == config_get_number(kbdIncrement, 0))
                 savestates_inc_slot();
-            else if (event->key.keysym.unicode == config_get_number(kbdReset, SDLK_F9))
+            else if (event->key.keysym.sym == config_get_number(kbdReset, SDLK_F9))
             {
                 add_interupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
                 add_interupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
             }
-            else if (event->key.keysym.unicode == config_get_number(kbdSpeeddown, SDLK_F10))
+            else if (event->key.keysym.sym == config_get_number(kbdSpeeddown, SDLK_F10))
                 main_speeddown(5);
-            else if (event->key.keysym.unicode == config_get_number(kbdSpeedup, SDLK_F11))
+            else if (event->key.keysym.sym == config_get_number(kbdSpeedup, SDLK_F11))
                 main_speedup(5);
-            else if (event->key.keysym.unicode == config_get_number(kbdScreenshot, SDLK_F12))
+            else if (event->key.keysym.sym == config_get_number(kbdScreenshot, SDLK_F12))
                 // set flag so that screenshot will be taken at the end of frame rendering
                 take_next_screenshot();
-            else if (event->key.keysym.unicode == config_get_number(kbdPause, SDLK_p))
+            else if (event->key.keysym.sym == config_get_number(kbdPause, SDLK_p))
                 main_pause();
-            else if (event->key.keysym.unicode == config_get_number(kbdMute, SDLK_m))
+            else if (event->key.keysym.sym == config_get_number(kbdMute, SDLK_m))
             {
                 volumeMute();
                 main_draw_volume_osd();
             }
-            else if (event->key.keysym.unicode == config_get_number(kbdIncrease, SDLK_RIGHTBRACKET))
+            else if (event->key.keysym.sym == config_get_number(kbdIncrease, SDLK_RIGHTBRACKET))
             {
                 volumeUp();
                 main_draw_volume_osd();
             }
-            else if (event->key.keysym.unicode == config_get_number(kbdDecrease, SDLK_LEFTBRACKET))
+            else if (event->key.keysym.sym == config_get_number(kbdDecrease, SDLK_LEFTBRACKET))
             {
                 volumeDown();
                 main_draw_volume_osd();
             }
-            else if (event->key.keysym.unicode == config_get_number(kbdForward, SDLK_f))
+            else if (event->key.keysym.sym == config_get_number(kbdForward, SDLK_f))
             {
                 SavedSpeedFactor = l_SpeedFactor;
                 l_SpeedFactor = 250;
@@ -729,7 +729,7 @@ static int sdl_event_filter( const SDL_Event *event )
                 msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
                 osd_message_set_static(msgFF);
             }
-            else if (event->key.keysym.unicode == config_get_number(kbdAdvance, SDLK_SLASH))
+            else if (event->key.keysym.sym == config_get_number(kbdAdvance, SDLK_SLASH))
                 main_advance_one();
             // pass all other keypresses to the input plugin
             else keyDown( 0, event->key.keysym.sym );
@@ -741,7 +741,7 @@ static int sdl_event_filter( const SDL_Event *event )
             {
                 return 0;
             }
-            else if(event->key.keysym.unicode == config_get_number(kbdForward, SDLK_f))
+            else if(event->key.keysym.sym == config_get_number(kbdForward, SDLK_f))
             {
                 // cancel fast-forward
                 l_SpeedFactor = SavedSpeedFactor;
