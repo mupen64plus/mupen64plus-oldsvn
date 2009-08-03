@@ -253,25 +253,19 @@ ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
 endif
 
-# set CFLAGS, LIBS, and LDFLAGS for external dependencies
+# set CFLAGS, LIBS, and LDFLAGS according to the target OS
 ifeq ($(OS),FREEBSD)
   PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
-endif
-ifeq ($(OS),LINUX)
-  PLUGIN_LDFLAGS	= -Wl,-Bsymbolic -shared
-endif
-ifeq ($(OS),OSX)
-  PLUGIN_LDFLAGS	= -bundle
-endif
-
-ifeq ($(OS),FREEBSD)
   LIBGL_LIBS	= -L${LOCALBASE}/lib -lGL -lGLU
 endif
 ifeq ($(OS),LINUX)
+  PLUGIN_LDFLAGS = -Wl,-Bsymbolic -shared
   LIBGL_LIBS	= -L/usr/X11R6/lib -lGL -lGLU
 endif
 ifeq ($(OS),OSX)
+  PLUGIN_LDFLAGS = -bundle
   LIBGL_LIBS	= -framework OpenGL
+  QMAKE_FLAGS    = -spec macx-g++
 endif
 
 # set flags for compile options.

@@ -427,7 +427,7 @@ endif
 	$(CC) -o $@ $(CFLAGS) $(SDL_FLAGS) -c $<
 
 main/gui_qt4/Makefile:
-	${QMAKE} main/gui_qt4/gui_qt4.pro -o main/gui_qt4/Makefile
+	${QMAKE} main/gui_qt4/gui_qt4.pro ${QMAKE_FLAGS} -o main/gui_qt4/Makefile
 
 main/gui_qt4/libgui_qt4.a: main/gui_qt4/Makefile FORCE
 ifneq ($(OS), WINDOWS)
