@@ -33,6 +33,8 @@ static void RESERV(){
     sprintf(op, "INVLD(%02X)       0x%08X", (mot>>26)&0x3F, mot);
 }
 
+static void mr4kd_disassemble( uint32 instruction, uint32 counter, char * buffer );
+
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[ SPECIAL ]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=[//
 
 static void SLL()
@@ -1189,7 +1191,7 @@ void r4300_decode_op( uint32 instr, char *opcode, char *arguments, int counter )
 }
 
 /* Disassemble */
-void mr4kd_disassemble ( uint32 instruction, uint32 counter, char * buffer )
+static void mr4kd_disassemble ( uint32 instruction, uint32 counter, char * buffer )
 {
     mot = instruction;
     pc  = counter;
