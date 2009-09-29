@@ -19,37 +19,140 @@
 # *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-# detect system architecture: i386, x86_64, or PPC/PPC64
-UNAME = $(shell uname -m)
-ifeq ("$(UNAME)","amd64")
-  CPU = X86
+# detect system architecture: i386, x86_64, PPC/PPC64, ALPHA, ARM, AVR32, HPPA,
+# IA64, M32R, M68K, MIPS, S390, SH3, SH4, SPARC
+HOST_CPU ?= $(shell uname -m)
+NO_ASM ?= 1
+ifneq ("$(filter x86_64 amd64,$(HOST_CPU))","")
+  CPU := X86
   ifeq ("$(BITS)", "32")
-    ARCH_DETECTED = 64BITS_32
+    ARCH_DETECTED := 64BITS_32
   else
-    ARCH_DETECTED = 64BITS
+    ARCH_DETECTED := 64BITS
   endif
+  NO_ASM := 0
+  CPU_ENDIANNESS := LITTLE
 endif
-ifeq ("$(UNAME)","x86_64")
-  CPU = X86
-  ifeq ("$(BITS)", "32")
-    ARCH_DETECTED = 64BITS_32
-  else
-    ARCH_DETECTED = 64BITS
-  endif
+ifneq ("$(filter pentium i%86,$(HOST_CPU))","")
+  CPU := X86
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 0
+  CPU_ENDIANNESS := LITTLE
 endif
-ifneq ("$(filter i%86,$(UNAME))","")
-  CPU = X86
-  ARCH_DETECTED = 32BITS
+ifneq ("$(filter ppc powerpc,$(HOST_CPU))","")
+  CPU := PPC
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
 endif
-ifeq ("$(UNAME)","ppc")
-  CPU = PPC
-  ARCH_DETECTED = 32BITS
-  NO_ASM = 1
+ifneq ("$(filter ppc64 powerpc64,$(HOST_CPU))","")
+  CPU := PPC
+  ARCH_DETECTED := 64BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
 endif
-ifeq ("$(UNAME)","ppc64")
-  CPU = PPC
-  ARCH_DETECTED = 64BITS
-  NO_ASM = 1
+ifneq ("$(filter alpha%,$(HOST_CPU))","")
+  CPU := ALPHA
+  ARCH_DETECTED := 64BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := LITTLE
+endif
+ifneq ("$(filter arm%b,$(HOST_CPU))","")
+  CPU := ARM
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+else
+ifneq ("$(filter arm%,$(HOST_CPU))","")
+  CPU := ARM
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := LITTLE
+endif
+endif
+ifneq ("$(filter hppa%b,$(HOST_CPU))","")
+  CPU := HPPA
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","ia64")
+  CPU := IA64
+  ARCH_DETECTED := 64BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := LITTLE
+endif
+ifeq ("$(HOST_CPU)","avr32")
+  CPU := AVR32
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","m32r")
+  CPU := M32R
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","m68k")
+  CPU := M68K
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifneq ("$(filter mips mipseb,$(HOST_CPU))","")
+  CPU := MIPS
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","mipsel")
+  CPU := MIPS
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := LITTLE
+endif
+ifeq ("$(HOST_CPU)","s390")
+  CPU := S390
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","s390x")
+  CPU := S390
+  ARCH_DETECTED := 64BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","sh3")
+  CPU := SH3
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := LITTLE
+endif
+ifeq ("$(HOST_CPU)","sh3eb")
+  CPU := SH3
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","sh4")
+  CPU := SH4
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := LITTLE
+endif
+ifeq ("$(HOST_CPU)","sh4eb")
+  CPU := SH4
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
+endif
+ifeq ("$(HOST_CPU)","sparc")
+  CPU := SPARC
+  ARCH_DETECTED := 32BITS
+  NO_ASM := 1
+  CPU_ENDIANNESS := BIG
 endif
 
 # detect operation system. Currently just linux and OSX.
@@ -250,7 +353,10 @@ else
   endif
 endif
 ifeq ($(CPU), PPC)
-  CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
+  CFLAGS += -mcpu=powerpc
+endif
+ifeq ($(CPU_ENDIANNESS), BIG)
+  CFLAGS += -D_BIG_ENDIAN
 endif
 
 # set CFLAGS, LIBS, and LDFLAGS according to the target OS
