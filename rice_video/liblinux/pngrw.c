@@ -94,12 +94,12 @@ Comments:
     gray scale images with alpha components are converted to 32-bit images
 */
 BMGError ReadPNG( const char *filename,
-        struct BMGImageStruct *img )
+        struct BMGImageStruct * volatile img )
 {
     jmp_buf             err_jmp;
     int                 error;
 
-    FILE               *file = NULL;
+    FILE * volatile     file = NULL;
     int                 BitDepth;
     int                 BitsPerPixel;
     int                 FixedBitDepth;
@@ -107,8 +107,9 @@ BMGError ReadPNG( const char *filename,
     int                 ImageChannels;
     int                 InterlaceType;
     unsigned char       signature[8];
-    png_structp         png_ptr = NULL;
-    png_infop           info_ptr = NULL;
+    png_structp volatile png_ptr = NULL;
+    png_infop   volatile info_ptr = NULL;
+    png_infop   volatile end_info = NULL;
     png_colorp          PNGPalette = NULL;
     png_color_16       *ImageBackground = NULL;
     png_bytep           trns = NULL;
@@ -118,7 +119,7 @@ BMGError ReadPNG( const char *filename,
     png_uint_32         Width, Height;
 
     unsigned char      *bits, *p, *q;
-    unsigned char**     rows = NULL;
+    unsigned char** volatile rows = NULL;
     int                 NumColors = 0;
     unsigned char       BgdRed = 0;
     unsigned char       BgdGreen = 0;
@@ -130,20 +131,26 @@ BMGError ReadPNG( const char *filename,
 
     /* error handler */
     error = setjmp( err_jmp );
-    if ( error != 0 )
+    if (error != 0)
     {
-        if ( png_ptr != NULL )
-            png_destroy_read_struct( &png_ptr, NULL, NULL );
-        if ( rows )
+        if (end_info != NULL)
+            png_destroy_read_struct((png_structp *) &png_ptr, (png_infop *) &info_ptr, (png_infop *) &end_info);
+        else if (info_ptr != NULL)
+            png_destroy_read_struct((png_structp *) &png_ptr, (png_infop *) &info_ptr, png_infopp_NULL);
+        else if (png_ptr != NULL)
+            png_destroy_read_struct((png_structp *) &png_ptr, png_infopp_NULL, png_infopp_NULL);
+        if (rows)
         {
-            if ( rows[0] )
-                free( rows[0] );
-            free( rows );
+            if (rows[0])
+                free(rows[0]);
+            free(rows);
         }
-        FreeBMGImage( img );
-        fclose( file );
-        SetLastBMGError( (BMGError)error );
-        return (BMGError)error;
+        if (img)
+            FreeBMGImage(img);
+        if (file)
+            fclose(file);
+        SetLastBMGError((BMGError) error);
+        return (BMGError) error;
     }
 
     if ( img == NULL )
@@ -163,6 +170,16 @@ BMGError ReadPNG( const char *filename,
     if ( !png_ptr )
         longjmp( err_jmp, (int)errMemoryAllocation );
 
+    /* create a pointer to the png info structure */
+    info_ptr = png_create_info_struct( png_ptr );
+    if ( !info_ptr )
+        longjmp( err_jmp, (int)errMemoryAllocation );
+
+    /* create a pointer to the png end-info structure */
+    end_info = png_create_info_struct(png_ptr);
+    if (!end_info)
+        longjmp( err_jmp, (int)errMemoryAllocation );
+
     /* bamboozle the PNG longjmp buffer */
     /*generic PNG error handler*/
     /* error will always == 1 which == errLib */
@@ -170,11 +187,6 @@ BMGError ReadPNG( const char *filename,
     error = setjmp( png_jmpbuf( png_ptr ) );
     if ( error > 0 )
         longjmp( err_jmp, error );
-
-    /* create a pointer to the png info structure */
-    info_ptr = png_create_info_struct( png_ptr );
-    if ( !info_ptr )
-        longjmp( err_jmp, (int)errMemoryAllocation );
 
     /* attach file buffer to the png read pointer */
     png_init_io( png_ptr, file );
@@ -187,7 +199,7 @@ BMGError ReadPNG( const char *filename,
 
     /* extract the data we need to form the HBITMAP from the PNG header */
     png_get_IHDR( png_ptr, info_ptr, &Width, &Height, &BitDepth, &ColorType,
-        &InterlaceType, NULL, NULL );
+        &InterlaceType, int_p_NULL, int_p_NULL);
 
     img->width = (unsigned int) Width;
     img->height = (unsigned int) Height;
@@ -475,7 +487,7 @@ BMGError ReadPNG( const char *filename,
     free( rows[0] );
     free( rows );
     png_read_end( png_ptr, info_ptr );
-    png_destroy_read_struct( &png_ptr, &info_ptr, NULL );
+    png_destroy_read_struct((png_structp *) &png_ptr, (png_infop *) &info_ptr, (png_infop *) &end_info);
     fclose( file );
 
     return BMG_OK;

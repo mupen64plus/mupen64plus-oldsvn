@@ -205,18 +205,18 @@ err_jmp:
 BMGError WriteBMP( const char *filename,
                    struct BMGImageStruct img )
 {
-    FILE *file = NULL;
+    FILE * volatile file = NULL;
     jmp_buf err_jmp;
     int error;
 
-    unsigned char *bits = NULL;
+    unsigned char * volatile bits = NULL;
     unsigned int DIBScanWidth;
     unsigned int BitsPerPixel;
     unsigned int bit_size; /*, new_bit_size; */
 /*    unsigned int rawbit_size; */
     unsigned char *p, *q, *r, *t;
 /*    unsigned int cnt;  */
-    unsigned char *pColor = NULL;
+    unsigned char * volatile pColor = NULL;
 
     BITMAPFILEHEADER bmfh;
     BITMAPINFOHEADER bmih;
@@ -224,17 +224,17 @@ BMGError WriteBMP( const char *filename,
     SetLastBMGError( BMG_OK );
 
     /* error handler */
-    error = setjmp( err_jmp );
-    if ( error != 0 )
+    error = setjmp(err_jmp);
+    if (error != 0)
     {
-        if ( file != NULL )
-            fclose( file );
-        if ( bits != NULL )
-            free( bits );
-        if ( pColor != NULL )
-            free( pColor );
-        SetLastBMGError( (BMGError)error );
-        return (BMGError)error;
+        if (file != NULL)
+            fclose(file);
+        if (bits != NULL)
+            free(bits);
+        if (pColor != NULL)
+            free(pColor);
+        SetLastBMGError((BMGError)error);
+        return (BMGError) error;
     }
 
     if ( img.bits == NULL )
