@@ -210,12 +210,34 @@ int get_has_recompiled(uint32 addr)
 
 #else
 
+#define CHECK_MEM(address)
+
 char* get_recompiled(uint32 addr, int index)
 {
     return NULL;
 }
 
 int get_num_recompiled(uint32 addr)
+{
+    return 0;
+}
+
+char* get_recompiled_opcode(uint32 addr, int index)
+{
+    return NULL;
+}
+
+char* get_recompiled_args(uint32 addr, int index)
+{
+    return NULL;
+}
+
+void * get_recompiled_addr(uint32 addr, int index)
+{
+    return 0;
+}
+
+int get_has_recompiled(uint32 addr)
 {
     return 0;
 }
