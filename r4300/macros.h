@@ -98,7 +98,7 @@ stop=1; \
 #define TagHi reg_cop0[29]
 #define ErrorEPC reg_cop0[30]
 
-#ifdef X86
+#if (defined(__i386__) || defined(__x86_64__))
 #define set_rounding() __asm__ __volatile__("fldcw %0" : : "m" (rounding_mode))
 #define set_trunc() __asm__ __volatile__("fldcw %0" : : "m" (trunc_mode))
 #define set_round() __asm__ __volatile__("fldcw %0" : : "m" (round_mode))
