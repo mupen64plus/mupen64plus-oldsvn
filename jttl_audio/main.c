@@ -713,9 +713,10 @@ EXPORT void CALL RomClosed( void )
        return;
     printf("[JttL's SDL Audio plugin] Cleaning up SDL sound plugin...\n");
     
-    // Pause SDL Audio (Should be done before clean up)
+    // Shut down SDL Audio output
     SDL_PauseAudio(1);
-    
+    SDL_CloseAudio();
+
     // Delete the buffer, as we are done producing sound
     if (buffer != NULL)
     {
@@ -732,9 +733,6 @@ EXPORT void CALL RomClosed( void )
     if(hardware_spec != NULL) free(hardware_spec);
     hardware_spec = NULL;
     buffer = NULL;
-
-    // Actually close the audio device
-    SDL_CloseAudio();
 
     // Shutdown the respective subsystems
     if(SDL_WasInit(SDL_INIT_AUDIO) != 0) SDL_QuitSubSystem(SDL_INIT_AUDIO);
