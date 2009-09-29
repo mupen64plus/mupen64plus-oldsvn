@@ -173,22 +173,24 @@ ifneq ($(NO_ASM), 1)
       DYNAREC = x86
     endif
   endif
+endif
+ifneq ($(DYNAREC), )
   OBJ_DYNAREC = \
-      r4300/$(DYNAREC)/assemble.o \
-      r4300/$(DYNAREC)/debug.o \
-      r4300/$(DYNAREC)/gbc.o \
-      r4300/$(DYNAREC)/gcop0.o \
-      r4300/$(DYNAREC)/gcop1.o \
-      r4300/$(DYNAREC)/gcop1_d.o \
-      r4300/$(DYNAREC)/gcop1_l.o \
-      r4300/$(DYNAREC)/gcop1_s.o \
-      r4300/$(DYNAREC)/gcop1_w.o \
-      r4300/$(DYNAREC)/gr4300.o \
-      r4300/$(DYNAREC)/gregimm.o \
-      r4300/$(DYNAREC)/gspecial.o \
-      r4300/$(DYNAREC)/gtlb.o \
-      r4300/$(DYNAREC)/regcache.o \
-      r4300/$(DYNAREC)/rjump.o
+    r4300/$(DYNAREC)/assemble.o \
+    r4300/$(DYNAREC)/debug.o \
+    r4300/$(DYNAREC)/gbc.o \
+    r4300/$(DYNAREC)/gcop0.o \
+    r4300/$(DYNAREC)/gcop1.o \
+    r4300/$(DYNAREC)/gcop1_d.o \
+    r4300/$(DYNAREC)/gcop1_l.o \
+    r4300/$(DYNAREC)/gcop1_s.o \
+    r4300/$(DYNAREC)/gcop1_w.o \
+    r4300/$(DYNAREC)/gr4300.o \
+    r4300/$(DYNAREC)/gregimm.o \
+    r4300/$(DYNAREC)/gspecial.o \
+    r4300/$(DYNAREC)/gtlb.o \
+    r4300/$(DYNAREC)/regcache.o \
+    r4300/$(DYNAREC)/rjump.o
 else
   OBJ_DYNAREC = r4300/empty_dynarec.o
 endif
