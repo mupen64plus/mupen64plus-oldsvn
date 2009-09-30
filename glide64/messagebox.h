@@ -21,7 +21,7 @@
 /** flags **/
 // The message box contains three push buttons: Abort, Retry, and Ignore.
 #define MB_ABORTRETRYIGNORE     (0x00000001)
-// Microsoft® Windows® 2000/XP: The message box contains three push buttons: Cancel, Try Again, Continue. Use this message box type instead of MB_ABORTRETRYIGNORE.
+// Microsoft(R) Windows(R) 2000/XP: The message box contains three push buttons: Cancel, Try Again, Continue. Use this message box type instead of MB_ABORTRETRYIGNORE.
 #define MB_CANCELTRYCONTINUE        (0x00000002)
 // The message box contains one push button: OK. This is the default.
 #define MB_OK               (0x00000004)

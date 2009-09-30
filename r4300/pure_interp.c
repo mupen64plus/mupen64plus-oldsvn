@@ -626,7 +626,7 @@ static void BLTZAL()
     if(local_rs < 0)
       interp_addr += (local_immediate-1)*4;
      }
-   else printf("erreur dans bltzal\n");
+   else printf("error in bltzal\n");
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -661,7 +661,7 @@ static void BGEZAL()
     if(local_rs >= 0)
       interp_addr += (local_immediate-1)*4;
      }
-   else printf("erreur dans bgezal\n");
+   else printf("error in bgezal\n");
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -699,7 +699,7 @@ static void BLTZALL()
       }
     else interp_addr+=8;
      }
-   else printf("erreur dans bltzall\n");
+   else printf("error in bltzall\n");
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -737,7 +737,7 @@ static void BGEZALL()
       }
     else interp_addr+=8;
      }
-   else printf("erreur dans bgezall\n");
+   else printf("error in bgezall\n");
    last_addr = interp_addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -948,7 +948,7 @@ static void ERET()
    update_count();
    if (Status & 0x4)
      {
-    printf("erreur dans ERET\n");
+    printf("error in ERET\n");
     stop=1;
      }
    else
@@ -1082,7 +1082,7 @@ static void MTC0()
       case 13:   // Cause
     if (rrt!=0)
       {
-         printf("écriture dans Cause\n");
+         printf("Write in Cause\n");
          stop = 1;
       }
     else Cause = rrt;
@@ -3062,7 +3062,7 @@ void prefetch()
       }
     else
       {
-         printf("execution à l'addresse :%x\n", (int)interp_addr);
+         printf("execute address :%x\n", (int)interp_addr);
          stop=1;
       }
      }

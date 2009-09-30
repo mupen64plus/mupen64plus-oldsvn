@@ -444,7 +444,7 @@ void ERET(void)
    update_count();
    if (Status & 0x4)
      {
-    printf ("erreur dans ERET\n");
+    printf ("error in ERET\n");
     stop=1;
      }
    else

@@ -125,7 +125,7 @@ void MTC0(void)
       case 13:   // Cause
     if (rrt!=0)
       {
-         printf("écriture dans Cause\n");
+         printf("Write in Cause\n");
          stop = 1;
       }
     else Cause = rrt;

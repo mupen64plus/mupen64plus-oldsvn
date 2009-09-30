@@ -12,11 +12,11 @@
 //    Copyright (c) 1998, 1999 Glenn Randers-Pehrson
 //    (libpng versions 0.97, January 1998, through 1.0.5, October 15, 1999)
 //
-// You may use the software for any purpose you see fit.  You may modify
+// You may use the software for any purpose you see fit. You may modify
 // it, incorporate it in a commercial application, use it for school,
-// even turn it in as homework.  You must keep the Copyright in the
-// header and source files.  This software is not in the "Public Domain".
-// You may use this software at your own risk.  I have made a reasonable
+// even turn it in as homework. You must keep the Copyright in the
+// header and source files. This software is not in the "Public Domain".
+// You may use this software at your own risk. I have made a reasonable
 // effort to verify that this software works in the manner I expect it to;
 // however,...
 //

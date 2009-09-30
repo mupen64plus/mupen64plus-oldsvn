@@ -366,7 +366,7 @@ void ReadSpecialSettings (const char name[21])
     settings.tonic = TRUE;
   else if (strstr(name, (const char *)"All") && strstr(name, (const char *)"Star") && strstr(name, (const char *)"Baseball"))
     settings.ASB = TRUE;
-  else if (strstr(name, (const char *)"��״��2 ˶�ɼ����"))
+  else if (strstr(name, (const char *)"\xbf\xef\xef\xbd\xbd\xbf\xb4\xd7\xbf\xef\xef\xbd\xbd\xbf\x20\x32\xb6\xcb\xbf\xef\xc9\xbd\xef\xbc\xbd\xbf\xbf\xef\xef\xbd\xbd\xbf\xbf\xef\x0a\xbd"))
     settings.doraemon2 = TRUE;
   else if (strstr(name, (const char *)"SPACE INVADERS"))
     settings.invaders = TRUE;

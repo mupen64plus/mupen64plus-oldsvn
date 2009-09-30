@@ -252,7 +252,7 @@ void BLTZAL(void)
     if(local_rs < 0 && !skip_jump)
       PC += (PC-2)->f.i.immediate-1;
      }
-   else printf("erreur dans bltzal\n");
+   else printf("error in bltzal\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -275,7 +275,7 @@ void BLTZAL_OUT(void)
     if(!skip_jump && local_rs < 0)
       jump_to(PC->addr + ((jump_target-1)<<2));
      }
-   else printf("erreur dans bltzal\n");
+   else printf("error in bltzal\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -310,7 +310,7 @@ void BGEZAL(void)
     if(local_rs >= 0 && !skip_jump)
       PC += (PC-2)->f.i.immediate-1;
      }
-   else printf("erreur dans bgezal\n");
+   else printf("error in bgezal\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -333,7 +333,7 @@ void BGEZAL_OUT(void)
     if(!skip_jump && local_rs >= 0)
       jump_to(PC->addr + ((jump_target-1)<<2));
      }
-   else printf("erreur dans bgezal\n");
+   else printf("error in bgezal\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -373,7 +373,7 @@ void BLTZALL(void)
     else
       PC+=2;
      }
-   else printf("erreur dans bltzall\n");
+   else printf("error in bltzall\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -401,7 +401,7 @@ void BLTZALL_OUT(void)
     else
       PC+=2;
      }
-   else printf("erreur dans bltzall\n");
+   else printf("error in bltzall\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -441,7 +441,7 @@ void BGEZALL(void)
     else
       PC+=2;
      }
-   else printf("erreur dans bgezall\n");
+   else printf("error in bgezall\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -469,7 +469,7 @@ void BGEZALL_OUT(void)
     else
       PC+=2;
      }
-   else printf("erreur dans bgezall\n");
+   else printf("error in bgezall\n");
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }

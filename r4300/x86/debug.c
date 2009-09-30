@@ -86,7 +86,7 @@ void debug(void)
            (unsigned int)hi,
            (unsigned int)(lo >> 32),
            (unsigned int)lo);
-    printf("après %d instructions soit %x\n", 
+    printf("apres %d instructions soit %x\n", 
            (unsigned int)(debug_count+Count),
            (unsigned int)(debug_count+Count));
     getchar();  
