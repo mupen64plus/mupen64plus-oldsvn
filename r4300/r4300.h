@@ -42,7 +42,6 @@ extern int local_rs32, local_rt32;
 extern unsigned int jump_target;
 extern double *reg_cop1_double[32];
 extern float *reg_cop1_simple[32];
-extern int reg_cop1_fgr_32[32];
 extern long long int reg_cop1_fgr_64[32];
 extern int FCR0, FCR31;
 extern tlb tlb_e[32];
@@ -66,6 +65,8 @@ void compare_core();
 void jump_to_func();
 void update_count();
 int check_cop1_unusable();
+void shuffle_fpr_data(int oldStatus, int newStatus);
+void set_fpr_pointers(int newStatus);
 
 #define jump_to(a) { jump_to_address = a; jump_to_func(); }
 

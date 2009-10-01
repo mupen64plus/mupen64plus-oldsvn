@@ -34,6 +34,7 @@
 
 #include "../memory/memory.h"
 #include "../memory/flashram.h"
+#include "../r4300/macros.h"
 #include "../r4300/r4300.h"
 #include "../r4300/interupt.h"
 #include "../opengl/osd.h"
@@ -190,7 +191,18 @@ void savestates_save()
     gzwrite(f, reg_cop0, 32*4);
     gzwrite(f, &lo, 8);
     gzwrite(f, &hi, 8);
-    gzwrite(f, reg_cop1_fgr_64, 32*8);
+
+    if ((Status & 0x04000000) == 0)
+    {   // FR bit == 0 means 32-bit (MIPS I) FGR mode
+        shuffle_fpr_data(0, 0x04000000);  // shuffle data into 64-bit register format for storage
+        gzwrite(f, reg_cop1_fgr_64, 32*8);
+        shuffle_fpr_data(0x04000000, 0);  // put it back in 32-bit mode
+    }
+    else
+    {
+        gzwrite(f, reg_cop1_fgr_64, 32*8);
+    }
+
     gzwrite(f, &FCR0, 4);
     gzwrite(f, &FCR31, 4);
     gzwrite(f, tlb_e, 32*sizeof(tlb));
@@ -306,9 +318,12 @@ void savestates_load()
     gzread(f, &llbit, 4);
     gzread(f, reg, 32*8);
     gzread(f, reg_cop0, 32*4);
+    set_fpr_pointers(Status);  // Status is reg_cop0[12]
     gzread(f, &lo, 8);
     gzread(f, &hi, 8);
     gzread(f, reg_cop1_fgr_64, 32*8);
+    if ((Status & 0x04000000) == 0)  // 32-bit FPR mode requires data shuffling because 64-bit layout is always stored in savestate file
+        shuffle_fpr_data(0x04000000, 0);
     gzread(f, &FCR0, 4);
     gzread(f, &FCR31, 4);
     gzread(f, tlb_e, 32*sizeof(tlb));
@@ -432,7 +447,16 @@ int savestates_save_pj64()
     length = zipWriteInFileInZip(zipfile, &vi_timer,                       4);
     length = zipWriteInFileInZip(zipfile, &addr,                           4);
     length = zipWriteInFileInZip(zipfile, reg,                             32*8);
-    length = zipWriteInFileInZip(zipfile, reg_cop1_fgr_64,                 32*8);
+    if ((Status & 0x04000000) == 0)
+    {   // FR bit == 0 means 32-bit (MIPS I) FGR mode
+        shuffle_fpr_data(0, 0x04000000);  // shuffle data into 64-bit register format for storage
+        length = zipWriteInFileInZip(zipfile, reg_cop1_fgr_64,                 32*8);
+        shuffle_fpr_data(0x04000000, 0);  // put it back in 32-bit mode
+    }
+    else
+    {
+        length = zipWriteInFileInZip(zipfile, reg_cop1_fgr_64,                 32*8);
+    }
     length = zipWriteInFileInZip(zipfile, reg_cop0,                        32*4);
     length = zipWriteInFileInZip(zipfile, &FCR0,                           4);
     length = zipWriteInFileInZip(zipfile, &dummy,                          4*30);
@@ -576,6 +600,10 @@ void savestates_load_pj64()
 
     // CP0
     unzReadCurrentFile(zipstatefile, reg_cop0, 4*32);
+
+    set_fpr_pointers(Status);  // Status is reg_cop0[12]
+    if ((Status & 0x04000000) == 0)
+        shuffle_fpr_data(0x04000000, 0);  // shuffle FGR data into 32-bit format
 
     // Initialze the interupts
     vi_timer += reg_cop0[9]; // Add current Count
