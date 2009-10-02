@@ -78,8 +78,8 @@ static void put8(unsigned char octet)
    code_length++;
    if (code_length == max_code_length)
      {
-    max_code_length += 1000;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
+    *inst_pointer = realloc_exec(*inst_pointer, max_code_length, max_code_length+8192);
+    max_code_length += 8192;
      }
 }
 
@@ -87,8 +87,8 @@ static void put16(unsigned short word)
 {
    if ((code_length+2) >= max_code_length)
      {
-    max_code_length += 1000;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
+    *inst_pointer = realloc_exec(*inst_pointer, max_code_length, max_code_length+8192);
+    max_code_length += 8192;
      }
    *((unsigned short *)(&(*inst_pointer)[code_length])) = word;
    code_length+=2;
@@ -98,8 +98,8 @@ static void put32(unsigned int dword)
 {
    if ((code_length+4) >= max_code_length)
      {
-    max_code_length += 1000;
-    *inst_pointer = realloc(*inst_pointer, max_code_length);
+    *inst_pointer = realloc_exec(*inst_pointer, max_code_length, max_code_length+8192);
+    max_code_length += 8192;
      }
    *((unsigned int *)(&(*inst_pointer)[code_length])) = dword;
    code_length+=4;

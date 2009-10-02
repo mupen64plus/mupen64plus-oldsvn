@@ -20,6 +20,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
+#if defined(__GNUC__)
+#include <unistd.h>
+#include <malloc.h>
+#include <sys/mman.h>
+#endif
 
 #include "recomp.h"
 #include "recomph.h" //include for function prototypes
@@ -2168,7 +2173,7 @@ void init_block(int *source, precomp_block *block)
   if (!block->block)
   {
     long memsize = ((length+1)+(length>>2)) * sizeof(precomp_instr);
-    block->block = malloc(memsize);
+    block->block = malloc_exec(memsize);
     memset(block->block, 0, memsize);
     already_exist = 0;
   }
@@ -2178,12 +2183,12 @@ void init_block(int *source, precomp_block *block)
     if (!block->code)
     {
 #if defined(PROFILE_R4300)
-      block->code = malloc(524288); /* allocate so much code space that we'll never have to realloc(), because this may */
-      max_code_length = 524288;     /* cause instruction locations to move, and break our profiling data                */
+      max_code_length = 524288; /* allocate so much code space that we'll never have to realloc(), because this may */
+                                /* cause instruction locations to move, and break our profiling data                */
 #else
-      block->code = malloc(32768);
       max_code_length = 32768;
 #endif
+      block->code = malloc_exec(max_code_length);
     }
     else
     {
@@ -2573,4 +2578,49 @@ void prefetch_opcode(unsigned int op)
    src = op;
    recomp_ops[((src >> 26) & 0x3F)]();
 }
+
+/**********************************************************************
+ ************** allocate memory with executable bit set ***************
+ **********************************************************************/
+void *malloc_exec(size_t size)
+{
+#if defined(__GNUC__)
+   int pagesize = sysconf(_SC_PAGE_SIZE);
+   if (pagesize == -1)
+       { printf("Memory error: couldn't determine system memory page size.\n"); return NULL; }
+
+   /* Allocate a buffer aligned on a page boundary;
+      initial protection is PROT_READ | PROT_WRITE */
+   void *block = NULL;
+   if (posix_memalign(&block, pagesize, size) != 0)
+       { printf("Memory error: couldn't allocate %i byte block of %i-byte aligned memory.\n", size, pagesize); return NULL; }
+
+   if (mprotect(block, size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0)
+       { printf("Memory error: couldn't set RWX permissions on %i byte block of memory.\n", size); return NULL; }
+
+   return block;
+#else
+   return malloc(size);
+#endif
+}
+
+/**********************************************************************
+ ************* reallocate memory with executable bit set **************
+ **********************************************************************/
+void *realloc_exec(void *ptr, size_t size, size_t newsize)
+{
+   void* block = malloc_exec(newsize);
+   if (block != NULL)
+   {
+      size_t copysize;
+      if (size < newsize)
+         copysize = size;
+      else
+         copysize = newsize;
+      memcpy(block, ptr, copysize);
+   }
+   free(ptr);
+   return block;
+}
+
 

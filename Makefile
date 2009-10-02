@@ -43,16 +43,6 @@ ifeq ($(OS), LINUX)
   LDFLAGS += -Wl,-export-dynamic
 endif
 
-# set executable stack as a linker option for X86 architecture, for dynamic recompiler
-ifeq ($(CPU), X86)
-  ifeq ($(OS), FREEBSD)
-    LDFLAGS += -z execstack
-  endif
-  ifeq ($(OS), LINUX)
-    LDFLAGS += -z execstack
-  endif
-endif
-
 # set options
 ifeq ($(DBG), 1)
   CFLAGS += -DDBG

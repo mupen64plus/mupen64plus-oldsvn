@@ -22,6 +22,7 @@
 #ifndef RECOMP_H
 #define RECOMP_H
 
+#include <stddef.h>
 #if defined(__x86_64__)
   #include "x86_64/assemble.h"
 #else
@@ -92,6 +93,8 @@ void prefetch_opcode(unsigned int op);
 void dyna_jump();
 void dyna_start(void (*code)());
 void dyna_stop();
+void *malloc_exec(size_t size);
+void *realloc_exec(void *ptr, size_t size, size_t newsize);
 
 extern precomp_instr *dst; /* precomp_instr structure for instruction being recompiled */
 
