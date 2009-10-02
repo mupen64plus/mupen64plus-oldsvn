@@ -633,33 +633,98 @@ void savestates_load_pj64()
     unzReadCurrentFile(zipstatefile, &sp_register.sp_dram_addr_reg, 4);
     unzReadCurrentFile(zipstatefile, &sp_register.sp_rd_len_reg, 4);
     unzReadCurrentFile(zipstatefile, &sp_register.sp_wr_len_reg, 4);
-    unzReadCurrentFile(zipstatefile, &sp_register.w_sp_status_reg, 4);
+    unzReadCurrentFile(zipstatefile, &sp_register.sp_status_reg, 4);
     unzReadCurrentFile(zipstatefile, &sp_register.sp_dma_full_reg, 4);
     unzReadCurrentFile(zipstatefile, &sp_register.sp_dma_busy_reg, 4);
     unzReadCurrentFile(zipstatefile, &sp_register.sp_semaphore_reg, 4);
     unzReadCurrentFile(zipstatefile, &value, 4); // SP_PC_REG -> Not part of mupen savestate. Dummy read.
     unzReadCurrentFile(zipstatefile, &value, 4); // SP_IBIST_REG -> Not part of mupen savestate. Dummy read.
+
+    unsigned int *w_sp = &sp_register.w_sp_status_reg; // Only done to reduce the amount
+    unsigned int *sp = &sp_register.sp_status_reg;     // of character in the below ifs / elses
+    *w_sp = 0;
+    if ((*sp & 0x0001) == 0) { *w_sp |= 0x0000001; }
+    else                     { *w_sp |= 0x0000002; }
+    if ((*sp & 0x0002) == 0) { *w_sp |= 0x0000004; }
+    if ((*sp & 0x001c) == 0) { *w_sp |= 0x0000008; } // TODO: Unsecure if this is correct
+    else                     { *w_sp |= 0x0000010; } // TODO:  --- " ---
+    if ((*sp & 0x0020) == 0) { *w_sp |= 0x0000020; }
+    else                     { *w_sp |= 0x0000040; }
+    if ((*sp & 0x0040) == 0) { *w_sp |= 0x0000080; }
+    else                     { *w_sp |= 0x0000100; }
+    if ((*sp & 0x0080) == 0) { *w_sp |= 0x0000200; }
+    else                     { *w_sp |= 0x0000400; }
+    if ((*sp & 0x0100) == 0) { *w_sp |= 0x0000800; }
+    else                     { *w_sp |= 0x0001000; }
+    if ((*sp & 0x0200) == 0) { *w_sp |= 0x0002000; }
+    else                     { *w_sp |= 0x0004000; }
+    if ((*sp & 0x0400) == 0) { *w_sp |= 0x0008000; }
+    else                     { *w_sp |= 0x0010000; }
+    if ((*sp & 0x0800) == 0) { *w_sp |= 0x0020000; }
+    else                     { *w_sp |= 0x0040000; }
+    if ((*sp & 0x1000) == 0) { *w_sp |= 0x0080000; }
+    else                     { *w_sp |= 0x0100000; }
+    if ((*sp & 0x2000) == 0) { *w_sp |= 0x0200000; }
+    else                     { *w_sp |= 0x0400000; }
+    if ((*sp & 0x4000) == 0) { *w_sp |= 0x0800000; }
+    else                     { *w_sp |= 0x1000000; }
     update_SP();
 
     // dpc_register
     unzReadCurrentFile(zipstatefile, &dpc_register.dpc_start, 4);
     unzReadCurrentFile(zipstatefile, &dpc_register.dpc_end, 4);
     unzReadCurrentFile(zipstatefile, &dpc_register.dpc_current, 4);
-    unzReadCurrentFile(zipstatefile, &dpc_register.w_dpc_status, 4);
+    unzReadCurrentFile(zipstatefile, &dpc_register.dpc_status, 4);
     unzReadCurrentFile(zipstatefile, &dpc_register.dpc_clock, 4);
     unzReadCurrentFile(zipstatefile, &dpc_register.dpc_bufbusy, 4);
     unzReadCurrentFile(zipstatefile, &dpc_register.dpc_pipebusy, 4);
     unzReadCurrentFile(zipstatefile, &dpc_register.dpc_tmem, 4);
     unzReadCurrentFile(zipstatefile, &value, 4); // Dummy read
     unzReadCurrentFile(zipstatefile, &value, 4); // Dummy read
+    unsigned int *w_dpc = &dpc_register.w_dpc_status;
+    unsigned int *dpc = &dpc_register.dpc_status;
+    *w_dpc = 0;
+    if ((*dpc & 0x0001) == 0) { *w_dpc |= 0x0000001; }
+    else                      { *w_dpc |= 0x0000002; }
+    if ((*dpc & 0x0002) == 0) { *w_dpc |= 0x0000004; }
+    else                      { *w_dpc |= 0x0000008; }
+    if ((*dpc & 0x0004) == 0) { *w_dpc |= 0x0000010; }
+    else                      { *w_dpc |= 0x0000020; }
     update_DPC();
 
     // mi_register
-    unzReadCurrentFile(zipstatefile, &MI_register.w_mi_init_mode_reg, 4);
+    unzReadCurrentFile(zipstatefile, &MI_register.mi_init_mode_reg, 4);
     unzReadCurrentFile(zipstatefile, &MI_register.mi_version_reg, 4);
     unzReadCurrentFile(zipstatefile, &MI_register.mi_intr_reg, 4);
-    unzReadCurrentFile(zipstatefile, &MI_register.w_mi_intr_mask_reg, 4);
+    unzReadCurrentFile(zipstatefile, &MI_register.mi_intr_mask_reg, 4);
+    MI_register.w_mi_init_mode_reg = MI_register.mi_init_mode_reg & 0x7F;
+    if ((MI_register.mi_init_mode_reg & 0x080) == 0)
+        { MI_register.w_mi_init_mode_reg |= 0x0000080;
+    } else {
+        MI_register.w_mi_init_mode_reg |= 0x0000100;
+    }
+    if ((MI_register.mi_init_mode_reg & 0x200) == 0) {
+        MI_register.w_mi_init_mode_reg |= 0x0001000;
+    } else {
+        MI_register.w_mi_init_mode_reg |= 0x0002000;
+    }
+    // TODO: Unsecure about 'clear DP interrupt' (MI_register.w_mi_init_mode_reg[11])
     update_MI_intr_mask_reg();
+    unsigned int *w_mi = (unsigned int *) &MI_register.w_mi_intr_mask_reg;
+    unsigned int *mi = (unsigned int *) &MI_register.mi_intr_mask_reg;
+    *w_mi = 0;
+    if ((*mi & 0x01) == 0) { *w_mi |= 0x0000001; }
+    else                   { *w_mi |= 0x0000002; }
+    if ((*mi & 0x02) == 0) { *w_mi |= 0x0000004; }
+    else                   { *w_mi |= 0x0000008; }
+    if ((*mi & 0x04) == 0) { *w_mi |= 0x0000010; }
+    else                   { *w_mi |= 0x0000020; }
+    if ((*mi & 0x08) == 0) { *w_mi |= 0x0000040; }
+    else                   { *w_mi |= 0x0000080; }
+    if ((*mi & 0x10) == 0) { *w_mi |= 0x0000100; }
+    else                   { *w_mi |= 0x0000200; }
+    if ((*mi & 0x20) == 0) { *w_mi |= 0x0000400; }
+    else                   { *w_mi |= 0x0000800; }
     update_MI_init_mode_reg();
 
     // vi_register 
@@ -668,9 +733,9 @@ void savestates_load_pj64()
     // ai_register
     unzReadCurrentFile(zipstatefile, &ai_register, 4*6);
 
-    // TODO: Not avialable in PJ64 savestate
+    // TODO: Not avialable in PJ64 savestate. Leave it as is.
     // ai_register.next_delay = 0; ai_register.next_len = 0;
-    // ai_register.current_delay = 0;//804629; ai_register.current_len = 0;
+    // ai_register.current_delay = 0; ai_register.current_len = 0;
 
     // pi_register
     unzReadCurrentFile(zipstatefile, &pi_register, sizeof(PI_register));
