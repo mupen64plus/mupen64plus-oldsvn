@@ -32,12 +32,6 @@ endif
 CFLAGS += $(SDL_FLAGS) -fpic -DPIC -Wall
 LDFLAGS	+= -lpng $(SDL_LIBS) $(LIBGL_LIBS) $(PLUGIN_LDFLAGS)
 
-# set options
-
-ifeq ($(DBG), 1)
-  CFLAGS += -D_DEBUG
-endif
-
 # list of object files to generate
 OBJECTS = OGLGraphicsContext.o \
 	Debugger.o \
