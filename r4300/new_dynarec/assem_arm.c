@@ -23,6 +23,7 @@ extern int last_count;
 extern int pcaddr;
 extern int pending_exception;
 extern int branch_target;
+extern int ram_offset;
 extern uint64_t readmem_dword;
 extern precomp_instr fake_pc;
 extern void *dynarec_local;
@@ -1085,6 +1086,8 @@ void emit_loadreg(int r, int hr)
 {
   if((r&63)==0)
     emit_zeroreg(hr);
+  else if(r==MMREG)
+    emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,hr);
   else {
     int addr=((int)reg)+((r&63)<<3)+((r&64)>>4);
     if((r&63)==HIREG) addr=(int)&hi+((r&64)>>4);
@@ -1093,6 +1096,7 @@ void emit_loadreg(int r, int hr)
     if(r==CSREG) addr=(int)&Status;
     if(r==FSREG) addr=(int)&FCR31;
     if(r==INVCP) addr=(int)&invc_ptr;
+    if(r==ROREG) addr=(int)&ram_offset;
     u_int offset = addr-(u_int)&dynarec_local;
     assert(offset<4096);
     assem_debug("ldr %s,fp+%d\n",regname[hr],offset);
@@ -1812,8 +1816,8 @@ void emit_readdword_indexed_tlb(int addr, int rs, int map, int rh, int rl)
   }else{
     assert(rh!=rs);
     if(rh>=0) emit_readword_indexed_tlb(addr, rs, map, rh);
-    emit_addimm(map,1,map);
-    emit_readword_indexed_tlb(addr, rs, map, rl);
+    emit_addimm(map,1,HOST_TEMPREG);
+    emit_readword_indexed_tlb(addr, rs, HOST_TEMPREG, rl);
   }
 }
 void emit_movsbl_indexed(int offset, int rs, int rt)
@@ -1831,9 +1835,9 @@ void emit_movsbl_indexed_tlb(int addr, int rs, int map, int rt)
   if(map<0) emit_movsbl_indexed(addr, rs, rt);
   else {
     if(addr==0) {
-      emit_shlimm(map,2,map);
-      assem_debug("ldrsb %s,%s+%s\n",regname[rt],regname[rs],regname[map]);
-      output_w32(0xe19000d0|rd_rn_rm(rt,rs,map));
+      emit_shlimm(map,2,HOST_TEMPREG);
+      assem_debug("ldrsb %s,%s+%s\n",regname[rt],regname[rs],regname[HOST_TEMPREG]);
+      output_w32(0xe19000d0|rd_rn_rm(rt,rs,HOST_TEMPREG));
     }else{
       assert(addr>-256&&addr<256);
       assem_debug("add %s,%s,%s,lsl #2\n",regname[rt],regname[rs],regname[map]);
@@ -3000,7 +3004,7 @@ do_cop1stub(int n)
 
 /* TLB */
 
-int do_tlb_r(int s,int ar,int map,int x,int a,int shift,int c,u_int addr)
+int do_tlb_r(int s,int ar,int map,int cache,int x,int a,int shift,int c,u_int addr)
 {
   if(c) {
     if((signed int)addr>=(signed int)0xC0000000) {
@@ -3012,8 +3016,13 @@ int do_tlb_r(int s,int ar,int map,int x,int a,int shift,int c,u_int addr)
   }
   else {
     assert(s!=map);
-    emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
-    emit_addsr12(map,s,map);
+    if(cache>=0) {
+      // Use cached offset to memory map
+      emit_addsr12(cache,s,map);
+    }else{
+      emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
+      emit_addsr12(map,s,map);
+    }
     // Schedule this while we wait on the load
     //if(x) emit_xorimm(s,x,ar);
     if(shift>=0) emit_shlimm(s,3,shift);
@@ -3039,7 +3048,7 @@ int gen_tlb_addr_r(int ar, int map) {
   }
 }
 
-int do_tlb_w(int s,int ar,int map,int x,int c,u_int addr)
+int do_tlb_w(int s,int ar,int map,int cache,int x,int c,u_int addr)
 {
   if(c) {
     if(addr<0x80800000||addr>=0xC0000000) {
@@ -3051,8 +3060,13 @@ int do_tlb_w(int s,int ar,int map,int x,int c,u_int addr)
   }
   else {
     assert(s!=map);
-    emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
-    emit_addsr12(map,s,map);
+    if(cache>=0) {
+      // Use cached offset to memory map
+      emit_addsr12(cache,s,map);
+    }else{
+      emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
+      emit_addsr12(map,s,map);
+    }
     // Schedule this while we wait on the load
     //if(x) emit_xorimm(s,x,ar);
     emit_readword_dualindexedx4(FP,map,map);
@@ -3072,6 +3086,14 @@ int gen_tlb_addr_w(int ar, int map) {
   if(map>=0) {
     assem_debug("add %s,%s,%s lsl #2\n",regname[ar],regname[ar],regname[map]);
     output_w32(0xe0800100|rd_rn_rm(ar,ar,map));
+  }
+}
+
+// This reverses the above operation
+int gen_orig_addr_w(int ar, int map) {
+  if(map>=0) {
+    assem_debug("sub %s,%s,%s lsl #2\n",regname[ar],regname[ar],regname[map]);
+    output_w32(0xe0400100|rd_rn_rm(ar,ar,map));
   }
 }
 
@@ -3196,7 +3218,7 @@ void shift_assemble_arm(int i,struct regstat *i_regs)
 
 void loadlr_assemble_arm(int i,struct regstat *i_regs)
 {
-  int s,th,tl,temp,temp2,addr,map=-1;
+  int s,th,tl,temp,temp2,addr,map=-1,cache=-1;
   int offset;
   int jaddr=0;
   int memtarget,c=0;
@@ -3222,6 +3244,10 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
   }
   if(!using_tlb) {
     if(!c) {
+      #ifdef RAM_OFFSET
+      map=get_reg(i_regs->regmap,ROREG);
+      if(map<0) emit_loadreg(ROREG,map=HOST_TEMPREG);
+      #endif
       emit_shlimm(addr,3,temp);
       if (opcode[i]==0x22||opcode[i]==0x26) {
         emit_andimm(addr,0xFFFFFFFC,temp2); // LWL/LWR
@@ -3249,8 +3275,9 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
       a=0xFFFFFFF8; // LDL/LDR
     }
     map=get_reg(i_regs->regmap,TLREG);
+    cache=get_reg(i_regs->regmap,MMREG); // Get cached offset to memory_map
     assert(map>=0);
-    map=do_tlb_r(addr,temp2,map,0,a,c?-1:temp,c,constmap[i][s]+offset);
+    map=do_tlb_r(addr,temp2,map,cache,0,a,c?-1:temp,c,constmap[i][s]+offset);
     if(c) {
       if (opcode[i]==0x22||opcode[i]==0x26) {
         emit_movimm(((constmap[i][s]+offset)<<3)&24,temp); // LWL/LWR
@@ -3263,7 +3290,7 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
   if (opcode[i]==0x22||opcode[i]==0x26) { // LWL/LWR
     if(!c||memtarget) {
       //emit_readword_indexed((int)rdram-0x80000000,temp2,temp2);
-      emit_readword_indexed_tlb((int)rdram-0x80000000,temp2,map,temp2);
+      emit_readword_indexed_tlb(0,temp2,map,temp2);
       if(jaddr) add_stub(LOADW_STUB,jaddr,(int)out,i,temp2,(int)i_regs,ccadj[i],reglist);
     }
     else
@@ -3289,7 +3316,7 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
     if(!c||memtarget) {
       //if(th>=0) emit_readword_indexed((int)rdram-0x80000000,temp2,temp2h);
       //emit_readword_indexed((int)rdram-0x7FFFFFFC,temp2,temp2);
-      emit_readdword_indexed_tlb((int)rdram-0x80000000,temp2,map,temp2h,temp2);
+      emit_readdword_indexed_tlb(0,temp2,map,temp2h,temp2);
       if(jaddr) add_stub(LOADD_STUB,jaddr,(int)out,i,temp2,(int)i_regs,ccadj[i],reglist);
     }
     else
@@ -4526,6 +4553,10 @@ void arch_init() {
   rounding_modes[1]=0x3<<22; // trunc
   rounding_modes[2]=0x1<<22; // ceil
   rounding_modes[3]=0x2<<22; // floor
+
+  #ifdef RAM_OFFSET
+  ram_offset=((int)rdram-(int)0x80000000)>>2;
+  #endif
 
   // Trampolines for jumps >32M
   int *ptr,*ptr2;

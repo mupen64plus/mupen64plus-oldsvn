@@ -3169,7 +3169,7 @@ do_cop1stub(int n)
 
 /* TLB */
 
-int do_tlb_r(int s,int ar,int map,int x,int a,int shift,int c,u_int addr)
+int do_tlb_r(int s,int ar,int map,int cache,int x,int a,int shift,int c,u_int addr)
 {
   if(c) {
     if((signed int)addr>=(signed int)0xC0000000) {
@@ -3205,7 +3205,7 @@ int gen_tlb_addr_r(int ar, int map) {
   }
 }
 
-int do_tlb_w(int s,int ar,int map,int x,int c,u_int addr)
+int do_tlb_w(int s,int ar,int map,int cache,int x,int c,u_int addr)
 {
   if(c) {
     if(addr<0x80800000||addr>=0xC0000000) {
@@ -3444,7 +3444,7 @@ void loadlr_assemble_x86(int i,struct regstat *i_regs)
     }
     map=get_reg(i_regs->regmap,TLREG);
     assert(map>=0);
-    map=do_tlb_r(addr,temp2,map,0,a,c?-1:temp,c,constmap[i][s]+offset);
+    map=do_tlb_r(addr,temp2,map,-1,0,a,c?-1:temp,c,constmap[i][s]+offset);
     if(c) {
       if (opcode[i]==0x22||opcode[i]==0x26) {
         emit_movimm(((constmap[i][s]+offset)<<3)&24,temp); // LWL/LWR

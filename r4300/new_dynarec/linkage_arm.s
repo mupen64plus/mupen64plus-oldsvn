@@ -58,6 +58,7 @@ rdram = 0x80000000
 	.global	fake_pc
 	.global	mini_ht
 	.global	restore_candidate
+	.global	ram_offset
 	.global	memory_map
 	.bss
 	.align	4
@@ -140,8 +141,10 @@ PC = branch_target + 4
 fake_pc = PC + 4
 	.type	fake_pc, %object
 	.size	fake_pc, 132
-/* 4 bytes free */
-mini_ht = fake_pc + 136
+ram_offset = fake_pc + 132
+	.type	ram_offset, %object
+	.size	ram_offset, 4
+mini_ht = ram_offset + 4
 	.type	mini_ht, %object
 	.size	mini_ht, 256
 restore_candidate = mini_ht + 256
@@ -740,41 +743,47 @@ new_dyna_start:
 	.global	write_rdram_new
 	.type	write_rdram_new, %function
 write_rdram_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 	ldr	r0, [fp, #word-dynarec_local]
-	str	r0, [r2]
+	str	r0, [r2, r3, lsl #2]
 	b	.E12
 	.size	write_rdram_new, .-write_rdram_new
 	.align	2
 	.global	write_rdramb_new
 	.type	write_rdramb_new, %function
 write_rdramb_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 	ldrb	r0, [fp, #byte-dynarec_local]
 	eor	r2, r2, #3
-	strb	r0, [r2]
+	strb	r0, [r2, r3, lsl #2]
 	b	.E12
 	.size	write_rdramb_new, .-write_rdramb_new
 	.align	2
 	.global	write_rdramh_new
 	.type	write_rdramh_new, %function
 write_rdramh_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 	ldrh	r0, [fp, #hword-dynarec_local]
 	eor	r2, r2, #2
-	strh	r0, [r2]
+	lsl	r3, r3, #2
+	strh	r0, [r2, r3]
 	b	.E12
 	.size	write_rdramh_new, .-write_rdramh_new
 	.align	2
 	.global	write_rdramd_new
 	.type	write_rdramd_new, %function
 write_rdramd_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 /*	ldrd	r0, [fp, #dword-dynarec_local]*/
 	ldr	r0, [fp, #dword-dynarec_local]
 	ldr	r1, [fp, #dword+4-dynarec_local]
-	str	r0, [r2, #4]
-	str	r1, [r2]
+	add	r3, r2, r3, lsl #2
+	str	r0, [r3, #4]
+	str	r1, [r3]
 	b	.E12
 	.size	write_rdramd_new, .-write_rdramd_new
 	.align	2
