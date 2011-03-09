@@ -39,6 +39,7 @@ rdram = 0x80000000
 	.global reg_cop0
 	.global	FCR0
 	.global	FCR31
+	.global	rounding_modes
 	.global	next_interupt
 	.global	cycle_count
 	.global	last_count
@@ -55,7 +56,6 @@ rdram = 0x80000000
 	.global	branch_target
 	.global	PC
 	.global	fake_pc
-	.global	fake_pc_float
 	.global	mini_ht
 	.global	restore_candidate
 	.global	memory_map
@@ -64,7 +64,7 @@ rdram = 0x80000000
 	.type	dynarec_local, %object
 	.size	dynarec_local, 64
 dynarec_local:
-	.space	64+16+16+8+8+8+8+256+8+8+128+128+128+8+132+132+256+512+4194304
+	.space	64+16+16+8+8+8+8+256+8+8+128+128+128+16+8+132+4+256+512+4194304
 next_interupt = dynarec_local + 64
 	.type	next_interupt, %object
 	.size	next_interupt, 4
@@ -128,7 +128,10 @@ reg_cop1_simple = reg_cop0 + 128
 reg_cop1_double = reg_cop1_simple + 128
 	.type	reg_cop1_double, %object
 	.size	reg_cop1_double, 128
-branch_target = reg_cop1_double + 128
+rounding_modes = reg_cop1_double + 128
+	.type	rounding_modes, %object
+	.size	rounding_modes, 16
+branch_target = rounding_modes + 16
 	.type	branch_target, %object
 	.size	branch_target, 4
 PC = branch_target + 4
@@ -137,10 +140,8 @@ PC = branch_target + 4
 fake_pc = PC + 4
 	.type	fake_pc, %object
 	.size	fake_pc, 132
-fake_pc_float = fake_pc + 132
-	.type	fake_pc_float, %object
-	.size	fake_pc_float, 132
-mini_ht = fake_pc_float + 132
+/* 4 bytes free */
+mini_ht = fake_pc + 136
 	.type	mini_ht, %object
 	.size	mini_ht, 256
 restore_candidate = mini_ht + 256
@@ -492,7 +493,7 @@ verify_code_ds:
 	.global	verify_code_vm
 	.type	verify_code_vm, %function
 verify_code_vm:
-	/* r0 = instruction pointer (vitual address) */
+	/* r0 = instruction pointer (virtual address) */
 	/* r1 = source (virtual address) */
 	/* r2 = target */
 	/* r3 = length */
@@ -655,14 +656,19 @@ jump_syscall:
 	mov	pc, r0
 	.size	jump_syscall, .-jump_syscall
 	.align	2
+	.global	indirect_jump_indexed
+	.type	indirect_jump_indexed, %function
+indirect_jump_indexed:
+	ldr	r0, [r0, r1, lsl #2]
+	.size	indirect_jump_indexed, .-indirect_jump_indexed
+	.align	2
 	.global	indirect_jump
 	.type	indirect_jump, %function
 indirect_jump:
 	ldr	r12, [fp, #last_count-dynarec_local]
-	add	r0, r0, r1, lsl #2
 	add	r2, r2, r12 
 	str	r2, [fp, #reg_cop0+36-dynarec_local] /* Count */
-	ldr	pc, [r0]
+	mov	pc, r0
 	.size	indirect_jump, .-indirect_jump
 	.align	2
 	.global	jump_eret

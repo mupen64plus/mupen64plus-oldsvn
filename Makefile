@@ -195,6 +195,7 @@ ifneq ($(NO_ASM), 1)
       r4300/$(DYNAREC)/regcache.o \
       r4300/$(DYNAREC)/rjump.o \
       r4300/new_dynarec/new_dynarec.o \
+      r4300/new_dynarec/fpu.o \
       r4300/new_dynarec/linkage_$(DYNAREC).o
   else
     ifeq ($(CPU), ARM)
@@ -202,6 +203,7 @@ ifneq ($(NO_ASM), 1)
     endif
     OBJ_DYNAREC = r4300/empty_dynarec.o \
       r4300/new_dynarec/new_dynarec.o \
+      r4300/new_dynarec/fpu.o \
       r4300/new_dynarec/linkage_$(DYNAREC).o
   endif
 else

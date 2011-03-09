@@ -35,6 +35,7 @@
 #include "../r4300/r4300.h"
 #include "../r4300/interupt.h"
 #include "../opengl/osd.h"
+#include "../r4300/new_dynarec/new_dynarec.h"
 
 const char* savestate_magic = "M64+SAVE";
 const int savestate_version = 0x00010000;  /* 1.0 */
@@ -180,7 +181,11 @@ void savestates_save()
     if(!dynacore&&interpcore)
         gzwrite(f, &interp_addr, 4);
     else
+        #ifdef NEW_DYNAREC
+        gzwrite(f, &pcaddr, 4);
+        #else
         gzwrite(f, &PC->addr, 4);
+        #endif
 
     gzwrite(f, &next_interupt, 4);
     gzwrite(f, &next_vi, 4);
@@ -296,11 +301,17 @@ void savestates_load()
         gzread(f, &interp_addr, 4);
     else
         {
+#ifdef NEW_DYNAREC
+        gzread(f, &pcaddr, 4);
+        pending_exception = 1;
+        invalidate_all_pages();
+#else
         int i;
         gzread(f, &queuelength, 4);
         for (i = 0; i < 0x100000; i++)
             invalid_code[i] = 1;
         jump_to(queuelength);
+#endif
         }
 
     gzread(f, &next_interupt, 4);
