@@ -47,6 +47,24 @@ const void * jump_vaddr_reg[8] = {
   0,
   jump_vaddr_edi };
 
+void invalidate_block_eax();
+void invalidate_block_ecx();
+void invalidate_block_edx();
+void invalidate_block_ebx();
+void invalidate_block_ebp();
+void invalidate_block_esi();
+void invalidate_block_edi();
+
+const void * invalidate_block_reg[8] = {
+  invalidate_block_eax,
+  invalidate_block_ecx,
+  invalidate_block_edx,
+  invalidate_block_ebx,
+  0,
+  invalidate_block_ebp,
+  invalidate_block_esi,
+  invalidate_block_edi };
+
 const u_short rounding_modes[4] = {
   0x33F, // round
   0xF3F, // trunc
@@ -3116,10 +3134,7 @@ do_invstub(int n)
 {
   u_int reglist=stubs[n][3];
   set_jump_target(stubs[n][1],(int)out);
-  save_regs(reglist);
-  if(stubs[n][4]!=EDI) emit_mov(stubs[n][4],EDI);
-  emit_call((int)&invalidate_block);
-  restore_regs(reglist);
+  emit_call(invalidate_block_reg[stubs[n][4]]);
   emit_jmp(stubs[n][2]); // return address
 }
 

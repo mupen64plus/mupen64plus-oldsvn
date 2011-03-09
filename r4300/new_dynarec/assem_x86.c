@@ -47,6 +47,24 @@ const u_int jump_vaddr_reg[8] = {
   0,
   (int)jump_vaddr_edi };
 
+void invalidate_block_eax();
+void invalidate_block_ecx();
+void invalidate_block_edx();
+void invalidate_block_ebx();
+void invalidate_block_ebp();
+void invalidate_block_esi();
+void invalidate_block_edi();
+
+const u_int invalidate_block_reg[8] = {
+  (int)invalidate_block_eax,
+  (int)invalidate_block_ecx,
+  (int)invalidate_block_edx,
+  (int)invalidate_block_ebx,
+  0,
+  (int)invalidate_block_ebp,
+  (int)invalidate_block_esi,
+  (int)invalidate_block_edi };
+
 const u_short rounding_modes[4] = {
   0x33F, // round
   0xF3F, // trunc
@@ -2955,11 +2973,7 @@ void printregs(int edi,int esi,int ebp,int esp,int b,int d,int c,int a)
 do_invstub(int n)
 {
   set_jump_target(stubs[n][1],(int)out);
-  if(stubs[n][4]!=EDI) emit_xchg(stubs[n][4],EDI);
-  emit_pusha();
-  emit_call((int)&invalidate_block);
-  emit_popa();
-  if(stubs[n][4]!=EDI) emit_xchg(stubs[n][4],EDI);
+  emit_call(invalidate_block_reg[stubs[n][4]]);
   emit_jmp(stubs[n][2]); // return address
 }
 
