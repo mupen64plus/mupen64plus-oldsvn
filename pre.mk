@@ -43,6 +43,10 @@ ifeq ("$(UNAME)","ppc64")
   ARCH = 64BITS
   NO_ASM = 1
 endif
+ifeq ("$(UNAME)","armv7l")
+  CPU = ARM
+  ARCH = 32BITS
+endif
 
 # detect operation system. Currently just linux and OSX.
 UNAME = $(shell uname -s)

@@ -41,6 +41,7 @@
 #include "r4300.h"
 #include "macros.h"
 #include "exception.h"
+#include "new_dynarec/new_dynarec.h"
 
 #include "../memory/memory.h"
 
@@ -606,7 +607,15 @@ void gen_interupt()
             break;
     }
 
+#ifdef NEW_DYNAREC
+    EPC = pcaddr;
+    pcaddr = 0x80000180;
+    Status |= 2;
+    Cause &= 0x7FFFFFFF;
+    pending_exception=1;
+#else
     exception_general();
+#endif
 
     if (savestates_job & SAVESTATE) 
     {

@@ -28,6 +28,7 @@
 #include "macros.h"
 #include "recomp.h"
 #include "recomph.h"
+#include "new_dynarec/new_dynarec.h"
 
 #include "../memory/memory.h"
 
@@ -37,22 +38,30 @@
 
 unsigned int dynacore = 0, interpcore = 0;
 int no_compiled_jump = 0;
-int stop, llbit, rompause;
+int llbit, rompause;
+#if defined(NO_ASM) || !defined(__arm__)
+int stop;
 long long int reg[32], hi, lo;
-long long int local_rs, local_rt;
 unsigned int reg_cop0[32];
+#endif
+long long int local_rs, local_rt;
 int local_rs32, local_rt32;
 unsigned int jump_target;
+#if defined(NO_ASM) || !defined(__arm__)
 float *reg_cop1_simple[32];
 double *reg_cop1_double[32];
+int FCR0, FCR31;
+#endif
 int reg_cop1_fgr_32[32];
 long long int reg_cop1_fgr_64[32];
-int FCR0, FCR31;
 tlb tlb_e[32];
 unsigned int delay_slot, skip_jump = 0, dyna_interp = 0, last_addr;
 unsigned long long int debug_count = 0;
-unsigned int next_interupt, CIC_Chip;
+unsigned int CIC_Chip;
+#if defined(NO_ASM) || !defined(__arm__)
+unsigned int next_interupt;
 precomp_instr *PC;
+#endif
 char invalid_code[0x100000];
 
 precomp_block *blocks[0x100000], *actual;
@@ -1516,12 +1525,14 @@ void update_count()
      }
    else
      {
+#if !defined(NEW_DYNAREC)
     if (PC->addr < last_addr)
       {
          printf("PC->addr < last_addr\n");
       }
     Count = Count + (PC->addr - last_addr)/2;
     last_addr = PC->addr;
+#endif
      }
 #ifdef COMPARE_CORE
    if (delay_slot)
@@ -1826,15 +1837,21 @@ void r4300_execute()
             PC->ops();
         }
     }
-#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__))
+#if !defined(NO_ASM) && (defined(__i386__) || defined(__x86_64__) || defined(__arm__))
     else if (dynacore == 1)
     {
         dynacore = 1;
         printf ("R4300 Core mode: Dynamic Recompiler\n");
         init_blocks();
         code = (void *)(actual->code+(actual->block[0x40/4].local_addr));
+#ifdef NEW_DYNAREC
+        new_dynarec_init();
+        new_dyna_start();
+        new_dynarec_cleanup();
+#else
         dyna_start(code);
         PC++;
+#endif
 #if defined(PROFILE_R4300)
         pfProfile = fopen("instructionaddrs.dat", "ab");
         for (i=0; i<0x100000; i++)

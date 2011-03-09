@@ -26,6 +26,7 @@
 #else
 #include <windows.h>
 #endif
+#include <sys/mman.h>
 
 #include "memory.h"
 #include "dma.h"
@@ -57,7 +58,9 @@ RI_register ri_register;
 AI_register ai_register;
 DPC_register dpc_register;
 DPS_register dps_register;
+#if defined(__x86_64__) || defined(NO_ASM) || (!defined(__i386__)&&!defined(__arm__))
 unsigned int rdram[0x800000/4]  __attribute__((aligned(16)));
+#endif
 unsigned char *rdramb = (unsigned char *)(rdram);
 unsigned int SP_DMEM[0x1000/4*2];
 unsigned int *SP_IMEM = SP_DMEM+0x1000/4;
@@ -67,7 +70,9 @@ unsigned int PIF_RAM[0x40/4];
 unsigned char *PIF_RAMb = (unsigned char *)(PIF_RAM);
 
 // address : address of the read/write operation being done
+#if defined(NO_ASM) || !defined(__arm__)
 unsigned int address = 0;
+#endif
 // *address_low = the lower 16 bit of the address :
 #ifdef _BIG_ENDIAN
 static unsigned short *address_low = (unsigned short *)(&address)+1; 
@@ -76,10 +81,12 @@ static unsigned short *address_low = (unsigned short *)(&address);
 #endif
 
 // values that are being written are stored in these variables
+#if defined(NO_ASM) || !defined(__arm__)
 unsigned int word;
 unsigned char byte;
 unsigned short hword;
 unsigned long long int dword;
+#endif
 
 // addresse where the read value will be stored
 unsigned long long int* rdword;
@@ -143,7 +150,16 @@ int init_memory(int DoByteSwap)
      }
    
    //init RDRAM
-   for (i=0; i<(0x800000/4); i++) rdram[i]=0;
+   if((int)rdram!=0x80000000) {
+     for (i=0; i<(0x800000/4); i++) rdram[i]=0;
+   }
+   else {
+     munmap ((void*)0x80000000, 0x800000);
+     if(mmap ((void*)0x80000000, 0x800000,
+            PROT_READ | PROT_WRITE,
+            MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS,
+            -1, 0) <= 0) {printf("mmap(0x80000000) failed\n");}
+   }
    for (i=0; i</*0x40*/0x80; i++) 
      {
     readmem[(0x8000+i)] = read_rdram;

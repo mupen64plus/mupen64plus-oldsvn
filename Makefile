@@ -40,6 +40,20 @@ ifeq ($(CPU), X86)
   endif
 endif
 
+# keep memory map roughly consistent between architectures
+ifeq ($(OS), LINUX)
+  ifeq ($(CPU), X86)
+    ifeq ($(ARCH), 64BITS)
+      LDFLAGS += -Xlinker -Ttext -Xlinker 0x8000000
+    endif
+  endif
+  ifeq ($(CPU), ARM)
+    ifeq ($(ARCH), 32BITS)
+      LDFLAGS += -Xlinker --section-start -Xlinker .init=0x08000000
+    endif
+  endif
+endif
+
 # set options
 ifeq ($(DBG), 1)
   CFLAGS += -DDBG
@@ -164,8 +178,7 @@ ifneq ($(NO_ASM), 1)
     else
       DYNAREC = x86
     endif
-  endif
-  OBJ_DYNAREC = \
+    OBJ_DYNAREC = \
       r4300/$(DYNAREC)/assemble.o \
       r4300/$(DYNAREC)/debug.o \
       r4300/$(DYNAREC)/gbc.o \
@@ -180,7 +193,17 @@ ifneq ($(NO_ASM), 1)
       r4300/$(DYNAREC)/gspecial.o \
       r4300/$(DYNAREC)/gtlb.o \
       r4300/$(DYNAREC)/regcache.o \
-      r4300/$(DYNAREC)/rjump.o
+      r4300/$(DYNAREC)/rjump.o \
+      r4300/new_dynarec/new_dynarec.o \
+      r4300/new_dynarec/linkage_$(DYNAREC).o
+  else
+    ifeq ($(CPU), ARM)
+      DYNAREC = arm
+    endif
+    OBJ_DYNAREC = r4300/empty_dynarec.o \
+      r4300/new_dynarec/new_dynarec.o \
+      r4300/new_dynarec/linkage_$(DYNAREC).o
+  endif
 else
   OBJ_DYNAREC = r4300/empty_dynarec.o
 endif
@@ -236,10 +259,10 @@ PLUGINS	= plugins/blight_input.$(SO_EXTENSION) \
           plugins/dummyvideo.$(SO_EXTENSION) \
           plugins/glN64.$(SO_EXTENSION) \
           plugins/ricevideo.$(SO_EXTENSION) \
-          plugins/glide64.$(SO_EXTENSION) \
           plugins/jttl_audio.$(SO_EXTENSION) \
           plugins/mupen64_hle_rsp_azimer.$(SO_EXTENSION) \
-          plugins/mupen64_input.$(SO_EXTENSION)
+          plugins/mupen64_input.$(SO_EXTENSION) \
+#          plugins/glide64.$(SO_EXTENSION)
 
 SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
@@ -313,6 +336,8 @@ targets:
 
 all: version.h $(ALL)
 
+plugins: $(PLUGINS)
+
 mupen64plus: $(MISC_DEPS) version.h $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) $(CORE_LDFLAGS) $(LIBS) -o $@
 ifneq ($(OS), WINDOWS)
@@ -342,7 +367,7 @@ endif
 
 clean-core:
 ifneq ($(OS), WINDOWS)
-	$(RM_F) ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
+	$(RM_F) ./r4300/*.o ./r4300/x86/*.o ./r4300/x86_64/*.o ./r4300/new_dynarec/*.o ./memory/*.o ./debugger/*.o ./opengl/*.o
 	$(RM_F) ./main/*.o ./main/version.h ./main/zip/*.o ./main/bzip2/*.o ./main/lzma/*.o ./main/7zip/*.o ./main/gui_gtk/*.o ./main/gui_gtk/debugger/*.o
 	$(RM_F) mupen64plus mupen64plus.desktop
 	$(RM_F) main/gui_qt4/moc_* main/gui_qt4/ui_*.h main/gui_qt4/*.o main/gui_qt4/*.a main/gui_qt4/Makefile

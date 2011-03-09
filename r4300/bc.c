@@ -137,8 +137,10 @@ void BC1FL(void)
     if(!skip_jump)
       PC += (PC-2)->f.i.immediate-1;
      }
-   else
+   else {
      PC+=2;
+     update_count();
+  }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -160,8 +162,10 @@ void BC1FL_OUT(void)
     if (!skip_jump)
       jump_to(PC->addr + ((jump_target-1)<<2));
      }
-   else
+   else {
      PC+=2;
+     update_count();
+  }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -195,8 +199,10 @@ void BC1TL(void)
     if(!skip_jump)
       PC += (PC-2)->f.i.immediate-1;
      }
-   else
+   else {
      PC+=2;
+     update_count();
+  }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }
@@ -218,8 +224,10 @@ void BC1TL_OUT(void)
     if (!skip_jump)
       jump_to(PC->addr + ((jump_target-1)<<2));
      }
-   else
+   else {
      PC+=2;
+     update_count();
+  }
    last_addr = PC->addr;
    if (next_interupt <= Count) gen_interupt();
 }

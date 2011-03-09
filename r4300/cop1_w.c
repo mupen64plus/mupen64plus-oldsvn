@@ -23,6 +23,11 @@
 #include "ops.h"
 #include "macros.h"
 
+#include "new_dynarec/new_dynarec.h"
+#ifdef NEW_DYNAREC
+#define check_cop1_unusable() 0
+#endif
+
 void CVT_S_W(void)
 {  
    if (check_cop1_unusable()) return;

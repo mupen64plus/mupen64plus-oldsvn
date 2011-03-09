@@ -453,8 +453,10 @@ void ERET(void)
     jump_to(EPC);
      }
    llbit = 0;
-   check_interupt();
+   //This won't work right since we changed the address
+   //check_interupt();
    last_addr = PC->addr;
-   if (next_interupt <= Count) gen_interupt();
+   //FIXME: This will generate a bogus interrupt...
+   //if (next_interupt <= Count) gen_interupt();
 }
 

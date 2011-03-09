@@ -19,6 +19,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <stdio.h>
 #include "exception.h"
 #include "r4300.h"
 #include "macros.h"
@@ -55,6 +56,8 @@ void XTLB_refill_exception(unsigned long long int addresse)
 void TLB_refill_exception(unsigned int address, int w)
 {
    int usual_handler = 0, i;
+  printf("TRACE: count=%d next=%d (TLB_refill_exception %x)\n",(int)Count,(int)next_interupt,(int)address);
+  fflush(stdout);
    //printf("TLB_refill_exception:%x\n", address);
    if (!dynacore && w != 2) update_count();
    if (w == 1) Cause = (3 << 2);
