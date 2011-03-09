@@ -111,11 +111,45 @@ dyna_linker:
 	jmp	dyna_linker
 	.size	dyna_linker, .-dyna_linker
 
+.globl jump_vaddr_eax
+	.type	jump_vaddr_eax, @function
+jump_vaddr_eax:
+	mov	%eax, %edi
+	jmp	jump_vaddr_edi
+	.size	jump_vaddr_eax, .-jump_vaddr_eax
+.globl jump_vaddr_ecx
+	.type	jump_vaddr_ecx, @function
+jump_vaddr_ecx:
+	mov	%ecx, %edi
+	jmp	jump_vaddr_edi
+	.size	jump_vaddr_ecx, .-jump_vaddr_ecx
+.globl jump_vaddr_edx
+	.type	jump_vaddr_edx, @function
+jump_vaddr_edx:
+	mov	%edx, %edi
+	jmp	jump_vaddr_edi
+	.size	jump_vaddr_edx, .-jump_vaddr_edx
+.globl jump_vaddr_ebx
+	.type	jump_vaddr_ebx, @function
+jump_vaddr_ebx:
+	mov	%ebx, %edi
+	jmp	jump_vaddr_edi
+	.size	jump_vaddr_ebx, .-jump_vaddr_ebx
+.globl jump_vaddr_ebp
+	.type	jump_vaddr_ebp, @function
+jump_vaddr_ebp:
+	mov	%ebp, %edi
+	.size	jump_vaddr_ebp, .-jump_vaddr_ebp
+.globl jump_vaddr_edi
+	.type	jump_vaddr_edi, @function
+jump_vaddr_edi:
+	mov	%edi, %eax
+	.size	jump_vaddr_edi, .-jump_vaddr_edi
+
 .globl jump_vaddr
 	.type	jump_vaddr, @function
 jump_vaddr:
   /* Check hash table */
-	mov	%eax, %edi
 	shr	$16, %eax
 	xor	%edi, %eax
 	movzwl	%ax, %eax
@@ -173,8 +207,13 @@ verify_code:
 cc_interrupt:
 	add	last_count, %esi
 	add	$-8, %rsp /* Align stack */
-	movl	$0, pending_exception
 	mov	%esi, reg_cop0+36 /* Count */
+	shr	$19, %esi
+	movl	$0, pending_exception
+	and	$0x7f, %esi
+	cmpl	$0, restore_candidate(,%esi,4)
+	jne	.L16
+.L13:
 	call	gen_interupt
 	mov	reg_cop0+36, %esi
 	mov	next_interupt, %eax
@@ -184,18 +223,18 @@ cc_interrupt:
 	mov	%eax, last_count
 	sub	%eax, %esi
 	test	%ecx, %ecx
-	jne	.L14
+	jne	.L15
 	test	%ebx, %ebx
-	jne	.L13
+	jne	.L14
 	ret
-.L13:
+.L14:
 	mov	pcaddr, %edi
 	mov	%esi, cycle_count /* CCREG */
 	call	get_addr_ht
 	mov	cycle_count, %esi
 	add	$8, %rsp /* pop return address */
 	jmp	*%rax
-.L14:
+.L15:
 	pop	%rbp /* pop return address and discard it */
 	pop	%rbp /* pop junk */
 	pop	%r15 /* restore callee-save registers */
@@ -205,6 +244,22 @@ cc_interrupt:
 	pop	%rbx
 	pop	%rbp
 	ret	     /* exit dynarec */
+.L16:
+	/* Move 'dirty' blocks to the 'clean' list */
+	mov	restore_candidate(,%esi,4), %ebx
+	mov	%esi, %ebp
+	movl	$0, restore_candidate(,%esi,4)
+	shl	$5, %ebp
+.L17:
+	shr	$1, %ebx
+	jnc	.L18
+	mov	%ebp, %edi
+	call	clean_blocks
+.L18:
+	inc	%ebp
+	test	$31, %ebp
+	jne	.L17
+	jmp	.L13
 	.size	cc_interrupt, .-cc_interrupt
 
 .globl do_interrupt
@@ -220,7 +275,7 @@ do_interrupt:
 	.type	fp_exception, @function
 fp_exception:
 	mov	$0x1000002c, %edx
-.fpe:
+.Lfpe:
 	mov	reg_cop0+48, %ebx
 	or	$2, %ebx
 	mov	%ebx, reg_cop0+48 /* Status */
@@ -237,7 +292,7 @@ fp_exception:
 	.type	fp_exception_ds, @function
 fp_exception_ds:
 	mov	$0x9000002c, %edx /* Set high bit if delay slot */
-	jmp	.fpe
+	jmp	.Lfpe
 	.size	fp_exception_ds, .-fp_exception_ds
 
 .globl jump_syscall
@@ -270,12 +325,12 @@ jump_eret:
 	mov	%eax, last_count
 	sub	%eax, %esi
 	mov	reg_cop0+56, %edi /* EPC */
-	jns	.L18
-.L15:
+	jns	.L22
+.L19:
 	mov	%esi, %r12d
 	mov	$248, %ebx
 	xor	%esi, %esi
-.L16:
+.L20:
 	mov	reg(%ebx), %ecx
 	mov	reg+4(%ebx), %edx
 	sar	$31, %ecx
@@ -283,27 +338,27 @@ jump_eret:
 	neg	%edx
 	adc	%esi, %esi
 	sub	$8, %ebx
-	jne	.L16
+	jne	.L20
 	mov	hi(%ebx), %ecx
 	mov	hi+4(%ebx), %edx
 	sar	$31, %ecx
 	xor	%ecx, %edx
-	jne	.L17
+	jne	.L21
 	mov	lo(%ebx), %ecx
 	mov	lo+4(%ebx), %edx
 	sar	$31, %ecx
 	xor	%ecx, %edx
-.L17:
+.L21:
 	neg	%edx
 	adc	%esi, %esi
 	call	get_addr_32
 	mov	%r12d, %esi
 	jmp	*%rax
-.L18:
+.L22:
 	mov	%edi, pcaddr
 	call	cc_interrupt
 	mov	pcaddr, %edi
-	jmp	.L15
+	jmp	.L19
 	.size	jump_eret, .-jump_eret
 
 .globl new_dyna_start
@@ -332,7 +387,7 @@ write_rdram_new:
 	mov	word, %ecx
 	and	$0x7FFFFFFF, %edi
 	mov	%ecx, rdram(%rdi)
-	jmp	.L19
+	jmp	.L23
 	.size	write_rdram_new, .-write_rdram_new
 
 .globl write_rdramb_new
@@ -343,7 +398,7 @@ write_rdramb_new:
 	movb	byte, %cl
 	and	$0x7FFFFFFF, %edi
 	movb	%cl, rdram(%rdi)
-	jmp	.L19
+	jmp	.L23
 	.size	write_rdramb_new, .-write_rdramb_new
 
 .globl write_rdramh_new
@@ -354,7 +409,7 @@ write_rdramh_new:
 	movw	hword, %cx
 	and	$0x7FFFFFFF, %edi
 	movw	%cx, rdram(%rdi)
-	jmp	.L19
+	jmp	.L23
 	.size	write_rdramh_new, .-write_rdramh_new
 
 .globl write_rdramd_new
@@ -366,7 +421,7 @@ write_rdramd_new:
 	and	$0x7FFFFFFF, %edi
 	mov	%ecx, rdram(%rdi)
 	mov	%edx, rdram+4(%rdi)
-	jmp	.L19
+	jmp	.L23
 	.size	write_rdramd_new, .-write_rdramd_new
 
 .globl do_invalidate
@@ -374,13 +429,13 @@ write_rdramd_new:
 do_invalidate:
 	mov	address, %edi
 	mov	%edi, %ebx /* Return ebx to caller */
-.L19:
+.L23:
 	shr	$12, %edi
 	mov	%edi, %r12d /* Return r12 to caller */
 	cmpb	$1, invalid_code(%edi)
-	je	.L20
+	je	.L24
 	call	invalidate_block
-.L20:
+.L24:
 	ret
 	.size	do_invalidate, .-do_invalidate
 

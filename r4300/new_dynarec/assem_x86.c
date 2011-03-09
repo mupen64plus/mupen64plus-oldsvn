@@ -25,25 +25,32 @@ int pending_exception;
 uint64_t readmem_dword;
 precomp_instr fake_pc,fake_pc_float;
 u_int memory_map[1048576];
+u_int mini_ht[32][2]  __attribute__((aligned(8)));
+u_char restore_candidate[512]  __attribute__((aligned(4)));
 
 void do_interrupt();
+void jump_vaddr_eax();
+void jump_vaddr_ecx();
+void jump_vaddr_edx();
+void jump_vaddr_ebx();
+void jump_vaddr_ebp();
+void jump_vaddr_edi();
+
+const u_int jump_vaddr_reg[8] = {
+  (int)jump_vaddr_eax,
+  (int)jump_vaddr_ecx,
+  (int)jump_vaddr_edx,
+  (int)jump_vaddr_ebx,
+  0,
+  (int)jump_vaddr_ebp,
+  0,
+  (int)jump_vaddr_edi };
 
 // We need these for cmovcc instructions on x86
 u_int const_zero=0;
 u_int const_one=1;
 
 /* Linker */
-
-void kill_pointer(void *stub)
-{
-  int *i_ptr=*((int **)(stub+6));
-  *i_ptr=(int)stub-(int)i_ptr-4;
-}
-int get_pointer(void *stub)
-{
-  int *i_ptr=*((int **)(stub+6));
-  return *i_ptr+(int)i_ptr+4;
-}
 
 void set_jump_target(int addr,int target)
 {
@@ -54,12 +61,27 @@ void set_jump_target(int addr,int target)
     u_int *ptr2=(u_int *)(ptr+2);
     *ptr2=target-(int)ptr2-4;
   }
-  else
-  {
-    assert(*ptr==0xe8||*ptr==0xe9);
+  else if(*ptr==0xe8||*ptr==0xe9) {
     u_int *ptr2=(u_int *)(ptr+1);
     *ptr2=target-(int)ptr2-4;
   }
+  else
+  {
+    assert(*ptr==0xc7); /* mov immediate (store address) */
+    u_int *ptr2=(u_int *)(ptr+6);
+    *ptr2=target;
+  }
+}
+
+void kill_pointer(void *stub)
+{
+  int *i_ptr=*((int **)(stub+6));
+  *i_ptr=(int)stub-(int)i_ptr-4;
+}
+int get_pointer(void *stub)
+{
+  int *i_ptr=*((int **)(stub+6));
+  return *i_ptr+(int)i_ptr+4;
 }
 
 int verify_dirty(int addr)
@@ -73,14 +95,36 @@ int verify_dirty(int addr)
   return !memcmp((void *)source,(void *)copy,len);
 }
 
+void get_bounds(int addr,u_int *start,u_int *end)
+{
+  u_char *ptr=(u_char *)addr;
+  assert(ptr[5]==0xB8);
+  u_int source=*(u_int *)(ptr+6);
+  //u_int copy=*(u_int *)(ptr+11);
+  u_int len=*(u_int *)(ptr+16);
+  if(start) *start=source;
+  if(end) *end=source+len;
+}
+
+// Find the "clean" entry point from a "dirty" entry point
+// by skipping past the call to verify_code
+u_int get_clean_addr(int addr)
+{
+  u_char *ptr=(u_char *)addr;
+  assert(ptr[20]==0xE8); // call instruction
+  assert(ptr[25]==0x83); // pop (add esp,4) instruction
+  if(ptr[28]==0xE9) return *(u_int *)(ptr+29)+addr+33; // follow jmp
+  else return(addr+28);
+}
+
 /* Register allocation */
 
 // Note: registers are allocated clean (unmodified state)
 // if you intend to modify the register, you must call dirty_reg().
 void alloc_reg(struct regstat *cur,int i,char reg)
 {
-  int preferred_reg = (reg&3)+(reg>28)*4-(reg==32)+2*(reg==36)-(reg==40);
   int r,hr;
+  int preferred_reg = (reg&3)+(reg>28)*4-(reg==32)+2*(reg==36)-(reg==40);
   
   // Don't allocate unused registers
   if((cur->u>>reg)&1) return;
@@ -1529,6 +1573,13 @@ void emit_pushimm(int imm)
   output_byte(0x68);
   output_w32(imm);
 }
+void emit_pushmem(int addr)
+{
+  assem_debug("push *%x\n",addr);
+  output_byte(0xFF);
+  output_modrm(0,5,6);
+  output_w32(addr);
+}
 void emit_pusha()
 {
   assem_debug("pusha\n");
@@ -1564,6 +1615,14 @@ void emit_jmpreg(u_int r)
   assert(r<8);
   output_byte(0xFF);
   output_modrm(3,r,4);
+}
+void emit_jmpmem_indexed(u_int addr,u_int r)
+{
+  assem_debug("jmp *%x(%%%s)\n",addr,regname[r]);
+  assert(r<8);
+  output_byte(0xFF);
+  output_modrm(2,r,4);
+  output_w32(addr);
 }
 
 void emit_readword_indexed(int addr, int rs, int rt)
@@ -2130,7 +2189,7 @@ do_readstub(int n)
     temp=!addr;
   }
   emit_readword((int)&last_count,temp);
-  emit_addimm(cc,2*stubs[n][6]+2,cc);
+  emit_addimm(cc,CLOCK_DIVIDER*(stubs[n][6]+1),cc);
   emit_writeword_imm_esp(start+stubs[n][3]*4+(((regs[i].was32>>rs1[i])&1)<<1)+ds,32);
   //emit_movimm(start+stubs[n][3]*4+(((regs[i].was32>>rs1[i])&1)<<1)+ds,EBP);
   emit_add(cc,temp,cc);
@@ -2140,7 +2199,7 @@ do_readstub(int n)
   // but not doing so causes random crashes...
   emit_readword((int)&Count,HOST_CCREG);
   emit_readword((int)&next_interupt,ECX);
-  emit_addimm(HOST_CCREG,-2*stubs[n][6]-2,HOST_CCREG);
+  emit_addimm(HOST_CCREG,-CLOCK_DIVIDER*(stubs[n][6]+1),HOST_CCREG);
   emit_sub(HOST_CCREG,ECX,HOST_CCREG);
   emit_writeword(ECX,(int)&last_count);
   emit_storereg(CCREG,HOST_CCREG);
@@ -2208,7 +2267,7 @@ inline_readstub(int type, u_int addr, char regmap[], int target, int adj, u_int 
     temp=!rs;
   }
   emit_readword((int)&last_count,temp);
-  emit_addimm(cc,2*adj+2,cc);
+  emit_addimm(cc,CLOCK_DIVIDER*(adj+1),cc);
   emit_add(cc,temp,cc);
   emit_writeword(cc,(int)&Count);
   emit_call(((u_int *)ftable)[addr>>16]);
@@ -2216,7 +2275,7 @@ inline_readstub(int type, u_int addr, char regmap[], int target, int adj, u_int 
   // but not doing so causes random crashes...
   emit_readword((int)&Count,HOST_CCREG);
   emit_readword((int)&next_interupt,ECX);
-  emit_addimm(HOST_CCREG,-2*adj-2,HOST_CCREG);
+  emit_addimm(HOST_CCREG,-CLOCK_DIVIDER*(adj+1),HOST_CCREG);
   emit_sub(HOST_CCREG,ECX,HOST_CCREG);
   emit_writeword(ECX,(int)&last_count);
   emit_storereg(CCREG,HOST_CCREG);
@@ -2313,7 +2372,7 @@ do_writestub(int n)
     temp=!addr;
   }
   emit_readword((int)&last_count,temp);
-  emit_addimm(cc,2*stubs[n][6]+2,cc);
+  emit_addimm(cc,CLOCK_DIVIDER*(stubs[n][6]+1),cc);
   emit_writeword_imm_esp(start+stubs[n][3]*4+(((regs[i].was32>>rs1[i])&1)<<1)+ds,32);
   //emit_movimm(start+stubs[n][3]*4+(((regs[i].was32>>rs1[i])&1)<<1)+ds,EBP);
   emit_add(cc,temp,cc);
@@ -2321,7 +2380,7 @@ do_writestub(int n)
   emit_callreg(addr);
   emit_readword((int)&Count,HOST_CCREG);
   emit_readword((int)&next_interupt,ECX);
-  emit_addimm(HOST_CCREG,-2*stubs[n][6]-2,HOST_CCREG);
+  emit_addimm(HOST_CCREG,-CLOCK_DIVIDER*(stubs[n][6]+1),HOST_CCREG);
   emit_sub(HOST_CCREG,ECX,HOST_CCREG);
   emit_writeword(ECX,(int)&last_count);
   emit_storereg(CCREG,HOST_CCREG);
@@ -2384,13 +2443,13 @@ inline_writestub(int type, u_int addr, char regmap[], int target, int adj, u_int
     temp=!rs;
   }
   emit_readword((int)&last_count,temp);
-  emit_addimm(cc,2*adj+2,cc);
+  emit_addimm(cc,CLOCK_DIVIDER*(adj+1),cc);
   emit_add(cc,temp,cc);
   emit_writeword(cc,(int)&Count);
   emit_call(((u_int *)ftable)[addr>>16]);
   emit_readword((int)&Count,HOST_CCREG);
   emit_readword((int)&next_interupt,ECX);
-  emit_addimm(HOST_CCREG,-2*adj-2,HOST_CCREG);
+  emit_addimm(HOST_CCREG,-CLOCK_DIVIDER*(adj+1),HOST_CCREG);
   emit_sub(HOST_CCREG,ECX,HOST_CCREG);
   emit_writeword(ECX,(int)&last_count);
   emit_storereg(CCREG,HOST_CCREG);
@@ -2455,7 +2514,7 @@ do_cop1stub(int n)
   wb_dirtys(i_regs->regmap_entry,i_regs->was32,i_regs->wasdirty);
   if(regs[i].regmap_entry[HOST_CCREG]!=CCREG) emit_loadreg(CCREG,HOST_CCREG);
   emit_movimm(start+(i-ds)*4,EAX); // Get PC
-  emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
+  emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
   emit_jmp(ds?(int)fp_exception_ds:(int)fp_exception);
   
   /* This works, but uses a lot of memory...
@@ -2833,10 +2892,10 @@ void loadlr_assemble_x86(int i,struct regstat *i_regs)
     }
     if (opcode[i]==0x1A||opcode[i]==0x1B) { // LDL/LDR
       if(s>=0) 
-        if((regs[i].wasdirty>>s)&1) // FIXME
+        if((i_regs->wasdirty>>s)&1)
           emit_storereg(rs1[i],s);
       if(get_reg(i_regs->regmap,rs1[i]|64)>=0) 
-        if((regs[i].wasdirty>>get_reg(i_regs->regmap,rs1[i]|64))&1) // FIXME
+        if((i_regs->wasdirty>>get_reg(i_regs->regmap,rs1[i]|64))&1)
           emit_storereg(rs1[i]|64,get_reg(i_regs->regmap,rs1[i]|64));
       int temp2h=get_reg(i_regs->regmap,FTEMP|64);
       if(!c||memtarget) {
@@ -2888,7 +2947,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
         emit_readword((int)&last_count,ECX);
         emit_loadreg(CCREG,HOST_CCREG); // TODO: do proper reg alloc
         emit_add(HOST_CCREG,ECX,HOST_CCREG);
-        emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG);
+        emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
         emit_writeword(HOST_CCREG,(int)&Count);
       }
       emit_call((int)MFC0);
@@ -2911,7 +2970,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_readword((int)&last_count,ECX);
       emit_loadreg(CCREG,HOST_CCREG); // TODO: do proper reg alloc
       emit_add(HOST_CCREG,ECX,HOST_CCREG);
-      emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG);
+      emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
       emit_writeword(HOST_CCREG,(int)&Count);
     }
     // What a mess.  The status register (12) can enable interrupts,
@@ -2928,7 +2987,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
     if(copr==9||copr==11||copr==12) {
       emit_readword((int)&Count,HOST_CCREG);
       emit_readword((int)&next_interupt,ECX);
-      emit_addimm(HOST_CCREG,-2*ccadj[i],HOST_CCREG);
+      emit_addimm(HOST_CCREG,-CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
       emit_sub(HOST_CCREG,ECX,HOST_CCREG);
       emit_writeword(ECX,(int)&last_count);
       emit_storereg(CCREG,HOST_CCREG);
@@ -2958,7 +3017,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
     {
       int count=ccadj[i];
       if(i_regs->regmap[HOST_CCREG]!=CCREG) emit_loadreg(CCREG,HOST_CCREG);
-      emit_addimm_and_set_flags(2*count,HOST_CCREG); // TODO: Should there be an extra cycle here?
+      emit_addimm_and_set_flags(CLOCK_DIVIDER*count,HOST_CCREG); // TODO: Should there be an extra cycle here?
       emit_jmp((int)jump_eret);
 
       /* FIXME: Check for interrupt
@@ -3061,6 +3120,92 @@ void cop1_assemble(int i,struct regstat *i_regs)
     emit_writeword_indexed(sl,0,temp);
   }
 }
+
+void cvt_s_w(int *source,float *dest)
+{
+  *dest = *source;
+}
+void cvt_d_w(int *source,double *dest)
+{
+  *dest = *source;
+}
+void cvt_s_l(long long *source,float *dest)
+{
+  *dest = *source;
+}
+void cvt_d_l(long long *source,double *dest)
+{
+  *dest = *source;
+}
+
+void fconv_assemble_x86(int i,struct regstat *i_regs)
+{
+  signed char rs=get_reg(i_regs->regmap,CSREG);
+  assert(rs>=0);
+  // Check cop1 unusable
+  if(!cop1_usable) {
+    emit_testimm(rs,0x20000000);
+    int jaddr=(int)out;
+    emit_jeq(0);
+    add_stub(FP_STUB,jaddr,(int)out,i,rs,(int)i_regs,is_delayslot,0);
+    cop1_usable=1;
+  }
+
+  if(opcode2[i]==0x14&&(source[i]&0x3f)==0x20) {
+    //emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],EAX);
+    //emit_readword((int)&reg_cop1_simple[(source[i]>> 6)&0x1f],EBX);
+    //emit_pushreg(EBX);
+    //emit_pushreg(EAX);
+    emit_pushmem((int)&reg_cop1_simple[(source[i]>> 6)&0x1f]);
+    emit_pushmem((int)&reg_cop1_simple[(source[i]>>11)&0x1f]);
+    emit_call((int)cvt_s_w);
+  }
+  if(opcode2[i]==0x14&&(source[i]&0x3f)==0x21) {
+    //emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],EAX);
+    //emit_readword((int)&reg_cop1_double[(source[i]>> 6)&0x1f],EBX);
+    //emit_pushreg(EBX);
+    //emit_pushreg(EAX);
+    emit_pushmem((int)&reg_cop1_double[(source[i]>> 6)&0x1f]);
+    emit_pushmem((int)&reg_cop1_simple[(source[i]>>11)&0x1f]);
+    emit_call((int)cvt_d_w);
+  }
+  if(opcode2[i]==0x15&&(source[i]&0x3f)==0x20) {
+    emit_pushmem((int)&reg_cop1_simple[(source[i]>> 6)&0x1f]);
+    emit_pushmem((int)&reg_cop1_double[(source[i]>>11)&0x1f]);
+    emit_call((int)cvt_s_l);
+  }
+  if(opcode2[i]==0x15&&(source[i]&0x3f)==0x21) {
+    emit_pushmem((int)&reg_cop1_double[(source[i]>> 6)&0x1f]);
+    emit_pushmem((int)&reg_cop1_double[(source[i]>>11)&0x1f]);
+    emit_call((int)cvt_d_l);
+  }
+  emit_addimm(ESP,8,ESP);
+  emit_loadreg(CSREG,rs);
+  return;
+/*
+  #ifdef IMM_WRITE
+  emit_writeword_imm((int)&fake_pc_float,(int)&PC);
+  //emit_writebyte_imm((source[i]>>16)&0x1f,(int)&(fake_pc_float.f.cf.ft));
+  emit_writebyte_imm((source[i]>>11)&0x1f,(int)&(fake_pc_float.f.cf.fs));
+  emit_writebyte_imm((source[i]>> 6)&0x1f,(int)&(fake_pc_float.f.cf.fd));
+  #else
+  emit_addimm(FP,(int)&fake_pc_float-(int)&dynarec_local,ARG1_REG);
+  //emit_movimm((source[i]>>16)&0x1f,ARG2_REG);
+  emit_movimm((source[i]>>11)&0x1f,ARG3_REG);
+  emit_movimm((source[i]>> 6)&0x1f,ARG4_REG);
+  emit_writeword(ARG1_REG,(int)&PC);
+  //emit_writebyte(ARG2_REG,(int)&(fake_pc_float.f.cf.ft));
+  emit_writebyte(ARG3_REG,(int)&(fake_pc_float.f.cf.fs));
+  emit_writebyte(ARG4_REG,(int)&(fake_pc_float.f.cf.fd));
+  #endif
+  
+  if(opcode2[i]==0x14&&(source[i]&0x3f)==0x20) emit_call((int)CVT_S_W);
+  if(opcode2[i]==0x14&&(source[i]&0x3f)==0x21) emit_call((int)CVT_D_W);
+  if(opcode2[i]==0x15&&(source[i]&0x3f)==0x20) emit_call((int)CVT_S_L);
+  if(opcode2[i]==0x15&&(source[i]&0x3f)==0x21) emit_call((int)CVT_D_L);
+  emit_loadreg(CSREG,rs);*/
+}
+#define fconv_assemble fconv_assemble_x86
 
 void multdiv_assemble_x86(int i,struct regstat *i_regs)
 {
@@ -3302,8 +3447,39 @@ void syscall_assemble(int i,struct regstat *i_regs)
   assert(ccreg==HOST_CCREG);
   assert(!is_delayslot);
   emit_movimm(start+i*4,EAX); // Get PC
-  emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
+  emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
   emit_jmp((int)jump_syscall);
+}
+
+void do_preload_rhash(int r) {
+  emit_movimm(0xf8,r);
+}
+
+void do_preload_rhtbl(int r) {
+  // Don't need this for x86
+}
+
+void do_rhash(int rs,int rh) {
+  emit_and(rs,rh,rh);
+}
+
+void do_miniht_load(int ht,int rh) {
+  // Don't need this for x86.  The load and compare can be combined into
+  // a single instruction (below)
+}
+
+void do_miniht_jump(int rs,int rh,int ht) {
+  emit_cmpmem_indexed((int)mini_ht,rh,rs);
+  emit_jne(jump_vaddr_reg[rs]);
+  emit_jmpmem_indexed((int)mini_ht+4,rh);
+}
+
+void do_miniht_insert(int return_address,int rt,int temp) {
+  emit_movimm(return_address,rt); // PC into link register
+  //emit_writeword_imm(return_address,(int)&mini_ht[(return_address&0xFF)>>8][0]);
+  emit_writeword(rt,(int)&mini_ht[(return_address&0xFF)>>3][0]);
+  add_to_linker((int)out,return_address,1);
+  emit_writeword_imm(0,(int)&mini_ht[(return_address&0xFF)>>3][1]);
 }
 
 // We don't need this for x86

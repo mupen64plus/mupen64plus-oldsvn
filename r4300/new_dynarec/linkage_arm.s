@@ -55,13 +55,15 @@ rdram = 0x80000000
 	.global	PC
 	.global	fake_pc
 	.global	fake_pc_float
+	.global	mini_ht
+	.global	restore_candidate
 	.global	memory_map
 	.bss
 	.align	4
 	.type	dynarec_local, %object
 	.size	dynarec_local, 64
 dynarec_local:
-	.space	64+16+16+8+8+8+8+256+8+8+128+128+128+8+132+132+4194304
+	.space	64+16+16+8+8+8+8+256+8+8+128+128+128+8+132+132+256+512+4194304
 next_interupt = dynarec_local + 64
 	.type	next_interupt, %object
 	.size	next_interupt, 4
@@ -135,7 +137,13 @@ fake_pc = PC + 8
 fake_pc_float = fake_pc + 132
 	.type	fake_pc_float, %object
 	.size	fake_pc_float, 132
-memory_map = fake_pc_float + 132
+mini_ht = fake_pc_float + 132
+	.type	mini_ht, %object
+	.size	mini_ht, 256
+restore_candidate = mini_ht + 256
+	.type	restore_candidate, %object
+	.size	restore_candidate, 512
+memory_map = restore_candidate + 512
 	.type	memory_map, %object
 	.size	memory_map, 4194304
 
@@ -237,10 +245,91 @@ dyna_linker:
 .htptr:
 	.word	hash_table
 	.align	2
+	.global	jump_vaddr_r0
+	.type	jump_vaddr_r0, %function
+jump_vaddr_r0:
+	eor	r2, r0, r0, lsl #16
+	b	jump_vaddr
+	.size	jump_vaddr_r0, .-jump_vaddr_r0
+	.global	jump_vaddr_r1
+	.type	jump_vaddr_r1, %function
+jump_vaddr_r1:
+	eor	r2, r1, r1, lsl #16
+	mov	r0, r1
+	b	jump_vaddr
+	.size	jump_vaddr_r1, .-jump_vaddr_r1
+	.global	jump_vaddr_r2
+	.type	jump_vaddr_r2, %function
+jump_vaddr_r2:
+	mov	r0, r2
+	eor	r2, r2, r2, lsl #16
+	b	jump_vaddr
+	.size	jump_vaddr_r2, .-jump_vaddr_r2
+	.global	jump_vaddr_r3
+	.type	jump_vaddr_r3, %function
+jump_vaddr_r3:
+	eor	r2, r3, r3, lsl #16
+	mov	r0, r3
+	b	jump_vaddr
+	.size	jump_vaddr_r3, .-jump_vaddr_r3
+	.global	jump_vaddr_r4
+	.type	jump_vaddr_r4, %function
+jump_vaddr_r4:
+	eor	r2, r4, r4, lsl #16
+	mov	r0, r4
+	b	jump_vaddr
+	.size	jump_vaddr_r4, .-jump_vaddr_r4
+	.global	jump_vaddr_r5
+	.type	jump_vaddr_r5, %function
+jump_vaddr_r5:
+	eor	r2, r5, r5, lsl #16
+	mov	r0, r5
+	b	jump_vaddr
+	.size	jump_vaddr_r5, .-jump_vaddr_r5
+	.global	jump_vaddr_r6
+	.type	jump_vaddr_r6, %function
+jump_vaddr_r6:
+	eor	r2, r6, r6, lsl #16
+	mov	r0, r6
+	b	jump_vaddr
+	.size	jump_vaddr_r6, .-jump_vaddr_r6
+	.global	jump_vaddr_r8
+	.type	jump_vaddr_r8, %function
+jump_vaddr_r8:
+	eor	r2, r8, r8, lsl #16
+	mov	r0, r8
+	b	jump_vaddr
+	.size	jump_vaddr_r8, .-jump_vaddr_r8
+	.global	jump_vaddr_r9
+	.type	jump_vaddr_r9, %function
+jump_vaddr_r9:
+	eor	r2, r9, r9, lsl #16
+	mov	r0, r9
+	b	jump_vaddr
+	.size	jump_vaddr_r9, .-jump_vaddr_r9
+	.global	jump_vaddr_r10
+	.type	jump_vaddr_r10, %function
+jump_vaddr_r10:
+	eor	r2, r10, r10, lsl #16
+	mov	r0, r10
+	b	jump_vaddr
+	.size	jump_vaddr_r10, .-jump_vaddr_r10
+	.global	jump_vaddr_r12
+	.type	jump_vaddr_r12, %function
+jump_vaddr_r12:
+	eor	r2, r12, r12, lsl #16
+	mov	r0, r12
+	b	jump_vaddr
+	.size	jump_vaddr_r12, .-jump_vaddr_r12
+	.global	jump_vaddr_r7
+	.type	jump_vaddr_r7, %function
+jump_vaddr_r7:
+	eor	r2, r7, r7, lsl #16
+	add	r0, r7, #0
+	.size	jump_vaddr_r7, .-jump_vaddr_r7
 	.global	jump_vaddr
 	.type	jump_vaddr, %function
 jump_vaddr:
-	eor	r2, r0, r0, lsl #16
 	ldr	r1, .htptr
 	lsr	r2, r2, #12
 	bic	r2, r2, #15
@@ -289,10 +378,17 @@ verify_code:
 cc_interrupt:
 	ldr	r0, [fp, #last_count-dynarec_local]
 	mov	r1, #0
+	mov	r2, #0x1fc
 	add	r10, r0, r10
 	str	r1, [fp, #pending_exception-dynarec_local]
+	and	r2, r2, r10, lsr #17
+	add	r3, fp, #restore_candidate-dynarec_local
 	str	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
+	ldr	r4, [r2, r3]
 	mov	r10, lr
+	tst	r4, r4
+	bne	.L16
+.L13:
 	bl	gen_interupt
 	mov	lr, r10
 	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
@@ -302,17 +398,29 @@ cc_interrupt:
 	str	r0, [fp, #last_count-dynarec_local]
 	sub	r10, r10, r0
 	tst	r2, r2
-	bne	.L14
+	bne	.L15
 	tst	r1, r1
-	bne	.L13
-	mov	pc, lr
-.L13:
+	moveq	pc, lr
+.L14:
 	ldr	r0, [fp, #pcaddr-dynarec_local]
 	bl	get_addr_ht
 	mov	pc, r0
-.L14:
+.L15:
 	add	r12, fp, #28
 	ldmia	r12, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+.L16:
+	/* Move 'dirty' blocks to the 'clean' list */
+	lsl	r5, r2, #3
+	str	r1, [r2, r3]
+.L17:
+	lsrs	r4, r4, #1
+	mov	r0, r5
+	add	r5, r5, #1
+	blcs	clean_blocks
+	tst	r5, #31
+	bne	.L17
+	b	.L13
+
 	.size	cc_interrupt, .-cc_interrupt
 	.align	2
 	.global	do_interrupt
@@ -386,19 +494,19 @@ jump_eret:
 	ldr	r0, [fp, #reg_cop0+56-dynarec_local] /* EPC */
 	str	r1, [fp, #last_count-dynarec_local]
 	subs	r10, r10, r1
-	bpl	.L18
-.L15:
+	bpl	.L22
+.L19:
 	add	r6, fp, #reg+256-dynarec_local
 	mov	r5, #248
 	mov	r1, #0
-.L16:
+.L20:
 	ldr	r2, [r6, #-8]!
 	ldr	r3, [r6, #4]
 	eor	r3, r3, r2, asr #31
 	subs	r3, r3, #1
 	adc	r1, r1, r1
 	subs	r5, r5, #8
-	bne	.L16
+	bne	.L20
 	ldr	r2, [fp, #hi-dynarec_local]
 	ldr	r3, [fp, #hi+4-dynarec_local]
 	eors	r3, r3, r2, asr #31
@@ -409,11 +517,11 @@ jump_eret:
 	adc	r1, r1, r1
 	bl	get_addr_32
 	mov	pc, r0
-.L18:
+.L22:
 	str	r0, [fp, #pcaddr-dynarec_local]
 	bl	cc_interrupt
 	ldr	r0, [fp, #pcaddr-dynarec_local]
-	b	.L15
+	b	.L19
 	.size	jump_eret, .-jump_eret
 	.align	2
 	.global	new_dyna_start
@@ -440,7 +548,7 @@ write_rdram_new:
 	ldr	r2, [fp, #address-dynarec_local]
 	ldr	r0, [fp, #word-dynarec_local]
 	str	r0, [r2]
-	b	.L19
+	b	.L23
 	.size	write_rdram_new, .-write_rdram_new
 	.align	2
 	.global	write_rdramb_new
@@ -450,7 +558,7 @@ write_rdramb_new:
 	ldrb	r0, [fp, #byte-dynarec_local]
 	eor	r2, r2, #3
 	strb	r0, [r2]
-	b	.L19
+	b	.L23
 	.size	write_rdramb_new, .-write_rdramb_new
 	.align	2
 	.global	write_rdramh_new
@@ -460,7 +568,7 @@ write_rdramh_new:
 	ldrh	r0, [fp, #hword-dynarec_local]
 	eor	r2, r2, #2
 	strh	r0, [r2]
-	b	.L19
+	b	.L23
 	.size	write_rdramh_new, .-write_rdramh_new
 	.align	2
 	.global	write_rdramd_new
@@ -472,14 +580,14 @@ write_rdramd_new:
 	ldr	r1, [fp, #dword+4-dynarec_local]
 	str	r0, [r2, #4]
 	str	r1, [r2]
-	b	.L19
+	b	.L23
 	.size	write_rdramd_new, .-write_rdramd_new
 	.align	2
 	.global	do_invalidate
 	.type	do_invalidate, %function
 do_invalidate:
 	ldr	r2, [fp, #address-dynarec_local]
-.L19:
+.L23:
 	ldr	r1, [fp, #invc_ptr-dynarec_local]
 	lsr	r0, r2, #12
 	ldrb	r2, [r1, r0]

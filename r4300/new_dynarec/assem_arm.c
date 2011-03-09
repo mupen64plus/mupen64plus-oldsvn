@@ -26,19 +26,97 @@ extern uint64_t readmem_dword;
 extern precomp_instr fake_pc,fake_pc_float;
 extern void *dynarec_local;
 extern u_int memory_map[1048576];
+extern u_int mini_ht[32][2];
 
 void indirect_jump();
 void do_interrupt();
+void jump_vaddr_r0();
+void jump_vaddr_r1();
+void jump_vaddr_r2();
+void jump_vaddr_r3();
+void jump_vaddr_r4();
+void jump_vaddr_r5();
+void jump_vaddr_r6();
+void jump_vaddr_r7();
+void jump_vaddr_r8();
+void jump_vaddr_r9();
+void jump_vaddr_r10();
+void jump_vaddr_r12();
+
+const u_int jump_vaddr_reg[16] = {
+  (int)jump_vaddr_r0,
+  (int)jump_vaddr_r1,
+  (int)jump_vaddr_r2,
+  (int)jump_vaddr_r3,
+  (int)jump_vaddr_r4,
+  (int)jump_vaddr_r5,
+  (int)jump_vaddr_r6,
+  (int)jump_vaddr_r7,
+  (int)jump_vaddr_r8,
+  (int)jump_vaddr_r9,
+  (int)jump_vaddr_r10,
+  0,
+  (int)jump_vaddr_r12,
+  0,
+  0,
+  0};
 
 /* Linker */
 
-void set_jump_target(int addr,int target)
+void set_jump_target(int addr,u_int target)
 {
   u_char *ptr=(u_char *)addr;
-  assert((ptr[3]&0x0e)==0xa);
   u_int *ptr2=(u_int *)ptr;
-  *ptr2=(*ptr2&0xFF000000)|(((target-(u_int)ptr2-8)<<6)>>8);
+  if(ptr[3]==0xe2) {
+    assert((target-(u_int)ptr2-8)<4096);
+    *ptr2=(*ptr2&0xFFFFF000)|(target-(u_int)ptr2-8);
+  }
+  else {
+    assert((ptr[3]&0x0e)==0xa);
+    *ptr2=(*ptr2&0xFF000000)|(((target-(u_int)ptr2-8)<<6)>>8);
+  }
 }
+
+// This optionally copies the instruction from the target of the branch into
+// the space before the branch.  Works, but the difference in speed is
+// usually insignificant.
+void set_jump_target_fillslot(int addr,u_int target,int copy)
+{
+  u_char *ptr=(u_char *)addr;
+  u_int *ptr2=(u_int *)ptr;
+  assert(!copy||ptr2[-1]==0xe28dd000);
+  if(ptr[3]==0xe2) {
+    assert(!copy);
+    assert((target-(u_int)ptr2-8)<4096);
+    *ptr2=(*ptr2&0xFFFFF000)|(target-(u_int)ptr2-8);
+  }
+  else {
+    assert((ptr[3]&0x0e)==0xa);
+    u_int target_insn=*(u_int *)target;
+    if((target_insn&0x0e100000)==0) { // ALU, no immediate, no flags
+      copy=0;
+    }
+    if((target_insn&0x0c100000)==0x04100000) { // Load
+      copy=0;
+    }
+    if(target_insn&0x08000000) {
+      copy=0;
+    }
+    if(copy) {
+      ptr2[-1]=target_insn;
+      target+=4;
+    }
+    *ptr2=(*ptr2&0xFF000000)|(((target-(u_int)ptr2-8)<<6)>>8);
+  }
+}
+
+/* Literal pool */
+add_literal(int addr,int val)
+{
+  literals[literalcount][0]=addr;
+  literals[literalcount][1]=val;
+  literalcount++; 
+} 
 
 void kill_pointer(void *stub)
 {
@@ -62,14 +140,6 @@ int get_pointer(void *stub)
   return (int)i_ptr+((*i_ptr<<8)>>6)+8;
 }
 
-/* Literal pool */
-add_literal(int addr,int val)
-{
-  literals[literalcount][0]=addr;
-  literals[literalcount][1]=val;
-  literalcount++; 
-} 
-
 int verify_dirty(int addr)
 {
   u_int *ptr=(u_int *)addr;
@@ -82,7 +152,6 @@ int verify_dirty(int addr)
   u_int copy=l_ptr[1];
   u_int len=l_ptr[2];
   #else
-  //if((*ptr&0xFFF00000)==0xe3000000) {
   // ARMv7 movw/movt
   assert((*ptr&0xFFF00000)==0xe3000000);
   u_int source=(ptr[0]&0xFFF)+((ptr[0]>>4)&0xF000)+((ptr[2]<<16)&0xFFF0000)+((ptr[2]<<12)&0xF0000000);
@@ -91,6 +160,47 @@ int verify_dirty(int addr)
   #endif
   //printf("verify_dirty: %x %x %x\n",source,copy,len);
   return !memcmp((void *)source,(void *)copy,len);
+}
+
+void get_bounds(int addr,u_int *start,u_int *end)
+{
+  u_int *ptr=(u_int *)addr;
+  #ifdef ARMv5_ONLY
+  // get from literal pool
+  assert((*ptr&0xFFF00000)==0xe5900000);
+  u_int offset=*ptr&0xfff;
+  u_int *l_ptr=(void *)ptr+offset+8;
+  u_int source=l_ptr[0];
+  //u_int copy=l_ptr[1];
+  u_int len=l_ptr[2];
+  #else
+  // ARMv7 movw/movt
+  assert((*ptr&0xFFF00000)==0xe3000000);
+  u_int source=(ptr[0]&0xFFF)+((ptr[0]>>4)&0xF000)+((ptr[2]<<16)&0xFFF0000)+((ptr[2]<<12)&0xF0000000);
+  //u_int copy=(ptr[1]&0xFFF)+((ptr[1]>>4)&0xF000)+((ptr[3]<<16)&0xFFF0000)+((ptr[3]<<12)&0xF0000000);
+  u_int len=(ptr[4]&0xFFF)+((ptr[4]>>4)&0xF000);
+  #endif
+  *start=source;
+  *end=source+len;
+}
+
+// Find the "clean" entry point from a "dirty" entry point
+// by skipping past the call to verify_code
+u_int get_clean_addr(int addr)
+{
+  int *ptr=(int *)addr;
+  #ifdef ARMv5_ONLY
+  ptr+=4;
+  #else
+  ptr+=6;
+  #endif
+  if((*ptr&0xFF000000)!=0xeb000000) ptr++;
+  assert((*ptr&0xFF000000)==0xeb000000); // bl instruction
+  ptr++;
+  if((*ptr&0xFF000000)==0xea000000) {
+    return (int)ptr+((*ptr<<8)>>6)+8; // follow jump
+  }
+  return (u_int)ptr;
 }
 
 /* Register allocation */
@@ -839,6 +949,11 @@ void emit_movimm(u_int imm,u_int rt)
     #endif
   }
 }
+void emit_pcreladdr(u_int rt)
+{
+  assem_debug("add %s,pc,#?\n",regname[rt]);
+  output_w32(0xe2800000|rd_rn_rm(rt,15,0));
+}
 
 void emit_addimm(u_int rs,int imm,u_int rt)
 {
@@ -893,6 +1008,13 @@ void emit_addimm_and_set_flags(int imm,int rt)
 void emit_addimm_no_flags(u_int imm,u_int rt)
 {
   emit_addimm(rt,imm,rt);
+}
+
+void emit_addnop(u_int r)
+{
+  assert(r<16);
+  assem_debug("add %s,%s,#0 (nop)\n",regname[r],regname[r]);
+  output_w32(0xe2800000|rd_rn_rm(r,r,0));
 }
 
 void emit_adcimm(u_int rs,int imm,u_int rt)
@@ -1213,6 +1335,11 @@ void emit_cmovs_imm(int imm,int rt)
   assert(genimm(imm,&armval));
   output_w32(0x43a00000|rd_rn_rm(rt,0,0)|armval);
 }
+void emit_cmove_reg(int rs,int rt)
+{
+  assem_debug("moveq %s,%s\n",regname[rt],regname[rs]);
+  output_w32(0x01a00000|rd_rn_rm(rt,0,rs));
+}
 void emit_cmovne_reg(int rs,int rt)
 {
   assem_debug("movne %s,%s\n",regname[rt],regname[rs]);
@@ -1445,8 +1572,8 @@ void emit_callreg(u_int r)
 }
 void emit_jmpreg(u_int r)
 {
-  assem_debug("jmp *%%%s\n",regname[r]);
-  assert(0);
+  assem_debug("mov pc,%s\n",regname[r]);
+  output_w32(0xe1a00000|rd_rn_rm(15,0,r));
 }
 
 void emit_readword_indexed(int offset, int rs, int rt)
@@ -1773,6 +1900,54 @@ void emit_negsmi(int rs, int rt)
   output_w32(0x42700000|rd_rn_rm(rt,rs,0));
 }
 
+void emit_orreq(u_int rs1,u_int rs2,u_int rt)
+{
+  assem_debug("orreq %s,%s,%s\n",regname[rt],regname[rs1],regname[rs2]);
+  output_w32(0x01800000|rd_rn_rm(rt,rs1,rs2));
+}
+
+void emit_orrne(u_int rs1,u_int rs2,u_int rt)
+{
+  assem_debug("orrne %s,%s,%s\n",regname[rt],regname[rs1],regname[rs2]);
+  output_w32(0x11800000|rd_rn_rm(rt,rs1,rs2));
+}
+
+void emit_bic_lsl(u_int rs1,u_int rs2,u_int shift,u_int rt)
+{
+  assem_debug("bic %s,%s,%s lsl %s\n",regname[rt],regname[rs1],regname[rs2],regname[shift]);
+  output_w32(0xe1C00000|rd_rn_rm(rt,rs1,rs2)|0x10|(shift<<8));
+}
+
+void emit_biceq_lsl(u_int rs1,u_int rs2,u_int shift,u_int rt)
+{
+  assem_debug("biceq %s,%s,%s lsl %s\n",regname[rt],regname[rs1],regname[rs2],regname[shift]);
+  output_w32(0x01C00000|rd_rn_rm(rt,rs1,rs2)|0x10|(shift<<8));
+}
+
+void emit_bicne_lsl(u_int rs1,u_int rs2,u_int shift,u_int rt)
+{
+  assem_debug("bicne %s,%s,%s lsl %s\n",regname[rt],regname[rs1],regname[rs2],regname[shift]);
+  output_w32(0x11C00000|rd_rn_rm(rt,rs1,rs2)|0x10|(shift<<8));
+}
+
+void emit_bic_lsr(u_int rs1,u_int rs2,u_int shift,u_int rt)
+{
+  assem_debug("bic %s,%s,%s lsr %s\n",regname[rt],regname[rs1],regname[rs2],regname[shift]);
+  output_w32(0xe1C00000|rd_rn_rm(rt,rs1,rs2)|0x30|(shift<<8));
+}
+
+void emit_biceq_lsr(u_int rs1,u_int rs2,u_int shift,u_int rt)
+{
+  assem_debug("biceq %s,%s,%s lsr %s\n",regname[rt],regname[rs1],regname[rs2],regname[shift]);
+  output_w32(0x01C00000|rd_rn_rm(rt,rs1,rs2)|0x30|(shift<<8));
+}
+
+void emit_bicne_lsr(u_int rs1,u_int rs2,u_int shift,u_int rt)
+{
+  assem_debug("bicne %s,%s,%s lsr %s\n",regname[rt],regname[rs1],regname[rs2],regname[shift]);
+  output_w32(0x11C00000|rd_rn_rm(rt,rs1,rs2)|0x30|(shift<<8));
+}
+
 void emit_teq(int rs, int rt)
 {
   assem_debug("teq %s,%s\n",regname[rs],regname[rt]);
@@ -1884,6 +2059,14 @@ void emit_prefetchreg(int r)
 {
   assem_debug("pld %s\n",regname[r]);
   output_w32(0xf5d0f000|rd_rn_rm(0,r,0));
+}
+
+// Special case for mini_ht
+void emit_ldreq_indexed(int rs, u_int offset, int rt)
+{
+  assert(offset<4096);
+  assem_debug("ldreq %s,[%s, #%d]\n",regname[rt],regname[rs],offset);
+  output_w32(0x05900000|rd_rn_rm(rt,rs,0)|offset);
 }
 
 void emit_submem(int r,int addr)
@@ -2120,7 +2303,7 @@ inline_readstub(int type, u_int addr, signed char regmap[], int target, int adj,
     emit_loadreg(CCREG,2);
   }
   //emit_movimm(ftable,0);
-  emit_addimm(cc<0?2:cc,2*adj+2,2);
+  emit_addimm(cc<0?2:cc,CLOCK_DIVIDER*(adj+1),2);
   emit_readword((int)&last_count,3);
   emit_add(3,2,2);
   emit_writeword(2,(int)&Count);
@@ -2129,7 +2312,7 @@ inline_readstub(int type, u_int addr, signed char regmap[], int target, int adj,
   // but not doing so causes random crashes...
   emit_readword((int)&Count,HOST_TEMPREG);
   emit_readword((int)&next_interupt,2);
-  emit_addimm(HOST_TEMPREG,-2*adj-2,HOST_TEMPREG);
+  emit_addimm(HOST_TEMPREG,-CLOCK_DIVIDER*(adj+1),HOST_TEMPREG);
   emit_writeword(2,(int)&last_count);
   emit_sub(HOST_TEMPREG,2,cc<0?HOST_TEMPREG:cc);
   if(cc<0) {
@@ -2275,14 +2458,14 @@ inline_writestub(int type, u_int addr, signed char regmap[], int target, int adj
     emit_loadreg(CCREG,2);
   }
   //emit_movimm(ftable,0);
-  emit_addimm(cc<0?2:cc,2*adj+2,2);
+  emit_addimm(cc<0?2:cc,CLOCK_DIVIDER*(adj+1),2);
   emit_readword((int)&last_count,3);
   emit_add(3,2,2);
   emit_writeword(2,(int)&Count);
   emit_call(((u_int *)ftable)[addr>>16]);
   emit_readword((int)&Count,HOST_TEMPREG);
   emit_readword((int)&next_interupt,2);
-  emit_addimm(HOST_TEMPREG,-2*adj-2,HOST_TEMPREG);
+  emit_addimm(HOST_TEMPREG,-CLOCK_DIVIDER*(adj+1),HOST_TEMPREG);
   emit_writeword(2,(int)&last_count);
   emit_sub(HOST_TEMPREG,2,cc<0?HOST_TEMPREG:cc);
   if(cc<0) {
@@ -2357,7 +2540,7 @@ do_cop1stub(int n)
   wb_dirtys(i_regs->regmap_entry,i_regs->was32,i_regs->wasdirty);
   if(regs[i].regmap_entry[HOST_CCREG]!=CCREG) emit_loadreg(CCREG,HOST_CCREG);
   emit_movimm(start+(i-ds)*4,EAX); // Get PC
-  emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
+  emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
   emit_jmp(ds?(int)fp_exception_ds:(int)fp_exception);
   
   /* This works, but uses a lot of memory...
@@ -2659,25 +2842,16 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
       if (opcode[i]==0x26) emit_xorimm(temp,24,temp); // LWR
       emit_movimm(-1,HOST_TEMPREG);
       if (opcode[i]==0x26) {
-        emit_shr(HOST_TEMPREG,temp,HOST_TEMPREG);
         emit_shr(temp2,temp,temp2);
+        emit_bic_lsr(tl,HOST_TEMPREG,temp,tl);
       }else{
-        emit_shl(HOST_TEMPREG,temp,HOST_TEMPREG);
         emit_shl(temp2,temp,temp2);
+        emit_bic_lsl(tl,HOST_TEMPREG,temp,tl);
       }
-      emit_not(HOST_TEMPREG,temp);
-      emit_and(temp,tl,tl);
       emit_or(temp2,tl,tl);
       //emit_storereg(rt1[i],tl); // DEBUG
     }
     if (opcode[i]==0x1A||opcode[i]==0x1B) { // LDL/LDR
-      assert(opcode[i]!=0x1A&&opcode[i]!=0x1B);
-      if(s>=0) 
-        if((regs[i].wasdirty>>s)&1) // FIXME
-          emit_storereg(rs1[i],s);
-      if(get_reg(i_regs->regmap,rs1[i]|64)>=0) 
-        if((regs[i].wasdirty>>get_reg(i_regs->regmap,rs1[i]|64))&1) // FIXME
-          emit_storereg(rs1[i]|64,get_reg(i_regs->regmap,rs1[i]|64));
       int temp2h=get_reg(i_regs->regmap,FTEMP|64);
       if(!c||memtarget) {
         //if(th>=0) emit_readword_indexed((int)rdram-0x80000000,temp2,temp2h);
@@ -2687,28 +2861,33 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
       }
       else
         inline_readstub(LOADD_STUB,(constmap[i][s]+offset)&0xFFFFFFF8,i_regs->regmap,FTEMP,ccadj[i],reglist);
-      emit_andimm(temp,56,temp);
-      emit_pushreg(temp);
-      emit_pushreg(temp2h);
-      emit_pushreg(temp2);
-      emit_pushreg(th);
-      emit_pushreg(tl);
-      if(opcode[i]==0x1A) emit_call((int)ldl_merge);
-      if(opcode[i]==0x1B) emit_call((int)ldr_merge);
-      emit_addimm(ESP,20,ESP);
-      if(tl!=EDX) {
-        if(tl!=EAX) emit_mov(EAX,tl);
-        if(th!=EDX) emit_mov(EDX,th);
-      } else
-      if(th!=EAX) {
-        if(th!=EDX) emit_mov(EDX,th);
-        if(tl!=EAX) emit_mov(EAX,tl);
-      } else {
-        emit_xchg(EAX,EDX);
+      emit_testimm(temp,32);
+      emit_andimm(temp,24,temp);
+      if (opcode[i]==0x1A) { // LDL
+        emit_rsbimm(temp,32,HOST_TEMPREG);
+        emit_shl(temp2h,temp,temp2h);
+        emit_orrshr(temp2,HOST_TEMPREG,temp2h);
+        emit_movimm(-1,HOST_TEMPREG);
+        emit_shl(temp2,temp,temp2);
+        emit_cmove_reg(temp2h,th);
+        emit_biceq_lsl(tl,HOST_TEMPREG,temp,tl);
+        emit_bicne_lsl(th,HOST_TEMPREG,temp,th);
+        emit_orreq(temp2,tl,tl);
+        emit_orrne(temp2,th,th);
       }
-      if(s>=0) emit_loadreg(rs1[i],s);
-      if(get_reg(i_regs->regmap,rs1[i]|64)>=0)
-        emit_loadreg(rs1[i]|64,get_reg(i_regs->regmap,rs1[i]|64));
+      if (opcode[i]==0x1B) { // LDR
+        emit_xorimm(temp,24,temp);
+        emit_rsbimm(temp,32,HOST_TEMPREG);
+        emit_shr(temp2,temp,temp2);
+        emit_orrshl(temp2h,HOST_TEMPREG,temp2);
+        emit_movimm(-1,HOST_TEMPREG);
+        emit_shr(temp2h,temp,temp2h);
+        emit_cmovne_reg(temp2,tl);
+        emit_bicne_lsr(th,HOST_TEMPREG,temp,th);
+        emit_biceq_lsr(tl,HOST_TEMPREG,temp,tl);
+        emit_orrne(temp2h,th,th);
+        emit_orreq(temp2h,tl,tl);
+      }
     }
   }
 }
@@ -2730,7 +2909,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
         emit_readword((int)&last_count,ECX);
         emit_loadreg(CCREG,HOST_CCREG); // TODO: do proper reg alloc
         emit_add(HOST_CCREG,ECX,HOST_CCREG);
-        emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG);
+        emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
         emit_writeword(HOST_CCREG,(int)&Count);
       }
       emit_call((int)MFC0);
@@ -2752,7 +2931,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_readword((int)&last_count,ECX);
       emit_loadreg(CCREG,HOST_CCREG); // TODO: do proper reg alloc
       emit_add(HOST_CCREG,ECX,HOST_CCREG);
-      emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG);
+      emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
       emit_writeword(HOST_CCREG,(int)&Count);
     }
     // What a mess.  The status register (12) can enable interrupts,
@@ -2771,7 +2950,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
     if(copr==9||copr==11||copr==12) {
       emit_readword((int)&Count,HOST_CCREG);
       emit_readword((int)&next_interupt,ECX);
-      emit_addimm(HOST_CCREG,-2*ccadj[i],HOST_CCREG);
+      emit_addimm(HOST_CCREG,-CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
       emit_sub(HOST_CCREG,ECX,HOST_CCREG);
       emit_writeword(ECX,(int)&last_count);
       emit_storereg(CCREG,HOST_CCREG);
@@ -2806,7 +2985,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
       int count=ccadj[i];
       if(i_regs->regmap[HOST_CCREG]!=CCREG) emit_loadreg(CCREG,HOST_CCREG);
       //emit_readword((int)&Status,1);
-      emit_addimm(HOST_CCREG,2*count,HOST_CCREG); // TODO: Should there be an extra cycle here?
+      emit_addimm(HOST_CCREG,CLOCK_DIVIDER*count,HOST_CCREG); // TODO: Should there be an extra cycle here?
       emit_jmp((int)jump_eret);
       /* FIXME: Check for interrupt
       emit_readword((int)&EPC,0);
@@ -2815,6 +2994,7 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_writeword(1,(int)&Status);
       emit_call((int)get_addr_ht);
       emit_mov(0,15); /* Jump */
+      //emit_jmpreg(0);
     }
   }
 }
@@ -2903,6 +3083,60 @@ void cop1_assemble(int i,struct regstat *i_regs)
     emit_writeword_indexed(sl,0,temp);
   }
 }
+
+void cvt_s_w(int *source,float *dest)
+{
+  *dest = *source;
+}
+void cvt_d_w(int *source,double *dest)
+{
+  *dest = *source;
+}
+void cvt_s_l(long long *source,float *dest)
+{
+  *dest = *source;
+}
+void cvt_d_l(long long *source,double *dest)
+{
+  *dest = *source;
+}
+
+void fconv_assemble_arm(int i,struct regstat *i_regs)
+{
+  signed char rs=get_reg(i_regs->regmap,CSREG);
+  assert(rs>=0);
+  // Check cop1 unusable
+  if(!cop1_usable) {
+    emit_testimm(rs,0x20000000);
+    int jaddr=(int)out;
+    emit_jeq(0);
+    add_stub(FP_STUB,jaddr,(int)out,i,rs,(int)i_regs,is_delayslot,0);
+    cop1_usable=1;
+  }
+
+  if(opcode2[i]==0x14&&(source[i]&0x3f)==0x20) {
+    emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],ARG1_REG);
+    emit_readword((int)&reg_cop1_simple[(source[i]>> 6)&0x1f],ARG2_REG);
+    emit_call((int)cvt_s_w);
+  }
+  if(opcode2[i]==0x14&&(source[i]&0x3f)==0x21) {
+    emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],ARG1_REG);
+    emit_readword((int)&reg_cop1_double[(source[i]>> 6)&0x1f],ARG2_REG);
+    emit_call((int)cvt_d_w);
+  }
+  if(opcode2[i]==0x15&&(source[i]&0x3f)==0x20) {
+    emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],ARG1_REG);
+    emit_readword((int)&reg_cop1_simple[(source[i]>> 6)&0x1f],ARG2_REG);
+    emit_call((int)cvt_s_l);
+  }
+  if(opcode2[i]==0x15&&(source[i]&0x3f)==0x21) {
+    emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],ARG1_REG);
+    emit_readword((int)&reg_cop1_double[(source[i]>> 6)&0x1f],ARG2_REG);
+    emit_call((int)cvt_d_l);
+  }
+  if(rs<4||rs==12) emit_loadreg(CSREG,rs);
+}
+#define fconv_assemble fconv_assemble_arm
 
 void multdiv_assemble_arm(int i,struct regstat *i_regs)
 {
@@ -3207,8 +3441,54 @@ void syscall_assemble(int i,struct regstat *i_regs)
   assert(ccreg==HOST_CCREG);
   assert(!is_delayslot);
   emit_movimm(start+i*4,EAX); // Get PC
-  emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
+  emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG); // CHECK: is this right?  There should probably be an extra cycle...
   emit_jmp((int)jump_syscall);
+}
+
+void do_preload_rhash(int r) {
+  // Don't need this for ARM.  On x86, this puts the value 0xf8 into the
+  // register.  On ARM the hash can be done with a single instruction (below)
+}
+
+void do_preload_rhtbl(int ht) {
+  emit_addimm(FP,(int)&mini_ht-(int)&dynarec_local,ht);
+}
+
+void do_rhash(int rs,int rh) {
+  emit_andimm(rs,0xf8,rh);
+}
+
+void do_miniht_load(int ht,int rh) {
+  assem_debug("ldr %s,[%s,%s]!\n",regname[rh],regname[ht],regname[rh]);
+  output_w32(0xe7b00000|rd_rn_rm(rh,ht,rh));
+}
+
+void do_miniht_jump(int rs,int rh,int ht) {
+  emit_cmp(rh,rs);
+  emit_ldreq_indexed(ht,4,15);
+  #ifdef CORTEX_A8_BRANCH_PREDICTION_HACK
+  emit_mov(rs,7);
+  emit_jmp(jump_vaddr_reg[7]);
+  #else
+  emit_jmp(jump_vaddr_reg[rs]);
+  #endif
+}
+
+void do_miniht_insert(u_int return_address,int rt,int temp) {
+  #ifdef ARMv5_ONLY
+  emit_movimm(return_address,rt); // PC into link register
+  add_to_linker((int)out,return_address,1);
+  emit_pcreladdr(temp);
+  emit_writeword(rt,(int)&mini_ht[(return_address&0xFF)>>3][0]);
+  emit_writeword(temp,(int)&mini_ht[(return_address&0xFF)>>3][1]);
+  #else
+  emit_movw(return_address&0x0000FFFF,rt);
+  add_to_linker((int)out,return_address,1);
+  emit_pcreladdr(temp);
+  emit_writeword(temp,(int)&mini_ht[(return_address&0xFF)>>3][1]);
+  emit_movt(return_address&0xFFFF0000,rt);
+  emit_writeword(rt,(int)&mini_ht[(return_address&0xFF)>>3][0]);
+  #endif
 }
 
 // Sign-extend to 64 bits and write out upper half of a register
