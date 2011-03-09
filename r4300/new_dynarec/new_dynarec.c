@@ -124,11 +124,12 @@ struct ll_entry
   int is_delayslot;
   int cop1_usable;
   u_char *out;
-  struct ll_entry *jump_in[2049];
-  struct ll_entry *jump_out[2049];
-  struct ll_entry *jump_dirty[2049];
+  struct ll_entry *jump_in[4096];
+  struct ll_entry *jump_out[4096];
+  struct ll_entry *jump_dirty[4096];
   u_int hash_table[65536][4]  __attribute__((aligned(16)));
   char shadow[1048576]  __attribute__((aligned(16)));
+  //u_char never_seen[262144];
   void *copy;
   int expirep;
   u_int using_tlb;
@@ -148,6 +149,8 @@ struct ll_entry
 #define MAXREG 40
 #define AGEN1 41 // Address generation temporary register
 #define AGEN2 42 // Address generation temporary register
+#define MGEN1 43 // Maptable address generation temporary register
+#define MGEN2 44 // Maptable address generation temporary register
 
   /* instruction types */
 #define NOP 0     // No operation
@@ -248,8 +251,10 @@ void nullf() {}
 // This is called from the recompiled JR/JALR instructions
 void *get_addr(u_int vaddr)
 {
+  //if((never_seen[(vaddr>>3)&0x3FFFF]>>(vaddr&7))&1) {
   u_int page=(vaddr^0x80000000)>>12;
-  if(page>2048) page=2048;
+  if(page>262143&&tlb_LUT_r[vaddr>>12]) page=(tlb_LUT_r[vaddr>>12]^0x80000000)>>12;
+  if(page>2048) page=2048+(page&2047);
   struct ll_entry *head;
   //printf("TRACE: count=%d next=%d (get_addr %x,page %d)\n",Count,next_interupt,vaddr,page);
   head=jump_in[page];
@@ -269,16 +274,24 @@ void *get_addr(u_int vaddr)
   while(head!=NULL) {
     if(head->vaddr==vaddr) {
   //printf("TRACE: count=%d next=%d (get_addr match dirty %x: %x)\n",Count,next_interupt,vaddr,(int)head->addr);
-      // FIXME: Should verify the block before returning the address
-      int *ht_bin=hash_table[((vaddr>>16)^vaddr)&0xFFFF];
-      ht_bin[3]=ht_bin[1];
-      ht_bin[2]=ht_bin[0];
-      ht_bin[1]=(int)head->addr;
-      ht_bin[0]=vaddr;
-      return head->addr;
+      if(verify_dirty(head->addr)) {
+        int *ht_bin=hash_table[((vaddr>>16)^vaddr)&0xFFFF];
+        if(ht_bin[0]==vaddr) {
+          ht_bin[1]=(int)head->addr; // Replace existing entry
+        }
+        else
+        {
+          ht_bin[3]=ht_bin[1];
+          ht_bin[2]=ht_bin[0];
+          ht_bin[1]=(int)head->addr;
+          ht_bin[0]=vaddr;
+        }
+        return head->addr;
+      }
     }
     head=head->next;
   }
+  //}
   new_recompile_block(vaddr);
   return get_addr(vaddr);
 }
@@ -298,7 +311,8 @@ void *get_addr_32(u_int vaddr,u_int flags)
   if(ht_bin[0]==vaddr) return (void *)ht_bin[1];
   if(ht_bin[2]==vaddr) return (void *)ht_bin[3];
   u_int page=(vaddr^0x80000000)>>12;
-  if(page>2048) page=2048;
+  if(page>262143&&tlb_LUT_r[vaddr>>12]) page=(tlb_LUT_r[vaddr>>12]^0x80000000)>>12;
+  if(page>2048) page=2048+(page&2047);
   struct ll_entry *head;
   head=jump_in[page];
   while(head!=NULL) {
@@ -747,15 +761,39 @@ void ll_add_32(struct ll_entry **head,int vaddr,u_int reg32,void *addr)
 }
 
 // Check if an address is already compiled
+// but don't return addresses which are about to expire from the cache
 void *check_addr(u_int vaddr)
 {
+  u_int *ht_bin=hash_table[((vaddr>>16)^vaddr)&0xFFFF];
+  if(ht_bin[0]==vaddr) {
+    if(((ht_bin[1]-MAX_OUTPUT_BLOCK_SIZE-(u_int)out)<<(32-TARGET_SIZE_2))>0x60000000+(MAX_OUTPUT_BLOCK_SIZE<<(32-TARGET_SIZE_2)))
+      return (void *)ht_bin[1];
+  }
+  if(ht_bin[2]==vaddr) {
+    if(((ht_bin[3]-MAX_OUTPUT_BLOCK_SIZE-(u_int)out)<<(32-TARGET_SIZE_2))>0x60000000+(MAX_OUTPUT_BLOCK_SIZE<<(32-TARGET_SIZE_2)))
+      return (void *)ht_bin[3];
+  }
+  //if(!((never_seen[(vaddr>>3)&0x3FFFF]>>(vaddr&7))&1)) return 0;
   u_int page=(vaddr^0x80000000)>>12;
-  if(page>2048) page=2048;
+  if(page>262143&&tlb_LUT_r[vaddr>>12]) page=(tlb_LUT_r[vaddr>>12]^0x80000000)>>12;
+  if(page>2048) page=2048+(page&2047);
   struct ll_entry *head;
   head=jump_in[page];
   while(head!=NULL) {
     if(head->vaddr==vaddr&&head->reg32==0) {
-      return head->addr;
+      if((((u_int)head->addr-(u_int)out)<<(32-TARGET_SIZE_2))>0x60000000+(MAX_OUTPUT_BLOCK_SIZE<<(32-TARGET_SIZE_2))) {
+        // Insert into hash table with low priority.
+        // Don't evict existing entries, as they are probably
+        // addresses that are being accessed frequently.
+        if(ht_bin[0]&1) {
+          ht_bin[1]=(int)head->addr;
+          ht_bin[0]=vaddr;
+        }else if(ht_bin[2]&1) {
+          ht_bin[3]=(int)head->addr;
+          ht_bin[2]=vaddr;
+        }
+        return head->addr;
+      }
     }
     head=head->next;
   }
@@ -771,6 +809,7 @@ void remove_hash(int vaddr)
   if(ht_bin[0]==vaddr) {
     ht_bin[0]=ht_bin[2];
     ht_bin[1]=ht_bin[3];
+    ht_bin[2]=ht_bin[3]=-1;
   }
 }
 
@@ -828,7 +867,8 @@ void ll_kill_pointers(struct ll_entry *head,int addr,int shift)
 void invalidate_block(u_int block)
 {
   u_int page=block^0x80000;
-  if(page>2048) page=2048;
+  if(page>262143&&tlb_LUT_r[block]) page=(tlb_LUT_r[block]^0x80000000)>>12;
+  if(page>2048) page=2048+(page&2047);
   inv_debug("INVALIDATE: %x (%d)\n",block<<12,page);
   struct ll_entry *head;
   struct ll_entry *next;
@@ -858,7 +898,11 @@ void invalidate_block(u_int block)
   // If there is a valid TLB entry for this page, remove write protect
   if(tlb_LUT_w[block]) {
     assert(tlb_LUT_r[block]==tlb_LUT_w[block]);
+    // CHECK: Is this right?
     memory_map[block]=((tlb_LUT_w[block]&0xFFFFF000)-(block<<12)+(unsigned int)rdram-0x80000000)>>2;
+    u_int real_block=tlb_LUT_w[block]>>12;
+    invalid_code[real_block]=1;
+    if(real_block>=0x80000&&real_block<0x80800) memory_map[real_block]=((u_int)rdram-0x80000000)>>2;
   }
   else if(block>=0x80000&&block<0x80800) memory_map[block]=((u_int)rdram-0x80000000)>>2;
 }
@@ -870,9 +914,10 @@ void invalidate_addr(u_int addr)
 // Add an entry to jump_out after making a link
 void add_link(u_int vaddr,void *src)
 {
-  inv_debug("add_link: %x -> %x\n",(int)src,vaddr);
   u_int page=(vaddr^0x80000000)>>12;
-  if(page>2048) page=2048;
+  if(page>262143&&tlb_LUT_r[vaddr>>12]) page=(tlb_LUT_r[vaddr>>12]^0x80000000)>>12;
+  if(page>4095) page=2048+(page&2047);
+  inv_debug("add_link: %x -> %x (%d)\n",(int)src,vaddr,page);
   ll_add(jump_out+page,vaddr,src);
 }
 
@@ -1022,6 +1067,9 @@ void alu_alloc(struct regstat *current,int i)
       if(!((current->is32>>rs1[i])&(current->is32>>rs2[i])&1))
       {
         if(!((current->uu>>rt1[i])&1)) {
+          alloc_reg64(current,i,rt1[i]);
+        }
+        if(get_reg(current->regmap,rt1[i]|64)>=0) {
           if(rs1[i]&&rs2[i]) {
             alloc_reg64(current,i,rs1[i]);
             alloc_reg64(current,i,rs2[i]);
@@ -1034,7 +1082,6 @@ void alu_alloc(struct regstat *current,int i)
             if(rs2[i]&&needed_again(rs2[i],i)) alloc_reg64(current,i,rs2[i]);
             #endif
           }
-          alloc_reg64(current,i,rt1[i]);
         }
         current->is32&=~(1LL<<rt1[i]);
       } else {
@@ -1044,16 +1091,22 @@ void alu_alloc(struct regstat *current,int i)
   }
   if(opcode2[i]>=0x2c&&opcode2[i]<=0x2f) { // DADD/DADDU/DSUB/DSUBU
     if(rt1[i]) {
-      if(!((current->uu>>rt1[i])&1)) {
-        if(rs1[i]&&rs2[i]) {
+      if(rs1[i]&&rs2[i]) {
+        if(!((current->uu>>rt1[i])&1)||get_reg(current->regmap,rt1[i]|64)>=0) {
           alloc_reg64(current,i,rs1[i]);
           alloc_reg64(current,i,rs2[i]);
           alloc_reg64(current,i,rt1[i]);
+        } else {
+          alloc_reg(current,i,rs1[i]);
+          alloc_reg(current,i,rs2[i]);
+          alloc_reg(current,i,rt1[i]);
         }
-        else {
+      }
+      else {
+        alloc_reg(current,i,rt1[i]);
+        if(!((current->uu>>rt1[i])&1)||get_reg(current->regmap,rt1[i]|64)>=0) {
           // DADD used as move, or zeroing
           // If we have a 64-bit source, then make the target 64 bits too
-          alloc_reg(current,i,rt1[i]);
           if(rs1[i]&&!((current->is32>>rs1[i])&1)) {
             if(get_reg(current->regmap,rs1[i])>=0) alloc_reg64(current,i,rs1[i]);
             alloc_reg64(current,i,rt1[i]);
@@ -1068,12 +1121,6 @@ void alu_alloc(struct regstat *current,int i)
             alloc_reg64(current,i,rt1[i]);
           }
         }
-      } else {
-        if(rs1[i]&&rs2[i]) {
-          alloc_reg(current,i,rs1[i]);
-          alloc_reg(current,i,rs2[i]);
-        }
-        alloc_reg(current,i,rt1[i]);
       }
       if(rs1[i]&&rs2[i]) {
         current->is32&=~(1LL<<rt1[i]);
@@ -1102,9 +1149,12 @@ void imm16_alloc(struct regstat *current,int i)
   else lt1[i]=rs1[i];
   if(rt1[i]) alloc_reg(current,i,rt1[i]);
   if(opcode[i]==0x18||opcode[i]==0x19) { // DADDI/DADDIU
-    alloc_reg64(current,i,rt1[i]);
     current->is32&=~(1LL<<rt1[i]);
-    if(!(((current->uu>>rt1[i])|(current->is32>>rs1[i]))&1)) alloc_reg64(current,i,rs1[i]);
+    if(!((current->uu>>rt1[i])&1)||get_reg(current->regmap,rt1[i]|64)>=0) {
+      // TODO: Could preserve the 32-bit flag if the immediate is zero
+      alloc_reg64(current,i,rt1[i]);
+      alloc_reg64(current,i,rs1[i]);
+    }
     clear_const(current,rs1[i]);
     clear_const(current,rt1[i]);
   }
@@ -2391,7 +2441,6 @@ void store_assemble(int i,struct regstat *i_regs)
     if(using_tlb&&((signed int)(constmap[i][s]+offset))>=(signed int)0xC0000000) memtarget=1;
   }
   assert(tl>=0);
-  assert(rs1[i]>0);
   assert(temp>=0);
   for(hr=0;hr<HOST_REGS;hr++) {
     if(i_regs->regmap[hr]>=0) reglist|=1<<hr;
@@ -2537,7 +2586,6 @@ void storelr_assemble(int i,struct regstat *i_regs)
     if(using_tlb&&((signed int)(constmap[i][s]+offset))>=(signed int)0xC0000000) memtarget=1;
   }
   assert(tl>=0);
-  assert(rs1[i]>0);
   for(hr=0;hr<HOST_REGS;hr++) {
     if(i_regs->regmap[hr]>=0) reglist|=1<<hr;
   }
@@ -2552,7 +2600,7 @@ void storelr_assemble(int i,struct regstat *i_regs)
       }
       else
       {
-        if(!memtarget) {
+        if(!memtarget||!rs1[i]) {
           jaddr=(int)out;
           emit_jmp(0);
         }
@@ -3135,6 +3183,7 @@ void ds_assemble(int i,struct regstat *i_regs)
 // Is the branch target a valid internal jump?
 int internal_branch(uint64_t i_is32,int addr)
 {
+  if(addr&1) return 0; // Indirect (register) jump
   if(addr>=start && addr<start+slen*4-4)
   {
     int t=(addr-start)>>2;
@@ -3251,6 +3300,7 @@ void address_generation(int i,signed char i_regmap[],signed char entry[])
   if(itype[i]==LOAD||itype[i]==LOADLR||itype[i]==STORE||itype[i]==STORELR||itype[i]==C1LS) {
     int ra;
     int agr=AGEN1+(i&1);
+    int mgr=MGEN1+(i&1);
     if(itype[i]==LOAD) {
       ra=get_reg(i_regmap,rt1[i]);
       //if(rt1[i]) assert(ra>=0);
@@ -3275,7 +3325,24 @@ void address_generation(int i,signed char i_regmap[],signed char entry[])
     if(ra>=0) {
       int offset=imm[i];
       int c=(wasconst[i]>>rs)&1;
-      if(rs<0) {
+      if(rs1[i]==0) {
+        // Using r0 as a base address
+        /*if(rm>=0) {
+          if(!entry||entry[rm]!=mgr) {
+            generate_map_const(offset,rm);
+          } // else did it in the previous cycle
+        }*/
+        if(!entry||entry[ra]!=agr) {
+          if (opcode[i]==0x22||opcode[i]==0x26) {
+            emit_movimm(offset&0xFFFFFFFC,ra); // LWL/LWR
+          }else if (opcode[i]==0x1a||opcode[i]==0x1b) {
+            emit_movimm(offset&0xFFFFFFF8,ra); // LDL/LDR
+          }else{
+            emit_movimm(offset,ra);
+          }
+        } // else did it in the previous cycle
+      }
+      else if(rs<0) {
         if(!entry||entry[ra]!=rs1[i])
           emit_loadreg(rs1[i],ra);
         //if(!entry||entry[ra]!=rs1[i])
@@ -3283,15 +3350,17 @@ void address_generation(int i,signed char i_regmap[],signed char entry[])
       }
       else if(c) {
         if(rm>=0) {
-          if(itype[i]==STORE||itype[i]==STORELR||opcode[i]==0x39||opcode[i]==0x3D) {
-            // Stores to memory go thru the mapper to detect self-modifying
-            // code, loads don't.
-            if((unsigned int)(constmap[i][rs]+offset)>=0xC0000000 ||
-               (unsigned int)(constmap[i][rs]+offset)<0x80800000 )
-              generate_map_const(constmap[i][rs]+offset,rm);
-          }else{
-            if((signed int)(constmap[i][rs]+offset)>=(signed int)0xC0000000)
-              generate_map_const(constmap[i][rs]+offset,rm);
+          if(!entry||entry[rm]!=mgr) {
+            if(itype[i]==STORE||itype[i]==STORELR||opcode[i]==0x39||opcode[i]==0x3D) {
+              // Stores to memory go thru the mapper to detect self-modifying
+              // code, loads don't.
+              if((unsigned int)(constmap[i][rs]+offset)>=0xC0000000 ||
+                 (unsigned int)(constmap[i][rs]+offset)<0x80800000 )
+                generate_map_const(constmap[i][rs]+offset,rm);
+            }else{
+              if((signed int)(constmap[i][rs]+offset)>=(signed int)0xC0000000)
+                generate_map_const(constmap[i][rs]+offset,rm);
+            }
           }
         }
         if(rs1[i]!=rt1[i]||itype[i]!=LOAD) {
@@ -3306,7 +3375,7 @@ void address_generation(int i,signed char i_regmap[],signed char entry[])
           } // else did it in the previous cycle
         } // else load_consts already did it
       }
-      if(offset&&!c) {
+      if(offset&&!c&&rs1[i]) {
         if(rs>=0) {
           emit_addimm(rs,offset,ra);
         }else{
@@ -3317,8 +3386,35 @@ void address_generation(int i,signed char i_regmap[],signed char entry[])
   }
   // Preload constants for next instruction
   if(itype[i+1]==LOAD||itype[i+1]==LOADLR||itype[i+1]==STORE||itype[i+1]==STORELR||itype[i+1]==C1LS) {
-    int agr=AGEN1+((i+1)&1);
-    int ra=get_reg(i_regmap,agr);
+    int agr,ra;
+    #ifndef HOST_IMM_ADDR32
+    // Mapper entry
+    agr=MGEN1+((i+1)&1);
+    ra=get_reg(i_regmap,agr);
+    if(ra>=0) {
+      int rs=get_reg(regs[i+1].regmap,rs1[i+1]);
+      int offset=imm[i+1];
+      int c=(wasconst[i+1]>>rs)&1;
+      if(c) {
+        if(itype[i+1]==STORE||itype[i+1]==STORELR||opcode[i+1]==0x39||opcode[i+1]==0x3D) {
+          // Stores to memory go thru the mapper to detect self-modifying
+          // code, loads don't.
+          if((unsigned int)(constmap[i+1][rs]+offset)>=0xC0000000 ||
+             (unsigned int)(constmap[i+1][rs]+offset)<0x80800000 )
+            generate_map_const(constmap[i+1][rs]+offset,ra);
+        }else{
+          if((signed int)(constmap[i+1][rs]+offset)>=(signed int)0xC0000000)
+            generate_map_const(constmap[i+1][rs]+offset,ra);
+        }
+      }
+      /*else if(rs1[i]==0) {
+        generate_map_const(offset,ra);
+      }*/
+    }
+    #endif
+    // Actual address
+    agr=AGEN1+((i+1)&1);
+    ra=get_reg(i_regmap,agr);
     if(ra>=0) {
       int rs=get_reg(regs[i+1].regmap,rs1[i+1]);
       int offset=imm[i+1];
@@ -3330,6 +3426,16 @@ void address_generation(int i,signed char i_regmap[],signed char entry[])
           emit_movimm((constmap[i+1][rs]+offset)&0xFFFFFFF8,ra); // LDL/LDR
         }else{
           emit_movimm(constmap[i+1][rs]+offset,ra);
+        }
+      }
+      else if(rs1[i+1]==0) {
+        // Using r0 as a base address
+        if (opcode[i+1]==0x22||opcode[i+1]==0x26) {
+          emit_movimm(offset&0xFFFFFFFC,ra); // LWL/LWR
+        }else if (opcode[i+1]==0x1a||opcode[i+1]==0x1b) {
+          emit_movimm(offset&0xFFFFFFF8,ra); // LDL/LDR
+        }else{
+          emit_movimm(offset,ra);
         }
       }
     }
@@ -3992,34 +4098,57 @@ void do_ccstub(int n)
       }
       if((opcode[i]&0x2f)==4) // BEQ
       {
-        emit_movimm(ba[i],addr);
-        emit_movimm(start+i*4+8,alt);
-        if(s1h>=0) {
-          if(s2h>=0) emit_cmp(s1h,s2h);
-          else emit_test(s1h,s1h);
+        //emit_movimm(ba[i],addr);
+        //emit_movimm(start+i*4+8,alt);
+        #ifdef HAVE_CMOV_IMM
+        if(s1h<0) {
+          if(s2l>=0) emit_cmp(s1l,s2l);
+          else emit_test(s1l,s1l);
+          emit_cmov2imm_e_ne_compact(ba[i],start+i*4+8,addr);
+        }
+        else
+        #endif
+        {
+          emit_mov2imm_compact(ba[i],addr,start+i*4+8,alt);
+          if(s1h>=0) {
+            if(s2h>=0) emit_cmp(s1h,s2h);
+            else emit_test(s1h,s1h);
+            emit_cmovne_reg(alt,addr);
+          }
+          if(s2l>=0) emit_cmp(s1l,s2l);
+          else emit_test(s1l,s1l);
           emit_cmovne_reg(alt,addr);
         }
-        if(s2l>=0) emit_cmp(s1l,s2l);
-        else emit_test(s1l,s1l);
-        emit_cmovne_reg(alt,addr);
       }
       if((opcode[i]&0x2f)==5) // BNE
       {
-        emit_movimm(start+i*4+8,addr);
-        emit_movimm(ba[i],alt);
-        if(s1h>=0) {
-          if(s2h>=0) emit_cmp(s1h,s2h);
-          else emit_test(s1h,s1h);
+        //emit_movimm(start+i*4+8,addr);
+        //emit_movimm(ba[i],alt);
+        #ifdef HAVE_CMOV_IMM
+        if(s1h<0) {
+          if(s2l>=0) emit_cmp(s1l,s2l);
+          else emit_test(s1l,s1l);
+          emit_cmov2imm_e_ne_compact(start+i*4+8,ba[i],addr);
+        }
+        else
+        #endif
+        {
+          emit_mov2imm_compact(start+i*4+8,addr,ba[i],alt);
+          if(s1h>=0) {
+            if(s2h>=0) emit_cmp(s1h,s2h);
+            else emit_test(s1h,s1h);
+            emit_cmovne_reg(alt,addr);
+          }
+          if(s2l>=0) emit_cmp(s1l,s2l);
+          else emit_test(s1l,s1l);
           emit_cmovne_reg(alt,addr);
         }
-        if(s2l>=0) emit_cmp(s1l,s2l);
-        else emit_test(s1l,s1l);
-        emit_cmovne_reg(alt,addr);
       }
       if((opcode[i]&0x2f)==6) // BLEZ
       {
-        emit_movimm(ba[i],alt);
-        emit_movimm(start+i*4+8,addr);
+        //emit_movimm(ba[i],alt);
+        //emit_movimm(start+i*4+8,addr);
+        emit_mov2imm_compact(ba[i],alt,start+i*4+8,addr);
         emit_cmpimm(s1l,1);
         if(s1h>=0) emit_mov(addr,ntaddr);
         emit_cmovl_reg(alt,addr);
@@ -4031,8 +4160,9 @@ void do_ccstub(int n)
       }
       if((opcode[i]&0x2f)==7) // BGTZ
       {
-        emit_movimm(ba[i],addr);
-        emit_movimm(start+i*4+8,ntaddr);
+        //emit_movimm(ba[i],addr);
+        //emit_movimm(start+i*4+8,ntaddr);
+        emit_mov2imm_compact(ba[i],addr,start+i*4+8,ntaddr);
         emit_cmpimm(s1l,1);
         if(s1h>=0) emit_mov(addr,alt);
         emit_cmovl_reg(ntaddr,addr);
@@ -4044,16 +4174,18 @@ void do_ccstub(int n)
       }
       if((opcode[i]==1)&&(opcode2[i]&0x2D)==0) // BLTZ
       {
-        emit_movimm(ba[i],alt);
-        emit_movimm(start+i*4+8,addr);
+        //emit_movimm(ba[i],alt);
+        //emit_movimm(start+i*4+8,addr);
+        emit_mov2imm_compact(ba[i],alt,start+i*4+8,addr);
         if(s1h>=0) emit_test(s1h,s1h);
         else emit_test(s1l,s1l);
         emit_cmovs_reg(alt,addr);
       }
       if((opcode[i]==1)&&(opcode2[i]&0x2D)==1) // BGEZ
       {
-        emit_movimm(ba[i],addr);
-        emit_movimm(start+i*4+8,alt);
+        //emit_movimm(ba[i],addr);
+        //emit_movimm(start+i*4+8,alt);
+        emit_mov2imm_compact(ba[i],addr,start+i*4+8,alt);
         if(s1h>=0) emit_test(s1h,s1h);
         else emit_test(s1l,s1l);
         emit_cmovs_reg(alt,addr);
@@ -4061,15 +4193,17 @@ void do_ccstub(int n)
       if(opcode[i]==0x11 && opcode2[i]==0x08 ) {
         if(source[i]&0x10000) // BC1T
         {
-          emit_movimm(ba[i],alt);
-          emit_movimm(start+i*4+8,addr);
+          //emit_movimm(ba[i],alt);
+          //emit_movimm(start+i*4+8,addr);
+          emit_mov2imm_compact(ba[i],alt,start+i*4+8,addr);
           emit_testimm(s1l,0x800000);
           emit_cmovne_reg(alt,addr);
         }
         else // BC1F
         {
-          emit_movimm(ba[i],addr);
-          emit_movimm(start+i*4+8,alt);
+          //emit_movimm(ba[i],addr);
+          //emit_movimm(start+i*4+8,alt);
+          emit_mov2imm_compact(ba[i],addr,start+i*4+8,alt);
           emit_testimm(s1l,0x800000);
           emit_cmovne_reg(alt,addr);
         }
@@ -5801,7 +5935,7 @@ void clean_registers(int istart,int iend,int wr)
       }
       printf("\n");*/
 
-      if(i==istart||(itype[i-1]!=RJUMP&&itype[i-1]!=UJUMP&&itype[i-1]!=CJUMP&&itype[i-1]!=SJUMP&&itype[i-1]!=FJUMP)) {
+      //if(i==istart||(itype[i-1]!=RJUMP&&itype[i-1]!=UJUMP&&itype[i-1]!=CJUMP&&itype[i-1]!=SJUMP&&itype[i-1]!=FJUMP)) {
         regs[i].dirty|=will_dirty_i;
         #ifndef DESTRUCTIVE_WRITEBACK
         regs[i].dirty&=wont_dirty_i;
@@ -5830,7 +5964,7 @@ void clean_registers(int istart,int iend,int wr)
           }
         }
         #endif
-      }
+      //}
     }
     // Deal with changed mappings
     if(i<iend) {
@@ -5964,6 +6098,8 @@ void new_dynarec_init()
     invalid_code[n]=1;
   for(n=0;n<65536;n++)
     hash_table[n][0]=hash_table[n][2]=-1;
+  // This doesn't really help, and wastes L2 cache
+  //memset(never_seen,0,sizeof(never_seen));
   copy=shadow;
   expirep=16384; // Expiry pointer, +2 blocks
   pending_exception=0;
@@ -6027,10 +6163,12 @@ void new_dynarec_init()
         addr=0;
         break;
     }
+    #ifdef __x86_64__
     assert(rom<=0xFFFFFFFF); // memory_map is 32-bit, so make sure we don't get screwed in 64-bit mode
+    #endif
     if(addr) {
       for(n=0x7F000;n<0x80000;n++) {
-        memory_map[n]=((u_int)(((u_int)rom)+addr-0x7F000000))>>2;
+        memory_map[n]=(((u_int)(((u_int)rom)+addr-0x7F000000))>>2)|0x40000000;
       }
     }
   }
@@ -6040,9 +6178,9 @@ void new_dynarec_cleanup()
 {
   int n;
   if (munmap ((void *)BASE_ADDR, 1<<TARGET_SIZE_2) < 0) {printf("munmap() failed\n");}
-  for(n=0;n<=2048;n++) ll_clear(jump_in+n);
-  for(n=0;n<=2048;n++) ll_clear(jump_out+n);
-  for(n=0;n<=2048;n++) ll_clear(jump_dirty+n);
+  for(n=0;n<4096;n++) ll_clear(jump_in+n);
+  for(n=0;n<4096;n++) ll_clear(jump_out+n);
+  for(n=0;n<4096;n++) ll_clear(jump_dirty+n);
 }
 
 void new_recompile_block(int addr)
@@ -6592,7 +6730,7 @@ void new_recompile_block(int addr)
       ba[i]=(int)addr+i*4+8; // Ignore never taken branch
     else if(type==CJUMP||type==SJUMP||type==FJUMP)
       ba[i]=(int)addr+i*4+4+((signed int)((unsigned int)source[i]<<16)>>14);
-    else ba[i]=0;
+    else ba[i]=-1;
     /* Is this the end of the block? */
     if(i>0&&(itype[i-1]==UJUMP||itype[i-1]==RJUMP||(source[i-1]>>16)==0x1000)) {
       if(rt1[i-1]!=31) { // Continue past subroutine call (JAL)
@@ -7226,6 +7364,11 @@ void new_recompile_block(int addr)
                (rs2[i-1]&&(rs2[i-1]==rt1[i]||rs2[i-1]==rt2[i]))) {
               // The delay slot overwrote one of our conditions
               // Delay slot goes after the test (in order)
+              current.u=branch_unneeded_reg[i-1]&~((1LL<<rs1[i])|(1LL<<rs2[i]));
+              current.uu=branch_unneeded_reg_upper[i-1]&~((1LL<<us1[i])|(1LL<<us2[i]));
+              if((~current.uu>>rt1[i])&1) current.uu&=~((1LL<<dep1[i])|(1LL<<dep2[i]));
+              current.u|=1;
+              current.uu|=1;
               delayslot_alloc(&current,i);
             }
             else
@@ -7252,6 +7395,11 @@ void new_recompile_block(int addr)
             if(rs1[i-1]==rt1[i]||rs1[i-1]==rt2[i]) {
               // The delay slot overwrote the branch condition
               // Delay slot goes after the test (in order)
+              current.u=branch_unneeded_reg[i-1]&~((1LL<<rs1[i])|(1LL<<rs2[i]));
+              current.uu=branch_unneeded_reg_upper[i-1]&~((1LL<<us1[i])|(1LL<<us2[i]));
+              if((~current.uu>>rt1[i])&1) current.uu&=~((1LL<<dep1[i])|(1LL<<dep2[i]));
+              current.u|=1;
+              current.uu|=1;
               delayslot_alloc(&current,i);
             }
             else
@@ -7307,6 +7455,11 @@ void new_recompile_block(int addr)
             if(rs1[i-1]==rt1[i]||rs1[i-1]==rt2[i]) {
               // The delay slot overwrote the branch condition
               // Delay slot goes after the test (in order)
+              current.u=branch_unneeded_reg[i-1]&~((1LL<<rs1[i])|(1LL<<rs2[i]));
+              current.uu=branch_unneeded_reg_upper[i-1]&~((1LL<<us1[i])|(1LL<<us2[i]));
+              if((~current.uu>>rt1[i])&1) current.uu&=~((1LL<<dep1[i])|(1LL<<dep2[i]));
+              current.u|=1;
+              current.uu|=1;
               delayslot_alloc(&current,i);
             }
             else
@@ -7781,6 +7934,42 @@ void new_recompile_block(int addr)
               }
             }
           }
+          #ifndef HOST_IMM_ADDR32
+          if(itype[i+1]==LOAD||itype[i+1]==LOADLR||itype[i+1]==STORE||itype[i+1]==STORELR||itype[i+1]==C1LS) {
+            hr=get_reg(regs[i+1].regmap,TLREG);
+            if(hr>=0) {
+              int sr=get_reg(regs[i+1].regmap,rs1[i+1]);
+              if(sr>=0&&((wasconst[i+1]>>sr)&1)) {
+                int nr;
+                if(regs[i].regmap[hr]<0&&regs[i+1].regmap_entry[hr]<0)
+                {
+                  regs[i].regmap[hr]=MGEN1+((i+1)&1);
+                  regmap_pre[i+1][hr]=MGEN1+((i+1)&1);
+                  regs[i+1].regmap_entry[hr]=MGEN1+((i+1)&1);
+                  isconst[i]&=~(1<<hr);
+                  isconst[i]|=isconst[i+1]&(1<<hr);
+                  constmap[i][hr]=constmap[i+1][hr];
+                  regs[i+1].wasdirty&=~(1<<hr);
+                  regs[i].dirty&=~(1<<hr);
+                }
+                else if((nr=get_reg2(regs[i].regmap,regs[i+1].regmap,-1))>=0)
+                {
+                  // move it to another register
+                  regs[i+1].regmap[hr]=-1;
+                  regmap_pre[i+2][hr]=-1;
+                  regs[i+1].regmap[nr]=TLREG;
+                  regs[i].regmap[nr]=MGEN1+((i+1)&1);
+                  regmap_pre[i+1][nr]=MGEN1+((i+1)&1);
+                  regs[i+1].regmap_entry[nr]=MGEN1+((i+1)&1);
+                  isconst[i]&=~(1<<nr);
+                  isconst[i+1]&=~(1<<nr);
+                  regs[i+1].wasdirty&=~(1<<nr);
+                  regs[i].dirty&=~(1<<nr);
+                }
+              }
+            }
+          }
+          #endif
           if(itype[i+1]==STORE||itype[i+1]==STORELR||opcode[i+1]==0x39||opcode[i+1]==0x3D) { // SB/SH/SW/SD/SWC1/SDC1
             if(get_reg(regs[i+1].regmap,rs1[i+1])<0) {
               hr=get_reg2(regs[i].regmap,regs[i+1].regmap,-1);
@@ -8323,17 +8512,30 @@ void new_recompile_block(int addr)
     {
       if(instr_addr[i]) // TODO - delay slots (=null)
       {
-        u_int page=(0x80000000^start+i*4)>>12;
-        if(page>2048) page=2048;
+        u_int vaddr=start+i*4;
+        u_int page=(0x80000000^vaddr)>>12;
+        if(page>262143&&tlb_LUT_r[page^0x80000]) page=(tlb_LUT_r[page^0x80000]^0x80000000)>>12;
+        if(page>2048) page=2048+(page&2047);
         literal_pool(256);
         //if(!(is32[i]&(~unneeded_reg_upper[i])&~(1LL<<CCREG)))
         if(!requires_32bit[i])
         {
           assem_debug("%8x (%d) <- %8x\n",instr_addr[i],i,start+i*4);
           assem_debug("jump_in: %x\n",start+i*4);
-          ll_add(jump_dirty+page,start+i*4,(void *)out);
+          ll_add(jump_dirty+page,vaddr,(void *)out);
           int entry_point=do_dirty_stub(i);
-          ll_add(jump_in+page,start+i*4,(void *)entry_point);
+          ll_add(jump_in+page,vaddr,(void *)entry_point);
+          // If there was an existing entry in the hash table,
+          // replace it with the new address.
+          // Don't add new entries.  We'll insert the
+          // ones that actually get used in check_addr().
+          int *ht_bin=hash_table[((vaddr>>16)^vaddr)&0xFFFF];
+          if(ht_bin[0]==vaddr) {
+            ht_bin[1]=entry_point;
+          }
+          if(ht_bin[2]==vaddr) {
+            ht_bin[3]=entry_point;
+          }
         }
         else
         {
@@ -8347,8 +8549,11 @@ void new_recompile_block(int addr)
             entry_point=instr_addr[i];
           else
             emit_jmp(instr_addr[i]);
-          ll_add_32(jump_in+page,start+i*4,r,(void *)entry_point);
+          ll_add_32(jump_in+page,vaddr,r,(void *)entry_point);
         }
+        // Mark address as seen (and possibly compiled)
+        // REMOVED: This doesn't really help, and wastes L2 cache
+        //never_seen[(vaddr>>3)&0x3FFFF]|=1<<(vaddr&7);
       }
     }
   }
@@ -8387,16 +8592,13 @@ void new_recompile_block(int addr)
         // Clear jump_in and jump_dirty
         ll_remove_matching_addrs(jump_in+(expirep&2047),base,shift);
         ll_remove_matching_addrs(jump_dirty+(expirep&2047),base,shift);
-        if((expirep&2047)==2047) {
-          ll_remove_matching_addrs(jump_in+2048,base,shift);
-          ll_remove_matching_addrs(jump_dirty+2048,base,shift);
-        }
+        ll_remove_matching_addrs(jump_in+2048+(expirep&2047),base,shift);
+        ll_remove_matching_addrs(jump_dirty+2048+(expirep&2047),base,shift);
         break;
       case 1:
         // Clear pointers
         ll_kill_pointers(jump_out[expirep&2047],base,shift);
-        if((expirep&2047)==2047)
-          ll_kill_pointers(jump_out[2048],base,shift);
+        ll_kill_pointers(jump_out[(expirep&2047)+2048],base,shift);
         break;
       case 2:
         // Clear hash table
@@ -8422,8 +8624,7 @@ void new_recompile_block(int addr)
           __clear_cache((void *)BASE_ADDR,(void *)BASE_ADDR+(1<<TARGET_SIZE_2));
         #endif
         ll_remove_matching_addrs(jump_out+(expirep&2047),base,shift);
-        if((expirep&2047)==2047)
-          ll_remove_matching_addrs(jump_out+2048,base,shift);
+        ll_remove_matching_addrs(jump_out+2048+(expirep&2047),base,shift);
         break;
     }
     expirep=(expirep+1)&65535;

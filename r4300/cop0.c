@@ -123,7 +123,7 @@ void MTC0(void)
     //PC++;
     update_count();
     check_interupt();
-    //if (next_interupt <= Count) gen_interupt();
+    if (next_interupt <= Count) gen_interupt();
     //PC--;
     break;
       case 13:   // Cause

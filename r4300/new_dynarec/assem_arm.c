@@ -28,6 +28,7 @@ extern void *dynarec_local;
 extern u_int memory_map[1048576];
 
 void indirect_jump();
+void do_interrupt();
 
 /* Linker */
 
@@ -68,6 +69,29 @@ add_literal(int addr,int val)
   literals[literalcount][1]=val;
   literalcount++; 
 } 
+
+int verify_dirty(int addr)
+{
+  u_int *ptr=(u_int *)addr;
+  #ifdef ARMv5_ONLY
+  // get from literal pool
+  assert((*ptr&0xFFF00000)==0xe5900000);
+  u_int offset=*ptr&0xfff;
+  u_int *l_ptr=(void *)ptr+offset+8;
+  u_int source=l_ptr[0];
+  u_int copy=l_ptr[1];
+  u_int len=l_ptr[2];
+  #else
+  //if((*ptr&0xFFF00000)==0xe3000000) {
+  // ARMv7 movw/movt
+  assert((*ptr&0xFFF00000)==0xe3000000);
+  u_int source=(ptr[0]&0xFFF)+((ptr[0]>>4)&0xF000)+((ptr[2]<<16)&0xFFF0000)+((ptr[2]<<12)&0xF0000000);
+  u_int copy=(ptr[1]&0xFFF)+((ptr[1]>>4)&0xF000)+((ptr[3]<<16)&0xFFF0000)+((ptr[3]<<12)&0xF0000000);
+  u_int len=(ptr[4]&0xFFF)+((ptr[4]>>4)&0xF000);
+  #endif
+  //printf("verify_dirty: %x %x %x\n",source,copy,len);
+  return !memcmp((void *)source,(void *)copy,len);
+}
 
 /* Register allocation */
 
@@ -1763,6 +1787,56 @@ void emit_rsbimm(int rs, int imm, int rt)
   output_w32(0xe2600000|rd_rn_rm(rt,rs,0)|armval);
 }
 
+// Load 2 immediates optimizing for small code size
+void emit_mov2imm_compact(int imm1,u_int rt1,int imm2,u_int rt2)
+{
+  emit_movimm(imm1,rt1);
+  u_int armval;
+  if(genimm(imm2-imm1,&armval)) {
+    assem_debug("add %s,%s,#%d\n",regname[rt2],regname[rt1],imm2-imm1);
+    output_w32(0xe2800000|rd_rn_rm(rt2,rt1,0)|armval);
+  }else if(genimm(imm1-imm2,&armval)) {
+    assem_debug("sub %s,%s,#%d\n",regname[rt2],regname[rt1],imm1-imm2);
+    output_w32(0xe2400000|rd_rn_rm(rt2,rt1,0)|armval);
+  }
+  else emit_movimm(imm2,rt2);
+}
+
+// Conditionally select one of two immediates, optimizing for small code size
+// This will only be called if HAVE_CMOV_IMM is defined
+void emit_cmov2imm_e_ne_compact(int imm1,int imm2,u_int rt)
+{
+  u_int armval;
+  if(genimm(imm2-imm1,&armval)) {
+    emit_movimm(imm1,rt);
+    assem_debug("addne %s,%s,#%d\n",regname[rt],regname[rt],imm2-imm1);
+    output_w32(0x12800000|rd_rn_rm(rt,rt,0)|armval);
+  }else if(genimm(imm1-imm2,&armval)) {
+    emit_movimm(imm1,rt);
+    assem_debug("subne %s,%s,#%d\n",regname[rt],regname[rt],imm1-imm2);
+    output_w32(0x12400000|rd_rn_rm(rt,rt,0)|armval);
+  }
+  else {
+    #ifdef ARMV5_ONLY
+    emit_movimm(imm1,rt);
+    add_literal((int)out,imm2);
+    assem_debug("ldrne %s,pc+? [=%x]\n",regname[rt],imm2);
+    output_w32(0x15900000|rd_rn_rm(rt,15,0));
+    #else
+    emit_movw(imm1&0x0000FFFF,rt);
+    if((imm1&0xFFFF)!=(imm2&0xFFFF)) {
+      assem_debug("movwne %s,#%d (0x%x)\n",regname[rt],imm2&0xFFFF,imm2&0xFFFF);
+      output_w32(0x13000000|rd_rn_rm(rt,0,0)|(imm2&0xfff)|((imm2<<4)&0xf0000));
+    }
+    emit_movt(imm1&0xFFFF0000,rt);
+    if((imm1&0xFFFF0000)!=(imm2&0xFFFF0000)) {
+      assem_debug("movtne %s,#%d (0x%x)\n",regname[rt],imm2&0xffff0000,imm2&0xffff0000);
+      output_w32(0x13400000|rd_rn_rm(rt,0,0)|((imm2>>16)&0xfff)|((imm2>>12)&0xf0000));
+    }
+    #endif
+  }
+}
+
 // special case for checking invalid_code
 void emit_cmpmem_indexedsr12_imm(int addr,int r,int imm)
 {
@@ -2245,10 +2319,19 @@ do_invstub(int n)
 int do_dirty_stub(int i)
 {
   assem_debug("do_dirty_stub %x\n",start+i*4);
+  // Careful about the code output here, verify_dirty needs to parse it.
+  #ifdef ARMv5_ONLY
+  emit_loadlp((int)source,1);
+  emit_loadlp((int)copy,2);
+  emit_loadlp(slen*4,3);
+  #else
+  emit_movw(((u_int)source)&0x0000FFFF,1);
+  emit_movw(((u_int)copy)&0x0000FFFF,2);
+  emit_movt(((u_int)source)&0xFFFF0000,1);
+  emit_movt(((u_int)copy)&0xFFFF0000,2);
+  emit_movw(slen*4,3);
+  #endif
   emit_movimm(start+i*4,0);
-  emit_movimm((int)source,1);
-  emit_movimm((int)copy,2);
-  emit_movimm(slen*4,3);
   emit_call((int)&verify_code);
   int entry=(int)out;
   load_regs_entry(i);
@@ -2672,6 +2755,18 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG);
       emit_writeword(HOST_CCREG,(int)&Count);
     }
+    // What a mess.  The status register (12) can enable interrupts,
+    // so needs a special case to handle a pending interrupt.
+    // The interrupt must be taken immediately, because a subsequent
+    // instruction might disable interrupts again.
+    if(copr==12&&!is_delayslot) {
+      emit_movimm(start+i*4+4,0);
+      emit_movimm(0,1);
+      emit_writeword(0,(int)&pcaddr);
+      emit_writeword(1,(int)&pending_exception);
+    }
+    //else if(copr==12&&is_delayslot) emit_call((int)MTC0_R12);
+    //else
     emit_call((int)MTC0);
     if(copr==9||copr==11||copr==12) {
       emit_readword((int)&Count,HOST_CCREG);
@@ -2681,7 +2776,17 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_writeword(ECX,(int)&last_count);
       emit_storereg(CCREG,HOST_CCREG);
     }
-    emit_loadreg(rs1[i],s); // FIXME (is32)
+    if(copr==12) {
+      assert(!is_delayslot);
+      emit_readword((int)&pending_exception,14);
+    }
+    emit_loadreg(rs1[i],s);
+    if(get_reg(i_regs->regmap,rs1[i]|64)>=0)
+      emit_loadreg(rs1[i]|64,get_reg(i_regs->regmap,rs1[i]|64));
+    if(copr==12) {
+      emit_test(14,14);
+      emit_jne((int)&do_interrupt);
+    }
     cop1_usable=0;
   }
   else

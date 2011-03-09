@@ -26,6 +26,8 @@ uint64_t readmem_dword;
 precomp_instr fake_pc,fake_pc_float;
 u_int memory_map[1048576];
 
+void do_interrupt();
+
 // We need these for cmovcc instructions on x86
 u_int const_zero=0;
 u_int const_one=1;
@@ -58,6 +60,17 @@ void set_jump_target(int addr,int target)
     u_int *ptr2=(u_int *)(ptr+1);
     *ptr2=target-(int)ptr2-4;
   }
+}
+
+int verify_dirty(int addr)
+{
+  u_char *ptr=(u_char *)addr;
+  assert(ptr[0]==0xB8);
+  u_int source=*(u_int *)(ptr+1);
+  u_int copy=*(u_int *)(ptr+6);
+  u_int len=*(u_int *)(ptr+11);
+  //printf("verify_dirty: %x %x %x\n",source,copy,len);
+  return !memcmp((void *)source,(void *)copy,len);
 }
 
 /* Register allocation */
@@ -2044,6 +2057,25 @@ void emit_cdq()
   output_byte(0x99);
 }
 
+// Load 2 immediates optimizing for small code size
+void emit_mov2imm_compact(int imm1,u_int rt1,int imm2,u_int rt2)
+{
+  emit_movimm(imm1,rt1);
+  if(imm2-imm1<128&&imm2-imm1>=-128) emit_addimm(rt1,imm2-imm1,rt2);
+  else emit_movimm(imm2,rt2);
+}
+
+// special case for checking pending_exception
+void emit_cmpmem_imm_byte(int addr,int imm)
+{
+  assert(imm<128&&imm>=-127);
+  assem_debug("cmpb $%d,%x\n",imm,addr);
+  output_byte(0x80);
+  output_modrm(0,5,7);
+  output_w32(addr-(int)out-5); // Note: rip-relative in 64-bit mode
+  output_byte(imm);
+}
+
 // special case for checking invalid_code
 void emit_cmpmem_indexedsr12_imm(int addr,int r,int imm)
 {
@@ -2524,10 +2556,10 @@ do_invstub(int n)
 int do_dirty_stub(int i)
 {
   assem_debug("do_dirty_stub %x\n",start+i*4);
-  emit_movimm(start+i*4,12);
   emit_movimm((int)source,EAX);
   emit_movimm((int)copy,EBX);
   emit_movimm(slen*4,ECX);
+  emit_movimm(start+i*4,12);
   emit_call((int)&verify_code);
   int entry=(int)out;
   load_regs_entry(i);
@@ -3004,6 +3036,16 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG);
       emit_writeword(HOST_CCREG,(int)&Count);
     }
+    // What a mess.  The status register (12) can enable interrupts,
+    // so needs a special case to handle a pending interrupt.
+    // The interrupt must be taken immediately, because a subsequent
+    // instruction might disable interrupts again.
+    if(copr==12&&!is_delayslot) {
+      emit_writeword_imm(start+i*4+4,(int)&pcaddr);
+      emit_writebyte_imm(0,(int)&pending_exception);
+    }
+    //else if(copr==12&&is_delayslot) emit_call((int)MTC0_R12);
+    //else
     emit_call((int)MTC0);
     if(copr==9||copr==11||copr==12) {
       emit_readword((int)&Count,HOST_CCREG);
@@ -3014,6 +3056,12 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_storereg(CCREG,HOST_CCREG);
     }
     emit_loadreg(rs1[i],s);
+    if(copr==12) {
+      assert(!is_delayslot);
+      //if(is_delayslot) output_byte(0xcc);
+      emit_cmpmem_imm_byte((int)&pending_exception,0);
+      emit_jne((int)&do_interrupt);
+    }
     cop1_usable=0;
   }
   else
