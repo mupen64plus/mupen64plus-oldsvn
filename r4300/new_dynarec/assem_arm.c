@@ -23,6 +23,7 @@ extern int last_count;
 extern int pcaddr;
 extern int pending_exception;
 extern int branch_target;
+extern int ram_offset;
 extern uint64_t readmem_dword;
 extern precomp_instr fake_pc;
 extern void *dynarec_local;
@@ -64,7 +65,168 @@ const u_int jump_vaddr_reg[16] = {
   0,
   0};
 
+void invalidate_addr_r0();
+void invalidate_addr_r1();
+void invalidate_addr_r2();
+void invalidate_addr_r3();
+void invalidate_addr_r4();
+void invalidate_addr_r5();
+void invalidate_addr_r6();
+void invalidate_addr_r7();
+void invalidate_addr_r8();
+void invalidate_addr_r9();
+void invalidate_addr_r10();
+void invalidate_addr_r12();
+
+const u_int invalidate_addr_reg[16] = {
+  (int)invalidate_addr_r0,
+  (int)invalidate_addr_r1,
+  (int)invalidate_addr_r2,
+  (int)invalidate_addr_r3,
+  (int)invalidate_addr_r4,
+  (int)invalidate_addr_r5,
+  (int)invalidate_addr_r6,
+  (int)invalidate_addr_r7,
+  (int)invalidate_addr_r8,
+  (int)invalidate_addr_r9,
+  (int)invalidate_addr_r10,
+  0,
+  (int)invalidate_addr_r12,
+  0,
+  0,
+  0};
+
 #include "fpu.h"
+
+const u_int jump_table_symbols[] = {
+  (int)invalidate_addr,
+  (int)jump_vaddr,
+  (int)dyna_linker,
+  (int)dyna_linker_ds,
+  (int)verify_code,
+  (int)verify_code_vm,
+  (int)verify_code_ds,
+  (int)cc_interrupt,
+  (int)fp_exception,
+  (int)fp_exception_ds,
+  (int)jump_syscall,
+  (int)jump_eret,
+  (int)indirect_jump_indexed,
+  (int)indirect_jump,
+  (int)do_interrupt,
+  (int)MFC0,
+  (int)MTC0,
+  (int)TLBR,
+  (int)TLBP,
+  (int)TLBWI_new,
+  (int)TLBWR_new,
+  (int)jump_vaddr_r0,
+  (int)jump_vaddr_r1,
+  (int)jump_vaddr_r2,
+  (int)jump_vaddr_r3,
+  (int)jump_vaddr_r4,
+  (int)jump_vaddr_r5,
+  (int)jump_vaddr_r6,
+  (int)jump_vaddr_r7,
+  (int)jump_vaddr_r8,
+  (int)jump_vaddr_r9,
+  (int)jump_vaddr_r10,
+  (int)jump_vaddr_r12,
+  (int)invalidate_addr_r0,
+  (int)invalidate_addr_r1,
+  (int)invalidate_addr_r2,
+  (int)invalidate_addr_r3,
+  (int)invalidate_addr_r4,
+  (int)invalidate_addr_r5,
+  (int)invalidate_addr_r6,
+  (int)invalidate_addr_r7,
+  (int)invalidate_addr_r8,
+  (int)invalidate_addr_r9,
+  (int)invalidate_addr_r10,
+  (int)invalidate_addr_r12,
+  (int)mult64,
+  (int)multu64,
+  (int)div64,
+  (int)divu64,
+  (int)cvt_s_w,
+  (int)cvt_d_w,
+  (int)cvt_s_l,
+  (int)cvt_d_l,
+  (int)cvt_w_s,
+  (int)cvt_w_d,
+  (int)cvt_l_s,
+  (int)cvt_l_d,
+  (int)cvt_d_s,
+  (int)cvt_s_d,
+  (int)round_l_s,
+  (int)round_w_s,
+  (int)trunc_l_s,
+  (int)trunc_w_s,
+  (int)ceil_l_s,
+  (int)ceil_w_s,
+  (int)floor_l_s,
+  (int)floor_w_s,
+  (int)round_l_d,
+  (int)round_w_d,
+  (int)trunc_l_d,
+  (int)trunc_w_d,
+  (int)ceil_l_d,
+  (int)ceil_w_d,
+  (int)floor_l_d,
+  (int)floor_w_d,
+  (int)c_f_s,
+  (int)c_un_s,
+  (int)c_eq_s,
+  (int)c_ueq_s,
+  (int)c_olt_s,
+  (int)c_ult_s,
+  (int)c_ole_s,
+  (int)c_ule_s,
+  (int)c_sf_s,
+  (int)c_ngle_s,
+  (int)c_seq_s,
+  (int)c_ngl_s,
+  (int)c_lt_s,
+  (int)c_nge_s,
+  (int)c_le_s,
+  (int)c_ngt_s,
+  (int)c_f_d,
+  (int)c_un_d,
+  (int)c_eq_d,
+  (int)c_ueq_d,
+  (int)c_olt_d,
+  (int)c_ult_d,
+  (int)c_ole_d,
+  (int)c_ule_d,
+  (int)c_sf_d,
+  (int)c_ngle_d,
+  (int)c_seq_d,
+  (int)c_ngl_d,
+  (int)c_lt_d,
+  (int)c_nge_d,
+  (int)c_le_d,
+  (int)c_ngt_d,
+  (int)add_s,
+  (int)sub_s,
+  (int)mul_s,
+  (int)div_s,
+  (int)sqrt_s,
+  (int)abs_s,
+  (int)mov_s,
+  (int)neg_s,
+  (int)add_d,
+  (int)sub_d,
+  (int)mul_d,
+  (int)div_d,
+  (int)sqrt_d,
+  (int)abs_d,
+  (int)mov_d,
+  (int)neg_d
+};
+
+unsigned int needs_clear_cache[1<<(TARGET_SIZE_2-17)];
+
+#define JUMP_TABLE_SIZE (sizeof(jump_table_symbols)*2)
 
 /* Linker */
 
@@ -140,7 +302,7 @@ add_literal(int addr,int val)
   literalcount++; 
 } 
 
-void kill_pointer(void *stub)
+void *kill_pointer(void *stub)
 {
   int *ptr=(int *)(stub+4);
   assert((*ptr&0x0ff00000)==0x05900000);
@@ -148,6 +310,7 @@ void kill_pointer(void *stub)
   int **l_ptr=(void *)ptr+offset+8;
   int *i_ptr=*l_ptr;
   set_jump_target((int)i_ptr,(int)stub);
+  return i_ptr;
 }
 
 int get_pointer(void *stub)
@@ -203,7 +366,7 @@ int verify_dirty(int addr)
   #endif
   if((*ptr&0xFF000000)!=0xeb000000) ptr++;
   assert((*ptr&0xFF000000)==0xeb000000); // bl instruction
-  u_int verifier=(int)ptr+((*ptr<<8)>>6)+8; // get target of bl
+  u_int verifier=(int)ptr+((signed int)(*ptr<<8)>>6)+8; // get target of bl
   if(verifier==(u_int)verify_code_vm||verifier==(u_int)verify_code_ds) {
     unsigned int page=source>>12;
     unsigned int map_value=memory_map[page];
@@ -256,7 +419,7 @@ void get_bounds(int addr,u_int *start,u_int *end)
   #endif
   if((*ptr&0xFF000000)!=0xeb000000) ptr++;
   assert((*ptr&0xFF000000)==0xeb000000); // bl instruction
-  u_int verifier=(int)ptr+((*ptr<<8)>>6)+8; // get target of bl
+  u_int verifier=(int)ptr+((signed int)(*ptr<<8)>>6)+8; // get target of bl
   if(verifier==(u_int)verify_code_vm||verifier==(u_int)verify_code_ds) {
     if(memory_map[source>>12]>=0x80000000) source = 0;
     else source = source+(memory_map[source>>12]<<2);
@@ -823,8 +986,20 @@ u_int genimm(u_int imm,u_int *encoded)
 }
 u_int genjmp(u_int addr)
 {
+  if(addr<4) return 0;
   int offset=addr-(int)out-8;
-  if(offset<-33554432||offset>=33554432) return 0;
+  if(offset<-33554432||offset>=33554432) {
+    int n;
+    for (n=0;n<sizeof(jump_table_symbols)/4;n++)
+    {
+      if(addr==jump_table_symbols[n])
+      {
+        offset=BASE_ADDR+(1<<TARGET_SIZE_2)-JUMP_TABLE_SIZE+n*8-(int)out-8;
+        break;
+      }
+    }
+  }
+  assert(offset>=-33554432&&offset<33554432);
   return ((u_int)offset>>2)&0xffffff;
 }
 
@@ -900,10 +1075,62 @@ void emit_zeroreg(int rt)
   output_w32(0xe3a00000|rd_rn_rm(rt,0,0));
 }
 
+void emit_loadlp(u_int imm,u_int rt)
+{
+  add_literal((int)out,imm);
+  assem_debug("ldr %s,pc+? [=%x]\n",regname[rt],imm);
+  output_w32(0xe5900000|rd_rn_rm(rt,15,0));
+}
+void emit_movw(u_int imm,u_int rt)
+{
+  assert(imm<65536);
+  assem_debug("movw %s,#%d (0x%x)\n",regname[rt],imm,imm);
+  output_w32(0xe3000000|rd_rn_rm(rt,0,0)|(imm&0xfff)|((imm<<4)&0xf0000));
+}
+void emit_movt(u_int imm,u_int rt)
+{
+  assem_debug("movt %s,#%d (0x%x)\n",regname[rt],imm&0xffff0000,imm&0xffff0000);
+  output_w32(0xe3400000|rd_rn_rm(rt,0,0)|((imm>>16)&0xfff)|((imm>>12)&0xf0000));
+}
+void emit_movimm(u_int imm,u_int rt)
+{
+  u_int armval;
+  if(genimm(imm,&armval)) {
+    assem_debug("mov %s,#%d\n",regname[rt],imm);
+    output_w32(0xe3a00000|rd_rn_rm(rt,0,0)|armval);
+  }else if(genimm(~imm,&armval)) {
+    assem_debug("mvn %s,#%d\n",regname[rt],imm);
+    output_w32(0xe3e00000|rd_rn_rm(rt,0,0)|armval);
+  }else if(imm<65536) {
+    #ifdef ARMv5_ONLY
+    assem_debug("mov %s,#%d\n",regname[rt],imm&0xFF00);
+    output_w32(0xe3a00000|rd_rn_imm_shift(rt,0,imm>>8,8));
+    assem_debug("add %s,%s,#%d\n",regname[rt],regname[rt],imm&0xFF);
+    output_w32(0xe2800000|rd_rn_imm_shift(rt,rt,imm&0xff,0));
+    #else
+    emit_movw(imm,rt);
+    #endif
+  }else{
+    #ifdef ARMv5_ONLY
+    emit_loadlp(imm,rt);
+    #else
+    emit_movw(imm&0x0000FFFF,rt);
+    emit_movt(imm&0xFFFF0000,rt);
+    #endif
+  }
+}
+void emit_pcreladdr(u_int rt)
+{
+  assem_debug("add %s,pc,#?\n",regname[rt]);
+  output_w32(0xe2800000|rd_rn_rm(rt,15,0));
+}
+
 void emit_loadreg(int r, int hr)
 {
   if((r&63)==0)
     emit_zeroreg(hr);
+  else if(r==MMREG)
+    emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,hr);
   else {
     int addr=((int)reg)+((r&63)<<3)+((r&64)>>4);
     if((r&63)==HIREG) addr=(int)&hi+((r&64)>>4);
@@ -912,6 +1139,7 @@ void emit_loadreg(int r, int hr)
     if(r==CSREG) addr=(int)&Status;
     if(r==FSREG) addr=(int)&FCR31;
     if(r==INVCP) addr=(int)&invc_ptr;
+    if(r==ROREG) addr=(int)&ram_offset;
     u_int offset = addr-(u_int)&dynarec_local;
     assert(offset<4096);
     assem_debug("ldr %s,fp+%d\n",regname[hr],offset);
@@ -972,56 +1200,6 @@ void emit_xor(u_int rs1,u_int rs2,u_int rt)
 {
   assem_debug("eor %s,%s,%s\n",regname[rt],regname[rs1],regname[rs2]);
   output_w32(0xe0200000|rd_rn_rm(rt,rs1,rs2));
-}
-
-void emit_loadlp(u_int imm,u_int rt)
-{
-  add_literal((int)out,imm);
-  assem_debug("ldr %s,pc+? [=%x]\n",regname[rt],imm);
-  output_w32(0xe5900000|rd_rn_rm(rt,15,0));
-}
-void emit_movw(u_int imm,u_int rt)
-{
-  assert(imm<65536);
-  assem_debug("movw %s,#%d (0x%x)\n",regname[rt],imm,imm);
-  output_w32(0xe3000000|rd_rn_rm(rt,0,0)|(imm&0xfff)|((imm<<4)&0xf0000));
-}
-void emit_movt(u_int imm,u_int rt)
-{
-  assem_debug("movt %s,#%d (0x%x)\n",regname[rt],imm&0xffff0000,imm&0xffff0000);
-  output_w32(0xe3400000|rd_rn_rm(rt,0,0)|((imm>>16)&0xfff)|((imm>>12)&0xf0000));
-}
-void emit_movimm(u_int imm,u_int rt)
-{
-  u_int armval;
-  if(genimm(imm,&armval)) {
-    assem_debug("mov %s,#%d\n",regname[rt],imm);
-    output_w32(0xe3a00000|rd_rn_rm(rt,0,0)|armval);
-  }else if(genimm(~imm,&armval)) {
-    assem_debug("mvn %s,#%d\n",regname[rt],imm);
-    output_w32(0xe3e00000|rd_rn_rm(rt,0,0)|armval);
-  }else if(imm<65536) {
-    #ifdef ARMv5_ONLY
-    assem_debug("mov %s,#%d\n",regname[rt],imm&0xFF00);
-    output_w32(0xe3a00000|rd_rn_imm_shift(rt,0,imm>>8,8));
-    assem_debug("add %s,%s,#%d\n",regname[rt],regname[rt],imm&0xFF);
-    output_w32(0xe2800000|rd_rn_imm_shift(rt,rt,imm&0xff,0));
-    #else
-    emit_movw(imm,rt);
-    #endif
-  }else{
-    #ifdef ARMv5_ONLY
-    emit_loadlp(imm,rt);
-    #else
-    emit_movw(imm&0x0000FFFF,rt);
-    emit_movt(imm&0xFFFF0000,rt);
-    #endif
-  }
-}
-void emit_pcreladdr(u_int rt)
-{
-  assem_debug("add %s,pc,#?\n",regname[rt]);
-  output_w32(0xe2800000|rd_rn_rm(rt,15,0));
 }
 
 void emit_addimm(u_int rs,int imm,u_int rt)
@@ -1144,7 +1322,9 @@ void emit_sbb(int rs1,int rs2)
 void emit_andimm(int rs,int imm,int rt)
 {
   u_int armval;
-  if(genimm(imm,&armval)) {
+  if(imm==0) {
+    emit_zeroreg(rt);
+  }else if(genimm(imm,&armval)) {
     assem_debug("and %s,%s,#%d\n",regname[rt],regname[rs],imm);
     output_w32(0xe2000000|rd_rn_rm(rt,rs,0)|armval);
   }else if(genimm(~imm,&armval)) {
@@ -1178,7 +1358,9 @@ void emit_andimm(int rs,int imm,int rt)
 void emit_orimm(int rs,int imm,int rt)
 {
   u_int armval;
-  if(genimm(imm,&armval)) {
+  if(imm==0) {
+    if(rs!=rt) emit_mov(rs,rt);
+  }else if(genimm(imm,&armval)) {
     assem_debug("orr %s,%s,#%d\n",regname[rt],regname[rs],imm);
     output_w32(0xe3800000|rd_rn_rm(rt,rs,0)|armval);
   }else{
@@ -1192,13 +1374,14 @@ void emit_orimm(int rs,int imm,int rt)
 
 void emit_xorimm(int rs,int imm,int rt)
 {
-  assert(imm>0&&imm<65536);
   u_int armval;
-  if(genimm(imm,&armval)) {
+  if(imm==0) {
+    if(rs!=rt) emit_mov(rs,rt);
+  }else if(genimm(imm,&armval)) {
     assem_debug("eor %s,%s,#%d\n",regname[rt],regname[rs],imm);
     output_w32(0xe2200000|rd_rn_rm(rt,rs,0)|armval);
   }else{
-    assert(imm>0);
+    assert(imm>0&&imm<65536);
     assem_debug("eor %s,%s,#%d\n",regname[rt],regname[rs],imm&0xFF00);
     assem_debug("eor %s,%s,#%d\n",regname[rt],regname[rs],imm&0xFF);
     output_w32(0xe2200000|rd_rn_imm_shift(rt,rs,imm>>8,8));
@@ -1676,8 +1859,8 @@ void emit_readdword_indexed_tlb(int addr, int rs, int map, int rh, int rl)
   }else{
     assert(rh!=rs);
     if(rh>=0) emit_readword_indexed_tlb(addr, rs, map, rh);
-    emit_addimm(map,1,map);
-    emit_readword_indexed_tlb(addr, rs, map, rl);
+    emit_addimm(map,1,HOST_TEMPREG);
+    emit_readword_indexed_tlb(addr, rs, HOST_TEMPREG, rl);
   }
 }
 void emit_movsbl_indexed(int offset, int rs, int rt)
@@ -1695,9 +1878,9 @@ void emit_movsbl_indexed_tlb(int addr, int rs, int map, int rt)
   if(map<0) emit_movsbl_indexed(addr, rs, rt);
   else {
     if(addr==0) {
-      emit_shlimm(map,2,map);
-      assem_debug("ldrsb %s,%s+%s\n",regname[rt],regname[rs],regname[map]);
-      output_w32(0xe19000d0|rd_rn_rm(rt,rs,map));
+      emit_shlimm(map,2,HOST_TEMPREG);
+      assem_debug("ldrsb %s,%s+%s\n",regname[rt],regname[rs],regname[HOST_TEMPREG]);
+      output_w32(0xe19000d0|rd_rn_rm(rt,rs,HOST_TEMPREG));
     }else{
       assert(addr>-256&&addr<256);
       assem_debug("add %s,%s,%s,lsl #2\n",regname[rt],regname[rs],regname[map]);
@@ -1893,7 +2076,7 @@ void emit_writebyte(int rt, int addr)
 {
   u_int offset = addr-(u_int)&dynarec_local;
   assert(offset<4096);
-  assem_debug("str %s,fp+%d\n",regname[rt],offset);
+  assem_debug("strb %s,fp+%d\n",regname[rt],offset);
   output_w32(0xe5c00000|rd_rn_rm(rt,FP,0)|offset);
 }
 void emit_writeword_imm(int imm, int addr)
@@ -2117,6 +2300,13 @@ void emit_addsr12(int rs1,int rs2,int rt)
 {
   assem_debug("add %s,%s,%s lsr #12\n",regname[rt],regname[rs1],regname[rs2]);
   output_w32(0xe0800620|rd_rn_rm(rt,rs1,rs2));
+}
+
+void emit_callne(int a)
+{
+  assem_debug("blne %x\n",a);
+  u_int offset=genjmp(a);
+  output_w32(0x1b000000|offset);
 }
 
 // Used to preload hash table entries
@@ -2446,7 +2636,7 @@ emit_extjump2(int addr, int target, int linker)
   assert((ptr[3]&0x0e)==0xa);
   emit_loadlp(target,0);
   emit_loadlp(addr,1);
-  assert(addr>=0x7000000&&addr<0x7FFFFFF);
+  //assert(addr>=0x7000000&&addr<0x7FFFFFF);
   //assert((target>=0x80000000&&target<0x80800000)||(target>0xA4000000&&target<0xA4001000));
 //DEBUG >
 #ifdef DEBUG_CYCLE_COUNT
@@ -2492,8 +2682,8 @@ do_readstub(int n)
     rt=get_reg(i_regmap,rt1[i]);
   }
   assert(rs>=0);
-  assert(rt>=0);
   if(addr<0) addr=rt;
+  if(addr<0&&itype[i]!=C1LS&&itype[i]!=LOADLR) addr=get_reg(i_regmap,-1);
   assert(addr>=0);
   int ftable=0;
   if(type==LOADB_STUB||type==LOADBU_STUB)
@@ -2543,19 +2733,21 @@ do_readstub(int n)
   //if((cc=get_reg(regmap,CCREG))>=0) {
   //  emit_loadreg(CCREG,cc);
   //}
-  if(type==LOADB_STUB)
-    emit_movsbl((int)&readmem_dword,rt);
-  if(type==LOADBU_STUB)
-    emit_movzbl((int)&readmem_dword,rt);
-  if(type==LOADH_STUB)
-    emit_movswl((int)&readmem_dword,rt);
-  if(type==LOADHU_STUB)
-    emit_movzwl((int)&readmem_dword,rt);
-  if(type==LOADW_STUB)
-    emit_readword((int)&readmem_dword,rt);
-  if(type==LOADD_STUB) {
-    emit_readword((int)&readmem_dword,rt);
-    if(rth>=0) emit_readword(((int)&readmem_dword)+4,rth);
+  if(rt>=0) {
+    if(type==LOADB_STUB)
+      emit_movsbl((int)&readmem_dword,rt);
+    if(type==LOADBU_STUB)
+      emit_movzbl((int)&readmem_dword,rt);
+    if(type==LOADH_STUB)
+      emit_movswl((int)&readmem_dword,rt);
+    if(type==LOADHU_STUB)
+      emit_movzwl((int)&readmem_dword,rt);
+    if(type==LOADW_STUB)
+      emit_readword((int)&readmem_dword,rt);
+    if(type==LOADD_STUB) {
+      emit_readword((int)&readmem_dword,rt);
+      if(rth>=0) emit_readword(((int)&readmem_dword)+4,rth);
+    }
   }
   emit_jmp(stubs[n][2]); // return address
 }
@@ -2565,8 +2757,8 @@ inline_readstub(int type, int i, u_int addr, signed char regmap[], int target, i
   int rs=get_reg(regmap,target);
   int rth=get_reg(regmap,target|64);
   int rt=get_reg(regmap,target);
+  if(rs<0) rs=get_reg(regmap,-1);
   assert(rs>=0);
-  assert(rt>=0);
   int ftable=0;
   if(type==LOADB_STUB||type==LOADBU_STUB)
     ftable=(int)readmemb;
@@ -2609,19 +2801,21 @@ inline_readstub(int type, int i, u_int addr, signed char regmap[], int target, i
   }
   //emit_popa();
   restore_regs(reglist);
-  if(type==LOADB_STUB)
-    emit_movsbl((int)&readmem_dword,rt);
-  if(type==LOADBU_STUB)
-    emit_movzbl((int)&readmem_dword,rt);
-  if(type==LOADH_STUB)
-    emit_movswl((int)&readmem_dword,rt);
-  if(type==LOADHU_STUB)
-    emit_movzwl((int)&readmem_dword,rt);
-  if(type==LOADW_STUB)
-    emit_readword((int)&readmem_dword,rt);
-  if(type==LOADD_STUB) {
-    emit_readword((int)&readmem_dword,rt);
-    if(rth>=0) emit_readword(((int)&readmem_dword)+4,rth);
+  if(rt>=0) {
+    if(type==LOADB_STUB)
+      emit_movsbl((int)&readmem_dword,rt);
+    if(type==LOADBU_STUB)
+      emit_movzbl((int)&readmem_dword,rt);
+    if(type==LOADH_STUB)
+      emit_movswl((int)&readmem_dword,rt);
+    if(type==LOADHU_STUB)
+      emit_movzwl((int)&readmem_dword,rt);
+    if(type==LOADW_STUB)
+      emit_readword((int)&readmem_dword,rt);
+    if(type==LOADD_STUB) {
+      emit_readword((int)&readmem_dword,rt);
+      if(rth>=0) emit_readword(((int)&readmem_dword)+4,rth);
+    }
   }
 }
 
@@ -2860,7 +3054,7 @@ do_cop1stub(int n)
 
 /* TLB */
 
-int do_tlb_r(int s,int ar,int map,int x,int a,int shift,int c,u_int addr)
+int do_tlb_r(int s,int ar,int map,int cache,int x,int a,int shift,int c,u_int addr)
 {
   if(c) {
     if((signed int)addr>=(signed int)0xC0000000) {
@@ -2872,8 +3066,13 @@ int do_tlb_r(int s,int ar,int map,int x,int a,int shift,int c,u_int addr)
   }
   else {
     assert(s!=map);
-    emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
-    emit_addsr12(map,s,map);
+    if(cache>=0) {
+      // Use cached offset to memory map
+      emit_addsr12(cache,s,map);
+    }else{
+      emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
+      emit_addsr12(map,s,map);
+    }
     // Schedule this while we wait on the load
     //if(x) emit_xorimm(s,x,ar);
     if(shift>=0) emit_shlimm(s,3,shift);
@@ -2899,7 +3098,7 @@ int gen_tlb_addr_r(int ar, int map) {
   }
 }
 
-int do_tlb_w(int s,int ar,int map,int x,int c,u_int addr)
+int do_tlb_w(int s,int ar,int map,int cache,int x,int c,u_int addr)
 {
   if(c) {
     if(addr<0x80800000||addr>=0xC0000000) {
@@ -2911,8 +3110,13 @@ int do_tlb_w(int s,int ar,int map,int x,int c,u_int addr)
   }
   else {
     assert(s!=map);
-    emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
-    emit_addsr12(map,s,map);
+    if(cache>=0) {
+      // Use cached offset to memory map
+      emit_addsr12(cache,s,map);
+    }else{
+      emit_movimm(((int)memory_map-(int)&dynarec_local)>>2,map);
+      emit_addsr12(map,s,map);
+    }
     // Schedule this while we wait on the load
     //if(x) emit_xorimm(s,x,ar);
     emit_readword_dualindexedx4(FP,map,map);
@@ -2932,6 +3136,14 @@ int gen_tlb_addr_w(int ar, int map) {
   if(map>=0) {
     assem_debug("add %s,%s,%s lsl #2\n",regname[ar],regname[ar],regname[map]);
     output_w32(0xe0800100|rd_rn_rm(ar,ar,map));
+  }
+}
+
+// This reverses the above operation
+int gen_orig_addr_w(int ar, int map) {
+  if(map>=0) {
+    assem_debug("sub %s,%s,%s lsl #2\n",regname[ar],regname[ar],regname[map]);
+    output_w32(0xe0400100|rd_rn_rm(ar,ar,map));
   }
 }
 
@@ -3056,7 +3268,7 @@ void shift_assemble_arm(int i,struct regstat *i_regs)
 
 void loadlr_assemble_arm(int i,struct regstat *i_regs)
 {
-  int s,th,tl,temp,temp2,addr,map=-1;
+  int s,th,tl,temp,temp2,addr,map=-1,cache=-1;
   int offset;
   int jaddr=0;
   int memtarget,c=0;
@@ -3080,57 +3292,61 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
     memtarget=((signed int)(constmap[i][s]+offset))<(signed int)0x80800000;
     if(using_tlb&&((signed int)(constmap[i][s]+offset))>=(signed int)0xC0000000) memtarget=1;
   }
-  if(tl>=0) {
-    //assert(tl>=0);
-    //assert(rt1[i]);
-    if(!using_tlb) {
-      if(!c) {
-        emit_shlimm(addr,3,temp);
-        if (opcode[i]==0x22||opcode[i]==0x26) {
-          emit_andimm(addr,0xFFFFFFFC,temp2); // LWL/LWR
-        }else{
-          emit_andimm(addr,0xFFFFFFF8,temp2); // LDL/LDR
-        }
-        emit_cmpimm(addr,0x800000);
-        jaddr=(int)out;
-        emit_jno(0);
-      }
-      else {
-        if (opcode[i]==0x22||opcode[i]==0x26) {
-          emit_movimm(((constmap[i][s]+offset)<<3)&24,temp); // LWL/LWR
-        }else{
-          emit_movimm(((constmap[i][s]+offset)<<3)&56,temp); // LDL/LDR
-        }
-      }
-    }else{ // using tlb
-      int a;
-      if(c) {
-        a=-1;
-      }else if (opcode[i]==0x22||opcode[i]==0x26) {
-        a=0xFFFFFFFC; // LWL/LWR
+  if(!using_tlb) {
+    if(!c) {
+      #ifdef RAM_OFFSET
+      map=get_reg(i_regs->regmap,ROREG);
+      if(map<0) emit_loadreg(ROREG,map=HOST_TEMPREG);
+      #endif
+      emit_shlimm(addr,3,temp);
+      if (opcode[i]==0x22||opcode[i]==0x26) {
+        emit_andimm(addr,0xFFFFFFFC,temp2); // LWL/LWR
       }else{
-        a=0xFFFFFFF8; // LDL/LDR
+        emit_andimm(addr,0xFFFFFFF8,temp2); // LDL/LDR
       }
-      map=get_reg(i_regs->regmap,TLREG);
-      assert(map>=0);
-      map=do_tlb_r(addr,temp2,map,0,a,c?-1:temp,c,constmap[i][s]+offset);
-      if(c) {
-        if (opcode[i]==0x22||opcode[i]==0x26) {
-          emit_movimm(((constmap[i][s]+offset)<<3)&24,temp); // LWL/LWR
-        }else{
-          emit_movimm(((constmap[i][s]+offset)<<3)&56,temp); // LDL/LDR
-        }
-      }
-      do_tlb_r_branch(map,c,constmap[i][s]+offset,&jaddr);
+      emit_cmpimm(addr,0x800000);
+      jaddr=(int)out;
+      emit_jno(0);
     }
-    if (opcode[i]==0x22||opcode[i]==0x26) { // LWL/LWR
-      if(!c||memtarget) {
-        //emit_readword_indexed((int)rdram-0x80000000,temp2,temp2);
-        emit_readword_indexed_tlb((int)rdram-0x80000000,temp2,map,temp2);
-        if(jaddr) add_stub(LOADW_STUB,jaddr,(int)out,i,temp2,(int)i_regs,ccadj[i],reglist);
+    else {
+      if (opcode[i]==0x22||opcode[i]==0x26) {
+        emit_movimm(((constmap[i][s]+offset)<<3)&24,temp); // LWL/LWR
+      }else{
+        emit_movimm(((constmap[i][s]+offset)<<3)&56,temp); // LDL/LDR
       }
-      else
-        inline_readstub(LOADW_STUB,i,(constmap[i][s]+offset)&0xFFFFFFFC,i_regs->regmap,FTEMP,ccadj[i],reglist);
+    }
+  }else{ // using tlb
+    int a;
+    if(c) {
+      a=-1;
+    }else if (opcode[i]==0x22||opcode[i]==0x26) {
+      a=0xFFFFFFFC; // LWL/LWR
+    }else{
+      a=0xFFFFFFF8; // LDL/LDR
+    }
+    map=get_reg(i_regs->regmap,TLREG);
+    cache=get_reg(i_regs->regmap,MMREG); // Get cached offset to memory_map
+    assert(map>=0);
+    map=do_tlb_r(addr,temp2,map,cache,0,a,c?-1:temp,c,constmap[i][s]+offset);
+    if(c) {
+      if (opcode[i]==0x22||opcode[i]==0x26) {
+        emit_movimm(((constmap[i][s]+offset)<<3)&24,temp); // LWL/LWR
+      }else{
+        emit_movimm(((constmap[i][s]+offset)<<3)&56,temp); // LDL/LDR
+      }
+    }
+    do_tlb_r_branch(map,c,constmap[i][s]+offset,&jaddr);
+  }
+  if (opcode[i]==0x22||opcode[i]==0x26) { // LWL/LWR
+    if(!c||memtarget) {
+      //emit_readword_indexed((int)rdram-0x80000000,temp2,temp2);
+      emit_readword_indexed_tlb(0,temp2,map,temp2);
+      if(jaddr) add_stub(LOADW_STUB,jaddr,(int)out,i,temp2,(int)i_regs,ccadj[i],reglist);
+    }
+    else
+      inline_readstub(LOADW_STUB,i,(constmap[i][s]+offset)&0xFFFFFFFC,i_regs->regmap,FTEMP,ccadj[i],reglist);
+    if(rt1[i]) {
+      assert(tl>=0);
       emit_andimm(temp,24,temp);
       if (opcode[i]==0x26) emit_xorimm(temp,24,temp); // LWR
       emit_movimm(-1,HOST_TEMPREG);
@@ -3142,18 +3358,22 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
         emit_bic_lsl(tl,HOST_TEMPREG,temp,tl);
       }
       emit_or(temp2,tl,tl);
-      //emit_storereg(rt1[i],tl); // DEBUG
     }
-    if (opcode[i]==0x1A||opcode[i]==0x1B) { // LDL/LDR
-      int temp2h=get_reg(i_regs->regmap,FTEMP|64);
-      if(!c||memtarget) {
-        //if(th>=0) emit_readword_indexed((int)rdram-0x80000000,temp2,temp2h);
-        //emit_readword_indexed((int)rdram-0x7FFFFFFC,temp2,temp2);
-        emit_readdword_indexed_tlb((int)rdram-0x80000000,temp2,map,temp2h,temp2);
-        if(jaddr) add_stub(LOADD_STUB,jaddr,(int)out,i,temp2,(int)i_regs,ccadj[i],reglist);
-      }
-      else
-        inline_readstub(LOADD_STUB,i,(constmap[i][s]+offset)&0xFFFFFFF8,i_regs->regmap,FTEMP,ccadj[i],reglist);
+    //emit_storereg(rt1[i],tl); // DEBUG
+  }
+  if (opcode[i]==0x1A||opcode[i]==0x1B) { // LDL/LDR
+    int temp2h=get_reg(i_regs->regmap,FTEMP|64);
+    if(!c||memtarget) {
+      //if(th>=0) emit_readword_indexed((int)rdram-0x80000000,temp2,temp2h);
+      //emit_readword_indexed((int)rdram-0x7FFFFFFC,temp2,temp2);
+      emit_readdword_indexed_tlb(0,temp2,map,temp2h,temp2);
+      if(jaddr) add_stub(LOADD_STUB,jaddr,(int)out,i,temp2,(int)i_regs,ccadj[i],reglist);
+    }
+    else
+      inline_readstub(LOADD_STUB,i,(constmap[i][s]+offset)&0xFFFFFFF8,i_regs->regmap,FTEMP,ccadj[i],reglist);
+    if(rt1[i]) {
+      assert(th>=0);
+      assert(tl>=0);
       emit_testimm(temp,32);
       emit_andimm(temp,24,temp);
       if (opcode[i]==0x1A) { // LDL
@@ -3190,23 +3410,24 @@ void cop0_assemble(int i,struct regstat *i_regs)
 {
   if(opcode2[i]==0) // MFC0
   {
-    signed char t=get_reg(i_regs->regmap,rt1[i]);
-    char copr=(source[i]>>11)&0x1f;
-    //assert(t>=0); // Why does this happen?  OOT is weird
-    if(t>=0) {
-      emit_addimm(FP,(int)&fake_pc-(int)&dynarec_local,0);
-      emit_movimm((source[i]>>11)&0x1f,1);
-      emit_writeword(0,(int)&PC);
-      emit_writebyte(1,(int)&(fake_pc.f.r.nrd));
-      if(copr==9) {
-        emit_readword((int)&last_count,ECX);
-        emit_loadreg(CCREG,HOST_CCREG); // TODO: do proper reg alloc
-        emit_add(HOST_CCREG,ECX,HOST_CCREG);
-        emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
-        emit_writeword(HOST_CCREG,(int)&Count);
+    if(rt1[i]) {
+      signed char t=get_reg(i_regs->regmap,rt1[i]);
+      char copr=(source[i]>>11)&0x1f;
+      if(t>=0) {
+        emit_addimm(FP,(int)&fake_pc-(int)&dynarec_local,0);
+        emit_movimm((source[i]>>11)&0x1f,1);
+        emit_writeword(0,(int)&PC);
+        emit_writebyte(1,(int)&(fake_pc.f.r.nrd));
+        if(copr==9) {
+          emit_readword((int)&last_count,ECX);
+          emit_loadreg(CCREG,HOST_CCREG); // TODO: do proper reg alloc
+          emit_add(HOST_CCREG,ECX,HOST_CCREG);
+          emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
+          emit_writeword(HOST_CCREG,(int)&Count);
+        }
+        emit_call((int)MFC0);
+        emit_readword((int)&readmem_dword,t);
       }
-      emit_call((int)MFC0);
-      emit_readword((int)&readmem_dword,t);
     }
   }
   else if(opcode2[i]==4) // MTC0
@@ -4344,10 +4565,74 @@ void wb_invalidate_arm(signed char pre[],signed char entry[],uint64_t dirty,uint
 #define wb_invalidate wb_invalidate_arm
 */
 
+// Clearing the cache is rather slow on ARM Linux, so mark the areas
+// that need to be cleared, and then only clear these areas once.
+void do_clear_cache()
+{
+  int i,j;
+  for (i=0;i<(1<<(TARGET_SIZE_2-17));i++)
+  {
+    u_int bitmap=needs_clear_cache[i];
+    if(bitmap) {
+      u_int start,end;
+      for(j=0;j<32;j++) 
+      {
+        if(bitmap&(1<<j)) {
+          start=BASE_ADDR+i*131072+j*4096;
+          end=start+4095;
+          j++;
+          while(j<32) {
+            if(bitmap&(1<<j)) {
+              end+=4096;
+              j++;
+            }else{
+              __clear_cache((void *)start,(void *)end);
+              break;
+            }
+          }
+        }
+      }
+      needs_clear_cache[i]=0;
+    }
+  }
+}
+
 // CPU-architecture-specific initialization
 void arch_init() {
   rounding_modes[0]=0x0<<22; // round
   rounding_modes[1]=0x3<<22; // trunc
   rounding_modes[2]=0x1<<22; // ceil
   rounding_modes[3]=0x2<<22; // floor
+
+  #ifdef RAM_OFFSET
+  ram_offset=((int)rdram-(int)0x80000000)>>2;
+  #endif
+
+  // Trampolines for jumps >32M
+  int *ptr,*ptr2;
+  ptr=(int *)jump_table_symbols;
+  ptr2=(int *)((void *)BASE_ADDR+(1<<TARGET_SIZE_2)-JUMP_TABLE_SIZE);
+  while((void *)ptr<(void *)jump_table_symbols+sizeof(jump_table_symbols))
+  {
+    int offset=*ptr-(int)ptr2-8;
+    if(offset>=-33554432&&offset<33554432) {
+      *ptr2=0xea000000|((offset>>2)&0xffffff); // direct branch
+    }else{
+      *ptr2=0xe51ff004; // ldr pc,[pc,#-4]
+    }
+    ptr2++;
+    *ptr2=*ptr;
+    ptr++;
+    ptr2++;
+  }
+
+  // Jumping thru the trampolines created above slows things down by about 1%.
+  // If part of the cache is beyond the 32M limit, avoid using this area
+  // initially.  It will be used later if the cache gets full.
+  if((u_int)dyna_linker-33554432>(u_int)BASE_ADDR) {
+    if((u_int)dyna_linker-33554432<(u_int)BASE_ADDR+(1<<(TARGET_SIZE_2-1))) {
+      out=(u_char *)(((u_int)dyna_linker-33554432)&~4095);
+      expirep=((((int)out-BASE_ADDR)>>(TARGET_SIZE_2-16))+16384)&65535;
+    }
+  }
 }

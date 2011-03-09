@@ -58,6 +58,7 @@ rdram = 0x80000000
 	.global	fake_pc
 	.global	mini_ht
 	.global	restore_candidate
+	.global	ram_offset
 	.global	memory_map
 	.bss
 	.align	4
@@ -140,8 +141,10 @@ PC = branch_target + 4
 fake_pc = PC + 4
 	.type	fake_pc, %object
 	.size	fake_pc, 132
-/* 4 bytes free */
-mini_ht = fake_pc + 136
+ram_offset = fake_pc + 132
+	.type	ram_offset, %object
+	.size	ram_offset, 4
+mini_ht = ram_offset + 4
 	.type	mini_ht, %object
 	.size	mini_ht, 256
 restore_candidate = mini_ht + 256
@@ -719,58 +722,170 @@ jump_eret:
 	.type	new_dyna_start, %function
 new_dyna_start:
 	ldr	r12, .dlptr
+	ldr	r1, .tgtptr
 	mov	r0, #0xa4000000
 	stmia	r12, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
 	sub	fp, r12, #28
+	ldr	r4, [r1]
 	add	r0, r0, #0x40
 	bl	new_recompile_block
 	ldr	r0, [fp, #next_interupt-dynarec_local]
 	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
 	str	r0, [fp, #last_count-dynarec_local]
 	sub	r10, r10, r0
-	mov	pc, #0x7000000
+	mov	pc, r4
 .dlptr:
 	.word	dynarec_local+28
+.tgtptr:
+	.word	out
 	.size	new_dyna_start, .-new_dyna_start
+	.align	2
+	.global	invalidate_addr_r0
+	.type	invalidate_addr_r0, %function
+invalidate_addr_r0:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r0, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r0, .-invalidate_addr_r0
+	.align	2
+	.global	invalidate_addr_r1
+	.type	invalidate_addr_r1, %function
+invalidate_addr_r1:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r1, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r1, .-invalidate_addr_r1
+	.align	2
+	.global	invalidate_addr_r2
+	.type	invalidate_addr_r2, %function
+invalidate_addr_r2:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r2, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r2, .-invalidate_addr_r2
+	.align	2
+	.global	invalidate_addr_r3
+	.type	invalidate_addr_r3, %function
+invalidate_addr_r3:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r3, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r3, .-invalidate_addr_r3
+	.align	2
+	.global	invalidate_addr_r4
+	.type	invalidate_addr_r4, %function
+invalidate_addr_r4:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r4, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r4, .-invalidate_addr_r4
+	.align	2
+	.global	invalidate_addr_r5
+	.type	invalidate_addr_r5, %function
+invalidate_addr_r5:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r5, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r5, .-invalidate_addr_r5
+	.align	2
+	.global	invalidate_addr_r6
+	.type	invalidate_addr_r6, %function
+invalidate_addr_r6:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r6, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r6, .-invalidate_addr_r6
+	.align	2
+	.global	invalidate_addr_r7
+	.type	invalidate_addr_r7, %function
+invalidate_addr_r7:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r7, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r7, .-invalidate_addr_r7
+	.align	2
+	.global	invalidate_addr_r8
+	.type	invalidate_addr_r8, %function
+invalidate_addr_r8:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r8, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r8, .-invalidate_addr_r8
+	.align	2
+	.global	invalidate_addr_r9
+	.type	invalidate_addr_r9, %function
+invalidate_addr_r9:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r9, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r9, .-invalidate_addr_r9
+	.align	2
+	.global	invalidate_addr_r10
+	.type	invalidate_addr_r10, %function
+invalidate_addr_r10:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r10, #12	
+	b	invalidate_addr_call
+	.size	invalidate_addr_r10, .-invalidate_addr_r10
+	.align	2
+	.global	invalidate_addr_r12
+	.type	invalidate_addr_r12, %function
+invalidate_addr_r12:
+	stmia	fp, {r0, r1, r2, r3, r12, lr}
+	lsr	r0, r12, #12	
+	.size	invalidate_addr_r12, .-invalidate_addr_r12
+	.align	2
+	.global	invalidate_addr_call
+	.type	invalidate_addr_call, %function
+invalidate_addr_call:
+	bl	invalidate_block
+	ldmia	fp, {r0, r1, r2, r3, r12, pc}
+	.size	invalidate_addr_call, .-invalidate_addr_call
 	.align	2
 	.global	write_rdram_new
 	.type	write_rdram_new, %function
 write_rdram_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 	ldr	r0, [fp, #word-dynarec_local]
-	str	r0, [r2]
+	str	r0, [r2, r3, lsl #2]
 	b	.E12
 	.size	write_rdram_new, .-write_rdram_new
 	.align	2
 	.global	write_rdramb_new
 	.type	write_rdramb_new, %function
 write_rdramb_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 	ldrb	r0, [fp, #byte-dynarec_local]
 	eor	r2, r2, #3
-	strb	r0, [r2]
+	strb	r0, [r2, r3, lsl #2]
 	b	.E12
 	.size	write_rdramb_new, .-write_rdramb_new
 	.align	2
 	.global	write_rdramh_new
 	.type	write_rdramh_new, %function
 write_rdramh_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 	ldrh	r0, [fp, #hword-dynarec_local]
 	eor	r2, r2, #2
-	strh	r0, [r2]
+	lsl	r3, r3, #2
+	strh	r0, [r2, r3]
 	b	.E12
 	.size	write_rdramh_new, .-write_rdramh_new
 	.align	2
 	.global	write_rdramd_new
 	.type	write_rdramd_new, %function
 write_rdramd_new:
+	ldr	r3, [fp, #ram_offset-dynarec_local]
 	ldr	r2, [fp, #address-dynarec_local]
 /*	ldrd	r0, [fp, #dword-dynarec_local]*/
 	ldr	r0, [fp, #dword-dynarec_local]
 	ldr	r1, [fp, #dword+4-dynarec_local]
-	str	r0, [r2, #4]
-	str	r1, [r2]
+	add	r3, r2, r3, lsl #2
+	str	r0, [r3, #4]
+	str	r1, [r3]
 	b	.E12
 	.size	write_rdramd_new, .-write_rdramd_new
 	.align	2

@@ -8,6 +8,8 @@
 #define CORTEX_A8_BRANCH_PREDICTION_HACK 1
 #define USE_MINI_HT 1
 //#define REG_PREFETCH 1
+#define HAVE_CONDITIONAL_CALL 1
+//#define RAM_OFFSET 1
 
 /* ARM calling convention:
    r0-r3, r12: caller-save
@@ -35,8 +37,9 @@
 
 extern char *invc_ptr;
 
-#define BASE_ADDR 0x7000000 // Code generator target address
-#define TARGET_SIZE_2 24 // 2^24 = 16 megabytes
+#define BASE_ADDR 0x6000000 // Code generator target address
+//#define TARGET_SIZE_2 24 // 2^24 = 16 megabytes
+#define TARGET_SIZE_2 25 // 2^25 = 32 megabytes
 
 // This is defined in linkage_arm.s, but gcc -O3 likes this better
 #define rdram ((unsigned int *)0x80000000)

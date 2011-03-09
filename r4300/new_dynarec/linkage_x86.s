@@ -577,6 +577,80 @@ new_dyna_start:
 	jmp	0x70000000
 	.size	new_dyna_start, .-new_dyna_start
 
+/* Note: Assumes %ebx, %ebp, %esi, %edi are callee-saved */
+.globl invalidate_block_eax
+	.type	invalidate_block_eax, @function
+invalidate_block_eax:
+	push	%eax
+	push	%ecx
+	push	%edx
+	push	%eax
+	jmp	invalidate_block_call
+	.size	invalidate_block_eax, .-invalidate_block_eax
+.globl invalidate_block_ecx
+	.type	invalidate_block_ecx, @function
+invalidate_block_ecx:
+	push	%eax
+	push	%ecx
+	push	%edx
+	push	%ecx
+	jmp	invalidate_block_call
+	.size	invalidate_block_ecx, .-invalidate_block_ecx
+.globl invalidate_block_edx
+	.type	invalidate_block_edx, @function
+invalidate_block_edx:
+	push	%eax
+	push	%ecx
+	push	%edx
+	push	%edx
+	jmp	invalidate_block_call
+	.size	invalidate_block_edx, .-invalidate_block_edx
+.globl invalidate_block_ebx
+	.type	invalidate_block_ebx, @function
+invalidate_block_ebx:
+	push	%eax
+	push	%ecx
+	push	%edx
+	push	%ebx
+	jmp	invalidate_block_call
+	.size	invalidate_block_ebx, .-invalidate_block_ebx
+.globl invalidate_block_ebp
+	.type	invalidate_block_ebp, @function
+invalidate_block_ebp:
+	push	%eax
+	push	%ecx
+	push	%edx
+	push	%ebp
+	jmp	invalidate_block_call
+	.size	invalidate_block_ebp, .-invalidate_block_ebp
+.globl invalidate_block_esi
+	.type	invalidate_block_esi, @function
+invalidate_block_esi:
+	push	%eax
+	push	%ecx
+	push	%edx
+	push	%esi
+	jmp	invalidate_block_call
+	.size	invalidate_block_esi, .-invalidate_block_esi
+.globl invalidate_block_edi
+	.type	invalidate_block_edi, @function
+invalidate_block_edi:
+	push	%eax
+	push	%ecx
+	push	%edx
+	push	%edi
+	.size	invalidate_block_edi, .-invalidate_block_edi
+.globl invalidate_block_call
+	.type	invalidate_block_call, @function
+invalidate_block_call:
+	call	invalidate_block
+	pop	%eax /* Throw away */
+	pop	%edx
+	pop	%ecx
+	pop	%eax
+	ret
+	.size	invalidate_block_call, .-invalidate_block_call
+
 .globl write_rdram_new
 	.type	write_rdram_new, @function
 write_rdram_new:

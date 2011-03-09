@@ -559,6 +559,94 @@ new_dyna_start:
 	jmp	0x70000000
 	.size	new_dyna_start, .-new_dyna_start
 
+/* Note: Assumes %rbx, %rbp are callee-saved */
+.globl invalidate_block_eax
+	.type	invalidate_block_eax, @function
+invalidate_block_eax:
+	push	%rax
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rdi
+	mov	%eax, %edi
+	jmp	invalidate_block_call
+	.size	invalidate_block_eax, .-invalidate_block_eax
+.globl invalidate_block_ecx
+	.type	invalidate_block_ecx, @function
+invalidate_block_ecx:
+	push	%rax
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rdi
+	mov	%ecx, %edi
+	jmp	invalidate_block_call
+	.size	invalidate_block_ecx, .-invalidate_block_ecx
+.globl invalidate_block_edx
+	.type	invalidate_block_edx, @function
+invalidate_block_edx:
+	push	%rax
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rdi
+	mov	%edx, %edi
+	jmp	invalidate_block_call
+	.size	invalidate_block_edx, .-invalidate_block_edx
+.globl invalidate_block_ebx
+	.type	invalidate_block_ebx, @function
+invalidate_block_ebx:
+	push	%rax
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rdi
+	mov	%ebx, %edi
+	jmp	invalidate_block_call
+	.size	invalidate_block_ebx, .-invalidate_block_ebx
+.globl invalidate_block_ebp
+	.type	invalidate_block_ebp, @function
+invalidate_block_ebp:
+	push	%rax
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rdi
+	mov	%ebp, %edi
+	jmp	invalidate_block_call
+	.size	invalidate_block_ebp, .-invalidate_block_ebp
+.globl invalidate_block_esi
+	.type	invalidate_block_esi, @function
+invalidate_block_esi:
+	push	%rax
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rdi
+	mov	%esi, %edi
+	jmp	invalidate_block_call
+	.size	invalidate_block_esi, .-invalidate_block_esi
+.globl invalidate_block_edi
+	.type	invalidate_block_edi, @function
+invalidate_block_edi:
+	push	%rax
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rdi
+	.size	invalidate_block_edi, .-invalidate_block_edi
+.globl invalidate_block_call
+	.type	invalidate_block_call, @function
+invalidate_block_call:
+	call	invalidate_block
+	pop	%rdi
+	pop	%rsi
+	pop	%rdx
+	pop	%rcx
+	pop	%rax
+	ret
+	.size	invalidate_block_call, .-invalidate_block_call
+
 .globl write_rdram_new
 	.type	write_rdram_new, @function
 write_rdram_new:
