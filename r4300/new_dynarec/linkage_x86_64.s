@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - linkage_x86_64.s                                        *
- *   Copyright (C) 2009 Ari64                                              *
+ *   Copyright (C) 2009-2010 Ari64                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -158,12 +158,14 @@ jump_syscall:
 	.type	cc_interrupt, @function
 cc_interrupt:
 	add	last_count, %esi
+	add	$-8, %rsp /* Align stack */
 	mov	%esi, reg_cop0+36 /* Count */
 	call	gen_interupt
 	mov	reg_cop0+36, %esi
 	mov	next_interupt, %eax
 	mov	pending_exception, %ebx
 	mov	stop, %ecx
+	add	$8, %rsp
 	mov	%eax, last_count
 	sub	%eax, %esi
 	test	%ecx, %ecx
@@ -180,6 +182,7 @@ cc_interrupt:
 	jmp	*%rax
 .L10:
 	pop	%rbp /* pop return address and discard it */
+	pop	%rbp /* pop junk */
 	pop	%r15 /* restore callee-save registers */
 	pop	%r14
 	pop	%r13
@@ -200,11 +203,12 @@ new_dyna_start:
 	push	%r15
 	mov	$0xa4000040, %edi
 	call	new_recompile_block
+	add	$-8, %rsp /* align stack */
 	movl	next_interupt, %edi
 	movl	reg_cop0+36, %esi
 	movl	%edi, last_count
 	subl	%edi, %esi
-	jmp	0x7000000
+	jmp	0x70000000
 	.size	new_dyna_start, .-new_dyna_start
 
 .globl jump_vaddr
@@ -267,3 +271,229 @@ jump_eret:
 	mov	%r12d, %esi
 	jmp	*%rax
 	.size	jump_eret, .-jump_eret
+
+.globl write_rdram_new
+	.type	write_rdram_new, @function
+write_rdram_new:
+	mov	address, %edi
+	mov	word, %ecx
+	and	$0x7FFFFFFF, %edi
+	mov	%ecx, rdram(%rdi)
+	jmp	.L15
+	.size	write_rdram_new, .-write_rdram_new
+
+.globl write_rdramb_new
+	.type	write_rdramb_new, @function
+write_rdramb_new:
+	mov	address, %edi
+	xor	$3, %edi
+	movb	byte, %cl
+	and	$0x7FFFFFFF, %edi
+	movb	%cl, rdram(%rdi)
+	jmp	.L15
+	.size	write_rdramb_new, .-write_rdramb_new
+
+.globl write_rdramh_new
+	.type	write_rdramh_new, @function
+write_rdramh_new:
+	mov	address, %edi
+	xor	$2, %edi
+	movw	hword, %cx
+	and	$0x7FFFFFFF, %edi
+	movw	%cx, rdram(%rdi)
+	jmp	.L15
+	.size	write_rdramh_new, .-write_rdramh_new
+
+.globl write_rdramd_new
+	.type	write_rdramd_new, @function
+write_rdramd_new:
+	mov	address, %edi
+	mov	dword+4, %ecx
+	mov	dword, %edx
+	and	$0x7FFFFFFF, %edi
+	mov	%ecx, rdram(%rdi)
+	mov	%edx, rdram+4(%rdi)
+	jmp	.L15
+	.size	write_rdramd_new, .-write_rdramd_new
+
+.globl do_invalidate
+	.type	do_invalidate, @function
+do_invalidate:
+	mov	address, %edi
+	mov	%edi, %ebx /* Return ebx to caller */
+.L15:
+	shr	$12, %edi
+	mov	%edi, %r12d /* Return r12 to caller */
+	cmpb	$1, invalid_code(%edi)
+	je	.L16
+	call	invalidate_block
+.L16:
+	ret
+	.size	do_invalidate, .-do_invalidate
+
+.globl read_nomem_new
+	.type	read_nomem_new, @function
+read_nomem_new:
+	mov	address, %edi
+	mov	%edi, %ebx
+	shr	$12, %edi
+	mov	memory_map(,%edi,4),%edi
+	mov	$0x8, %eax
+	test	%edi, %edi
+	js	tlb_exception
+	mov	(%ebx,%edi,4), %ecx
+	mov	%ecx, readmem_dword
+	ret
+	.size	read_nomem_new, .-read_nomem_new
+
+.globl read_nomemb_new
+	.type	read_nomemb_new, @function
+read_nomemb_new:
+	mov	address, %edi
+	mov	%edi, %ebx
+	shr	$12, %edi
+	mov	memory_map(,%edi,4),%edi
+	mov	$0x8, %eax
+	test	%edi, %edi
+	js	tlb_exception
+	xor	$3, %ebx
+	movzbl	(%ebx,%edi,4), %ecx
+	mov	%ecx, readmem_dword
+	ret
+	.size	read_nomemb_new, .-read_nomemb_new
+
+.globl read_nomemh_new
+	.type	read_nomemh_new, @function
+read_nomemh_new:
+	mov	address, %edi
+	mov	%edi, %ebx
+	shr	$12, %edi
+	mov	memory_map(,%edi,4),%edi
+	mov	$0x8, %eax
+	test	%edi, %edi
+	js	tlb_exception
+	xor	$2, %ebx
+	movzwl	(%ebx,%edi,4), %ecx
+	mov	%ecx, readmem_dword
+	ret
+	.size	read_nomemh_new, .-read_nomemh_new
+
+.globl read_nomemd_new
+	.type	read_nomemd_new, @function
+read_nomemd_new:
+	mov	address, %edi
+	mov	%edi, %ebx
+	shr	$12, %edi
+	mov	memory_map(,%edi,4),%edi
+	mov	$0x8, %eax
+	test	%edi, %edi
+	js	tlb_exception
+	mov	4(%ebx,%edi,4), %ecx
+	mov	(%ebx,%edi,4), %edx
+	mov	%ecx, readmem_dword
+	mov	%edx, readmem_dword+4
+	ret
+	.size	read_nomemd_new, .-read_nomemd_new
+
+.globl write_nomem_new
+	.type	write_nomem_new, @function
+write_nomem_new:
+	call	do_invalidate
+	mov	memory_map(,%r12d,4),%edi
+	mov	word, %ecx
+	mov	$0xc, %eax
+	shl	$2, %edi
+	jc	tlb_exception
+	mov	%ecx, (%ebx,%edi)
+	ret
+	.size	write_nomem_new, .-write_nomem_new
+
+.globl write_nomemb_new
+	.type	write_nomemb_new, @function
+write_nomemb_new:
+	call	do_invalidate
+	mov	memory_map(,%r12d,4),%edi
+	movb	byte, %cl
+	mov	$0xc, %eax
+	shl	$2, %edi
+	jc	tlb_exception
+	xor	$3, %ebx
+	movb	%cl, (%ebx,%edi)
+	ret
+	.size	write_nomemb_new, .-write_nomemb_new
+
+.globl write_nomemh_new
+	.type	write_nomemh_new, @function
+write_nomemh_new:
+	call	do_invalidate
+	mov	memory_map(,%r12d,4),%edi
+	movw	hword, %cx
+	mov	$0xc, %eax
+	shl	$2, %edi
+	jc	tlb_exception
+	xor	$2, %ebx
+	movw	%cx, (%ebx,%edi)
+	ret
+	.size	write_nomemh_new, .-write_nomemh_new
+
+.globl write_nomemd_new
+	.type	write_nomemd_new, @function
+write_nomemd_new:
+	call	do_invalidate
+	mov	memory_map(,%r12d,4),%edi
+	mov	dword+4, %edx
+	mov	dword, %ecx
+	mov	$0xc, %eax
+	shl	$2, %edi
+	jc	tlb_exception
+	mov	%edx, (%ebx,%edi)
+	mov	%ecx, 4(%ebx,%edi)
+	ret
+	.size	write_nomemd_new, .-write_nomemd_new
+
+.globl tlb_exception
+	.type	tlb_exception, @function
+tlb_exception:
+	/* eax = cause */
+	/* ebx = address */
+	/* ebp = instr addr + flags */
+	mov	8(%rsp), %ebp
+	mov	reg_cop0+48, %esi
+	mov	%ebp, %ecx
+	mov	%ebp, %edx
+	mov	%ebp, %edi
+	shl	$31, %ebp
+	or	$2, %esi
+	shr	$12, %ecx
+	or	%ebp, %eax
+	and	$0xFFFFFFFC, %edx
+	mov	memory_map(,%ecx,4), %ecx
+	mov	%esi, reg_cop0+48 /* Status */
+	mov	%eax, reg_cop0+52 /* Cause */
+	mov	%edx, reg_cop0+56 /* EPC */
+	mov	(%edx, %ecx, 4), %ecx
+	add	$0x48, %rsp
+	mov	$0x6003a22, %edx
+	mov	%ecx, %ebp
+	movswl	%cx, %eax
+	shr	$26, %ecx
+	shr	$21, %ebp
+	sub	%eax, %ebx
+	and	$0x1f, %ebp
+	ror	%cl, %edx
+	cmovc	reg(,%ebp,8), %ebx
+	mov	%ebx, reg(,%ebp,8)
+	lea	(%eax, %ebx), %ecx
+	sar	$31, %ebx
+	test	$2, %edi
+	mov	%ecx, reg_cop0+32 /* BadVAddr */
+	cmove	reg+4(,%ebp,8), %ebx
+	mov	$0x80000180, %edi
+	mov	%ebx, reg+4(,%ebp,8)
+	call	get_addr_ht
+	movl	next_interupt, %edi
+	movl	reg_cop0+36, %esi /* Count */
+	movl	%edi, last_count
+	subl	%edi, %esi
+	jmp	*%rax
+	.size	tlb_exception, .-tlb_exception

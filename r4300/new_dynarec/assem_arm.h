@@ -31,3 +31,8 @@
 // Thus the local variables are actually global and not on the stack.
 
 extern char *invc_ptr;
+
+#define BASE_ADDR 0x7000000 // Code generator target address
+
+// This is defined in linkage_arm.s, but gcc -O3 likes this better
+#define rdram ((unsigned int *)0x80000000)

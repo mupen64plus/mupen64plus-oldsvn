@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - linkage_arm.s                                           *
- *   Copyright (C) 2009 Ari64                                              *
+ *   Copyright (C) 2009-2010 Ari64                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -27,7 +27,7 @@
 	.eabi_attribute 26, 2
 	.eabi_attribute 30, 6
 	.eabi_attribute 18, 4
-	.file	"dynarec_arm.s"
+	.file	"linkage_arm.s"
 	.global	rdram
 rdram = 0x80000000
 	.global	dynarec_local
@@ -55,12 +55,13 @@ rdram = 0x80000000
 	.global	PC
 	.global	fake_pc
 	.global	fake_pc_float
+	.global	memory_map
 	.bss
 	.align	4
 	.type	dynarec_local, %object
 	.size	dynarec_local, 64
 dynarec_local:
-	.space	64+16+16+8+8+8+8+256+8+8+128+128+128+8+132+132
+	.space	64+16+16+8+8+8+8+256+8+8+128+128+128+8+132+132+4194304
 next_interupt = dynarec_local + 64
 	.type	next_interupt, %object
 	.size	next_interupt, 4
@@ -134,6 +135,9 @@ fake_pc = PC + 8
 fake_pc_float = fake_pc + 132
 	.type	fake_pc_float, %object
 	.size	fake_pc_float, 132
+memory_map = fake_pc_float + 132
+	.type	memory_map, %object
+	.size	memory_map, 4194304
 
 	.text
 	.align	2
@@ -220,7 +224,8 @@ verify_code:
 	ldr	r5, [r2], #4
 	cmp	r1, r3
 	bcc	.L7
-	teq	r4, r5
+	teq	r7, r8
+	teqeq	r4, r5
 	bne	.L8
 	mov	pc, lr
 .L8:
@@ -326,9 +331,9 @@ jump_syscall:
 	.global	indirect_jump
 	.type	indirect_jump, %function
 indirect_jump:
-	ldr	r3, [fp, #last_count-dynarec_local]
+	ldr	r12, [fp, #last_count-dynarec_local]
 	add	r0, r0, r1, lsl #2
-	add	r2, r2, r3 
+	add	r2, r2, r12 
 	str	r2, [fp, #reg_cop0+36-dynarec_local] /* Count */
 	ldr	pc, [r0]
 	.size	indirect_jump, .-indirect_jump
@@ -380,4 +385,256 @@ jump_eret:
 	bl	get_addr_32
 	mov	pc, r0
 	.size	jump_eret, .-jump_eret
+	.align	2
+	.global	write_rdram_new
+	.type	write_rdram_new, %function
+write_rdram_new:
+	ldr	r2, [fp, #address-dynarec_local]
+	ldr	r0, [fp, #word-dynarec_local]
+	str	r0, [r2]
+	b	.L15
+	.size	write_rdram_new, .-write_rdram_new
+	.align	2
+	.global	write_rdramb_new
+	.type	write_rdramb_new, %function
+write_rdramb_new:
+	ldr	r2, [fp, #address-dynarec_local]
+	ldrb	r0, [fp, #byte-dynarec_local]
+	eor	r2, r2, #3
+	strb	r0, [r2]
+	b	.L15
+	.size	write_rdramb_new, .-write_rdramb_new
+	.align	2
+	.global	write_rdramh_new
+	.type	write_rdramh_new, %function
+write_rdramh_new:
+	ldr	r2, [fp, #address-dynarec_local]
+	ldrh	r0, [fp, #hword-dynarec_local]
+	eor	r2, r2, #2
+	strh	r0, [r2]
+	b	.L15
+	.size	write_rdramh_new, .-write_rdramh_new
+	.align	2
+	.global	write_rdramd_new
+	.type	write_rdramd_new, %function
+write_rdramd_new:
+	ldr	r2, [fp, #address-dynarec_local]
+/*	ldrd	r0, [fp, #dword-dynarec_local]*/
+	ldr	r0, [fp, #dword-dynarec_local]
+	ldr	r1, [fp, #dword+4-dynarec_local]
+	str	r0, [r2, #4]
+	str	r1, [r2]
+	b	.L15
+	.size	write_rdramd_new, .-write_rdramd_new
+	.align	2
+	.global	do_invalidate
+	.type	do_invalidate, %function
+do_invalidate:
+	ldr	r2, [fp, #address-dynarec_local]
+.L15:
+	ldr	r1, [fp, #invc_ptr-dynarec_local]
+	lsr	r0, r2, #12
+	ldrb	r2, [r1, r0]
+	tst	r2, r2
+	beq	invalidate_block
+	mov	pc, lr
+	.size	do_invalidate, .-do_invalidate
+	.align	2
+	.global	read_nomem_new
+	.type	read_nomem_new, %function
+read_nomem_new:
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	lsr	r0, r2, #12
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #8
+	tst	r12, r12
+	bmi	tlb_exception
+	ldr	r0, [r2, r12, lsl #2]
+	str	r0, [fp, #readmem_dword-dynarec_local]
+	mov	pc, lr
+	.size	read_nomem_new, .-read_nomem_new
+	.align	2
+	.global	read_nomemb_new
+	.type	read_nomemb_new, %function
+read_nomemb_new:
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	lsr	r0, r2, #12
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #8
+	tst	r12, r12
+	bmi	tlb_exception
+	eor	r2, r2, #3
+	ldrb	r0, [r2, r12, lsl #2]
+	str	r0, [fp, #readmem_dword-dynarec_local]
+	mov	pc, lr
+	.size	read_nomemb_new, .-read_nomemb_new
+	.align	2
+	.global	read_nomemh_new
+	.type	read_nomemh_new, %function
+read_nomemh_new:
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	lsr	r0, r2, #12
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #8
+	tst	r12, r12
+	bmi	tlb_exception
+	lsl	r12, r12, #2
+	eor	r2, r2, #2
+	ldrh	r0, [r2, r12]
+	str	r0, [fp, #readmem_dword-dynarec_local]
+	mov	pc, lr
+	.size	read_nomemh_new, .-read_nomemh_new
+	.align	2
+	.global	read_nomemd_new
+	.type	read_nomemd_new, %function
+read_nomemd_new:
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	lsr	r0, r2, #12
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #8
+	tst	r12, r12
+	bmi	tlb_exception
+	lsl	r12, r12, #2
+/*	ldrd	r0, [r2, r12]*/
+	add	r3, r2, #4
+	ldr	r0, [r2, r12]
+	ldr	r1, [r3, r12]
+	str	r0, [fp, #readmem_dword+4-dynarec_local]
+	str	r1, [fp, #readmem_dword-dynarec_local]
+	mov	pc, lr
+	.size	read_nomemd_new, .-read_nomemd_new
+	.align	2
+	.global	write_nomem_new
+	.type	write_nomem_new, %function
+write_nomem_new:
+	str	r3, [fp, #24]
+	str	lr, [fp, #28]
+	bl	do_invalidate
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	ldr	lr, [fp, #28]
+	lsr	r0, r2, #12
+	ldr	r3, [fp, #24]
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #0xc
+	tst	r12, #0x40000000
+	bne	tlb_exception
+	ldr	r0, [fp, #word-dynarec_local]
+	str	r0, [r2, r12, lsl #2]
+	mov	pc, lr
+	.size	write_nomem_new, .-write_nomem_new
+	.align	2
+	.global	write_nomemb_new
+	.type	write_nomemb_new, %function
+write_nomemb_new:
+	str	r3, [fp, #24]
+	str	lr, [fp, #28]
+	bl	do_invalidate
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	ldr	lr, [fp, #28]
+	lsr	r0, r2, #12
+	ldr	r3, [fp, #24]
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #0xc
+	tst	r12, #0x40000000
+	bne	tlb_exception
+	eor	r2, r2, #3
+	ldrb	r0, [fp, #byte-dynarec_local]
+	strb	r0, [r2, r12, lsl #2]
+	mov	pc, lr
+	.size	write_nomemb_new, .-write_nomemb_new
+	.align	2
+	.global	write_nomemh_new
+	.type	write_nomemh_new, %function
+write_nomemh_new:
+	str	r3, [fp, #24]
+	str	lr, [fp, #28]
+	bl	do_invalidate
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	ldr	lr, [fp, #28]
+	lsr	r0, r2, #12
+	ldr	r3, [fp, #24]
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #0xc
+	lsls	r12, #2
+	bcs	tlb_exception
+	eor	r2, r2, #2
+	ldrh	r0, [fp, #hword-dynarec_local]
+	strh	r0, [r2, r12]
+	mov	pc, lr
+	.size	write_nomemh_new, .-write_nomemh_new
+	.align	2
+	.global	write_nomemd_new
+	.type	write_nomemd_new, %function
+write_nomemd_new:
+	str	r3, [fp, #24]
+	str	lr, [fp, #28]
+	bl	do_invalidate
+	ldr	r2, [fp, #address-dynarec_local]
+	add	r12, fp, #memory_map-dynarec_local
+	ldr	lr, [fp, #28]
+	lsr	r0, r2, #12
+	ldr	r3, [fp, #24]
+	ldr	r12, [r12, r0, lsl #2]
+	mov	r1, #0xc
+	lsls	r12, #2
+	bcs	tlb_exception
+	add	r3, r2, #4
+	ldr	r0, [fp, #dword+4-dynarec_local]
+	ldr	r1, [fp, #dword-dynarec_local]
+/*	strd	r0, [r2, r12]*/
+	str	r0, [r2, r12]
+	str	r1, [r3, r12]
+	mov	pc, lr
+	.size	write_nomemd_new, .-write_nomemd_new
+	.align	2
+	.global	tlb_exception
+	.type	tlb_exception, %function
+tlb_exception:
+	/* r1 = cause */
+	/* r2 = address */
+	/* r3 = instr addr/flags */
+	ldr	r4, [fp, #reg_cop0+48-dynarec_local] /* Status */
+	add	r5, fp, #memory_map-dynarec_local
+	lsr	r6, r3, #12
+	orr	r1, r1, r3, lsl #31
+	orr	r4, r4, #2
+	ldr	r7, [r5, r6, lsl #2]
+	bic	r8, r3, #3
+	str	r4, [fp, #reg_cop0+48-dynarec_local] /* Status */
+	mov	r9, #0x6000000
+	str	r1, [fp, #reg_cop0+52-dynarec_local] /* Cause */
+	orr	r9, r9, #0x22
+	ldr	r0, [r8, r7, lsl #2]
+	add	r5, fp, #reg-dynarec_local
+	str	r8, [fp, #reg_cop0+56-dynarec_local] /* EPC */
+	mov	r7, #0xf8
+	lsl	r1, r0, #16
+	lsr	r4, r0,	#26
+	and	r7, r7, r0, lsr #18
+	add	r6, fp, #reg+4-dynarec_local
+	sub	r2, r2, r1, asr #16
+	rors	r9, r9, r4
+	mov	r0, #0x80000000
+	ldrcs	r2, [r5, r7]
+	tst	r3, #2
+	str	r2, [r5, r7]
+	add	r4, r2, r1, asr #16
+	asr	r8, r2, #31
+	str	r4, [fp, #reg_cop0+32-dynarec_local] /* BadVAddr */
+	add	r0, r0, #0x180
+	strne	r8, [r6, r7]
+	bl	get_addr_ht
+	ldr	r1, [fp, #next_interupt-dynarec_local]
+	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
+	str	r1, [fp, #last_count-dynarec_local]
+	sub	r10, r10, r1
+	mov	pc, r0	
+	.size	tlb_exception, .-tlb_exception
 	.section	.note.GNU-stack,"",%progbits

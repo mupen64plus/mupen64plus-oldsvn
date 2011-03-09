@@ -31,6 +31,8 @@ void MFC0(void)
       case 1:
     printf("lecture de Random\n");
     stop=1;
+      case 9:    // Count
+    update_count();
       default:
     rrt32 = reg_cop0[PC->f.r.nrd];
     sign_extended(rrt);
@@ -72,6 +74,7 @@ void MTC0(void)
     break;
       case 9:    // Count
     update_count();
+    //printf("DEBUG: Wrote count\n");
     //if (next_interupt <= Count) gen_interupt();
     debug_count += Count;
     translate_event_queue(rrt & 0xFFFFFFFF);
@@ -118,8 +121,8 @@ void MTC0(void)
     Status = rrt;
     //WTF? This screws up the count...
     //PC++;
-    check_interupt();
     update_count();
+    check_interupt();
     //if (next_interupt <= Count) gen_interupt();
     //PC--;
     break;
