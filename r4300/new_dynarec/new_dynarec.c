@@ -519,7 +519,7 @@ void dirty_reg(struct regstat *cur,signed char reg)
 // Note: Do this only after completion of the instruction, because
 // some instructions may need to read the full 64-bit value even if
 // overwriting it (eg SLTI, DSRA32).
-void flush_dirty_uppers(struct regstat *cur)
+static void flush_dirty_uppers(struct regstat *cur)
 {
   int hr,reg;
   for (hr=0;hr<HOST_REGS;hr++) {
@@ -747,6 +747,8 @@ int needed_again(int r, int i)
   return 0;
 }
 
+// Try to match register allocations at the end of a loop with those
+// at the beginning
 int loop_reg(int i, int r, int hr)
 {
   int j,k;
@@ -1845,7 +1847,7 @@ void delayslot_alloc(struct regstat *current,int i)
 }
 
 // Special case where a branch and delay slot span two pages in virtual memory
-void pagespan_alloc(struct regstat *current,int i)
+static void pagespan_alloc(struct regstat *current,int i)
 {
   current->isconst=0;
   current->wasconst=0;
@@ -1983,7 +1985,8 @@ void memdebug(int i)
   //printf("TRACE: count=%d next=%d (rchecksum %x)\n",Count,next_interupt,rchecksum());
   //rlist();
   //if(tracedebug) {
-  if(Count>=454223928) {
+  //if(Count>=-2084597794) {
+  if((signed int)Count>=-2084597794&&(signed int)Count<0) {
   //if(0) {
     printf("TRACE: count=%d next=%d (checksum %x)\n",Count,next_interupt,mchecksum());
     //printf("TRACE: count=%d next=%d (checksum %x) Status=%x\n",Count,next_interupt,mchecksum(),Status);
@@ -2876,10 +2879,11 @@ void load_assemble(int i,struct regstat *i_regs)
   }
   //if(opcode[i]==0x23)
   //if(opcode[i]==0x24)
-  /*if(opcode[i]==0x23||opcode[i]==0x24)
+  //if(opcode[i]==0x23||opcode[i]==0x24)
+  /*if(opcode[i]==0x21||opcode[i]==0x23||opcode[i]==0x24)
   {
-    emit_pusha();
-    //save_regs(0x100f);
+    //emit_pusha();
+    save_regs(0x100f);
         emit_readword((int)&last_count,ECX);
         #ifdef __i386__
         if(get_reg(i_regs->regmap,CCREG)<0)
@@ -2898,8 +2902,8 @@ void load_assemble(int i,struct regstat *i_regs)
         emit_writeword(0,(int)&Count);
         #endif
     emit_call((int)memdebug);
-    emit_popa();
-    //restore_regs(0x100f);
+    //emit_popa();
+    restore_regs(0x100f);
   }/**/
 }
 
@@ -3701,7 +3705,7 @@ void load_regs(signed char entry[],signed char regmap[],int is32,int rs1,int rs2
 
 // Load registers prior to the start of a loop
 // so that they are not loaded within the loop
-void loop_preload(signed char pre[],signed char entry[])
+static void loop_preload(signed char pre[],signed char entry[])
 {
   int hr;
   for(hr=0;hr<HOST_REGS;hr++) {
@@ -5918,7 +5922,7 @@ void fjump_assemble(int i,struct regstat *i_regs)
   }
 }
 
-void pagespan_assemble(int i,struct regstat *i_regs)
+static void pagespan_assemble(int i,struct regstat *i_regs)
 {
   int s1l=get_reg(i_regs->regmap,rs1[i]);
   int s1h=get_reg(i_regs->regmap,rs1[i]|64);
@@ -6184,7 +6188,7 @@ void pagespan_assemble(int i,struct regstat *i_regs)
 }
 
 // Assemble the delay slot for the above
-void pagespan_ds()
+static void pagespan_ds()
 {
   assem_debug("initial delay slot:\n");
   u_int vaddr=start+1;
@@ -6523,7 +6527,7 @@ void unneeded_registers(int istart,int iend,int r)
 // Identify registers which are likely to contain 32-bit values
 // This is used to predict whether any branches will jump to a
 // location with 64-bit values in registers.
-void provisional_32bit()
+static void provisional_32bit()
 {
   int i,j;
   uint64_t is32=1;
@@ -6750,7 +6754,7 @@ void provisional_32bit()
 // and where optimizations will rely on this.
 // This is used to determine whether backward branches can safely
 // jump to a location with 64-bit values in registers.
-void provisional_r32()
+static void provisional_r32()
 {
   u_int r32=0;
   int i;
@@ -7255,43 +7259,41 @@ void clean_registers(int istart,int iend,int wr)
       //}
     }
     // Deal with changed mappings
-    if(i<iend) {
-      temp_will_dirty=will_dirty_i;
-      temp_wont_dirty=wont_dirty_i;
-      for(r=0;r<HOST_REGS;r++) {
-        if(r!=EXCLUDE_REG) {
-          int nr;
-          if(regs[i].regmap[r]==regmap_pre[i][r]) {
-            if(wr) {
-              #ifndef DESTRUCTIVE_WRITEBACK
-              regs[i].wasdirty&=wont_dirty_i|~(1<<r);
-              #endif
-              regs[i].wasdirty|=will_dirty_i&(1<<r);
-            }
+    temp_will_dirty=will_dirty_i;
+    temp_wont_dirty=wont_dirty_i;
+    for(r=0;r<HOST_REGS;r++) {
+      if(r!=EXCLUDE_REG) {
+        int nr;
+        if(regs[i].regmap[r]==regmap_pre[i][r]) {
+          if(wr) {
+            #ifndef DESTRUCTIVE_WRITEBACK
+            regs[i].wasdirty&=wont_dirty_i|~(1<<r);
+            #endif
+            regs[i].wasdirty|=will_dirty_i&(1<<r);
           }
-          else if((nr=get_reg(regs[i].regmap,regmap_pre[i][r]))>=0) {
-            // Register moved to a different register
-            will_dirty_i&=~(1<<r);
-            wont_dirty_i&=~(1<<r);
-            will_dirty_i|=((temp_will_dirty>>nr)&1)<<r;
-            wont_dirty_i|=((temp_wont_dirty>>nr)&1)<<r;
-            if(wr) {
-              #ifndef DESTRUCTIVE_WRITEBACK
-              regs[i].wasdirty&=wont_dirty_i|~(1<<r);
-              #endif
-              regs[i].wasdirty|=will_dirty_i&(1<<r);
-            }
+        }
+        else if((nr=get_reg(regs[i].regmap,regmap_pre[i][r]))>=0) {
+          // Register moved to a different register
+          will_dirty_i&=~(1<<r);
+          wont_dirty_i&=~(1<<r);
+          will_dirty_i|=((temp_will_dirty>>nr)&1)<<r;
+          wont_dirty_i|=((temp_wont_dirty>>nr)&1)<<r;
+          if(wr) {
+            #ifndef DESTRUCTIVE_WRITEBACK
+            regs[i].wasdirty&=wont_dirty_i|~(1<<r);
+            #endif
+            regs[i].wasdirty|=will_dirty_i&(1<<r);
           }
-          else {
-            will_dirty_i&=~(1<<r);
-            wont_dirty_i&=~(1<<r);
-            if((regmap_pre[i][r]&63)>0 && (regmap_pre[i][r]&63)<34) {
-              will_dirty_i|=((unneeded_reg[i]>>(regmap_pre[i][r]&63))&1)<<r;
-              wont_dirty_i|=((unneeded_reg[i]>>(regmap_pre[i][r]&63))&1)<<r;
-            } else {
-              wont_dirty_i|=1<<r;
-              /*printf("i: %x (%d) mismatch: %d\n",start+i*4,i,r);/*assert(!((will_dirty>>r)&1));*/
-            }
+        }
+        else {
+          will_dirty_i&=~(1<<r);
+          wont_dirty_i&=~(1<<r);
+          if((regmap_pre[i][r]&63)>0 && (regmap_pre[i][r]&63)<34) {
+            will_dirty_i|=((unneeded_reg[i]>>(regmap_pre[i][r]&63))&1)<<r;
+            wont_dirty_i|=((unneeded_reg[i]>>(regmap_pre[i][r]&63))&1)<<r;
+          } else {
+            wont_dirty_i|=1<<r;
+            /*printf("i: %x (%d) mismatch: %d\n",start+i*4,i,r);/*assert(!((will_dirty>>r)&1));*/
           }
         }
       }
@@ -7525,7 +7527,7 @@ int new_recompile_block(int addr)
 
   //printf("addr = %x source = %x %x\n", addr,source,source[0]);
   
-  /* Pass 1 diassembly */
+  /* Pass 1 disassembly */
 
   for(i=0;!done;i++) {
     bt[i]=0;likely[i]=0;op2=0;
@@ -10408,6 +10410,10 @@ int new_recompile_block(int addr)
   memcpy(copy,source,slen*4);
   copy+=slen*4;
   
+  #ifdef __arm__
+  __clear_cache((void *)beginning,out);
+  #endif
+  
   // If we're within 256K of the end of the buffer,
   // start over from the beginning. (Is 256K enough?)
   if((int)out>BASE_ADDR+(1<<TARGET_SIZE_2)-MAX_OUTPUT_BLOCK_SIZE) out=(u_char *)BASE_ADDR;
@@ -10424,10 +10430,6 @@ int new_recompile_block(int addr)
       //printf("write protect physical page: %x (virtual %x)\n",j<<12,start);
     }
   }
-  
-  #ifdef __arm__
-  __clear_cache((void *)beginning,out);
-  #endif
   
   /* Pass 10 - Free memory by expiring oldest blocks */
   
