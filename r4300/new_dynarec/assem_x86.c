@@ -1138,7 +1138,10 @@ void emit_sbb(int rs1,int rs2)
 
 void emit_andimm(int rs,int imm,int rt)
 {
-  if(rs==rt) {
+  if(imm==0) {
+    emit_zeroreg(rt);
+  }
+  else if(rs==rt) {
     assem_debug("and $%d,%%%s\n",imm,regname[rt]);
     if(imm<128&&imm>=-128) {
       output_byte(0x83);
@@ -1161,17 +1164,19 @@ void emit_andimm(int rs,int imm,int rt)
 void emit_orimm(int rs,int imm,int rt)
 {
   if(rs==rt) {
-    assem_debug("or $%d,%%%s\n",imm,regname[rt]);
-    if(imm<128&&imm>=-128) {
-      output_byte(0x83);
-      output_modrm(3,rt,1);
-      output_byte(imm);
-    }
-    else
-    {
-      output_byte(0x81);
-      output_modrm(3,rt,1);
-      output_w32(imm);
+    if(imm!=0) {
+      assem_debug("or $%d,%%%s\n",imm,regname[rt]);
+      if(imm<128&&imm>=-128) {
+        output_byte(0x83);
+        output_modrm(3,rt,1);
+        output_byte(imm);
+      }
+      else
+      {
+        output_byte(0x81);
+        output_modrm(3,rt,1);
+        output_w32(imm);
+      }
     }
   }
   else {
@@ -1183,17 +1188,19 @@ void emit_orimm(int rs,int imm,int rt)
 void emit_xorimm(int rs,int imm,int rt)
 {
   if(rs==rt) {
-    assem_debug("xor $%d,%%%s\n",imm,regname[rt]);
-    if(imm<128&&imm>=-128) {
-      output_byte(0x83);
-      output_modrm(3,rt,6);
-      output_byte(imm);
-    }
-    else
-    {
-      output_byte(0x81);
-      output_modrm(3,rt,6);
-      output_w32(imm);
+    if(imm!=0) {
+      assem_debug("xor $%d,%%%s\n",imm,regname[rt]);
+      if(imm<128&&imm>=-128) {
+        output_byte(0x83);
+        output_modrm(3,rt,6);
+        output_byte(imm);
+      }
+      else
+      {
+        output_byte(0x81);
+        output_modrm(3,rt,6);
+        output_w32(imm);
+      }
     }
   }
   else {
