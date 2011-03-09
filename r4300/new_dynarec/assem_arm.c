@@ -1926,7 +1926,7 @@ void cop1_assemble(int i,signed char regmap[])
     add_stub(FP_STUB,jaddr,(int)out,i,rs,is_delayslot,0);
     cop1_usable=1;
   }
-  if(opcode2[i]<3) // MFC1/DMFC1/CFC1
+  if(opcode2[i]==2) // MFC1/DMFC1/CFC1
   {
     signed char tl=get_reg(regmap,rt1[i]);
     signed char th=get_reg(regmap,rt1[i]|64);
@@ -1944,7 +1944,7 @@ void cop1_assemble(int i,signed char regmap[])
       emit_loadreg(CSREG,rs);
     }
   }
-  else if(opcode2[i]>3) // MTC1/DMTC1/CTC1
+  else if(opcode2[i]==6) // MTC1/DMTC1/CTC1
   {
     signed char sl=get_reg(regmap,rs1[i]);
     signed char sh=get_reg(regmap,rs1[i]|64);
@@ -1966,6 +1966,36 @@ void cop1_assemble(int i,signed char regmap[])
     emit_loadreg(rs1[i],sl);
     if(sh>=0) emit_loadreg(rs1[i]|64,sh);
     emit_loadreg(CSREG,rs);
+  }
+  else if (opcode2[i]==0) { // MFC1
+    signed char tl=get_reg(regmap,rt1[i]);
+    if(tl>=0) {
+      emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],tl);
+      emit_readword_indexed(0,tl,tl);
+    }
+  }
+  else if (opcode2[i]==1) { // DMFC1
+    signed char tl=get_reg(regmap,rt1[i]);
+    signed char th=get_reg(regmap,rt1[i]|64);
+    if(tl>=0) {
+      emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],tl);
+      if(th>=0) emit_readword_indexed(4,tl,th);
+      emit_readword_indexed(0,tl,tl);
+    }
+  }
+  else if (opcode2[i]==4) { // MTC1
+    signed char sl=get_reg(regmap,rs1[i]);
+    signed char temp=get_reg(regmap,-1);
+    emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],temp);
+    emit_writeword_indexed(sl,0,temp);
+  }
+  else if (opcode2[i]==5) { // DMTC1
+    signed char sl=get_reg(regmap,rs1[i]);
+    signed char sh=get_reg(regmap,rs1[i]|64);
+    signed char temp=get_reg(regmap,-1);
+    emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],temp);
+    emit_writeword_indexed(sh,4,temp);
+    emit_writeword_indexed(sl,0,temp);
   }
 }
 

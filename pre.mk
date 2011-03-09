@@ -208,6 +208,9 @@ ifeq ($(CPU), X86)
     LDFLAGS += -m32 -m elf_i386
   endif
 endif
+ifeq ($(CPU), ARM)
+  CFLAGS += -mcpu=cortex-a8
+endif
 ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN
 endif

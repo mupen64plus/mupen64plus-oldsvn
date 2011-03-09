@@ -528,10 +528,13 @@ void emit_add(int rs1,int rs2,int rt)
     if(rs1!=EBP) {
       output_modrm(0,4,rt);
       output_sib(0,rs2,rs1);
-    }else{
-      assert(rs2!=EBP);
+    }else if(rs2!=EBP) {
       output_modrm(0,4,rt);
       output_sib(0,rs1,rs2);
+    }else /* lea 0(,%ebp,2) */{
+      output_modrm(0,4,rt);
+      output_sib(1,EBP,5);
+      output_w32(0);
     }
   }
 }
@@ -2172,15 +2175,19 @@ void cop1_assemble(int i,char regmap[])
   }
   else if (opcode2[i]==0) { // MFC1
     char tl=get_reg(regmap,rt1[i]);
-    emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],tl);
-    emit_readword_indexed(0,tl,tl);
+    if(tl>=0) {
+      emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],tl);
+      emit_readword_indexed(0,tl,tl);
+    }
   }
   else if (opcode2[i]==1) { // DMFC1
     char tl=get_reg(regmap,rt1[i]);
     char th=get_reg(regmap,rt1[i]|64);
-    emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],tl);
-    emit_readword_indexed(4,tl,th);
-    emit_readword_indexed(0,tl,tl);
+    if(tl>=0) {
+      emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],tl);
+      if(th>=0) emit_readword_indexed(4,tl,th);
+      emit_readword_indexed(0,tl,tl);
+    }
   }
   else if (opcode2[i]==4) { // MTC1
     char sl=get_reg(regmap,rs1[i]);

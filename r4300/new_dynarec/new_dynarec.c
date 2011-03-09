@@ -98,6 +98,7 @@ struct ll_entry
   uint64_t constmap[MAXBLOCK][HOST_REGS];
   uint64_t known_value[HOST_REGS];
   u_int isconst[MAXBLOCK];
+  u_int wasconst[MAXBLOCK];
   u_int known_reg;
   struct regstat branch_regs[MAXBLOCK];
   u_int needed_reg[MAXBLOCK];
@@ -969,13 +970,26 @@ void alu_alloc(struct regstat *current,int i)
         if(rs1[i]&&rs2[i]) {
           alloc_reg64(current,i,rs1[i]);
           alloc_reg64(current,i,rs2[i]);
+          alloc_reg64(current,i,rt1[i]);
         }
         else {
-          // If we have a 32-bit register, extend it to 64 bits
-          if(get_reg(current->regmap,rs1[i])>=0) alloc_reg64(current,i,rs1[i]);
-          if(get_reg(current->regmap,rs2[i])>=0) alloc_reg64(current,i,rs2[i]);
+          // DADD used as move, or zeroing
+          // If we have a 64-bit source, then make the target 64 bits too
+          alloc_reg(current,i,rt1[i]);
+          if(rs1[i]&&!((current->is32>>rs1[i])&1)) {
+            if(get_reg(current->regmap,rs1[i])>=0) alloc_reg64(current,i,rs1[i]);
+            alloc_reg64(current,i,rt1[i]);
+          } else if(rs2[i]&&!((current->is32>>rs2[i])&1)) {
+            if(get_reg(current->regmap,rs2[i])>=0) alloc_reg64(current,i,rs2[i]);
+            alloc_reg64(current,i,rt1[i]);
+          }
+          if(opcode2[i]>=0x2e&&rs2[i]) {
+            // DSUB used as negation - 64-bit result
+            // If we have a 32-bit register, extend it to 64 bits
+            if(get_reg(current->regmap,rs2[i])>=0) alloc_reg64(current,i,rs2[i]);
+            alloc_reg64(current,i,rt1[i]);
+          }
         }
-        alloc_reg64(current,i,rt1[i]);
       } else {
         if(rs1[i]&&rs2[i]) {
           alloc_reg(current,i,rs1[i]);
@@ -983,7 +997,19 @@ void alu_alloc(struct regstat *current,int i)
         }
         alloc_reg(current,i,rt1[i]);
       }
-      current->is32&=~(1LL<<rt1[i]);
+      if(rs1[i]&&rs2[i]) {
+        current->is32&=~(1LL<<rt1[i]);
+      } else if(rs1[i]) {
+        current->is32&=~(1LL<<rt1[i]);
+        if((current->is32>>rs1[i])&1)
+          current->is32|=1LL<<rt1[i];
+      } else if(rs2[i]) {
+        current->is32&=~(1LL<<rt1[i]);
+        if((current->is32>>rs2[i])&1)
+          current->is32|=1LL<<rt1[i];
+      } else {
+        current->is32|=1LL<<rt1[i];
+      }
     }
   }
   clear_const(current,rs1[i]);
@@ -1388,7 +1414,8 @@ void memdebug(int i)
   //printf("TRACE: count=%d next=%d (checksum %x) lo=%8x%8x\n",Count,next_interupt,mchecksum(),(int)(reg[LOREG]>>32),(int)reg[LOREG]);
   //printf("TRACE: count=%d next=%d (rchecksum %x)\n",Count,next_interupt,rchecksum());
   //rlist();
-  if(/*tracedebug* /Count>=522616700*/1) {
+  //if(/*tracedebug* /Count>=522616700*/1) {
+  if(Count>=27631096) {
     printf("TRACE: count=%d next=%d (checksum %x)\n",Count,next_interupt,mchecksum());
     //printf("TRACE: count=%d next=%d (checksum %x) Status=%x\n",Count,next_interupt,mchecksum(),Status);
     //printf("TRACE: count=%d next=%d (checksum %x) hi=%8x%8x\n",Count,next_interupt,mchecksum(),(int)(reg[HIREG]>>32),(int)reg[HIREG]);
@@ -2207,7 +2234,7 @@ void load_assemble(int i,signed char regmap[])
   }
   if(regmap[HOST_CCREG]==CCREG) reglist&=~(1<<HOST_CCREG);
   if(s>=0) {
-    c=(isconst[i]>>s)&1;
+    c=(wasconst[i]>>s)&1;
     memtarget=((signed int)(constmap[i][s]+offset))<(signed int)0x80800000;
   }
   //printf("load_assemble: c=%d\n",c);
@@ -2336,7 +2363,7 @@ void loadlr_assemble(int i,signed char regmap[])
   }
   reglist|=1<<temp;
   if(s>=0) {
-    c=(isconst[i]>>s)&1;
+    c=(wasconst[i]>>s)&1;
     memtarget=((signed int)(constmap[i][s]+offset))<(signed int)0x80800000;
   }
   if(tl>=0) {
@@ -2545,8 +2572,8 @@ void store_assemble(int i,signed char regmap[])
   /*if(opcode[i]==0x2B)
   //if(opcode[i]==0x2B || opcode[i]==0x28 || opcode[i]==0x29 || opcode[i]==0x3F)
   {
-    //emit_pusha();
-    save_regs(0x100f);
+    emit_pusha();
+    //save_regs(0x100f);
         emit_readword((int)&last_count,ECX);
         if(get_reg(regmap,CCREG)<0)
           emit_loadreg(CCREG,HOST_CCREG);
@@ -2554,8 +2581,8 @@ void store_assemble(int i,signed char regmap[])
         emit_addimm(HOST_CCREG,2*ccadj[i],HOST_CCREG);
         emit_writeword(HOST_CCREG,(int)&Count);
     emit_call((int)memdebug);
-    //emit_popa();
-    restore_regs(0x100f);
+    emit_popa();
+    //restore_regs(0x100f);
   }/**/
 }
 
@@ -3369,16 +3396,18 @@ int get_final_value(int hr, int i, int *value)
   while(i<slen-1) {
     if(regmap[i+1][hr]!=reg) break;
     if(!((isconst[i+1]>>hr)&1)) break;
+    if(bt[i+1]) break;
     i++;
   }
   if(i<slen-1&&itype[i+1]==LOAD&&rs1[i+1]==reg&&rt1[i+1]==reg&&!bt[i+1])
   {
     // Precompute load address
     *value=constmap[i][hr]+imm[i+1];
-    isconst[i+1]|=1<<hr;
+    //printf("c=%x imm=%x\n",(int)constmap[i][hr],imm[i+1]);
     return 1;
   }
   *value=constmap[i][hr];
+  //printf("c=%x\n",(int)constmap[i][hr]);
   if(i==slen-1) return 0;
   if(reg<64) {
     return !((unneeded_reg[i+1]>>reg)&1);
@@ -3388,14 +3417,14 @@ int get_final_value(int hr, int i, int *value)
 }
 
 // Load registers with known constants
-void load_consts(signed char entry[],signed char regmap[],int is32,int i)
+void load_consts(signed char pre[],signed char regmap[],int is32,int i)
 {
   int hr;
   // Load 32-bit regs
   for(hr=0;hr<HOST_REGS;hr++) {
     if(hr!=EXCLUDE_REG&&regmap[hr]>=0) {
       //if(entry[hr]!=regmap[hr]) {
-      if(i==0||!((isconst[i-1]>>hr)&1)||entry[hr]!=regmap[hr]) {
+      if(i==0||!((isconst[i-1]>>hr)&1)||pre[hr]!=regmap[hr]||bt[i]) {
         if(((isconst[i]>>hr)&1)&&regmap[hr]<64&&regmap[hr]>0) {
           int value;
           if(get_final_value(hr,i,&value)) {
@@ -3414,7 +3443,7 @@ void load_consts(signed char entry[],signed char regmap[],int is32,int i)
   for(hr=0;hr<HOST_REGS;hr++) {
     if(hr!=EXCLUDE_REG&&regmap[hr]>=0) {
       //if(entry[hr]!=regmap[hr]) {
-      if(i==0||!((isconst[i-1]>>hr)&1)||entry[hr]!=regmap[hr]) {
+      if(i==0||!((isconst[i-1]>>hr)&1)||pre[hr]!=regmap[hr]||bt[i]) {
         if(((isconst[i]>>hr)&1)&&regmap[hr]>64) {
           if((is32>>(regmap[hr]&63))&1) {
             int lr=get_reg(regmap,regmap[hr]-64);
@@ -5193,6 +5222,8 @@ void unneeded_registers(int istart,int iend)
             } else {
               u&=b;
               uu&=bu;
+        //u=1;
+        //uu=1;
             }
             if(i<slen-1) {
               branch_unneeded_reg[i]&=unneeded_reg[i+2];
@@ -5798,6 +5829,14 @@ void new_dynarec_cleanup()
 
 void new_recompile_block(int addr)
 {
+/*
+  if(addr==0x800cd050) {
+    int block;
+    for(block=0x80000;block<0x80800;block++) invalidate_block(block);
+    int n;
+    for(n=0;n<=2048;n++) ll_clear(jump_dirty+n);
+  }
+*/
   //if(Count==365117028) tracedebug=1;
   assem_debug("NOTCOMPILED: addr = %x -> %x\n", (int)addr, (int)out);
   //printf("TRACE: count=%d next=%d (compile %x)\n",Count,next_interupt,addr);
@@ -6326,6 +6365,7 @@ void new_recompile_block(int addr)
         for(j=i-1;j>=0;j--)
         {
           if(ba[j]==(u_int)addr+i*4+4) done=j=0;
+          if(ba[j]==(u_int)addr+i*4+8) done=j=0;
         }
       }
       // Don't recompile stuff that's already compiled
@@ -6421,6 +6461,7 @@ void new_recompile_block(int addr)
       }
     }
     memcpy(regmap_pre[i],current.regmap,sizeof(current.regmap));
+    wasconst[i]=current.isconst;
     is32[i]=current.is32;
     dirty[i]=current.dirty;
     #ifdef DESTRUCTIVE_WRITEBACK
@@ -7119,6 +7160,13 @@ void new_recompile_block(int addr)
     dirty_post[i]=current.dirty;
     isconst[i]=current.isconst;
     memcpy(constmap[i],current.constmap,sizeof(current.constmap));
+    for(hr=0;hr<HOST_REGS;hr++) {
+      if(hr!=EXCLUDE_REG&&regmap[i][hr]>=0) {
+        if(regmap_pre[i][hr]!=regmap[i][hr]) {
+          wasconst[i]&=~(1<<hr);
+        }
+      }
+    }
   }
   
   /* Pass 4 - Cull unused host registers */
@@ -7431,16 +7479,17 @@ void new_recompile_block(int addr)
       {
         // Internal branch
         // Need whatever matches the target
+        // (and doesn't get overwritten by the delay slot instruction)
         r32=0;
         int t=(ba[i]-start)>>2;
         if(ba[i]>(unsigned int)addr+i*4) {
           // Forward branch
           if(!(requires_32bit[t]&~is32[i]))
-            r32|=requires_32bit[t];
+            r32|=requires_32bit[t]&(~(1LL<<rt1[i+1]))&(~(1LL<<rt2[i+1]));
         }else{
           // Backward branch
           if(!(is32[t]&~unneeded_reg_upper[t]&~is32[i]))
-            r32|=is32[t]&~unneeded_reg_upper[t];
+            r32|=is32[t]&~unneeded_reg_upper[t]&(~(1LL<<rt1[i+1]))&(~(1LL<<rt2[i+1]));
         }
       }
       // Conditional branch may need registers for following instructions
@@ -7455,14 +7504,28 @@ void new_recompile_block(int addr)
         }
       }
       // Merge in delay slot
-      for(hr=0;hr<HOST_REGS;hr++)
+      if(!likely[i]) {
+        // These are overwritten unless the branch is "likely"
+        // and the delay slot is nullified if not taken
+        r32&=~(1LL<<rt1[i+1]);
+        r32&=~(1LL<<rt2[i+1]);
+      }
+      // Assume these are needed (delay slot)
+      if(us1[i+1]>0)
       {
-        if(!likely[i]) {
-          // These are overwritten unless the branch is "likely"
-          // and the delay slot is nullified if not taken
-          r32&=~(1LL<<rt1[i+1]);
-          r32&=~(1LL<<rt2[i+1]);
-        }
+        if((is32[i]>>us1[i+1])&1) r32|=1LL<<us1[i+1];
+      }
+      if(us2[i+1]>0)
+      {
+        if((is32[i]>>us2[i+1])&1) r32|=1LL<<us2[i+1];
+      }
+      if(dep1[i+1]&&!((unneeded_reg_upper[i]>>dep1[i+1])&1))
+      {
+        if((is32[i]>>dep1[i+1])&1) r32|=1LL<<dep1[i+1];
+      }
+      if(dep2[i+1]&&!((unneeded_reg_upper[i]>>dep2[i+1])&1))
+      {
+        if((is32[i]>>dep2[i+1])&1) r32|=1LL<<dep2[i+1];
       }
     }
     else if(itype[i]==SYSCALL)
@@ -7696,7 +7759,7 @@ void new_recompile_block(int addr)
       // load regs
       if(regmap_entry[i][HOST_CCREG]==CCREG&&regmap[i][HOST_CCREG]!=CCREG)
         wb_register(CCREG,regmap_entry[i],dirty[i],is32[i]);
-      load_consts(regmap_entry[i],regmap[i],is32[i],i);
+      load_consts(regmap_pre[i],regmap[i],is32[i],i);
       load_regs(regmap_entry[i],regmap[i],is32[i],rs1[i],rs2[i]);
       if(itype[i]==RJUMP||itype[i]==UJUMP||itype[i]==CJUMP||itype[i]==SJUMP||itype[i]==FJUMP)
       {
