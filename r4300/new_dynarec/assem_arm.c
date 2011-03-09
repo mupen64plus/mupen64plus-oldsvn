@@ -22,6 +22,7 @@ extern int cycle_count;
 extern int last_count;
 extern int pcaddr;
 extern int pending_exception;
+extern int branch_target;
 extern uint64_t readmem_dword;
 extern precomp_instr fake_pc,fake_pc_float;
 extern void *dynarec_local;
@@ -173,30 +174,26 @@ int verify_dirty(int addr)
   u_int source=l_ptr[0];
   u_int copy=l_ptr[1];
   u_int len=l_ptr[2];
+  ptr+=4;
   #else
   // ARMv7 movw/movt
   assert((*ptr&0xFFF00000)==0xe3000000);
   u_int source=(ptr[0]&0xFFF)+((ptr[0]>>4)&0xF000)+((ptr[2]<<16)&0xFFF0000)+((ptr[2]<<12)&0xF0000000);
   u_int copy=(ptr[1]&0xFFF)+((ptr[1]>>4)&0xF000)+((ptr[3]<<16)&0xFFF0000)+((ptr[3]<<12)&0xF0000000);
   u_int len=(ptr[4]&0xFFF)+((ptr[4]>>4)&0xF000);
+  ptr+=6;
   #endif
-  if(!((source+4)&0xFFF)) {
-    u_int *ptr2=(u_int *)get_clean_addr(addr);
-    #ifdef ARMv5_ONLY
-    if((*ptr2&0xFFFFF000)==0xe59f0000) {
-      offset=*ptr2&0xfff;
-      l_ptr=(void *)ptr2+offset+8;
-      u_int mapaddr=l_ptr[0];
-      u_int value=l_ptr[1];
-    #else
-    if((*ptr2&0xFFF0F000)==0xe3000000) {
-      u_int mapaddr=(ptr2[0]&0xFFF)+((ptr2[0]>>4)&0xF000)+((ptr2[1]<<16)&0xFFF0000)+((ptr2[1]<<12)&0xF0000000);
-      u_int value=(ptr2[2]&0xFFF)+((ptr2[2]>>4)&0xF000)+((ptr2[3]<<16)&0xFFF0000)+((ptr2[3]<<12)&0xF0000000);
-    #endif
-      if(mapaddr-(u_int)memory_map<4194304) {
-        if(*(u_int *)mapaddr!=value) return 0;
-      }
+  if((*ptr&0xFF000000)!=0xeb000000) ptr++;
+  assert((*ptr&0xFF000000)==0xeb000000); // bl instruction
+  u_int verifier=(int)ptr+((*ptr<<8)>>6)+8; // get target of bl
+  if(verifier==(u_int)verify_code_vm||verifier==(u_int)verify_code_ds) {
+    unsigned int page=source>>12;
+    unsigned int map_value=memory_map[page];
+    if(map_value>=0x80000000) return 0;
+    while(page<((source+len-1)>>12)) {
+      if((memory_map[++page]<<2)!=(map_value<<2)) return 0;
     }
+    source = source+(map_value<<2);
   }
   //printf("verify_dirty: %x %x %x\n",source,copy,len);
   return !memcmp((void *)source,(void *)copy,len);
@@ -213,8 +210,10 @@ int isclean(int addr)
   #endif
   if((*ptr&0xFF000000)!=0xeb000000) ptr++;
   if((*ptr&0xFF000000)!=0xeb000000) return 1; // bl instruction
-  if((int)ptr+((*ptr<<8)>>6)+8!=(int)verify_code) return 1;
-  return 0;
+  if((int)ptr+((*ptr<<8)>>6)+8==(int)verify_code) return 0;
+  if((int)ptr+((*ptr<<8)>>6)+8==(int)verify_code_vm) return 0;
+  if((int)ptr+((*ptr<<8)>>6)+8==(int)verify_code_ds) return 0;
+  return 1;
 }
 
 void get_bounds(int addr,u_int *start,u_int *end)
@@ -228,13 +227,22 @@ void get_bounds(int addr,u_int *start,u_int *end)
   u_int source=l_ptr[0];
   //u_int copy=l_ptr[1];
   u_int len=l_ptr[2];
+  ptr+=4;
   #else
   // ARMv7 movw/movt
   assert((*ptr&0xFFF00000)==0xe3000000);
   u_int source=(ptr[0]&0xFFF)+((ptr[0]>>4)&0xF000)+((ptr[2]<<16)&0xFFF0000)+((ptr[2]<<12)&0xF0000000);
   //u_int copy=(ptr[1]&0xFFF)+((ptr[1]>>4)&0xF000)+((ptr[3]<<16)&0xFFF0000)+((ptr[3]<<12)&0xF0000000);
   u_int len=(ptr[4]&0xFFF)+((ptr[4]>>4)&0xF000);
+  ptr+=6;
   #endif
+  if((*ptr&0xFF000000)!=0xeb000000) ptr++;
+  assert((*ptr&0xFF000000)==0xeb000000); // bl instruction
+  u_int verifier=(int)ptr+((*ptr<<8)>>6)+8; // get target of bl
+  if(verifier==(u_int)verify_code_vm||verifier==(u_int)verify_code_ds) {
+    if(memory_map[source>>12]>=0x80000000) source = 0;
+    else source = source+(memory_map[source>>12]<<2);
+  }
   *start=source;
   *end=source+len;
 }
@@ -258,6 +266,9 @@ void alloc_reg(struct regstat *cur,int i,signed char reg)
   {
     if(cur->regmap[hr]==reg) return;
   }
+  
+  // Keep the same mapping if the register was already allocated in a loop
+  preferred_reg = loop_reg(i,reg,preferred_reg);
   
   // Try to allocate the preferred register
   if(cur->regmap[preferred_reg]==-1) {
@@ -421,6 +432,9 @@ void alloc_reg64(struct regstat *cur,int i,signed char reg)
   {
     if(cur->regmap[hr]==reg+64) return;
   }
+  
+  // Keep the same mapping if the register was already allocated in a loop
+  preferred_reg = loop_reg(i,reg,preferred_reg);
   
   // Try to allocate the preferred register
   if(cur->regmap[preferred_reg]==-1) {
@@ -2203,7 +2217,7 @@ void literal_pool_jumpover(int n)
   set_jump_target(jaddr,(int)out);
 }
 
-emit_extjump(int addr, int target)
+emit_extjump2(int addr, int target, int linker)
 {
   u_char *ptr=(u_char *)addr;
   assert((ptr[3]&0x0e)==0xa);
@@ -2221,7 +2235,16 @@ emit_extjump(int addr, int target)
   emit_writeword(ECX,(int)&last_count);
 #endif
 //DEBUG <
-  emit_jmp((int)dyna_linker);
+  emit_jmp(linker);
+}
+
+emit_extjump(int addr, int target)
+{
+  emit_extjump2(addr, target, (int)dyna_linker);
+}
+emit_extjump_ds(int addr, int target)
+{
+  emit_extjump2(addr, target, (int)dyna_linker_ds);
 }
 
 do_readstub(int n)
@@ -2540,23 +2563,41 @@ int do_dirty_stub(int i)
   assem_debug("do_dirty_stub %x\n",start+i*4);
   // Careful about the code output here, verify_dirty needs to parse it.
   #ifdef ARMv5_ONLY
-  emit_loadlp((int)source,1);
+  emit_loadlp((int)start<(int)0xC0000000?(int)source:(int)start,1);
   emit_loadlp((int)copy,2);
   emit_loadlp(slen*4,3);
   #else
-  emit_movw(((u_int)source)&0x0000FFFF,1);
+  emit_movw(((int)start<(int)0xC0000000?(u_int)source:(u_int)start)&0x0000FFFF,1);
   emit_movw(((u_int)copy)&0x0000FFFF,2);
-  emit_movt(((u_int)source)&0xFFFF0000,1);
+  emit_movt(((int)start<(int)0xC0000000?(u_int)source:(u_int)start)&0xFFFF0000,1);
   emit_movt(((u_int)copy)&0xFFFF0000,2);
   emit_movw(slen*4,3);
   #endif
   emit_movimm(start+i*4,0);
-  emit_call((int)&verify_code);
+  emit_call((int)start<(int)0xC0000000?(int)&verify_code:(int)&verify_code_vm);
   int entry=(int)out;
   load_regs_entry(i);
   if(entry==(int)out) entry=instr_addr[i];
   emit_jmp(instr_addr[i]);
   return entry;
+}
+
+void do_dirty_stub_ds()
+{
+  // Careful about the code output here, verify_dirty needs to parse it.
+  #ifdef ARMv5_ONLY
+  emit_loadlp((int)start<(int)0xC0000000?(int)source:(int)start,1);
+  emit_loadlp((int)copy,2);
+  emit_loadlp(slen*4,3);
+  #else
+  emit_movw(((int)start<(int)0xC0000000?(u_int)source:(u_int)start)&0x0000FFFF,1);
+  emit_movw(((u_int)copy)&0x0000FFFF,2);
+  emit_movt(((int)start<(int)0xC0000000?(u_int)source:(u_int)start)&0xFFFF0000,1);
+  emit_movt(((u_int)copy)&0xFFFF0000,2);
+  emit_movw(slen*4,3);
+  #endif
+  emit_movimm(start+1,0);
+  emit_call((int)&verify_code_ds);
 }
 
 do_cop1stub(int n)
@@ -2682,27 +2723,6 @@ int gen_tlb_addr_w(int ar, int map) {
 generate_map_const(u_int addr,int reg) {
   //printf("generate_map_const(%x,%s)\n",addr,regname[reg]);
   emit_movimm((addr>>12)+(((u_int)memory_map-(u_int)&dynarec_local)>>2),reg);
-}
-
-/* Verify that the mapping hasn't changed */
-void verify_mapping(u_int addr)
-{
-  assem_debug("verify_mapping\n");
-  assert(!((addr+4)&0xFFF));
-  u_int orig=memory_map[(addr+4)>>12];
-  emit_movimm((int)&memory_map[(addr+4)>>12],0);
-  emit_movimm(orig,1);
-  emit_readword_indexed(0,0,0);
-  emit_movimm(addr,4);
-  emit_cmp(0,1);
-  u_int branch=(u_int)out;
-  emit_jeq(0);
-  emit_mov(4,0);
-  emit_call((int)remove_hash);
-  emit_mov(4,0);
-  emit_call((int)invalidate_addr);
-  emit_jmp((int)jump_vaddr_r4);
-  set_jump_target(branch,(int)out);
 }
 
 /* Special assem */

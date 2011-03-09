@@ -1,5 +1,6 @@
 #define HOST_REGS 13
 #define HOST_CCREG 10
+#define HOST_BTREG 8
 #define EXCLUDE_REG 11
 
 #define HOST_IMM8 1

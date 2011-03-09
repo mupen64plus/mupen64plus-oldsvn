@@ -32,11 +32,13 @@ rdram = 0x80000000
 .globl dyna_linker
 	.type	dyna_linker, @function
 dyna_linker:
-	mov	%eax, %ebp
+	/* eax = virtual target address */
+	/* ebx = instruction to patch */
+	mov	%eax, %edi
 	mov	%eax, %ecx
-	shr	$12, %ebp
+	shr	$12, %edi
 	cmp	$0xC0000000, %eax
-	cmovge	tlb_LUT_r(,%ebp,4), %ecx
+	cmovge	tlb_LUT_r(,%edi,4), %ecx
 	test	%ecx, %ecx
 	cmovz	%eax, %ecx
 	xor	$0x80000000, %ecx
@@ -48,17 +50,16 @@ dyna_linker:
 	cmova	%edx, %ecx
 	/* jump_in lookup */
 	mov	jump_in(,%ecx,4), %edx
-.L1:
+.A1:
 	test	%edx, %edx
-	je	.L3
+	je	.A3
 	mov	(%edx), %edi
-	mov	4(%edx), %ebp
 	xor	%eax, %edi
-	or	%ebp, %edi
-	je	.L2
+	or	4(%edx), %edi
+	je	.A2
 	movl	12(%edx), %edx
-	jmp	.L1
-.L2:
+	jmp	.A1
+.A2:
 	mov	(%ebx), %edi
 	mov	%esi, %ebp
 	lea	4(%ebx,%edi,1), %esi
@@ -68,47 +69,53 @@ dyna_linker:
 	popa
 	mov	8(%edx), %edi
 	mov	%ebp, %esi
-	lea	-4(%edi), %ebp
-	subl	%ebx, %ebp
-	movl	%ebp, (%ebx)
+	lea	-4(%edi), %edx
+	subl	%ebx, %edx
+	movl	%edx, (%ebx)
 	jmp	*%edi
-.L3:
+.A3:
 	/* hash_table lookup */
-	mov	%eax, %ebp
-	shr	$16, %ebp
-	xor	%eax, %ebp
-	movzwl	%bp, %ebp
-	shl	$4, %ebp
-	cmp	hash_table(%ebp), %edx
-	jne	.L5
-.L4:
-	mov	hash_table+4(%ebp), %edx
+	mov	%eax, %edi
+	mov	%eax, %edx
+	shr	$16, %edi
+	shr	$12, %edx
+	xor	%eax, %edi
+	and	$2047, %edx
+	movzwl	%di, %edi
+	shl	$4, %edi
+	cmp	$2048, %ecx
+	cmovc	%edx, %ecx
+	cmp	hash_table(%edi), %eax
+	jne	.A5
+.A4:
+	mov	hash_table+4(%edi), %edx
 	jmp	*%edx
-.L5:
-	cmp	hash_table+8(%ebp), %edx
-	lea	8(%ebp), %ebp
-	je	.L4
+.A5:
+	cmp	hash_table+8(%edi), %eax
+	lea	8(%edi), %edi
+	je	.A4
 	/* jump_dirty lookup */
 	mov	jump_dirty(,%ecx,4), %edx
-.L6:
+.A6:
 	testl	%edx, %edx
-	je	.L8
-	movl	(%edx), %edi
-	cmpl	%edi, %eax
-	je	.L7
+	je	.A8
+	mov	(%edx), %ecx
+	xor	%eax, %ecx
+	or	4(%edx), %ecx
+	je	.A7
 	movl	12(%edx), %edx
-	jmp	.L6
-.L7:
+	jmp	.A6
+.A7:
 	mov	8(%edx), %edx
 	/* hash_table insert */
-	mov	hash_table-8(%ebp), %ebx
-	mov	hash_table-4(%ebp), %ecx
-	mov	%eax, hash_table-8(%ebp)
-	mov	%edx, hash_table-4(%ebp)
-	mov	%ebx, hash_table(%ebp)
-	mov	%ecx, hash_table+4(%ebp)
+	mov	hash_table-8(%edi), %ebx
+	mov	hash_table-4(%edi), %ecx
+	mov	%eax, hash_table-8(%edi)
+	mov	%edx, hash_table-4(%edi)
+	mov	%ebx, hash_table(%edi)
+	mov	%ecx, hash_table+4(%edi)
 	jmp	*%edx
-.L8:
+.A8:
 	mov	%eax, %edi
 	pusha
 	call	new_recompile_block
@@ -116,13 +123,8 @@ dyna_linker:
 	popa
 	je	dyna_linker
 	/* pagefault */
+	mov	%eax, %ebx
 	mov	$0x08, %ecx
-	mov	$0x80000008, %edx
-	lea	4(%eax), %ebx
-	lea	4(%esi), %edi
-	cmovs	%edx, %ecx
-	cmovns	%eax, %ebx
-	cmovs	%edi, %esi
 	.size	dyna_linker, .-dyna_linker
 
 .globl exec_pagefault
@@ -153,6 +155,109 @@ exec_pagefault:
 	pop	%esi
 	jmp	*%eax
 	.size	exec_pagefault, .-exec_pagefault
+
+/* Special dynamic linker for the case where a page fault
+   may occur in a branch delay slot */
+.globl dyna_linker_ds
+	.type	dyna_linker_ds, @function
+dyna_linker_ds:
+	mov	%eax, %edi
+	mov	%eax, %ecx
+	shr	$12, %edi
+	cmp	$0xC0000000, %eax
+	cmovge	tlb_LUT_r(,%edi,4), %ecx
+	test	%ecx, %ecx
+	cmovz	%eax, %ecx
+	xor	$0x80000000, %ecx
+	mov	$2047, %edx
+	shr	$12, %ecx
+	and	%ecx, %edx
+	or	$2048, %edx
+	cmp	%edx, %ecx
+	cmova	%edx, %ecx
+	/* jump_in lookup */
+	mov	jump_in(,%ecx,4), %edx
+.B1:
+	test	%edx, %edx
+	je	.B3
+	mov	(%edx), %edi
+	xor	%eax, %edi
+	or	4(%edx), %edi
+	je	.B2
+	movl	12(%edx), %edx
+	jmp	.B1
+.B2:
+	mov	(%ebx), %edi
+	mov	%esi, %ecx
+	lea	4(%ebx,%edi,1), %esi
+	mov	%eax, %edi
+	pusha
+	call	add_link
+	popa
+	mov	8(%edx), %edi
+	mov	%ecx, %esi
+	lea	-4(%edi), %edx
+	subl	%ebx, %edx
+	movl	%edx, (%ebx)
+	jmp	*%edi
+.B3:
+	/* hash_table lookup */
+	mov	%eax, %edi
+	mov	%eax, %edx
+	shr	$16, %edi
+	shr	$12, %edx
+	xor	%eax, %edi
+	and	$2047, %edx
+	movzwl	%di, %edi
+	shl	$4, %edi
+	cmp	$2048, %ecx
+	cmovc	%edx, %ecx
+	cmp	hash_table(%edi), %eax
+	jne	.B5
+.B4:
+	mov	hash_table+4(%edi), %edx
+	jmp	*%edx
+.B5:
+	cmp	hash_table+8(%edi), %eax
+	lea	8(%edi), %edi
+	je	.B4
+	/* jump_dirty lookup */
+	mov	jump_dirty(,%ecx,4), %edx
+.B6:
+	testl	%edx, %edx
+	je	.B8
+	mov	(%edx), %ecx
+	xor	%eax, %ecx
+	or	4(%edx), %ecx
+	je	.B7
+	movl	12(%edx), %edx
+	jmp	.B6
+.B7:
+	mov	8(%edx), %edx
+	/* hash_table insert */
+	mov	hash_table-8(%edi), %ebx
+	mov	hash_table-4(%edi), %ecx
+	mov	%eax, hash_table-8(%edi)
+	mov	%edx, hash_table-4(%edi)
+	mov	%ebx, hash_table(%edi)
+	mov	%ecx, hash_table+4(%edi)
+	jmp	*%edx
+.B8:
+	mov	%eax, %edi
+	and	$0xFFFFFFF8, %edi
+	inc	%edi
+	pusha
+	call	new_recompile_block
+	test	%eax, %eax
+	popa
+	je	dyna_linker_ds
+	/* pagefault */
+	and	$0xFFFFFFF8, %eax
+	mov	$0x80000008, %ecx /* High bit set indicates pagefault in delay slot */
+	mov	%eax, %ebx
+	sub	$4, %eax
+	jmp	exec_pagefault
+	.size	dyna_linker_ds, .-dyna_linker_ds
 
 .globl jump_vaddr_eax
 	.type	jump_vaddr_eax, @function
@@ -198,14 +303,14 @@ jump_vaddr:
 	movzwl	%ax, %eax
 	shl	$4, %eax
 	cmp	hash_table(%eax), %edi
-	jne	.L10
-.L9:
+	jne	.C2
+.C1:
 	mov	hash_table+4(%eax), %edi
 	jmp	*%edi
-.L10:
+.C2:
 	cmp	hash_table+8(%eax), %edi
 	lea	8(%eax), %eax
-	je	.L9
+	je	.C1
   /* No hit on hash table, call compiler */
 	push	%edi
 	mov	%esi, cycle_count /* CCREG */
@@ -215,40 +320,74 @@ jump_vaddr:
 	jmp	*%eax
 	.size	jump_vaddr, .-jump_vaddr
 
+.globl verify_code_ds
+	.type	verify_code_ds, @function
+verify_code_ds:
+	mov	%ebp, branch_target
+	.size	verify_code_ds, .-verify_code_ds
+
+.globl verify_code_vm
+	.type	verify_code_vm, @function
+verify_code_vm:
+	/* eax = source (virtual address) */
+	/* ebx = target */
+	/* ecx = length */
+	cmp	$0xC0000000, %eax
+	jl	verify_code
+	mov	%eax, %edx
+	lea	-1(%eax,%ecx,1), %ebp
+	shr	$12, %edx
+	shr	$12, %ebp
+	mov	memory_map(,%edx,4), %edi
+	test	%edi, %edi
+	js	.D5
+	lea	(%eax,%edi,4), %eax
+.D1:
+	xor	memory_map(,%edx,4), %edi
+	shl	$2, %edi
+	jne	.D5
+	mov	memory_map(,%edx,4), %edi
+	inc	%edx
+	cmp	%ebp, %edx
+	jbe	.D1
+	.size	verify_code_vm, .-verify_code_vm
+
 .globl verify_code
 	.type	verify_code, @function
 verify_code:
 	/* eax = source */
 	/* ebx = target */
 	/* ecx = length */
-	mov	%esi, cycle_count
-	mov	-4(%eax,%ecx,1), %esi
-	mov	-4(%ebx,%ecx,1), %edi
+	mov	-4(%eax,%ecx,1), %edi
+	xor	-4(%ebx,%ecx,1), %edi
+	jne	.D5
 	mov	%ecx, %edx
-	xor	%esi, %edi
-	jne	.L13
 	add	$-4, %ecx
-	je	.L12
+	je	.D3
 	test	$4, %edx
 	cmove	%edx, %ecx
-.L11:
+	mov	%esi, cycle_count
+.D2:
 	mov	-4(%eax,%ecx,1), %edx
 	mov	-4(%ebx,%ecx,1), %ebp
 	mov	-8(%eax,%ecx,1), %esi
 	xor	%edx, %ebp
 	mov	-8(%ebx,%ecx,1), %edi
-	jne	.L13
+	jne	.D4
 	xor	%esi, %edi
-	jne	.L13
+	jne	.D4
 	add	$-8, %ecx
-	jne	.L11
-.L12:
-	mov	cycle_count, %esi /* CCREG */
+	jne	.D2
+	mov	cycle_count, %esi
+	mov	branch_target, %ebp
+.D3:
 	ret
-.L13:
+.D4:
+	mov	cycle_count, %esi
+.D5:
+	mov	branch_target, %ebp
 	add	$4, %esp /* pop return address, we're not returning */
 	call	get_addr
-	mov	cycle_count, %esi
 	add	$4, %esp /* pop virtual address */
 	jmp	*%eax
 	.size	verify_code, .-verify_code
@@ -263,8 +402,8 @@ cc_interrupt:
 	movl	$0, pending_exception
 	and	$0x7f, %esi
 	cmpl	$0, restore_candidate(,%esi,4)
-	jne	.L17
-.L14:
+	jne	.E4
+.E1:
 	call	gen_interupt
 	mov	reg_cop0+36, %esi
 	mov	next_interupt, %eax
@@ -274,11 +413,11 @@ cc_interrupt:
 	mov	%eax, last_count
 	sub	%eax, %esi
 	test	%ecx, %ecx
-	jne	.L16
+	jne	.E3
 	test	%ebx, %ebx
-	jne	.L15
+	jne	.E2
 	ret
-.L15:
+.E2:
 	mov	pcaddr, %edi
 	mov	%esi, cycle_count /* CCREG */
 	push	%edi
@@ -286,29 +425,29 @@ cc_interrupt:
 	mov	cycle_count, %esi
 	add	$8, %esp
 	jmp	*%eax
-.L16:
+.E3:
 	add	$16, %esp /* pop stack */
 	pop	%edi /* restore edi */
 	pop	%esi /* restore esi */
 	pop	%ebx /* restore ebx */
 	pop	%ebp /* restore ebp */
 	ret	     /* exit dynarec */
-.L17:
+.E4:
 	/* Move 'dirty' blocks to the 'clean' list */
 	mov	restore_candidate(,%esi,4), %ebx
 	mov	%esi, %ebp
 	movl	$0, restore_candidate(,%esi,4)
 	shl	$5, %ebp
-.L18:
+.E5:
 	shr	$1, %ebx
-	jnc	.L19
+	jnc	.E6
 	mov	%ebp, (%esp)
 	call	clean_blocks
-.L19:
+.E6:
 	inc	%ebp
 	test	$31, %ebp
-	jne	.L18
-	jmp	.L14
+	jne	.E5
+	jmp	.E1
 	.size	cc_interrupt, .-cc_interrupt
 
 .globl do_interrupt
@@ -330,7 +469,7 @@ do_interrupt:
 	.type	fp_exception, @function
 fp_exception:
 	mov	$0x1000002c, %edx
-.L20:
+.E7:
 	mov	reg_cop0+48, %ebx
 	or	$2, %ebx
 	mov	%ebx, reg_cop0+48 /* Status */
@@ -348,7 +487,7 @@ fp_exception:
 	.type	fp_exception_ds, @function
 fp_exception_ds:
 	mov	$0x9000002c, %edx /* Set high bit if delay slot */
-	jmp	.L20
+	jmp	.E7
 	.size	fp_exception_ds, .-fp_exception_ds
 
 .globl jump_syscall
@@ -382,11 +521,11 @@ jump_eret:
 	mov	%eax, last_count
 	sub	%eax, %esi
 	mov	reg_cop0+56, %eax /* EPC */
-	jns	.L24
-.L21:
+	jns	.E11
+.E8:
 	mov	$248, %ebx
 	xor	%edi, %edi
-.L22:
+.E9:
 	mov	reg(%ebx), %ecx
 	mov	reg+4(%ebx), %edx
 	sar	$31, %ecx
@@ -394,17 +533,17 @@ jump_eret:
 	neg	%edx
 	adc	%edi, %edi
 	sub	$8, %ebx
-	jne	.L22
+	jne	.E9
 	mov	hi(%ebx), %ecx
 	mov	hi+4(%ebx), %edx
 	sar	$31, %ecx
 	xor	%ecx, %edx
-	jne	.L23
+	jne	.E10
 	mov	lo(%ebx), %ecx
 	mov	lo+4(%ebx), %edx
 	sar	$31, %ecx
 	xor	%ecx, %edx
-.L23:
+.E10:
 	neg	%edx
 	adc	%edi, %edi
 	push	%edi
@@ -414,11 +553,11 @@ jump_eret:
 	mov	cycle_count, %esi
 	add	$8, %esp
 	jmp	*%eax
-.L24:
+.E11:
 	mov	%eax, pcaddr
 	call	cc_interrupt
 	mov	pcaddr, %eax
-	jmp	.L21
+	jmp	.E8
 	.size	jump_eret, .-jump_eret
 
 .globl new_dyna_start
@@ -444,7 +583,7 @@ write_rdram_new:
 	mov	address, %edi
 	mov	word, %ecx
 	mov	%ecx, rdram-0x80000000(%edi)
-	jmp	.L25
+	jmp	.E12
 	.size	write_rdram_new, .-write_rdram_new
 
 .globl write_rdramb_new
@@ -454,7 +593,7 @@ write_rdramb_new:
 	xor	$3, %edi
 	movb	byte, %cl
 	movb	%cl, rdram-0x80000000(%edi)
-	jmp	.L25
+	jmp	.E12
 	.size	write_rdramb_new, .-write_rdramb_new
 
 .globl write_rdramh_new
@@ -464,7 +603,7 @@ write_rdramh_new:
 	xor	$2, %edi
 	movw	hword, %cx
 	movw	%cx, rdram-0x80000000(%edi)
-	jmp	.L25
+	jmp	.E12
 	.size	write_rdramh_new, .-write_rdramh_new
 
 .globl write_rdramd_new
@@ -475,7 +614,7 @@ write_rdramd_new:
 	mov	dword, %edx
 	mov	%ecx, rdram-0x80000000(%edi)
 	mov	%edx, rdram-0x80000000+4(%edi)
-	jmp	.L25
+	jmp	.E12
 	.size	write_rdramd_new, .-write_rdramd_new
 
 .globl do_invalidate
@@ -483,14 +622,14 @@ write_rdramd_new:
 do_invalidate:
 	mov	address, %edi
 	mov	%edi, %ebx /* Return ebx to caller */
-.L25:
+.E12:
 	shr	$12, %edi
 	cmpb	$1, invalid_code(%edi)
-	je	.L26
+	je	.E13
 	push	%edi
 	call	invalidate_block
 	pop	%edi
-.L26:
+.E13:
 	ret
 	.size	do_invalidate, .-do_invalidate
 

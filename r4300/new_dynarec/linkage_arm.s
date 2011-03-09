@@ -52,6 +52,7 @@ rdram = 0x80000000
 	.global	word
 	.global	hword
 	.global	byte
+	.global	branch_target
 	.global	PC
 	.global	fake_pc
 	.global	fake_pc_float
@@ -127,11 +128,13 @@ reg_cop1_simple = reg_cop0 + 128
 reg_cop1_double = reg_cop1_simple + 128
 	.type	reg_cop1_double, %object
 	.size	reg_cop1_double, 128
-PC = reg_cop1_double + 128
+branch_target = reg_cop1_double + 128
+	.type	branch_target, %object
+	.size	branch_target, 4
+PC = branch_target + 4
 	.type	PC, %object
 	.size	PC, 4
-	/* 4 bytes free */
-fake_pc = PC + 8
+fake_pc = PC + 4
 	.type	fake_pc, %object
 	.size	fake_pc, 132
 fake_pc_float = fake_pc + 132
@@ -152,38 +155,40 @@ memory_map = restore_candidate + 512
 	.global	dyna_linker
 	.type	dyna_linker, %function
 dyna_linker:
+	/* r0 = virtual target address */
+	/* r1 = instruction to patch */
 	ldr	r4, .tlbptr
 	lsr	r5, r0, #12
-	mov	r8, r0
+	mov	r12, r0
 	cmp	r0, #0xC0000000
 	mov	r6, #4096
-	ldrge	r8, [r4, r5, lsl #2]
+	ldrge	r12, [r4, r5, lsl #2]
 	mov	r2, #0x80000
 	ldr	r3, .jiptr
-	tst	r8, r8
+	tst	r12, r12
 	sub	r6, r6, #1
-	moveq	r8, r0
+	moveq	r12, r0
 	ldr	r7, [r1]
-	eor	r2, r2, r8, lsr #12
-	and	r6, r6, r8, lsr #12
+	eor	r2, r2, r12, lsr #12
+	and	r6, r6, r12, lsr #12
 	cmp	r2, #2048
 	add	r12, r7, #2
 	orrcs	r2, r6, #2048
 	ldr	r5, [r3, r2, lsl #2]
 	lsl	r12, r12, #8
 	/* jump_in lookup */
-.L1:
+.A1:
 	movs	r4, r5
-	beq	.L3
+	beq	.A3
 	ldr	r3, [r5]
 	ldr	r5, [r4, #12]
 	teq	r3, r0
-	bne	.L1
+	bne	.A1
 	ldr	r3, [r4, #4]
 	ldr	r4, [r4, #8]
 	tst	r3, r3
-	bne	.L1
-.L2:
+	bne	.A1
+.A2:
 	mov	r5, r1
 	add	r1, r1, r12, asr #6
 	teq	r1, r4
@@ -196,12 +201,15 @@ dyna_linker:
 	add	r1, r1, r2, lsr #8
 	str	r1, [r5]
 	mov	pc, r4
-.L3:
+.A3:
 	/* hash_table lookup */
+	cmp	r2, #2048
 	ldr	r3, .jdptr
 	eor	r4, r0, r0, lsl #16
+	lslcc	r2, r0, #9
 	ldr	r6, .htptr
 	lsr	r4, r4, #12
+	lsrcc	r2, r2, #21
 	bic	r4, r4, #15
 	ldr	r5, [r3, r2, lsl #2]
 	ldr	r7, [r6, r4]!
@@ -211,24 +219,24 @@ dyna_linker:
 	teq	r7, r0
 	ldreq	pc, [r6, #12]
 	/* jump_dirty lookup */
-.L6:
+.A6:
 	movs	r4, r5
-	beq	.L8
+	beq	.A8
 	ldr	r3, [r5]
 	ldr	r5, [r4, #12]
 	teq	r3, r0
-	bne	.L6
-.L7:
-	ldr	r5, [r4, #8]
+	bne	.A6
+.A7:
+	ldr	r1, [r4, #8]
 	/* hash_table insert */
-	ldr	r7, [r6]
-	ldr	r8, [r6, #4]
+	ldr	r2, [r6]
+	ldr	r3, [r6, #4]
 	str	r0, [r6]
-	str	r5, [r6, #4]
-	str	r7, [r6, #8]
-	str	r8, [r6, #12]
-	mov	pc, r5
-.L8:
+	str	r1, [r6, #4]
+	str	r2, [r6, #8]
+	str	r3, [r6, #12]
+	mov	pc, r1
+.A8:
 	mov	r4, r0
 	mov	r5, r1
 	bl	new_recompile_block
@@ -239,9 +247,6 @@ dyna_linker:
 	/* pagefault */
 	mov	r1, r0
 	mov	r2, #8
-	addmi	r10, r10, #4
-	addmi	r1, r1, #4
-	addmi	r2, r2, #0x80000000
 	.size	dyna_linker, .-dyna_linker
 	.global	exec_pagefault
 	.type	exec_pagefault, %function
@@ -268,6 +273,108 @@ exec_pagefault:
 	bl	get_addr_ht
 	mov	pc, r0
 	.size	exec_pagefault, .-exec_pagefault
+/* Special dynamic linker for the case where a page fault
+   may occur in a branch delay slot */
+	.global	dyna_linker_ds
+	.type	dyna_linker_ds, %function
+dyna_linker_ds:
+	/* r0 = virtual target address */
+	/* r1 = instruction to patch */
+	ldr	r4, .tlbptr
+	lsr	r5, r0, #12
+	mov	r12, r0
+	cmp	r0, #0xC0000000
+	mov	r6, #4096
+	ldrge	r12, [r4, r5, lsl #2]
+	mov	r2, #0x80000
+	ldr	r3, .jiptr
+	tst	r12, r12
+	sub	r6, r6, #1
+	moveq	r12, r0
+	ldr	r7, [r1]
+	eor	r2, r2, r12, lsr #12
+	and	r6, r6, r12, lsr #12
+	cmp	r2, #2048
+	add	r12, r7, #2
+	orrcs	r2, r6, #2048
+	ldr	r5, [r3, r2, lsl #2]
+	lsl	r12, r12, #8
+	/* jump_in lookup */
+.B1:
+	movs	r4, r5
+	beq	.B3
+	ldr	r3, [r5]
+	ldr	r5, [r4, #12]
+	teq	r3, r0
+	bne	.B1
+	ldr	r3, [r4, #4]
+	ldr	r4, [r4, #8]
+	tst	r3, r3
+	bne	.B1
+.B2:
+	mov	r5, r1
+	add	r1, r1, r12, asr #6
+	teq	r1, r4
+	moveq	pc, r4 /* Stale i-cache */
+	bl	add_link
+	sub	r2, r4, r5
+	and	r1, r7, #0xff000000
+	lsl	r2, r2, #6
+	sub	r1, r1, #2
+	add	r1, r1, r2, lsr #8
+	str	r1, [r5]
+	mov	pc, r4
+.B3:
+	/* hash_table lookup */
+	cmp	r2, #2048
+	ldr	r3, .jdptr
+	eor	r4, r0, r0, lsl #16
+	lslcc	r2, r0, #9
+	ldr	r6, .htptr
+	lsr	r4, r4, #12
+	lsrcc	r2, r2, #21
+	bic	r4, r4, #15
+	ldr	r5, [r3, r2, lsl #2]
+	ldr	r7, [r6, r4]!
+	teq	r7, r0
+	ldreq	pc, [r6, #4]
+	ldr	r7, [r6, #8]
+	teq	r7, r0
+	ldreq	pc, [r6, #12]
+	/* jump_dirty lookup */
+.B6:
+	movs	r4, r5
+	beq	.B8
+	ldr	r3, [r5]
+	ldr	r5, [r4, #12]
+	teq	r3, r0
+	bne	.B6
+.B7:
+	ldr	r1, [r4, #8]
+	/* hash_table insert */
+	ldr	r2, [r6]
+	ldr	r3, [r6, #4]
+	str	r0, [r6]
+	str	r1, [r6, #4]
+	str	r2, [r6, #8]
+	str	r3, [r6, #12]
+	mov	pc, r1
+.B8:
+	mov	r4, r0
+	bic	r0, r0, #7
+	mov	r5, r1
+	orr	r0, r0, #1
+	bl	new_recompile_block
+	tst	r0, r0
+	mov	r0, r4
+	mov	r1, r5
+	beq	dyna_linker_ds
+	/* pagefault */
+	bic	r1, r0, #7
+	mov	r2, #0x80000008 /* High bit set indicates pagefault in delay slot */
+	sub	r0, r1, #4
+	b	exec_pagefault
+	.size	dyna_linker_ds, .-dyna_linker_ds
 .jiptr:
 	.word	jump_in
 .jdptr:
@@ -377,6 +484,38 @@ jump_vaddr:
 	mov	pc, r0
 	.size	jump_vaddr, .-jump_vaddr
 	.align	2
+	.global	verify_code_ds
+	.type	verify_code_ds, %function
+verify_code_ds:
+	str	r8, [fp, #branch_target-dynarec_local]
+	.size	verify_code_ds, .-verify_code_ds
+	.global	verify_code_vm
+	.type	verify_code_vm, %function
+verify_code_vm:
+	/* r0 = instruction pointer (vitual address) */
+	/* r1 = source (virtual address) */
+	/* r2 = target */
+	/* r3 = length */
+	cmp	r1, #0xC0000000
+	blt	verify_code
+	add	r12, fp, #memory_map-dynarec_local
+	lsr	r4, r1, #12
+	add	r5, r1, r3
+	sub	r5, #1
+	ldr	r6, [r12, r4, lsl #2]
+	lsr	r5, r5, #12
+	movs	r7, r6
+	bmi	.D5
+	add	r1, r1, r6, lsl #2
+	lsl	r6, r6, #2
+.D1:
+	add	r4, r4, #1
+	teq	r6, r7, lsl #2
+	bne	.D5
+	ldr	r7, [r12, r4, lsl #2]
+	cmp	r4, r5
+	bls	.D1
+	.size	verify_code_vm, .-verify_code_vm
 	.global	verify_code
 	.type	verify_code, %function
 verify_code:
@@ -391,24 +530,25 @@ verify_code:
 	mov	r12, #0
 	ldrne	r5, [r2], #4
 	teq	r1, r3
-	beq	.L12
-.L11:
+	beq	.D3
+.D2:
 	ldr	r7, [r1], #4
 	eor	r9, r4, r5
 	ldr	r8, [r2], #4
 	orrs	r9, r9, r12
-	bne	.L13
+	bne	.D4
 	ldr	r4, [r1], #4
 	eor	r12, r7, r8
 	ldr	r5, [r2], #4
 	cmp	r1, r3
-	bcc	.L11
+	bcc	.D2
 	teq	r7, r8
-.L12:
+.D3:
 	teqeq	r4, r5
-	bne	.L13
-	mov	pc, lr
-.L13:
+.D4:
+	ldr	r8, [fp, #branch_target-dynarec_local]
+	moveq	pc, lr
+.D5:
 	bl	get_addr
 	mov	pc, r0
 	.size	verify_code, .-verify_code
@@ -427,8 +567,8 @@ cc_interrupt:
 	ldr	r4, [r2, r3]
 	mov	r10, lr
 	tst	r4, r4
-	bne	.L17
-.L14:
+	bne	.E4
+.E1:
 	bl	gen_interupt
 	mov	lr, r10
 	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
@@ -438,28 +578,28 @@ cc_interrupt:
 	str	r0, [fp, #last_count-dynarec_local]
 	sub	r10, r10, r0
 	tst	r2, r2
-	bne	.L16
+	bne	.E3
 	tst	r1, r1
 	moveq	pc, lr
-.L15:
+.E2:
 	ldr	r0, [fp, #pcaddr-dynarec_local]
 	bl	get_addr_ht
 	mov	pc, r0
-.L16:
+.E3:
 	add	r12, fp, #28
 	ldmia	r12, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
-.L17:
+.E4:
 	/* Move 'dirty' blocks to the 'clean' list */
 	lsl	r5, r2, #3
 	str	r1, [r2, r3]
-.L18:
+.E5:
 	lsrs	r4, r4, #1
 	mov	r0, r5
 	add	r5, r5, #1
 	blcs	clean_blocks
 	tst	r5, #31
-	bne	.L18
-	b	.L14
+	bne	.E5
+	b	.E1
 
 	.size	cc_interrupt, .-cc_interrupt
 	.align	2
@@ -480,7 +620,7 @@ do_interrupt:
 	.type	fp_exception, %function
 fp_exception:
 	mov	r2, #0x10000000
-.L20:
+.E7:
 	ldr	r1, [fp, #reg_cop0+48-dynarec_local] /* Status */
 	mov	r3, #0x80000000
 	str	r0, [fp, #reg_cop0+56-dynarec_local] /* EPC */
@@ -497,7 +637,7 @@ fp_exception:
 	.type	fp_exception_ds, %function
 fp_exception_ds:
 	mov	r2, #0x90000000 /* Set high bit if delay slot */
-	b	.L20
+	b	.E7
 	.size	fp_exception_ds, .-fp_exception_ds
 	.align	2
 	.global	jump_syscall
@@ -539,19 +679,19 @@ jump_eret:
 	ldr	r0, [fp, #reg_cop0+56-dynarec_local] /* EPC */
 	str	r1, [fp, #last_count-dynarec_local]
 	subs	r10, r10, r1
-	bpl	.L24
-.L21:
+	bpl	.E11
+.E8:
 	add	r6, fp, #reg+256-dynarec_local
 	mov	r5, #248
 	mov	r1, #0
-.L22:
+.E9:
 	ldr	r2, [r6, #-8]!
 	ldr	r3, [r6, #4]
 	eor	r3, r3, r2, asr #31
 	subs	r3, r3, #1
 	adc	r1, r1, r1
 	subs	r5, r5, #8
-	bne	.L22
+	bne	.E9
 	ldr	r2, [fp, #hi-dynarec_local]
 	ldr	r3, [fp, #hi+4-dynarec_local]
 	eors	r3, r3, r2, asr #31
@@ -562,11 +702,11 @@ jump_eret:
 	adc	r1, r1, r1
 	bl	get_addr_32
 	mov	pc, r0
-.L24:
+.E11:
 	str	r0, [fp, #pcaddr-dynarec_local]
 	bl	cc_interrupt
 	ldr	r0, [fp, #pcaddr-dynarec_local]
-	b	.L21
+	b	.E8
 	.size	jump_eret, .-jump_eret
 	.align	2
 	.global	new_dyna_start
@@ -593,7 +733,7 @@ write_rdram_new:
 	ldr	r2, [fp, #address-dynarec_local]
 	ldr	r0, [fp, #word-dynarec_local]
 	str	r0, [r2]
-	b	.L25
+	b	.E12
 	.size	write_rdram_new, .-write_rdram_new
 	.align	2
 	.global	write_rdramb_new
@@ -603,7 +743,7 @@ write_rdramb_new:
 	ldrb	r0, [fp, #byte-dynarec_local]
 	eor	r2, r2, #3
 	strb	r0, [r2]
-	b	.L25
+	b	.E12
 	.size	write_rdramb_new, .-write_rdramb_new
 	.align	2
 	.global	write_rdramh_new
@@ -613,7 +753,7 @@ write_rdramh_new:
 	ldrh	r0, [fp, #hword-dynarec_local]
 	eor	r2, r2, #2
 	strh	r0, [r2]
-	b	.L25
+	b	.E12
 	.size	write_rdramh_new, .-write_rdramh_new
 	.align	2
 	.global	write_rdramd_new
@@ -625,14 +765,14 @@ write_rdramd_new:
 	ldr	r1, [fp, #dword+4-dynarec_local]
 	str	r0, [r2, #4]
 	str	r1, [r2]
-	b	.L25
+	b	.E12
 	.size	write_rdramd_new, .-write_rdramd_new
 	.align	2
 	.global	do_invalidate
 	.type	do_invalidate, %function
 do_invalidate:
 	ldr	r2, [fp, #address-dynarec_local]
-.L25:
+.E12:
 	ldr	r1, [fp, #invc_ptr-dynarec_local]
 	lsr	r0, r2, #12
 	ldrb	r2, [r1, r0]

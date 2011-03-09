@@ -22,6 +22,7 @@ int cycle_count;
 int last_count;
 int pcaddr;
 int pending_exception;
+int branch_target;
 uint64_t readmem_dword;
 precomp_instr fake_pc,fake_pc_float;
 u_int memory_map[1048576];
@@ -102,18 +103,16 @@ int verify_dirty(int addr)
   u_int copy=*(u_int *)(ptr+6);
   u_int len=*(u_int *)(ptr+11);
   //printf("source=%x source-rdram=%x\n",source,source-(int)rdram);
-  if(!((source-(u_int)rdram+4)&0xFFF)) {
-    u_char *ptr2=(u_char *)get_clean_addr(addr);
-    if(ptr2[0]==0xb8) // mov $imm,%eax
-      if(ptr2[5]==0x39&&ptr2[6]==5) // cmp mapaddr,%eax
-        if(*(u_int *)(ptr2+11)==0x0018840f) // je +24
-        {
-          u_int *mapaddr=(u_int *)(*(u_int *)(ptr2+7)+((u_int)ptr2+11)); // rip-relative on x86-64
-          u_int value=*(u_int *)(ptr2+1);
-          //printf("mapaddr=%x value=%x\n",(int)mapaddr,value);
-          fflush(stdout);
-          if(*mapaddr!=value) return 0;
-        }
+  assert(ptr[21]==0xE8); // call instruction
+  u_int verifier=*(u_int *)(ptr+22)+(u_int)ptr+26;
+  if(verifier==(u_int)verify_code_vm||verifier==(u_int)verify_code_ds) {
+    unsigned int page=source>>12;
+    unsigned int map_value=memory_map[page];
+    if(map_value>=0x80000000) return 0;
+    while(page<((source+len-1)>>12)) {
+      if((memory_map[++page]<<2)!=(map_value<<2)) return 0;
+    }
+    source = source+(map_value<<2);
   }
   //printf("verify_dirty: %x %x %x\n",source,copy,len);
   return !memcmp((void *)source,(void *)copy,len);
@@ -140,6 +139,12 @@ void get_bounds(int addr,u_int *start,u_int *end)
   u_int source=*(u_int *)(ptr+1);
   //u_int copy=*(u_int *)(ptr+6);
   u_int len=*(u_int *)(ptr+11);
+  assert(ptr[21]==0xE8); // call instruction
+  u_int verifier=*(u_int *)(ptr+22)+(u_int)ptr+26;
+  if(verifier==(u_int)verify_code_vm||verifier==(u_int)verify_code_ds) {
+    if(memory_map[source>>12]>=0x80000000) source = 0;
+    else source = source+(memory_map[source>>12]<<2);
+  }
   *start=source;
   *end=source+len;
 }
@@ -161,6 +166,9 @@ void alloc_reg(struct regstat *cur,int i,char reg)
   {
     if(cur->regmap[hr]==reg) return;
   }
+  
+  // Keep the same mapping if the register was already allocated in a loop
+  preferred_reg = loop_reg(i,reg,preferred_reg);
   
   // Try to allocate the preferred register
   if(cur->regmap[preferred_reg]==-1) {
@@ -336,6 +344,9 @@ void alloc_reg64(struct regstat *cur,int i,char reg)
   {
     if(cur->regmap[hr]==reg+64) return;
   }
+  
+  // Keep the same mapping if the register was already allocated in a loop
+  preferred_reg = loop_reg(i,reg,preferred_reg);
   
   // Try to allocate the preferred register
   if(cur->regmap[preferred_reg]==-1) {
@@ -2283,7 +2294,7 @@ void restore_regs(u_int reglist)
 
 /* Stubs/epilogue */
 
-emit_extjump(int addr, int target)
+emit_extjump2(int addr, int target, int linker)
 {
   u_char *ptr=(u_char *)addr;
   if(*ptr==0x0f)
@@ -2310,7 +2321,16 @@ emit_extjump(int addr, int target)
   emit_writeword(ECX,(int)&last_count);
 #endif
 //DEBUG <
-  emit_jmp((int)dyna_linker);
+  emit_jmp(linker);
+}
+
+emit_extjump(int addr, int target)
+{
+  emit_extjump2(addr, target, (int)dyna_linker);
+}
+emit_extjump_ds(int addr, int target)
+{
+  emit_extjump2(addr, target, (int)dyna_linker_ds);
 }
 
 do_readstub(int n)
@@ -2671,11 +2691,11 @@ do_invstub(int n)
 int do_dirty_stub(int i)
 {
   assem_debug("do_dirty_stub %x\n",start+i*4);
-  emit_movimm((int)source,EAX);
+  emit_movimm((int)start<(int)0xC0000000?(int)source:(int)start,EAX);
   emit_movimm((int)copy,EBX);
   emit_movimm(slen*4,ECX);
   emit_movimm(start+i*4,12);
-  emit_call((int)&verify_code);
+  emit_call((int)start<(int)0xC0000000?(int)&verify_code:(int)&verify_code_vm);
   int entry=(int)out;
   load_regs_entry(i);
   if(entry==(int)out) entry=instr_addr[i];
@@ -2683,6 +2703,15 @@ int do_dirty_stub(int i)
   return entry;
 }
 
+void do_dirty_stub_ds()
+{
+  emit_movimm((int)start<(int)0xC0000000?(int)source:(int)start,EAX);
+  emit_movimm((int)copy,EBX);
+  emit_movimm(slen*4,ECX);
+  emit_movimm(start+1,12);
+  emit_call((int)&verify_code_ds);
+}
+                    
 do_cop1stub(int n)
 {
   assem_debug("do_cop1stub %x\n",start+stubs[n][3]*4);
@@ -2799,25 +2828,6 @@ int gen_tlb_addr_w(int addr, int map) {
 // We don't need this for x86
 generate_map_const(u_int addr,int reg) {
   // void *mapaddr=memory_map+(addr>>12);
-}
-
-/* Verify that the mapping hasn't changed */
-void verify_mapping(u_int addr)
-{
-  assem_debug("verify_mapping\n");
-  assert(!((addr+4)&0xFFF));
-  u_int orig=memory_map[(addr+4)>>12];
-  emit_movimm(orig,EAX);
-  emit_cmpmem((int)&memory_map[(addr+4)>>12],EAX);
-  u_int branch=(u_int)out;
-  emit_jeq(0);
-  emit_movimm(addr,EDI);
-  emit_mov(EDI,EBX);
-  emit_call((int)remove_hash);
-  emit_mov(EBX,EDI);
-  emit_call((int)invalidate_addr);
-  emit_jmp((int)jump_vaddr_ebx);
-  set_jump_target(branch,(int)out);
 }
 
 /* Special assem */

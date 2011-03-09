@@ -248,7 +248,6 @@ void TLBWI_new(void)
   {
     if(i<0x80000||i>0xBFFFF)
     {
-      invalidate_mapping(i);
       invalidate_block(i);
       memory_map[i]=-1;
     }
@@ -257,7 +256,6 @@ void TLBWI_new(void)
   {
     if(i<0x80000||i>0xBFFFF)
     {
-      invalidate_mapping(i);
       invalidate_block(i);
       memory_map[i]=-1;
     }
@@ -513,7 +511,6 @@ void TLBWR_new(void)
   {
     if(i<0x80000||i>0xBFFFF)
     {
-      invalidate_mapping(i);
       invalidate_block(i);
       memory_map[i]=-1;
     }
@@ -522,7 +519,6 @@ void TLBWR_new(void)
   {
     if(i<0x80000||i>0xBFFFF)
     {
-      invalidate_mapping(i);
       invalidate_block(i);
       memory_map[i]=-1;
     }
