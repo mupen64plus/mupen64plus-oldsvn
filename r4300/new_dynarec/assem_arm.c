@@ -66,6 +66,122 @@ const u_int jump_vaddr_reg[16] = {
 
 #include "fpu.h"
 
+const u_int jump_table_symbols[] = {
+  (int)invalidate_addr,
+  (int)jump_vaddr,
+  (int)dyna_linker,
+  (int)dyna_linker_ds,
+  (int)verify_code,
+  (int)verify_code_vm,
+  (int)verify_code_ds,
+  (int)cc_interrupt,
+  (int)fp_exception,
+  (int)fp_exception_ds,
+  (int)jump_syscall,
+  (int)jump_eret,
+  (int)indirect_jump_indexed,
+  (int)indirect_jump,
+  (int)do_interrupt,
+  (int)MFC0,
+  (int)MTC0,
+  (int)TLBR,
+  (int)TLBP,
+  (int)TLBWI_new,
+  (int)TLBWR_new,
+  (int)jump_vaddr_r0,
+  (int)jump_vaddr_r1,
+  (int)jump_vaddr_r2,
+  (int)jump_vaddr_r3,
+  (int)jump_vaddr_r4,
+  (int)jump_vaddr_r5,
+  (int)jump_vaddr_r6,
+  (int)jump_vaddr_r7,
+  (int)jump_vaddr_r8,
+  (int)jump_vaddr_r9,
+  (int)jump_vaddr_r10,
+  (int)jump_vaddr_r12,
+  (int)mult64,
+  (int)multu64,
+  (int)div64,
+  (int)divu64,
+  (int)cvt_s_w,
+  (int)cvt_d_w,
+  (int)cvt_s_l,
+  (int)cvt_d_l,
+  (int)cvt_w_s,
+  (int)cvt_w_d,
+  (int)cvt_l_s,
+  (int)cvt_l_d,
+  (int)cvt_d_s,
+  (int)cvt_s_d,
+  (int)round_l_s,
+  (int)round_w_s,
+  (int)trunc_l_s,
+  (int)trunc_w_s,
+  (int)ceil_l_s,
+  (int)ceil_w_s,
+  (int)floor_l_s,
+  (int)floor_w_s,
+  (int)round_l_d,
+  (int)round_w_d,
+  (int)trunc_l_d,
+  (int)trunc_w_d,
+  (int)ceil_l_d,
+  (int)ceil_w_d,
+  (int)floor_l_d,
+  (int)floor_w_d,
+  (int)c_f_s,
+  (int)c_un_s,
+  (int)c_eq_s,
+  (int)c_ueq_s,
+  (int)c_olt_s,
+  (int)c_ult_s,
+  (int)c_ole_s,
+  (int)c_ule_s,
+  (int)c_sf_s,
+  (int)c_ngle_s,
+  (int)c_seq_s,
+  (int)c_ngl_s,
+  (int)c_lt_s,
+  (int)c_nge_s,
+  (int)c_le_s,
+  (int)c_ngt_s,
+  (int)c_f_d,
+  (int)c_un_d,
+  (int)c_eq_d,
+  (int)c_ueq_d,
+  (int)c_olt_d,
+  (int)c_ult_d,
+  (int)c_ole_d,
+  (int)c_ule_d,
+  (int)c_sf_d,
+  (int)c_ngle_d,
+  (int)c_seq_d,
+  (int)c_ngl_d,
+  (int)c_lt_d,
+  (int)c_nge_d,
+  (int)c_le_d,
+  (int)c_ngt_d,
+  (int)add_s,
+  (int)sub_s,
+  (int)mul_s,
+  (int)div_s,
+  (int)sqrt_s,
+  (int)abs_s,
+  (int)mov_s,
+  (int)neg_s,
+  (int)add_d,
+  (int)sub_d,
+  (int)mul_d,
+  (int)div_d,
+  (int)sqrt_d,
+  (int)abs_d,
+  (int)mov_d,
+  (int)neg_d
+};
+
+#define JUMP_TABLE_SIZE (sizeof(jump_table_symbols)*2)
+
 /* Linker */
 
 void set_jump_target(int addr,u_int target)
@@ -823,8 +939,20 @@ u_int genimm(u_int imm,u_int *encoded)
 }
 u_int genjmp(u_int addr)
 {
+  if(addr<4) return 0;
   int offset=addr-(int)out-8;
-  if(offset<-33554432||offset>=33554432) return 0;
+  if(offset<-33554432||offset>=33554432) {
+    int n;
+    for (n=0;n<sizeof(jump_table_symbols)/4;n++)
+    {
+      if(addr==jump_table_symbols[n])
+      {
+        offset=BASE_ADDR+(1<<TARGET_SIZE_2)-JUMP_TABLE_SIZE+n*8-(int)out-8;
+        break;
+      }
+    }
+  }
+  assert(offset>=-33554432&&offset<33554432);
   return ((u_int)offset>>2)&0xffffff;
 }
 
@@ -2446,7 +2574,7 @@ emit_extjump2(int addr, int target, int linker)
   assert((ptr[3]&0x0e)==0xa);
   emit_loadlp(target,0);
   emit_loadlp(addr,1);
-  assert(addr>=0x7000000&&addr<0x7FFFFFF);
+  //assert(addr>=0x7000000&&addr<0x7FFFFFF);
   //assert((target>=0x80000000&&target<0x80800000)||(target>0xA4000000&&target<0xA4001000));
 //DEBUG >
 #ifdef DEBUG_CYCLE_COUNT
@@ -4350,4 +4478,32 @@ void arch_init() {
   rounding_modes[1]=0x3<<22; // trunc
   rounding_modes[2]=0x1<<22; // ceil
   rounding_modes[3]=0x2<<22; // floor
+
+  // Trampolines for jumps >32M
+  int *ptr,*ptr2;
+  ptr=(int *)jump_table_symbols;
+  ptr2=(int *)((void *)BASE_ADDR+(1<<TARGET_SIZE_2)-JUMP_TABLE_SIZE);
+  while((void *)ptr<(void *)jump_table_symbols+sizeof(jump_table_symbols))
+  {
+    int offset=*ptr-(int)ptr2-8;
+    if(offset>=-33554432&&offset<33554432) {
+      *ptr2=0xea000000|((offset>>2)&0xffffff); // direct branch
+    }else{
+      *ptr2=0xe51ff004; // ldr pc,[pc,#-4]
+    }
+    ptr2++;
+    *ptr2=*ptr;
+    ptr++;
+    ptr2++;
+  }
+
+  // Jumping thru the trampolines created above slows things down by about 1%.
+  // If part of the cache is beyond the 32M limit, avoid using this area
+  // initially.  It will be used later if the cache gets full.
+  if((u_int)dyna_linker-33554432>(u_int)BASE_ADDR) {
+    if((u_int)dyna_linker-33554432<(u_int)BASE_ADDR+(1<<(TARGET_SIZE_2-1))) {
+      out=(u_char *)(((u_int)dyna_linker-33554432)&~4095);
+      expirep=((((int)out-BASE_ADDR)>>(TARGET_SIZE_2-16))+16384)&65535;
+    }
+  }
 }

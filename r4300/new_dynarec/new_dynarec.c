@@ -10416,7 +10416,7 @@ int new_recompile_block(int addr)
   
   // If we're within 256K of the end of the buffer,
   // start over from the beginning. (Is 256K enough?)
-  if((int)out>BASE_ADDR+(1<<TARGET_SIZE_2)-MAX_OUTPUT_BLOCK_SIZE) out=(u_char *)BASE_ADDR;
+  if((int)out>BASE_ADDR+(1<<TARGET_SIZE_2)-MAX_OUTPUT_BLOCK_SIZE-JUMP_TABLE_SIZE) out=(u_char *)BASE_ADDR;
   
   // Trap writes to any of the pages we compiled
   for(i=start>>12;i<=(start+slen*4)>>12;i++) {

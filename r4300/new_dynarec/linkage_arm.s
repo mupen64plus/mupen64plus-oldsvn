@@ -719,18 +719,22 @@ jump_eret:
 	.type	new_dyna_start, %function
 new_dyna_start:
 	ldr	r12, .dlptr
+	ldr	r1, .tgtptr
 	mov	r0, #0xa4000000
 	stmia	r12, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
 	sub	fp, r12, #28
+	ldr	r4, [r1]
 	add	r0, r0, #0x40
 	bl	new_recompile_block
 	ldr	r0, [fp, #next_interupt-dynarec_local]
 	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
 	str	r0, [fp, #last_count-dynarec_local]
 	sub	r10, r10, r0
-	mov	pc, #0x7000000
+	mov	pc, r4
 .dlptr:
 	.word	dynarec_local+28
+.tgtptr:
+	.word	out
 	.size	new_dyna_start, .-new_dyna_start
 	.align	2
 	.global	write_rdram_new
