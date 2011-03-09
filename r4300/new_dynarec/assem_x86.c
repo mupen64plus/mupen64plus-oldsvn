@@ -82,10 +82,11 @@ void set_jump_target(int addr,int target)
   }
 }
 
-void kill_pointer(void *stub)
+void *kill_pointer(void *stub)
 {
   int *i_ptr=*((int **)(stub+6));
   *i_ptr=(int)stub-(int)i_ptr-4;
+  return i_ptr;
 }
 int get_pointer(void *stub)
 {

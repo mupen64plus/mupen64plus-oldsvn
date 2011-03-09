@@ -1068,16 +1068,18 @@ void ll_kill_pointers(struct ll_entry *head,int addr,int shift)
        (((ptr-MAX_OUTPUT_BLOCK_SIZE)>>shift)==(addr>>shift)))
     {
       inv_debug("EXP: Kill pointer at %x (%x)\n",(int)head->addr,head->vaddr);
-      kill_pointer(head->addr);
+      u_int host_addr=(u_int)kill_pointer(head->addr);
+      #ifdef __arm__
+        needs_clear_cache[(host_addr-(u_int)BASE_ADDR)>>17]|=1<<(((host_addr-(u_int)BASE_ADDR)>>12)&31);
+      #endif
     }
     head=head->next;
   }
 }
 
 // This is called when we write to a compiled block (see do_invstub)
-int invalidate_page(u_int page)
+void invalidate_page(u_int page)
 {
-  int modified=0;
   struct ll_entry *head;
   struct ll_entry *next;
   head=jump_in[page];
@@ -1093,17 +1095,17 @@ int invalidate_page(u_int page)
   jump_out[page]=0;
   while(head!=NULL) {
     inv_debug("INVALIDATE: kill pointer to %x (%x)\n",head->vaddr,(int)head->addr);
-    kill_pointer(head->addr);
-    modified=1;
+    u_int host_addr=(u_int)kill_pointer(head->addr);
+    #ifdef __arm__
+      needs_clear_cache[(host_addr-(u_int)BASE_ADDR)>>17]|=1<<(((host_addr-(u_int)BASE_ADDR)>>12)&31);
+    #endif
     next=head->next;
     free(head);
     head=next;
   }
-  return modified;
 }
 void invalidate_block(u_int block)
 {
-  int modified;
   u_int page,vpage;
   page=vpage=block^0x80000;
   if(page>262143&&tlb_LUT_r[block]) page=(tlb_LUT_r[block]^0x80000000)>>12;
@@ -1138,7 +1140,7 @@ void invalidate_block(u_int block)
     head=head->next;
   }
   //printf("first=%d last=%d\n",first,last);
-  modified=invalidate_page(page);
+  invalidate_page(page);
   assert(first+5>page); // NB: this assumes MAXBLOCK<=4096 (4 pages)
   assert(last<page+5);
   // Invalidate the adjacent pages if a block crosses a 4K boundary
@@ -1149,6 +1151,9 @@ void invalidate_block(u_int block)
   for(first=page+1;first<last;first++) {
     invalidate_page(first);
   }
+  #ifdef __arm__
+    do_clear_cache();
+  #endif
   
   // Don't trap writes
   invalid_code[block]=1;
@@ -1162,10 +1167,6 @@ void invalidate_block(u_int block)
     if(real_block>=0x80000&&real_block<0x80800) memory_map[real_block]=((u_int)rdram-0x80000000)>>2;
   }
   else if(block>=0x80000&&block<0x80800) memory_map[block]=((u_int)rdram-0x80000000)>>2;
-  #ifdef __arm__
-  if(modified)
-    __clear_cache((void *)BASE_ADDR,(void *)BASE_ADDR+(1<<TARGET_SIZE_2));
-  #endif
   #ifdef USE_MINI_HT
   memset(mini_ht,-1,sizeof(mini_ht));
   #endif
@@ -1174,6 +1175,8 @@ void invalidate_addr(u_int addr)
 {
   invalidate_block(addr>>12);
 }
+// This is called when loading a save state.
+// Anything could have changed, so invalidate everything.
 void invalidate_all_pages()
 {
   u_int page,n;
@@ -10501,8 +10504,8 @@ int new_recompile_block(int addr)
       case 3:
         // Clear jump_out
         #ifdef __arm__
-        if((expirep&2047)==0)
-          __clear_cache((void *)BASE_ADDR,(void *)BASE_ADDR+(1<<TARGET_SIZE_2));
+        if((expirep&2047)==0) 
+          do_clear_cache();
         #endif
         ll_remove_matching_addrs(jump_out+(expirep&2047),base,shift);
         ll_remove_matching_addrs(jump_out+2048+(expirep&2047),base,shift);

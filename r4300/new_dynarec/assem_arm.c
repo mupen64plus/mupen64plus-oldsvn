@@ -180,6 +180,8 @@ const u_int jump_table_symbols[] = {
   (int)neg_d
 };
 
+unsigned int needs_clear_cache[1<<(TARGET_SIZE_2-17)];
+
 #define JUMP_TABLE_SIZE (sizeof(jump_table_symbols)*2)
 
 /* Linker */
@@ -256,7 +258,7 @@ add_literal(int addr,int val)
   literalcount++; 
 } 
 
-void kill_pointer(void *stub)
+void *kill_pointer(void *stub)
 {
   int *ptr=(int *)(stub+4);
   assert((*ptr&0x0ff00000)==0x05900000);
@@ -264,6 +266,7 @@ void kill_pointer(void *stub)
   int **l_ptr=(void *)ptr+offset+8;
   int *i_ptr=*l_ptr;
   set_jump_target((int)i_ptr,(int)stub);
+  return i_ptr;
 }
 
 int get_pointer(void *stub)
@@ -4484,6 +4487,38 @@ void wb_invalidate_arm(signed char pre[],signed char entry[],uint64_t dirty,uint
 }
 #define wb_invalidate wb_invalidate_arm
 */
+
+// Clearing the cache is rather slow on ARM Linux, so mark the areas
+// that need to be cleared, and then only clear these areas once.
+void do_clear_cache()
+{
+  int i,j;
+  for (i=0;i<(1<<(TARGET_SIZE_2-17));i++)
+  {
+    u_int bitmap=needs_clear_cache[i];
+    if(bitmap) {
+      u_int start,end;
+      for(j=0;j<32;j++) 
+      {
+        if(bitmap&(1<<j)) {
+          start=BASE_ADDR+i*131072+j*4096;
+          end=start+4095;
+          j++;
+          while(j<32) {
+            if(bitmap&(1<<j)) {
+              end+=4096;
+              j++;
+            }else{
+              __clear_cache((void *)start,(void *)end);
+              break;
+            }
+          }
+        }
+      }
+      needs_clear_cache[i]=0;
+    }
+  }
+}
 
 // CPU-architecture-specific initialization
 void arch_init() {
