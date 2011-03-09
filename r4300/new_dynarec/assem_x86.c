@@ -3602,6 +3602,7 @@ void fconv_assemble_x86(int i,struct regstat *i_regs)
     add_stub(FP_STUB,jaddr,(int)out,i,rs,(int)i_regs,is_delayslot,0);
     cop1_usable=1;
   }
+#ifdef __SSE__
   if(opcode2[i]==0x10&&(source[i]&0x3f)==0x0d) { // trunc_w_s
     emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],temp);
     emit_movss_load(temp,0);
@@ -3619,6 +3620,7 @@ void fconv_assemble_x86(int i,struct regstat *i_regs)
     emit_movd_store(0,temp);
     return;
   }
+#endif
   
   if(opcode2[i]==0x14&&(source[i]&0x3f)==0x20) { // cvt_s_w
     emit_readword((int)&reg_cop1_simple[(source[i]>>11)&0x1f],temp);
