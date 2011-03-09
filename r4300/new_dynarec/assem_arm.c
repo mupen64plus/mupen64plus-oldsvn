@@ -68,8 +68,11 @@ void set_jump_target(int addr,u_int target)
   u_char *ptr=(u_char *)addr;
   u_int *ptr2=(u_int *)ptr;
   if(ptr[3]==0xe2) {
-    assert((target-(u_int)ptr2-8)<4096);
-    *ptr2=(*ptr2&0xFFFFF000)|(target-(u_int)ptr2-8);
+    assert((target-(u_int)ptr2-8)<1024);
+    assert((addr&3)==0);
+    assert((target&3)==0);
+    *ptr2=(*ptr2&0xFFFFF000)|((target-(u_int)ptr2-8)>>2)|0xF00;
+    //printf("target=%x addr=%x insn=%x\n",target,addr,*ptr2);
   }
   else {
     assert((ptr[3]&0x0e)==0xa);
@@ -140,6 +143,25 @@ int get_pointer(void *stub)
   return (int)i_ptr+((*i_ptr<<8)>>6)+8;
 }
 
+// Find the "clean" entry point from a "dirty" entry point
+// by skipping past the call to verify_code
+u_int get_clean_addr(int addr)
+{
+  int *ptr=(int *)addr;
+  #ifdef ARMv5_ONLY
+  ptr+=4;
+  #else
+  ptr+=6;
+  #endif
+  if((*ptr&0xFF000000)!=0xeb000000) ptr++;
+  assert((*ptr&0xFF000000)==0xeb000000); // bl instruction
+  ptr++;
+  if((*ptr&0xFF000000)==0xea000000) {
+    return (int)ptr+((*ptr<<8)>>6)+8; // follow jump
+  }
+  return (u_int)ptr;
+}
+
 int verify_dirty(int addr)
 {
   u_int *ptr=(u_int *)addr;
@@ -158,8 +180,41 @@ int verify_dirty(int addr)
   u_int copy=(ptr[1]&0xFFF)+((ptr[1]>>4)&0xF000)+((ptr[3]<<16)&0xFFF0000)+((ptr[3]<<12)&0xF0000000);
   u_int len=(ptr[4]&0xFFF)+((ptr[4]>>4)&0xF000);
   #endif
+  if(!((source+4)&0xFFF)) {
+    u_int *ptr2=(u_int *)get_clean_addr(addr);
+    #ifdef ARMv5_ONLY
+    if((*ptr2&0xFFFFF000)==0xe59f0000) {
+      offset=*ptr2&0xfff;
+      l_ptr=(void *)ptr2+offset+8;
+      u_int mapaddr=l_ptr[0];
+      u_int value=l_ptr[1];
+    #else
+    if((*ptr2&0xFFF0F000)==0xe3000000) {
+      u_int mapaddr=(ptr2[0]&0xFFF)+((ptr2[0]>>4)&0xF000)+((ptr2[1]<<16)&0xFFF0000)+((ptr2[1]<<12)&0xF0000000);
+      u_int value=(ptr2[2]&0xFFF)+((ptr2[2]>>4)&0xF000)+((ptr2[3]<<16)&0xFFF0000)+((ptr2[3]<<12)&0xF0000000);
+    #endif
+      if(mapaddr-(u_int)memory_map<4194304) {
+        if(*(u_int *)mapaddr!=value) return 0;
+      }
+    }
+  }
   //printf("verify_dirty: %x %x %x\n",source,copy,len);
   return !memcmp((void *)source,(void *)copy,len);
+}
+
+// This doesn't necessarily find all clean entry points, just
+// guarantees that it's not dirty
+int isclean(int addr)
+{
+  #ifdef ARMv5_ONLY
+  int *ptr=((u_int *)addr)+4;
+  #else
+  int *ptr=((u_int *)addr)+6;
+  #endif
+  if((*ptr&0xFF000000)!=0xeb000000) ptr++;
+  if((*ptr&0xFF000000)!=0xeb000000) return 1; // bl instruction
+  if((int)ptr+((*ptr<<8)>>6)+8!=(int)verify_code) return 1;
+  return 0;
 }
 
 void get_bounds(int addr,u_int *start,u_int *end)
@@ -182,25 +237,6 @@ void get_bounds(int addr,u_int *start,u_int *end)
   #endif
   *start=source;
   *end=source+len;
-}
-
-// Find the "clean" entry point from a "dirty" entry point
-// by skipping past the call to verify_code
-u_int get_clean_addr(int addr)
-{
-  int *ptr=(int *)addr;
-  #ifdef ARMv5_ONLY
-  ptr+=4;
-  #else
-  ptr+=6;
-  #endif
-  if((*ptr&0xFF000000)!=0xeb000000) ptr++;
-  assert((*ptr&0xFF000000)==0xeb000000); // bl instruction
-  ptr++;
-  if((*ptr&0xFF000000)==0xea000000) {
-    return (int)ptr+((*ptr<<8)>>6)+8; // follow jump
-  }
-  return (u_int)ptr;
 }
 
 /* Register allocation */
@@ -932,7 +968,7 @@ void emit_movimm(u_int imm,u_int rt)
     assem_debug("mvn %s,#%d\n",regname[rt],imm);
     output_w32(0xe3e00000|rd_rn_rm(rt,0,0)|armval);
   }else if(imm<65536) {
-    #ifdef ARMV5_ONLY
+    #ifdef ARMv5_ONLY
     assem_debug("mov %s,#%d\n",regname[rt],imm&0xFF00);
     output_w32(0xe3a00000|rd_rn_imm_shift(rt,0,imm>>8,8));
     assem_debug("add %s,%s,#%d\n",regname[rt],regname[rt],imm&0xFF);
@@ -941,7 +977,7 @@ void emit_movimm(u_int imm,u_int rt)
     emit_movw(imm,rt);
     #endif
   }else{
-    #ifdef ARMV5_ONLY
+    #ifdef ARMv5_ONLY
     emit_loadlp(imm,rt);
     #else
     emit_movw(imm&0x0000FFFF,rt);
@@ -1082,7 +1118,7 @@ void emit_andimm(int rs,int imm,int rt)
     assem_debug("bic %s,%s,#%d\n",regname[rt],regname[rs],imm);
     output_w32(0xe3c00000|rd_rn_rm(rt,rs,0)|armval);
   }else if(imm==65535) {
-    #ifdef ARMV5_ONLY
+    #ifdef ARMv5_ONLY
     assem_debug("bic %s,%s,#FF000000\n",regname[rt],regname[rs]);
     output_w32(0xe3c00000|rd_rn_rm(rt,rs,0)|0x4FF);
     assem_debug("bic %s,%s,#00FF0000\n",regname[rt],regname[rt]);
@@ -1093,7 +1129,7 @@ void emit_andimm(int rs,int imm,int rt)
     #endif
   }else{
     assert(imm>0&&imm<65535);
-    #ifdef ARMV5_ONLY
+    #ifdef ARMv5_ONLY
     assem_debug("mov r14,#%d\n",imm&0xFF00);
     output_w32(0xe3a00000|rd_rn_imm_shift(HOST_TEMPREG,0,imm>>8,8));
     assem_debug("add r14,r14,#%d\n",imm&0xFF);
@@ -1273,7 +1309,7 @@ void emit_cmpimm(int rs,int imm)
     output_w32(0xe3700000|rd_rn_rm(0,rs,0)|armval);
   }else if(imm>0) {
     assert(imm<65536);
-    #ifdef ARMV5_ONLY
+    #ifdef ARMv5_ONLY
     emit_movimm(imm,HOST_TEMPREG);
     #else
     emit_movw(imm,HOST_TEMPREG);
@@ -1282,7 +1318,7 @@ void emit_cmpimm(int rs,int imm)
     output_w32(0xe1500000|rd_rn_rm(0,rs,HOST_TEMPREG));
   }else{
     assert(imm>-65536);
-    #ifdef ARMV5_ONLY
+    #ifdef ARMv5_ONLY
     emit_movimm(-imm,HOST_TEMPREG);
     #else
     emit_movw(-imm,HOST_TEMPREG);
@@ -1992,7 +2028,7 @@ void emit_cmov2imm_e_ne_compact(int imm1,int imm2,u_int rt)
     output_w32(0x12400000|rd_rn_rm(rt,rt,0)|armval);
   }
   else {
-    #ifdef ARMV5_ONLY
+    #ifdef ARMv5_ONLY
     emit_movimm(imm1,rt);
     add_literal((int)out,imm2);
     assem_debug("ldrne %s,pc+? [=%x]\n",regname[rt],imm2);
@@ -2113,7 +2149,7 @@ void wb_consts(signed char i_regmap[],uint64_t i_is32,u_int i_dirty,int i)
   int hr;
   for(hr=0;hr<HOST_REGS;hr++) {
     if(hr!=EXCLUDE_REG&&i_regmap[hr]>=0&&((i_dirty>>hr)&1)) {
-      if(((isconst[i]>>hr)&1)&&i_regmap[hr]>0) {
+      if(((regs[i].isconst>>hr)&1)&&i_regmap[hr]>0) {
         if(i_regmap[hr]<64 || !((i_is32>>(i_regmap[hr]&63))&1) ) {
           int value=constmap[i][hr];
           if(value==0) {
@@ -2191,7 +2227,7 @@ emit_extjump(int addr, int target)
 do_readstub(int n)
 {
   assem_debug("do_readstub %x\n",start+stubs[n][3]*4);
-  literal_pool(64);
+  literal_pool(256);
   set_jump_target(stubs[n][1],(int)out);
   int type=stubs[n][0];
   int i=stubs[n][3];
@@ -2227,7 +2263,7 @@ do_readstub(int n)
   save_regs(reglist);
   ds=i_regs!=&regs[i];
   int real_rs=(itype[i]==LOADLR)?-1:get_reg(i_regmap,rs1[i]);
-  u_int cmask=ds?-1:(0x100f|~wasconst[i]);
+  u_int cmask=ds?-1:(0x100f|~i_regs->wasconst);
   if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty&~(1<<addr)&(real_rs<0?-1:~(1<<real_rs))&0x100f,i);
   wb_dirtys(i_regs->regmap_entry,i_regs->was32,i_regs->wasdirty&cmask&~(1<<addr)&(real_rs<0?-1:~(1<<real_rs)));
   if(!ds) wb_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty&~(1<<addr)&(real_rs<0?-1:~(1<<real_rs))&~0x100f,i);
@@ -2339,7 +2375,7 @@ inline_readstub(int type, u_int addr, signed char regmap[], int target, int adj,
 do_writestub(int n)
 {
   assem_debug("do_writestub %x\n",start+stubs[n][3]*4);
-  literal_pool(64);
+  literal_pool(256);
   set_jump_target(stubs[n][1],(int)out);
   int type=stubs[n][0];
   int i=stubs[n][3];
@@ -2387,7 +2423,7 @@ do_writestub(int n)
   save_regs(reglist);
   ds=i_regs!=&regs[i];
   int real_rs=get_reg(i_regmap,rs1[i]);
-  u_int cmask=ds?-1:(0x100f|~wasconst[i]);
+  u_int cmask=ds?-1:(0x100f|~i_regs->wasconst);
   if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty&~(1<<addr)&(real_rs<0?-1:~(1<<real_rs))&0x100f,i);
   wb_dirtys(i_regs->regmap_entry,i_regs->was32,i_regs->wasdirty&cmask&~(1<<addr)&(real_rs<0?-1:~(1<<real_rs)));
   if(!ds) wb_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty&~(1<<addr)&(real_rs<0?-1:~(1<<real_rs))&~0x100f,i);
@@ -2648,6 +2684,27 @@ generate_map_const(u_int addr,int reg) {
   emit_movimm((addr>>12)+(((u_int)memory_map-(u_int)&dynarec_local)>>2),reg);
 }
 
+/* Verify that the mapping hasn't changed */
+void verify_mapping(u_int addr)
+{
+  assem_debug("verify_mapping\n");
+  assert(!((addr+4)&0xFFF));
+  u_int orig=memory_map[(addr+4)>>12];
+  emit_movimm((int)&memory_map[(addr+4)>>12],0);
+  emit_movimm(orig,1);
+  emit_readword_indexed(0,0,0);
+  emit_movimm(addr,4);
+  emit_cmp(0,1);
+  u_int branch=(u_int)out;
+  emit_jeq(0);
+  emit_mov(4,0);
+  emit_call((int)remove_hash);
+  emit_mov(4,0);
+  emit_call((int)invalidate_addr);
+  emit_jmp((int)jump_vaddr_r4);
+  set_jump_target(branch,(int)out);
+}
+
 /* Special assem */
 
 void shift_assemble_arm(int i,struct regstat *i_regs)
@@ -2783,7 +2840,7 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
   if(offset||s<0||c) addr=temp2;
   else addr=s;
   if(s>=0) {
-    c=(wasconst[i]>>s)&1;
+    c=(i_regs->wasconst>>s)&1;
     memtarget=((signed int)(constmap[i][s]+offset))<(signed int)0x80800000;
     if(using_tlb&&((signed int)(constmap[i][s]+offset))>=(signed int)0xC0000000) memtarget=1;
   }
@@ -2975,9 +3032,16 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_call((int)TLBR);
     if((source[i]&0x3f)==0x02) // TLBWI
       emit_call((int)TLBWI_new);
-    assert((source[i]&0x3f)!=0x06); // FIXME
-    //if((source[i]&0x3f)==0x06) // TLBWR
-    //  emit_call((int)TLBWR);
+    if((source[i]&0x3f)==0x06) { // TLBWR
+      // The TLB entry written by TLBWR is dependent on the count,
+      // so update the cycle count
+      emit_readword((int)&last_count,ECX);
+      if(i_regs->regmap[HOST_CCREG]!=CCREG) emit_loadreg(CCREG,HOST_CCREG);
+      emit_add(HOST_CCREG,ECX,HOST_CCREG);
+      emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
+      emit_writeword(HOST_CCREG,(int)&Count);
+      emit_call((int)TLBWR_new);
+    }
     if((source[i]&0x3f)==0x08) // TLBP
       emit_call((int)TLBP);
     if((source[i]&0x3f)==0x18) // ERET
@@ -3040,7 +3104,7 @@ void cop1_assemble(int i,struct regstat *i_regs)
       assert(sh>=0);
       emit_writeword(sh,(int)&readmem_dword+4);
     }
-    wb_register(rs1[i],i_regs->regmap,dirty_post[i],is32[i]);
+    wb_register(rs1[i],i_regs->regmap,i_regs->dirty,i_regs->is32);
     emit_addimm(FP,(int)&fake_pc-(int)&dynarec_local,0);
     emit_movimm((source[i]>>11)&0x1f,1);
     emit_writeword(0,(int)&PC);
@@ -3076,7 +3140,7 @@ void cop1_assemble(int i,struct regstat *i_regs)
   }
   else if (opcode2[i]==5) { // DMTC1
     signed char sl=get_reg(i_regs->regmap,rs1[i]);
-    signed char sh=get_reg(i_regs->regmap,rs1[i]|64);
+    signed char sh=rs1[i]>0?get_reg(i_regs->regmap,rs1[i]|64):sl;
     signed char temp=get_reg(i_regs->regmap,-1);
     emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],temp);
     emit_writeword_indexed(sh,4,temp);

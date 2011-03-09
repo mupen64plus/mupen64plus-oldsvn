@@ -232,10 +232,42 @@ dyna_linker:
 	mov	r4, r0
 	mov	r5, r1
 	bl	new_recompile_block
+	tst	r0, r0
 	mov	r0, r4
 	mov	r1, r5
-	b	dyna_linker
+	beq	dyna_linker
+	/* pagefault */
+	mov	r1, r0
+	mov	r2, #8
+	addmi	r10, r10, #4
+	addmi	r1, r1, #4
+	addmi	r2, r2, #0x80000000
 	.size	dyna_linker, .-dyna_linker
+	.global	exec_pagefault
+	.type	exec_pagefault, %function
+exec_pagefault:
+	/* r0 = instruction pointer */
+	/* r1 = fault address */
+	/* r2 = cause */
+	ldr	r3, [fp, #reg_cop0+48-dynarec_local] /* Status */
+	mvn	r6, #0xF000000F
+	ldr	r4, [fp, #reg_cop0+16-dynarec_local] /* Context */
+	bic	r6, r6, #0x0F800000
+	str	r0, [fp, #reg_cop0+56-dynarec_local] /* EPC */
+	orr	r3, r3, #2
+	str	r1, [fp, #reg_cop0+32-dynarec_local] /* BadVAddr */
+	bic	r4, r4, r6
+	str	r3, [fp, #reg_cop0+48-dynarec_local] /* Status */
+	and	r5, r6, r1, lsr #9
+	str	r2, [fp, #reg_cop0+52-dynarec_local] /* Cause */
+	and	r1, r1, r6, lsl #9
+	str	r1, [fp, #reg_cop0+40-dynarec_local] /* EntryHi */
+	orr	r4, r4, r5
+	str	r4, [fp, #reg_cop0+16-dynarec_local] /* Context */
+	mov	r0, #0x80000000
+	bl	get_addr_ht
+	mov	pc, r0
+	.size	exec_pagefault, .-exec_pagefault
 .jiptr:
 	.word	jump_in
 .jdptr:
@@ -331,21 +363,26 @@ jump_vaddr_r7:
 	.type	jump_vaddr, %function
 jump_vaddr:
 	ldr	r1, .htptr
-	lsr	r2, r2, #12
-	bic	r2, r2, #15
+	mvn	r3, #15
+	and	r2, r3, r2, lsr #12
 	ldr	r2, [r1, r2]!
 	teq	r2, r0
 	ldreq	pc, [r1, #4]
 	ldr	r2, [r1, #8]
 	teq	r2, r0
 	ldreq	pc, [r1, #12]
+	str	r10, [fp, #cycle_count-dynarec_local]
 	bl	get_addr
+	ldr	r10, [fp, #cycle_count-dynarec_local]
 	mov	pc, r0
 	.size	jump_vaddr, .-jump_vaddr
 	.align	2
 	.global	verify_code
 	.type	verify_code, %function
 verify_code:
+	/* r1 = source */
+	/* r2 = target */
+	/* r3 = length */
 	tst	r3, #4
 	mov	r4, #0
 	add	r3, r1, r3
@@ -353,22 +390,25 @@ verify_code:
 	ldrne	r4, [r1], #4
 	mov	r12, #0
 	ldrne	r5, [r2], #4
+	teq	r1, r3
+	beq	.L12
 .L11:
 	ldr	r7, [r1], #4
 	eor	r9, r4, r5
 	ldr	r8, [r2], #4
 	orrs	r9, r9, r12
-	bne	.L12
+	bne	.L13
 	ldr	r4, [r1], #4
 	eor	r12, r7, r8
 	ldr	r5, [r2], #4
 	cmp	r1, r3
 	bcc	.L11
 	teq	r7, r8
-	teqeq	r4, r5
-	bne	.L12
-	mov	pc, lr
 .L12:
+	teqeq	r4, r5
+	bne	.L13
+	mov	pc, lr
+.L13:
 	bl	get_addr
 	mov	pc, r0
 	.size	verify_code, .-verify_code
@@ -387,8 +427,8 @@ cc_interrupt:
 	ldr	r4, [r2, r3]
 	mov	r10, lr
 	tst	r4, r4
-	bne	.L16
-.L13:
+	bne	.L17
+.L14:
 	bl	gen_interupt
 	mov	lr, r10
 	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
@@ -398,28 +438,28 @@ cc_interrupt:
 	str	r0, [fp, #last_count-dynarec_local]
 	sub	r10, r10, r0
 	tst	r2, r2
-	bne	.L15
+	bne	.L16
 	tst	r1, r1
 	moveq	pc, lr
-.L14:
+.L15:
 	ldr	r0, [fp, #pcaddr-dynarec_local]
 	bl	get_addr_ht
 	mov	pc, r0
-.L15:
+.L16:
 	add	r12, fp, #28
 	ldmia	r12, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
-.L16:
+.L17:
 	/* Move 'dirty' blocks to the 'clean' list */
 	lsl	r5, r2, #3
 	str	r1, [r2, r3]
-.L17:
+.L18:
 	lsrs	r4, r4, #1
 	mov	r0, r5
 	add	r5, r5, #1
 	blcs	clean_blocks
 	tst	r5, #31
-	bne	.L17
-	b	.L13
+	bne	.L18
+	b	.L14
 
 	.size	cc_interrupt, .-cc_interrupt
 	.align	2
@@ -428,6 +468,11 @@ cc_interrupt:
 do_interrupt:
 	ldr	r0, [fp, #pcaddr-dynarec_local]
 	bl	get_addr_ht
+	ldr	r1, [fp, #next_interupt-dynarec_local]
+	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
+	str	r1, [fp, #last_count-dynarec_local]
+	sub	r10, r10, r1
+	add	r10, r10, #2
 	mov	pc, r0
 	.size	do_interrupt, .-do_interrupt
 	.align	2
@@ -435,7 +480,7 @@ do_interrupt:
 	.type	fp_exception, %function
 fp_exception:
 	mov	r2, #0x10000000
-.fpe:
+.L20:
 	ldr	r1, [fp, #reg_cop0+48-dynarec_local] /* Status */
 	mov	r3, #0x80000000
 	str	r0, [fp, #reg_cop0+56-dynarec_local] /* EPC */
@@ -452,7 +497,7 @@ fp_exception:
 	.type	fp_exception_ds, %function
 fp_exception_ds:
 	mov	r2, #0x90000000 /* Set high bit if delay slot */
-	b	.fpe
+	b	.L20
 	.size	fp_exception_ds, .-fp_exception_ds
 	.align	2
 	.global	jump_syscall
@@ -494,19 +539,19 @@ jump_eret:
 	ldr	r0, [fp, #reg_cop0+56-dynarec_local] /* EPC */
 	str	r1, [fp, #last_count-dynarec_local]
 	subs	r10, r10, r1
-	bpl	.L22
-.L19:
+	bpl	.L24
+.L21:
 	add	r6, fp, #reg+256-dynarec_local
 	mov	r5, #248
 	mov	r1, #0
-.L20:
+.L22:
 	ldr	r2, [r6, #-8]!
 	ldr	r3, [r6, #4]
 	eor	r3, r3, r2, asr #31
 	subs	r3, r3, #1
 	adc	r1, r1, r1
 	subs	r5, r5, #8
-	bne	.L20
+	bne	.L22
 	ldr	r2, [fp, #hi-dynarec_local]
 	ldr	r3, [fp, #hi+4-dynarec_local]
 	eors	r3, r3, r2, asr #31
@@ -517,11 +562,11 @@ jump_eret:
 	adc	r1, r1, r1
 	bl	get_addr_32
 	mov	pc, r0
-.L22:
+.L24:
 	str	r0, [fp, #pcaddr-dynarec_local]
 	bl	cc_interrupt
 	ldr	r0, [fp, #pcaddr-dynarec_local]
-	b	.L19
+	b	.L21
 	.size	jump_eret, .-jump_eret
 	.align	2
 	.global	new_dyna_start
@@ -548,7 +593,7 @@ write_rdram_new:
 	ldr	r2, [fp, #address-dynarec_local]
 	ldr	r0, [fp, #word-dynarec_local]
 	str	r0, [r2]
-	b	.L23
+	b	.L25
 	.size	write_rdram_new, .-write_rdram_new
 	.align	2
 	.global	write_rdramb_new
@@ -558,7 +603,7 @@ write_rdramb_new:
 	ldrb	r0, [fp, #byte-dynarec_local]
 	eor	r2, r2, #3
 	strb	r0, [r2]
-	b	.L23
+	b	.L25
 	.size	write_rdramb_new, .-write_rdramb_new
 	.align	2
 	.global	write_rdramh_new
@@ -568,7 +613,7 @@ write_rdramh_new:
 	ldrh	r0, [fp, #hword-dynarec_local]
 	eor	r2, r2, #2
 	strh	r0, [r2]
-	b	.L23
+	b	.L25
 	.size	write_rdramh_new, .-write_rdramh_new
 	.align	2
 	.global	write_rdramd_new
@@ -580,14 +625,14 @@ write_rdramd_new:
 	ldr	r1, [fp, #dword+4-dynarec_local]
 	str	r0, [r2, #4]
 	str	r1, [r2]
-	b	.L23
+	b	.L25
 	.size	write_rdramd_new, .-write_rdramd_new
 	.align	2
 	.global	do_invalidate
 	.type	do_invalidate, %function
 do_invalidate:
 	ldr	r2, [fp, #address-dynarec_local]
-.L23:
+.L25:
 	ldr	r1, [fp, #invc_ptr-dynarec_local]
 	lsr	r0, r2, #12
 	ldrb	r2, [r1, r0]
@@ -764,29 +809,36 @@ tlb_exception:
 	ldr	r7, [r5, r6, lsl #2]
 	bic	r8, r3, #3
 	str	r4, [fp, #reg_cop0+48-dynarec_local] /* Status */
-	mov	r9, #0x6000000
+	mov	r6, #0x6000000
 	str	r1, [fp, #reg_cop0+52-dynarec_local] /* Cause */
-	orr	r9, r9, #0x22
+	orr	r6, r6, #0x22
 	ldr	r0, [r8, r7, lsl #2]
 	add	r4, r8, r1, asr #29
 	add	r5, fp, #reg-dynarec_local
 	str	r4, [fp, #reg_cop0+56-dynarec_local] /* EPC */
 	mov	r7, #0xf8
+	ldr	r8, [fp, #reg_cop0+16-dynarec_local] /* Context */
 	lsl	r1, r0, #16
 	lsr	r4, r0,	#26
 	and	r7, r7, r0, lsr #18
-	add	r6, fp, #reg+4-dynarec_local
+	mvn	r9, #0xF000000F
 	sub	r2, r2, r1, asr #16
-	rors	r9, r9, r4
+	bic	r9, r9, #0x0F800000
+	rors	r6, r6, r4
 	mov	r0, #0x80000000
 	ldrcs	r2, [r5, r7]
+	bic	r8, r8, r9
 	tst	r3, #2
 	str	r2, [r5, r7]
 	add	r4, r2, r1, asr #16
-	asr	r8, r2, #31
+	add	r6, fp, #reg+4-dynarec_local
+	asr	r3, r2, #31
 	str	r4, [fp, #reg_cop0+32-dynarec_local] /* BadVAddr */
 	add	r0, r0, #0x180
-	strne	r8, [r6, r7]
+	and	r4, r9, r4, lsr #9
+	strne	r3, [r6, r7]
+	orr	r8, r8, r4
+	str	r8, [fp, #reg_cop0+16-dynarec_local] /* Context */
 	bl	get_addr_ht
 	ldr	r1, [fp, #next_interupt-dynarec_local]
 	ldr	r10, [fp, #reg_cop0+36-dynarec_local] /* Count */
@@ -794,4 +846,11 @@ tlb_exception:
 	sub	r10, r10, r1
 	mov	pc, r0	
 	.size	tlb_exception, .-tlb_exception
+	.align	2
+	.global	breakpoint
+	.type	breakpoint, %function
+breakpoint:
+	/* Set breakpoint here for debugging */
+	mov	pc, lr
+	.size	breakpoint, .-breakpoint
 	.section	.note.GNU-stack,"",%progbits

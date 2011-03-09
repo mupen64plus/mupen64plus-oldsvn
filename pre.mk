@@ -209,7 +209,7 @@ ifeq ($(CPU), X86)
   endif
 endif
 ifeq ($(CPU), ARM)
-  CFLAGS += -mcpu=cortex-a8
+  CFLAGS += -mcpu=cortex-a8 -mfpu=vfp -mfloat-abi=softfp
 endif
 ifeq ($(CPU), PPC)
   CFLAGS += -mcpu=powerpc -D_BIG_ENDIAN

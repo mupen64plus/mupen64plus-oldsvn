@@ -33,14 +33,6 @@ rdram = 0x80000000
 	.type	dyna_linker, @function
 dyna_linker:
 	mov	%eax, %ebp
-/*	shr	$5, %ebp
-	mov	%eax, %ecx
-	movzwl	%bp, %edi
-	mov	never_seen(,%edi,4), %edi
-	shr	$7, %ebp
-	shr	%cl, %edi
-	test	$1, %edi
-	je	.L8*/
 	mov	%eax, %ecx
 	shr	$12, %ebp
 	cmp	$0xC0000000, %eax
@@ -120,9 +112,47 @@ dyna_linker:
 	mov	%eax, %edi
 	pusha
 	call	new_recompile_block
+	test	%eax, %eax
 	popa
-	jmp	dyna_linker
+	je	dyna_linker
+	/* pagefault */
+	mov	$0x08, %ecx
+	mov	$0x80000008, %edx
+	lea	4(%eax), %ebx
+	lea	4(%esi), %edi
+	cmovs	%edx, %ecx
+	cmovns	%eax, %ebx
+	cmovs	%edi, %esi
 	.size	dyna_linker, .-dyna_linker
+
+.globl exec_pagefault
+	.type	exec_pagefault, @function
+exec_pagefault:
+	/* eax = instruction pointer */
+	/* ebx = fault address */
+	/* ecx = cause */
+	mov	reg_cop0+48, %edx
+	mov	reg_cop0+16, %edi
+	or	$2, %edx
+	mov	%ebx, reg_cop0+32 /* BadVAddr */
+	and	$0xFF80000F, %edi
+	mov	%edx, reg_cop0+48 /* Status */
+	mov	%ecx, reg_cop0+52 /* Cause */
+	mov	%eax, reg_cop0+56 /* EPC */
+	mov	%ebx, %ecx
+	shr	$9, %ebx
+	and	$0xFFFFE000, %ecx
+	and	$0x007FFFF0, %ebx
+	mov	%ecx, reg_cop0+40 /* EntryHI */
+	or	%ebx, %edi
+	mov	%edi, reg_cop0+16 /* Context */
+	push	%esi
+	push	$0x80000000
+	call	get_addr_ht
+	pop	%esi
+	pop	%esi
+	jmp	*%eax
+	.size	exec_pagefault, .-exec_pagefault
 
 .globl jump_vaddr_eax
 	.type	jump_vaddr_eax, @function
@@ -188,28 +218,34 @@ jump_vaddr:
 .globl verify_code
 	.type	verify_code, @function
 verify_code:
+	/* eax = source */
+	/* ebx = target */
+	/* ecx = length */
 	mov	%esi, cycle_count
-	test	$7, %ecx
-	je	.L11
 	mov	-4(%eax,%ecx,1), %esi
 	mov	-4(%ebx,%ecx,1), %edi
-	add	$-4, %ecx
+	mov	%ecx, %edx
 	xor	%esi, %edi
-	jne	.L12
+	jne	.L13
+	add	$-4, %ecx
+	je	.L12
+	test	$4, %edx
+	cmove	%edx, %ecx
 .L11:
 	mov	-4(%eax,%ecx,1), %edx
 	mov	-4(%ebx,%ecx,1), %ebp
 	mov	-8(%eax,%ecx,1), %esi
 	xor	%edx, %ebp
 	mov	-8(%ebx,%ecx,1), %edi
-	jne	.L12
+	jne	.L13
 	xor	%esi, %edi
-	jne	.L12
+	jne	.L13
 	add	$-8, %ecx
 	jne	.L11
+.L12:
 	mov	cycle_count, %esi /* CCREG */
 	ret
-.L12:
+.L13:
 	add	$4, %esp /* pop return address, we're not returning */
 	call	get_addr
 	mov	cycle_count, %esi
@@ -227,8 +263,8 @@ cc_interrupt:
 	movl	$0, pending_exception
 	and	$0x7f, %esi
 	cmpl	$0, restore_candidate(,%esi,4)
-	jne	.L16
-.L13:
+	jne	.L17
+.L14:
 	call	gen_interupt
 	mov	reg_cop0+36, %esi
 	mov	next_interupt, %eax
@@ -238,11 +274,11 @@ cc_interrupt:
 	mov	%eax, last_count
 	sub	%eax, %esi
 	test	%ecx, %ecx
-	jne	.L15
+	jne	.L16
 	test	%ebx, %ebx
-	jne	.L14
+	jne	.L15
 	ret
-.L14:
+.L15:
 	mov	pcaddr, %edi
 	mov	%esi, cycle_count /* CCREG */
 	push	%edi
@@ -250,29 +286,29 @@ cc_interrupt:
 	mov	cycle_count, %esi
 	add	$8, %esp
 	jmp	*%eax
-.L15:
+.L16:
 	add	$16, %esp /* pop stack */
 	pop	%edi /* restore edi */
 	pop	%esi /* restore esi */
 	pop	%ebx /* restore ebx */
 	pop	%ebp /* restore ebp */
 	ret	     /* exit dynarec */
-.L16:
+.L17:
 	/* Move 'dirty' blocks to the 'clean' list */
 	mov	restore_candidate(,%esi,4), %ebx
 	mov	%esi, %ebp
 	movl	$0, restore_candidate(,%esi,4)
 	shl	$5, %ebp
-.L17:
+.L18:
 	shr	$1, %ebx
-	jnc	.L18
+	jnc	.L19
 	mov	%ebp, (%esp)
 	call	clean_blocks
-.L18:
+.L19:
 	inc	%ebp
 	test	$31, %ebp
-	jne	.L17
-	jmp	.L13
+	jne	.L18
+	jmp	.L14
 	.size	cc_interrupt, .-cc_interrupt
 
 .globl do_interrupt
@@ -281,8 +317,12 @@ do_interrupt:
 	mov	pcaddr, %edi
 	push	%edi
 	call	get_addr_ht
-	mov	cycle_count, %esi
 	add	$4, %esp
+	mov	reg_cop0+36, %esi
+	mov	next_interupt, %ebx
+	mov	%ebx, last_count
+	sub	%ebx, %esi
+	add	$2, %esi
 	jmp	*%eax
 	.size	do_interrupt, .-do_interrupt
 
@@ -290,7 +330,7 @@ do_interrupt:
 	.type	fp_exception, @function
 fp_exception:
 	mov	$0x1000002c, %edx
-.Lfpe:
+.L20:
 	mov	reg_cop0+48, %ebx
 	or	$2, %ebx
 	mov	%ebx, reg_cop0+48 /* Status */
@@ -308,7 +348,7 @@ fp_exception:
 	.type	fp_exception_ds, @function
 fp_exception_ds:
 	mov	$0x9000002c, %edx /* Set high bit if delay slot */
-	jmp	.Lfpe
+	jmp	.L20
 	.size	fp_exception_ds, .-fp_exception_ds
 
 .globl jump_syscall
@@ -342,11 +382,11 @@ jump_eret:
 	mov	%eax, last_count
 	sub	%eax, %esi
 	mov	reg_cop0+56, %eax /* EPC */
-	jns	.L22
-.L19:
+	jns	.L24
+.L21:
 	mov	$248, %ebx
 	xor	%edi, %edi
-.L20:
+.L22:
 	mov	reg(%ebx), %ecx
 	mov	reg+4(%ebx), %edx
 	sar	$31, %ecx
@@ -354,29 +394,31 @@ jump_eret:
 	neg	%edx
 	adc	%edi, %edi
 	sub	$8, %ebx
-	jne	.L20
+	jne	.L22
 	mov	hi(%ebx), %ecx
 	mov	hi+4(%ebx), %edx
 	sar	$31, %ecx
 	xor	%ecx, %edx
-	jne	.L21
+	jne	.L23
 	mov	lo(%ebx), %ecx
 	mov	lo+4(%ebx), %edx
 	sar	$31, %ecx
 	xor	%ecx, %edx
-.L21:
+.L23:
 	neg	%edx
 	adc	%edi, %edi
 	push	%edi
 	push	%eax
+	mov	%esi, cycle_count
 	call	get_addr_32
+	mov	cycle_count, %esi
 	add	$8, %esp
 	jmp	*%eax
-.L22:
+.L24:
 	mov	%eax, pcaddr
 	call	cc_interrupt
 	mov	pcaddr, %eax
-	jmp	.L19
+	jmp	.L21
 	.size	jump_eret, .-jump_eret
 
 .globl new_dyna_start
@@ -402,7 +444,7 @@ write_rdram_new:
 	mov	address, %edi
 	mov	word, %ecx
 	mov	%ecx, rdram-0x80000000(%edi)
-	jmp	.L23
+	jmp	.L25
 	.size	write_rdram_new, .-write_rdram_new
 
 .globl write_rdramb_new
@@ -412,7 +454,7 @@ write_rdramb_new:
 	xor	$3, %edi
 	movb	byte, %cl
 	movb	%cl, rdram-0x80000000(%edi)
-	jmp	.L23
+	jmp	.L25
 	.size	write_rdramb_new, .-write_rdramb_new
 
 .globl write_rdramh_new
@@ -422,7 +464,7 @@ write_rdramh_new:
 	xor	$2, %edi
 	movw	hword, %cx
 	movw	%cx, rdram-0x80000000(%edi)
-	jmp	.L23
+	jmp	.L25
 	.size	write_rdramh_new, .-write_rdramh_new
 
 .globl write_rdramd_new
@@ -433,7 +475,7 @@ write_rdramd_new:
 	mov	dword, %edx
 	mov	%ecx, rdram-0x80000000(%edi)
 	mov	%edx, rdram-0x80000000+4(%edi)
-	jmp	.L23
+	jmp	.L25
 	.size	write_rdramd_new, .-write_rdramd_new
 
 .globl do_invalidate
@@ -441,14 +483,14 @@ write_rdramd_new:
 do_invalidate:
 	mov	address, %edi
 	mov	%edi, %ebx /* Return ebx to caller */
-.L23:
+.L25:
 	shr	$12, %edi
 	cmpb	$1, invalid_code(%edi)
-	je	.L24
+	je	.L26
 	push	%edi
 	call	invalidate_block
 	pop	%edi
-.L24:
+.L26:
 	ret
 	.size	do_invalidate, .-do_invalidate
 
@@ -613,15 +655,21 @@ tlb_exception:
 	sub	%eax, %ebx
 	and	$0x1f, %ebp
 	ror	%cl, %edx
+	mov	reg_cop0+16, %esi
 	cmovc	reg(,%ebp,8), %ebx
+	and	$0xFF80000F, %esi
 	mov	%ebx, reg(,%ebp,8)
-	lea	(%eax, %ebx), %ecx
+	add	%ebx, %eax
 	sar	$31, %ebx
+	mov	%eax, reg_cop0+32 /* BadVAddr */
+	shr	$9, %eax
 	test	$2, %edi
-	mov	%ecx, reg_cop0+32 /* BadVAddr */
 	cmove	reg+4(,%ebp,8), %ebx
+	and	$0x007FFFF0, %eax
 	push	$0x80000180
 	mov	%ebx, reg+4(,%ebp,8)
+	or	%eax, %esi
+	mov	%esi, reg_cop0+16 /* Context */
 	call	get_addr_ht
 	pop	%esi
 	movl	next_interupt, %edi

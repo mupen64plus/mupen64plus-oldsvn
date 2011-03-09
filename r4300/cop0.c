@@ -74,7 +74,6 @@ void MTC0(void)
     break;
       case 9:    // Count
     update_count();
-    //printf("DEBUG: Wrote count\n");
     //if (next_interupt <= Count) gen_interupt();
     debug_count += Count;
     translate_event_queue(rrt & 0xFFFFFFFF);
@@ -119,12 +118,11 @@ void MTC0(void)
            }
       }
     Status = rrt;
-    //WTF? This screws up the count...
-    //PC++;
     update_count();
+    PC++;
     check_interupt();
     if (next_interupt <= Count) gen_interupt();
-    //PC--;
+    PC--;
     break;
       case 13:   // Cause
     if (rrt!=0)

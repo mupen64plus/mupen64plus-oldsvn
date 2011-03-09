@@ -240,15 +240,27 @@ void TLBWI_new(void)
 {
   unsigned int i;
   /* Remove old entries */
-  for (i=tlb_e[Index&0x3F].start_even>>12; i<=tlb_e[Index&0x3F].end_even>>12; i++)
+  unsigned int old_start_even=tlb_e[Index&0x3F].start_even;
+  unsigned int old_end_even=tlb_e[Index&0x3F].end_even;
+  unsigned int old_start_odd=tlb_e[Index&0x3F].start_odd;
+  unsigned int old_end_odd=tlb_e[Index&0x3F].end_odd;
+  for (i=old_start_even>>12; i<=old_end_even>>12; i++)
   {
     if(i<0x80000||i>0xBFFFF)
+    {
+      invalidate_mapping(i);
+      invalidate_block(i);
       memory_map[i]=-1;
+    }
   }
-  for (i=tlb_e[Index&0x3F].start_odd>>12; i<=tlb_e[Index&0x3F].end_odd>>12; i++)
+  for (i=old_start_odd>>12; i<=old_end_odd>>12; i++)
   {
     if(i<0x80000||i>0xBFFFF)
+    {
+      invalidate_mapping(i);
+      invalidate_block(i);
       memory_map[i]=-1;
+    }
   }
   TLBWI();
   //printf("TLBWI: index=%d\n",Index);
@@ -485,6 +497,81 @@ void TLBWR(void)
       }
      }
    PC++;
+}
+
+//#ifdef NEW_DYNAREC
+void TLBWR_new(void)
+{
+  unsigned int i;
+  Random = (Count/2 % (32 - Wired)) + Wired;
+  /* Remove old entries */
+  unsigned int old_start_even=tlb_e[Random&0x3F].start_even;
+  unsigned int old_end_even=tlb_e[Random&0x3F].end_even;
+  unsigned int old_start_odd=tlb_e[Random&0x3F].start_odd;
+  unsigned int old_end_odd=tlb_e[Random&0x3F].end_odd;
+  for (i=old_start_even>>12; i<=old_end_even>>12; i++)
+  {
+    if(i<0x80000||i>0xBFFFF)
+    {
+      invalidate_mapping(i);
+      invalidate_block(i);
+      memory_map[i]=-1;
+    }
+  }
+  for (i=old_start_odd>>12; i<=old_end_odd>>12; i++)
+  {
+    if(i<0x80000||i>0xBFFFF)
+    {
+      invalidate_mapping(i);
+      invalidate_block(i);
+      memory_map[i]=-1;
+    }
+  }
+  TLBWR();
+  /* Combine tlb_LUT_r, tlb_LUT_w, and invalid_code into a single table
+     for fast look up. */
+  for (i=tlb_e[Random&0x3F].start_even>>12; i<=tlb_e[Random&0x3F].end_even>>12; i++)
+  {
+    //printf("%x: r:%8x w:%8x\n",i,tlb_LUT_r[i],tlb_LUT_w[i]);
+    if(i<0x80000||i>0xBFFFF)
+    {
+      if(tlb_LUT_r[i]) {
+        memory_map[i]=((tlb_LUT_r[i]&0xFFFFF000)-(i<<12)+(unsigned int)rdram-0x80000000)>>2;
+        // FIXME: should make sure the physical page is invalid too
+        if(!tlb_LUT_w[i]||!invalid_code[i]) {
+          memory_map[i]|=0x40000000; // Write protect
+        }else{
+          assert(tlb_LUT_r[i]==tlb_LUT_w[i]);
+        }
+        if(!using_tlb) printf("Enabled TLB\n");
+        // Tell the dynamic recompiler to generate tlb lookup code
+        using_tlb=1;
+      }
+      else memory_map[i]=-1;
+    }
+    //printf("memory_map[%x]: %8x (+%8x)\n",i,memory_map[i],memory_map[i]<<2);
+  }
+  for (i=tlb_e[Random&0x3F].start_odd>>12; i<=tlb_e[Random&0x3F].end_odd>>12; i++)
+  {
+    //printf("%x: r:%8x w:%8x\n",i,tlb_LUT_r[i],tlb_LUT_w[i]);
+    if(i<0x80000||i>0xBFFFF)
+    {
+      if(tlb_LUT_r[i]) {
+        memory_map[i]=((tlb_LUT_r[i]&0xFFFFF000)-(i<<12)+(unsigned int)rdram-0x80000000)>>2;
+        // FIXME: should make sure the physical page is invalid too
+        if(!tlb_LUT_w[i]||!invalid_code[i]) {
+          memory_map[i]|=0x40000000; // Write protect
+        }else{
+          assert(tlb_LUT_r[i]==tlb_LUT_w[i]);
+        }
+        if(!using_tlb) printf("Enabled TLB\n");
+        // Tell the dynamic recompiler to generate tlb lookup code
+        using_tlb=1;
+      }
+      else memory_map[i]=-1;
+    }
+    //printf("memory_map[%x]: %8x (+%8x)\n",i,memory_map[i],memory_map[i]<<2);
+  }
 }
 
 void TLBP(void)

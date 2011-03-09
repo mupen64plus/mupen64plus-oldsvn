@@ -84,6 +84,16 @@ int get_pointer(void *stub)
   return *((int *)i_ptr)+(int)i_ptr+4;
 }
 
+// Find the "clean" entry point from a "dirty" entry point
+// by skipping past the call to verify_code
+u_int get_clean_addr(int addr)
+{
+  u_char *ptr=(u_char *)addr;
+  assert(ptr[21]==0xE8); // call instruction
+  if(ptr[26]==0xE9) return *(u_int *)(ptr+27)+addr+31; // follow jmp
+  else return(addr+26);
+}
+
 int verify_dirty(int addr)
 {
   u_char *ptr=(u_char *)addr;
@@ -91,8 +101,36 @@ int verify_dirty(int addr)
   u_int source=*(u_int *)(ptr+1);
   u_int copy=*(u_int *)(ptr+6);
   u_int len=*(u_int *)(ptr+11);
+  //printf("source=%x source-rdram=%x\n",source,source-(int)rdram);
+  if(!((source-(u_int)rdram+4)&0xFFF)) {
+    u_char *ptr2=(u_char *)get_clean_addr(addr);
+    if(ptr2[0]==0xb8) // mov $imm,%eax
+      if(ptr2[5]==0x39&&ptr2[6]==5) // cmp mapaddr,%eax
+        if(*(u_int *)(ptr2+11)==0x0018840f) // je +24
+        {
+          u_int *mapaddr=(u_int *)(*(u_int *)(ptr2+7)+((u_int)ptr2+11)); // rip-relative on x86-64
+          u_int value=*(u_int *)(ptr2+1);
+          //printf("mapaddr=%x value=%x\n",(int)mapaddr,value);
+          fflush(stdout);
+          if(*mapaddr!=value) return 0;
+        }
+  }
   //printf("verify_dirty: %x %x %x\n",source,copy,len);
   return !memcmp((void *)source,(void *)copy,len);
+}
+
+// This doesn't necessarily find all clean entry points, just
+// guarantees that it's not dirty
+int isclean(int addr)
+{
+  u_char *ptr=(u_char *)addr;
+  if(ptr[0]!=0xB8) return 1; // mov imm,%eax
+  if(ptr[5]!=0xBB) return 1; // mov imm,%ebx
+  if(ptr[10]!=0xB9) return 1; // mov imm,%ecx
+  if(ptr[15]!=0x41) return 1; // rex prefix
+  if(ptr[16]!=0xBC) return 1; // mov imm,%r12d
+  if(ptr[21]!=0xE8) return 1; // call instruction
+  return 0;
 }
 
 void get_bounds(int addr,u_int *start,u_int *end)
@@ -104,16 +142,6 @@ void get_bounds(int addr,u_int *start,u_int *end)
   u_int len=*(u_int *)(ptr+11);
   *start=source;
   *end=source+len;
-}
-
-// Find the "clean" entry point from a "dirty" entry point
-// by skipping past the call to verify_code
-u_int get_clean_addr(int addr)
-{
-  u_char *ptr=(u_char *)addr;
-  assert(ptr[21]==0xE8); // call instruction
-  if(ptr[26]==0xE9) return *(u_int *)(ptr+27)+addr+31; // follow jmp
-  else return(addr+26);
 }
 
 /* Register allocation */
@@ -2177,6 +2205,16 @@ void emit_cmpmem_indexed(int addr,int rs,int rt)
   output_w32(addr);
 }
 
+// special case for checking memory_map in verify_mapping
+void emit_cmpmem(int addr,int rt)
+{
+  assert(rt>=0&&rt<8);
+  assem_debug("cmp %x,%%%s\n",addr,regname[rt]);
+  output_byte(0x39);
+  output_modrm(0,5,rt);
+  output_w32((int)addr-(int)out-4); // Note: rip-relative in 64-bit mode
+}
+
 // Used to preload hash table entries
 void emit_prefetch(void *addr)
 {
@@ -2763,6 +2801,25 @@ generate_map_const(u_int addr,int reg) {
   // void *mapaddr=memory_map+(addr>>12);
 }
 
+/* Verify that the mapping hasn't changed */
+void verify_mapping(u_int addr)
+{
+  assem_debug("verify_mapping\n");
+  assert(!((addr+4)&0xFFF));
+  u_int orig=memory_map[(addr+4)>>12];
+  emit_movimm(orig,EAX);
+  emit_cmpmem((int)&memory_map[(addr+4)>>12],EAX);
+  u_int branch=(u_int)out;
+  emit_jeq(0);
+  emit_movimm(addr,EDI);
+  emit_mov(EDI,EBX);
+  emit_call((int)remove_hash);
+  emit_mov(EBX,EDI);
+  emit_call((int)invalidate_addr);
+  emit_jmp((int)jump_vaddr_ebx);
+  set_jump_target(branch,(int)out);
+}
+
 /* Special assem */
 
 void shift_assemble_x86(int i,struct regstat *i_regs)
@@ -2850,15 +2907,17 @@ void shift_assemble_x86(int i,struct regstat *i_regs)
           if(tl==ECX&&sl!=ECX) {
             if(shift!=ECX) emit_mov(shift,ECX);
             if(sl!=shift) emit_mov(sl,shift);
+            if(th>=0 && sh!=th) emit_mov(sh,th);
           }
           else if(th==ECX&&sh!=ECX) {
             if(shift!=ECX) emit_mov(shift,ECX);
             if(sh!=shift) emit_mov(sh,shift);
+            if(sl!=tl) emit_mov(sl,tl);
           }
           else
           {
             if(sl!=tl) emit_mov(sl,tl);
-            if(sh!=th) emit_mov(sh,th);
+            if(th>=0 && sh!=th) emit_mov(sh,th);
             if(shift!=ECX) {
               if(i_regs->regmap[ECX]<0)
                 emit_mov(shift,ECX);
@@ -2927,7 +2986,7 @@ void loadlr_assemble_x86(int i,struct regstat *i_regs)
   if(offset||s<0||c) addr=temp2;
   else addr=s;
   if(s>=0) {
-    c=(wasconst[i]>>s)&1;
+    c=(i_regs->wasconst>>s)&1;
     memtarget=((signed int)(constmap[i][s]+offset))<(signed int)0x80800000;
     if(using_tlb&&((signed int)(constmap[i][s]+offset))>=(signed int)0xC0000000) memtarget=1;
   }
@@ -3146,9 +3205,16 @@ void cop0_assemble(int i,struct regstat *i_regs)
       emit_call((int)TLBR);
     if((source[i]&0x3f)==0x02) // TLBWI
       emit_call((int)TLBWI_new);
-    assert((source[i]&0x3f)!=0x06); // FIXME
-    //if((source[i]&0x3f)==0x06) // TLBWR
-    //  emit_call((int)TLBWR);
+    if((source[i]&0x3f)==0x06) { // TLBWR
+      // The TLB entry written by TLBWR is dependent on the count,
+      // so update the cycle count
+      emit_readword((int)&last_count,ECX);
+      if(i_regs->regmap[HOST_CCREG]!=CCREG) emit_loadreg(CCREG,HOST_CCREG);
+      emit_add(HOST_CCREG,ECX,HOST_CCREG);
+      emit_addimm(HOST_CCREG,CLOCK_DIVIDER*ccadj[i],HOST_CCREG);
+      emit_writeword(HOST_CCREG,(int)&Count);
+      emit_call((int)TLBWR_new);
+    }
     if((source[i]&0x3f)==0x08) // TLBP
       emit_call((int)TLBP);
     if((source[i]&0x3f)==0x18) // ERET
@@ -3247,7 +3313,7 @@ void cop1_assemble(int i,struct regstat *i_regs)
   }
   else if (opcode2[i]==5) { // DMTC1
     char sl=get_reg(i_regs->regmap,rs1[i]);
-    char sh=get_reg(i_regs->regmap,rs1[i]|64);
+    char sh=rs1[i]>0?get_reg(i_regs->regmap,rs1[i]|64):sl;
     char temp=get_reg(i_regs->regmap,-1);
     emit_readword((int)&reg_cop1_double[(source[i]>>11)&0x1f],temp);
     emit_writeword_indexed(sh,4,temp);

@@ -12,3 +12,7 @@
 #define USE_MINI_HT 1
 
 #define BASE_ADDR 0x70000000 // Code generator target address
+
+/* x86 calling convention:
+   caller-save: %eax %ecx %edx
+   callee-save: %ebp %ebx %esi %edi */
