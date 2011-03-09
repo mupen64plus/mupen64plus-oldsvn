@@ -45,6 +45,7 @@
 
 #define MAXBLOCK 4096
 #define BASE_ADDR 0x7000000 // Code generator target address
+#define MAX_OUTPUT_BLOCK_SIZE 262144
 #define TARGET_SIZE_2 24 // 2^24 = 16 megabytes
 
 struct regstat
@@ -721,7 +722,8 @@ void ll_remove_matching_addrs(struct ll_entry **head,int addr,int shift)
 {
   struct ll_entry *next;
   while(*head) {
-    if(((u_int)((*head)->addr)>>shift)==(addr>>shift))
+    if(((u_int)((*head)->addr)>>shift)==(addr>>shift) || 
+       ((u_int)((*head)->addr-MAX_OUTPUT_BLOCK_SIZE)>>shift)==(addr>>shift))
     {
       inv_debug("EXP: Remove pointer to %x (%x)\n",(int)(*head)->addr,(*head)->vaddr);
       next=(*head)->next;
@@ -754,8 +756,10 @@ void ll_clear(struct ll_entry **head)
 void ll_kill_pointers(struct ll_entry *head,int addr,int shift)
 {
   while(head) {
-    inv_debug("EXP: Lookup pointer to %x at %x (%x)\n",(int)get_pointer(head->addr),(int)head->addr,head->vaddr);
-    if((get_pointer(head->addr)>>shift)==(addr>>shift))
+    int ptr=get_pointer(head->addr);
+    inv_debug("EXP: Lookup pointer to %x at %x (%x)\n",(int)ptr,(int)head->addr,head->vaddr);
+    if(((ptr>>shift)==(addr>>shift)) ||
+       (((ptr-MAX_OUTPUT_BLOCK_SIZE)>>shift)==(addr>>shift)))
     {
       inv_debug("EXP: Kill pointer at %x (%x)\n",(int)head->addr,head->vaddr);
       kill_pointer(head->addr);
@@ -800,7 +804,7 @@ void invalidate_addr(u_int addr)
 // Add an entry to jump_out after making a link
 void add_link(u_int vaddr,void *src)
 {
-  //printf("add_link: %x -> %x\n",vaddr,(int)src);
+  inv_debug("add_link: %x -> %x\n",(int)src,vaddr);
   u_int page=(vaddr^0x80000000)>>12;
   if(page>2048) page=2048;
   ll_add(jump_out+page,vaddr,src);
@@ -6370,8 +6374,10 @@ void new_recompile_block(int addr)
       }
       // Don't recompile stuff that's already compiled
       if(check_addr((u_int)addr+i*4+4)) done=1;
-      //done=1;
+      // Don't get too close to the limit
+      if(i>MAXBLOCK-1024) done=1;
     }
+    assert(i<MAXBLOCK-1);
     if (i==MAXBLOCK-1) done=1;
   }
   slen=i; // FIXME: what if last instruction is a jump?
@@ -7930,13 +7936,10 @@ void new_recompile_block(int addr)
   }
   // Write out the literal pool if necessary
   literal_pool(0);
+  assert((u_int)out-*instr_addr<MAX_OUTPUT_BLOCK_SIZE);
   //printf("shadow buffer: %x-%x\n",(int)copy,(int)copy+slen*4);
   memcpy(copy,source,slen*4);
   copy+=slen*4;
-  
-  // If we're within 64K of the end of the buffer,
-  // start over from the beginning. (Is 64K enough?)
-  if((int)out>BASE_ADDR+(1<<TARGET_SIZE_2)-65536) out=(u_char *)BASE_ADDR;
   
   // Trap writes to any of the pages we compiled
   for(i=start>>12;i<=(start+slen*4)>>12;i++) invalid_code[i]=0;
@@ -7944,6 +7947,10 @@ void new_recompile_block(int addr)
   #ifdef __arm__
   __clear_cache((void *)*instr_addr,out);
   #endif
+  
+  // If we're within 256K of the end of the buffer,
+  // start over from the beginning. (Is 256K enough?)
+  if((int)out>BASE_ADDR+(1<<TARGET_SIZE_2)-MAX_OUTPUT_BLOCK_SIZE) out=(u_char *)BASE_ADDR;
   
   /* Pass 10 - Free memory by expiring oldest blocks */
   
@@ -7974,11 +7981,13 @@ void new_recompile_block(int addr)
         // Clear hash table
         for(i=0;i<32;i++) {
           int *ht_bin=hash_table[((expirep&2047)<<5)+i];
-          if((ht_bin[3]>>shift)==(base>>shift)) {
+          if((ht_bin[3]>>shift)==(base>>shift) ||
+             ((ht_bin[3]-MAX_OUTPUT_BLOCK_SIZE)>>shift)==(base>>shift)) {
             inv_debug("EXP: Remove hash %x -> %x\n",ht_bin[2],ht_bin[3]);
             ht_bin[2]=ht_bin[3]=-1;
           }
-          if((ht_bin[1]>>shift)==(base>>shift)) {
+          if((ht_bin[1]>>shift)==(base>>shift) ||
+             ((ht_bin[1]-MAX_OUTPUT_BLOCK_SIZE)>>shift)==(base>>shift)) {
             inv_debug("EXP: Remove hash %x -> %x\n",ht_bin[0],ht_bin[1]);
             ht_bin[0]=ht_bin[2];
             ht_bin[1]=ht_bin[3];
@@ -7987,6 +7996,10 @@ void new_recompile_block(int addr)
         break;
       case 3:
         // Clear jump_out
+        #ifdef __arm__
+        if((expirep&2047)==0)
+          __clear_cache((void *)BASE_ADDR,(void *)BASE_ADDR+(1<<TARGET_SIZE_2));
+        #endif
         ll_remove_matching_addrs(jump_out+(expirep&2047),base,shift);
         if((expirep&2047)==2047)
           ll_remove_matching_addrs(jump_out+2048,base,shift);
