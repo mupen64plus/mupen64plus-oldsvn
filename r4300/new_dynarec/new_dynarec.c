@@ -3098,11 +3098,6 @@ void store_assemble(int i,struct regstat *i_regs)
     }
     type=STORED_STUB;
   }
-  if(jaddr) {
-    add_stub(type,jaddr,(int)out,i,addr,(int)i_regs,ccadj[i],reglist);
-  } else if(!memtarget) {
-    inline_writestub(type,i,constmap[i][s]+offset,i_regs->regmap,rs2[i],ccadj[i],reglist);
-  }
   if(!using_tlb) {
     if(!c||memtarget) {
       #ifdef DESTRUCTIVE_SHIFT
@@ -3121,6 +3116,11 @@ void store_assemble(int i,struct regstat *i_regs)
       emit_jne(0);
       add_stub(INVCODE_STUB,jaddr2,(int)out,reglist|(1<<HOST_CCREG),addr,0,0,0);
     }
+  }
+  if(jaddr) {
+    add_stub(type,jaddr,(int)out,i,addr,(int)i_regs,ccadj[i],reglist);
+  } else if(c&&!memtarget) {
+    inline_writestub(type,i,constmap[i][s]+offset,i_regs->regmap,rs2[i],ccadj[i],reglist);
   }
   //if(opcode[i]==0x2B || opcode[i]==0x3F)
   //if(opcode[i]==0x2B || opcode[i]==0x28)
