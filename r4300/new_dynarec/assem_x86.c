@@ -1753,11 +1753,11 @@ void emit_readword_tlb(int addr, int map, int rt)
   if(map<0) emit_readword(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("mov (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("mov (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x8B);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_readword_indexed_tlb(int addr, int rs, int map, int rt)
@@ -1799,8 +1799,8 @@ void emit_readdword_tlb(int addr, int map, int rh, int rl)
     emit_readword(addr+(int)rdram-0x7FFFFFFC, rl);
   }
   else {
-    if(rh>=0) emit_movmem_indexedx4(addr+(int)rdram-0x80000000, map, rh);
-    emit_movmem_indexedx4(addr+(int)rdram-0x7FFFFFFC, map, rl);
+    if(rh>=0) emit_movmem_indexedx4(addr, map, rh);
+    emit_movmem_indexedx4(addr+4, map, rl);
   }
 }
 void emit_readdword_indexed_tlb(int addr, int rs, int map, int rh, int rl)
@@ -1830,12 +1830,12 @@ void emit_movsbl_tlb(int addr, int map, int rt)
   if(map<0) emit_movsbl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movsbl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movsbl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xBE);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movsbl_indexed_tlb(int addr, int rs, int map, int rt)
@@ -1884,12 +1884,12 @@ void emit_movswl_tlb(int addr, int map, int rt)
   if(map<0) emit_movswl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movswl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movswl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xBF);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movzbl(int addr, int rt)
@@ -1913,12 +1913,12 @@ void emit_movzbl_tlb(int addr, int map, int rt)
   if(map<0) emit_movzbl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movzbl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movzbl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xB6);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movzbl_indexed_tlb(int addr, int rs, int map, int rt)
@@ -1967,12 +1967,12 @@ void emit_movzwl_tlb(int addr, int map, int rt)
   if(map<0) emit_movzwl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movzwl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movzwl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xB7);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movzwl_reg(int rs, int rt)
@@ -2023,7 +2023,7 @@ void emit_writeword_tlb(int rt, int addr, int map)
   if(map<0) {
     emit_writeword(rt, addr+(int)rdram-0x80000000);
   } else {
-    emit_writeword_indexed(rt, addr+(int)rdram-0x80000000, map);
+    emit_writeword_indexed(rt, addr, map);
   }
 }
 void emit_writeword_indexed_tlb(int rt, int addr, int rs, int map, int temp)
@@ -2058,8 +2058,8 @@ void emit_writedword_tlb(int rh, int rl, int addr, int map)
     emit_writeword(rl, addr+(int)rdram-0x7FFFFFFC);
   }
   else {
-    emit_writeword_indexed(rh, addr+(int)rdram-0x80000000, map);
-    emit_writeword_indexed(rl, addr+(int)rdram-0x7FFFFFFC, map);
+    emit_writeword_indexed(rh, addr, map);
+    emit_writeword_indexed(rl, addr+4, map);
   }
 }
 void emit_writedword_indexed_tlb(int rh, int rl, int addr, int rs, int map, int temp)
@@ -2096,7 +2096,7 @@ void emit_writehword_tlb(int rt, int addr, int map)
   if(map<0) {
     emit_writehword(rt, addr+(int)rdram-0x80000000);
   } else {
-    emit_writehword_indexed(rt, addr+(int)rdram-0x80000000, map);
+    emit_writehword_indexed(rt, addr, map);
   }
 }
 void emit_writebyte(int rt, int addr)
@@ -2141,7 +2141,7 @@ void emit_writebyte_tlb(int rt, int addr, int map)
   if(map<0) {
     emit_writebyte(rt, addr+(int)rdram-0x80000000);
   } else {
-    emit_writebyte_indexed(rt, addr+(int)rdram-0x80000000, map);
+    emit_writebyte_indexed(rt, addr, map);
   }
 }
 void emit_writebyte_indexed_tlb(int rt, int addr, int rs, int map, int temp)
