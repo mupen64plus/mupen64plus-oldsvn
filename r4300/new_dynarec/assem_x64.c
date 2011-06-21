@@ -2700,14 +2700,14 @@ void save_regs(u_int reglist)
       }
     }
   }
-  emit_addimm(ESP,-(8-count)*8,ESP);
+  emit_addimm64(ESP,-(8-count)*8,ESP);
 }
 // Restore registers after function call
 void restore_regs(u_int reglist)
 {
   int hr;
   int count=count_bits(reglist);
-  emit_addimm(ESP,(8-count)*8,ESP);
+  emit_addimm64(ESP,(8-count)*8,ESP);
   if(count) {
     for(hr=HOST_REGS-1;hr>=0;hr--) {
       if(hr!=EXCLUDE_REG) {
