@@ -1215,9 +1215,9 @@ void emit_addimm64_32(int rsh,int rsl,int imm,int rth,int rtl)
 
 void emit_sbb(int rs1,int rs2)
 {
-  assem_debug("sbb %%%s,%%%s\n",regname[rs2],regname[rs1]);
+  assem_debug("sbb %%%s,%%%s\n",regname[rs1],regname[rs2]);
   output_byte(0x19);
-  output_modrm(3,rs1,rs2);
+  output_modrm(3,rs2,rs1);
 }
 
 void emit_andimm(int rs,int imm,int rt)
@@ -1665,7 +1665,7 @@ void emit_set_if_less64_32(int u1, int l1, int u2, int l2, int rt)
   assert(u2!=rt);
   emit_cmp(l1,l2);
   emit_mov(u1,rt);
-  emit_sbb(rt,u2);
+  emit_sbb(u2,rt);
   emit_movimm(0,rt);
   emit_cmovl(&const_one,rt);
 }
@@ -1676,7 +1676,7 @@ void emit_set_if_carry64_32(int u1, int l1, int u2, int l2, int rt)
   assert(u2!=rt);
   emit_cmp(l1,l2);
   emit_mov(u1,rt);
-  emit_sbb(rt,u2);
+  emit_sbb(u2,rt);
   emit_movimm(0,rt);
   emit_adcimm(0,rt);
 }
