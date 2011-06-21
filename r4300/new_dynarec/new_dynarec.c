@@ -125,7 +125,7 @@ struct ll_entry
   struct ll_entry *jump_out[4096];
   struct ll_entry *jump_dirty[4096];
   u_int hash_table[65536][4]  __attribute__((aligned(16)));
-  char shadow[1048576]  __attribute__((aligned(16)));
+  char shadow[2097152]  __attribute__((aligned(16)));
   void *copy;
   int expirep;
   u_int using_tlb;
