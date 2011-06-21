@@ -1288,7 +1288,7 @@ void emit_rorimm(int rs,u_int imm,int rt)
   }
   else {
     emit_mov(rs,rt);
-    emit_sarimm(rt,imm,rt);
+    emit_rorimm(rt,imm,rt);
   }
 }
 
