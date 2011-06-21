@@ -73,6 +73,9 @@ endif
 ifeq ($(LIRC), 1)
   CFLAGS += -DWITH_LIRC
 endif
+ifeq ($(HAVE_OPENGL), 1)
+  CFLAGS += -DHAVE_OPENGL
+endif
 ifeq ($(GUI), NONE)
   CFLAGS += -DNO_GUI
 else
@@ -270,10 +273,14 @@ SHARE = $(shell grep CONFIG_PATH config.h | cut -d '"' -f 2)
 
 # set primary objects and libraries for all outputs
 ALL = mupen64plus $(PLUGINS)
-OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC) $(OBJ_OPENGL)
-LIBS = $(SDL_LIBS) $(LIBGL_LIBS)
+OBJECTS = $(OBJ_CORE) $(OBJ_DYNAREC)
+LIBS = $(SDL_LIBS)
 
 # add extra objects and libraries for selected options
+ifeq ($(HAVE_OPENGL), 1)
+  OBJECTS += $(OBJ_OPENGL)
+  LIBS += $(LIBGL_LIBS)
+endif
 ifeq ($(DBG), 1)
   OBJECTS +=  $(OBJ_DBG) $(OBJ_GTK_DBG_GUI)
   LIBS += -lopcodes -lbfd

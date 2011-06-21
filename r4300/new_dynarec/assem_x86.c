@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - assem_x86.c                                             *
- *   Copyright (C) 2009-2010 Ari64                                         *
+ *   Copyright (C) 2009-2011 Ari64                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -657,15 +657,20 @@ void alloc_reg_temp(struct regstat *cur,int i,signed char reg)
 void alloc_x86_reg(struct regstat *cur,int i,signed char reg,char hr)
 {
   int n;
+  int dirty=0;
   
   // see if it's already allocated (and dealloc it)
   for(n=0;n<HOST_REGS;n++)
   {
-    if(n!=ESP&&cur->regmap[n]==reg) {cur->regmap[n]=-1;}
+    if(n!=ESP&&cur->regmap[n]==reg) {
+      dirty=(cur->dirty>>n)&1;
+      cur->regmap[n]=-1;
+    }
   }
   
   cur->regmap[hr]=reg;
   cur->dirty&=~(1<<hr);
+  cur->dirty|=dirty<<hr;
   cur->isconst&=~(1<<hr);
 }
 
@@ -1150,9 +1155,9 @@ void emit_addimm64_32(int rsh,int rsl,int imm,int rth,int rtl)
 
 void emit_sbb(int rs1,int rs2)
 {
-  assem_debug("sbb %%%s,%%%s\n",regname[rs2],regname[rs1]);
+  assem_debug("sbb %%%s,%%%s\n",regname[rs1],regname[rs2]);
   output_byte(0x19);
-  output_modrm(3,rs1,rs2);
+  output_modrm(3,rs2,rs1);
 }
 
 void emit_andimm(int rs,int imm,int rt)
@@ -1288,7 +1293,7 @@ void emit_rorimm(int rs,u_int imm,int rt)
   }
   else {
     emit_mov(rs,rt);
-    emit_sarimm(rt,imm,rt);
+    emit_rorimm(rt,imm,rt);
   }
 }
 
@@ -1582,7 +1587,7 @@ void emit_set_if_less64_32(int u1, int l1, int u2, int l2, int rt)
   assert(u2!=rt);
   emit_cmp(l1,l2);
   emit_mov(u1,rt);
-  emit_sbb(rt,u2);
+  emit_sbb(u2,rt);
   emit_movimm(0,rt);
   emit_cmovl(&const_one,rt);
 }
@@ -1593,7 +1598,7 @@ void emit_set_if_carry64_32(int u1, int l1, int u2, int l2, int rt)
   assert(u2!=rt);
   emit_cmp(l1,l2);
   emit_mov(u1,rt);
-  emit_sbb(rt,u2);
+  emit_sbb(u2,rt);
   emit_movimm(0,rt);
   emit_adcimm(0,rt);
 }
@@ -1753,11 +1758,11 @@ void emit_readword_tlb(int addr, int map, int rt)
   if(map<0) emit_readword(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("mov (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("mov (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x8B);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_readword_indexed_tlb(int addr, int rs, int map, int rt)
@@ -1799,8 +1804,8 @@ void emit_readdword_tlb(int addr, int map, int rh, int rl)
     emit_readword(addr+(int)rdram-0x7FFFFFFC, rl);
   }
   else {
-    if(rh>=0) emit_movmem_indexedx4(addr+(int)rdram-0x80000000, map, rh);
-    emit_movmem_indexedx4(addr+(int)rdram-0x7FFFFFFC, map, rl);
+    if(rh>=0) emit_movmem_indexedx4(addr, map, rh);
+    emit_movmem_indexedx4(addr+4, map, rl);
   }
 }
 void emit_readdword_indexed_tlb(int addr, int rs, int map, int rh, int rl)
@@ -1830,12 +1835,12 @@ void emit_movsbl_tlb(int addr, int map, int rt)
   if(map<0) emit_movsbl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movsbl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movsbl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xBE);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movsbl_indexed_tlb(int addr, int rs, int map, int rt)
@@ -1884,12 +1889,12 @@ void emit_movswl_tlb(int addr, int map, int rt)
   if(map<0) emit_movswl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movswl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movswl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xBF);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movzbl(int addr, int rt)
@@ -1913,12 +1918,12 @@ void emit_movzbl_tlb(int addr, int map, int rt)
   if(map<0) emit_movzbl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movzbl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movzbl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xB6);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movzbl_indexed_tlb(int addr, int rs, int map, int rt)
@@ -1967,12 +1972,12 @@ void emit_movzwl_tlb(int addr, int map, int rt)
   if(map<0) emit_movzwl(addr+(int)rdram-0x80000000, rt);
   else
   {
-    assem_debug("movzwl (%x,%%%s,4),%%%s\n",addr+(int)rdram-0x80000000,regname[map],regname[rt]);
+    assem_debug("movzwl (%x,%%%s,4),%%%s\n",addr,regname[map],regname[rt]);
     output_byte(0x0F);
     output_byte(0xB7);
     output_modrm(0,4,rt);
     output_sib(2,map,5);
-    output_w32(addr+(int)rdram-0x80000000);
+    output_w32(addr);
   }
 }
 void emit_movzwl_reg(int rs, int rt)
@@ -2023,7 +2028,7 @@ void emit_writeword_tlb(int rt, int addr, int map)
   if(map<0) {
     emit_writeword(rt, addr+(int)rdram-0x80000000);
   } else {
-    emit_writeword_indexed(rt, addr+(int)rdram-0x80000000, map);
+    emit_writeword_indexed(rt, addr, map);
   }
 }
 void emit_writeword_indexed_tlb(int rt, int addr, int rs, int map, int temp)
@@ -2058,8 +2063,8 @@ void emit_writedword_tlb(int rh, int rl, int addr, int map)
     emit_writeword(rl, addr+(int)rdram-0x7FFFFFFC);
   }
   else {
-    emit_writeword_indexed(rh, addr+(int)rdram-0x80000000, map);
-    emit_writeword_indexed(rl, addr+(int)rdram-0x7FFFFFFC, map);
+    emit_writeword_indexed(rh, addr, map);
+    emit_writeword_indexed(rl, addr+4, map);
   }
 }
 void emit_writedword_indexed_tlb(int rh, int rl, int addr, int rs, int map, int temp)
@@ -2096,7 +2101,7 @@ void emit_writehword_tlb(int rt, int addr, int map)
   if(map<0) {
     emit_writehword(rt, addr+(int)rdram-0x80000000);
   } else {
-    emit_writehword_indexed(rt, addr+(int)rdram-0x80000000, map);
+    emit_writehword_indexed(rt, addr, map);
   }
 }
 void emit_writebyte(int rt, int addr)
@@ -2141,7 +2146,7 @@ void emit_writebyte_tlb(int rt, int addr, int map)
   if(map<0) {
     emit_writebyte(rt, addr+(int)rdram-0x80000000);
   } else {
-    emit_writebyte_indexed(rt, addr+(int)rdram-0x80000000, map);
+    emit_writebyte_indexed(rt, addr, map);
   }
 }
 void emit_writebyte_indexed_tlb(int rt, int addr, int rs, int map, int temp)
@@ -2734,6 +2739,16 @@ inline_readstub(int type, int i, u_int addr, signed char regmap[], int target, i
   emit_writeword(rs,(int)&address);
   #endif
   emit_pusha();
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   int cc=get_reg(regmap,CCREG);
   int temp;
   if(cc<0) {
@@ -2915,6 +2930,16 @@ inline_writestub(int type, int i, u_int addr, signed char regmap[], int target, 
     emit_writeword(target?rth:rt,(int)&dword+4);
   }
   emit_pusha();
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   int cc=get_reg(regmap,CCREG);
   int temp;
   if(cc<0) {
@@ -3300,6 +3325,7 @@ void loadlr_assemble_x86(int i,struct regstat *i_regs)
     }
     map=get_reg(i_regs->regmap,TLREG);
     assert(map>=0);
+    reglist&=~(1<<map);
     map=do_tlb_r(addr,temp2,map,-1,0,a,c?-1:temp,c,constmap[i][s]+offset);
     if(c) {
       if (opcode[i]==0x22||opcode[i]==0x26) {

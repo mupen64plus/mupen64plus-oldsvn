@@ -28,10 +28,12 @@ ifeq ("$(UNAME)","x86_64")
   else
     ARCH = 64BITS
   endif
+  HAVE_OPENGL = 1
 endif
 ifneq ("$(filter i%86,$(UNAME))","")
   CPU = X86
   ARCH = 32BITS
+  HAVE_OPENGL = 1
 endif
 ifeq ("$(UNAME)","ppc")
   CPU = PPC

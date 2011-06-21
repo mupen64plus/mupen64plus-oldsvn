@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <limits.h> // PATH_MAX
 
+#include "messagebox.h"
 #include "stdafx.h"
 #include "../main/version.h"
 
@@ -2074,7 +2075,6 @@ uint32 CountryCodeToTVSystem(uint32 countryCode)
     return system;
 }
 #include <gtk/gtk.h>
-#include "messagebox.h"
 
 typedef struct
 {

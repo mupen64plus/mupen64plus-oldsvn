@@ -216,8 +216,10 @@ void main_message(unsigned int console, unsigned int statusbar, unsigned int osd
     buffer[2048]='\0';
     va_end(ap);
 
+#ifdef HAVE_OPENGL
     if (g_OsdEnabled && osd)
         osd_new_message(osd_corner, buffer);
+#endif
 #ifndef NO_GUI
     if (l_GuiEnabled && statusbar)
         gui_message(GUI_MESSAGE_INFO, buffer);
@@ -337,6 +339,7 @@ void main_advance_one(void)
 
 void main_draw_volume_osd(void)
 {
+#ifdef HAVE_OPENGL
     char msgString[32];
     const char *volString;
 
@@ -362,6 +365,7 @@ void main_draw_volume_osd(void)
         osd_update_message(l_volMsg, msgString);
     else
         l_volMsg = osd_new_message(OSD_MIDDLE_CENTER, msgString);
+#endif
 }
 
 /* this function could be called as a result of a keypress, joystick/button movement,
@@ -520,11 +524,13 @@ int pauseContinueEmulation(void)
         g_romcache.rcspause = 1;
 #endif
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Emulation continued.\n"));
+#ifdef HAVE_OPENGL
         if(msg)
         {
             osd_delete_message(msg);
             msg = NULL;
         }
+#endif
     }
     else
     {
@@ -532,12 +538,16 @@ int pauseContinueEmulation(void)
         gui_set_state(GUI_STATE_PAUSED);
         g_romcache.rcspause = 0;
 #endif
+#ifdef HAVE_OPENGL
         if(msg)
             osd_delete_message(msg);
+#endif
 
         main_message(0, 1, 0, OSD_BOTTOM_LEFT, tr("Paused\n"));
+#ifdef HAVE_OPENGL
         msg = osd_new_message(OSD_MIDDLE_CENTER, tr("Paused\n"));
         osd_message_set_static(msg);
+#endif
     }
 
     rompause = !rompause;
@@ -550,6 +560,7 @@ int pauseContinueEmulation(void)
 
 void video_plugin_render_callback(void)
 {
+#ifdef HAVE_OPENGL
     // if the flag is set to take a screenshot, then grab it now
     if (g_TakeScreenshot != 0)
     {
@@ -562,6 +573,7 @@ void video_plugin_render_callback(void)
     {
         osd_render();
     }
+#endif
 }
 
 void new_frame(void)
@@ -725,8 +737,10 @@ static int sdl_event_filter( const SDL_Event *event )
                 l_SpeedFactor = 250;
                 setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                 // set fast-forward indicator
+#ifdef HAVE_OPENGL
                 msgFF = osd_new_message(OSD_TOP_RIGHT, tr("Fast Forward"));
                 osd_message_set_static(msgFF);
+#endif
             }
             else if (event->key.keysym.sym == config_get_number("Kbd Mapping Frame Advance", SDLK_SLASH))
                 main_advance_one();
@@ -746,7 +760,9 @@ static int sdl_event_filter( const SDL_Event *event )
                 l_SpeedFactor = SavedSpeedFactor;
                 setSpeedFactor(l_SpeedFactor);  // call to audio plugin
                 // remove message
+#ifdef HAVE_OPENGL
                 osd_delete_message(msgFF);
+#endif
             }
             else keyUp( 0, event->key.keysym.sym );
 
@@ -872,6 +888,7 @@ static int emulationThread( void *_arg )
     if (g_Fullscreen)
         changeWindow();
 
+#ifdef HAVE_OPENGL
     if (g_OsdEnabled)
     {
         // init on-screen display
@@ -885,6 +902,7 @@ static int emulationThread( void *_arg )
         }
         osd_init(width, height);
     }
+#endif
 
     // setup rendering callback from video plugin to the core, for screenshots and On-Screen-Display
     setRenderingCallback(video_plugin_render_callback);
@@ -907,7 +925,9 @@ static int emulationThread( void *_arg )
     cheat_load_current_rom();
 
     /* Startup message on the OSD */
+#ifdef HAVE_OPENGL
     osd_new_message(OSD_MIDDLE_CENTER, "Mupen64Plus Started...");
+#endif
 
     /* call r4300 CPU core and run the game */
     r4300_reset_hard();
@@ -923,10 +943,12 @@ static int emulationThread( void *_arg )
         destroy_debugger();
 #endif
 
+#ifdef HAVE_OPENGL
     if (g_OsdEnabled)
     {
         osd_exit();
     }
+#endif
 
     romClosed_RSP();
     romClosed_input();
@@ -1169,10 +1191,12 @@ void parseCommandLine(int argc, char **argv)
                 }
                 break;
             case OPT_SSHOTDIR:
+#ifdef HAVE_OPENGL
                 if(isdir(optarg))
                     SetScreenshotDir(optarg);
                 else
                     printf("***Warning: Screen shot directory '%s' is not accessible or not a directory.\n", optarg);
+#endif
                 break;
             case OPT_CONFIGDIR:
                 if(isdir(optarg))
@@ -1396,6 +1420,7 @@ static void setPaths(void)
         closedir(dir);
     }
 
+#ifdef HAVE_OPENGL
     // set screenshot dir if it wasn't specified by the user
     if (!ValidScreenshotDir())
     {
@@ -1403,6 +1428,7 @@ static void setPaths(void)
         snprintf(chDefaultDir, PATH_MAX, "%sscreenshots/", l_ConfigDir);
         SetScreenshotDir(chDefaultDir);
     }
+#endif
 #endif /* __WIN32__ */
 }
 

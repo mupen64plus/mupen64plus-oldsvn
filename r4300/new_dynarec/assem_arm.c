@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - assem_arm.c                                             *
- *   Copyright (C) 2009-2010 Ari64                                         *
+ *   Copyright (C) 2009-2011 Ari64                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -889,15 +889,20 @@ void alloc_reg_temp(struct regstat *cur,int i,signed char reg)
 void alloc_arm_reg(struct regstat *cur,int i,signed char reg,char hr)
 {
   int n;
+  int dirty=0;
   
   // see if it's already allocated (and dealloc it)
   for(n=0;n<HOST_REGS;n++)
   {
-    if(n!=EXCLUDE_REG&&cur->regmap[n]==reg) {cur->regmap[n]=-1;}
+    if(n!=EXCLUDE_REG&&cur->regmap[n]==reg) {
+      dirty=(cur->dirty>>n)&1;
+      cur->regmap[n]=-1;
+    }
   }
   
   cur->regmap[hr]=reg;
   cur->dirty&=~(1<<hr);
+  cur->dirty|=dirty<<hr;
   cur->isconst&=~(1<<hr);
 }
 
@@ -1168,7 +1173,7 @@ void emit_test(int rs, int rt)
 void emit_testimm(int rs,int imm)
 {
   u_int armval;
-  assem_debug("tst %s,$%d\n",regname[rs],imm);
+  assem_debug("tst %s,#%d\n",regname[rs],imm);
   assert(genimm(imm,&armval));
   output_w32(0xe3100000|rd_rn_rm(0,rs,0)|armval);
 }
@@ -1518,10 +1523,10 @@ void emit_cmpimm(int rs,int imm)
 {
   u_int armval;
   if(genimm(imm,&armval)) {
-    assem_debug("cmp %s,$%d\n",regname[rs],imm);
+    assem_debug("cmp %s,#%d\n",regname[rs],imm);
     output_w32(0xe3500000|rd_rn_rm(0,rs,0)|armval);
   }else if(genimm(-imm,&armval)) {
-    assem_debug("cmn %s,$%d\n",regname[rs],imm);
+    assem_debug("cmn %s,#%d\n",regname[rs],imm);
     output_w32(0xe3700000|rd_rn_rm(0,rs,0)|armval);
   }else if(imm>0) {
     assert(imm<65536);
@@ -2771,6 +2776,16 @@ inline_readstub(int type, int i, u_int addr, signed char regmap[], int target, i
   emit_writeword(rs,(int)&address);
   //emit_pusha();
   save_regs(reglist);
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   //emit_shrimm(rs,16,1);
   int cc=get_reg(regmap,CCREG);
   if(cc<0) {
@@ -2935,6 +2950,16 @@ inline_writestub(int type, int i, u_int addr, signed char regmap[], int target, 
   }
   //emit_pusha();
   save_regs(reglist);
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   //emit_shrimm(rs,16,1);
   int cc=get_reg(regmap,CCREG);
   if(cc<0) {
@@ -3327,6 +3352,7 @@ void loadlr_assemble_arm(int i,struct regstat *i_regs)
     map=get_reg(i_regs->regmap,TLREG);
     cache=get_reg(i_regs->regmap,MMREG); // Get cached offset to memory_map
     assert(map>=0);
+    reglist&=~(1<<map);
     map=do_tlb_r(addr,temp2,map,cache,0,a,c?-1:temp,c,constmap[i][s]+offset);
     if(c) {
       if (opcode[i]==0x22||opcode[i]==0x26) {
@@ -4474,23 +4500,8 @@ void wb_valid(signed char pre[],signed char entry[],u_int dirty_pre,u_int dirty,
     if(hr!=EXCLUDE_REG) {
       reg=pre[hr];
       if(((~u)>>(reg&63))&1) {
-        if(reg==entry[hr]||(reg>0&&entry[hr]<0)) {
+        if(reg>0) {
           if(((dirty_pre&~dirty)>>hr)&1) {
-            if(reg>0&&reg<34) {
-              emit_storereg(reg,hr);
-              if( ((is32_pre&~uu)>>reg)&1 ) {
-                emit_sarimm(hr,31,HOST_TEMPREG);
-                emit_storereg(reg|64,HOST_TEMPREG);
-              }
-            }
-            else if(reg>=64) {
-              emit_storereg(reg,hr);
-            }
-          }
-        }
-        else // Check if register moved to a different register
-        if((new_hr=get_reg(entry,reg))>=0) {
-          if((dirty_pre>>hr)&(~dirty>>new_hr)&1) {
             if(reg>0&&reg<34) {
               emit_storereg(reg,hr);
               if( ((is32_pre&~uu)>>reg)&1 ) {

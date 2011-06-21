@@ -390,8 +390,10 @@ void gen_interupt()
             // if paused, poll for input events
             if(rompause)
             {
+#ifdef HAVE_OPENGL
                 osd_render();  // draw Paused message in case updateScreen didn't do it
                 SDL_GL_SwapBuffers();
+#endif
                 while(rompause)
                 {
 #ifdef __WIN32__

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - assem_x64.c                                             *
- *   Copyright (C) 2009-2010 Ari64                                         *
+ *   Copyright (C) 2009-2011 Ari64                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -658,15 +658,20 @@ void alloc_reg_temp(struct regstat *cur,int i,signed char reg)
 void alloc_x86_reg(struct regstat *cur,int i,signed char reg,char hr)
 {
   int n;
+  int dirty=0;
   
   // see if it's already allocated (and dealloc it)
   for(n=0;n<HOST_REGS;n++)
   {
-    if(n!=ESP&&cur->regmap[n]==reg) {cur->regmap[n]=-1;}
+    if(n!=ESP&&cur->regmap[n]==reg) {
+      dirty=(cur->dirty>>n)&1;
+      cur->regmap[n]=-1;
+    }
   }
   
   cur->regmap[hr]=reg;
   cur->dirty&=~(1<<hr);
+  cur->dirty|=dirty<<hr;
   cur->isconst&=~(1<<hr);
 }
 
@@ -1215,9 +1220,9 @@ void emit_addimm64_32(int rsh,int rsl,int imm,int rth,int rtl)
 
 void emit_sbb(int rs1,int rs2)
 {
-  assem_debug("sbb %%%s,%%%s\n",regname[rs2],regname[rs1]);
+  assem_debug("sbb %%%s,%%%s\n",regname[rs1],regname[rs2]);
   output_byte(0x19);
-  output_modrm(3,rs1,rs2);
+  output_modrm(3,rs2,rs1);
 }
 
 void emit_andimm(int rs,int imm,int rt)
@@ -1371,7 +1376,7 @@ void emit_rorimm(int rs,u_int imm,int rt)
   }
   else {
     emit_mov(rs,rt);
-    emit_sarimm(rt,imm,rt);
+    emit_rorimm(rt,imm,rt);
   }
 }
 
@@ -1548,10 +1553,19 @@ void emit_setl(int rt)
 }
 void emit_movzbl_reg(int rs, int rt)
 {
-  assem_debug("movzbl %%%s,%%%s\n",regname[rs]+1,regname[rt]);
-  output_byte(0x0F);
-  output_byte(0xB6);
-  output_modrm(3,rs,rt);
+  if(rs<4&&rt<8) {
+    assem_debug("movzbl %%%s,%%%s\n",regname[rs]+1,regname[rt]);
+    output_byte(0x0F);
+    output_byte(0xB6);
+    output_modrm(3,rs,rt);
+  }
+  else {
+    assem_debug("movzbl %%%s,%%%s\n",regname[rs]+1,regname[rt]);
+    output_rex(0,rt>>3,0,rs>>3);
+    output_byte(0x0F);
+    output_byte(0xB6);
+    output_modrm(3,rs,rt);
+  }
 }
 
 void emit_slti32(int rs,int imm,int rt)
@@ -1665,7 +1679,7 @@ void emit_set_if_less64_32(int u1, int l1, int u2, int l2, int rt)
   assert(u2!=rt);
   emit_cmp(l1,l2);
   emit_mov(u1,rt);
-  emit_sbb(rt,u2);
+  emit_sbb(u2,rt);
   emit_movimm(0,rt);
   emit_cmovl(&const_one,rt);
 }
@@ -1676,7 +1690,7 @@ void emit_set_if_carry64_32(int u1, int l1, int u2, int l2, int rt)
   assert(u2!=rt);
   emit_cmp(l1,l2);
   emit_mov(u1,rt);
-  emit_sbb(rt,u2);
+  emit_sbb(u2,rt);
   emit_movimm(0,rt);
   emit_adcimm(0,rt);
 }
@@ -2220,39 +2234,25 @@ void emit_writehword_tlb(int rt, int addr, int map)
 }
 void emit_writebyte(int rt, int addr)
 {
-  if(rt<4) {
-    assem_debug("movb %%%cl,%x\n",regname[rt][1],addr);
-    output_byte(0x88);
-    output_modrm(0,5,rt);
-    output_w32(addr-(int)out-4); // Note: rip-relative in 64-bit mode
-  }
-  else
-  {
-    emit_xchg(EAX,rt);
-    emit_writebyte(EAX,addr);
-    emit_xchg(EAX,rt);
-  }
+  assem_debug("movb %%%cl,%x\n",regname[rt][1],addr);
+  if(rt>=4) output_rex(0,rt>>3,0,0);
+  output_byte(0x88);
+  output_modrm(0,5,rt);
+  output_w32(addr-(int)out-4); // Note: rip-relative in 64-bit mode
 }
 void emit_writebyte_indexed(int rt, int addr, int rs)
 {
-  if(rt<4) {
-    assem_debug("movb %%%cl,%x+%%%s\n",regname[rt][1],addr,regname[rs]);
-    output_byte(0x88);
-    if(addr<128&&addr>=-128) {
-      output_modrm(1,rs,rt);
-      output_byte(addr);
-    }
-    else
-    {
-      output_modrm(2,rs,rt);
-      output_w32(addr);
-    }
+  assem_debug("movb %%%cl,%x+%%%s\n",regname[rt][1],addr,regname[rs]);
+  if(rt>=4||rs>=8) output_rex(0,rt>>3,0,rs>>3);
+  output_byte(0x88);
+  if(addr<128&&addr>=-128) {
+    output_modrm(1,rs,rt);
+    output_byte(addr);
   }
   else
   {
-    emit_xchg(EAX,rt);
-    emit_writebyte_indexed(EAX,addr,rs==EAX?rt:rs);
-    emit_xchg(EAX,rt);
+    output_modrm(2,rs,rt);
+    output_w32(addr);
   }
 }
 void emit_writebyte_tlb(int rt, int addr, int map)
@@ -2267,10 +2267,11 @@ void emit_writebyte_indexed_tlb(int rt, int addr, int rs, int map, int temp)
 {
   if(map<0) emit_writebyte_indexed(rt, addr+(int)rdram-0x80000000, rs);
   else
-  if(rt<4) {
+  {
     assem_debug("addr32 movb %%%cl,%x(%%%s,%%%s,1)\n",regname[rt][1],addr,regname[rs],regname[map]);
     assert(rs!=ESP);
     output_byte(0x67);
+    if(rt>=4||rs>=8||map>=8) output_rex(0,rt>>3,map>>3,rs>>3);
     output_byte(0x88);
     if(addr==0&&rs!=EBP) {
       output_modrm(0,4,rt);
@@ -2287,12 +2288,6 @@ void emit_writebyte_indexed_tlb(int rt, int addr, int rs, int map, int temp)
       output_sib(0,map,rs);
       output_w32(addr);
     }
-  }
-  else
-  {
-    emit_xchg(EAX,rt);
-    emit_writebyte_indexed_tlb(EAX,addr,rs==EAX?rt:rs,map==EAX?rt:map,temp);
-    emit_xchg(EAX,rt);
   }
 }
 void emit_writeword_imm(int imm, int addr)
@@ -2710,14 +2705,14 @@ void save_regs(u_int reglist)
       }
     }
   }
-  emit_addimm(ESP,-(8-count)*8,ESP);
+  emit_addimm64(ESP,-(8-count)*8,ESP);
 }
 // Restore registers after function call
 void restore_regs(u_int reglist)
 {
   int hr;
   int count=count_bits(reglist);
-  emit_addimm(ESP,(8-count)*8,ESP);
+  emit_addimm64(ESP,(8-count)*8,ESP);
   if(count) {
     for(hr=HOST_REGS-1;hr>=0;hr--) {
       if(hr!=EXCLUDE_REG) {
@@ -2893,6 +2888,16 @@ inline_readstub(int type, int i, u_int addr, signed char regmap[], int target, i
   emit_writeword(rs,(int)&address);
   #endif
   save_regs(reglist);
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   int cc=get_reg(regmap,CCREG);
   int temp;
   if(cc<0) {
@@ -3075,6 +3080,16 @@ inline_writestub(int type, int i, u_int addr, signed char regmap[], int target, 
     emit_writeword(target?rth:rt,(int)&dword+4);
   }
   save_regs(reglist);
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   int cc=get_reg(regmap,CCREG);
   int temp;
   if(cc<0) {
@@ -3459,6 +3474,7 @@ void loadlr_assemble_x86(int i,struct regstat *i_regs)
     }
     map=get_reg(i_regs->regmap,TLREG);
     assert(map>=0);
+    reglist&=~(1<<map);
     map=do_tlb_r(addr,temp2,map,-1,0,a,c?-1:temp,c,constmap[i][s]+offset);
     if(c) {
       if (opcode[i]==0x22||opcode[i]==0x26) {

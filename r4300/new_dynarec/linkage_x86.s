@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   Mupen64plus - linkage_x86.s                                           *
- *   Copyright (C) 2009-2010 Ari64                                         *
+ *   Copyright (C) 2009-2011 Ari64                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -134,6 +134,7 @@ exec_pagefault:
 	/* ebx = fault address */
 	/* ecx = cause */
 	mov	reg_cop0+48, %edx
+	add	$-12, %esp
 	mov	reg_cop0+16, %edi
 	or	$2, %edx
 	mov	%ebx, reg_cop0+32 /* BadVAddr */
@@ -148,11 +149,9 @@ exec_pagefault:
 	mov	%ecx, reg_cop0+40 /* EntryHI */
 	or	%ebx, %edi
 	mov	%edi, reg_cop0+16 /* Context */
-	push	%esi
 	push	$0x80000000
 	call	get_addr_ht
-	pop	%esi
-	pop	%esi
+	add	$16, %esp
 	jmp	*%eax
 	.size	exec_pagefault, .-exec_pagefault
 
@@ -312,11 +311,12 @@ jump_vaddr:
 	lea	8(%eax), %eax
 	je	.C1
   /* No hit on hash table, call compiler */
+	add	$-12, %esp
 	push	%edi
 	mov	%esi, cycle_count /* CCREG */
 	call	get_addr
 	mov	cycle_count, %esi
-	add	$4, %esp
+	add	$16, %esp
 	jmp	*%eax
 	.size	jump_vaddr, .-jump_vaddr
 
@@ -386,9 +386,10 @@ verify_code:
 	mov	cycle_count, %esi
 .D5:
 	mov	branch_target, %ebp
-	add	$4, %esp /* pop return address, we're not returning */
+	push	%esi /* for stack alignment, unused */
+	push	8(%esp)
 	call	get_addr
-	add	$4, %esp /* pop virtual address */
+	add	$16, %esp /* pop stack */
 	jmp	*%eax
 	.size	verify_code, .-verify_code
 
@@ -418,12 +419,13 @@ cc_interrupt:
 	jne	.E2
 	ret
 .E2:
+	add	$-8, %esp
 	mov	pcaddr, %edi
 	mov	%esi, cycle_count /* CCREG */
 	push	%edi
 	call	get_addr_ht
 	mov	cycle_count, %esi
-	add	$8, %esp
+	add	$16, %esp
 	jmp	*%eax
 .E3:
 	add	$16, %esp /* pop stack */
@@ -454,9 +456,10 @@ cc_interrupt:
 	.type	do_interrupt, @function
 do_interrupt:
 	mov	pcaddr, %edi
+	add	$-12, %esp
 	push	%edi
 	call	get_addr_ht
-	add	$4, %esp
+	add	$16, %esp
 	mov	reg_cop0+36, %esi
 	mov	next_interupt, %ebx
 	mov	%ebx, last_count
@@ -471,15 +474,14 @@ fp_exception:
 	mov	$0x1000002c, %edx
 .E7:
 	mov	reg_cop0+48, %ebx
+	add	$-12, %esp
 	or	$2, %ebx
 	mov	%ebx, reg_cop0+48 /* Status */
 	mov	%edx, reg_cop0+52 /* Cause */
 	mov	%eax, reg_cop0+56 /* EPC */
-	push	%esi
 	push    $0x80000180
 	call	get_addr_ht
-	pop	%esi
-	pop	%esi
+	add	$16, %esp
 	jmp	*%eax
 	.size	fp_exception, .-fp_exception
 
@@ -495,15 +497,14 @@ fp_exception_ds:
 jump_syscall:
 	mov	$0x20, %edx
 	mov	reg_cop0+48, %ebx
+	add	$-12, %esp
 	or	$2, %ebx
 	mov	%ebx, reg_cop0+48 /* Status */
 	mov	%edx, reg_cop0+52 /* Cause */
 	mov	%eax, reg_cop0+56 /* EPC */
-	push	%esi
 	push    $0x80000180
 	call	get_addr_ht
-	pop	%esi
-	pop	%esi
+	mov	$16, %esp
 	jmp	*%eax
 	.size	jump_syscall, .-jump_syscall
 
@@ -546,12 +547,13 @@ jump_eret:
 .E10:
 	neg	%edx
 	adc	%edi, %edi
+	add	$-8, %esp
 	push	%edi
 	push	%eax
 	mov	%esi, cycle_count
 	call	get_addr_32
 	mov	cycle_count, %esi
-	add	$8, %esp
+	add	$16, %esp
 	jmp	*%eax
 .E11:
 	mov	%eax, pcaddr
@@ -567,9 +569,9 @@ new_dyna_start:
 	push	%ebx
 	push	%esi
 	push	%edi
+	add	$-8, %esp /* align stack */
 	push	$0xa4000040
 	call	new_recompile_block
-	add	$-8, %esp /* align stack */
 	movl	next_interupt, %edi
 	movl	reg_cop0+36, %esi
 	movl	%edi, last_count
@@ -878,16 +880,22 @@ tlb_exception:
 	shr	$9, %eax
 	test	$2, %edi
 	cmove	reg+4(,%ebp,8), %ebx
+	add	$-12, %esp
 	and	$0x007FFFF0, %eax
-	push	$0x80000180
 	mov	%ebx, reg+4(,%ebp,8)
+	push	$0x80000180
 	or	%eax, %esi
 	mov	%esi, reg_cop0+16 /* Context */
 	call	get_addr_ht
-	pop	%esi
+	add	$16, %esp
 	movl	next_interupt, %edi
 	movl	reg_cop0+36, %esi /* Count */
 	movl	%edi, last_count
 	subl	%edi, %esi
 	jmp	*%eax
 	.size	tlb_exception, .-tlb_exception
+
+.globl breakpoint
+	.type	breakpoint, @function
+breakpoint:
+	.size	breakpoint, .-breakpoint
