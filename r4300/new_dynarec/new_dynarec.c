@@ -2757,6 +2757,7 @@ void load_assemble(int i,struct regstat *i_regs)
     map=get_reg(i_regs->regmap,TLREG);
     cache=get_reg(i_regs->regmap,MMREG);
     assert(map>=0);
+    reglist&=~(1<<map);
     map=do_tlb_r(addr,tl,map,cache,x,-1,-1,c,constmap[i][s]+offset);
     do_tlb_r_branch(map,c,constmap[i][s]+offset,&jaddr);
   }
@@ -3034,6 +3035,7 @@ void store_assemble(int i,struct regstat *i_regs)
     map=get_reg(i_regs->regmap,TLREG);
     cache=get_reg(i_regs->regmap,MMREG);
     assert(map>=0);
+    reglist&=~(1<<map);
     map=do_tlb_w(addr,temp,map,cache,x,c,constmap[i][s]+offset);
     do_tlb_w_branch(map,c,constmap[i][s]+offset,&jaddr);
   }
@@ -3200,6 +3202,7 @@ void storelr_assemble(int i,struct regstat *i_regs)
     int map=get_reg(i_regs->regmap,TLREG);
     int cache=get_reg(i_regs->regmap,MMREG);
     assert(map>=0);
+    reglist&=~(1<<map);
     map=do_tlb_w(c||s<0||offset?temp:s,temp,map,cache,0,c,constmap[i][s]+offset);
     if(!c&&!offset&&s>=0) emit_mov(s,temp);
     do_tlb_w_branch(map,c,constmap[i][s]+offset,&jaddr);
@@ -3454,6 +3457,7 @@ void c1ls_assemble(int i,struct regstat *i_regs)
     map=get_reg(i_regs->regmap,TLREG);
     int cache=get_reg(i_regs->regmap,MMREG);
     assert(map>=0);
+    reglist&=~(1<<map);
     if (opcode[i]==0x31||opcode[i]==0x35) { // LWC1/LDC1
       map=do_tlb_r(offset||c||s<0?ar:s,ar,map,cache,0,-1,-1,c,constmap[i][s]+offset);
     }
@@ -4240,7 +4244,7 @@ void load_all_regs(signed char i_regmap[])
         emit_zeroreg(hr);
       }
       else
-      if(i_regmap[hr]>0 && i_regmap[hr]!=CCREG)
+      if(i_regmap[hr]>0 && (i_regmap[hr]&63)<TEMPREG && i_regmap[hr]!=CCREG)
       {
         emit_loadreg(i_regmap[hr],hr);
       }
@@ -4259,7 +4263,7 @@ void load_needed_regs(signed char i_regmap[],signed char next_regmap[])
           emit_zeroreg(hr);
         }
         else
-        if(i_regmap[hr]>0 && i_regmap[hr]!=CCREG)
+        if(i_regmap[hr]>0 && (i_regmap[hr]&63)<TEMPREG && i_regmap[hr]!=CCREG)
         {
           emit_loadreg(i_regmap[hr],hr);
         }
@@ -4279,7 +4283,7 @@ void load_regs_entry(int t)
   }
   // Load 32-bit regs
   for(hr=0;hr<HOST_REGS;hr++) {
-    if(regs[t].regmap_entry[hr]>=0&&regs[t].regmap_entry[hr]<64) {
+    if(regs[t].regmap_entry[hr]>=0&&regs[t].regmap_entry[hr]<TEMPREG) {
       if(regs[t].regmap_entry[hr]==0) {
         emit_zeroreg(hr);
       }
@@ -4291,7 +4295,7 @@ void load_regs_entry(int t)
   }
   // Load 64-bit regs
   for(hr=0;hr<HOST_REGS;hr++) {
-    if(regs[t].regmap_entry[hr]>=64) {
+    if(regs[t].regmap_entry[hr]>=64&&regs[t].regmap_entry[hr]<TEMPREG+64) {
       assert(regs[t].regmap_entry[hr]!=64);
       if((regs[t].was32>>(regs[t].regmap_entry[hr]&63))&1) {
         int lr=get_reg(regs[t].regmap_entry,regs[t].regmap_entry[hr]-64);
@@ -4371,7 +4375,7 @@ void load_regs_bt(signed char i_regmap[],uint64_t i_is32,uint64_t i_dirty,int ad
     }
     // Load 32-bit regs
     for(hr=0;hr<HOST_REGS;hr++) {
-      if(hr!=EXCLUDE_REG&&regs[t].regmap_entry[hr]>=0&&regs[t].regmap_entry[hr]<64) {
+      if(hr!=EXCLUDE_REG&&regs[t].regmap_entry[hr]>=0&&regs[t].regmap_entry[hr]<TEMPREG) {
         #ifdef DESTRUCTIVE_WRITEBACK
         if(i_regmap[hr]!=regs[t].regmap_entry[hr] || ( !((regs[t].dirty>>hr)&1) && ((i_dirty>>hr)&1) && (((i_is32&~unneeded_reg_upper[t])>>i_regmap[hr])&1) ) || (((i_is32&~regs[t].was32&~unneeded_reg_upper[t])>>(i_regmap[hr]&63))&1)) {
         #else
@@ -4389,7 +4393,7 @@ void load_regs_bt(signed char i_regmap[],uint64_t i_is32,uint64_t i_dirty,int ad
     }
     //Load 64-bit regs
     for(hr=0;hr<HOST_REGS;hr++) {
-      if(hr!=EXCLUDE_REG&&regs[t].regmap_entry[hr]>=64) {
+      if(hr!=EXCLUDE_REG&&regs[t].regmap_entry[hr]>=64&&regs[t].regmap_entry[hr]<TEMPREG+64) {
         if(i_regmap[hr]!=regs[t].regmap_entry[hr]) {
           assert(regs[t].regmap_entry[hr]!=64);
           if((i_is32>>(regs[t].regmap_entry[hr]&63))&1) {
@@ -4430,19 +4434,19 @@ int match_bt(signed char i_regmap[],uint64_t i_is32,uint64_t i_dirty,int addr)
       {
         if(i_regmap[hr]!=regs[t].regmap_entry[hr])
         {
-          if(regs[t].regmap_entry[hr]!=-1)
+          if(regs[t].regmap_entry[hr]>=0&&(regs[t].regmap_entry[hr]|64)<TEMPREG+64)
           {
             return 0;
           }
           else 
           if((i_dirty>>hr)&1)
           {
-            if(i_regmap[hr]<64)
+            if(i_regmap[hr]<TEMPREG)
             {
               if(!((unneeded_reg[t]>>i_regmap[hr])&1))
                 return 0;
             }
-            else
+            else if(i_regmap[hr]>=64&&i_regmap[hr]<TEMPREG+64)
             {
               if(!((unneeded_reg_upper[t]>>(i_regmap[hr]&63))&1))
                 return 0;
