@@ -1548,10 +1548,19 @@ void emit_setl(int rt)
 }
 void emit_movzbl_reg(int rs, int rt)
 {
-  assem_debug("movzbl %%%s,%%%s\n",regname[rs]+1,regname[rt]);
-  output_byte(0x0F);
-  output_byte(0xB6);
-  output_modrm(3,rs,rt);
+  if(rs<4&&rt<8) {
+    assem_debug("movzbl %%%s,%%%s\n",regname[rs]+1,regname[rt]);
+    output_byte(0x0F);
+    output_byte(0xB6);
+    output_modrm(3,rs,rt);
+  }
+  else {
+    assem_debug("movzbl %%%s,%%%s\n",regname[rs]+1,regname[rt]);
+    output_rex(0,rt>>3,0,rs>>3);
+    output_byte(0x0F);
+    output_byte(0xB6);
+    output_modrm(3,rs,rt);
+  }
 }
 
 void emit_slti32(int rs,int imm,int rt)
@@ -2220,39 +2229,25 @@ void emit_writehword_tlb(int rt, int addr, int map)
 }
 void emit_writebyte(int rt, int addr)
 {
-  if(rt<4) {
-    assem_debug("movb %%%cl,%x\n",regname[rt][1],addr);
-    output_byte(0x88);
-    output_modrm(0,5,rt);
-    output_w32(addr-(int)out-4); // Note: rip-relative in 64-bit mode
-  }
-  else
-  {
-    emit_xchg(EAX,rt);
-    emit_writebyte(EAX,addr);
-    emit_xchg(EAX,rt);
-  }
+  assem_debug("movb %%%cl,%x\n",regname[rt][1],addr);
+  if(rt>=4) output_rex(0,rt>>3,0,0);
+  output_byte(0x88);
+  output_modrm(0,5,rt);
+  output_w32(addr-(int)out-4); // Note: rip-relative in 64-bit mode
 }
 void emit_writebyte_indexed(int rt, int addr, int rs)
 {
-  if(rt<4) {
-    assem_debug("movb %%%cl,%x+%%%s\n",regname[rt][1],addr,regname[rs]);
-    output_byte(0x88);
-    if(addr<128&&addr>=-128) {
-      output_modrm(1,rs,rt);
-      output_byte(addr);
-    }
-    else
-    {
-      output_modrm(2,rs,rt);
-      output_w32(addr);
-    }
+  assem_debug("movb %%%cl,%x+%%%s\n",regname[rt][1],addr,regname[rs]);
+  if(rt>=4||rs>=8) output_rex(0,rt>>3,0,rs>>3);
+  output_byte(0x88);
+  if(addr<128&&addr>=-128) {
+    output_modrm(1,rs,rt);
+    output_byte(addr);
   }
   else
   {
-    emit_xchg(EAX,rt);
-    emit_writebyte_indexed(EAX,addr,rs==EAX?rt:rs);
-    emit_xchg(EAX,rt);
+    output_modrm(2,rs,rt);
+    output_w32(addr);
   }
 }
 void emit_writebyte_tlb(int rt, int addr, int map)
@@ -2267,10 +2262,11 @@ void emit_writebyte_indexed_tlb(int rt, int addr, int rs, int map, int temp)
 {
   if(map<0) emit_writebyte_indexed(rt, addr+(int)rdram-0x80000000, rs);
   else
-  if(rt<4) {
+  {
     assem_debug("addr32 movb %%%cl,%x(%%%s,%%%s,1)\n",regname[rt][1],addr,regname[rs],regname[map]);
     assert(rs!=ESP);
     output_byte(0x67);
+    if(rt>=4||rs>=8||map>=8) output_rex(0,rt>>3,map>>3,rs>>3);
     output_byte(0x88);
     if(addr==0&&rs!=EBP) {
       output_modrm(0,4,rt);
@@ -2287,12 +2283,6 @@ void emit_writebyte_indexed_tlb(int rt, int addr, int rs, int map, int temp)
       output_sib(0,map,rs);
       output_w32(addr);
     }
-  }
-  else
-  {
-    emit_xchg(EAX,rt);
-    emit_writebyte_indexed_tlb(EAX,addr,rs==EAX?rt:rs,map==EAX?rt:map,temp);
-    emit_xchg(EAX,rt);
   }
 }
 void emit_writeword_imm(int imm, int addr)
