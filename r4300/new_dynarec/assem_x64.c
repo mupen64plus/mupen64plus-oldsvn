@@ -2893,6 +2893,16 @@ inline_readstub(int type, int i, u_int addr, signed char regmap[], int target, i
   emit_writeword(rs,(int)&address);
   #endif
   save_regs(reglist);
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   int cc=get_reg(regmap,CCREG);
   int temp;
   if(cc<0) {
@@ -3075,6 +3085,16 @@ inline_writestub(int type, int i, u_int addr, signed char regmap[], int target, 
     emit_writeword(target?rth:rt,(int)&dword+4);
   }
   save_regs(reglist);
+  if((signed int)addr>=(signed int)0xC0000000) {
+    // Theoretically we can have a pagefault here, if the TLB has never
+    // been enabled and the address is outside the range 80000000..BFFFFFFF
+    // Write out the registers so the pagefault can be handled.  This is
+    // a very rare case and likely represents a bug.
+    int ds=regmap!=regs[i].regmap;
+    if(!ds) load_all_consts(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty,i);
+    if(!ds) wb_dirtys(regs[i].regmap_entry,regs[i].was32,regs[i].wasdirty);
+    else wb_dirtys(branch_regs[i-1].regmap_entry,branch_regs[i-1].was32,branch_regs[i-1].wasdirty);
+  }
   int cc=get_reg(regmap,CCREG);
   int temp;
   if(cc<0) {
