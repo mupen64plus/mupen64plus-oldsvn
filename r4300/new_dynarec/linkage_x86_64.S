@@ -17,14 +17,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifdef __PIC__
+#define RELATIVE(x) x(%rip)
+#else
+#define RELATIVE(x) x
+#endif
+
 	.file	"linkage_x86_64.s"
 	.bss
 	.align 4
-//.globl rdram
-//rdram = 0x80000000
 	.section	.rodata
 	.text
 .globl dyna_linker
+	.hidden dyna_linker
 	.type	dyna_linker, @function
 dyna_linker:
 	/* eax = virtual target address */
@@ -33,7 +39,11 @@ dyna_linker:
 	mov	%eax, %ecx
 	shr	$12, %edi
 	cmp	$0xC0000000, %eax
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmovge	tlb_LUT_r(,%edi,4), %ecx
+#endif
 	test	%ecx, %ecx
 	cmovz	%eax, %ecx
 	xor	$0x80000000, %ecx
@@ -44,7 +54,11 @@ dyna_linker:
 	cmp	%edx, %ecx
 	cmova	%edx, %ecx
 	/* jump_in lookup */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	movq	jump_in(,%ecx,8), %r12
+#endif
 .A1:
 	test	%r12, %r12
 	je	.A3
@@ -78,17 +92,33 @@ dyna_linker:
 	shl	$4, %edi
 	cmp	$2048, %ecx
 	cmovc	%edx, %ecx
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmp	hash_table(%edi), %eax
+#endif
 	jne	.A5
 .A4:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	hash_table+4(%edi), %edx
+#endif
 	jmp	*%rdx
 .A5:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmp	hash_table+8(%edi), %eax
+#endif
 	lea	8(%edi), %edi
 	je	.A4
 	/* jump_dirty lookup */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	movq	jump_dirty(,%ecx,8), %r12
+#endif
 .A6:
 	test	%r12, %r12
 	je	.A8
@@ -101,12 +131,16 @@ dyna_linker:
 .A7:
 	movl	8(%r12), %edx
 	/* hash_table insert */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	hash_table-8(%edi), %ebx
 	mov	hash_table-4(%edi), %ecx
 	mov	%eax, hash_table-8(%edi)
 	mov	%edx, hash_table-4(%edi)
 	mov	%ebx, hash_table(%edi)
 	mov	%ecx, hash_table+4(%edi)
+#endif
 	jmp	*%rdx
 .A8:
 	mov	%eax, %edi
@@ -123,26 +157,27 @@ dyna_linker:
 	.size	dyna_linker, .-dyna_linker
 
 .globl exec_pagefault
+	.hidden exec_pagefault
 	.type	exec_pagefault, @function
 exec_pagefault:
 	/* eax = instruction pointer */
 	/* ebx = fault address */
 	/* ecx = cause */
-	mov	reg_cop0+48, %edx
-	mov	reg_cop0+16, %edi
+	mov	48+RELATIVE(reg_cop0), %edx
+	mov	16+RELATIVE(reg_cop0), %edi
 	or	$2, %edx
-	mov	%ebx, reg_cop0+32 /* BadVAddr */
+	mov	%ebx, 32+RELATIVE(reg_cop0) /* BadVAddr */
 	and	$0xFF80000F, %edi
-	mov	%edx, reg_cop0+48 /* Status */
-	mov	%ecx, reg_cop0+52 /* Cause */
-	mov	%eax, reg_cop0+56 /* EPC */
+	mov	%edx, 48+RELATIVE(reg_cop0) /* Status */
+	mov	%ecx, 52+RELATIVE(reg_cop0) /* Cause */
+	mov	%eax, 56+RELATIVE(reg_cop0) /* EPC */
 	mov	%ebx, %ecx
 	shr	$9, %ebx
 	and	$0xFFFFE000, %ecx
 	and	$0x007FFFF0, %ebx
-	mov	%ecx, reg_cop0+40 /* EntryHI */
+	mov	%ecx, 40+RELATIVE(reg_cop0) /* EntryHI */
 	or	%ebx, %edi
-	mov	%edi, reg_cop0+16 /* Context */
+	mov	%edi, 16+RELATIVE(reg_cop0) /* Context */
 	mov	%esi, %ebx
 	mov	$0x80000000, %edi
 	call	get_addr_ht
@@ -153,13 +188,18 @@ exec_pagefault:
 /* Special dynamic linker for the case where a page fault
    may occur in a branch delay slot */
 .globl dyna_linker_ds
+	.hidden dyna_linker_ds
 	.type	dyna_linker_ds, @function
 dyna_linker_ds:
 	mov	%eax, %edi
 	mov	%eax, %ecx
 	shr	$12, %edi
 	cmp	$0xC0000000, %eax
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmovge	tlb_LUT_r(,%edi,4), %ecx
+#endif
 	test	%ecx, %ecx
 	cmovz	%eax, %ecx
 	xor	$0x80000000, %ecx
@@ -170,7 +210,11 @@ dyna_linker_ds:
 	cmp	%edx, %ecx
 	cmova	%edx, %ecx
 	/* jump_in lookup */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	movq	jump_in(,%ecx,8), %r12
+#endif
 .B1:
 	test	%r12, %r12
 	je	.B3
@@ -204,17 +248,33 @@ dyna_linker_ds:
 	shl	$4, %edi
 	cmp	$2048, %ecx
 	cmovc	%edx, %ecx
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmp	hash_table(%edi), %eax
+#endif
 	jne	.B5
 .B4:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	hash_table+4(%edi), %edx
+#endif
 	jmp	*%rdx
 .B5:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmp	hash_table+8(%edi), %eax
+#endif
 	lea	8(%edi), %edi
 	je	.B4
 	/* jump_dirty lookup */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	movq	jump_dirty(,%ecx,8), %r12
+#endif
 .B6:
 	test	%r12, %r12
 	je	.B8
@@ -227,12 +287,16 @@ dyna_linker_ds:
 .B7:
 	movl	8(%r12), %edx
 	/* hash_table insert */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	hash_table-8(%edi), %ebx
 	mov	hash_table-4(%edi), %ecx
 	mov	%eax, hash_table-8(%edi)
 	mov	%edx, hash_table-4(%edi)
 	mov	%ebx, hash_table(%edi)
 	mov	%ecx, hash_table+4(%edi)
+#endif
 	jmp	*%rdx
 .B8:
 	mov	%eax, %edi
@@ -254,41 +318,48 @@ dyna_linker_ds:
 	.size	dyna_linker_ds, .-dyna_linker_ds
 
 .globl jump_vaddr_eax
+	.hidden jump_vaddr_eax
 	.type	jump_vaddr_eax, @function
 jump_vaddr_eax:
 	mov	%eax, %edi
 	jmp	jump_vaddr_edi
 	.size	jump_vaddr_eax, .-jump_vaddr_eax
 .globl jump_vaddr_ecx
+	.hidden jump_vaddr_ecx
 	.type	jump_vaddr_ecx, @function
 jump_vaddr_ecx:
 	mov	%ecx, %edi
 	jmp	jump_vaddr_edi
 	.size	jump_vaddr_ecx, .-jump_vaddr_ecx
 .globl jump_vaddr_edx
+	.hidden jump_vaddr_edx
 	.type	jump_vaddr_edx, @function
 jump_vaddr_edx:
 	mov	%edx, %edi
 	jmp	jump_vaddr_edi
 	.size	jump_vaddr_edx, .-jump_vaddr_edx
 .globl jump_vaddr_ebx
+	.hidden jump_vaddr_ebx
 	.type	jump_vaddr_ebx, @function
 jump_vaddr_ebx:
 	mov	%ebx, %edi
 	jmp	jump_vaddr_edi
 	.size	jump_vaddr_ebx, .-jump_vaddr_ebx
 .globl jump_vaddr_ebp
+	.hidden jump_vaddr_ebp
 	.type	jump_vaddr_ebp, @function
 jump_vaddr_ebp:
 	mov	%ebp, %edi
 	.size	jump_vaddr_ebp, .-jump_vaddr_ebp
 .globl jump_vaddr_edi
+	.hidden jump_vaddr_edi
 	.type	jump_vaddr_edi, @function
 jump_vaddr_edi:
 	mov	%edi, %eax
 	.size	jump_vaddr_edi, .-jump_vaddr_edi
 
 .globl jump_vaddr
+	.hidden jump_vaddr
 	.type	jump_vaddr, @function
 jump_vaddr:
   /* Check hash table */
@@ -296,29 +367,43 @@ jump_vaddr:
 	xor	%edi, %eax
 	movzwl	%ax, %eax
 	shl	$4, %eax
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmp	hash_table(%eax), %edi
+#endif
 	jne	.C2
 .C1:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	hash_table+4(%eax), %edi
+#endif
 	jmp	*%rdi
 .C2:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmp	hash_table+8(%eax), %edi
+#endif
 	lea	8(%eax), %eax
 	je	.C1
   /* No hit on hash table, call compiler */
-	mov	%esi, cycle_count /* CCREG */
+	mov	%esi, RELATIVE(cycle_count) /* CCREG */
 	call	get_addr
-	mov	cycle_count, %esi
+	mov	RELATIVE(cycle_count), %esi
 	jmp	*%rax
 	.size	jump_vaddr, .-jump_vaddr
 
 .globl verify_code_ds
+	.hidden verify_code_ds
 	.type	verify_code_ds, @function
 verify_code_ds:
 	nop
 	.size	verify_code_ds, .-verify_code_ds
 
 .globl verify_code_vm
+	.hidden verify_code_vm
 	.type	verify_code_vm, @function
 verify_code_vm:
 	/* eax = source (virtual address) */
@@ -330,13 +415,21 @@ verify_code_vm:
 	lea	-1(%eax,%ecx,1), %r9d
 	shr	$12, %edx
 	shr	$12, %r9d
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%edx,4), %edi
+#endif
 	test	%edi, %edi
 	js	.D4
 	lea	(%eax,%edi,4), %eax
 	mov	%edi, %r8d
 .D1:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	xor	memory_map(,%edx,4), %edi
+#endif
 	shl	$2, %edi
 	jne	.D4
 	mov	%r8d, %edi
@@ -346,6 +439,7 @@ verify_code_vm:
 	.size	verify_code_vm, .-verify_code_vm
 
 .globl verify_code
+	.hidden verify_code
 	.type	verify_code, @function
 verify_code:
 	/* eax = source */
@@ -378,24 +472,29 @@ verify_code:
 	.size	verify_code, .-verify_code
 
 .globl cc_interrupt
+	.hidden cc_interrupt
 	.type	cc_interrupt, @function
 cc_interrupt:
-	add	last_count, %esi
+	add	RELATIVE(last_count), %esi
 	add	$-8, %rsp /* Align stack */
-	mov	%esi, reg_cop0+36 /* Count */
+	mov	%esi, 36+RELATIVE(reg_cop0) /* Count */
 	shr	$19, %esi
-	movl	$0, pending_exception
+	movl	$0, RELATIVE(pending_exception)
 	and	$0x7f, %esi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmpl	$0, restore_candidate(,%esi,4)
+#endif
 	jne	.E4
 .E1:
 	call	gen_interupt
-	mov	reg_cop0+36, %esi
-	mov	next_interupt, %eax
-	mov	pending_exception, %ebx
-	mov	stop, %ecx
+	mov	36+RELATIVE(reg_cop0), %esi
+	mov	RELATIVE(next_interupt), %eax
+	mov	RELATIVE(pending_exception), %ebx
+	mov	RELATIVE(stop), %ecx
 	add	$8, %rsp
-	mov	%eax, last_count
+	mov	%eax, RELATIVE(last_count)
 	sub	%eax, %esi
 	test	%ecx, %ecx
 	jne	.E3
@@ -403,10 +502,10 @@ cc_interrupt:
 	jne	.E2
 	ret
 .E2:
-	mov	pcaddr, %edi
-	mov	%esi, cycle_count /* CCREG */
+	mov	RELATIVE(pcaddr), %edi
+	mov	%esi, RELATIVE(cycle_count) /* CCREG */
 	call	get_addr_ht
-	mov	cycle_count, %esi
+	mov	RELATIVE(cycle_count), %esi
 	add	$8, %rsp /* pop return address */
 	jmp	*%rax
 .E3:
@@ -421,9 +520,17 @@ cc_interrupt:
 	ret	     /* exit dynarec */
 .E4:
 	/* Move 'dirty' blocks to the 'clean' list */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	restore_candidate(,%esi,4), %ebx
+#endif
 	mov	%esi, %ebp
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	movl	$0, restore_candidate(,%esi,4)
+#endif
 	shl	$5, %ebp
 .E5:
 	shr	$1, %ebx
@@ -438,28 +545,30 @@ cc_interrupt:
 	.size	cc_interrupt, .-cc_interrupt
 
 .globl do_interrupt
+	.hidden do_interrupt
 	.type	do_interrupt, @function
 do_interrupt:
-	mov	pcaddr, %edi
+	mov	RELATIVE(pcaddr), %edi
 	call	get_addr_ht
-	mov	reg_cop0+36, %esi
-	mov	next_interupt, %ebx
-	mov	%ebx, last_count
+	mov	36+RELATIVE(reg_cop0), %esi
+	mov	RELATIVE(next_interupt), %ebx
+	mov	%ebx, RELATIVE(last_count)
 	sub	%ebx, %esi
 	add	$2, %esi
 	jmp	*%rax
 	.size	do_interrupt, .-do_interrupt
 
 .globl fp_exception
+	.hidden fp_exception
 	.type	fp_exception, @function
 fp_exception:
 	mov	$0x1000002c, %edx
 .E7:
-	mov	reg_cop0+48, %ebx
+	mov	48+RELATIVE(reg_cop0), %ebx
 	or	$2, %ebx
-	mov	%ebx, reg_cop0+48 /* Status */
-	mov	%edx, reg_cop0+52 /* Cause */
-	mov	%eax, reg_cop0+56 /* EPC */
+	mov	%ebx, 48+RELATIVE(reg_cop0) /* Status */
+	mov	%edx, 52+RELATIVE(reg_cop0) /* Cause */
+	mov	%eax, 56+RELATIVE(reg_cop0) /* EPC */
 	mov	%esi, %ebx
 	mov	$0x80000180, %edi
 	call	get_addr_ht
@@ -468,6 +577,7 @@ fp_exception:
 	.size	fp_exception, .-fp_exception
 
 .globl fp_exception_ds
+	.hidden fp_exception_ds
 	.type	fp_exception_ds, @function
 fp_exception_ds:
 	mov	$0x9000002c, %edx /* Set high bit if delay slot */
@@ -475,14 +585,15 @@ fp_exception_ds:
 	.size	fp_exception_ds, .-fp_exception_ds
 
 .globl jump_syscall
+	.hidden jump_syscall
 	.type	jump_syscall, @function
 jump_syscall:
 	mov	$0x20, %edx
-	mov	reg_cop0+48, %ebx
+	mov	48+RELATIVE(reg_cop0), %ebx
 	or	$2, %ebx
-	mov	%ebx, reg_cop0+48 /* Status */
-	mov	%edx, reg_cop0+52 /* Cause */
-	mov	%eax, reg_cop0+56 /* EPC */
+	mov	%ebx, 48+RELATIVE(reg_cop0) /* Status */
+	mov	%edx, 52+RELATIVE(reg_cop0) /* Cause */
+	mov	%eax, 56+RELATIVE(reg_cop0) /* EPC */
 	mov	%esi, %ebx
 	mov	$0x80000180, %edi
 	call	get_addr_ht
@@ -491,40 +602,53 @@ jump_syscall:
 	.size	jump_syscall, .-jump_syscall
 
 .globl jump_eret
+	.hidden jump_eret
 	.type	jump_eret, @function
 jump_eret:
-	mov	reg_cop0+48, %ebx /* Status */
-	add	last_count, %esi
+	mov	48+RELATIVE(reg_cop0), %ebx /* Status */
+	add	RELATIVE(last_count), %esi
 	and	$0xFFFFFFFD, %ebx
-	mov	%esi, reg_cop0+36 /* Count */
-	mov	%ebx, reg_cop0+48 /* Status */
+	mov	%esi, 36+RELATIVE(reg_cop0) /* Count */
+	mov	%ebx, 48+RELATIVE(reg_cop0) /* Status */
 	call	check_interupt
-	mov	next_interupt, %eax
-	mov	reg_cop0+36, %esi
-	mov	%eax, last_count
+	mov	RELATIVE(next_interupt), %eax
+	mov	36+RELATIVE(reg_cop0), %esi
+	mov	%eax, RELATIVE(last_count)
 	sub	%eax, %esi
-	mov	reg_cop0+56, %edi /* EPC */
+	mov	56+RELATIVE(reg_cop0), %edi /* EPC */
 	jns	.E11
 .E8:
 	mov	%esi, %r12d
 	mov	$248, %ebx
 	xor	%esi, %esi
 .E9:
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	reg(%ebx), %ecx
 	mov	reg+4(%ebx), %edx
+#endif
 	sar	$31, %ecx
 	xor	%ecx, %edx
 	neg	%edx
 	adc	%esi, %esi
 	sub	$8, %ebx
 	jne	.E9
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	hi(%ebx), %ecx
 	mov	hi+4(%ebx), %edx
+#endif
 	sar	$31, %ecx
 	xor	%ecx, %edx
 	jne	.E10
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	lo(%ebx), %ecx
 	mov	lo+4(%ebx), %edx
+#endif
 	sar	$31, %ecx
 	xor	%ecx, %edx
 .E10:
@@ -534,13 +658,14 @@ jump_eret:
 	mov	%r12d, %esi
 	jmp	*%rax
 .E11:
-	mov	%edi, pcaddr
+	mov	%edi, RELATIVE(pcaddr)
 	call	cc_interrupt
-	mov	pcaddr, %edi
+	mov	RELATIVE(pcaddr), %edi
 	jmp	.E8
 	.size	jump_eret, .-jump_eret
 
 .globl new_dyna_start
+	.hidden new_dyna_start
 	.type	new_dyna_start, @function
 new_dyna_start:
 	push	%rbp
@@ -552,15 +677,16 @@ new_dyna_start:
 	mov	$0xa4000040, %edi
 	call	new_recompile_block
 	add	$-8, %rsp /* align stack */
-	movl	next_interupt, %edi
-	movl	reg_cop0+36, %esi
-	movl	%edi, last_count
+	movl	RELATIVE(next_interupt), %edi
+	movl	36+RELATIVE(reg_cop0), %esi
+	movl	%edi, RELATIVE(last_count)
 	subl	%edi, %esi
-	jmp	0x70000000
+	jmp	*RELATIVE(base_addr)
 	.size	new_dyna_start, .-new_dyna_start
 
 /* Note: Assumes %rbx, %rbp are callee-saved */
 .globl invalidate_block_eax
+	.hidden invalidate_block_eax
 	.type	invalidate_block_eax, @function
 invalidate_block_eax:
 	push	%rax
@@ -572,6 +698,7 @@ invalidate_block_eax:
 	jmp	invalidate_block_call
 	.size	invalidate_block_eax, .-invalidate_block_eax
 .globl invalidate_block_ecx
+	.hidden invalidate_block_ecx
 	.type	invalidate_block_ecx, @function
 invalidate_block_ecx:
 	push	%rax
@@ -583,6 +710,7 @@ invalidate_block_ecx:
 	jmp	invalidate_block_call
 	.size	invalidate_block_ecx, .-invalidate_block_ecx
 .globl invalidate_block_edx
+	.hidden invalidate_block_edx
 	.type	invalidate_block_edx, @function
 invalidate_block_edx:
 	push	%rax
@@ -594,6 +722,7 @@ invalidate_block_edx:
 	jmp	invalidate_block_call
 	.size	invalidate_block_edx, .-invalidate_block_edx
 .globl invalidate_block_ebx
+	.hidden invalidate_block_ebx
 	.type	invalidate_block_ebx, @function
 invalidate_block_ebx:
 	push	%rax
@@ -605,6 +734,7 @@ invalidate_block_ebx:
 	jmp	invalidate_block_call
 	.size	invalidate_block_ebx, .-invalidate_block_ebx
 .globl invalidate_block_ebp
+	.hidden invalidate_block_ebp
 	.type	invalidate_block_ebp, @function
 invalidate_block_ebp:
 	push	%rax
@@ -616,6 +746,7 @@ invalidate_block_ebp:
 	jmp	invalidate_block_call
 	.size	invalidate_block_ebp, .-invalidate_block_ebp
 .globl invalidate_block_esi
+	.hidden invalidate_block_esi
 	.type	invalidate_block_esi, @function
 invalidate_block_esi:
 	push	%rax
@@ -627,6 +758,7 @@ invalidate_block_esi:
 	jmp	invalidate_block_call
 	.size	invalidate_block_esi, .-invalidate_block_esi
 .globl invalidate_block_edi
+	.hidden invalidate_block_edi
 	.type	invalidate_block_edi, @function
 invalidate_block_edi:
 	push	%rax
@@ -636,6 +768,7 @@ invalidate_block_edi:
 	push	%rdi
 	.size	invalidate_block_edi, .-invalidate_block_edi
 .globl invalidate_block_call
+	.hidden invalidate_block_call
 	.type	invalidate_block_call, @function
 invalidate_block_call:
 	call	invalidate_block
@@ -648,58 +781,83 @@ invalidate_block_call:
 	.size	invalidate_block_call, .-invalidate_block_call
 
 .globl write_rdram_new
+	.hidden write_rdram_new
 	.type	write_rdram_new, @function
 write_rdram_new:
-	mov	address, %edi
-	mov	word, %ecx
+	mov	RELATIVE(address), %edi
+	mov	RELATIVE(word), %ecx
 	and	$0x7FFFFFFF, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	%ecx, rdram(%rdi)
+#endif
 	jmp	.E12
 	.size	write_rdram_new, .-write_rdram_new
 
 .globl write_rdramb_new
+	.hidden write_rdramb_new
 	.type	write_rdramb_new, @function
 write_rdramb_new:
-	mov	address, %edi
+	mov	RELATIVE(address), %edi
 	xor	$3, %edi
-	movb	byte, %cl
+	movb	RELATIVE(byte), %cl
 	and	$0x7FFFFFFF, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	movb	%cl, rdram(%rdi)
+#endif
 	jmp	.E12
 	.size	write_rdramb_new, .-write_rdramb_new
 
 .globl write_rdramh_new
+	.hidden write_rdramh_new
 	.type	write_rdramh_new, @function
 write_rdramh_new:
-	mov	address, %edi
+	mov	RELATIVE(address), %edi
 	xor	$2, %edi
-	movw	hword, %cx
+	movw	RELATIVE(hword), %cx
 	and	$0x7FFFFFFF, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	movw	%cx, rdram(%rdi)
+#endif
 	jmp	.E12
 	.size	write_rdramh_new, .-write_rdramh_new
 
 .globl write_rdramd_new
+	.hidden write_rdramd_new
 	.type	write_rdramd_new, @function
 write_rdramd_new:
-	mov	address, %edi
-	mov	dword+4, %ecx
-	mov	dword, %edx
+	mov	RELATIVE(address), %edi
+	mov	4+RELATIVE(dword), %ecx
+	mov	RELATIVE(dword), %edx
 	and	$0x7FFFFFFF, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	%ecx, rdram(%rdi)
 	mov	%edx, rdram+4(%rdi)
+#endif
 	jmp	.E12
 	.size	write_rdramd_new, .-write_rdramd_new
 
 .globl do_invalidate
+	.hidden do_invalidate
 	.type	do_invalidate, @function
 do_invalidate:
-	mov	address, %edi
+	mov	RELATIVE(address), %edi
 	mov	%edi, %ebx /* Return ebx to caller */
 .E12:
 	shr	$12, %edi
 	mov	%edi, %r12d /* Return r12 to caller */
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmpb	$1, invalid_code(%edi)
+#endif
 	je	.E13
 	call	invalidate_block
 .E13:
@@ -707,75 +865,100 @@ do_invalidate:
 	.size	do_invalidate, .-do_invalidate
 
 .globl read_nomem_new
+	.hidden read_nomem_new
 	.type	read_nomem_new, @function
 read_nomem_new:
-	mov	address, %edi
+	mov	RELATIVE(address), %edi
 	mov	%edi, %ebx
 	shr	$12, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%edi,4),%edi
+#endif
 	mov	$0x8, %eax
 	test	%edi, %edi
 	js	tlb_exception
 	mov	(%ebx,%edi,4), %ecx
-	mov	%ecx, readmem_dword
+	mov	%ecx, RELATIVE(readmem_dword)
 	ret
 	.size	read_nomem_new, .-read_nomem_new
 
 .globl read_nomemb_new
+	.hidden read_nomemb_new
 	.type	read_nomemb_new, @function
 read_nomemb_new:
-	mov	address, %edi
+	mov	RELATIVE(address), %edi
 	mov	%edi, %ebx
 	shr	$12, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%edi,4),%edi
+#endif
 	mov	$0x8, %eax
 	test	%edi, %edi
 	js	tlb_exception
 	xor	$3, %ebx
 	movzbl	(%ebx,%edi,4), %ecx
-	mov	%ecx, readmem_dword
+	mov	%ecx, RELATIVE(readmem_dword)
 	ret
 	.size	read_nomemb_new, .-read_nomemb_new
 
 .globl read_nomemh_new
+	.hidden read_nomemh_new
 	.type	read_nomemh_new, @function
 read_nomemh_new:
-	mov	address, %edi
+	mov	RELATIVE(address), %edi
 	mov	%edi, %ebx
 	shr	$12, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%edi,4),%edi
+#endif
 	mov	$0x8, %eax
 	test	%edi, %edi
 	js	tlb_exception
 	xor	$2, %ebx
 	movzwl	(%ebx,%edi,4), %ecx
-	mov	%ecx, readmem_dword
+	mov	%ecx, RELATIVE(readmem_dword)
 	ret
 	.size	read_nomemh_new, .-read_nomemh_new
 
 .globl read_nomemd_new
+	.hidden read_nomemd_new
 	.type	read_nomemd_new, @function
 read_nomemd_new:
-	mov	address, %edi
+	mov	RELATIVE(address), %edi
 	mov	%edi, %ebx
 	shr	$12, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%edi,4),%edi
+#endif
 	mov	$0x8, %eax
 	test	%edi, %edi
 	js	tlb_exception
 	mov	4(%ebx,%edi,4), %ecx
 	mov	(%ebx,%edi,4), %edx
-	mov	%ecx, readmem_dword
-	mov	%edx, readmem_dword+4
+	mov	%ecx, RELATIVE(readmem_dword)
+	mov	%edx, 4+RELATIVE(readmem_dword)
 	ret
 	.size	read_nomemd_new, .-read_nomemd_new
 
 .globl write_nomem_new
+	.hidden write_nomem_new
 	.type	write_nomem_new, @function
 write_nomem_new:
 	call	do_invalidate
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%r12d,4),%edi
-	mov	word, %ecx
+#endif
+	mov	RELATIVE(word), %ecx
 	mov	$0xc, %eax
 	shl	$2, %edi
 	jc	tlb_exception
@@ -784,11 +967,16 @@ write_nomem_new:
 	.size	write_nomem_new, .-write_nomem_new
 
 .globl write_nomemb_new
+	.hidden write_nomemb_new
 	.type	write_nomemb_new, @function
 write_nomemb_new:
 	call	do_invalidate
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%r12d,4),%edi
-	movb	byte, %cl
+#endif
+	movb	RELATIVE(byte), %cl
 	mov	$0xc, %eax
 	shl	$2, %edi
 	jc	tlb_exception
@@ -798,11 +986,16 @@ write_nomemb_new:
 	.size	write_nomemb_new, .-write_nomemb_new
 
 .globl write_nomemh_new
+	.hidden write_nomemh_new
 	.type	write_nomemh_new, @function
 write_nomemh_new:
 	call	do_invalidate
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%r12d,4),%edi
-	movw	hword, %cx
+#endif
+	movw	RELATIVE(hword), %cx
 	mov	$0xc, %eax
 	shl	$2, %edi
 	jc	tlb_exception
@@ -812,12 +1005,17 @@ write_nomemh_new:
 	.size	write_nomemh_new, .-write_nomemh_new
 
 .globl write_nomemd_new
+	.hidden write_nomemd_new
 	.type	write_nomemd_new, @function
 write_nomemd_new:
 	call	do_invalidate
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%r12d,4),%edi
-	mov	dword+4, %edx
-	mov	dword, %ecx
+#endif
+	mov	4+RELATIVE(dword), %edx
+	mov	RELATIVE(dword), %ecx
 	mov	$0xc, %eax
 	shl	$2, %edi
 	jc	tlb_exception
@@ -827,13 +1025,18 @@ write_nomemd_new:
 	.size	write_nomemd_new, .-write_nomemd_new
 
 .globl tlb_exception
+	.hidden tlb_exception
 	.type	tlb_exception, @function
 tlb_exception:
 	/* eax = cause */
 	/* ebx = address */
 	/* ebp = instr addr + flags */
 	mov	8(%rsp), %ebp
-	mov	reg_cop0+48, %esi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
+	mov	48+RELATIVE(reg_cop0), %esi
+#endif
 	mov	%ebp, %ecx
 	mov	%ebp, %edx
 	mov	%ebp, %edi
@@ -842,13 +1045,17 @@ tlb_exception:
 	or	%ebp, %eax
 	sar	$29, %ebp
 	and	$0xFFFFFFFC, %edx
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	memory_map(,%ecx,4), %ecx
+#endif
 	or	$2, %esi
 	mov	(%edx, %ecx, 4), %ecx
 	add	%ebp, %edx
-	mov	%esi, reg_cop0+48 /* Status */
-	mov	%eax, reg_cop0+52 /* Cause */
-	mov	%edx, reg_cop0+56 /* EPC */
+	mov	%esi, 48+RELATIVE(reg_cop0) /* Status */
+	mov	%eax, 52+RELATIVE(reg_cop0) /* Cause */
+	mov	%edx, 56+RELATIVE(reg_cop0) /* EPC */
 	add	$0x48, %rsp
 	mov	$0x6000022, %edx
 	mov	%ecx, %ebp
@@ -858,25 +1065,41 @@ tlb_exception:
 	sub	%eax, %ebx
 	and	$0x1f, %ebp
 	ror	%cl, %edx
-	mov	reg_cop0+16, %esi
+	mov	16+RELATIVE(reg_cop0), %esi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmovc	reg(,%ebp,8), %ebx
+#endif
 	and	$0xFF80000F, %esi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	%ebx, reg(,%ebp,8)
+#endif
 	add	%ebx, %eax
 	sar	$31, %ebx
-	mov	%eax, reg_cop0+32 /* BadVAddr */
+	mov	%eax, 32+RELATIVE(reg_cop0) /* BadVAddr */
 	shr	$9, %eax
 	test	$2, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	cmove	reg+4(,%ebp,8), %ebx
+#endif
 	and	$0x007FFFF0, %eax
 	mov	$0x80000180, %edi
+#ifdef __PIC__
+#error PIC relocations not supported
+#else
 	mov	%ebx, reg+4(,%ebp,8)
+#endif
 	or	%eax, %esi
-	mov	%esi, reg_cop0+16 /* Context */
+	mov	%esi, 16+RELATIVE(reg_cop0) /* Context */
 	call	get_addr_ht
-	movl	next_interupt, %edi
-	movl	reg_cop0+36, %esi /* Count */
-	movl	%edi, last_count
+	movl	RELATIVE(next_interupt), %edi
+	movl	36+RELATIVE(reg_cop0), %esi /* Count */
+	movl	%edi, RELATIVE(last_count)
 	subl	%edi, %esi
 	jmp	*%rax
 	.size	tlb_exception, .-tlb_exception

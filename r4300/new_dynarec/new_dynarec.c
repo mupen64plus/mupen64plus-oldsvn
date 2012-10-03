@@ -47,6 +47,8 @@
 #define MAX_OUTPUT_BLOCK_SIZE 262144
 #define CLOCK_DIVIDER 2
 
+void *base_addr = BASE_ADDR;
+
 struct regstat
 {
   signed char regmap_entry[HOST_REGS];
@@ -480,7 +482,7 @@ void clear_all_regs(signed char regmap[])
 signed char get_reg(signed char regmap[],int r)
 {
   int hr;
-  for (hr=0;hr<HOST_REGS;hr++) if(hr!=EXCLUDE_REG&&regmap[hr]==r) return hr;
+  for (hr=0;hr<HOST_REGS;hr++) { if(hr!=EXCLUDE_REG&&regmap[hr]==r) return hr; }
   return -1;
 }
 
