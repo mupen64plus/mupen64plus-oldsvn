@@ -18,7 +18,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.          *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef __PIC__
+#ifdef __PIC__ || 1
 #define RELATIVE(x) x(%rip)
 #else
 #define RELATIVE(x) x
@@ -54,8 +54,9 @@ dyna_linker:
 	cmp	%edx, %ecx
 	cmova	%edx, %ecx
 	/* jump_in lookup */
-#ifdef __PIC__
-#error PIC relocations not supported
+#ifdef __PIC__ || 1
+	lea	jump_in(%rip), %r12
+	movq	(%r12,%rcx,8), %r12
 #else
 	movq	jump_in(,%ecx,8), %r12
 #endif
